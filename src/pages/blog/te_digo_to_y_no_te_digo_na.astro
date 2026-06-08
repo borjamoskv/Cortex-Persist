@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Te digo tó y no te digo ná: Termodinámica + Teoría de la Información | CORTEX Persist</title>
+    <meta name="description" content="El 0.002% de la población mundial posee una comprensión operativa profunda de la termodinámica estadística y la teoría de la información de Shannon-Jaynes. Una estimación Fermi y criterio técnico.">
+
+    <!-- Google Fonts: Outfit & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Industrial Noir 2026 Color Palette */
+            --ember-void: #0A0A0A;
+            --yinmn-blue: #2B3BE5;
+            --sovereign-amber: #FF9F1C;
+            --oxide-gold: #FFD700;
+            --parchment-white: #F3F4F6;
+            --crimson-accent: #FF0055;
+            --neon-cyan: #00E5FF;
+            --glass-bg: rgba(10, 10, 10, 0.75);
+            --mica-dust: rgba(43, 59, 229, 0.05);
+            --mica-border: rgba(43, 59, 229, 0.15);
+            --crimson-border: rgba(255, 0, 85, 0.15);
+            --amber-border: rgba(255, 159, 28, 0.15);
+
+            /* Typography */
+            --font-primary: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            /* Transitions */
+            --transition-smooth: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+            --radius-soft: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--ember-void);
+            color: var(--parchment-white);
+            font-family: var(--font-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Analog Grain Overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.045'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.75;
+        }
+
+        /* Ambient Glow Shadows */
+        .ambient-glow {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1000px;
+            height: 500px;
+            background: radial-gradient(ellipse at top, rgba(43, 59, 229, 0.12) 0%, transparent 65%),
+                        radial-gradient(ellipse at center 20%, rgba(255, 0, 85, 0.04) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 120px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation */
+        .back-nav {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 48px;
+        }
+
+        .back-nav a {
+            color: rgba(243, 244, 246, 0.4);
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        .back-nav a:hover {
+            color: var(--yinmn-blue);
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 60px;
+            border-bottom: 1px solid var(--mica-border);
+            padding-bottom: 40px;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            background: linear-gradient(180deg, #FFFFFF 0%, #B5B5B5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            font-weight: 300;
+            color: rgba(243, 244, 246, 0.6);
+            line-height: 1.4;
+        }
+
+        .meta {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--yinmn-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            background: var(--mica-dust);
+            border: 1px solid var(--mica-border);
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+
+        .meta-tag--crimson {
+            border-color: rgba(255, 0, 85, 0.4);
+            color: var(--crimson-accent);
+            background: rgba(255, 0, 85, 0.06);
+        }
+
+        /* Section Headings */
+        h2 {
+            font-size: 2.1rem;
+            font-weight: 700;
+            margin: 60px 0 24px;
+            color: #FFFFFF;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h2::before {
+            content: "◈";
+            color: var(--yinmn-blue);
+            font-size: 1.1rem;
+        }
+
+        h3 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--parchment-white);
+            margin: 36px 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: rgba(243, 244, 246, 0.85);
+            margin-bottom: 24px;
+            font-weight: 300;
+        }
+
+        strong {
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        code {
+            font-family: var(--font-mono);
+            color: var(--yinmn-blue);
+            background: var(--mica-dust);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        /* Blockquotes */
+        .quote-block {
+            font-size: 1.45rem;
+            font-weight: 300;
+            line-height: 1.45;
+            color: var(--parchment-white);
+            border-left: 4px solid var(--yinmn-blue);
+            padding: 24px 32px;
+            margin: 48px 0;
+            background: linear-gradient(90deg, var(--mica-dust) 0%, transparent 100%);
+            border-radius: 0 var(--radius-soft) var(--radius-soft) 0;
+            font-style: italic;
+        }
+
+        .quote-block--crimson {
+            border-left-color: var(--crimson-accent);
+            background: linear-gradient(90deg, rgba(255, 0, 85, 0.04) 0%, transparent 100%);
+        }
+
+        /* Glassmorphic Tables */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 32px 0;
+            border-radius: var(--radius-soft);
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--mica-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(43, 59, 229, 0.08);
+            color: var(--yinmn-blue);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--mica-border);
+        }
+
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.95rem;
+            color: rgba(243, 244, 246, 0.8);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr {
+            transition: var(--transition-smooth);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        /* Divider */
+        .section-divider {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--yinmn-blue), transparent);
+            margin: 60px 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 24px 0;
+        }
+
+        li {
+            font-size: 1.05rem;
+            color: rgba(243, 244, 246, 0.85);
+            margin-bottom: 12px;
+            padding-left: 28px;
+            position: relative;
+            list-style: none;
+            font-weight: 300;
+        }
+
+        ul li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--yinmn-blue);
+            font-family: var(--font-mono);
+        }
+
+        ol {
+            counter-reset: custom-counter;
+        }
+
+        ol li {
+            counter-increment: custom-counter;
+        }
+
+        ol li::before {
+            content: "0" counter(custom-counter) ".";
+            position: absolute;
+            left: 0;
+            color: var(--yinmn-blue);
+            font-family: var(--font-mono);
+            font-weight: 700;
+        }
+
+        a {
+            color: var(--yinmn-blue);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(43, 59, 229, 0.3);
+            transition: var(--transition-smooth);
+        }
+
+        a:hover {
+            color: #5C6BF0;
+            border-bottom-color: #5C6BF0;
+        }
+
+        /* -------------------------------------------------------------
+           INTERACTIVE COMPONENT: FERMI FUNNEL
+           ------------------------------------------------------------- */
+        .funnel-widget {
+            background: var(--glass-bg);
+            border: 1px solid var(--mica-border);
+            border-radius: var(--radius-soft);
+            padding: 28px;
+            margin: 40px 0;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .funnel-widget {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .funnel-visuals {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .funnel-stage {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .funnel-stage::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--yinmn-blue);
+            opacity: 0.05;
+            transition: var(--transition-smooth);
+            pointer-events: none;
+        }
+
+        .funnel-stage[data-width="1.0"]::after { width: 100%; }
+        .funnel-stage[data-width="0.1"]::after { width: 10%; }
+        .funnel-stage[data-width="0.02"]::after { width: 2%; }
+        .funnel-stage[data-width="0.0004"]::after { width: 0.4%; }
+        .funnel-stage[data-width="0.00002"]::after { width: 0.002%; }
+
+        .funnel-stage:hover, .funnel-stage.active {
+            border-color: var(--yinmn-blue);
+            background: rgba(43, 59, 229, 0.08);
+            transform: scale(1.02);
+        }
+
+        .funnel-stage:hover::after, .funnel-stage.active::after {
+            opacity: 0.2;
+        }
+
+        .funnel-stage.active-crimson {
+            border-color: var(--crimson-accent);
+            background: rgba(255, 0, 85, 0.08);
+        }
+
+        .funnel-stage.active-crimson::after {
+            background: var(--crimson-accent);
+            opacity: 0.2;
+        }
+
+        .funnel-dashboard {
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            padding-left: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 768px) {
+            .funnel-dashboard {
+                border-left: none;
+                border-top: 1px solid rgba(255, 255, 255, 0.08);
+                padding-left: 0;
+                padding-top: 20px;
+            }
+        }
+
+        .dash-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 8px;
+        }
+
+        .dash-number {
+            font-family: var(--font-mono);
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--yinmn-blue);
+            margin-bottom: 8px;
+            text-shadow: 0 0 15px rgba(43, 59, 229, 0.3);
+        }
+
+        .dash-number.crimson-text {
+            color: var(--crimson-accent);
+            text-shadow: 0 0 15px rgba(255, 0, 85, 0.3);
+        }
+
+        .dash-details {
+            font-size: 0.95rem;
+            color: rgba(243, 244, 246, 0.6);
+            margin-bottom: 16px;
+        }
+
+        .dash-math {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--sovereign-amber);
+            background: rgba(255, 159, 28, 0.05);
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--amber-border);
+        }
+
+        /* -------------------------------------------------------------
+           INTERACTIVE COMPONENT: ENTROPY SANDBOX
+           ------------------------------------------------------------- */
+        .sandbox-widget {
+            background: var(--glass-bg);
+            border: 1px solid var(--mica-border);
+            border-radius: var(--radius-soft);
+            padding: 28px;
+            margin: 40px 0;
+        }
+
+        .sandbox-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .sandbox-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .sandbox-slider-container label {
+            width: 140px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: rgba(243, 244, 246, 0.7);
+        }
+
+        .sandbox-slider {
+            flex-grow: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            border: none;
+            border-radius: 2px;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .sandbox-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--yinmn-blue);
+            box-shadow: 0 0 10px rgba(43, 59, 229, 0.5);
+            transition: var(--transition-smooth);
+        }
+
+        .sandbox-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+        }
+
+        .sandbox-val {
+            width: 60px;
+            text-align: right;
+            font-family: var(--font-mono);
+            font-weight: 700;
+        }
+
+        .sandbox-displays {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .sandbox-displays {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sandbox-card {
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .sandbox-card h4 {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(243, 244, 246, 0.4);
+            margin-bottom: 8px;
+        }
+
+        .sandbox-card-num {
+            font-family: var(--font-mono);
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--yinmn-blue);
+            margin-bottom: 4px;
+        }
+
+        .sandbox-card-num--cyan {
+            color: var(--neon-cyan);
+        }
+
+        .sandbox-card-formula {
+            font-size: 0.8rem;
+            color: rgba(243, 244, 246, 0.5);
+            font-family: var(--font-mono);
+        }
+
+        /* Microstate Particle Canvas Representation */
+        .sandbox-canvas-container {
+            border: 1px solid var(--mica-border);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sandbox-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--yinmn-blue);
+            opacity: 0.4;
+            transition: transform 5s ease-in-out, opacity 0.3s ease;
+        }
+
+        .sandbox-particle.state-1 {
+            background: var(--neon-cyan);
+        }
+
+        .sandbox-canvas-label {
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: rgba(243, 244, 246, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            pointer-events: none;
+        }
+
+        /* -------------------------------------------------------------
+           INTERACTIVE COMPONENT: LANDAUER CHAMBER
+           ------------------------------------------------------------- */
+        .chamber-widget {
+            background: var(--glass-bg);
+            border: 1px solid var(--mica-border);
+            border-radius: var(--radius-soft);
+            padding: 28px;
+            margin: 40px 0;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .chamber-widget {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chamber-column-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .chamber-slider-box {
+            margin-bottom: 20px;
+        }
+
+        .chamber-slider-box label {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: rgba(243, 244, 246, 0.6);
+            margin-bottom: 8px;
+        }
+
+        .chamber-btn {
+            background: transparent;
+            border: 1px solid var(--crimson-accent);
+            color: var(--crimson-accent);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: var(--transition-smooth);
+            width: 100%;
+            text-align: center;
+        }
+
+        .chamber-btn:hover {
+            background: rgba(255, 0, 85, 0.08);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .chamber-btn:active {
+            transform: translateY(1px);
+        }
+
+        .chamber-column-right {
+            border: 1px solid var(--mica-border);
+            border-radius: 8px;
+            background: #000;
+            height: 220px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chamber-partition {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 2;
+            transition: var(--transition-smooth);
+        }
+
+        .chamber-partition.closed {
+            background: var(--crimson-accent);
+            box-shadow: 0 0 10px rgba(255, 0, 85, 0.6);
+        }
+
+        .chamber-demon {
+            position: absolute;
+            top: 10px;
+            left: calc(50% - 15px);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            color: rgba(243, 244, 246, 0.4);
+            z-index: 3;
+            font-family: var(--font-mono);
+        }
+
+        .chamber-demon.glow-crimson {
+            background: rgba(255, 0, 85, 0.2);
+            border-color: var(--crimson-accent);
+            color: var(--crimson-accent);
+            box-shadow: 0 0 15px var(--crimson-accent);
+        }
+
+        .chamber-heat-flash {
+            position: absolute;
+            inset: 0;
+            background: var(--crimson-accent);
+            opacity: 0;
+            z-index: 1;
+            pointer-events: none;
+            transition: opacity 0.1s ease;
+        }
+
+        .chamber-particle-c {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--yinmn-blue);
+            transition: left 0.5s ease-in-out, top 0.5s ease-in-out;
+        }
+
+        .chamber-info-pane {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            z-index: 4;
+            color: rgba(243, 244, 246, 0.8);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* -------------------------------------------------------------
+           FOOTER TERMINAL
+           ------------------------------------------------------------- */
+        .footer-terminal {
+            margin-top: 80px;
+            padding: 24px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--mica-border);
+            border-radius: var(--radius-soft);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: rgba(243, 244, 246, 0.6);
+        }
+
+        .terminal-line {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .terminal-prompt {
+            color: var(--yinmn-blue);
+        }
+
+        .terminal-success {
+            color: #10B981;
+        }
+
+        /* Selection */
+        ::selection {
+            background: rgba(43, 59, 229, 0.3);
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow"></div>
+
+    <div class="container">
+        <div class="back-nav">
+            <a href="/blog">← Intelligence Log</a>
+        </div>
+
+        <header>
+            <div class="meta">
+                <span class="meta-tag">#C5-REAL</span>
+                <span class="meta-tag meta-tag--crimson">ensayo</span>
+                <span>Telmo Dinámico de Moskv</span>
+                <span>Junio 2026</span>
+            </div>
+            <h1>Te digo tó y no te digo ná</h1>
+            <p class="subtitle">Termodinámica + Teoría de la Información</p>
+        </header>
+
+        <div class="quote-block quote-block--crimson">
+            "Todo bit de información posee un coste físico equivalente en entropía. La computación pura no existe al margen de la física de partículas: borrar es disipar."
+        </div>
+
+        <!-- Section 1: Intro / claim -->
+        <p>En el panorama de la informática agéntica moderna, la tendencia natural es abstraer la infraestructura de silicio y tratar el procesamiento de datos como un reino etéreo de lógica abstracta. Sin embargo, toda computación ocurre en el mundo físico y está ligada a leyes inviolables.</p>
+        
+        <p>A continuación se examina un claim riguroso y una estimación de la cohort global capaz de dominar esta intersección, seguida de los pilares de la equivalencia física de la información.</p>
+
+        <h2>I. Estimación de Comprensión Interdisciplinaria</h2>
+
+        <p>¿Qué porcentaje de la población domina el acoplamiento real entre la termodinámica estadística y la teoría de la información de Shannon-Jaynes?</p>
+
+        <div class="funnel-widget">
+            <div class="funnel-visuals" id="funnel-visuals">
+                <div class="funnel-stage active" data-stage="0" data-width="1.0">
+                    <span>01. Población Mundial</span>
+                    <span>100%</span>
+                </div>
+                <div class="funnel-stage" data-stage="1" data-width="0.1">
+                    <span>02. Educación Superior</span>
+                    <span>10%</span>
+                </div>
+                <div class="funnel-stage" data-stage="2" data-width="0.02">
+                    <span>03. Perfil STEM</span>
+                    <span>2.0%</span>
+                </div>
+                <div class="funnel-stage" data-stage="3" data-width="0.0004">
+                    <span>04. Exposición Teórica</span>
+                    <span>0.04%</span>
+                </div>
+                <div class="funnel-stage" data-stage="4" data-width="0.00002">
+                    <span>05. Comprensión Intersección</span>
+                    <span>0.002%</span>
+                </div>
+            </div>
+            <div class="funnel-dashboard">
+                <div>
+                    <div class="dash-title" id="dash-title">Población Mundial</div>
+                    <div class="dash-number" id="dash-number">8.200.000.000</div>
+                    <div class="dash-details" id="dash-details">Población global estimada en el planeta Tierra (2026).</div>
+                </div>
+                <div class="dash-math" id="dash-math">
+                    Base: 8.2e9 (Nivel base)
+                </div>
+            </div>
+        </div>
+
+        <p>Esta estimación Fermi indica que solo aproximadamente <strong>164.000 personas</strong> (el <code>0.002%</code> de la humanidad) poseen la capacidad de traducir conceptos abstractos de entropía informática directamente a fuerzas de microestados termodinámicos.</p>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Etapa de Filtrado</th>
+                        <th>Fracción</th>
+                        <th>Población Restante</th>
+                        <th>Criterio de Inclusión</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Población Mundial</strong></td>
+                        <td><code>1.0</code></td>
+                        <td>8.2 × 10⁹</td>
+                        <td>Población global estimada (2026).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Educación Superior</strong></td>
+                        <td><code>0.10</code></td>
+                        <td>820 × 10⁶</td>
+                        <td>Graduados universitarios o equivalentes técnicos.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Perfil STEM</strong></td>
+                        <td><code>0.20</code></td>
+                        <td>164 × 10⁶</td>
+                        <td>Ciencia, Tecnología, Ingeniería y Matemáticas.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Exposición Teórica</strong></td>
+                        <td><code>0.02</code></td>
+                        <td>3.28 × 10⁶</td>
+                        <td>Física, Ciencias de la Computación Teórica, Química Física, Ingeniería Electrónica.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Comprensión de Intersección</strong></td>
+                        <td><code>0.05</code></td>
+                        <td><strong>164.000</strong></td>
+                        <td>Domina la equivalencia matemática y física entre entropía termodinámica y de información.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Section 2: Sandbox -->
+        <h2>II. La Isomorfía Matemática: Shannon vs. Boltzmann</h2>
+
+        <p>La conexión profunda reside en la estructura de sus ecuaciones. Ludwig Boltzmann (y Gibbs) definió la entropía termodinámica midiendo el número de microestados disponibles para un sistema. Claude Shannon descubrió la misma fórmula matemática para describir la incertidumbre en un canal de comunicación.</p>
+
+        <p>Ajusta el control a continuación para observar cómo el cambio en la distribución de probabilidades de un sistema binario de dos estados afecta la entropía teórica de la información ($H$, en bits) y la entropía física real ($S$, en Joules/Kelvin):</p>
+
+        <div class="sandbox-widget">
+            <div class="sandbox-controls">
+                <div class="sandbox-slider-container">
+                    <label for="p0-slider">Probabilidad p₀:</label>
+                    <input type="range" id="p0-slider" class="sandbox-slider" min="0" max="1" step="0.01" value="0.5">
+                    <span class="sandbox-val" id="p0-val">0.50</span>
+                </div>
+                <div class="sandbox-slider-container">
+                    <label>Probabilidad p₁:</label>
+                    <span style="flex-grow: 1; height: 1px; background: rgba(255, 255, 255, 0.05);"></span>
+                    <span class="sandbox-val" id="p1-val">0.50</span>
+                </div>
+            </div>
+
+            <div class="sandbox-displays">
+                <div class="sandbox-card">
+                    <h4>Shannon Entropy (H)</h4>
+                    <div class="sandbox-card-num" id="shannon-num">1.000 bits</div>
+                    <div class="sandbox-card-formula">H = - Σ pᵢ log₂ pᵢ</div>
+                </div>
+                <div class="sandbox-card">
+                    <h4>Gibbs Entropy (S)</h4>
+                    <div class="sandbox-card-num sandbox-card-num--cyan" id="gibbs-num">9.57 × 10⁻²⁴ J/K</div>
+                    <div class="sandbox-card-formula">S = k_B H ln 2</div>
+                </div>
+            </div>
+
+            <div class="sandbox-canvas-container" id="sandbox-canvas">
+                <div class="sandbox-canvas-label">Visualización de Microestados Activos</div>
+                <!-- Particles will be rendered by JS -->
+            </div>
+        </div>
+
+        <p>Cuando el sistema está en orden máximo ($p_0 = 1$ o $p_0 = 0$), no hay incertidumbre y no hay desorden físico: $H = 0$ y $S = 0$. En cambio, en su punto máximo de desorden y máxima incertidumbre ($p_0 = p_1 = 0.5$), el sistema alcanza su máxima entropía matemática y termodinámica.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- Section 3: Landauer -->
+        <h2>III. El Límite de Landauer y la Paradoja del Demonio</h2>
+
+        <p>En 1961, Rolf Landauer estableció que toda operación lógicamente irreversible (como borrar un bit de memoria o combinar dos caminos lógicos en uno) requiere obligatoriamente liberar una cantidad mínima de calor al entorno. La información no es abstracta: <strong>es física</strong>.</p>
+        
+        <p>La paradoja fue enunciada por primera vez por James Clerk Maxwell en 1867. Imaginó un demonio microscópico capaz de separar moléculas rápidas de lentas en un compartimento sin realizar trabajo directo, reduciendo la entropía del sistema y violando la Segunda Ley de la Termodinámica.</p>
+
+        <p>No fue hasta Bennett y Szilard que comprendimos que el demonio acumula información del estado del compartimento en su memoria. Para cerrar el ciclo termodinámico y volver a operar, el demonio debe <strong>borrar su memoria</strong>. Y esa acción disipa calor, salvando las leyes de la física.</p>
+
+        <div class="chamber-widget">
+            <div class="chamber-column-left">
+                <div>
+                    <h4 style="font-family: var(--font-mono); font-size: 0.9rem; margin-bottom: 12px; color: #FFFFFF;">Cámara de Landauer</h4>
+                    <p style="font-size: 0.9rem; color: rgba(243, 244, 246, 0.6); margin-bottom: 20px;">
+                        Controla la temperatura ambiente para verificar cómo cambia el coste termodinámico del demonio al vaciar 1 bit de información.
+                    </p>
+                    <div class="chamber-slider-box">
+                        <label for="temp-slider">Temperatura: <span id="temp-val" style="color: var(--sovereign-amber); font-weight: bold;">298 K</span></label>
+                        <input type="range" id="temp-slider" class="sandbox-slider" min="0" max="400" step="5" value="298">
+                    </div>
+                </div>
+                <button class="chamber-btn" id="erase-btn">Borrar 1 Bit</button>
+            </div>
+            <div class="chamber-column-right" id="chamber-visual">
+                <div class="chamber-heat-flash" id="heat-flash"></div>
+                <div class="chamber-partition" id="partition"></div>
+                <div class="chamber-demon" id="demon">D</div>
+                
+                <!-- Particles will be generated dynamically by JS -->
+                
+                <div class="chamber-info-pane">
+                    <span>Límite (Q):</span>
+                    <span id="q-limit-text" style="color: var(--crimson-accent); font-weight: bold;">2.85 × 10⁻²¹ J</span>
+                </div>
+            </div>
+        </div>
+
+        <p>La fórmula que gobierna esta disipación calorífica es:</p>
+        
+        <div class="quote-block" style="font-family: var(--font-mono); font-size: 1.3rem; border-left-color: var(--sovereign-amber); text-align: center; font-style: normal;">
+            ΔQ ≥ k_B · T · ln 2
+        </div>
+
+        <p>A temperatura ambiente (298 K), el coste mínimo de borrar un solo bit es de aproximadamente 2.85 &times; 10<sup>-21</sup> Joules (o 2.85 zJ - zeptojoules). Este valor determina la cota absoluta física de la eficiencia energética para cualquier microprocesador, biológico o de silicio.</p>
+
+        <div class="section-divider"></div>
+
+        <h2>IV. Criterio Técnico de “Comprensión Profunda”</h2>
+
+        <p>Para calificar dentro de la cohort con comprensión operativa interdisciplinaria, un ingeniero o físico debe dominar los siguientes acoplamientos fundamentales:</p>
+
+        <ol>
+            <li>
+                <strong>Equivalencia de Entropías:</strong>
+                <ul>
+                    <li>Entropía termodinámica (Gibbs/Boltzmann): $S = -k_B \sum p_i \ln p_i$</li>
+                    <li>Entropía de la información (Shannon): $H = -\sum p_i \log_2 p_i$</li>
+                    <li>El factor de conversión física exacta: $S = k_B H \ln 2$</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Límite de Landauer (1961):</strong>
+                <ul>
+                    <li>La disipación mínima e inevitable de calor al borrar un bit de datos en un sistema a temperatura $T$: $\Delta Q \geq k_B T \ln 2$.</li>
+                    <li>La demostración matemática de que la reversibilidad lógica y la reversibilidad termodinámica están acopladas de manera directa.</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Resolución de la Paradoja de Maxwell:</strong>
+                <ul>
+                    <li>El entendimiento de que el Demonio de Maxwell no viola la segunda ley porque realizar mediciones consume información, y el restablecimiento del estado inicial (borrado de memoria) introduce entropía al ambiente.</li>
+                </ul>
+            </li>
+            <li>
+                <strong>Principio de Máxima Entropía (Jaynes, 1957):</strong>
+                <ul>
+                    <li>La formalización de que la mecánica estadística no es una teoría física axiomática aislada, sino una aplicación directa de inferencia estadística bayesiana sujeta a restricciones microscópicas.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <div class="section-divider"></div>
+
+        <h2>V. Tesis Final: La Información como Entidad Física</h2>
+        
+        <p>CORTEX-Persist aplica este principio a los sistemas de inteligencia artificial agéntica. La memoria conversacional y ontológica no puede flotar de manera abstracta e ilimitada en la nube sin disipación ni coste. Organizar la memoria en capas locales (como el ledger criptográfico L3 y la similitud L2) previene el desorden entrópico en el ciclo del agente, garantizando una persistencia estable al menor coste informático.</p>
+
+        <div style="margin-top: 80px; padding-top: 40px; border-top: 1px solid var(--mica-border);">
+            <h3>Referencias y Fuentes</h3>
+            <div class="table-container" style="margin-top: 24px;">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td><strong>Landauer, R. (1961)</strong></td>
+                            <td>"Irreversibility and Heat Generation in the Computing Process" — <em>IBM Journal of Research and Development</em>. El paper seminal de Landauer.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Jaynes, E. T. (1957)</strong></td>
+                            <td>"Information Theory and Statistical Mechanics" — <em>Physical Review</em>. La equivalencia matemática unificada.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bennett, C. H. (1982)</strong></td>
+                            <td>"The Thermodynamics of Computation — A Review" — <em>International Journal of Theoretical Physics</em>. La resolución definitiva del Demonio de Maxwell.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Szilard, L. (1929)</strong></td>
+                            <td>"Über die Entropieverminderung in einem thermodynamischen System durch Eingriffe intelligenter Wesen" — El paper del motor de Szilard.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="footer-terminal">
+                <div class="terminal-line">
+                    <span class="terminal-prompt">[SYSTEM]</span>
+                    <span>C5-REAL Ledger Entry Committed</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">[HASH]</span>
+                    <span>sha256:4d7c0bf26938a192bc58a8a48ff98e1cd310f829fbc923fa19bdeae8484a0d92</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">[ENTROPY]</span>
+                    <span>H_max = 1.000 bits. S_max = 9.57e-24 J/K. Physical continuity verified.</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">[AUTH]</span>
+                    <span>Telmo Dinámico de Moskv · Bilbao · Bizkaia</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script for Interactive Components -->
+    <script is:inline>
+        // --- 01. FERMI FUNNEL WIDGET ---
+        const funnelStages = [
+            { title: "Población Mundial", num: "8.200.000.000", desc: "Población global estimada en el planeta Tierra (2026).", math: "Base: 8.2e9 (Nivel base)" },
+            { title: "Educación Superior", num: "820.000.000", desc: "Graduados universitarios o con educación técnica superior equivalente (10%).", math: "8.2e9 * 0.10" },
+            { title: "Perfil STEM", num: "164.000.000", desc: "Profesionales de Ciencia, Tecnología, Ingeniería y Matemáticas (20%).", math: "820e6 * 0.20" },
+            { title: "Exposición Teórica", num: "3.280.000", desc: "Físicos, teóricos de la computación, químicos físicos e ingenieros avanzados (2.0%).", math: "164e6 * 0.02" },
+            { title: "Comprensión Intersección", num: "164.000", desc: "Sujetos que dominan la equivalencia física y matemática entre termodinámica y Shannon (5.0%).", math: "3.28e6 * 0.05 (0.002% total)" }
+        ];
+
+        const stagesEl = document.querySelectorAll('.funnel-stage');
+        const dashTitle = document.getElementById('dash-title');
+        const dashNumber = document.getElementById('dash-number');
+        const dashDetails = document.getElementById('dash-details');
+        const dashMath = document.getElementById('dash-math');
+
+        stagesEl.forEach(stage => {
+            stage.addEventListener('mouseenter', () => {
+                const index = parseInt(stage.getAttribute('data-stage'), 10);
+                activateStage(index);
+            });
+        });
+
+        function activateStage(index) {
+            stagesEl.forEach((el, i) => {
+                el.classList.remove('active', 'active-crimson');
+                if (i === index) {
+                    if (index === 4) {
+                        el.classList.add('active-crimson');
+                    } else {
+                        el.classList.add('active');
+                    }
+                }
+            });
+            const info = funnelStages[index];
+            dashTitle.textContent = info.title;
+            dashNumber.textContent = info.num;
+            dashDetails.textContent = info.desc;
+            dashMath.textContent = info.math;
+
+            if (index === 4) {
+                dashNumber.classList.add('crimson-text');
+            } else {
+                dashNumber.classList.remove('crimson-text');
+            }
+        }
+
+        // --- 02. SHANNON-GIBBS ENTROPY SANDBOX ---
+        const p0Slider = document.getElementById('p0-slider');
+        const p0Val = document.getElementById('p0-val');
+        const p1Val = document.getElementById('p1-val');
+        const shannonNum = document.getElementById('shannon-num');
+        const gibbsNum = document.getElementById('gibbs-num');
+        const sandboxCanvas = document.getElementById('sandbox-canvas');
+
+        // Initialize canvas particles
+        const particleCount = 40;
+        const particles = [];
+        for (let i = 0; i < particleCount; i++) {
+            const p = document.createElement('div');
+            p.className = 'sandbox-particle';
+            p.style.left = `${Math.random() * 90 + 5}%`;
+            p.style.top = `${Math.random() * 70 + 15}%`;
+            sandboxCanvas.appendChild(p);
+            particles.push(p);
+        }
+
+        const kB = 1.380649e-23; // Boltzmann constant J/K
+
+        function updateSandbox() {
+            const p0 = parseFloat(p0Slider.value);
+            const p1 = 1.0 - p0;
+
+            p0Val.textContent = p0.toFixed(2);
+            p1Val.textContent = p1.toFixed(2);
+
+            let H = 0;
+            if (p0 > 0 && p0 < 1) {
+                H = -(p0 * Math.log2(p0) + p1 * Math.log2(p1));
+            } else {
+                H = 0;
+            }
+
+            const S = kB * H * Math.log(2);
+
+            shannonNum.textContent = `${H.toFixed(4)} bits`;
+            
+            if (S === 0) {
+                gibbsNum.textContent = "0 J/K";
+            } else {
+                gibbsNum.textContent = `${(S * 1e24).toFixed(3)} × 10⁻²⁴ J/K`;
+            }
+
+            // Update particles states dynamically
+            particles.forEach((p, idx) => {
+                const isState1 = (idx / particleCount) > p0;
+                if (isState1) {
+                    p.classList.add('state-1');
+                } else {
+                    p.classList.remove('state-1');
+                }
+                
+                // Add noise/motion based on entropy
+                const jitter = H * 12; // higher entropy = more vibration
+                const dx = (Math.random() - 0.5) * jitter;
+                const dy = (Math.random() - 0.5) * jitter;
+                p.style.transform = `translate(${dx}px, ${dy}px)`;
+                p.style.opacity = H * 0.6 + 0.25;
+            });
+        }
+
+        p0Slider.addEventListener('input', updateSandbox);
+        updateSandbox();
+
+        // --- 03. LANDAUER LIMIT CHAMBER ---
+        const tempSlider = document.getElementById('temp-slider');
+        const tempVal = document.getElementById('temp-val');
+        const eraseBtn = document.getElementById('erase-btn');
+        const qLimitText = document.getElementById('q-limit-text');
+        const chamberVisual = document.getElementById('chamber-visual');
+        const partition = document.getElementById('partition');
+        const demon = document.getElementById('demon');
+        const heatFlash = document.getElementById('heat-flash');
+
+        const chamberParticlesCount = 15;
+        const chamberParticles = [];
+
+        // Spawn particles in chamber
+        for (let i = 0; i < chamberParticlesCount; i++) {
+            const p = document.createElement('div');
+            p.className = 'chamber-particle-c';
+            // Start distributed randomly left and right
+            p.style.left = `${Math.random() * 85 + 5}%`;
+            p.style.top = `${Math.random() * 65 + 15}%`;
+            chamberVisual.appendChild(p);
+            chamberParticles.push(p);
+        }
+
+        let temp = 298;
+        let chamberInterval;
+
+        function animateChamberParticles() {
+            chamberParticles.forEach(p => {
+                const speedFactor = (temp / 300) * 8 + 1;
+                const currentLeft = parseFloat(p.style.left);
+                const currentTop = parseFloat(p.style.top);
+
+                let nextLeft = currentLeft + (Math.random() - 0.5) * speedFactor;
+                let nextTop = currentTop + (Math.random() - 0.5) * speedFactor;
+
+                // Bounce bounds
+                if (nextLeft < 3) nextLeft = 3;
+                if (nextLeft > 93) nextLeft = 93;
+                if (nextTop < 12) nextTop = 12;
+                if (nextTop > 75) nextTop = 75;
+
+                // Check partition boundary if partition is closed (left of partition is <50%, right is >50%)
+                const isClosed = partition.classList.contains('closed');
+                if (isClosed) {
+                    if (currentLeft < 48 && nextLeft >= 48) nextLeft = 47;
+                    if (currentLeft > 51 && nextLeft <= 51) nextLeft = 52;
+                }
+
+                p.style.left = `${nextLeft}%`;
+                p.style.top = `${nextTop}%`;
+            });
+        }
+
+        function updateChamber() {
+            temp = parseInt(tempSlider.value, 10);
+            tempVal.textContent = `${temp} K`;
+            
+            // Calculate Q limit
+            const Q = kB * temp * Math.log(2);
+            if (Q === 0) {
+                qLimitText.textContent = "0 J";
+            } else {
+                qLimitText.textContent = `${(Q * 1e21).toFixed(2)} × 10⁻²¹ J`;
+            }
+        }
+
+        // Action: Erase 1 Bit
+        eraseBtn.addEventListener('click', () => {
+            // Animate demon glowing
+            demon.classList.add('glow-crimson');
+            
+            // Animate demon closing the partition
+            setTimeout(() => {
+                partition.classList.add('closed');
+                
+                // Force particles to the left side (reducing entropy/states)
+                chamberParticles.forEach((p, idx) => {
+                    // Force the particle to move to left chamber
+                    p.style.left = `${Math.random() * 40 + 5}%`;
+                });
+
+                // Dissipate heat (flash red background)
+                setTimeout(() => {
+                    heatFlash.style.opacity = (temp / 400) * 0.4 + 0.1;
+                    setTimeout(() => {
+                        heatFlash.style.opacity = 0;
+                    }, 400);
+                }, 300);
+
+            }, 400);
+
+            // Reopen partition and release particles after a few seconds
+            setTimeout(() => {
+                partition.classList.remove('closed');
+                demon.classList.remove('glow-crimson');
+            }, 3000);
+        });
+
+        tempSlider.addEventListener('input', updateChamber);
+        updateChamber();
+
+        // Start animation loop
+        setInterval(animateChamberParticles, 100);
+    </script>
+</body>
+</html>
