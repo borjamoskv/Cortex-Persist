@@ -4,7 +4,7 @@
 // Fuses Industrial Noir 2026 aesthetics with the complete GOLD ALBUMS ledger.
 
 import SiteLayout from '../layouts/SiteLayout.astro';
-import { Music, Search, Disc, Clock, Calendar, ExternalLink, SlidersHorizontal } from 'lucide-react';
+import { Music, Search, Disc, Clock, Calendar, ExternalLink, SlidersHorizontal, Youtube } from 'lucide-react';
 import { CortexFriction } from '../lib/CortexFriction';
 
 // Import our C5-REAL data
@@ -22,6 +22,13 @@ function getEmbedUrl(url: string) {
   return match ? `https://open.spotify.com/embed/album/${match[1]}?utm_source=generator&theme=0` : null;
 }
 
+// Helper to extract YouTube Video ID for embedding
+function getYoutubeEmbedUrl(url: string) {
+  if (!url) return null;
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
 // Map and merge data
 const albums = albumsData.map((album, index) => {
   const key = album.album_url || `unknown_album_${index}`;
@@ -33,7 +40,9 @@ const albums = albumsData.map((album, index) => {
     index: index + 1,
     exergyScore,
     analysis: analysesData[key as keyof typeof analysesData] || "Sonic analysis not available in local Ledger.",
-    embedUrl: getEmbedUrl(album.album_url || '')
+    embedUrl: getEmbedUrl(album.album_url || ''),
+    liveVideoUrl: album.live_video_url || null,
+    youtubeEmbedUrl: getYoutubeEmbedUrl(album.live_video_url || '')
   };
 });
 
@@ -316,9 +325,28 @@ Mission: Deep Work Focus</code></pre>
                   ></iframe>
                 </div>
               )}
+
+              {a.youtubeEmbedUrl && (
+                <div class="video-wrapper hidden">
+                  <iframe 
+                    class="lazy-youtube-iframe" 
+                    data-src={a.youtubeEmbedUrl}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen
+                    loading="lazy"
+                  ></iframe>
+                </div>
+              )}
               
               <div class="card-actions">
-                <button class="play-btn">[PLAY]</button>
+                <div class="card-play-actions">
+                  <button class="play-btn">[PLAY]</button>
+                  {a.youtubeEmbedUrl && (
+                    <button class="watch-btn" style="margin-left: 0.8rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                      <Youtube class="watch-btn-icon" style={{width: "0.85rem", height: "0.85rem", color: "#ff0000"}} /> [WATCH CONCERT]
+                    </button>
+                  )}
+                </div>
                 {a.album_url && (
                   <a 
                     href={a.album_url} 
@@ -981,8 +1009,21 @@ Mission: Deep Work Focus</code></pre>
     border-top: none;
     padding-top: 0;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 1rem;
+    gap: 1.2rem;
+  }
+
+  .albums-grid.list-view .embed-wrapper,
+  .albums-grid.list-view .video-wrapper {
+    width: 100%;
+    margin-top: 0.8rem;
+    order: 2;
+  }
+
+  .albums-grid.list-view .card-actions {
+    width: 100%;
+    order: 1;
   }
   
   .taste-album-card {
@@ -1121,6 +1162,25 @@ Mission: Deep Work Focus</code></pre>
     height: 80px;
     border: none;
   }
+
+  .video-wrapper {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+  }
+
+  .video-wrapper.hidden {
+    display: none;
+  }
+
+  .lazy-youtube-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
   
   .card-actions {
     display: flex;
@@ -1128,8 +1188,13 @@ Mission: Deep Work Focus</code></pre>
     align-items: center;
     width: 100%;
   }
+
+  .card-play-actions {
+    display: flex;
+    align-items: center;
+  }
   
-  .play-btn {
+  .play-btn, .watch-btn {
     background: transparent;
     border: none;
     font-family: 'IBM Plex Mono', monospace;
@@ -1140,10 +1205,10 @@ Mission: Deep Work Focus</code></pre>
     padding: 0;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
   }
   
-  .play-btn:hover {
+  .play-btn:hover, .watch-btn:hover {
     color: #fff;
   }
   
@@ -1265,6 +1330,10 @@ Mission: Deep Work Focus</code></pre>
     const playBtn = card.querySelector('.play-btn') as HTMLButtonElement;
     const embedWrapper = card.querySelector('.embed-wrapper') as HTMLDivElement;
     const iframe = card.querySelector('.lazy-spotify-iframe') as HTMLIFrameElement;
+
+    const watchBtn = card.querySelector('.watch-btn') as HTMLButtonElement;
+    const videoWrapper = card.querySelector('.video-wrapper') as HTMLDivElement;
+    const youtubeIframe = card.querySelector('.lazy-youtube-iframe') as HTMLIFrameElement;
     
     if (playBtn && embedWrapper && iframe) {
       playBtn.addEventListener('click', (e) => {
@@ -1279,9 +1348,41 @@ Mission: Deep Work Focus</code></pre>
           }
           embedWrapper.classList.remove('hidden');
           playBtn.textContent = "[HIDE PLAYER]";
+
+          // Hide video player if open
+          if (videoWrapper && !videoWrapper.classList.contains('hidden')) {
+            videoWrapper.classList.add('hidden');
+            if (watchBtn) watchBtn.textContent = "[WATCH CONCERT]";
+          }
         } else {
           embedWrapper.classList.add('hidden');
           playBtn.textContent = "[PLAY]";
+        }
+      });
+    }
+
+    if (watchBtn && videoWrapper && youtubeIframe) {
+      watchBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = videoWrapper.classList.contains('hidden');
+        
+        if (isHidden) {
+          // Lazy load the YouTube iframe source
+          const src = youtubeIframe.dataset.src;
+          if (src && !youtubeIframe.src) {
+            youtubeIframe.src = src;
+          }
+          videoWrapper.classList.remove('hidden');
+          watchBtn.textContent = "[HIDE CONCERT]";
+
+          // Hide Spotify player if open
+          if (embedWrapper && !embedWrapper.classList.contains('hidden')) {
+            embedWrapper.classList.add('hidden');
+            if (playBtn) playBtn.textContent = "[PLAY]";
+          }
+        } else {
+          videoWrapper.classList.add('hidden');
+          watchBtn.textContent = "[WATCH CONCERT]";
         }
       });
     }
