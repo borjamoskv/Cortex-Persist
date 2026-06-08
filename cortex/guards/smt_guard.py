@@ -10,10 +10,11 @@ Reality Level: C5-REAL
 """
 
 import logging
+import re
 from typing import Any
 
 try:
-    from z3 import Int, Real, Solver, sat, unsat
+    from z3 import Int, Real, Solver, sat, unsat, Bool, And
 
     HAS_Z3 = True
 except ImportError:
@@ -178,11 +179,136 @@ class SMTConstraintGuard:
         """Return structured audit report for a batch of facts."""
         results = [self.validate_fact(f) for f in facts]
         consistent = self.validate_consistency(facts)
+        unsat_core = []
+        if not consistent:
+            unsat_core = self.isolate_unsat_core(facts)
         return {
             "backend": self.backend,
             "total": len(facts),
             "valid": sum(results),
             "invalid": len(results) - sum(results),
             "consistent": consistent,
+            "unsat_core": unsat_core,
             "pass_rate": round(sum(results) / len(results), 4) if results else 1.0,
         }
+
+    def isolate_unsat_core(self, facts: list[dict[str, Any]]) -> list[str]:
+        """Isolate conflicting constraints when a batch of facts is unsat/inconsistent.
+
+        Returns a list of string descriptions explaining which constraints form the unsat core.
+        """
+        if not self._z3_available:
+            unsat_reasons = []
+            # Check temporal ordering
+            timestamps = [f.get("timestamp", f.get("created_at")) for f in facts]
+            valid_ts = [(i, t) for i, t in enumerate(timestamps) if t is not None]
+            for idx in range(len(valid_ts) - 1):
+                if valid_ts[idx][1] > valid_ts[idx + 1][1]:
+                    unsat_reasons.append(
+                        f"Temporal ordering violation: fact_{valid_ts[idx][0]} (ts={valid_ts[idx][1]}) > fact_{valid_ts[idx+1][0]} (ts={valid_ts[idx+1][1]})"
+                    )
+            # Check subject consistency
+            by_subject = {}
+            for i, f in enumerate(facts):
+                subj = f.get("subject", f.get("topic", f.get("ki_id")))
+                conf = f.get("confidence", f.get("score"))
+                if subj and conf is not None:
+                    by_subject.setdefault(str(subj), []).append((i, float(conf)))
+            for subj, items in by_subject.items():
+                for i in range(len(items)):
+                    for j in range(i + 1, len(items)):
+                        idx_a, val_a = items[i]
+                        idx_b, val_b = items[j]
+                        if abs(val_a - val_b) > 0.5:
+                            unsat_reasons.append(
+                                f"Confidence consistency violation on subject '{subj}': fact_{idx_a} (conf={val_a}) and fact_{idx_b} (conf={val_b}) differ by > 0.5"
+                            )
+            return unsat_reasons
+
+        # Z3 mode
+        s = Solver()
+        tracking_vars = []
+
+        # 1. Temporal validation
+        timestamps = [f.get("timestamp", f.get("created_at")) for f in facts]
+        valid_ts = [t for t in timestamps if t is not None]
+        if len(valid_ts) >= 2:
+            ts_vars = [Real(f"ts_{i}") for i in range(len(valid_ts))]
+            for i, (var, val) in enumerate(zip(ts_vars, valid_ts, strict=True)):
+                val_track = Bool(f"track_ts_val_{i}")
+                s.assert_and_track(var == float(val), val_track)
+                tracking_vars.append(val_track)
+
+                bounds_track = Bool(f"track_ts_bounds_{i}")
+                s.assert_and_track(var > 0.0, bounds_track)
+                tracking_vars.append(bounds_track)
+
+            for i in range(len(ts_vars) - 1):
+                order_track = Bool(f"track_ts_order_{i}_{i+1}")
+                s.assert_and_track(ts_vars[i] <= ts_vars[i + 1], order_track)
+                tracking_vars.append(order_track)
+
+        # 2. Subject validation
+        by_subject = {}
+        for idx, f in enumerate(facts):
+            subj = f.get("subject", f.get("topic", f.get("ki_id")))
+            conf = f.get("confidence", f.get("score"))
+            if subj and conf is not None:
+                by_subject.setdefault(str(subj), []).append((idx, float(conf)))
+
+        for subj, items in by_subject.items():
+            if len(items) >= 2:
+                c_vars = [Real(f"c_{subj}_{i}") for i in range(len(items))]
+                for i, (idx, val) in enumerate(items):
+                    val_track = Bool(f"track_conf_val_{subj}_{idx}")
+                    s.assert_and_track(c_vars[i] == val, val_track)
+                    tracking_vars.append(val_track)
+
+                for i in range(len(c_vars)):
+                    for j in range(i + 1, len(c_vars)):
+                        idx_a = items[i][0]
+                        idx_b = items[j][0]
+                        diff = Real(f"diff_{subj}_{idx_a}_{idx_b}")
+                        s.add(diff == c_vars[i] - c_vars[j])
+
+                        consistency_track = Bool(f"track_consistency_{subj}_{idx_a}_{idx_b}")
+                        s.assert_and_track(And(diff >= -0.5, diff <= 0.5), consistency_track)
+                        tracking_vars.append(consistency_track)
+
+        if s.check() == sat:
+            return []
+
+        unsat_core = s.unsat_core()
+        reasons = []
+        for track in unsat_core:
+            name = str(track)
+            
+            # Format to human readable format
+            match_order = re.match(r"track_ts_order_(\d+)_(\d+)", name)
+            match_val = re.match(r"track_ts_val_(\d+)", name)
+            match_bounds = re.match(r"track_ts_bounds_(\d+)", name)
+            match_conf = re.match(r"track_conf_val_(.+)_(?P<idx>\d+)", name)
+            match_consistency = re.match(r"track_consistency_(.+)_(?P<idx_a>\d+)_(?P<idx_b>\d+)", name)
+
+            if match_order:
+                a, b = match_order.groups()
+                reasons.append(f"Temporal ordering violation between fact_{a} and fact_{b}")
+            elif match_val:
+                a = match_val.group(1)
+                reasons.append(f"Fact_{a} has invalid/contradictory timestamp value")
+            elif match_bounds:
+                a = match_bounds.group(1)
+                reasons.append(f"Fact_{a} has timestamp <= 0")
+            elif match_conf:
+                subj = match_conf.group(1)
+                idx = match_conf.group("idx")
+                reasons.append(f"Fact_{idx} has confidence value conflict on subject '{subj}'")
+            elif match_consistency:
+                subj = match_consistency.group(1)
+                idx_a = match_consistency.group("idx_a")
+                idx_b = match_consistency.group("idx_b")
+                reasons.append(f"Confidence consistency violation on subject '{subj}' between fact_{idx_a} and fact_{idx_b}")
+            else:
+                reasons.append(name)
+                
+        return sorted(reasons)

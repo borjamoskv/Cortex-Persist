@@ -40,3 +40,28 @@ def test_adversarial_consistency():
         {"confidence": 0.5, "timestamp": 100},
     ]
     assert guard.validate_consistency(inconsistent_facts) is False
+
+
+def test_unsat_core_isolation():
+    guard = SMTConstraintGuard()
+
+    # Temporal ordering violation
+    inconsistent_facts = [
+        {"confidence": 0.5, "timestamp": 200},
+        {"confidence": 0.5, "timestamp": 100},
+    ]
+    core = guard.isolate_unsat_core(inconsistent_facts)
+    assert any("Temporal ordering violation" in c for c in core)
+
+    # Subject consistency violation
+    inconsistent_subj = [
+        {"subject": "test_subj", "confidence": 0.1, "timestamp": 100},
+        {"subject": "test_subj", "confidence": 0.9, "timestamp": 101},
+    ]
+    core_subj = guard.isolate_unsat_core(inconsistent_subj)
+    assert any("Confidence consistency violation on subject" in c for c in core_subj)
+
+    # Audit report format includes unsat_core
+    report = guard.audit_report(inconsistent_subj)
+    assert report["consistent"] is False
+    assert len(report["unsat_core"]) > 0
