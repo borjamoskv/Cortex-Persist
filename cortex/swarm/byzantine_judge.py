@@ -3,8 +3,9 @@
 Uses the SandboxJIT and Exergy economics to reach consensus on proposed code mutations.
 """
 import logging
-from typing import Dict, Any, List
-from cortex.engine.sandbox_jit import SandboxJIT, JITSandboxViolation
+from typing import Any, Optional
+
+from cortex.engine.sandbox_jit import JITSandboxViolation, SandboxJIT
 from cortex.swarm.exergy import ExergyBank
 
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ class ByzantineJudge:
         self.sandbox = SandboxJIT()
         self.bank = ExergyBank()
 
-    def evaluate_proposals(self, original_state: Dict[str, Any], proposals: List[Dict[str, str]]) -> Optional[str]:
+    def evaluate_proposals(self, original_state: dict[str, Any], proposals: list[dict[str, str]]) -> Optional[str]:
         """
         Receives a list of proposals from different agents:
         [{"agent_id": "alpha", "ast_code": "def func()..."}, ...]
@@ -38,7 +39,8 @@ class ByzantineJudge:
             try:
                 # 1. Ejecución Aislada JIT
                 logger.info(f"Evaluating AST from agent {agent_id}...")
-                new_state = self.sandbox.execute(code, context=dict(original_state))
+                _new_state = self.sandbox.execute(code, context=dict(original_state))
+
                 
                 # En un entorno real, aquí inyectaríamos la Test Suite (Pytest runner)
                 # Simulamos éxito si la compilación y ejecución fue segura (Sin Violaciones)

@@ -139,7 +139,7 @@ class VirgoContextGuard:
                     now_iso(),
                 ),
             )
-        except aiosqlite.IntegrityError as integrity_err:
+        except aiosqlite.IntegrityError:
             await self._trigger_ledger_rollback(
                 conn,
                 f"Replay attack detected: nonce '{nonce}' already exists (integrity collision).",

@@ -2,10 +2,8 @@
 [C5-REAL] Exergy Tokenomics & Staking Mechanism for OUROBOROS.
 Manages agent exergy (vitality) inside the Byzantine Swarm.
 """
-import uuid
 import logging
-from dataclasses import dataclass, field
-from typing import Dict, Optional
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +25,7 @@ class ExergyBank:
     REWARD_MULTIPLIER = 1.5
 
     def __init__(self):
-        self.wallets: Dict[str, AgentWallet] = {}
+        self.wallets: dict[str, AgentWallet] = {}
 
     def register_agent(self, agent_id: str) -> AgentWallet:
         if agent_id not in self.wallets:
@@ -74,7 +72,7 @@ class ExergyBank:
             wallet.successful_commits += 1
             logger.info(f"Agent {agent_id} REWARDED (+{reward} exergy).")
 
-    def get_state(self) -> Dict[str, dict]:
+    def get_state(self) -> dict[str, dict]:
         return {
             aid: {
                 "balance": w.balance,
