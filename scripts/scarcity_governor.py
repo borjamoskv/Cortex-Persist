@@ -5,10 +5,11 @@ Enforces thermodynamic limits (CPU/Memory pressure) before allowing agent mitosi
 If local geosphere (Mac) resources fall below thresholds, mitosis is blocked.
 """
 
-import sys
-import psutil
 import json
+import sys
 from datetime import datetime, timezone
+
+import psutil
 
 # C5-REAL Thresholds
 MIN_MEMORY_AVAILABLE_GB = 4.0
