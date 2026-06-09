@@ -1,4 +1,3 @@
-import os
 import shutil
 from pathlib import Path
 
@@ -35,8 +34,8 @@ def purge_scratch_entropy():
                 shutil.rmtree(item)
 
     freed_mb = total_bytes_freed / (1024 * 1024)
-    print(f"\n[LEA-Ω] PURGE COMPLETE")
-    print(f"Status: C5-REAL (Annihilation Confirmed)")
+    print("\n[LEA-Ω] PURGE COMPLETE")
+    print("Status: C5-REAL (Annihilation Confirmed)")
     print(f"Tokens/Files Destroyed: {total_files_deleted}")
     print(f"Entropy Cleared: {freed_mb:.2f} MB")
 
