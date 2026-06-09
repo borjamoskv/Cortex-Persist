@@ -6,6 +6,7 @@ Contains: score_semantics (Dimension 2), score_tests (Dimension 4).
 """
 import ast
 from pathlib import Path
+
 __all__ = ['score_semantics', 'score_tests']
 
 def score_semantics(files: list[Path]) -> tuple[float, list]:

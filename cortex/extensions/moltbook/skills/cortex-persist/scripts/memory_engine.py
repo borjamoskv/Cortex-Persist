@@ -10,12 +10,14 @@ Tiered architecture:
 Zero dependencies beyond stdlib. Works with any LLM backend.
 """
 import logging
+
 logger = logging.getLogger('cortex.exergy')
 import hashlib
 import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+
 MEMORY_ROOT = Path(os.environ.get('CORTEX_PERSIST_ROOT', Path.home() / '.cortex-persist'))
 SESSIONS_DIR = MEMORY_ROOT / 'sessions'
 KNOWLEDGE_DIR = MEMORY_ROOT / 'knowledge'
@@ -37,6 +39,7 @@ def _encrypt(data: str) -> str:
     if not key:
         return data
     import base64
+
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
     aesgcm = AESGCM(key)
     nonce = os.urandom(12)
@@ -94,15 +97,15 @@ def session_close(decisions: list[str] | None=None, errors: list[str] | None=Non
     entry_parts = [f'\n## Session {now}\n']
     if decisions:
         entry_parts.append('### Decisions')
-        entry_parts.extend((f'- {d}' for d in decisions))
+        entry_parts.extend(f'- {d}' for d in decisions)
         entry_parts.append('')
     if errors:
         entry_parts.append('### Errors')
-        entry_parts.extend((f'- {e}' for e in errors))
+        entry_parts.extend(f'- {e}' for e in errors)
         entry_parts.append('')
     if patterns:
         entry_parts.append('### Patterns')
-        entry_parts.extend((f'- {p}' for p in patterns))
+        entry_parts.extend(f'- {p}' for p in patterns)
         entry_parts.append('')
     if relationships:
         entry_parts.append('### Relationships')
@@ -208,11 +211,11 @@ def status() -> dict[str, object]:
     for fname in ('decisions.md', 'errors.md', 'patterns.md', 'relationships.md'):
         fpath = KNOWLEDGE_DIR / fname
         if fpath.exists():
-            entries = sum((1 for line in fpath.read_text().split('\n') if line.strip().startswith('- ')))
+            entries = sum(1 for line in fpath.read_text().split('\n') if line.strip().startswith('- '))
             st[f"{fname.replace('.md', '')}_count"] = entries
     session_files = list(SESSIONS_DIR.glob('*.md'))
     st['session_count'] = len(session_files)
-    total_bytes = sum((f.stat().st_size for f in MEMORY_ROOT.rglob('*') if f.is_file()))
+    total_bytes = sum(f.stat().st_size for f in MEMORY_ROOT.rglob('*') if f.is_file())
     st['disk_usage_kb'] = round(total_bytes / 1024, 1)
     return st
 

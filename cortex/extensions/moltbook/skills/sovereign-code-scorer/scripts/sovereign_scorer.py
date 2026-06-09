@@ -275,7 +275,6 @@ def score_aesthetics(files: list[Path]) -> tuple[float, list[Issue]]:
             ):
                 deductions += 0.5
         except SyntaxError:
-            import logging
             pass
 
         for i, line in enumerate(lines, 1):

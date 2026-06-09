@@ -10,11 +10,12 @@ from __future__ import annotations
 
 import json
 import logging
-import aiosqlite
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+import aiosqlite
 
 from cortex.extensions.llm.sovereign import SovereignLLM
 from cortex.extensions.moltbook.client import MoltbookClient, MoltbookError

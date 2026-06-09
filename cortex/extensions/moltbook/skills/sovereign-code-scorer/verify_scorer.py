@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 
@@ -6,7 +5,8 @@ from pathlib import Path
 scripts_dir = Path(__file__).parent / "scripts"
 sys.path.insert(0, str(scripts_dir))
 
-from sovereign_scorer import discover_files, score
+from sovereign_scorer import score
+
 
 def test_sovereign_scorer():
     """Verify that sovereign scorer can analyze its own codebase and returns a valid score."""

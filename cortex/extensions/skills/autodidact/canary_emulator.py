@@ -9,14 +9,11 @@ from __future__ import annotations
 
 import json
 import logging
-import math
-import os
 import re
 import time
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.llm._models import CortexPrompt
-from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm.router import CortexLLMRouter, IntentProfile
 from cortex.utils.pulmones import sovereign_circuit_breaker
 

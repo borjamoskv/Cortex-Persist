@@ -63,7 +63,6 @@ CORTEX-PERSIST intercepts stochastic text, enforces a deterministic shield via Z
 | **Mutation** | Silent CRUD / Overwritable | **Append-Only + SHA-256 Merkle Seals** |
 | **Agent Liability** | Ambiguous reconstruction | **Mathematically Defensible Lineage** |
 | **Verification** | Manual log diving | **O(1) Portable JSON Audit Packs** |
-| **Performance** | Blocked by I/O and GIL | **Rust-FFI Core (~390k Agents/Sec)** |
 
 ### ZERO-FRICTION SOVEREIGN INTEGRATION
 Inject the CORTEX memory substrate into any existing agent pipeline via our magic decorator.
@@ -145,17 +144,6 @@ pip install "cortex-persist[api,mcp,daemon]" # Web Server & MCP endpoints
 pip install "cortex-persist[cloud]"          # PostgreSQL, Redis, & Qdrant scaling
 
 ```
-
----
-
-## ▀▄ TERMINAL STATE 4: SILICON DISPERSION
-
-**Thermodynamic constraints conquered. Python GIL annihilated. Achieving ~390k Agents/Sec.**
-
-*   **Rust-Native Swarm Engine:** Parallel task execution via Rust `rayon`. 
-*   **VSA Memory (Zero-Copy):** O(1) Ring Buffer (mmap). OS I/O overhead bypassed.
-*   **ZK-STARK Ledger Seals:** Cryptographic transaction proofs. Inter-nodal mesh trust.
-*   **Live Telemetry:** Industrial Noir 20Hz WebSocket daemon. Real-time exergy metrics on `agents.archi`.
 
 ---
 

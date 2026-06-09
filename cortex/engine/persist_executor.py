@@ -7,7 +7,7 @@ Unifies CORTEX Memory (VSA/Manager) and ASL (Agent Specification Language) Proto
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from cortex.memory.manager import CortexMemoryManager
 from cortex.memory.vsa import SwarmMemory
@@ -71,7 +71,6 @@ class PersistExecutor:
         try:
             self.memory_manager.store(agent_id, state_data)  # pyright: ignore[reportUnusedCoroutine]
         except AttributeError:
-            import logging
 
             pass
 

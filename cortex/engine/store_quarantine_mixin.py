@@ -7,7 +7,6 @@ excluded from recall, search, and dedup.
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import logging
 

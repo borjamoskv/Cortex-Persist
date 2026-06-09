@@ -7,7 +7,7 @@ at init time instead of being hardcoded into store_mixin.py.
 
 from __future__ import annotations
 
-from typing import Any, Optional, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 import aiosqlite
 
