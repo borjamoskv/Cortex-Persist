@@ -490,7 +490,7 @@ async def test_expired_timestamp_rejection(agent_keys):
         expired_time = (datetime.now(timezone.utc) - timedelta(minutes=6)).isoformat()
         content = "Expired Content"
         canonical_content = canonicalize_content(content)
-        content_hash = hashlib.sha3_256(canonical_content.encode("utf-8")).hexdigest()
+        content_hash = hashlib.sha3_256(canonical_content).hexdigest()
 
         # Sign payload manually
         payload = f"agent_id={agent_id}&session_id=s1&timestamp={expired_time}&nonce=n1&content_hash={content_hash}"
