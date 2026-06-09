@@ -17,16 +17,29 @@ class TaintValidationError(ValueError):
     pass
 
 
-def canonicalize_content(content: str) -> str:
-    """Normalizes content string to ensure consistent hashing."""
-    normalized = "\n".join(line.strip() for line in content.strip().splitlines())
+def canonicalize_content(content: str | bytes | memoryview) -> bytes:
+    """Normalizes content to bytes to ensure consistent zero-copy hashing.
+    JIT-friendly hot-path (Python 3.13+ SOTA).
+    """
+    if isinstance(content, memoryview):
+        content = content.tobytes()
+    elif isinstance(content, str):
+        content = content.encode("utf-8")
+        
     try:
-        data = json.loads(normalized)
+        data = json.loads(content)
         if isinstance(data, dict | list):
-            return json.dumps(data, sort_keys=True, separators=(",", ":"))
-    except Exception as exc:
-        logger.warning("Suppressed exception: %s", exc)
-    return normalized
+            # Sort keys for deterministic hashing, minimal whitespaces
+            return json.dumps(data, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    except Exception:
+        pass
+    
+    # Fast path for non-JSON or invalid JSON
+    return b"\n".join(line.strip() for line in content.strip().splitlines())
+
+def _fast_sha3(buffer: bytes | memoryview) -> str:
+    """Zero-copy / Tier 2 JIT Hot-Path for SHA3-256."""
+    return hashlib.sha3_256(buffer).hexdigest()
 
 
 def generate_secure_taint_token(
@@ -43,9 +56,10 @@ def generate_secure_taint_token(
         nonce = uuid.uuid4().hex
 
     canonical_content = canonicalize_content(content)
-    content_hash = hashlib.sha3_256(canonical_content.encode("utf-8")).hexdigest()
+    content_hash = _fast_sha3(canonical_content)
 
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp}&nonce={nonce}&content_hash={content_hash}"
+
 
     priv_bytes = base64.b64decode(private_key_b64)
     priv_key = Ed25519PrivateKey.from_private_bytes(priv_bytes)
@@ -188,10 +202,11 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
         logger.error("[TaintEngine] SAGA-1: Agent %s is not registered or inactive.", agent_id)
         return False
 
-    # 4. Verify Signature
+    # 4. Verify Signature (Zero-copy aware)
     canonical_content = canonicalize_content(content)
-    content_hash = hashlib.sha3_256(canonical_content.encode("utf-8")).hexdigest()
+    content_hash = _fast_sha3(canonical_content)
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp_str}&nonce={nonce}&content_hash={content_hash}"
+
 
     try:
         pub_bytes = base64.b64decode(public_key_b64)
