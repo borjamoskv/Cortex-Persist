@@ -235,3 +235,39 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
         raise TaintValidationError(
             "SAGA-1 Rejection: Valid cryptographically signed CORTEX-TAINT token is required."
         )
+
+# =====================================================================
+# H-IMMUNO-02: Antigen-Signature Routing (MHC)
+# =====================================================================
+import re
+
+
+class MHCAntigenRouter:
+    """
+    C5-REAL Implementation of the Adaptive Immunity Task Router.
+    Bypasses LLM coordinator completely by matching deterministic
+    SHA3 signatures and Regex Antigens to specific T-Cell Daemons.
+    """
+    def __init__(self):
+        self._t_cells = {} # Daemon registry mapping antigen signatures to agent IDs
+        
+    def register_t_cell(self, agent_id: str, antigen_regex: str):
+        """Registers a specific daemon to awaken ONLY upon antigen detection."""
+        self._t_cells[agent_id] = re.compile(antigen_regex, re.IGNORECASE)
+        logger.info(f"[MHC] T-Cell {agent_id} bound to antigen pattern: {antigen_regex}")
+        
+    def present_antigen(self, payload: str) -> str | None:
+        """
+        Phagocytizes the raw payload and attempts MHC presentation.
+        Zero tokens consumed. Returns assigned agent_id or None.
+        """
+        canonical = canonicalize_content(payload)
+        payload_hash = _fast_sha3(canonical)[:12]
+        
+        for agent_id, antigen_pattern in self._t_cells.items():
+            if antigen_pattern.search(payload):
+                logger.info(f"[MHC] Antigen match! Signature {payload_hash} triggers {agent_id}")
+                return agent_id
+                
+        logger.warning(f"[MHC] No T-Cell match for antigen signature {payload_hash}")
+        return None
