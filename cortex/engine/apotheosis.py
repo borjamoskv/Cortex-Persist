@@ -26,13 +26,14 @@ else:
         _HAS_WATCHDOG = False
 
         class FileSystemEventHandler:  # type: ignore
-            pass
+            """Fallback class when watchdog is not installed."""
 
         class FileSystemEvent:  # type: ignore
-            pass
+            """Fallback class when watchdog is not installed."""
 
         class Observer:  # type: ignore
-            pass
+            """Fallback class when watchdog is not installed."""
+
 
 
 from cortex.engine.apotheosis_audits_mixin import ApotheosisAuditsMixin

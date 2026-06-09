@@ -95,7 +95,8 @@ class PhoenixState:
 class BaseEngine(ABC):
     @abstractmethod
     async def execute(self, state: PhoenixState, *args, **kwargs) -> PhoenixState:
-        pass
+        """Execute the atomic transition phase."""
+
 
 
 class AnalysisEngine(BaseEngine):

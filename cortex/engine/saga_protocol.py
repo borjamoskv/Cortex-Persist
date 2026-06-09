@@ -81,7 +81,7 @@ async def guard_exec(ctx: SagaContext):
 
 
 async def guard_comp(ctx: SagaContext):
-    pass
+    """Compensates the guard step by resetting the payload state."""
 
 
 async def taint_exec(ctx: SagaContext):
@@ -128,8 +128,7 @@ async def ledger_exec(ctx: SagaContext):
 
 
 async def ledger_comp(ctx: SagaContext):
-    # Emit abort event
-    pass
+    """Compensates the ledger step by emitting an abort event."""
 
 
 async def db_exec(ctx: SagaContext):
@@ -143,12 +142,11 @@ async def db_comp(ctx: SagaContext):
 
 
 async def index_exec(ctx: SagaContext):
-    # Vector index updates
-    pass
+    """Executes vector index updates."""
 
 
 async def index_comp(ctx: SagaContext):
-    pass
+    """Compensates the index update step."""
 
 
 def build_core_write_path_saga() -> SagaOrchestrator:

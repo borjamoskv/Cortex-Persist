@@ -53,7 +53,7 @@ class AetherOscBridge:
 
         # Start generic UDP sender for TX
         class OSCSenderProtocol(asyncio.DatagramProtocol):
-            pass
+            """Protocol for sending OSC messages over UDP."""
 
         self.tx_transport, _ = await loop.create_datagram_endpoint(
             OSCSenderProtocol, remote_addr=(self.tx_ip, self.tx_port)

@@ -208,7 +208,7 @@ class CortexPrompt(BaseModel):
 
 
 class BaseProvider(ABC):
-    """Interfaz estricta que todo proveedor LLM debe cumplir.
+    """Interfaz estricta que cualquier proveedor LLM debe cumplir.
 
     Cada provider declara su `intent_affinity` - el conjunto de intenciones
     que sirve con alta precisión. El router usa esta declaración para

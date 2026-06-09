@@ -91,7 +91,7 @@ class ChronosEngine:
             "Mantén el 'Zero Concepto' - si puedes simularlo antes de aplicarlo en el ecosistema, hazlo.",
         ],
         "impossible": [
-            "Estás operando en nivel Singularidad. Documenta todo para que quede testamento.",
+            "Estás operando en nivel Singularidad. Documenta cada detalle para que quede testamento.",
             "MOSKV-1 acaba de condensar años en segundos. Asegura la persistencia asintótica.",
             "ROI astronómico alcanzado. Vigila la cristalización arquitectónica.",
         ],

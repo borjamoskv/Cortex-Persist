@@ -16,7 +16,8 @@ SOCKET_PATH = "/tmp/cortex_bci.sock"
 
 
 class SovereignIntentError(Exception):
-    pass
+    """Raised when a BCI intent fails integrity verification."""
+
 
 
 class BCI_Daemon:

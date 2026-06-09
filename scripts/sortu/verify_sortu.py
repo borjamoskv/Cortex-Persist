@@ -10,7 +10,8 @@ import yaml
 
 
 class VerificationError(ValueError):
-    pass
+    """Raised when tripartite verification fails."""
+
 
 
 def _sha256(path: Path) -> str:

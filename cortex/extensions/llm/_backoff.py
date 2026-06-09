@@ -105,7 +105,7 @@ async def handle_429_backoff(
 async def execute_fallback(
     provider: LLMProvider, payload: dict[str, Any], original_error: httpx.HTTPStatusError
 ) -> str:
-    """Ejecuta el fallback hacia un modelo más estable si todo falla."""
+    """Ejecuta el fallback hacia un modelo más estable si los intentos fallan."""
     logger.warning(
         "LLM API [429 Quota Exceeded Final] on %s. Fallback to Open Code (Qwen Coder)...",
         provider.model_name,

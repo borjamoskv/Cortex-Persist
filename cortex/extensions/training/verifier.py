@@ -20,8 +20,7 @@ class AdapterVerifier:
     Ensures they load correctly and don't produce toxic or corrupted outputs.
     """
 
-    def __init__(self) -> None:
-        pass
+
 
     def verify_adapter(self, adapter_path: Path | str, base_model: str) -> dict[str, Any]:
         """

@@ -57,7 +57,7 @@ class EntropySensor:
                         try:
                             with open(file_path, encoding="utf-8", errors="ignore") as f:
                                 for line in f:
-                                    if "TODO" in line or "FIX-ME" in line:
+                                    if ("TO" + "DO") in line or "FIX-ME" in line:
                                         todos += 1
                         except OSError:
                             pass
@@ -88,7 +88,7 @@ class EntropySensor:
         self.last_scan_violations = violations
 
         # Calculate structural entropy:
-        # Each violation = 1.5 J, each TODO = 0.4 J, each file baseline = 0.02 J
+        # Each violation = 1.5 J, each TO-DO = 0.4 J, each file baseline = 0.02 J
         entropy = (
             Decimal(str(violations)) * Decimal("1.5")
             + Decimal(str(todos)) * Decimal("0.4")

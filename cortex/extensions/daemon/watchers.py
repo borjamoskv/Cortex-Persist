@@ -51,16 +51,16 @@ except ImportError:
         """Stub."""
 
         def schedule(self, *a, **kw):
-            pass
+            """Stub method to schedule observation."""
 
         def start(self):
-            pass
+            """Stub method to start observation."""
 
         def stop(self):
-            pass
+            """Stub method to stop observation."""
 
         def join(self):
-            pass
+            """Stub method to join observer thread."""
 
     _WATCHDOG_AVAILABLE = False
 

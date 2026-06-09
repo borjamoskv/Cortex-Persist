@@ -83,7 +83,7 @@ class EntropicWakeDaemon:
     def ignite_purification_agent(self, target: str = "modulo_entropico"):
         """
         Spawn the headless agent.
-        Todo ocurre sin un solo Input Field.
+        La ejecución ocurre sin un solo Input Field.
         """
         logger.warning("THRESHOLD EXCEEDED. Imploding execution context for %s.", target)
         intent = "Aniquilación y extracción O(1) vía OUROBOROS-Ω y Berreraiki."

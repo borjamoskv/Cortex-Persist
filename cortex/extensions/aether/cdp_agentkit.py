@@ -27,7 +27,7 @@ except ImportError:
         wallet: Any
 
         def __init__(self, **kwargs: Any) -> None:
-            pass
+            """Initialize the mock wrapper."""
 
         def export_wallet(self) -> str:
             return ""

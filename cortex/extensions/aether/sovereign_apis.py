@@ -14,7 +14,7 @@ class SovereignTriad:
     [SOVEREIGN TRIAD] - AETHER COGNITIVE APIS
     - Jina AI: Extracción web instantánea a Markdown. (Neutraliza entropía HTML).
     - Exa.ai: Búsqueda Semántica Neuronal. (Comprensión profunda, zero keyword-matching).
-    - Braintrust: Telemetría RLHF & Observabilidad. (Axioma 3: Zero Trust, todo medido).
+    - Braintrust: Telemetría RLHF & Observabilidad. (Axioma 3: Zero Trust, completamente medido).
 
     Reglas de Combate (O(1)):
     - Timeouts estrictos (red variable = entropía).

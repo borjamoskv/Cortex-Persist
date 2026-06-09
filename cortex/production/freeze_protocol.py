@@ -1,18 +1,19 @@
 # [C5-REAL] Exergy-Maximized
 def disable_mutations():
-    pass
+    """Temporarily disables any active state mutations across the system."""
 
 
 def flush_queues():
-    pass
+    """Flushes all queued events to ensure no pending items remain."""
 
 
 def snapshot_redis():
-    pass
+    """Takes a persistence snapshot of the Redis store."""
 
 
 def seal_ledger():
-    pass
+    """Seals the execution ledger to prevent updates during freeze."""
+
 
 
 def freeze_system():

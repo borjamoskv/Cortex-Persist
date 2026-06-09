@@ -1,7 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 class AIClient:
-    def __init__(self):
-        pass
+
 
     async def generate(self, prompt: str, **kwargs) -> str:
         # Dummy response acting as the LLM output for pathogen

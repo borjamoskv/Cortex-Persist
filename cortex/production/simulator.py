@@ -23,15 +23,16 @@ def generate_load(duration_seconds):
 
 
 class TimeoutError(Exception):
-    pass
+    """Simulated timeout exception for load testing."""
 
 
 class MemoryOverflow(Exception):
-    pass
+    """Simulated memory overflow exception for stress testing."""
 
 
 class LedgerCorruptionSim(Exception):
-    pass
+    """Simulated ledger corruption exception."""
+
 
 
 def inject_faults(request=None):

@@ -245,4 +245,4 @@ class LocalMIDIAdapter(AudioAdapter):
         return {"master": job_id}
 
     async def close(self) -> None:
-        pass
+        """No-op close for local MIDI generation."""

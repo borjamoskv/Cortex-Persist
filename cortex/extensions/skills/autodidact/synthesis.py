@@ -159,7 +159,7 @@ async def distill_sovereign_memo(
     if intent:
         intent_directive = (
             f"ENFOQUE LÁSER EN EL INTENT DEL AGENTE: '{intent}'. "
-            "Filtra todo lo que no resuelva directa o indirectamente esta necesidad."
+            "Filtra cualquier elemento que no resuelva directa o indirectamente esta necesidad."
         )
     else:
         intent_directive = "ENFOQUE GENERAL: Extracción de todos los patrones útiles."

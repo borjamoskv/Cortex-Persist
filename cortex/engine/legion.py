@@ -106,7 +106,7 @@ class SwarmAgent(ABC):
 
     @abstractmethod
     async def execute(self, target: str) -> SwarmSignal:
-        pass
+        """Execute a siege task on the target."""
 
 
 class Squadron(ABC):
@@ -122,7 +122,7 @@ class Squadron(ABC):
 
     @abstractmethod
     def _create_agent(self, agent_id: str) -> SwarmAgent:
-        pass
+        """Instantiate a new swarm agent with the given ID."""
 
     async def _map(self, target_pattern: str | None = None) -> list[str]:
         return [target_pattern] if target_pattern else []
