@@ -25,11 +25,9 @@ import glob
 import json
 import os
 import re
+from datetime import datetime, timezone
+from typing import Any
 
-pass
-from datetime import datetime
-
-pass
 from cortex.observability.telemetry import CortexTelemetry
 
 LOG_FILE = os.path.expanduser("~/.gemini/config/skills/_metrics/runtime_events.jsonl")
@@ -204,16 +202,8 @@ def parse_iso(ts):
     return None
 
 
-def run_cronos_analysis(transcripts, rolling_window=5) -> None:
-    """
-    Parses workflow metadata and evaluates session durations to construct
-    operational memory (CRONOS v0) and exergy rankings.
-    Implements Execution Funnel (VIEWED -> REFERENCED -> EXECUTED -> COMPLETED).
-    """
-    CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
-    CRONOS_REPORT = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_report.md")
-    import statistics
-
+def _load_workflow_metadata() -> dict[str, int]:
+    """Load expected duration for workflows from metadata."""
     workflow_meta = {}
     wf_dir = "/Users/borjafernandezangulo/.agents/workflows"
     if os.path.exists(wf_dir):
@@ -227,88 +217,146 @@ def run_cronos_analysis(transcripts, rolling_window=5) -> None:
                 workflow_meta[name] = int(match.group(1)) if match else 15
             except Exception:
                 workflow_meta[name] = 15
-    raw_sessions = []
-    for t in transcripts:
-        session_id = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(t))))
-        try:
-            with open(t, encoding="utf-8") as fh:
-                lines = [json.loads(line) for line in fh if line.strip()]
-        except Exception:
-            continue
-        if not lines:
-            continue
-        viewed_workflows = set()
-        referenced_workflows = set()
-        non_wf_tool_calls = 0
-        artifacts_generated = 0
-        for step in lines:
-            for call in step.get("tool_calls", []):
-                name = call.get("name", "")
-                args = call.get("args", {})
-                if name == "view_file":
-                    path = args.get("AbsolutePath", "")
-                    m = re.search("workflows/([^/]+)\\.md", path)
-                    if m:
-                        viewed_workflows.add(m.group(1))
-                        continue
-                if name in ["write_to_file", "replace_file_content", "multi_replace_file_content"]:
-                    if args.get("IsArtifact") or args.get("ArtifactMetadata"):
-                        artifacts_generated += 1
-                non_wf_tool_calls += 1
-            if step.get("source") == "USER_EXPLICIT" or step.get("type") == "USER_INPUT":
-                content = step.get("content", "")
-                for wf in workflow_meta:
-                    if re.search("^\\s*/" + re.escape(wf) + "\\b", content, re.MULTILINE):
-                        referenced_workflows.add(wf)
-        session_workflows = {}
-        all_wfs = viewed_workflows.union(referenced_workflows)
-        if not all_wfs:
-            continue
-        success = lines[-1].get("status") != "ERROR"
-        for wf in all_wfs:
-            state = "VIEWED"
-            score = 1.0
-            if wf in referenced_workflows:
-                state = "REFERENCED"
-                score += 2.0
-                if non_wf_tool_calls >= 2:
-                    state = "EXECUTED"
-                    score += 5.0 + 0.5 * non_wf_tool_calls + 2.0 * artifacts_generated
-                    if success:
-                        state = "COMPLETED"
-                        score += 10.0
-            session_workflows[wf] = {"state": state, "execution_score": round(score, 2)}
-        start_ts = lines[0].get("created_at")
-        end_ts = lines[-1].get("created_at")
-        start_raw = _parse_timestamp(lines[0].get("content", "")) or start_ts
-        end_raw = _parse_completed_at(lines[-1].get("content", "")) or end_ts
-        start_dt = parse_iso(start_raw)
-        end_dt = parse_iso(end_raw)
-        if not (start_dt and end_dt):
-            actual_min = 0.1
-        else:
-            actual_min = max(0.1, (end_dt - start_dt).total_seconds() / 60.0)
-        outcome_score = 1.0
-        for step in reversed(lines):
-            if step.get("source") == "USER_EXPLICIT" and "/score" in step.get("content", ""):
-                m = re.search("/score\\s+([0-9.]+)", step.get("content", ""))
+    return workflow_meta
+
+
+def _analyze_steps(
+    lines: list[dict[str, Any]], workflow_meta: dict[str, int]
+) -> tuple[set[str], set[str], int, int]:
+    """Analyze step log lines to find viewed/referenced workflows and counts."""
+    viewed_workflows = set()
+    referenced_workflows = set()
+    non_wf_tool_calls = 0
+    artifacts_generated = 0
+    for step in lines:
+        for call in step.get("tool_calls", []):
+            name = call.get("name", "")
+            args = call.get("args", {})
+            if name == "view_file":
+                path = args.get("AbsolutePath", "")
+                m = re.search("workflows/([^/]+)\\.md", path)
                 if m:
-                    outcome_score = float(m.group(1))
-                    break
-        raw_sessions.append(
-            {
-                "timestamp": end_ts or start_ts,
-                "session_id": session_id,
-                "workflows": session_workflows,
-                "actual_min": actual_min,
-                "success": success,
-                "start_dt": start_dt or datetime.utcnow(),
-                "outcome_score": outcome_score,
-                "artifacts": artifacts_generated,
-                "tool_calls": non_wf_tool_calls,
-            }
-        )
-    raw_sessions.sort(key=lambda x: x["start_dt"])
+                    viewed_workflows.add(m.group(1))
+                    continue
+            if name in ["write_to_file", "replace_file_content", "multi_replace_file_content"]:
+                if args.get("IsArtifact") or args.get("ArtifactMetadata"):
+                    artifacts_generated += 1
+            non_wf_tool_calls += 1
+        if step.get("source") == "USER_EXPLICIT" or step.get("type") == "USER_INPUT":
+            content = step.get("content", "")
+            for wf in workflow_meta:
+                if re.search("^\\s*/" + re.escape(wf) + "\\b", content, re.MULTILINE):
+                    referenced_workflows.add(wf)
+    return viewed_workflows, referenced_workflows, non_wf_tool_calls, artifacts_generated
+
+
+def _compute_funnel_states(
+    viewed_workflows: set[str],
+    referenced_workflows: set[str],
+    non_wf_tool_calls: int,
+    artifacts_generated: int,
+    success: bool,
+) -> dict[str, dict[str, Any]]:
+    """Compute states and scores for workflows in a session."""
+    session_workflows = {}
+    all_wfs = viewed_workflows.union(referenced_workflows)
+    for wf in all_wfs:
+        state = "VIEWED"
+        score = 1.0
+        if wf in referenced_workflows:
+            state = "REFERENCED"
+            score += 2.0
+            if non_wf_tool_calls >= 2:
+                state = "EXECUTED"
+                score += 5.0 + 0.5 * non_wf_tool_calls + 2.0 * artifacts_generated
+                if success:
+                    state = "COMPLETED"
+                    score += 10.0
+        session_workflows[wf] = {"state": state, "execution_score": round(score, 2)}
+    return session_workflows
+
+
+def _calculate_session_duration(lines: list[dict[str, Any]]) -> tuple[float, datetime | None]:
+    """Calculate actual session duration in minutes and start datetime."""
+    start_ts = lines[0].get("created_at")
+    end_ts = lines[-1].get("created_at")
+    start_raw = _parse_timestamp(lines[0].get("content", "")) or start_ts
+    end_raw = _parse_completed_at(lines[-1].get("content", "")) or end_ts
+    start_dt = parse_iso(start_raw)
+    end_dt = parse_iso(end_raw)
+    if not (start_dt and end_dt):
+        actual_min = 0.1
+    else:
+        actual_min = max(0.1, (end_dt - start_dt).total_seconds() / 60.0)
+    return actual_min, start_dt
+
+
+def _parse_outcome_score(lines: list[dict[str, Any]]) -> float:
+    """Parse output score from explicit user command '/score'."""
+    outcome_score = 1.0
+    for step in reversed(lines):
+        if step.get("source") == "USER_EXPLICIT" and "/score" in step.get("content", ""):
+            m = re.search("/score\\s+([0-9.]+)", step.get("content", ""))
+            if m:
+                outcome_score = float(m.group(1))
+                break
+    return outcome_score
+
+
+def _parse_single_transcript(t: str, workflow_meta: dict[str, int]) -> dict[str, Any] | None:
+    """Parse a single transcript and compile its metrics."""
+    session_id = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(t))))
+    try:
+        with open(t, encoding="utf-8") as fh:
+            lines = [json.loads(line) for line in fh if line.strip()]
+    except Exception:
+        return None
+    if not lines:
+        return None
+
+    (
+        viewed_workflows,
+        referenced_workflows,
+        non_wf_tool_calls,
+        artifacts_generated,
+    ) = _analyze_steps(lines, workflow_meta)
+
+    all_wfs = viewed_workflows.union(referenced_workflows)
+    if not all_wfs:
+        return None
+
+    success = lines[-1].get("status") != "ERROR"
+    session_workflows = _compute_funnel_states(
+        viewed_workflows, referenced_workflows, non_wf_tool_calls, artifacts_generated, success
+    )
+
+    actual_min, start_dt = _calculate_session_duration(lines)
+    outcome_score = _parse_outcome_score(lines)
+
+    start_ts = lines[0].get("created_at")
+    end_ts = lines[-1].get("created_at")
+
+    return {
+        "timestamp": end_ts or start_ts,
+        "session_id": session_id,
+        "workflows": session_workflows,
+        "actual_min": actual_min,
+        "success": success,
+        "start_dt": start_dt or datetime.now(timezone.utc),
+        "outcome_score": outcome_score,
+        "artifacts": artifacts_generated,
+        "tool_calls": non_wf_tool_calls,
+    }
+
+
+def _compute_cronos_records(
+    raw_sessions: list[dict[str, Any]],
+    workflow_meta: dict[str, int],
+    rolling_window: int,
+) -> list[dict[str, Any]]:
+    """Compute Cronos metrics and exergy scores across raw sessions."""
+    import statistics
+
     cronos_records = []
     history = {}
     for session in raw_sessions:
@@ -356,10 +404,11 @@ def run_cronos_analysis(transcripts, rolling_window=5) -> None:
             cronos_records.append(record)
             if state == "COMPLETED":
                 history[wf].append(actual_min)
-    os.makedirs(os.path.dirname(CRONOS_LOG), exist_ok=True)
-    with open(CRONOS_LOG, "w", encoding="utf-8") as fh:
-        for r in cronos_records:
-            fh.write(json.dumps(r) + "\n")
+    return cronos_records
+
+
+def _compile_stats(cronos_records: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Compile viewed, referenced, executed, completed metrics for each workflow."""
     stats = {}
     for r in cronos_records:
         wf = r["workflow"]
@@ -386,9 +435,14 @@ def run_cronos_analysis(transcripts, rolling_window=5) -> None:
         if st == "COMPLETED":
             stats[wf]["completed"] += 1
         stats[wf]["exec_score_sum"] += r["execution_score"]
+    return stats
+
+
+def _write_cronos_report(stats: dict[str, dict[str, Any]], report_path: str) -> None:
+    """Generate and write the markdown report."""
     report_lines = [
         "# CRONOS v0.2 — Execution Funnel & Exergy Report",
-        f"> **Reality Level: C5-REAL** | Compiled: {datetime.utcnow().isoformat()}Z",
+        f"> **Reality Level: C5-REAL** | Compiled: {datetime.now(timezone.utc).isoformat()}Z",
         "",
         "## Workflow Observability Funnel",
         "State transitions tracking real execution vs mere references.",
@@ -428,8 +482,36 @@ def run_cronos_analysis(transcripts, rolling_window=5) -> None:
             f"| `{wf}` | {runs} | {avg_planned:.1f}m | {avg_actual:.1f}m | {avg_dev:+.1f}m | {total_exergy:+.1f}m | {success_rate:.1f}% |"
         )
     report_content = "\n".join(report_lines)
-    with open(CRONOS_REPORT, "w", encoding="utf-8") as fh:
+    with open(report_path, "w", encoding="utf-8") as fh:
         fh.write(report_content)
+
+
+def run_cronos_analysis(transcripts, rolling_window=5) -> None:
+    """
+    Parses workflow metadata and evaluates session durations to construct
+    operational memory (CRONOS v0) and exergy rankings.
+    Implements Execution Funnel (VIEWED -> REFERENCED -> EXECUTED -> COMPLETED).
+    """
+    CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
+    CRONOS_REPORT = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_report.md")
+
+    workflow_meta = _load_workflow_metadata()
+    raw_sessions = []
+    for t in transcripts:
+        session = _parse_single_transcript(t, workflow_meta)
+        if session:
+            raw_sessions.append(session)
+
+    raw_sessions.sort(key=lambda x: x["start_dt"])
+    cronos_records = _compute_cronos_records(raw_sessions, workflow_meta, rolling_window)
+
+    os.makedirs(os.path.dirname(CRONOS_LOG), exist_ok=True)
+    with open(CRONOS_LOG, "w", encoding="utf-8") as fh:
+        for r in cronos_records:
+            fh.write(json.dumps(r) + "\n")
+
+    stats = _compile_stats(cronos_records)
+    _write_cronos_report(stats, CRONOS_REPORT)
     logger.info(f"Generated CRONOS report in {CRONOS_REPORT}")
 
 

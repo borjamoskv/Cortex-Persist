@@ -124,10 +124,8 @@ class SMTConstraintGuard:
             return self._validate_consistency_z3(facts)
         return self._validate_consistency_arithmetic(facts)
 
-    def _validate_consistency_z3(self, facts: list[dict[str, Any]]) -> bool:
-        s = Solver()
-        timestamps = [f.get("timestamp", f.get("created_at")) for f in facts]
-        valid_ts = [t for t in timestamps if t is not None]
+    def _add_z3_temporal_assertions(self, s: Any, valid_ts: list[float]) -> None:
+        """Add temporal consistency assertions to solver."""
         if len(valid_ts) >= 2:
             ts_vars = [Real(f"ts_{i}") for i in range(len(valid_ts))]
             for var, val in zip(ts_vars, valid_ts, strict=True):
@@ -135,12 +133,9 @@ class SMTConstraintGuard:
                 s.add(var > 0.0)
             for i in range(len(ts_vars) - 1):
                 s.add(ts_vars[i] <= ts_vars[i + 1])
-        by_subject: dict[str, list[float]] = {}
-        for f in facts:
-            subj = f.get("subject", f.get("topic", f.get("ki_id")))
-            conf = f.get("confidence", f.get("score"))
-            if subj and conf is not None:
-                by_subject.setdefault(str(subj), []).append(float(conf))
+
+    def _add_z3_subject_assertions(self, s: Any, by_subject: dict[str, list[float]]) -> None:
+        """Add subject confidence consistency assertions to solver."""
         for subj, confs in by_subject.items():
             if len(confs) >= 2:
                 c_vars = [Real(f"c_{subj}_{i}") for i in range(len(confs))]
@@ -152,6 +147,22 @@ class SMTConstraintGuard:
                         s.add(diff == c_vars[i] - c_vars[j])
                         s.add(diff >= -0.5)
                         s.add(diff <= 0.5)
+
+    def _validate_consistency_z3(self, facts: list[dict[str, Any]]) -> bool:
+        s = Solver()
+        timestamps = [f.get("timestamp", f.get("created_at")) for f in facts]
+        valid_ts = [t for t in timestamps if t is not None]
+        self._add_z3_temporal_assertions(s, valid_ts)
+
+        by_subject: dict[str, list[float]] = {}
+        for f in facts:
+            subj = f.get("subject", f.get("topic", f.get("ki_id")))
+            conf = f.get("confidence", f.get("score"))
+            if subj and conf is not None:
+                by_subject.setdefault(str(subj), []).append(float(conf))
+
+        self._add_z3_subject_assertions(s, by_subject)
+
         result = s.check()
         if result == unsat:
             logger.warning("SMT consistency check UNSAT for %d facts", len(facts))
@@ -192,46 +203,37 @@ class SMTConstraintGuard:
             "pass_rate": round(sum(results) / len(results), 4) if results else 1.0,
         }
 
-    def isolate_unsat_core(self, facts: list[dict[str, Any]]) -> list[str]:
-        """Isolate conflicting constraints when a batch of facts is unsat/inconsistent.
-
-        Returns a list of string descriptions explaining which constraints form the unsat core.
-        """
-        if not self._z3_available:
-            unsat_reasons = []
-            # Check temporal ordering
-            timestamps = [f.get("timestamp", f.get("created_at")) for f in facts]
-            valid_ts = [(i, t) for i, t in enumerate(timestamps) if t is not None]
-            for idx in range(len(valid_ts) - 1):
-                if valid_ts[idx][1] > valid_ts[idx + 1][1]:
-                    unsat_reasons.append(
-                        f"Temporal ordering violation: fact_{valid_ts[idx][0]} (ts={valid_ts[idx][1]}) > fact_{valid_ts[idx+1][0]} (ts={valid_ts[idx+1][1]})"
-                    )
-            # Check subject consistency
-            by_subject = {}
-            for i, f in enumerate(facts):
-                subj = f.get("subject", f.get("topic", f.get("ki_id")))
-                conf = f.get("confidence", f.get("score"))
-                if subj and conf is not None:
-                    by_subject.setdefault(str(subj), []).append((i, float(conf)))
-            for subj, items in by_subject.items():
-                for i in range(len(items)):
-                    for j in range(i + 1, len(items)):
-                        idx_a, val_a = items[i]
-                        idx_b, val_b = items[j]
-                        if abs(val_a - val_b) > 0.5:
-                            unsat_reasons.append(
-                                f"Confidence consistency violation on subject '{subj}': fact_{idx_a} (conf={val_a}) and fact_{idx_b} (conf={val_b}) differ by > 0.5"
-                            )
-            return unsat_reasons
-
-        # Z3 mode
-        s = Solver()
-        tracking_vars = []
-
-        # 1. Temporal validation
+    def _isolate_unsat_core_fallback(self, facts: list[dict[str, Any]]) -> list[str]:
+        """Isolate conflicting constraints in arithmetic fallback mode."""
+        unsat_reasons = []
+        # Check temporal ordering
         timestamps = [f.get("timestamp", f.get("created_at")) for f in facts]
-        valid_ts = [t for t in timestamps if t is not None]
+        valid_ts = [(i, t) for i, t in enumerate(timestamps) if t is not None]
+        for idx in range(len(valid_ts) - 1):
+            if valid_ts[idx][1] > valid_ts[idx + 1][1]:
+                unsat_reasons.append(
+                    f"Temporal ordering violation: fact_{valid_ts[idx][0]} (ts={valid_ts[idx][1]}) > fact_{valid_ts[idx+1][0]} (ts={valid_ts[idx+1][1]})"
+                )
+        # Check subject consistency
+        by_subject = {}
+        for i, f in enumerate(facts):
+            subj = f.get("subject", f.get("topic", f.get("ki_id")))
+            conf = f.get("confidence", f.get("score"))
+            if subj and conf is not None:
+                by_subject.setdefault(str(subj), []).append((i, float(conf)))
+        for subj, items in by_subject.items():
+            for i in range(len(items)):
+                for j in range(i + 1, len(items)):
+                    idx_a, val_a = items[i]
+                    idx_b, val_b = items[j]
+                    if abs(val_a - val_b) > 0.5:
+                        unsat_reasons.append(
+                            f"Confidence consistency violation on subject '{subj}': fact_{idx_a} (conf={val_a}) and fact_{idx_b} (conf={val_b}) differ by > 0.5"
+                        )
+        return unsat_reasons
+
+    def _assert_z3_temporal_constraints(self, s: Any, valid_ts: list[float], tracking_vars: list[Any]) -> None:
+        """Add temporal constraint variables to the Z3 solver with tracking."""
         if len(valid_ts) >= 2:
             ts_vars = [Real(f"ts_{i}") for i in range(len(valid_ts))]
             for i, (var, val) in enumerate(zip(ts_vars, valid_ts, strict=True)):
@@ -248,14 +250,8 @@ class SMTConstraintGuard:
                 s.assert_and_track(ts_vars[i] <= ts_vars[i + 1], order_track)
                 tracking_vars.append(order_track)
 
-        # 2. Subject validation
-        by_subject = {}
-        for idx, f in enumerate(facts):
-            subj = f.get("subject", f.get("topic", f.get("ki_id")))
-            conf = f.get("confidence", f.get("score"))
-            if subj and conf is not None:
-                by_subject.setdefault(str(subj), []).append((idx, float(conf)))
-
+    def _assert_z3_subject_constraints(self, s: Any, by_subject: dict[str, list[tuple[int, float]]], tracking_vars: list[Any]) -> None:
+        """Add subject consistency constraints to the Z3 solver with tracking."""
         for subj, items in by_subject.items():
             if len(items) >= 2:
                 c_vars = [Real(f"c_{subj}_{i}") for i in range(len(items))]
@@ -275,10 +271,8 @@ class SMTConstraintGuard:
                         s.assert_and_track(And(diff >= -0.5, diff <= 0.5), consistency_track)
                         tracking_vars.append(consistency_track)
 
-        if s.check() == sat:
-            return []
-
-        unsat_core = s.unsat_core()
+    def _parse_unsat_core_reasons(self, unsat_core: list[Any]) -> list[str]:
+        """Parse Z3 unsat_core reasons into human-readable string descriptions."""
         reasons = []
         for track in unsat_core:
             name = str(track)
@@ -312,3 +306,35 @@ class SMTConstraintGuard:
                 reasons.append(name)
                 
         return sorted(reasons)
+
+    def isolate_unsat_core(self, facts: list[dict[str, Any]]) -> list[str]:
+        """Isolate conflicting constraints when a batch of facts is unsat/inconsistent.
+
+        Returns a list of string descriptions explaining which constraints form the unsat core.
+        """
+        if not self._z3_available:
+            return self._isolate_unsat_core_fallback(facts)
+
+        # Z3 mode
+        s = Solver()
+        tracking_vars = []
+
+        # 1. Temporal validation
+        timestamps = [f.get("timestamp", f.get("created_at")) for f in facts]
+        valid_ts = [t for t in timestamps if t is not None]
+        self._assert_z3_temporal_constraints(s, valid_ts, tracking_vars)
+
+        # 2. Subject validation
+        by_subject = {}
+        for idx, f in enumerate(facts):
+            subj = f.get("subject", f.get("topic", f.get("ki_id")))
+            conf = f.get("confidence", f.get("score"))
+            if subj and conf is not None:
+                by_subject.setdefault(str(subj), []).append((idx, float(conf)))
+
+        self._assert_z3_subject_constraints(s, by_subject, tracking_vars)
+
+        if s.check() == sat:
+            return []
+
+        return self._parse_unsat_core_reasons(s.unsat_core())
