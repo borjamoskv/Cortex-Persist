@@ -237,6 +237,41 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
         )
 
 # =====================================================================
+# NATIVE SAGA-1: OS Sockets & AST Guards (cortex_native)
+# =====================================================================
+import socket
+
+try:
+    import cortex_native
+    HAS_NATIVE_GUARDS = True
+except ImportError:
+    HAS_NATIVE_GUARDS = False
+    logger.warning("[TaintEngine] cortex_native C-extension not loaded. Falling back to Python GC bounds.")
+
+class C5NativeSocketIngestor:
+    """
+    Ingests Swarm payloads using the native C extension,
+    bypassing Python's memory allocation for invalid data.
+    """
+    def __init__(self, sock: socket.socket):
+        self.sock = sock
+        self.fd = sock.fileno()
+    
+    def recv_and_validate(self, max_size: int = 1048576) -> bytes:
+        if not HAS_NATIVE_GUARDS:
+            raise RuntimeError("cortex_native is required for C5NativeSocketIngestor")
+            
+        try:
+            # The heavy lifting and validation happens in C
+            valid_payload = cortex_native.read_socket_direct(self.fd, max_size)
+            return valid_payload
+        except Exception as e:
+            logger.error(f"[TaintEngine] SAGA-1 Native Rejection: {e}")
+            self.sock.close()
+            raise TaintValidationError(f"Native Guard rejected payload: {e}")
+
+
+# =====================================================================
 # H-IMMUNO-02: Antigen-Signature Routing (MHC)
 # =====================================================================
 import re
