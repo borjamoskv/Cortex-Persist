@@ -44,6 +44,104 @@ class VirgoContextGuard:
         self.engine = engine
         self.trust_penalty = trust_penalty
 
+    async def _check_agent_validation_signature(
+        self,
+        content: str,
+        project: str,
+        meta: dict[str, Any],
+        agent_id: str | None,
+        conn: aiosqlite.Connection,
+    ) -> None:
+        """Verify the cryptographic Logos-Critique validation signature for an agent's fact."""
+        logos_signature = meta.get("logos_signature")
+        agent_public_key = meta.get("agent_public_key")
+        nonce = meta.get("nonce", "")
+
+        import os
+
+        is_strict = os.environ.get("CORTEX_STRICT_GUARDS") == "1"
+        is_testing = os.environ.get("CORTEX_TESTING") == "1"
+
+        if not logos_signature:
+            if is_testing and not is_strict:
+                # Bypass missing signature error for non-Virgo tests in test environments
+                return
+            self._apply_trust_penalty(agent_id, taint_severity=0.5)
+            await self._trigger_ledger_rollback(
+                conn, "Missing required Logos-Critique validation signature (logos_signature)."
+            )
+
+        # Verify signature deterministically
+        is_valid_sig = False
+
+        # A. Attempt ZKSwarm Ed25519 Cryptographic Verification
+        if agent_public_key and logos_signature:
+            is_valid_sig = ZKSwarmIdentity.verify_payload(
+                content=content, public_key_b64=agent_public_key, signature_b64=logos_signature
+            )
+
+        # B. Fallback to Deterministic HMAC/Hash binding
+        if not is_valid_sig:
+            # Expected deterministic hash: sha256(content + str(nonce) + project)
+            expected_hash = hashlib.sha256(f"{content}{nonce}{project}".encode()).hexdigest()
+            if logos_signature == expected_hash:
+                is_valid_sig = True
+
+        if not is_valid_sig:
+            self._apply_trust_penalty(agent_id, taint_severity=0.8)
+            await self._trigger_ledger_rollback(
+                conn,
+                f"Invalid Logos-Critique validation signature for agent fact. Sig: {(logos_signature or '')[:16]}...",
+            )
+
+    async def _check_replay_prevention(
+        self,
+        nonce: str,
+        logos_signature: str | None,
+        agent_id: str | None,
+        tenant_id: str,
+        conn: aiosqlite.Connection,
+    ) -> None:
+        """Verify nonce replay protection and record admission."""
+        if not nonce:
+            return
+        try:
+            async with conn.execute(
+                "SELECT 1 FROM ledger_replay_admissions WHERE tenant_id = ? AND nonce = ?",
+                (tenant_id, nonce),
+            ) as cursor:
+                if await cursor.fetchone() is not None:
+                    await self._trigger_ledger_rollback(
+                        conn,
+                        f"Replay attack detected: nonce '{nonce}' already exists.",
+                        error_class=VirgoValidationError,
+                    )
+
+            from cortex.utils.canonical import now_iso
+
+            await conn.execute(
+                """
+                INSERT INTO ledger_replay_admissions (
+                    tenant_id, event_id, nonce, request_hash, payload_hash,
+                    ledger_event_id, actor_key_id, action, issued_at, accepted_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    tenant_id,
+                    f"evt_{nonce}",
+                    nonce,
+                    logos_signature or "hash",
+                    logos_signature or "hash",
+                    f"evt_{nonce}",
+                    agent_id or "unknown",
+                    "store",
+                    now_iso(),
+                    now_iso(),
+                ),
+            )
+        except aiosqlite.Error as db_err:
+            logger.debug("ledger_replay_admissions write failed during Virgo check: %s", db_err)
+
     async def check(
         self,
         content: str,
@@ -86,85 +184,12 @@ class VirgoContextGuard:
             )
 
         # 2. Deterministic Validation Signature Verification
-        logos_signature = meta.get("logos_signature")
-        agent_public_key = meta.get("agent_public_key")
-        nonce = meta.get("nonce", "")
-
-        import os
-
-        is_strict = os.environ.get("CORTEX_STRICT_GUARDS") == "1"
-        is_testing = os.environ.get("CORTEX_TESTING") == "1"
-
-        if not logos_signature:
-            if is_testing and not is_strict:
-                # Bypass missing signature error for non-Virgo tests in test environments
-                return
-            self._apply_trust_penalty(agent_id, taint_severity=0.5)
-            await self._trigger_ledger_rollback(
-                conn, "Missing required Logos-Critique validation signature (logos_signature)."
-            )
-
-        # Verify signature deterministically
-        is_valid_sig = False
-
-        # A. Attempt ZKSwarm Ed25519 Cryptographic Verification
-        if agent_public_key and logos_signature:
-            is_valid_sig = ZKSwarmIdentity.verify_payload(
-                content=content, public_key_b64=agent_public_key, signature_b64=logos_signature
-            )
-
-        # B. Fallback to Deterministic HMAC/Hash binding
-        if not is_valid_sig:
-            # Expected deterministic hash: sha256(content + str(nonce) + project)
-            expected_hash = hashlib.sha256(f"{content}{nonce}{project}".encode()).hexdigest()
-            if logos_signature == expected_hash:
-                is_valid_sig = True
-
-        if not is_valid_sig:
-            self._apply_trust_penalty(agent_id, taint_severity=0.8)
-            await self._trigger_ledger_rollback(
-                conn,
-                f"Invalid Logos-Critique validation signature for agent fact. Sig: {(logos_signature or '')[:16]}...",
-            )
+        await self._check_agent_validation_signature(content, project, meta, agent_id, conn)
 
         # 3. Replay Protection: Check if this nonce has already been used
-        if nonce:
-            try:
-                async with conn.execute(
-                    "SELECT 1 FROM ledger_replay_admissions WHERE tenant_id = ? AND nonce = ?",
-                    (tenant_id, nonce),
-                ) as cursor:
-                    if await cursor.fetchone() is not None:
-                        await self._trigger_ledger_rollback(
-                            conn,
-                            f"Replay attack detected: nonce '{nonce}' already exists.",
-                            error_class=VirgoValidationError,
-                        )
-
-                from cortex.utils.canonical import now_iso
-
-                await conn.execute(
-                    """
-                    INSERT INTO ledger_replay_admissions (
-                        tenant_id, event_id, nonce, request_hash, payload_hash,
-                        ledger_event_id, actor_key_id, action, issued_at, accepted_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        tenant_id,
-                        f"evt_{nonce}",
-                        nonce,
-                        logos_signature or "hash",
-                        logos_signature or "hash",
-                        f"evt_{nonce}",
-                        agent_id or "unknown",
-                        "store",
-                        now_iso(),
-                        now_iso(),
-                    ),
-                )
-            except aiosqlite.Error as db_err:
-                logger.debug("ledger_replay_admissions write failed during Virgo check: %s", db_err)
+        nonce = meta.get("nonce", "")
+        logos_signature = meta.get("logos_signature")
+        await self._check_replay_prevention(nonce, logos_signature, agent_id, tenant_id, conn)
 
     def _detect_context_poisoning(self, content: str) -> str | None:
         """
