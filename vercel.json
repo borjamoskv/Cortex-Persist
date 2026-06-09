@@ -10,6 +10,18 @@
       "permanent": true
     }
   ],
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "cortexpersist.dev" }],
+      "destination": "/dev/:path*"
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "cortexpersist.org" }],
+      "destination": "/org/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
