@@ -8,7 +8,7 @@ import logging
 import os
 import sqlite3
 
-from cortex.graph.backends import GraphBackend, Neo4jBackend, SQLiteBackend
+from cortex.graph.backends import GraphBackend, SQLiteBackend
 from cortex.graph.patterns import COMMON_WORDS, ENTITY_PATTERNS, RELATION_SIGNALS
 
 __all__ = [
@@ -32,6 +32,7 @@ def get_backend(conn=None) -> GraphBackend:
     """Get the appropriate graph backend."""
     backend_type = os.environ.get("CORTEX_GRAPH_BACKEND", "sqlite").lower()
     if backend_type == "neo4j":
+        from cortex.graph.backends import Neo4jBackend
         return Neo4jBackend()  # type: ignore[abstract]
     return SQLiteBackend(conn)  # type: ignore[arg-type]
 

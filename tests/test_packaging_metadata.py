@@ -32,6 +32,10 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
     assert "arq" not in base_dependencies
     assert "email-validator" not in base_dependencies
     assert "PyYAML" not in base_dependencies
+    assert "pyyaml" not in base_dependencies
+    assert "python-osc" not in base_dependencies
+    assert "radon" not in base_dependencies
+    assert "neo4j" not in base_dependencies
     assert "watchdog" not in base_dependencies
     assert "aiofiles" not in base_dependencies
     assert "pyobjc-core" not in base_dependencies
@@ -43,6 +47,9 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
         "optimum",
     }
     assert _dependency_names(extras["acceleration"]) == {"numba"}
+    assert _dependency_names(extras["bci"]) == {"python-osc"}
+    assert _dependency_names(extras["graph"]) == {"neo4j"}
+    assert _dependency_names(extras["quality"]) == {"radon"}
     assert _dependency_names(extras["api"]) >= {
         "fastapi",
         "uvicorn",
@@ -61,7 +68,7 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
     assert _dependency_names(extras["platform"]) >= {"pyobjc-core", "pyobjc-framework-Cocoa"}
     assert _dependency_names(extras["authoring"]) == {"PyYAML"}
     assert extras["all"] == [
-        "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration]"
+        "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality]"
     ]
 
     assert (

@@ -165,7 +165,7 @@ def test_cli_init_without_numpy_logs_partial_memory_once(tmp_path: Path) -> None
 def test_cli_base_flow_without_extended_runtime_dependencies(tmp_path: Path) -> None:
     env = _blocked_import_env(
         tmp_path,
-        ["aiofiles", "aiohttp", "bs4", "arq", "email_validator", "watchdog", "yaml"],
+        ["aiofiles", "aiohttp", "bs4", "arq", "email_validator", "watchdog", "yaml", "pythonosc", "radon", "neo4j"],
     )
     env["CORTEX_NO_EMBED"] = "1"
     env["CORTEX_LLM_PROVIDER"] = ""

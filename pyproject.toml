@@ -36,10 +36,6 @@ dependencies = [
     "pydantic>=2.0",
     "prometheus-client>=0.20.0",
     "keyring>=25.7.0",
-    "pyyaml>=6.0.3",
-    "python-osc>=1.10.2",
-    "radon>=6.0.1",
-    "neo4j>=6.2.0",
 ]
 
 [project.urls]
@@ -118,8 +114,17 @@ embeddings = [
 acceleration = [
     "numba>=0.65.0",
 ]
+bci = [
+    "python-osc>=1.10.2",
+]
+graph = [
+    "neo4j>=6.2.0",
+]
+quality = [
+    "radon>=6.0.1",
+]
 all = [
-    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration]",
+    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality]",
 ]
 
 [project.scripts]
