@@ -5,16 +5,17 @@ Continuously monitors the knowledge directory for any changes and automatically
 compiles semantic vectors into the Persistent SQLite-Vec instance.
 """
 
+import asyncio
 import logging
 import os
-import asyncio
 import time
+
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.models import CortexFactModel
+from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
 logger = logging.getLogger("cortex.mcp.knowledge_watcher")
 

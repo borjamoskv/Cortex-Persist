@@ -263,14 +263,37 @@ class GenomeMutator:
         genome.parameters["synthesis_epoch"] = genome.lineage.generation
 
     def _mutate_meta(self, genome: StrategyGenome) -> None:
-        """META-MUTATION: Modify the genome's own mutation rates."""
-        mt = random.choice(list(MutationType))
-        current_rate = genome.mutation_rates.get(mt, 0.05)
-        delta = random.gauss(0, 0.05)
-        new_rate = max(0.001, min(0.8, current_rate + delta))
-        genome.mutation_rates[mt] = new_rate
+        """META-MUTATION: Adaptively modify the genome's mutation rates.
+
+        * Weighted selection uses sqrt of current rates to avoid "rich get richer".
+        * Delta is proportional to the current rate (5 % of the rate, min σ=0.001).
+        * Global budget (max_total=0.7) is enforced by only reducing the mutated
+          rate if the total exceeds the budget, preserving other rates.
+        * Logging records the final rate after any budget adjustment.
+        """
+        rates = genome.mutation_rates
+        # Weighted selection: dampened by sqrt to limit dominance of high rates
+        types = list(MutationType)
+        weights = [max(0.001, (rates.get(mt, 0.05)) ** 0.5) for mt in types]
+        selected_mt = random.choices(types, weights=weights, k=1)[0]
+
+        current_rate = rates.get(selected_mt, 0.05)
+        sigma = max(0.001, current_rate * 0.05)
+        delta = random.gauss(0, sigma)
+        new_rate = max(0.001, min(0.5, current_rate + delta))
+        rates[selected_mt] = new_rate
+
+        # Enforce global budget: only adjust the mutated rate if total exceeds limit
+        max_total = 0.7
+        total = sum(rates.values())
+        if total > max_total:
+            excess = total - max_total
+            adjusted_rate = max(0.001, rates[selected_mt] - excess)
+            rates[selected_mt] = adjusted_rate
+
+        final_rate = rates[selected_mt]
         genome.lineage.mutation_log.append(
-            f"META: {mt.value} rate {current_rate:.3f} → {new_rate:.3f}"
+            f"META: {selected_mt.value} rate {current_rate:.3f} → {final_rate:.3f}"
         )
 
     def _mutate_causal_patch(self, genome: StrategyGenome) -> None:

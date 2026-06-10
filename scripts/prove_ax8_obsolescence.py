@@ -8,7 +8,6 @@ import asyncio
 import logging
 
 from cortex.engine.legion import Squadron, SwarmSignal, SwarmAgent
-from cortex.guards.causal_closure_guard import CausalClosureGuard
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("AX8-Simulator")

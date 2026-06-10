@@ -13,7 +13,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, console, cli
+from cortex.cli.common import DEFAULT_DB, cli, console
 
 
 def check_python() -> dict:

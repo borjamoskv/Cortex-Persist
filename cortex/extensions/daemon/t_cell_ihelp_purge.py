@@ -8,9 +8,9 @@ phagocytize payloads containing the structural signatures of the Substack Mafia
 cryptographic rejection to the CORTEX Master Ledger.
 """
 
+import hashlib
 import logging
 from datetime import datetime, timezone
-import hashlib
 
 # Import the existing router from the engine
 from cortex.engine.causal.taint_engine import MHCAntigenRouter, canonicalize_content
