@@ -43,3 +43,26 @@ async def test_nous_runtime_guard_block() -> None:
     
     with pytest.raises(ValueError, match="CORTEX GUARD BLOCK: Cannot mutate master ledger."):
         await runtime._guard_check(ast)
+
+def test_ast_nous_compiler() -> None:
+    """Verifies the file-based NOUS AST Compiler."""
+    from cortex.extensions.nous.compiler import NousCompiler as ASTNousCompiler
+    compiler = ASTNousCompiler()
+    raw_nous = """
+    intent TestIntent {
+      ensure database is optimized
+      preserve audit_ledger
+      require disk_space > 10
+    }
+    """
+    intent = compiler.parse(raw_nous)
+    assert intent.name == "TestIntent"
+    assert "database is optimized" in intent.ensures
+    assert "audit_ledger" in intent.preserves
+    assert "disk_space > 10" in intent.requires
+
+    ast_nodes = compiler.compile(intent)
+    assert len(ast_nodes) == 1
+    assert ast_nodes[0].action_type == "migrate_schema"
+    assert ast_nodes[0].target == "database is optimized"
+
