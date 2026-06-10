@@ -62,6 +62,13 @@ class AsyncSignalBus:
         self._lock = asyncio.Lock()
 
     async def emit(self, signal: SwarmSignal) -> None:
+        """Emit a signal onto the bus.
+
+        Empty payloads are considered semantically empty.  Non‑VOID signals with an
+        empty ``payload`` are automatically downgraded to ``VOID`` before any
+        downstream processing (e.g. crystallization).  This invariant guarantees
+        that only signals carrying substantive data are counted as ``SUCCESS``.
+        """
         async with self._lock:
             # Enforce VOID invariant: Drop empty signals immediately
             if not signal.payload and signal.status != "VOID":

@@ -21,7 +21,7 @@ class MockAgent(SwarmAgent):
             agent_id=self.agent_id,
             target=target,
             status="SUCCESS",
-            payload={"code": "```python\nprint('hello')\n```"},
+            payload={"result": "ok"},
             metrics={"latency": 100},
         )
 
