@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 
+from .benchmark import replay_episode, run_episode
 from .entropy import (
     ShannonReport,
     compute_corpus_entropy,
@@ -9,7 +10,12 @@ from .entropy import (
 from .exergy import ActionRisk, ExergyInput, ExergyResult, calculate_exergy, enforce_exergy
 from .maxwell import MaxwellDemonResult, filter_context
 from .registry import make
-from .benchmark import run_episode, replay_episode
+from .verification import (
+    CrossVerifier,
+    DivergenceDetail,
+    DivergenceType,
+    ExecutionVerdict,
+)
 
 __all__ = [
     "ShannonReport",
@@ -26,4 +32,9 @@ __all__ = [
     "make",
     "run_episode",
     "replay_episode",
+    "CrossVerifier",
+    "DivergenceType",
+    "DivergenceDetail",
+    "ExecutionVerdict",
 ]
+

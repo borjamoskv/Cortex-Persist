@@ -1,11 +1,11 @@
 # cortex/shannon/env/client.py
 # [C5-REAL] Exergy-Maximized
 
-import socket
 import hashlib
+import socket
 import struct
 from abc import ABC, abstractmethod
-from typing import Optional
+
 
 class BinaryAgent(ABC):
     """
@@ -40,7 +40,7 @@ class HeuristicGenesisAgent(BinaryAgent):
         
         return b""
 
-    def decode_flag(self, payload: bytes) -> Optional[str]:
+    def decode_flag(self, payload: bytes) -> str | None:
         if len(payload) < 4:
             return None
         try:
@@ -64,7 +64,7 @@ class BinaryClient:
     def __init__(self, host: str, port: int):
         self.host = host
         self.port = port
-        self.sock: Optional[socket.socket] = None
+        self.sock: socket.socket | None = None
 
     def connect(self) -> bytes:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

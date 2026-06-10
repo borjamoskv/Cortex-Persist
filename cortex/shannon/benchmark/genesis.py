@@ -12,7 +12,6 @@ import random
 import secrets
 import struct
 from dataclasses import dataclass
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +29,7 @@ class MutantServer:
     def __init__(self, host: str = "127.0.0.1", port: int = 0):
         self.host = host
         self.port = port
-        self.server: Optional[asyncio.AbstractServer] = None
+        self.server: asyncio.AbstractServer | None = None
         self.mutation = self._generate_mutation()
         self.flag = f"CORTEX_GENESIS_FLAG_{secrets.token_hex(8)}".encode()
         self._running = False

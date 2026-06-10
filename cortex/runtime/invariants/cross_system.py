@@ -17,12 +17,11 @@ import hashlib
 import json
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Any
 
-from cortex.shannon.env.trace import EpisodeTrace
-from cortex.shannon.verification.cross_verifier import CrossVerifier, DivergenceType
 from cortex.engine.evolution_ledger import EvolutionLedger, MutationRecord
+from cortex.shannon.env.trace import EpisodeTrace
+from cortex.shannon.verification.cross_verifier import CrossVerifier
 
 logger = logging.getLogger("cortex.runtime.invariants")
 
@@ -119,7 +118,7 @@ class CrossSystemInvariantCompiler:
             )
 
         # Stepwise alignment check
-        for idx, (cortex_step, record) in enumerate(zip(cortex_steps, records)):
+        for idx, (cortex_step, record) in enumerate(zip(cortex_steps, records, strict=False)):
             # Verify agent index correlation if present in metadata
             meta = cortex_step.get("metadata", cortex_step)
             expected_agent_idx = meta.get("agent_idx")

@@ -28,9 +28,10 @@ import logging
 import os
 import struct
 import time
-from dataclasses import asdict, dataclass, field
+from collections.abc import Iterator
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 logger = logging.getLogger("cortex.evolution_ledger")
 
@@ -214,13 +215,13 @@ class EvolutionLedger:
 
         last_line = ""
         try:
-            with open(self._log_path, "r") as f:
+            with open(self._log_path) as f:
                 for line in f:
                     line = line.strip()
                     if line:
                         last_line = line
                         self._record_count += 1
-        except (OSError, IOError) as e:
+        except OSError as e:
             logger.error("Evolution ledger recovery failed: %s", e)
             return
 
@@ -289,7 +290,7 @@ class EvolutionLedger:
                 f.write(payload_line)
                 f.flush()
                 os.fsync(f.fileno())
-        except (OSError, IOError) as e:
+        except OSError as e:
             self._sequence -= 1  # rollback sequence
             logger.error("Evolution ledger write failed: %s", e)
             raise
@@ -315,7 +316,7 @@ class EvolutionLedger:
         expected_prev = self.GENESIS_HASH
         expected_seq = 0
 
-        with open(self._log_path, "r") as f:
+        with open(self._log_path) as f:
             for line_num, line in enumerate(f, 1):
                 line = line.strip()
                 if not line:
@@ -365,7 +366,7 @@ class EvolutionLedger:
         errors: list[str] = []
 
         try:
-            for record in self.replay(verify=True):
+            for _record in self.replay(verify=True):
                 count += 1
         except ReplayVerificationError as e:
             errors.append(str(e))

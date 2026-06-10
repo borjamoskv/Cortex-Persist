@@ -3,9 +3,9 @@
 
 import hashlib
 import json
-import time
-from dataclasses import dataclass, asdict
-from typing import List, Dict, Any
+from dataclasses import asdict, dataclass
+from typing import Any
+
 
 @dataclass
 class StepTrace:
@@ -14,27 +14,27 @@ class StepTrace:
     action_hex: str
     reward: float
     done: bool
-    info: Dict[str, Any]
+    info: dict[str, Any]
     timestamp: float
 
 
 @dataclass
 class EpisodeTrace:
     env_id: str
-    env_kwargs: Dict[str, Any]
+    env_kwargs: dict[str, Any]
     seed: Any
     initial_observation_hex: str
-    steps: List[StepTrace]
+    steps: list[StepTrace]
     checksum: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict(), indent=2)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "EpisodeTrace":
+    def from_dict(cls, data: dict[str, Any]) -> "EpisodeTrace":
         steps = [StepTrace(**s) for s in data["steps"]]
         return cls(
             env_id=data["env_id"],
@@ -57,7 +57,7 @@ class EpisodeTrace:
         return computed == self.checksum
 
 
-def compute_trace_checksum(env_id: str, initial_observation_hex: str, steps: List[StepTrace]) -> str:
+def compute_trace_checksum(env_id: str, initial_observation_hex: str, steps: list[StepTrace]) -> str:
     hasher = hashlib.sha256()
     hasher.update(env_id.encode())
     hasher.update(initial_observation_hex.encode())

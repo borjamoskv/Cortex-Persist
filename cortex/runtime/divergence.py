@@ -1,8 +1,7 @@
 # [C5-REAL] Exergy-Maximized
-import json
-import hashlib
-from typing import Any, List, Dict
 from dataclasses import dataclass
+from typing import Any
+
 
 @dataclass
 class ExecutionDiff:
@@ -15,7 +14,7 @@ class ExecutionDiff:
 
 class Trace:
     """A trace represents an execution trajectory through state space."""
-    def __init__(self, events: List[Dict[str, Any]], states: List[Dict[str, Any]]):
+    def __init__(self, events: list[dict[str, Any]], states: list[dict[str, Any]]):
         self.events = events
         self.states = states
         
@@ -64,10 +63,10 @@ class DivergenceEngine:
 class ExecutionSpace:
     """Geometría de comportamiento, no de logs."""
     
-    def __init__(self, traces: List[Trace]):
+    def __init__(self, traces: list[Trace]):
         self.traces = traces
         
-    def manifold(self) -> Dict[str, Any]:
+    def manifold(self) -> dict[str, Any]:
         """Returns the clustering, fork maps, and vector drift field."""
         return {
             "clusters": "EquivalenceClasses",

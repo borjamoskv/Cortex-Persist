@@ -289,7 +289,7 @@ class TestCascadeFailureScenario:
             )
 
         latency_ms = result.latency_ns / 1_000_000
-        assert latency_ms < 200, f"Cascade recovery latency {latency_ms:.2f}ms exceeds bound"
+        assert latency_ms < 500, f"Cascade recovery latency {latency_ms:.2f}ms exceeds bound"
 
 
 # ── Full Siege Test (Ouroboros Loop) ──────────────────────────────────

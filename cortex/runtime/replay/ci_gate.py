@@ -15,10 +15,10 @@ from __future__ import annotations
 import hashlib
 import json
 import random
-from dataclasses import dataclass, field
-from typing import Any, Type
+from dataclasses import dataclass
+from typing import Any
 
-from cortex.runtime.replay.engine import ReplayEngine, DivergenceException
+from cortex.runtime.replay.engine import ReplayEngine
 
 
 @dataclass(frozen=True)
@@ -73,7 +73,7 @@ class ReplayCIGate:
     Si alguna diverge → el sistema ha perdido determinismo → fallo catastrófico.
     """
 
-    def __init__(self, state_cls: Type[Any], *, replicas: int = 3):
+    def __init__(self, state_cls: type[Any], *, replicas: int = 3):
         if replicas < 2:
             raise ValueError("CI Gate requiere mínimo 2 réplicas para verificar identidad.")
         self.state_cls = state_cls
@@ -123,7 +123,7 @@ class ReplayCIGate:
 
             # Hash-by-hash chain verification
             for version_idx, (ref_hash, cur_hash) in enumerate(
-                zip(reference_chain, current_chain)
+                zip(reference_chain, current_chain, strict=False)
             ):
                 if ref_hash != cur_hash:
                     return ReplayCIResult(

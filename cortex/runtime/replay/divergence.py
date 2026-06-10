@@ -18,9 +18,8 @@ Propiedad:
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
-
 
 # ── Types ───────────────────────────────────────────────────────────
 
@@ -312,4 +311,139 @@ class DivergenceMap:
             gradient=gradient,
             mean_gradient=mean_grad,
             direction=direction,
+        )
+
+
+@dataclass(frozen=True)
+class DivergenceCoordinates:
+    """
+    Representación vectorial (coordenadas) de la divergencia de ejecución.
+    Mapea la taxonomía cualitativa a un espacio métrico continuo [0.0, 1.0].
+    """
+    structural: float
+    semantic: float
+    partial: float
+    entropy: float
+    composite: float
+
+    def to_vector(self) -> tuple[float, float, float, float]:
+        return (self.structural, self.semantic, self.partial, self.entropy)
+
+
+class DivergenceMetricEngine:
+    """
+    Divergence Normalization Layer.
+    Convierte discrepancias categóricas en coordenadas y calcula métricas
+    comparables de divergencia: divergence_score = f(type, magnitude, step_index, entropy_delta)
+    """
+
+    @staticmethod
+    def compute_step_distance(
+        trace_step: Any,
+        cortex_step: dict[str, Any],
+        step_idx: int
+    ) -> DivergenceCoordinates:
+        """
+        Calcula las coordenadas de divergencia a nivel de paso individual.
+        """
+        # 1. Structural (mismatch de secuencia/orden)
+        t_idx = getattr(trace_step, "step_idx", -1)
+        c_idx = int(cortex_step.get("step_idx", -1))
+        structural = 1.0 if t_idx != step_idx or c_idx != step_idx else 0.0
+
+        # 2. Semantic (acción/observación hex mismatches)
+        trace_action = getattr(trace_step, "action_hex", "").lower()
+        cortex_action = str(cortex_step.get("action_hex", "")).lower()
+        action_diff = 1.0 if trace_action != cortex_action else 0.0
+
+        trace_obs = getattr(trace_step, "observation_hex", "").lower()
+        cortex_obs = str(cortex_step.get("observation_hex", "")).lower()
+        obs_diff = 1.0 if trace_obs != cortex_obs else 0.0
+        
+        semantic = max(action_diff, obs_diff)
+
+        # 3. Partial (recompensas continuas y banderas done)
+        trace_reward = float(getattr(trace_step, "reward", 0.0))
+        cortex_reward = float(cortex_step.get("reward", 0.0))
+        reward_magnitude = abs(trace_reward - cortex_reward)
+        reward_norm = reward_magnitude / (1.0 + abs(trace_reward) + abs(cortex_reward))
+        
+        trace_done = bool(getattr(trace_step, "done", False))
+        cortex_done = bool(cortex_step.get("done", False))
+        done_diff = 1.0 if trace_done != cortex_done else 0.0
+        
+        partial = max(reward_norm, done_diff)
+
+        # 4. Entropy (derivación de la complejidad del metadata/info si está presente en cortex_step)
+        trace_info = getattr(trace_step, "info", {}) or {}
+        if "info" in cortex_step:
+            cortex_info = cortex_step.get("info", {}) or {}
+            len_t = len(trace_info)
+            len_c = len(cortex_info)
+            entropy_delta = abs(len_t - len_c)
+            entropy = entropy_delta / (1.0 + len_t + len_c)
+        else:
+            entropy = 0.0
+
+        # 5. Composite score: L2 Norm pesada con factor de decaimiento por paso (cascada temporal)
+        cascade_factor = 1.0 / (1.0 + 0.05 * step_idx)
+        w_struct, w_sem, w_part, w_ent = 0.4, 0.4, 0.1, 0.1
+        weighted_sum = (
+            w_struct * (structural ** 2) +
+            w_sem * (semantic ** 2) +
+            w_part * (partial ** 2) +
+            w_ent * (entropy ** 2)
+        )
+        composite = math.sqrt(weighted_sum) * cascade_factor
+
+        return DivergenceCoordinates(
+            structural=structural,
+            semantic=semantic,
+            partial=partial,
+            entropy=entropy,
+            composite=composite
+        )
+
+    @classmethod
+    def compute_trajectory_distance(
+        cls,
+        trace_steps: list[Any],
+        cortex_steps: list[dict[str, Any]]
+    ) -> DivergenceCoordinates:
+        """
+        Calcula las coordenadas métricas globales entre dos trayectorias de ejecución.
+        """
+        if not trace_steps and not cortex_steps:
+            return DivergenceCoordinates(0.0, 0.0, 0.0, 0.0, 0.0)
+
+        # Mismatch de longitud estructural
+        len_t = len(trace_steps)
+        len_c = len(cortex_steps)
+        if len_t == 0 or len_c == 0:
+            structural_base = 1.0
+        else:
+            structural_base = 1.0 - min(len_t, len_c) / max(len_t, len_c)
+
+        step_coords = []
+        min_len = min(len_t, len_c)
+        for idx in range(min_len):
+            coords = cls.compute_step_distance(trace_steps[idx], cortex_steps[idx], idx)
+            step_coords.append(coords)
+
+        if not step_coords:
+            return DivergenceCoordinates(structural_base, 1.0, 1.0, 1.0, 1.0)
+
+        # L_infinity norm sobre las dimensiones métricas individuales de cada paso
+        structural = max(structural_base, max(c.structural for c in step_coords))
+        semantic = max(c.semantic for c in step_coords)
+        partial = max(c.partial for c in step_coords)
+        entropy = max(c.entropy for c in step_coords)
+        composite = max(c.composite for c in step_coords)
+
+        return DivergenceCoordinates(
+            structural=structural,
+            semantic=semantic,
+            partial=partial,
+            entropy=entropy,
+            composite=composite
         )

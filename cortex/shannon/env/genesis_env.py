@@ -5,10 +5,11 @@ import asyncio
 import random
 import secrets
 import threading
-from typing import Optional, Tuple
+
 from .base import BinaryEnv, StepResult
-from .server import MutantServer
 from .protocol import GenesisProtocol
+from .server import MutantServer
+
 
 class AsyncEnvRunner:
     """
@@ -38,7 +39,7 @@ class GenesisEnv(BinaryEnv):
     Gymnasium-style environment wrapping the MutantServer with a GenesisProtocol.
     Communication happens over a real TCP loopback interface.
     """
-    def __init__(self, host: str = "127.0.0.1", flag: Optional[bytes] = None, seed: Optional[int] = None):
+    def __init__(self, host: str = "127.0.0.1", flag: bytes | None = None, seed: int | None = None):
         self.host = host
         self.seed = seed
         self.rng = random.Random(seed)
@@ -52,9 +53,9 @@ class GenesisEnv(BinaryEnv):
             else:
                 self.flag = f"CORTEX_GENESIS_FLAG_{secrets.token_hex(8)}".encode()
         
-        self.server: Optional[MutantServer] = None
-        self.reader: Optional[asyncio.StreamReader] = None
-        self.writer: Optional[asyncio.StreamWriter] = None
+        self.server: MutantServer | None = None
+        self.reader: asyncio.StreamReader | None = None
+        self.writer: asyncio.StreamWriter | None = None
         self.runner = AsyncEnvRunner()
 
     def _protocol_factory(self) -> GenesisProtocol:
