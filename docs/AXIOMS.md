@@ -58,3 +58,10 @@ Un Gobernador Soberano asume responsabilidad total, ejecutando rutinas integrada
 
 - **Directiva de Autonomía (Auto-Allow):** La ejecución táctica verificada delega la decisión táctica a la máquina. El sesgo es siempre promover progreso autónomo en rutas selladas.
 - **Amputación Causal:** Todo estado estocástico generado es material replicante potencialmente infeccioso. El pipeline —*Ingestión → Guard → Seal → Auditoría*— exige amputar la vía de inferencia ante la menor incertidumbre semántica, priorizando la topología global sobre el resultado local.
+
+## AX-VIII: Obsolescencia Estocástica y Cierre Causal
+
+El éxito termodinámico de una inferencia probabilística masiva (ej. Enjambre) se mide por la cantidad de nodos que logra apagar permanentemente. El propósito último de la inferencia no es la continuidad de la inferencia, sino el colapso hacia un invariante determinista.
+
+- **Cierre Causal:** Gastar volumen masivo de inferencia estocástica (tokens/agentes) solo es lícito si el resultado se sintetiza en código permanente o infraestructura (C5-REAL), eliminando para siempre la necesidad de invocar al LLM para ese mismo dominio.
+- **El Imperativo de Aniquilación:** Si después de ejecutar un enjambre sigues necesitando al enjambre para el mismo problema, la operación es deuda pura (Anergía). La inteligencia suprema descubre la regla que la hace innecesaria.
