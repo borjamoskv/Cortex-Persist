@@ -113,6 +113,7 @@ class MutationType(str, Enum):
     CONDITIONAL_INJECT = "conditional_inject"
     STRATEGY_SYNTHESIS = "strategy_synthesis"
     META_MUTATION = "meta_mutation"
+    CAUSAL_PATCH = "causal_patch"
 
 
 class StrategyGenome:
@@ -131,10 +132,11 @@ class StrategyGenome:
         self.dispatch_tree: AgentOp = dispatch_tree or noop()
         self.parameters: dict[str, Any] = parameters or {}
         self.mutation_rates: dict[str, float] = mutation_rates or {
-            MutationType.PARAMETER_DRIFT: 0.40,
-            MutationType.SUBTREE_SWAP: 0.15,
+            MutationType.CAUSAL_PATCH: 0.20,
+            MutationType.PARAMETER_DRIFT: 0.30,
+            MutationType.SUBTREE_SWAP: 0.10,
             MutationType.NODE_INSERT: 0.10,
-            MutationType.NODE_DELETE: 0.08,
+            MutationType.NODE_DELETE: 0.03,
             MutationType.PARALLELIZE: 0.05,
             MutationType.SEQUENTIALIZE: 0.05,
             MutationType.LOOP_UNROLL: 0.03,

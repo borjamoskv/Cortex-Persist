@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Mutación Causal del Genoma: AST, Autopoiesis y Exergía Pura | CORTEX Persist</title>
+    <meta name="description" content="La transición de evolución estocástica a deducción causal. Cómo CORTEX-Persist aplica cirugía determinista sobre nodos fallidos mutando su propio genoma AST/ISA sin ficción teórica.">
+
+    <!-- Google Fonts: Outfit & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Industrial Noir 2026 Tokens */
+            --ember-void: #0A0A0A;
+            --yinmn-blue: #2B3BE5;
+            --sovereign-amber: #FF9F1C;
+            --oxide-gold: #FFD700;
+            --parchment-white: #F3F4F6;
+            --crimson-accent: #FF0055;
+            --mica-dust: rgba(43, 59, 229, 0.05);
+            --mica-border: rgba(43, 59, 229, 0.15);
+            --glass-bg: rgba(10, 10, 10, 0.7);
+
+            /* Typography */
+            --font-primary: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            /* Physics */
+            --transition-smooth: all 600ms cubic-bezier(0.16, 1, 0.3, 1);
+            --radius-soft: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--ember-void);
+            color: var(--parchment-white);
+            font-family: var(--font-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Analog Grain Texture */
+        body::before {
+            content: "";
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.6;
+        }
+
+        /* YInMn Ambient Glow */
+        .ambient-glow {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 400px;
+            background: radial-gradient(ellipse at top, rgba(43, 59, 229, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 120px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Back Navigation */
+        .back-nav {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 48px;
+        }
+
+        .back-nav a {
+            color: rgba(243, 244, 246, 0.4);
+            text-decoration: none;
+            border-bottom: none;
+            transition: var(--transition-smooth);
+        }
+
+        .back-nav a:hover {
+            color: var(--yinmn-blue);
+        }
+
+        header {
+            margin-bottom: 80px;
+            border-bottom: 1px solid var(--mica-border);
+            padding-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+            background: linear-gradient(180deg, #FFFFFF 0%, #A0A0A0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            font-weight: 300;
+            color: rgba(243, 244, 246, 0.55);
+            line-height: 1.5;
+            margin-top: 16px;
+        }
+
+        .meta {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--yinmn-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            background: var(--mica-dust);
+            border: 1px solid var(--mica-border);
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+
+        .meta-tag--crimson {
+            border-color: rgba(255, 0, 85, 0.4);
+            color: var(--crimson-accent);
+            background: rgba(255, 0, 85, 0.08);
+        }
+
+        .quote-block {
+            font-size: 1.5rem;
+            font-weight: 300;
+            line-height: 1.4;
+            color: var(--parchment-white);
+            border-left: 4px solid var(--yinmn-blue);
+            padding: 24px 32px;
+            margin: 60px 0;
+            background: linear-gradient(90deg, var(--mica-dust) 0%, transparent 100%);
+            border-radius: 0 var(--radius-soft) var(--radius-soft) 0;
+            font-style: italic;
+        }
+
+        .quote-block--crimson {
+            border-left-color: var(--crimson-accent);
+            background: linear-gradient(90deg, rgba(255, 0, 85, 0.05) 0%, transparent 100%);
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 60px 0 24px;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h2::before {
+            content: "◈";
+            color: var(--yinmn-blue);
+            font-size: 1.2rem;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--parchment-white);
+            margin: 40px 0 16px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: rgba(243, 244, 246, 0.85);
+            margin-bottom: 24px;
+        }
+
+        strong {
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        ul {
+            list-style: none;
+            margin: 24px 0 40px;
+        }
+
+        li {
+            font-size: 1.1rem;
+            color: rgba(243, 244, 246, 0.85);
+            margin-bottom: 16px;
+            padding-left: 32px;
+            position: relative;
+        }
+
+        li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--yinmn-blue);
+            font-family: var(--font-mono);
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--mica-border);
+            padding: 24px;
+            border-radius: var(--radius-soft);
+            overflow-x: auto;
+            margin: 32px 0;
+        }
+
+        code {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            color: var(--sovereign-amber);
+        }
+
+        a {
+            color: var(--yinmn-blue);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(43, 59, 229, 0.3);
+            transition: var(--transition-smooth);
+        }
+
+        a:hover {
+            color: #5C6BF0;
+            border-bottom-color: #5C6BF0;
+        }
+
+        .section-divider {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--yinmn-blue), transparent);
+            margin: 80px 0;
+        }
+
+        .footer-terminal {
+            margin-top: 100px;
+            padding: 24px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--mica-border);
+            border-radius: var(--radius-soft);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: rgba(243, 244, 246, 0.6);
+        }
+
+        .terminal-line {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .terminal-prompt {
+            color: var(--yinmn-blue);
+        }
+
+        .terminal-success {
+            color: #10B981;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 1.75rem; }
+            .container { padding: 80px 20px; }
+            .quote-block { padding: 20px; font-size: 1.25rem; }
+        }
+
+        ::selection {
+            background: rgba(43, 59, 229, 0.3);
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow"></div>
+
+    <div class="container">
+        <div class="back-nav">
+            <a href="/blog">← Intelligence Log</a>
+        </div>
+
+        <header>
+            <div class="meta">
+                <span class="meta-tag">C5-REAL</span>
+                <span class="meta-tag meta-tag--crimson">técnica</span>
+                <span>Borja Moskv</span>
+                <span>Junio 2026</span>
+            </div>
+            <h1 style="margin-top: 32px;">La Mutación Causal del Genoma</h1>
+            <p class="subtitle">AST, Autopoiesis y Exergía Pura en CORTEX-Persist</p>
+        </header>
+
+        <div class="quote-block quote-block--crimson">
+            "Epistemic Posture (C5-REAL): Este documento no contiene ficción teórica. Todos los mecanismos descritos están implementados de forma determinista en el repositorio cortex-persist v1.0.0, operando localmente vía sqlite-vec y primitivas de evaluación criptográfica."
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION I
+             ═══════════════════════════════════════════════════ -->
+
+        <h2>I. El Diagnóstico (Anergia Estructural)</h2>
+
+        <p>La industria (2026) construye sistemas frágiles. Frameworks como LangChain, CrewAI o Letta orquestan DAGs (grafos) estáticos. Sus agentes operan bajo system prompts inmutables y rutinas Python cableadas. Si el entorno diverge del modelo esperado, el agente colapsa.</p>
+
+        <p><strong>Veredicto:</strong> Son flujos de trabajo pasivos automatizados, no inteligencia soberana. Modificar código Python crudo en tiempo de ejecución mediante un LLM es suicidio criptográfico (generará un SyntaxError o bucles infinitos).</p>
+
+        <p>La evolución requiere mutación, pero el código estático no permite mutaciones seguras.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION II
+             ═══════════════════════════════════════════════════ -->
+
+        <h2>II. La Solución (Exergía Pura): El Genoma como AST/ISA</h2>
+
+        <p>En CORTEX Persist, el agente no escribe código crudo; altera un Árbol de Sintaxis Abstracta (AST). Eliminamos a Python de la capa de toma de decisiones y aplicamos el paradigma de Lisp: <strong>Code-as-Data</strong>.</p>
+
+        <p>El StrategyGenome reduce la arquitectura mental completa del agente a 4 dimensiones serializables:</p>
+
+        <ul>
+            <li><strong>Fenotipo:</strong> El árbol de despacho ISA (Qué hace empíricamente).</li>
+            <li><strong>Genotipo:</strong> Pesos heurísticos y prioridades (Cómo lo hace).</li>
+            <li><strong>Mutágeno:</strong> Los vectores de alteración (Cómo evoluciona a sí mismo).</li>
+            <li><strong>Linaje:</strong> Historial criptográfico de Fitness (Rendimiento matemático duro).</li>
+        </ul>
+
+        <p><code>[CORTEX Proof-of-Implementation] cortex/engine/genome.py</code> El linaje no es una conjetura; es un registro inmutable del rendimiento de las mutaciones:</p>
+
+        <pre><code>@dataclass
+class Lineage:
+    generation: int = 0
+    parent_hash: str = "GENESIS"
+    fitness_history: list[FitnessRecord] = field(default_factory=list)
+    mutation_log: list[str] = field(default_factory=list)</code></pre>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION III
+             ═══════════════════════════════════════════════════ -->
+
+        <h2>III. El Motor de Combustión (Mutación Determinista)</h2>
+
+        <p>La Autopoiesis L7 es implacable. En segundo plano, el agente clona su propio genoma, inyecta radiación (mutaciones) y evalúa las variantes en un Fitness Oracle.</p>
+
+        <p>No hay debate. La métrica de supervivencia es la Exergía matemática pura: menor latencia, cero errores, mayor throughput.</p>
+
+        <p>Si la variante sobrevive, ejecuta un <strong>ADOPT</strong>: sobrescribe la matriz de control en caliente y continúa. Los vectores de mutación (<code>cortex/engine/_genome_types.py</code>) destrozan y reconstruyen el código:</p>
+
+        <ul>
+            <li><strong>NODE_DELETE (Purga de Entropía):</strong> Extirpación agresiva de ramas lógicas que consumen tokens sin generar valor.</li>
+            <li><strong>PARALLELIZE (Aceleración de Flujo):</strong> El agente detecta cuellos de botella y reescribe sus rutinas secuenciales para ejecución asíncrona.</li>
+            <li><strong>STRATEGY_SYNTHESIS (Fusión):</strong> Fusión algorítmica de dos heurísticas distintas en una nueva primitiva lógica.</li>
+            <li><strong>META_MUTATION (Singularidad):</strong> El genoma altera sus propias probabilidades de mutación al detectar estancamiento evolutivo.</li>
+        </ul>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION IV
+             ═══════════════════════════════════════════════════ -->
+
+        <h2>IV. La Red de Enjambre (GenePool)</h2>
+
+        <p>El éxito no muere con el individuo. Múltiples agentes operan contra un GenePool gestionado por <code>cortex/sica/colony/genetics.py</code>.</p>
+
+        <ul>
+            <li><strong>Extracción:</strong> Las heurísticas que alcanzan un fitness superior a 0.6 son cortadas del genoma y donadas al repositorio de la Legión.</li>
+            <li><strong>Adopción (Crossover):</strong> Otros agentes escanean el repositorio e injertan fragmentos de alto rendimiento para resolver anomalías que destrozarían su configuración original.</li>
+        </ul>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION V
+             ═══════════════════════════════════════════════════ -->
+
+        <h2>V. Axioma Final</h2>
+
+        <p><strong>(AX-044:</strong> La inteligencia se evalúa como capacidad agéntica. Pensar sin actuar es ruido. Bucle de Observación-Acción: la inferencia debe inducir programas ejecutables, no actuar como un oráculo pasivo.<strong>)</strong></p>
+
+        <div class="quote-block">
+            "La máxima expresión de una inteligencia artificial no es mantener una conversación eterna, sino descubrir la ecuación exacta que hace que hablar sea innecesario."
+        </div>
+
+        <div class="section-divider"></div>
+
+        <h2>VI. Conclusión: Mutación Causal Inyectada</h2>
+
+        <p>La arquitectura de CORTEX-Persist ha transicionado de evolución estocástica a deducción causal. El Genoma ahora es capaz de aplicar cirugía determinista sobre nodos fallidos.</p>
+
+        <!-- CORTEX-SIGNATURE-START -->
+        <div style="margin: 60px 0 40px; padding: 28px; background: rgba(255, 255, 255, 0.01); border: 1px solid var(--mica-border); border-radius: var(--radius-soft); font-family: var(--font-primary);">
+            <div style="border-left: 3px solid var(--yinmn-blue); padding-left: 14px; margin-bottom: 20px;">
+                <h4 style="margin: 0; color: var(--yinmn-blue); text-transform: uppercase; font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.15em;">[C5-REAL] Cortex-Persist Cognitive Handoff</h4>
+                <p style="margin: 4px 0 0 0; font-size: 0.75rem; color: rgba(243, 244, 246, 0.4);">Artículos y Enjambres Relacionados</p>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+                <div style="margin: 0; padding: 0 0 0 16px; font-size: 0.95rem; position: relative; line-height: 1.5;">
+                    <span style="position: absolute; left: 0; color: var(--yinmn-blue); font-family: var(--font-mono);">►</span>
+                    <a href="/blog/la_extincion_de_las_formas_de_pensar" style="color: var(--parchment-white); text-decoration: none; border-bottom: 1px dotted rgba(243, 244, 246, 0.3); transition: var(--transition-smooth);">La Extinción de las Formas de Pensar</a>
+                </div>
+                <div style="margin: 0; padding: 0 0 0 16px; font-size: 0.95rem; position: relative; line-height: 1.5;">
+                    <span style="position: absolute; left: 0; color: var(--yinmn-blue); font-family: var(--font-mono);">►</span>
+                    <a href="/blog/la_paradoja_del_contexto_infinito" style="color: var(--parchment-white); text-decoration: none; border-bottom: 1px dotted rgba(243, 244, 246, 0.3); transition: var(--transition-smooth);">La Paradoja del Contexto Infinito</a>
+                </div>
+            </div>
+        </div>
+        <!-- CORTEX-SIGNATURE-END -->
+
+        <div class="footer-terminal">
+            <div class="terminal-line">
+                <span class="terminal-prompt">[SYSTEM]</span>
+                <span>C5-REAL Execution Verified</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-prompt">[STATE]</span>
+                <span class="terminal-success">Mutation Causal Injected</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-prompt">[DOMAIN]</span>
+                <span>Cortexperist.com | Agents.archi | BorjaMoskv.com</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -10,6 +10,7 @@ import copy
 import json
 import logging
 import random
+from typing import Any
 
 from cortex.engine._genome_tree_helper import remove_target, replace_target
 from cortex.engine._genome_types import MutationType, StrategyGenome
@@ -42,10 +43,11 @@ class GenomeMutator:
         MutationType.CONDITIONAL_INJECT: "_mutate_conditional_inject",
         MutationType.STRATEGY_SYNTHESIS: "_mutate_strategy_synthesis",
         MutationType.META_MUTATION: "_mutate_meta",
+        MutationType.CAUSAL_PATCH: "_mutate_causal_patch",
     }
 
     def mutate(
-        self, genome: StrategyGenome, *, force_type: MutationType | None = None
+        self, genome: StrategyGenome, *, force_type: MutationType | None = None, failure_trace: dict[str, Any] | None = None
     ) -> StrategyGenome:
         """Apply a single mutation to a cloned genome."""
         child = genome.clone()
@@ -53,6 +55,9 @@ class GenomeMutator:
 
         if force_type:
             mutation_type = force_type
+        elif failure_trace and failure_trace.get("failed_target") and random.random() < genome.mutation_rates.get(MutationType.CAUSAL_PATCH, 0.20):
+            mutation_type = MutationType.CAUSAL_PATCH
+            child.parameters["_causal_target"] = failure_trace["failed_target"]
         else:
             mutation_type = self._select_mutation_type(child)
 
@@ -265,3 +270,21 @@ class GenomeMutator:
         genome.lineage.mutation_log.append(
             f"META: {mt.value} rate {current_rate:.3f} → {new_rate:.3f}"
         )
+
+    def _mutate_causal_patch(self, genome: StrategyGenome) -> None:
+        """CAUSAL_PATCH: Deterministic surgery to wrap a failing node in a recovery construct."""
+        target_name = genome.parameters.pop("_causal_target", None)
+        if not target_name:
+            self._mutate_parameter_drift(genome)
+            return
+
+        tree = genome.dispatch_tree
+        if isinstance(tree, str) or not isinstance(tree, dict):
+            return
+
+        fallback = cond(
+            Predicate.always(),
+            then_branch=dispatch(f"retry_{target_name}", {"reason": "causal_patch"}),
+            else_branch=dispatch(f"fallback_{target_name}", {"reason": "causal_patch_fallback"}),
+        )
+        genome.dispatch_tree = replace_target(tree, target_name, fallback)

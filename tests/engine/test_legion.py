@@ -23,7 +23,7 @@ class MockAgent(SwarmAgent):
             agent_id=self.agent_id,
             target=target,
             status="SUCCESS",
-            payload={"msg": f"Processed {target}"},
+            payload={"msg": f"Processed {target}", "proof": "Proof: { Base: 'Test', Range: [0,1], Confidence: C5-REAL }"},
             metrics={"time": 0.1},
         )
 
