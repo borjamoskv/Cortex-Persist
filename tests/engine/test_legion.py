@@ -170,3 +170,100 @@ async def test_legion_omega_engine_thermal_stagnation():
     result = await engine.forge("stable task")
     # Should break early due to code identity
     assert result.cycles < 5
+
+
+@pytest.mark.asyncio
+async def test_squadron_crystallize_cross_system_invariance():
+    """Validates that Squadron crystallization runs Cross-System verifier when context exists."""
+    from cortex.shannon.env.trace import EpisodeTrace, StepTrace
+    from cortex.engine.evolution_ledger import ControlVector, MutationRecord
+
+    # 1. Create a matching Shannon trace
+    steps = [
+        StepTrace(
+            step_idx=0,
+            observation_hex="010203",
+            action_hex="aabbcc",
+            reward=1.0,
+            done=False,
+            info={},
+            timestamp=1718000000.0,
+        ),
+    ]
+    from cortex.shannon.env.trace import compute_trace_checksum
+
+    checksum = compute_trace_checksum("genesis-v1", "000000", steps)
+    trace = EpisodeTrace(
+        env_id="genesis-v1",
+        env_kwargs={"seed": 42},
+        seed=42,
+        initial_observation_hex="000000",
+        steps=steps,
+        checksum=checksum,
+    )
+
+    # 2. Create matching substrate records
+    records = [
+        MutationRecord(
+            sequence=1,
+            agent_idx=0,
+            timestamp=1718000000.0,
+            prev_hash="GENESIS",
+            hash="h1",
+            vector_before=None,
+            vector_after=ControlVector(10.0, 0.05, 0.1, 0.6),
+            performance_delta=100.0,
+            source="substrate",
+        )
+    ]
+
+    # 3. Custom engine wrapper to provide trace and records
+    class MockEngine:
+        def __init__(self):
+            self.shannon_trace = trace
+            self.substrate_ledger = records
+
+    engine = MockEngine()
+
+    # 4. Mock squadron with agents emitting correct matching signals
+    class CustomMockAgent(SwarmAgent):
+        async def execute(self, target: str) -> SwarmSignal:
+            return SwarmSignal(
+                agent_id=self.agent_id,
+                target=target,
+                status="SUCCESS",
+                payload={
+                    "action_hex": "aabbcc",
+                    "observation_hex": "010203",
+                    "reward": 1.0,
+                    "done": False,
+                },
+                metrics={},
+            )
+
+    class CustomMockSquadron(Squadron):
+        SQUAD_NAME = "INVARIANT_TEST"
+        REPLICAS = 1
+
+        def _create_agent(self, agent_id: str) -> SwarmAgent:
+            return CustomMockAgent(agent_id, self.bus, self.engine)
+
+    squad = CustomMockSquadron(engine=engine)
+
+    # 5. Deploy and verify it passes
+    report = await squad.deploy("target-1")
+    assert report["squadron"] == "INVARIANT_TEST"
+    assert report["total_signals"] == 1
+
+    # 6. Test with a mismatched trace (e.g. empty trace) to verify it raises and fails
+    engine.shannon_trace = EpisodeTrace(
+        env_id="mismatch-v1",
+        env_kwargs={"seed": 99},
+        seed=99,
+        initial_observation_hex="000000",
+        steps=[],
+        checksum="bad",
+    )
+
+    with pytest.raises(RuntimeError, match="Cross-System Invariance Violation"):
+        await squad.deploy("target-2")

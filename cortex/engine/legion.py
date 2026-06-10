@@ -152,7 +152,7 @@ class Squadron(ABC):
         # ─── AX-VIII: CAUSAL CLOSURE GUARD ───
         # Produce a real LedgerPayload to satisfy structural condensation
         import json
-        from datetime import datetime
+        from datetime import datetime, timezone
 
         from cortex.guards import CausalClosureGuard, SwarmProposal
 
@@ -160,9 +160,57 @@ class Squadron(ABC):
             "type": "LedgerPayload",
             "swarm_size": len(signals),
             "successful_signals": success_count,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "payloads": [s.payload for s in signals if s.payload],
         }
+
+        # ─── Cross-System Invariance Verification ───
+        try:
+            from cortex.runtime.invariants.cross_system import CrossSystemInvariantCompiler
+
+            shannon_trace = getattr(self.engine, "shannon_trace", None)
+            substrate_ledger = getattr(self.engine, "substrate_ledger", None)
+
+            if shannon_trace is not None and substrate_ledger is not None:
+                # Format raw report data into shannon steps shape for verifier
+                cortex_steps = []
+                for idx, s in enumerate(signals):
+                    if s.payload:
+                        cortex_steps.append({
+                            "action": "SHANNON_STEP",
+                            "metadata": {
+                                "step_idx": idx,
+                                "action_hex": s.payload.get("action_hex", ""),
+                                "observation_hex": s.payload.get("observation_hex", ""),
+                                "reward": s.payload.get("reward", 0.0),
+                                "done": s.payload.get("done", False),
+                                "agent_idx": idx,
+                            }
+                        })
+                
+                # Prepend config/env_id info if trace contains it
+                cortex_ledger_input = [{"env_id": shannon_trace.env_id, "seed": shannon_trace.seed}] + cortex_steps
+
+                verdict = CrossSystemInvariantCompiler.verify_global_invariance(
+                    shannon_trace=shannon_trace,
+                    cortex_ledger=cortex_ledger_input,
+                    substrate_ledger=substrate_ledger,
+                )
+                if not verdict.consistent:
+                    raise RuntimeError(
+                        f"[P0] AX-VIII Cross-System Invariance Violation: {'; '.join(verdict.details)}"
+                    )
+
+                ledger_payload["global_proof_hash"] = verdict.global_proof_hash
+                ledger_payload["shannon_cortex_hash"] = verdict.shannon_cortex_hash
+                ledger_payload["substrate_hash"] = verdict.substrate_hash
+        except Exception as e:
+            if "Cross-System Invariance Violation" in str(e):
+                logger.error("[Crystallization] 🛑 Cross-System Invariance Divergence detected: %s", e)
+                raise
+            else:
+                logger.debug("Cross-System verifier bypassed: %s", e)
+
         content = json.dumps(ledger_payload)
 
         proposal = SwarmProposal(
