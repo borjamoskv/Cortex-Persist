@@ -3,6 +3,7 @@
 from .benchmark import replay_episode, run_episode
 from .entropy import (
     ShannonReport,
+    compute_character_entropy,
     compute_corpus_entropy,
     compute_fact_entropy,
     diagnose_health,
