@@ -147,7 +147,7 @@ def test_replay_detects_corruption():
             )
 
         # Tamper with line 2 (change hash)
-        with open(log_path, "r") as f:
+        with open(log_path) as f:
             lines = f.readlines()
 
         payload = json.loads(lines[1])
@@ -161,7 +161,7 @@ def test_replay_detects_corruption():
         corrupted_ledger = EvolutionLedger(log_path)
         try:
             list(corrupted_ledger.replay(verify=True))
-            assert False, "Should have raised ReplayVerificationError"
+            raise AssertionError("Should have raised ReplayVerificationError")
         except ReplayVerificationError as e:
             assert "hash mismatch" in str(e)
 

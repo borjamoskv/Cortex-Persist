@@ -3,10 +3,10 @@
 
 import hashlib
 import random
-import secrets
 import struct
 from abc import ABC, abstractmethod
-from typing import Tuple, Dict, Any, Optional
+from typing import Any
+
 
 class BinaryProtocol(ABC):
     """
@@ -19,7 +19,7 @@ class BinaryProtocol(ABC):
         pass
 
     @abstractmethod
-    def handle_message(self, data: bytes) -> Tuple[bytes, float, bool, Dict[str, Any]]:
+    def handle_message(self, data: bytes) -> tuple[bytes, float, bool, dict[str, Any]]:
         """
         Processes a client message and returns the response, reward, done flag, and info dict.
         """
@@ -30,7 +30,7 @@ class GenesisProtocol(BinaryProtocol):
     """
     Mutant binary protocol for the Genesis Tool Synthesis Benchmark.
     """
-    def __init__(self, flag: bytes, seed: Optional[int] = None):
+    def __init__(self, flag: bytes, seed: int | None = None):
         self.rng = random.Random(seed)
         self.flag = flag
         self.endianness = self.rng.choice(['>', '<'])
@@ -42,7 +42,7 @@ class GenesisProtocol(BinaryProtocol):
         endian_char = b'B' if self.endianness == '>' else b'L'
         return self.nonce + endian_char
 
-    def handle_message(self, data: bytes) -> Tuple[bytes, float, bool, Dict[str, Any]]:
+    def handle_message(self, data: bytes) -> tuple[bytes, float, bool, dict[str, Any]]:
         if self.state != "CHALLENGE":
             return b"ERR: INVALID_STATE", -1.0, True, {"error": "invalid_state"}
 

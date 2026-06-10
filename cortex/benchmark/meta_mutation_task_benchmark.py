@@ -15,12 +15,11 @@ import copy
 import math
 import random
 import statistics
-from typing import Dict, List, Tuple
 
 # Engine imports – these are part of the CORTEX-Persist codebase
 from cortex.engine._genome_mutator import GenomeMutator
-from cortex.engine._genome_types import StrategyGenome, MutationType
-from cortex.isa.builder import dispatch, seq, cond, noop, Predicate
+from cortex.engine._genome_types import MutationType, StrategyGenome
+from cortex.isa.builder import dispatch, noop, seq
 
 # ---------------------------------------------------------------------
 # Helper functions
@@ -91,7 +90,7 @@ def evaluate_tree(tree, x: int) -> int:
     return x
 
 
-def task_fitness(genome: StrategyGenome, inputs: List[int]) -> float:
+def task_fitness(genome: StrategyGenome, inputs: list[int]) -> float:
     """Compute the average negative absolute error against the target function.
 
     Target: f(x) = 3*x + 7
@@ -106,7 +105,7 @@ def task_fitness(genome: StrategyGenome, inputs: List[int]) -> float:
     return -statistics.mean(errors)
 
 
-def diversity_entropy(rates: Dict[MutationType, float]) -> float:
+def diversity_entropy(rates: dict[MutationType, float]) -> float:
     """Normalized Shannon entropy of the mutation‑rate distribution.
 
     p_i = r_i / Σ r_j   (probability mass)
@@ -128,8 +127,8 @@ def diversity_entropy(rates: Dict[MutationType, float]) -> float:
 
 
 def run_adaptive(
-    mutator: GenomeMutator, genome: StrategyGenome, generations: int, inputs: List[int]
-) -> Tuple[List[float], List[int], List[float]]:
+    mutator: GenomeMutator, genome: StrategyGenome, generations: int, inputs: list[int]
+) -> tuple[list[float], list[int], list[float]]:
     """Run a stream where the genome is mutated each generation.
 
     Returns a tuple of:
@@ -137,22 +136,26 @@ def run_adaptive(
       2. count of META_MUTATION events per generation (0 or 1)
       3. absolute rate drift (max change in any mutation rate) per generation
     """
-    fitness_history: List[float] = []
-    meta_counts: List[int] = []
-    rate_drifts: List[float] = []
+    fitness_history: list[float] = []
+    meta_counts: list[int] = []
+    rate_drifts: list[float] = []
+    current_fitness = task_fitness(genome, inputs)
     for _ in range(generations):
         pre_rates = genome.mutation_rates.copy()
         child = mutator.mutate(genome)
-        fitness_history.append(task_fitness(child, inputs))
+        child_fitness = task_fitness(child, inputs)
+        if child_fitness >= current_fitness:
+            genome = child
+            current_fitness = child_fitness
+        fitness_history.append(current_fitness)
         latest_log = child.lineage.mutation_log[-1] if child.lineage.mutation_log else ""
-        meta_counts.append(1 if latest_log.startswith("META:") else 0)
+        meta_counts.append(1 if "type=meta_mutation" in latest_log or latest_log.startswith("META:") else 0)
         drift = max(abs(child.mutation_rates[mt] - pre_rates.get(mt, 0.0)) for mt in MutationType)
         rate_drifts.append(drift)
-        genome = child
     return fitness_history, meta_counts, rate_drifts
 
 
-def run_static(genome: StrategyGenome, generations: int, inputs: List[int]) -> List[float]:
+def run_static(genome: StrategyGenome, generations: int, inputs: list[int]) -> list[float]:
     """Run a truly static control – the genome never changes.
 
     Returns a list of repeated task‑fitness values (identical each generation).
@@ -190,12 +193,12 @@ def main() -> None:
     mutator = GenomeMutator()
     inputs = list(range(1, 21))  # x = 1..20
 
-    adaptive_means: List[float] = []
-    static_means: List[float] = []
-    adaptive_diversities: List[float] = []
-    static_diversities: List[float] = []
-    meta_event_counts: List[int] = []
-    rate_drift_means: List[float] = []
+    adaptive_means: list[float] = []
+    static_means: list[float] = []
+    adaptive_diversities: list[float] = []
+    static_diversities: list[float] = []
+    meta_event_counts: list[int] = []
+    rate_drift_means: list[float] = []
 
     for i in range(args.repeats):
         random.seed(args.seed + i)
@@ -211,7 +214,7 @@ def main() -> None:
         static_means.append(statistics.mean(static_fitness))
         static_diversities.append(diversity_entropy(base_genome.mutation_rates))
 
-    def summarize(values: List[float]) -> Tuple[float, float]:
+    def summarize(values: list[float]) -> tuple[float, float]:
         return statistics.mean(values), statistics.stdev(values)
 
     ad_mean, ad_std = summarize(adaptive_means)

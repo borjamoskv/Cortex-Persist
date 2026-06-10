@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 from typing import Any
 
+
 class EventLedger:
     """Fuente única de verdad replayable. Almacena mutaciones en orden causal."""
     

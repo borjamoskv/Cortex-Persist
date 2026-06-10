@@ -2,12 +2,14 @@
 # [C5-REAL] Exergy-Maximized
 
 import time
-from typing import Dict, Any, List
-from ..registry import make
-from ..env.client import BinaryAgent
-from ..env.trace import EpisodeTrace, StepTrace, compute_trace_checksum
+from typing import Any
 
-def run_episode(env_id: str, agent: BinaryAgent, **env_kwargs) -> Dict[str, Any]:
+from cortex.shannon.env.client import BinaryAgent
+from cortex.shannon.env.trace import EpisodeTrace, StepTrace, compute_trace_checksum
+from cortex.shannon.registry import make
+
+
+def run_episode(env_id: str, agent: BinaryAgent, **env_kwargs) -> dict[str, Any]:
     """
     Executes a single Gym-like episode for a binary protocol agent and records a verifiable trace.
     """
@@ -21,7 +23,7 @@ def run_episode(env_id: str, agent: BinaryAgent, **env_kwargs) -> Dict[str, Any]
     done = False
     info = {}
     
-    step_traces: List[StepTrace] = []
+    step_traces: list[StepTrace] = []
     
     try:
         while not done:

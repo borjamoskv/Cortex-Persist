@@ -54,8 +54,8 @@ class CausalClosureGuard:
         has_json_array = False
         stripped_content = content.strip()
         if stripped_content.startswith("[") and stripped_content.endswith("]"):
-            import json
             import ast
+            import json
             try:
                 parsed = json.loads(stripped_content)
                 if isinstance(parsed, list) and all(isinstance(x, dict) for x in parsed) and len(parsed) > 0:

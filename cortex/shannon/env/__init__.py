@@ -2,10 +2,10 @@
 # [C5-REAL] Exergy-Maximized
 
 from .base import BinaryEnv, StepResult
+from .client import BinaryAgent, BinaryClient, HeuristicGenesisAgent
+from .genesis_env import GenesisEnv
 from .protocol import BinaryProtocol, GenesisProtocol
 from .server import MutantServer
-from .genesis_env import GenesisEnv
-from .client import BinaryAgent, HeuristicGenesisAgent, BinaryClient
 
 __all__ = [
     "BinaryEnv",

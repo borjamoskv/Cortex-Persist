@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
-from typing import Any, Type
+from typing import Any
+
 
 class DivergenceException(Exception):
     """Lanzada cuando el hash del estado actual diverge del histórico esperado."""
@@ -8,7 +9,7 @@ class DivergenceException(Exception):
 class ReplayEngine:
     """Motor determinista. Reproduce eventos pasados para reconstruir el estado."""
     
-    def __init__(self, state_cls: Type[Any]):
+    def __init__(self, state_cls: type[Any]):
         self.state_cls = state_cls
 
     def run(self, events: list[dict[str, Any]], expected_hashes: dict[int, str] = None) -> list[dict[str, Any]]:

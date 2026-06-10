@@ -49,7 +49,7 @@ class TestHashChainInvariant:
         events = fixed_event_trace(seed=42)
         r1 = ReplayEngine(RuntimeState).run(events)
         r2 = ReplayEngine(RuntimeState).run(events)
-        for s1, s2 in zip(r1, r2):
+        for s1, s2 in zip(r1, r2, strict=False):
             assert s1["state_hash"] == s2["state_hash"]
 
     def test_hash_chain_length_invariant(self):

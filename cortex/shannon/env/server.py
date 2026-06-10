@@ -3,7 +3,8 @@
 
 import asyncio
 import logging
-from typing import Optional, Callable
+from collections.abc import Callable
+
 from .protocol import BinaryProtocol
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,7 @@ class MutantServer:
         self.protocol_factory = protocol_factory
         self.host = host
         self.port = port
-        self.server: Optional[asyncio.AbstractServer] = None
+        self.server: asyncio.AbstractServer | None = None
         self._running = False
 
     async def handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):

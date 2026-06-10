@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import logging
-from typing import Dict, Any, Optional
 from dataclasses import dataclass
-from .divergence import ExecutionDiff, Trace, DivergenceEngine
+
+from .divergence import DivergenceEngine, ExecutionDiff, Trace
 
 logger = logging.getLogger("cortex.runtime.homeostasis")
 
