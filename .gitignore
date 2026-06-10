@@ -302,10 +302,8 @@ engine-c5/targets/
 .exergy_state.json
 test_ouro_remote.py
 test_db.py
-cortex-core/test_segfault.py
-cortex-core/test_mmap_stress.py
-cortex-core/dummy_exergy.py
-cortex-core/cortex_exergy_autopoiesis.py
+# cortex-core/ — runtime artifact directory (binaries, DBs, credentials)
+cortex-core/
 
 cortex_rs/target/
 cortex_rs/*.so
