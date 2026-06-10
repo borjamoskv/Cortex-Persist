@@ -5,10 +5,9 @@ Deploys 10,000 sovereign agents via Asyncio to demonstrate zero-Anergy scaling.
 """
 
 import asyncio
-import time
 import hashlib
 import logging
-from typing import List
+import time
 
 logging.basicConfig(
     level=logging.INFO,
@@ -67,7 +66,7 @@ async def deploy_legion():
     logger.info(f"✅ LEGION-10k COMPLETADO. {TOTAL_AGENTS} Agentes sincronizados.")
     logger.info(f"⚡ Tiempo Total: {elapsed:.4f}s")
     logger.info(f"⚡ Exergy Cost: {(elapsed / TOTAL_AGENTS) * 1000:.4f} ms / agente")
-    logger.info(f"Byzantine Consensus: 5/5 Supermajority Achieved.")
+    logger.info("Byzantine Consensus: 5/5 Supermajority Achieved.")
 
 if __name__ == "__main__":
     # Optimize event loop policy if needed, but standard is fine for 10k

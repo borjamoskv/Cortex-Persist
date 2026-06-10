@@ -12,7 +12,7 @@ Lifecycle Enforced: ACTIVE -> QUARANTINED -> TOMBSTONED -> PURGED
 
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any
+from typing import Any
 
 logger = logging.getLogger("cortex.daemon.reaper")
 
@@ -25,7 +25,7 @@ class DeathCertificate:
         self.lifetime_days = lifetime_days
         self.timestamp = datetime.now(timezone.utc).isoformat()
         
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "target_id": self.target_id,
             "cause_of_death": self.reason,
@@ -75,7 +75,7 @@ class ReaperDaemon:
         
         return cert
 
-    def sweep(self, registry: Dict[str, Dict[str, Any]]):
+    def sweep(self, registry: dict[str, dict[str, Any]]):
         """Sweeps the given registry for anomalies and enforces the protocol."""
         logger.info(f"[{self.agent_id}] Initiating Exergy Sweep over {len(registry)} entities...")
         purged = []
