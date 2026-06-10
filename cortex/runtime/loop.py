@@ -6,6 +6,8 @@ from typing import Any
 
 from .snapshot import SnapshotManager
 from .state import RuntimeState
+from .homeostasis import HomeostaticController
+from .divergence import DivergenceEngine, Trace
 
 logger = logging.getLogger("cortex.runtime")
 
@@ -13,12 +15,17 @@ logger = logging.getLogger("cortex.runtime")
 class RuntimeLoop:
     """The execution heart. Breathes events, mutates reality, bills divergence."""
 
-    def __init__(self, ledger: Any, metrics_emitter: Any, snapshot_manager: SnapshotManager):
+    def __init__(self, ledger: Any, metrics_emitter: Any, snapshot_manager: SnapshotManager, homeostatic_controller: HomeostaticController = None):
         self.ledger = ledger
         self.metrics = metrics_emitter
         self.snapshot_manager = snapshot_manager
         self.state = RuntimeState()
         self.is_running = False
+        self.homeostatic_controller = homeostatic_controller or HomeostaticController(DivergenceEngine(), mode="SHADOW")
+        self.baseline_events = []
+        self.baseline_states = []
+        self.current_events = []
+        self.current_states = []
 
     def ingest(self) -> dict:
         """Simulate stochastic ingestion of causal events."""
@@ -52,6 +59,21 @@ class RuntimeLoop:
                 snap_hash = self.snapshot_manager.maybe_save(self.state)
                 if snap_hash:
                     logger.info(f"[*] STATE FREEZE | Ver: {self.state.version} | Hash: {snap_hash}")
+
+                # 4.5. Monitor Homeostasis
+                self.current_events.append(event)
+                self.current_states.append(self.state.snapshot())
+                
+                baseline_trace = Trace(self.baseline_events, self.baseline_states)
+                current_trace = Trace(self.current_events, self.current_states)
+                
+                drift_metrics = self.homeostatic_controller.monitor_and_detect(baseline_trace, current_trace)
+                if drift_metrics.requires_action:
+                    logger.warning(f"[!] PATHOLOGICAL DRIFT DETECTED | Triggering Auto-Healing. Shift: {drift_metrics.semantic_shift}")
+                    try:
+                        self.homeostatic_controller.remediate(drift_metrics)
+                    except NotImplementedError:
+                        logger.warning("[!] Remediation bypassed (NotImplemented or SHADOW mode)")
 
                 # 5. Bill & Emit
                 self.metrics.emit(self.state)
