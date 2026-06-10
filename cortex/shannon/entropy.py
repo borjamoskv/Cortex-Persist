@@ -20,6 +20,7 @@ import aiosqlite
 
 __all__ = [
     "ShannonReport",
+    "compute_character_entropy",
     "compute_corpus_entropy",
     "compute_fact_entropy",
     "diagnose_health",
@@ -304,3 +305,17 @@ def diagnose_health(report: ShannonReport) -> list[str]:
         diagnostics.append("HEALTHY: Corpus entropy within normal parameters.")
 
     return diagnostics
+
+
+def compute_character_entropy(content: str) -> float:
+    """Calculate Shannon entropy of the characters in a string.
+
+    Used by security and anomaly detection engines to detect encoded/encrypted payloads.
+    """
+    if not content:
+        return 0.0
+    freq: dict[str, int] = {}
+    for ch in content:
+        freq[ch] = freq.get(ch, 0) + 1
+    length = len(content)
+    return -sum((c / length) * math.log2(c / length) for c in freq.values() if c > 0)

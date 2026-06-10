@@ -212,6 +212,14 @@ def list_windows_cmd(app_name: str):
     asyncio.run(_run())
 
 
+async def _run_window_op(op_name: str, coro) -> None:
+    res = await coro
+    if res.success:
+        console.print(f"[green]✔ {op_name}[/green]")
+    else:
+        console.print(f"[red]✘ Error: {res.error}[/red]")
+
+
 @maestro.command("move")
 @click.argument("app_name")
 @click.argument("x", type=int)
@@ -221,12 +229,10 @@ def move_cmd(app_name: str, x: int, y: int):
 
     async def _run():
         m = MaestroUI(engine=get_engine())
-        target = AppTarget(name=app_name)
-        res = await m.move_window(target, x, y)
-        if res.success:
-            console.print(f"[green]✔ Ventana movida a ({x}, {y})[/green]")
-        else:
-            console.print(f"[red]✘ Error: {res.error}[/red]")
+        await _run_window_op(
+            f"Ventana movida a ({x}, {y})",
+            m.move_window(AppTarget(name=app_name), x, y)
+        )
 
     asyncio.run(_run())
 
@@ -240,12 +246,10 @@ def resize_cmd(app_name: str, width: int, height: int):
 
     async def _run():
         m = MaestroUI(engine=get_engine())
-        target = AppTarget(name=app_name)
-        res = await m.resize_window(target, width, height)
-        if res.success:
-            console.print(f"[green]✔ Ventana redimensionada a {width}×{height}[/green]")
-        else:
-            console.print(f"[red]✘ Error: {res.error}[/red]")
+        await _run_window_op(
+            f"Ventana redimensionada a {width}×{height}",
+            m.resize_window(AppTarget(name=app_name), width, height)
+        )
 
     asyncio.run(_run())
 
@@ -257,11 +261,10 @@ def minimize_cmd(app_name: str):
 
     async def _run():
         m = MaestroUI(engine=get_engine())
-        res = await m.minimize_window(AppTarget(name=app_name))
-        if res.success:
-            console.print(f"[green]✔ {app_name} minimizado[/green]")
-        else:
-            console.print(f"[red]✘ Error: {res.error}[/red]")
+        await _run_window_op(
+            f"{app_name} minimizado",
+            m.minimize_window(AppTarget(name=app_name))
+        )
 
     asyncio.run(_run())
 
@@ -273,11 +276,10 @@ def fullscreen_cmd(app_name: str):
 
     async def _run():
         m = MaestroUI(engine=get_engine())
-        res = await m.fullscreen_window(AppTarget(name=app_name))
-        if res.success:
-            console.print(f"[green]✔ {app_name} pantalla completa alternada[/green]")
-        else:
-            console.print(f"[red]✘ Error: {res.error}[/red]")
+        await _run_window_op(
+            f"{app_name} pantalla completa alternada",
+            m.fullscreen_window(AppTarget(name=app_name))
+        )
 
     asyncio.run(_run())
 

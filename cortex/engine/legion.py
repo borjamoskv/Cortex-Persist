@@ -70,6 +70,8 @@ class AsyncSignalBus:
         that only signals carrying substantive data are counted as ``SUCCESS``.
         """
         async with self._lock:
+            if not signal.payload and signal.status == "SUCCESS":
+                raise ValueError("P0 Violation: SUCCESS signal emitted with empty payload.")
             # Enforce VOID invariant: Drop empty signals immediately
             if not signal.payload and signal.status != "VOID":
                 signal.status = "VOID"

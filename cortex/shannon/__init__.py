@@ -19,6 +19,7 @@ from .verification import (
 
 __all__ = [
     "ShannonReport",
+    "compute_character_entropy",
     "compute_corpus_entropy",
     "compute_fact_entropy",
     "diagnose_health",

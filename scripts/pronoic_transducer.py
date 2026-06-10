@@ -10,7 +10,6 @@ import inspect
 import json
 import os
 import sys
-import traceback
 from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
@@ -51,7 +50,7 @@ def pronoic_transduce(func: Callable[..., Any]) -> Callable[..., Any]:
             exc_msg = str(e)
 
             # Format failure trace
-            formatted_tb = traceback.format_exc()
+
 
             # Calculate System Surprise Entropy (Mock formula based on context size)
             state_entropy = len(safe_locals) * 0.85 + len(exc_msg) * 0.05

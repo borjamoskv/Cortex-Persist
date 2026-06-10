@@ -11,13 +11,9 @@ from cortex.ledger.writer import LedgerWriter
 
 
 @pytest.fixture
-def test_db():
-    db_path = "test_ledger_integrity.db"
-    if os.path.exists(db_path):
-        os.remove(db_path)
-    yield db_path
-    if os.path.exists(db_path):
-        os.remove(db_path)
+def test_db(tmp_path):
+    db_path = tmp_path / "test_ledger_integrity.db"
+    return str(db_path)
 
 
 def test_ledger_integrity_chain(test_db):

@@ -447,7 +447,18 @@ class DivergenceMetricEngine:
             w_part * (partial ** 2) +
             w_ent * (entropy ** 2)
         )
-        composite = math.sqrt(weighted_sum)
+        base_composite = math.sqrt(weighted_sum)
+
+        # Incorporar el factor de decaimiento por paso basado en el paso de máxima divergencia
+        max_step_idx = 0
+        max_step_composite = -1.0
+        for idx, coords in enumerate(step_coords):
+            if coords.composite > max_step_composite:
+                max_step_composite = coords.composite
+                max_step_idx = idx
+
+        cascade_factor = 1.0 / (1.0 + 0.05 * max_step_idx)
+        composite = base_composite * cascade_factor
 
         return DivergenceCoordinates(
             structural=structural,
