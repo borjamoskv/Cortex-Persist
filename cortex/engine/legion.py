@@ -141,6 +141,22 @@ class Squadron(ABC):
                 {"target": s.target, "status": s.status, "payload": s.payload} for s in signals
             ],
         }
+
+        # ─── AX-VIII: CAUSAL CLOSURE GUARD ───
+        from cortex.guards import CausalClosureGuard, SwarmProposal
+        
+        # We aggregate all payloads as a proxy for the swarm's narrative output
+        aggregated_payloads = str([s.payload for s in signals if s.payload])
+        # A full squadron deployment has an implicit high token cost
+        proposal = SwarmProposal(
+            agent_id=f"Squadron-{self.SQUAD_NAME}",
+            mission_statement="Crystallization Phase",
+            content=aggregated_payloads,
+            token_cost=50000  # Enforce strictly for Squadron deployment
+        )
+        guard = CausalClosureGuard()
+        guard.verify_closure(proposal)
+
         return report
 
     async def deploy(self, target_pattern: str | None = None) -> dict[str, Any]:
