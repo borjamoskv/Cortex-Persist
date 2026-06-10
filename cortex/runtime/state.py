@@ -49,8 +49,4 @@ class RuntimeState:
 
     def snapshot(self) -> dict[str, Any]:
         """Produce a deterministic snapshot dictionary for validation."""
-        return {
-            "version": self.version,
-            "state_hash": self.hash,
-            "data": dict(self.data)
-        }
+        return {"version": self.version, "state_hash": self.hash, "data": dict(self.data)}

@@ -10,6 +10,7 @@ Propiedad demostrada:
 
 Esto convierte el determinismo de propiedad implícita a invariante CI demostrable.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -24,6 +25,7 @@ from cortex.runtime.replay.engine import ReplayEngine
 @dataclass(frozen=True)
 class ReplayCIResult:
     """Resultado inmutable de una verificación CI de replay."""
+
     passed: bool
     runs_executed: int
     events_per_run: int
@@ -52,14 +54,16 @@ def fixed_event_trace(seed: int = 42, length: int = 20) -> list[dict[str, Any]]:
     rng = random.Random(seed)
     events = []
     for tick in range(1, length + 1):
-        events.append({
-            "action_type": "MEMORY_WRITE",
-            "payload": {
-                "tick": tick,
-                f"key_{tick}": rng.randint(0, 10000),
-                "entropy": rng.random() * 100,
-            },
-        })
+        events.append(
+            {
+                "action_type": "MEMORY_WRITE",
+                "payload": {
+                    "tick": tick,
+                    f"key_{tick}": rng.randint(0, 10000),
+                    "entropy": rng.random() * 100,
+                },
+            }
+        )
     return events
 
 

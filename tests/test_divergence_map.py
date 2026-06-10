@@ -10,6 +10,7 @@ Demuestra:
   5. Distance metric properties (symmetry, identity, triangle inequality holds)
   6. Fork topology correctness
 """
+
 import os
 import pytest
 
@@ -27,6 +28,7 @@ from cortex.runtime.replay.divergence import (
 
 
 # ── Helpers ─────────────────────────────────────────────────────────
+
 
 def _make_deterministic_trajectories(n: int = 5, seed: int = 42) -> list:
     """N identical replay trajectories."""
@@ -53,6 +55,7 @@ def _make_mixed_trajectories() -> list:
 
 
 # ── 1. Deterministic Trajectories ──────────────────────────────────
+
 
 class TestDeterministicManifold:
     """All identical runs → collapsed manifold (single point)."""
@@ -89,6 +92,7 @@ class TestDeterministicManifold:
 
 # ── 2. Divergent Trajectories ──────────────────────────────────────
 
+
 class TestDivergentManifold:
     """Different event traces → non-trivial execution geometry."""
 
@@ -123,6 +127,7 @@ class TestDivergentManifold:
 
 # ── 3. Entropy Drift ───────────────────────────────────────────────
 
+
 class TestEntropyDrift:
     """State complexity evolution over trajectory."""
 
@@ -153,6 +158,7 @@ class TestEntropyDrift:
 
 # ── 4. CI Threshold Enforcement ─────────────────────────────────────
 
+
 class TestCIThreshold:
     """CI gate mode: reject if max_distance > threshold."""
 
@@ -177,6 +183,7 @@ class TestCIThreshold:
 
 
 # ── 5. Distance Metric Properties ──────────────────────────────────
+
 
 class TestDistanceMetricProperties:
     """Verify metric axioms on the distance matrix."""
@@ -206,6 +213,7 @@ class TestDistanceMetricProperties:
 
 # ── 6. Report Serialization ────────────────────────────────────────
 
+
 class TestReportSerialization:
     def test_to_dict_deterministic(self):
         trajs = _make_deterministic_trajectories(n=2)
@@ -225,6 +233,7 @@ class TestReportSerialization:
 
 
 # ── 7. Edge Cases ──────────────────────────────────────────────────
+
 
 class TestEdgeCases:
     def test_minimum_two_trajectories(self):

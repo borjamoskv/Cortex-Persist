@@ -178,20 +178,24 @@ class Squadron(ABC):
                 cortex_steps = []
                 for idx, s in enumerate(signals):
                     if s.payload:
-                        cortex_steps.append({
-                            "action": "SHANNON_STEP",
-                            "metadata": {
-                                "step_idx": idx,
-                                "action_hex": s.payload.get("action_hex", ""),
-                                "observation_hex": s.payload.get("observation_hex", ""),
-                                "reward": s.payload.get("reward", 0.0),
-                                "done": s.payload.get("done", False),
-                                "agent_idx": idx,
+                        cortex_steps.append(
+                            {
+                                "action": "SHANNON_STEP",
+                                "metadata": {
+                                    "step_idx": idx,
+                                    "action_hex": s.payload.get("action_hex", ""),
+                                    "observation_hex": s.payload.get("observation_hex", ""),
+                                    "reward": s.payload.get("reward", 0.0),
+                                    "done": s.payload.get("done", False),
+                                    "agent_idx": idx,
+                                },
                             }
-                        })
-                
+                        )
+
                 # Prepend config/env_id info if trace contains it
-                cortex_ledger_input = [{"env_id": shannon_trace.env_id, "seed": shannon_trace.seed}] + cortex_steps
+                cortex_ledger_input = [
+                    {"env_id": shannon_trace.env_id, "seed": shannon_trace.seed}
+                ] + cortex_steps
 
                 verdict = CrossSystemInvariantCompiler.verify_global_invariance(
                     shannon_trace=shannon_trace,
@@ -208,7 +212,9 @@ class Squadron(ABC):
                 ledger_payload["substrate_hash"] = verdict.substrate_hash
         except Exception as e:
             if "Cross-System Invariance Violation" in str(e):
-                logger.error("[Crystallization] 🛑 Cross-System Invariance Divergence detected: %s", e)
+                logger.error(
+                    "[Crystallization] 🛑 Cross-System Invariance Divergence detected: %s", e
+                )
                 raise
             else:
                 logger.debug("Cross-System verifier bypassed: %s", e)

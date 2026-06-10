@@ -42,7 +42,7 @@ class EpisodeTrace:
             seed=data.get("seed"),
             initial_observation_hex=data["initial_observation_hex"],
             steps=steps,
-            checksum=data["checksum"]
+            checksum=data["checksum"],
         )
 
     @classmethod
@@ -57,11 +57,15 @@ class EpisodeTrace:
         return computed == self.checksum
 
 
-def compute_trace_checksum(env_id: str, initial_observation_hex: str, steps: list[StepTrace]) -> str:
+def compute_trace_checksum(
+    env_id: str, initial_observation_hex: str, steps: list[StepTrace]
+) -> str:
     hasher = hashlib.sha256()
     hasher.update(env_id.encode())
     hasher.update(initial_observation_hex.encode())
     for step in steps:
-        payload = f"{step.step_idx}:{step.observation_hex}:{step.action_hex}:{step.reward}:{step.done}"
+        payload = (
+            f"{step.step_idx}:{step.observation_hex}:{step.action_hex}:{step.reward}:{step.done}"
+        )
         hasher.update(payload.encode())
     return hasher.hexdigest()

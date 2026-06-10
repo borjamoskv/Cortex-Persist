@@ -35,14 +35,14 @@ class TestContractResolve:
     @pytest.mark.parametrize(
         "severity,blast_radius",
         [
-            (Severity.CRITICAL, 0),   # severity alone triggers
+            (Severity.CRITICAL, 0),  # severity alone triggers
             (Severity.CRITICAL, 1),
             (Severity.CRITICAL, 5),
-            (Severity.LOW, 3),        # blast_radius alone triggers
+            (Severity.LOW, 3),  # blast_radius alone triggers
             (Severity.MEDIUM, 3),
             (Severity.HIGH, 3),
-            (Severity.LOW, 10),       # extreme blast_radius
-            (Severity.CRITICAL, 3),   # both trigger
+            (Severity.LOW, 10),  # extreme blast_radius
+            (Severity.CRITICAL, 3),  # both trigger
         ],
     )
     def test_gate_ultra(self, severity: Severity, blast_radius: int) -> None:
@@ -61,8 +61,8 @@ class TestContractResolve:
             (False, True, True, "missing"),
             (True, False, True, "unreliable"),
             (True, True, False, "stale"),
-            (False, False, True, "missing"),    # multiple deficits
-            (False, False, False, "missing"),   # all deficits
+            (False, False, True, "missing"),  # multiple deficits
+            (False, False, False, "missing"),  # all deficits
         ],
     )
     def test_gate_research(
@@ -209,7 +209,9 @@ class TestAdapterLoading:
         """Default YAML loads without error if it exists."""
         from cortex.router.adapter import ExergyConfigAdapter
 
-        yaml_path = Path.home() / ".gemini/config/skills/Exergy-Engine-OMEGA/cognitive_routing_matrix.yaml"
+        yaml_path = (
+            Path.home() / ".gemini/config/skills/Exergy-Engine-OMEGA/cognitive_routing_matrix.yaml"
+        )
         if not yaml_path.exists():
             pytest.skip("Default YAML not present")
 
@@ -273,7 +275,9 @@ class TestAdapterContractEquivalence:
     def adapter(self):
         from cortex.router.adapter import ExergyConfigAdapter
 
-        yaml_path = Path.home() / ".gemini/config/skills/Exergy-Engine-OMEGA/cognitive_routing_matrix.yaml"
+        yaml_path = (
+            Path.home() / ".gemini/config/skills/Exergy-Engine-OMEGA/cognitive_routing_matrix.yaml"
+        )
         if not yaml_path.exists():
             pytest.skip("Default YAML not present")
         return ExergyConfigAdapter(strict=True)

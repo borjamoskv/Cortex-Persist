@@ -38,9 +38,7 @@ class CausalClosureGuard:
     def _contains_structural_condensation(self, content: str) -> bool:
         """Detects if the content contains permanent structural artifacts."""
         # Look for code blocks indicating logic synthesis
-        has_code_blocks = bool(
-            re.search(r"```\w*", content, re.IGNORECASE)
-        )
+        has_code_blocks = bool(re.search(r"```\w*", content, re.IGNORECASE))
 
         # Look for Ledger event payloads or Schema definitions
         has_ledger_payload = "LedgerPayload" in content or "CORTEX-TAINT" in content
@@ -56,14 +54,23 @@ class CausalClosureGuard:
         if stripped_content.startswith("[") and stripped_content.endswith("]"):
             import ast
             import json
+
             try:
                 parsed = json.loads(stripped_content)
-                if isinstance(parsed, list) and all(isinstance(x, dict) for x in parsed) and len(parsed) > 0:
+                if (
+                    isinstance(parsed, list)
+                    and all(isinstance(x, dict) for x in parsed)
+                    and len(parsed) > 0
+                ):
                     has_json_array = True
             except Exception:
                 try:
                     parsed = ast.literal_eval(stripped_content)
-                    if isinstance(parsed, list) and all(isinstance(x, dict) for x in parsed) and len(parsed) > 0:
+                    if (
+                        isinstance(parsed, list)
+                        and all(isinstance(x, dict) for x in parsed)
+                        and len(parsed) > 0
+                    ):
                         has_json_array = True
                 except Exception:
                     pass

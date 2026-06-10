@@ -9,11 +9,15 @@ from .protocol import BinaryProtocol
 
 logger = logging.getLogger(__name__)
 
+
 class MutantServer:
     """
     Protocol-agnostic TCP server that spins up a custom BinaryProtocol per connection.
     """
-    def __init__(self, protocol_factory: Callable[[], BinaryProtocol], host: str = "127.0.0.1", port: int = 0):
+
+    def __init__(
+        self, protocol_factory: Callable[[], BinaryProtocol], host: str = "127.0.0.1", port: int = 0
+    ):
         self.protocol_factory = protocol_factory
         self.host = host
         self.port = port

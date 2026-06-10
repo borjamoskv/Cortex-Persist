@@ -9,6 +9,7 @@ Demuestra:
   4. Gate rejects non-determinism: injected divergence triggers failure
   5. Trace generator determinism: fixed_event_trace is itself deterministic
 """
+
 import pytest
 
 from cortex.runtime.state import RuntimeState
@@ -21,6 +22,7 @@ from cortex.runtime.replay.engine import ReplayEngine
 
 
 # ── 1. Execution Identity ──────────────────────────────────────────
+
 
 class TestExecutionIdentity:
     """Replay(run_n(events)) == Replay(run_m(events)) ∀ n,m"""
@@ -41,6 +43,7 @@ class TestExecutionIdentity:
 
 
 # ── 2. Hash Chain Invariant ─────────────────────────────────────────
+
 
 class TestHashChainInvariant:
     """Per-version hash equality across replicas."""
@@ -68,6 +71,7 @@ class TestHashChainInvariant:
 
 
 # ── 3. CI Gate Programmatic Verifier ────────────────────────────────
+
 
 class TestReplayCIGate:
     """The gate itself — programmatic verification."""
@@ -111,6 +115,7 @@ class TestReplayCIGate:
 
 # ── 4. Seed Stability ──────────────────────────────────────────────
 
+
 class TestSeedStability:
     """Different seeds → different chains, but each seed is self-consistent."""
 
@@ -134,6 +139,7 @@ class TestSeedStability:
 
 
 # ── 5. Divergence Detection (injected non-determinism) ──────────────
+
 
 class TestDivergenceDetection:
     """Gate must reject systems that lose determinism."""
@@ -160,6 +166,7 @@ class TestDivergenceDetection:
 
             def snapshot(self):
                 import os
+
                 # Inject entropy — hash includes random bytes
                 noise = os.urandom(4).hex()
                 return {

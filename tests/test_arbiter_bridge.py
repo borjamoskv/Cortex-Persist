@@ -36,6 +36,7 @@ from cortex.router.contract import (
 
 # ─── Fixtures ────────────────────────────────────────────────────────────
 
+
 def _make_signals(
     l1: float = 0.80,
     l2: float = 0.75,
@@ -73,6 +74,7 @@ def bridge_no_rl(arbiter):
 
 # ─── Test: Consensus → NORMAL routing ────────────────────────────────────
 
+
 class TestConsensusRouting:
     """When all layers agree, bridge should produce NORMAL/LOW routing."""
 
@@ -102,6 +104,7 @@ class TestConsensusRouting:
 
 # ─── Test: Ledger Veto → ULTRA_THINK routing ─────────────────────────────
 
+
 class TestLedgerVetoRouting:
     """When L3 vetoes, bridge should escalate to ULTRA_THINK."""
 
@@ -122,6 +125,7 @@ class TestLedgerVetoRouting:
 
 # ─── Test: ABSTAIN → Fallback to contract.resolve() ─────────────────────
 
+
 class TestAbstainFallback:
     """When all layers are below confidence floor, bridge falls back."""
 
@@ -139,6 +143,7 @@ class TestAbstainFallback:
 
 
 # ─── Test: CONFLICT → Fallback routing ───────────────────────────────────
+
 
 class TestConflictRouting:
     """Irreconcilable conflicts should trigger fallback + ULTRA_THINK."""
@@ -162,6 +167,7 @@ class TestConflictRouting:
 
 # ─── Test: Weighted Fusion → DEEP_THINK ──────────────────────────────────
 
+
 class TestWeightedFusion:
     """Moderate divergence should resolve via weighted fusion."""
 
@@ -177,6 +183,7 @@ class TestWeightedFusion:
 
 
 # ─── Test: RL Feedback Trajectory ────────────────────────────────────────
+
 
 class TestRLFeedback:
     """Verify CausalTrajectory generation and logging."""
@@ -225,6 +232,7 @@ class TestRLFeedback:
 
 # ─── Test: Override Severity ─────────────────────────────────────────────
 
+
 class TestOverrideSeverity:
     """Override severity should bypass score-based classification."""
 
@@ -250,6 +258,7 @@ class TestOverrideSeverity:
 
 # ─── Test: Empty Signals ─────────────────────────────────────────────────
 
+
 class TestEmptySignals:
     """Bridge should handle empty signal list gracefully."""
 
@@ -264,6 +273,7 @@ class TestEmptySignals:
 
 
 # ─── Test: Diagnostics ──────────────────────────────────────────────────
+
 
 class TestDiagnostics:
     """Bridge stats tracking."""
@@ -286,8 +296,8 @@ class TestDiagnostics:
 
 # ─── Test: Score → Severity Mapping ──────────────────────────────────────
 
-class TestScoreToSeverity:
 
+class TestScoreToSeverity:
     def test_very_low_score_is_critical(self):
         sev = ArbiterBridge._score_to_severity(0.10)
         assert sev == Severity.CRITICAL

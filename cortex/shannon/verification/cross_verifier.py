@@ -16,14 +16,15 @@ class DivergenceType(Enum):
     Taxonomy of execution divergence between internal state (Cortex)
     and external environment (Shannon).
     """
+
     NONE = "none"
-    
+
     # 1. Structural Divergence: topological, sequence length, or configuration mismatch.
     STRUCTURAL = "structural"
-    
+
     # 2. Semantic Divergence: mismatches in actual operations/actions/observations.
     SEMANTIC = "semantic"
-    
+
     # 3. Partial Divergence: auxiliary fields (rewards, done flags, metadata) mismatch.
     PARTIAL = "partial"
 
@@ -68,7 +69,9 @@ class ExecutionVerdict:
                 "partial": self.coordinates.partial,
                 "entropy": self.coordinates.entropy,
                 "composite": self.coordinates.composite,
-            } if self.coordinates else None
+            }
+            if self.coordinates
+            else None,
         }
 
 
@@ -77,7 +80,7 @@ def compute_verdict_hash(
     divergence_type: DivergenceType,
     details: list[DivergenceDetail],
     cortex_hash: str,
-    shannon_hash: str
+    shannon_hash: str,
 ) -> str:
     """Computes a deterministic cryptographic hash representing the verification state."""
     hasher = hashlib.sha256()
@@ -94,10 +97,10 @@ def compute_verdict_hash(
 class CrossVerifier:
     """
     Cross-System Verifier (A)
-    
+
     Establishes and enforces a global equivalence relation:
     execution_A ≡ execution_B iff cross_system_verifier(A, B) == consistent
-    
+
     Guarantees symmetry:
     replay(cortex) == trace(shannon) AND trace(shannon) == replay(cortex)
     """
@@ -115,7 +118,7 @@ class CrossVerifier:
                 sh_steps = entry["data"].get("shannon_steps")
                 if isinstance(sh_steps, list):
                     return sh_steps
-                
+
                 # Check for single step properties in snapshot data
                 if "step_idx" in entry["data"]:
                     extracted.append(entry["data"])
@@ -125,7 +128,7 @@ class CrossVerifier:
             if entry.get("action") == "SHANNON_STEP" or "step_idx" in entry:
                 metadata = entry.get("metadata", entry)
                 extracted.append(metadata)
-                
+
         return extracted
 
     @classmethod
@@ -139,10 +142,12 @@ class CrossVerifier:
         """
         details: list[DivergenceDetail] = []
         cortex_steps = cls.extract_shannon_steps(ledger_replay)
-        
+
         # Determine base hashes for verdict tracking
-        shannon_hash = episode_trace.checksum if episode_trace.verify() else "INVALID_SHANNON_CHECKSUM"
-        
+        shannon_hash = (
+            episode_trace.checksum if episode_trace.verify() else "INVALID_SHANNON_CHECKSUM"
+        )
+
         # Compute a hash of the ledger replay to represent Cortex side state
         cortex_hasher = hashlib.sha256()
         for entry in ledger_replay:
@@ -151,141 +156,162 @@ class CrossVerifier:
 
         # Check for invalid Shannon trace checksum first
         if shannon_hash == "INVALID_SHANNON_CHECKSUM":
-            details.append(DivergenceDetail(
-                type=DivergenceType.SEMANTIC,
-                step_idx=None,
-                field="checksum",
-                expected=episode_trace.checksum,
-                actual="INVALID",
-                message="EpisodeTrace cryptographic validation failed (checksum mismatch)."
-            ))
-            v_hash = compute_verdict_hash(False, DivergenceType.SEMANTIC, details, cortex_hash, shannon_hash)
+            details.append(
+                DivergenceDetail(
+                    type=DivergenceType.SEMANTIC,
+                    step_idx=None,
+                    field="checksum",
+                    expected=episode_trace.checksum,
+                    actual="INVALID",
+                    message="EpisodeTrace cryptographic validation failed (checksum mismatch).",
+                )
+            )
+            v_hash = compute_verdict_hash(
+                False, DivergenceType.SEMANTIC, details, cortex_hash, shannon_hash
+            )
             coordinates = DivergenceCoordinates(
-                structural=0.0,
-                semantic=1.0,
-                partial=0.0,
-                entropy=0.0,
-                composite=1.0
+                structural=0.0, semantic=1.0, partial=0.0, entropy=0.0, composite=1.0
             )
             return ExecutionVerdict(
                 consistent=False,
                 verdict_hash=v_hash,
                 divergence_type=DivergenceType.SEMANTIC,
                 details=details,
-                coordinates=coordinates
+                coordinates=coordinates,
             )
 
         # 1. Structural Validation (topological, config, and seed metadata)
         # We verify that env settings recorded in Cortex match the environment trace.
         for entry in ledger_replay:
-            if "env_id" in entry or ("data" in entry and isinstance(entry["data"], dict) and "env_id" in entry["data"]):
+            if "env_id" in entry or (
+                "data" in entry and isinstance(entry["data"], dict) and "env_id" in entry["data"]
+            ):
                 ledger_env_id = entry.get("env_id") or entry["data"].get("env_id")
                 if ledger_env_id != episode_trace.env_id:
-                    details.append(DivergenceDetail(
-                        type=DivergenceType.STRUCTURAL,
-                        step_idx=None,
-                        field="env_id",
-                        expected=episode_trace.env_id,
-                        actual=ledger_env_id,
-                        message=f"Environment ID mismatch: {episode_trace.env_id} vs {ledger_env_id}"
-                    ))
-                
+                    details.append(
+                        DivergenceDetail(
+                            type=DivergenceType.STRUCTURAL,
+                            step_idx=None,
+                            field="env_id",
+                            expected=episode_trace.env_id,
+                            actual=ledger_env_id,
+                            message=f"Environment ID mismatch: {episode_trace.env_id} vs {ledger_env_id}",
+                        )
+                    )
+
                 ledger_seed = entry.get("seed") or entry["data"].get("seed")
                 if ledger_seed != episode_trace.seed:
-                    details.append(DivergenceDetail(
-                        type=DivergenceType.STRUCTURAL,
-                        step_idx=None,
-                        field="seed",
-                        expected=episode_trace.seed,
-                        actual=ledger_seed,
-                        message=f"Seed mismatch: {episode_trace.seed} vs {ledger_seed}"
-                    ))
+                    details.append(
+                        DivergenceDetail(
+                            type=DivergenceType.STRUCTURAL,
+                            step_idx=None,
+                            field="seed",
+                            expected=episode_trace.seed,
+                            actual=ledger_seed,
+                            message=f"Seed mismatch: {episode_trace.seed} vs {ledger_seed}",
+                        )
+                    )
 
         # Check length equivalence (symmetry check on cardinality)
         if len(cortex_steps) != len(episode_trace.steps):
-            details.append(DivergenceDetail(
-                type=DivergenceType.STRUCTURAL,
-                step_idx=None,
-                field="steps_count",
-                expected=len(episode_trace.steps),
-                actual=len(cortex_steps),
-                message=f"Step count mismatch: Shannon has {len(episode_trace.steps)}, Cortex has {len(cortex_steps)}"
-            ))
-            v_hash = compute_verdict_hash(False, DivergenceType.STRUCTURAL, details, cortex_hash, shannon_hash)
+            details.append(
+                DivergenceDetail(
+                    type=DivergenceType.STRUCTURAL,
+                    step_idx=None,
+                    field="steps_count",
+                    expected=len(episode_trace.steps),
+                    actual=len(cortex_steps),
+                    message=f"Step count mismatch: Shannon has {len(episode_trace.steps)}, Cortex has {len(cortex_steps)}",
+                )
+            )
+            v_hash = compute_verdict_hash(
+                False, DivergenceType.STRUCTURAL, details, cortex_hash, shannon_hash
+            )
             coordinates = DivergenceMetricEngine.compute_trajectory_distance(
-                episode_trace.steps,
-                cortex_steps
+                episode_trace.steps, cortex_steps
             )
             return ExecutionVerdict(
                 consistent=False,
                 verdict_hash=v_hash,
                 divergence_type=DivergenceType.STRUCTURAL,
                 details=details,
-                coordinates=coordinates
+                coordinates=coordinates,
             )
 
         # 2. Stepwise & Symmetry Verification
-        for idx, (trace_step, cortex_step) in enumerate(zip(episode_trace.steps, cortex_steps, strict=False)):
+        for idx, (trace_step, cortex_step) in enumerate(
+            zip(episode_trace.steps, cortex_steps, strict=False)
+        ):
             # Symmetry: Verify sequence indices
             if trace_step.step_idx != idx or int(cortex_step.get("step_idx", -1)) != idx:
-                details.append(DivergenceDetail(
-                    type=DivergenceType.STRUCTURAL,
-                    step_idx=idx,
-                    field="step_idx",
-                    expected=idx,
-                    actual=cortex_step.get("step_idx"),
-                    message=f"Out of order step indexing detected at step {idx}"
-                ))
+                details.append(
+                    DivergenceDetail(
+                        type=DivergenceType.STRUCTURAL,
+                        step_idx=idx,
+                        field="step_idx",
+                        expected=idx,
+                        actual=cortex_step.get("step_idx"),
+                        message=f"Out of order step indexing detected at step {idx}",
+                    )
+                )
 
             # Semantic Validation: Action/Observation equivalence
             trace_action = trace_step.action_hex.lower()
             cortex_action = str(cortex_step.get("action_hex", "")).lower()
             if trace_action != cortex_action:
-                details.append(DivergenceDetail(
-                    type=DivergenceType.SEMANTIC,
-                    step_idx=idx,
-                    field="action_hex",
-                    expected=trace_action,
-                    actual=cortex_action,
-                    message=f"Semantic action mismatch at step {idx}: Trace took {trace_action}, Ledger recorded {cortex_action}"
-                ))
+                details.append(
+                    DivergenceDetail(
+                        type=DivergenceType.SEMANTIC,
+                        step_idx=idx,
+                        field="action_hex",
+                        expected=trace_action,
+                        actual=cortex_action,
+                        message=f"Semantic action mismatch at step {idx}: Trace took {trace_action}, Ledger recorded {cortex_action}",
+                    )
+                )
 
             trace_obs = trace_step.observation_hex.lower()
             cortex_obs = str(cortex_step.get("observation_hex", "")).lower()
             if trace_obs != cortex_obs:
-                details.append(DivergenceDetail(
-                    type=DivergenceType.SEMANTIC,
-                    step_idx=idx,
-                    field="observation_hex",
-                    expected=trace_obs,
-                    actual=cortex_obs,
-                    message=f"Semantic observation mismatch at step {idx}: Trace saw {trace_obs}, Ledger recorded {cortex_obs}"
-                ))
+                details.append(
+                    DivergenceDetail(
+                        type=DivergenceType.SEMANTIC,
+                        step_idx=idx,
+                        field="observation_hex",
+                        expected=trace_obs,
+                        actual=cortex_obs,
+                        message=f"Semantic observation mismatch at step {idx}: Trace saw {trace_obs}, Ledger recorded {cortex_obs}",
+                    )
+                )
 
             # Partial Validation: Rewards & Done flags
             trace_reward = float(trace_step.reward)
             cortex_reward = float(cortex_step.get("reward", 0.0))
             if abs(trace_reward - cortex_reward) > 1e-9:
-                details.append(DivergenceDetail(
-                    type=DivergenceType.PARTIAL,
-                    step_idx=idx,
-                    field="reward",
-                    expected=trace_reward,
-                    actual=cortex_reward,
-                    message=f"Reward discrepancy at step {idx}: Shannon got {trace_reward}, Cortex got {cortex_reward}"
-                ))
+                details.append(
+                    DivergenceDetail(
+                        type=DivergenceType.PARTIAL,
+                        step_idx=idx,
+                        field="reward",
+                        expected=trace_reward,
+                        actual=cortex_reward,
+                        message=f"Reward discrepancy at step {idx}: Shannon got {trace_reward}, Cortex got {cortex_reward}",
+                    )
+                )
 
             trace_done = bool(trace_step.done)
             cortex_done = bool(cortex_step.get("done", False))
             if trace_done != cortex_done:
-                details.append(DivergenceDetail(
-                    type=DivergenceType.PARTIAL,
-                    step_idx=idx,
-                    field="done",
-                    expected=trace_done,
-                    actual=cortex_done,
-                    message=f"Done flag discrepancy at step {idx}: Shannon={trace_done}, Cortex={cortex_done}"
-                ))
+                details.append(
+                    DivergenceDetail(
+                        type=DivergenceType.PARTIAL,
+                        step_idx=idx,
+                        field="done",
+                        expected=trace_done,
+                        actual=cortex_done,
+                        message=f"Done flag discrepancy at step {idx}: Shannon={trace_done}, Cortex={cortex_done}",
+                    )
+                )
 
         # Determine overall verdict consistency
         consistent = len(details) == 0
@@ -302,17 +328,16 @@ class CrossVerifier:
                 verdict_type = DivergenceType.PARTIAL
 
         v_hash = compute_verdict_hash(consistent, verdict_type, details, cortex_hash, shannon_hash)
-        
+
         # Calculate metric coordinates
         coordinates = DivergenceMetricEngine.compute_trajectory_distance(
-            episode_trace.steps,
-            cortex_steps
+            episode_trace.steps, cortex_steps
         )
-        
+
         return ExecutionVerdict(
             consistent=consistent,
             verdict_hash=v_hash,
             divergence_type=verdict_type,
             details=details,
-            coordinates=coordinates
+            coordinates=coordinates,
         )

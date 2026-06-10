@@ -37,25 +37,27 @@ logger = logging.getLogger("cortex.engine.meta_arbiter")
 DEFAULT_WEIGHTS: Final[dict[str, float]] = {
     "L1_EMBEDDING": 0.35,
     "L2_TOPOLOGY": 0.30,
-    "L3_LEDGER": 0.0,   # Ledger is boolean gate, not weighted
+    "L3_LEDGER": 0.0,  # Ledger is boolean gate, not weighted
     "L4_RL": 0.35,
 }
 
 # Thresholds
-CONFLICT_THRESHOLD: Final[float] = 0.40   # Divergence above this → conflict
-CONFIDENCE_FLOOR: Final[float] = 0.25     # Below this → ABSTAIN
-LEDGER_VETO_ACTIVE: Final[bool] = True    # L3 can veto all other layers
+CONFLICT_THRESHOLD: Final[float] = 0.40  # Divergence above this → conflict
+CONFIDENCE_FLOOR: Final[float] = 0.25  # Below this → ABSTAIN
+LEDGER_VETO_ACTIVE: Final[bool] = True  # L3 can veto all other layers
 
 
 # ─── Data Structures ─────────────────────────────────────────────────
 
+
 class Resolution(Enum):
     """The arbiter's final disposition."""
-    CONSENSUS = auto()     # All layers agree (within threshold)
+
+    CONSENSUS = auto()  # All layers agree (within threshold)
     LEDGER_OVERRIDE = auto()  # Ledger truth overrides probabilistic layers
     WEIGHTED_FUSION = auto()  # Layers disagree; fused by weight
-    ABSTAIN = auto()       # Insufficient confidence from all layers
-    CONFLICT = auto()      # Irreconcilable divergence; requires human review
+    ABSTAIN = auto()  # Insufficient confidence from all layers
+    CONFLICT = auto()  # Irreconcilable divergence; requires human review
 
 
 class LayerID(Enum):
@@ -68,9 +70,10 @@ class LayerID(Enum):
 @dataclass(frozen=True)
 class LayerSignal:
     """A normalized signal from one cognitive layer."""
+
     layer: LayerID
-    score: float          # Normalized [0.0, 1.0] confidence/relevance
-    raw_value: Any        # Original value from the layer (for audit)
+    score: float  # Normalized [0.0, 1.0] confidence/relevance
+    raw_value: Any  # Original value from the layer (for audit)
     metadata: dict[str, Any] = field(default_factory=dict)
     timestamp_ns: int = field(default_factory=lambda: time.time_ns())
 
@@ -85,22 +88,24 @@ class LayerSignal:
 @dataclass(frozen=True)
 class ConflictPair:
     """Records a detected contradiction between two layers."""
+
     layer_a: LayerID
     layer_b: LayerID
-    divergence: float      # |score_a - score_b|
+    divergence: float  # |score_a - score_b|
     description: str
 
 
 @dataclass(frozen=True)
 class ArbiterVerdict:
     """The canonical output of the Meta-Arbiter."""
+
     resolution: Resolution
-    fused_score: float              # Final arbitrated confidence [0,1]
-    winning_layer: LayerID | None   # Which layer dominated (if applicable)
+    fused_score: float  # Final arbitrated confidence [0,1]
+    winning_layer: LayerID | None  # Which layer dominated (if applicable)
     conflicts: list[ConflictPair]
-    layer_signals: dict[str, float] # Snapshot of all input scores
-    audit_hash: str                 # SHA-256 of the verdict for ledger tracing
-    reasoning: str                  # Human-readable justification
+    layer_signals: dict[str, float]  # Snapshot of all input scores
+    audit_hash: str  # SHA-256 of the verdict for ledger tracing
+    reasoning: str  # Human-readable justification
     timestamp_ns: int = field(default_factory=lambda: time.time_ns())
 
     @property
@@ -110,6 +115,7 @@ class ArbiterVerdict:
 
 
 # ─── Meta-Arbiter Engine ─────────────────────────────────────────────
+
 
 class MetaArbiter:
     """
@@ -202,13 +208,10 @@ class MetaArbiter:
             return verdict
 
         # ── Phase 2: Confidence Floor Check ───────────────────────
-        probabilistic = [
-            s for s in signals if s.layer != LayerID.L3_LEDGER
-        ]
+        probabilistic = [s for s in signals if s.layer != LayerID.L3_LEDGER]
         if probabilistic and all(s.score < self._confidence_floor for s in probabilistic):
             logger.warning(
-                "⚠️ META-ARBITER: ABSTAIN — All probabilistic layers below "
-                "confidence floor (%.2f).",
+                "⚠️ META-ARBITER: ABSTAIN — All probabilistic layers below confidence floor (%.2f).",
                 self._confidence_floor,
             )
             return ArbiterVerdict(
@@ -245,8 +248,7 @@ class MetaArbiter:
             resolution = Resolution.CONFLICT
             winning = None
             conflict_desc = "; ".join(
-                f"{c.layer_a.value}↔{c.layer_b.value}={c.divergence:.2f}"
-                for c in conflicts
+                f"{c.layer_a.value}↔{c.layer_b.value}={c.divergence:.2f}" for c in conflicts
             )
             reasoning = (
                 f"Irreconcilable conflict detected: [{conflict_desc}]. "
@@ -294,13 +296,11 @@ class MetaArbiter:
 
     # ─── Internal Mechanics ───────────────────────────────────────
 
-    def _detect_conflicts(
-        self, signals: list[LayerSignal]
-    ) -> list[ConflictPair]:
+    def _detect_conflicts(self, signals: list[LayerSignal]) -> list[ConflictPair]:
         """Pairwise divergence detection among probabilistic layers."""
         conflicts: list[ConflictPair] = []
         for i, a in enumerate(signals):
-            for b in signals[i + 1:]:
+            for b in signals[i + 1 :]:
                 divergence = abs(a.score - b.score)
                 if divergence > self._conflict_threshold:
                     conflicts.append(
@@ -309,8 +309,7 @@ class MetaArbiter:
                             layer_b=b.layer,
                             divergence=divergence,
                             description=(
-                                f"{a.layer.value}({a.score:.3f}) vs "
-                                f"{b.layer.value}({b.score:.3f})"
+                                f"{a.layer.value}({a.score:.3f}) vs {b.layer.value}({b.score:.3f})"
                             ),
                         )
                     )

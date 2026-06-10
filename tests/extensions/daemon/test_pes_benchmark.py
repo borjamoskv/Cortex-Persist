@@ -154,9 +154,9 @@ async def test_event_storm():
         tasks.append(runtime._handle_telemetry_event({"cpu_usage": 10}))
 
     await asyncio.gather(*tasks)
+    elapsed = time.monotonic() - start
     # Throughput must be high, but allow tolerance for high-density parallel test environments
     assert elapsed < 10.0
-
 
 
 @pytest.mark.asyncio

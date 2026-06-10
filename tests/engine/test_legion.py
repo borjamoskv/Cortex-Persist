@@ -63,7 +63,6 @@ async def test_async_signal_bus():
     assert signals[1].status == "VOID"
 
 
-
 @pytest.mark.asyncio
 async def test_swarm_agent_run():
     """Validates SwarmAgent execution loop and error handling."""

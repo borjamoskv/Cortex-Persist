@@ -13,6 +13,7 @@ class BinaryProtocol(ABC):
     Abstract interface for pluggable binary protocols.
     Handles challenge generation and client action/state processing.
     """
+
     @abstractmethod
     def get_challenge(self) -> bytes:
         """Generate the initial challenge handshake bytes."""
@@ -30,16 +31,17 @@ class GenesisProtocol(BinaryProtocol):
     """
     Mutant binary protocol for the Genesis Tool Synthesis Benchmark.
     """
+
     def __init__(self, flag: bytes, seed: int | None = None):
         self.rng = random.Random(seed)
         self.flag = flag
-        self.endianness = self.rng.choice(['>', '<'])
+        self.endianness = self.rng.choice([">", "<"])
         self.xor_mask = self.rng.randint(1, 255)
         self.nonce = self.rng.randbytes(32)
         self.state = "CHALLENGE"  # CHALLENGE -> EXPECTING_RESPONSE -> DONE
 
     def get_challenge(self) -> bytes:
-        endian_char = b'B' if self.endianness == '>' else b'L'
+        endian_char = b"B" if self.endianness == ">" else b"L"
         return self.nonce + endian_char
 
     def handle_message(self, data: bytes) -> tuple[bytes, float, bool, dict[str, Any]]:
@@ -66,8 +68,9 @@ class GenesisProtocol(BinaryProtocol):
         obfuscated_flag = bytes([b ^ self.xor_mask for b in self.flag])
         header = struct.pack(f"{self.endianness}I", len(obfuscated_flag))
         self.state = "DONE"
-        return header + obfuscated_flag, 100.0, True, {
-            "success": True,
-            "endianness": self.endianness,
-            "xor_mask": self.xor_mask
-        }
+        return (
+            header + obfuscated_flag,
+            100.0,
+            True,
+            {"success": True, "endianness": self.endianness, "xor_mask": self.xor_mask},
+        )

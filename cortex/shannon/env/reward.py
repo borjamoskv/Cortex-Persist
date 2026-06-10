@@ -1,6 +1,7 @@
 # cortex/shannon/env/reward.py
 # [C5-REAL] Exergy-Maximized
 
+
 def calculate_step_reward(status: str, steps: int) -> float:
     """
     Standard reward calculation for binary protocol steps.

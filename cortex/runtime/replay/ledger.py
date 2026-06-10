@@ -4,7 +4,7 @@ from typing import Any
 
 class EventLedger:
     """Fuente única de verdad replayable. Almacena mutaciones en orden causal."""
-    
+
     def __init__(self):
         self.events = []
 

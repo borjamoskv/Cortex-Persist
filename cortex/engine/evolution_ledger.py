@@ -55,12 +55,14 @@ class ControlVector:
     cpu_load: float
 
     def to_bytes(self) -> bytes:
-        return struct.pack("dddd", self.queue_depth, self.error_rate,
-                           self.causal_entropy, self.cpu_load)
+        return struct.pack(
+            "dddd", self.queue_depth, self.error_rate, self.causal_entropy, self.cpu_load
+        )
 
     def magnitude(self) -> float:
-        return (self.queue_depth**2 + self.error_rate**2 +
-                self.causal_entropy**2 + self.cpu_load**2) ** 0.5
+        return (
+            self.queue_depth**2 + self.error_rate**2 + self.causal_entropy**2 + self.cpu_load**2
+        ) ** 0.5
 
     def delta(self, other: ControlVector) -> ControlVector:
         return ControlVector(
@@ -134,6 +136,7 @@ class MutationRecord:
 
 class ReplayVerificationError(Exception):
     """Hash chain integrity violation during replay."""
+
     pass
 
 
@@ -142,8 +145,7 @@ class ReplayVerificationError(Exception):
 
 def _canonical_json(obj: Any) -> str:
     """Deterministic JSON — matches cortex.utils.canonical.canonical_json."""
-    return json.dumps(obj, sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=True, default=str)
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
 
 
 def _compute_mutation_hash(
@@ -155,13 +157,12 @@ def _compute_mutation_hash(
     source: str,
 ) -> str:
     """Compute SHA-256 hash for a mutation record.
-    
+
     Format: v1\x00{prev}\x00{seq}\x00{agent}\x00{ts}\x00{vector_bytes_hex}\x00{source}
     """
     vec_hex = vector_after.to_bytes().hex()
     h_input = (
-        f"v1\x00{prev_hash}\x00{sequence}\x00{agent_idx}\x00"
-        f"{timestamp}\x00{vec_hex}\x00{source}"
+        f"v1\x00{prev_hash}\x00{sequence}\x00{agent_idx}\x00{timestamp}\x00{vec_hex}\x00{source}"
     )
     return hashlib.sha256(h_input.encode("utf-8")).hexdigest()
 
@@ -195,7 +196,10 @@ class EvolutionLedger:
         if log_path is None:
             log_path = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "..", "..", "cortex-core", "evolution_ledger.jsonl",
+                "..",
+                "..",
+                "cortex-core",
+                "evolution_ledger.jsonl",
             )
         self._log_path = Path(log_path)
         self._log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -300,7 +304,10 @@ class EvolutionLedger:
 
         logger.debug(
             "EVO-LEDGER seq=%d agent=%d hash=%s…%s",
-            self._sequence, agent_idx, new_hash[:8], new_hash[-4:]
+            self._sequence,
+            agent_idx,
+            new_hash[:8],
+            new_hash[-4:],
         )
         return record
 
@@ -326,9 +333,7 @@ class EvolutionLedger:
                     payload = json.loads(line)
                     record = MutationRecord.from_payload(payload)
                 except (json.JSONDecodeError, KeyError, TypeError) as e:
-                    raise ReplayVerificationError(
-                        f"Line {line_num}: corrupt record: {e}"
-                    ) from e
+                    raise ReplayVerificationError(f"Line {line_num}: corrupt record: {e}") from e
 
                 if verify:
                     expected_seq += 1
@@ -390,18 +395,20 @@ class EvolutionLedger:
         trajectory = []
         for record in self.replay(verify=False):
             if record.performance_delta is not None:
-                trajectory.append({
-                    "seq": record.sequence,
-                    "ts": record.timestamp,
-                    "agent_idx": record.agent_idx,
-                    "perf_delta": record.performance_delta,
-                    "vector_magnitude": record.vector_after.magnitude(),
-                })
+                trajectory.append(
+                    {
+                        "seq": record.sequence,
+                        "ts": record.timestamp,
+                        "agent_idx": record.agent_idx,
+                        "perf_delta": record.performance_delta,
+                        "vector_magnitude": record.vector_after.magnitude(),
+                    }
+                )
         return trajectory
 
     def compact_to_checkpoint(self) -> dict[str, Any]:
         """Generate a checkpoint summary without modifying the log.
-        
+
         Returns a snapshot that can be used to validate future replays
         without re-reading the entire log.
         """

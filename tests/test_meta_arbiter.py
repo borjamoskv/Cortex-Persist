@@ -28,6 +28,7 @@ from cortex.engine.meta_arbiter import (
 
 # ─── Fixtures ─────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def arbiter() -> MetaArbiter:
     return MetaArbiter()
@@ -49,6 +50,7 @@ def _make_signals(
 
 
 # ─── Resolution Path Tests ───────────────────────────────────────────
+
 
 class TestConsensus:
     """All layers agree within conflict threshold → CONSENSUS."""
@@ -181,6 +183,7 @@ class TestConflict:
 
 # ─── Data Structure Tests ────────────────────────────────────────────
 
+
 class TestLayerSignal:
     def test_valid_signal(self) -> None:
         s = LayerSignal(LayerID.L1_EMBEDDING, 0.75, raw_value=42)
@@ -223,6 +226,7 @@ class TestArbiterVerdict:
 
 
 # ─── Stats & Edge Cases ──────────────────────────────────────────────
+
 
 class TestStats:
     def test_stats_increment(self) -> None:

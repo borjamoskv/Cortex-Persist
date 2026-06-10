@@ -6,6 +6,7 @@ import cortex.shannon as shannon
 from cortex.shannon.env.client import HeuristicGenesisAgent
 from cortex.shannon.benchmark.runner import run_episode
 
+
 def test_genesis_gym_env_direct():
     """
     Test direct synchronous interaction with the Gymnasium-style GenesisEnv.
@@ -15,7 +16,7 @@ def test_genesis_gym_env_direct():
         # 1. Reset the environment to get the challenge
         challenge = env.reset()
         assert len(challenge) == 33
-        assert challenge[32:33] in (b'B', b'L')
+        assert challenge[32:33] in (b"B", b"L")
 
         # 2. Instantiate our heuristic agent
         agent = HeuristicGenesisAgent()
@@ -48,7 +49,7 @@ def test_genesis_gym_runner():
     assert result["total_reward"] == 100.0  # 100.0 reward for successful flag retrieval
     assert result["steps"] == 1
     assert result["info"].get("success") is True
-    
+
     # Decode the flag from the final observation
     decoded = agent.decode_flag(result["observation"])
     assert decoded is not None
@@ -69,6 +70,7 @@ def test_genesis_gym_trace():
     # 2. Test JSON Serialization/Deserialization
     json_str = trace.to_json()
     from cortex.shannon.env.trace import EpisodeTrace
+
     loaded_trace = EpisodeTrace.from_json(json_str)
     assert loaded_trace.verify() is True
     assert loaded_trace.env_id == trace.env_id
@@ -78,4 +80,3 @@ def test_genesis_gym_trace():
     # 3. Deterministic replay verification
     replay_success = shannon.replay_episode(loaded_trace)
     assert replay_success is True
-

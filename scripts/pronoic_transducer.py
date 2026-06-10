@@ -51,7 +51,6 @@ def pronoic_transduce(func: Callable[..., Any]) -> Callable[..., Any]:
 
             # Format failure trace
 
-
             # Calculate System Surprise Entropy (Mock formula based on context size)
             state_entropy = len(safe_locals) * 0.85 + len(exc_msg) * 0.05
 

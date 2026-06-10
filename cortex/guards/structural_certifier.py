@@ -47,7 +47,11 @@ class StructuralCertifier:
 
         # To match the behavior previously enforced via regex:
         # Require it to be a non-empty list containing only dicts.
-        if isinstance(parsed, list) and len(parsed) > 0 and all(isinstance(item, dict) for item in parsed):
+        if (
+            isinstance(parsed, list)
+            and len(parsed) > 0
+            and all(isinstance(item, dict) for item in parsed)
+        ):
             return StructuralGrade.ACCEPTED
 
         return StructuralGrade.WEAKLY_STRUCTURAL

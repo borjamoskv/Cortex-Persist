@@ -283,6 +283,7 @@ def test_substrate_integration():
     with tempfile.TemporaryDirectory() as tmpdir:
         # Override DB_PATH for isolation
         import ultramap as um_module
+
         original_db_path = um_module.DB_PATH
         um_module.DB_PATH = os.path.join(tmpdir, "test.db")
 
@@ -294,6 +295,7 @@ def test_substrate_integration():
                 f.write(b"\x00" * substrate.tensor_size)
             substrate._f = open(substrate.bin_path, "r+b")
             import mmap
+
             substrate._mmap = mmap.mmap(substrate._f.fileno(), substrate.tensor_size)
             substrate._buffer = memoryview(substrate._mmap)
 
@@ -307,8 +309,12 @@ def test_substrate_integration():
 
             # Update control vector — this should emit a ledger event
             success = substrate.update_control_vector(
-                0, queue_depth=15.0, error_rate=0.03, causal_entropy=0.12, cpu_load=0.55,
-                source="integration_test"
+                0,
+                queue_depth=15.0,
+                error_rate=0.03,
+                causal_entropy=0.12,
+                cpu_load=0.55,
+                source="integration_test",
             )
             assert success
 

@@ -13,17 +13,8 @@ from cortex.extensions.nous.sql_synthesizer import SQLSynthesizer
 
 logger = logging.getLogger(__name__)
 
-class SemanticDriftGuard:
-    def validate(self, ast: NousAST) -> bool:
-        return True
+from cortex.extensions.nous.guards import CapabilityGuard, InvariantGuard, SemanticDriftGuard
 
-class CapabilityGuard:
-    def validate(self, ast: NousAST) -> bool:
-        return True
-
-class InvariantGuard:
-    def validate(self, ast: NousAST) -> bool:
-        return True
 
 class NousRuntime:
     def __init__(self, engine: CortexEngine):
@@ -59,9 +50,9 @@ class NousRuntime:
         """
         await self._run_guards(ast)
         logger.warning("⚠️ [NOUS] EXECUTING REAL MIGRATION: %s", ast.metadata.version)
-        
+
         operations = SQLSynthesizer.synthesize(ast)
-        
+
         async with self.engine.transaction() as tx:
             for op in operations:
                 logger.debug("Executing: %s", op.sql_up)

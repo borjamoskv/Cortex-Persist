@@ -16,6 +16,7 @@ class AsyncEnvRunner:
     Background event loop runner to execute asynchronous socket and server
     operations safely from a synchronous interface.
     """
+
     def __init__(self):
         self.loop = asyncio.new_event_loop()
         self.thread = threading.Thread(target=self._run_loop, daemon=True)
@@ -39,20 +40,21 @@ class GenesisEnv(BinaryEnv):
     Gymnasium-style environment wrapping the MutantServer with a GenesisProtocol.
     Communication happens over a real TCP loopback interface.
     """
+
     def __init__(self, host: str = "127.0.0.1", flag: bytes | None = None, seed: int | None = None):
         self.host = host
         self.seed = seed
         self.rng = random.Random(seed)
-        
+
         if flag is not None:
             self.flag = flag
         else:
             if seed is not None:
-                flag_hex = f"{self.rng.randint(0, 0xffffffffffffffff):016x}"
+                flag_hex = f"{self.rng.randint(0, 0xFFFFFFFFFFFFFFFF):016x}"
                 self.flag = f"CORTEX_GENESIS_FLAG_{flag_hex}".encode()
             else:
                 self.flag = f"CORTEX_GENESIS_FLAG_{secrets.token_hex(8)}".encode()
-        
+
         self.server: MutantServer | None = None
         self.reader: asyncio.StreamReader | None = None
         self.writer: asyncio.StreamWriter | None = None
@@ -84,7 +86,7 @@ class GenesisEnv(BinaryEnv):
             # Read response (the server sends 4 bytes length then obfuscated flag, or an error string)
             # In general, read whatever bytes are available up to a chunk
             response = await asyncio.wait_for(self.reader.read(1024), timeout=5.0)
-            
+
             # Simple heuristic reward/info parser based on response headers
             done = True
             reward = -1.0
@@ -102,12 +104,7 @@ class GenesisEnv(BinaryEnv):
                 reward = 100.0
                 info["success"] = True
 
-            return StepResult(
-                observation=response,
-                reward=reward,
-                done=done,
-                info=info
-            )
+            return StepResult(observation=response, reward=reward, done=done, info=info)
         except Exception as e:
             return StepResult(b"", -1.0, True, {"error": str(e)})
 

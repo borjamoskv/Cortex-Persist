@@ -33,6 +33,7 @@ def sample_episode_trace() -> EpisodeTrace:
     ]
     # Compute valid checksum
     from cortex.shannon.env.trace import compute_trace_checksum
+
     checksum = compute_trace_checksum("genesis-v1", "000000", steps)
     return EpisodeTrace(
         env_id="genesis-v1",
@@ -47,6 +48,7 @@ def sample_episode_trace() -> EpisodeTrace:
 @pytest.fixture
 def sample_ledger_replay() -> list[dict]:
     import copy
+
     # Correct format matching the trace
     data = [
         {"env_id": "genesis-v1", "seed": 42},  # Config header
@@ -58,7 +60,7 @@ def sample_ledger_replay() -> list[dict]:
                 "observation_hex": "010203",
                 "reward": 1.0,
                 "done": False,
-            }
+            },
         },
         {
             "action": "SHANNON_STEP",
@@ -68,8 +70,8 @@ def sample_ledger_replay() -> list[dict]:
                 "observation_hex": "040506",
                 "reward": 100.0,
                 "done": True,
-            }
-        }
+            },
+        },
     ]
     return copy.deepcopy(data)
 
@@ -157,7 +159,7 @@ def test_verifier_coordinates_perfect(sample_ledger_replay, sample_episode_trace
     assert verdict.coordinates.partial == 0.0
     assert verdict.coordinates.entropy == 0.0
     assert verdict.coordinates.composite == 0.0
-    
+
     # Dict representation validation
     v_dict = verdict.to_dict()
     assert "coordinates" in v_dict
@@ -198,4 +200,3 @@ def test_verifier_coordinates_length_mismatch(sample_ledger_replay, sample_episo
     # 1 - min(2, 1) / max(2, 1) = 0.5
     assert verdict.coordinates.structural == 0.5
     assert verdict.coordinates.composite > 0.0
-

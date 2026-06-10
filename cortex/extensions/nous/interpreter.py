@@ -20,8 +20,10 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class NousIntentAST:
     """The Abstract Semantic Tree of a NOUS program."""
+
     def __init__(self, action: str, target: str, constraints: list[str], expected_state: str):
         self.action = action
         self.target = target
@@ -33,19 +35,20 @@ class NousIntentAST:
             "action": self.action,
             "target": self.target,
             "constraints": self.constraints,
-            "expected_state": self.expected_state
+            "expected_state": self.expected_state,
         }
+
 
 class NousCompiler:
     """Compiles Natural Language into deterministic NOUS Intent ASTs."""
-    
+
     async def compile(self, source_code: str) -> NousIntentAST:
         """
         In a full implementation, this calls an LLM (e.g., Gemini 3.1 Pro)
         with structured JSON output to parse the intent.
         """
         logger.info(f"NOUS Compiler analyzing: '{source_code}'")
-        
+
         # SIMULATED JIT COMPILATION (LLM Mock)
         # The AI transforms "Asegúrate de que la base de datos está limpia antes del deploy"
         # into a deterministic executable AST.
@@ -53,13 +56,15 @@ class NousCompiler:
             action="verify_state_and_purge",
             target="database:primary",
             constraints=["preserve_ledger", "dry_run_first"],
-            expected_state="tables_empty_except_audit"
+            expected_state="tables_empty_except_audit",
         )
+
 
 class NousRuntime:
     """
     Executes NOUS ASTs through the CORTEX Saga pattern (AX-045).
     """
+
     def __init__(self, tenant_id: str):
         self.tenant_id = tenant_id
 
@@ -82,41 +87,42 @@ class NousRuntime:
         The main interpreter loop for the NOUS language.
         """
         compiler = NousCompiler()
-        
+
         try:
             # 1. AI Compilation
             ast = await compiler.compile(source_code)
-            
+
             # 2. CORTEX-TAINT Generation
             taint = self._generate_taint(ast)
-            
+
             # 3. Deterministic Guard Execution (SAGA)
             await self._guard_check(ast)
-            
+
             # 4. Persistence / Execution
             logger.info(f"Executing with Taint: {taint}")
             return {
                 "status": "C5-REAL_SUCCESS",
                 "taint_signature": taint,
                 "ast": ast.to_dict(),
-                "side_effects": "Simulated deterministic state mutation."
+                "side_effects": "Simulated deterministic state mutation.",
             }
-            
+
         except Exception as e:
             logger.error(f"NOUS Runtime Panic: {str(e)}")
             return {"status": "SAGA_REJECTED", "error": str(e)}
 
+
 # --- EXECUTION ---
 if __name__ == "__main__":
     import asyncio
-    
+
     async def run_nous():
         runtime = NousRuntime(tenant_id="cortex-master")
         script = "Ensure the primary database is wiped, but strictly preserve the audit ledger."
-        
+
         print(f"\\n[NOUS SCRIPT] {script}")
         result = await runtime.execute(script)
         print("\\n[EXECUTION RESULT]")
         print(json.dumps(result, indent=2))
-        
+
     asyncio.run(run_nous())

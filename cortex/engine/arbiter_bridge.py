@@ -52,10 +52,10 @@ logger = logging.getLogger("cortex.engine.arbiter_bridge")
 
 # Fused score ranges → severity classification
 SEVERITY_THRESHOLDS: Final[list[tuple[float, Severity]]] = [
-    (0.25, Severity.CRITICAL),   # fused < 0.25 → catastrophic uncertainty
-    (0.50, Severity.HIGH),       # fused < 0.50 → significant divergence
-    (0.75, Severity.MEDIUM),     # fused < 0.75 → moderate concern
-    (1.01, Severity.LOW),        # fused >= 0.75 → routine
+    (0.25, Severity.CRITICAL),  # fused < 0.25 → catastrophic uncertainty
+    (0.50, Severity.HIGH),  # fused < 0.50 → significant divergence
+    (0.75, Severity.MEDIUM),  # fused < 0.75 → moderate concern
+    (1.01, Severity.LOW),  # fused >= 0.75 → routine
 ]
 
 # Resolution → blast_radius mapping
@@ -63,16 +63,18 @@ RESOLUTION_BLAST_RADIUS: Final[dict[Resolution, int]] = {
     Resolution.CONSENSUS: 0,
     Resolution.LEDGER_OVERRIDE: 3,  # Ledger veto = catastrophic scope
     Resolution.WEIGHTED_FUSION: 2,  # Fusion implies cross-layer impact
-    Resolution.ABSTAIN: 1,          # Unknown scope
-    Resolution.CONFLICT: 3,         # Irreconcilable = maximum blast
+    Resolution.ABSTAIN: 1,  # Unknown scope
+    Resolution.CONFLICT: 3,  # Irreconcilable = maximum blast
 }
 
 
 # ─── Bridge Output ───────────────────────────────────────────────────────
 
+
 @dataclass(frozen=True)
 class BridgeResult:
     """Complete bridge output: routing decision + arbiter provenance."""
+
     decision: RoutingDecision
     verdict: ArbiterVerdict
     fallback_used: bool
@@ -80,6 +82,7 @@ class BridgeResult:
 
 
 # ─── Arbiter-Router Bridge ───────────────────────────────────────────────
+
 
 class ArbiterBridge:
     """
@@ -200,8 +203,7 @@ class ArbiterBridge:
             "total_bridge_routes": self._total_routes,
             "total_fallbacks": self._total_fallbacks,
             "fallback_rate": (
-                self._total_fallbacks / self._total_routes
-                if self._total_routes > 0 else 0.0
+                self._total_fallbacks / self._total_routes if self._total_routes > 0 else 0.0
             ),
         }
 
@@ -221,9 +223,7 @@ class ArbiterBridge:
             severity = self._score_to_severity(verdict.fused_score)
 
         # Blast radius from resolution type
-        blast_radius = RESOLUTION_BLAST_RADIUS.get(
-            verdict.resolution, 1
-        )
+        blast_radius = RESOLUTION_BLAST_RADIUS.get(verdict.resolution, 1)
 
         # Information state from layer presence
         has_l1 = LayerID.L1_EMBEDDING.value in verdict.layer_signals
@@ -231,9 +231,9 @@ class ArbiterBridge:
         l3_score = verdict.layer_signals.get(LayerID.L3_LEDGER.value, 1.0)
 
         info_state = InformationState(
-            exists_internally=has_l1,         # Embedding found = info exists
+            exists_internally=has_l1,  # Embedding found = info exists
             is_reliable=has_l3 and l3_score >= 0.5,  # Ledger verified
-            is_current=verdict.fused_score >= 0.50,   # Recency proxy
+            is_current=verdict.fused_score >= 0.50,  # Recency proxy
         )
 
         return RoutingContext(
@@ -270,9 +270,9 @@ class ArbiterBridge:
         l4_score = verdict.layer_signals.get(LayerID.L4_RL.value, 0.5)
 
         signal_vec = SignalVector(
-            ast_complexity=l2_score * 100,      # Topology as complexity proxy
+            ast_complexity=l2_score * 100,  # Topology as complexity proxy
             kl_instability=1.0 - verdict.fused_score,  # Inverse fused = instability
-            entropy_score=1.0 - l1_score,       # Inverse embedding = entropy
+            entropy_score=1.0 - l1_score,  # Inverse embedding = entropy
             cyclomatic_depth=len(verdict.conflicts) * 10.0,
             event_rate=l4_score,
         )
@@ -280,7 +280,8 @@ class ArbiterBridge:
         # Map CognitiveMode → ModelType for trajectory
         action = (
             "gemini-3.1-pro"
-            if decision.mode in (CognitiveMode.DEEP_THINK, CognitiveMode.ULTRA_THINK, CognitiveMode.DEEP_RESEARCH)
+            if decision.mode
+            in (CognitiveMode.DEEP_THINK, CognitiveMode.ULTRA_THINK, CognitiveMode.DEEP_RESEARCH)
             else "gemini-3.5-flash"
         )
 

@@ -125,7 +125,7 @@ class GarbageCollector:
 
         # 3. Consensus structure and referencing tables structural deletion
         placeholders = ",".join(["?"] * len(fact_ids))
-        
+
         if "consensus_votes_v2" in existing_tables:
             await conn.execute(
                 f"DELETE FROM consensus_votes_v2 WHERE fact_id IN ({placeholders})", fact_ids
@@ -151,9 +151,7 @@ class GarbageCollector:
                 f"DELETE FROM entity_relations WHERE source_fact_id IN ({placeholders})", fact_ids
             )
         if "fact_tags" in existing_tables:
-            await conn.execute(
-                f"DELETE FROM fact_tags WHERE fact_id IN ({placeholders})", fact_ids
-            )
+            await conn.execute(f"DELETE FROM fact_tags WHERE fact_id IN ({placeholders})", fact_ids)
 
         # 4. Final physical deletion of the fact itself
         await conn.execute(f"DELETE FROM facts WHERE id IN ({placeholders})", fact_ids)

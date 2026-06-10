@@ -3,9 +3,8 @@
 
 from .env.genesis_env import GenesisEnv
 
-ENV_REGISTRY = {
-    "genesis-v1": GenesisEnv
-}
+ENV_REGISTRY = {"genesis-v1": GenesisEnv}
+
 
 def make(env_id: str, **kwargs):
     """

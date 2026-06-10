@@ -149,7 +149,9 @@ def run_adaptive(
             current_fitness = child_fitness
         fitness_history.append(current_fitness)
         latest_log = child.lineage.mutation_log[-1] if child.lineage.mutation_log else ""
-        meta_counts.append(1 if "type=meta_mutation" in latest_log or latest_log.startswith("META:") else 0)
+        meta_counts.append(
+            1 if "type=meta_mutation" in latest_log or latest_log.startswith("META:") else 0
+        )
         drift = max(abs(child.mutation_rates[mt] - pre_rates.get(mt, 0.0)) for mt in MutationType)
         rate_drifts.append(drift)
     return fitness_history, meta_counts, rate_drifts

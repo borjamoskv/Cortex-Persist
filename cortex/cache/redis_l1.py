@@ -62,7 +62,10 @@ class RedisL1Cache:
 
         if self._client is None and HAS_REDIS:
             # Skip Redis connection in standard test suites unless explicitly enabled
-            if os.environ.get("CORTEX_TESTING") == "1" and os.environ.get("CORTEX_TEST_REDIS") != "1":
+            if (
+                os.environ.get("CORTEX_TESTING") == "1"
+                and os.environ.get("CORTEX_TEST_REDIS") != "1"
+            ):
                 self._client = None
             else:
                 try:

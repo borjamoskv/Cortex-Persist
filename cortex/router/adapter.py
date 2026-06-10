@@ -38,7 +38,9 @@ logger = logging.getLogger("cortex.router.adapter")
 
 # ─── Constants ────────────────────────────────────────────────────────────
 
-_DEFAULT_YAML_PATH = Path.home() / ".gemini/config/skills/Exergy-Engine-OMEGA/cognitive_routing_matrix.yaml"
+_DEFAULT_YAML_PATH = (
+    Path.home() / ".gemini/config/skills/Exergy-Engine-OMEGA/cognitive_routing_matrix.yaml"
+)
 
 _SUPPORTED_SCHEMA_VERSIONS = frozenset({"2026.2"})
 
@@ -153,8 +155,7 @@ class ExergyConfigAdapter:
         version = raw.get("schema_version", "")
         if version not in _SUPPORTED_SCHEMA_VERSIONS:
             raise AdapterSchemaError(
-                f"Unsupported schema_version '{version}'. "
-                f"Supported: {_SUPPORTED_SCHEMA_VERSIONS}"
+                f"Unsupported schema_version '{version}'. Supported: {_SUPPORTED_SCHEMA_VERSIONS}"
             )
 
         rules = raw.get("routing_rules")
@@ -270,9 +271,7 @@ class ExergyConfigAdapter:
         logger.warning("[ADAPTER] No gate matched — falling back to contract.resolve()")
         return contract_resolve(ctx)
 
-    def _cross_validate(
-        self, ctx: RoutingContext, adapter_decision: RoutingDecision
-    ) -> None:
+    def _cross_validate(self, ctx: RoutingContext, adapter_decision: RoutingDecision) -> None:
         """Verify adapter decision matches contract.resolve() on mode and gate_id.
 
         Raises AdapterContractDrift if they diverge.

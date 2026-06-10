@@ -230,8 +230,7 @@ def move_cmd(app_name: str, x: int, y: int):
     async def _run():
         m = MaestroUI(engine=get_engine())
         await _run_window_op(
-            f"Ventana movida a ({x}, {y})",
-            m.move_window(AppTarget(name=app_name), x, y)
+            f"Ventana movida a ({x}, {y})", m.move_window(AppTarget(name=app_name), x, y)
         )
 
     asyncio.run(_run())
@@ -248,7 +247,7 @@ def resize_cmd(app_name: str, width: int, height: int):
         m = MaestroUI(engine=get_engine())
         await _run_window_op(
             f"Ventana redimensionada a {width}×{height}",
-            m.resize_window(AppTarget(name=app_name), width, height)
+            m.resize_window(AppTarget(name=app_name), width, height),
         )
 
     asyncio.run(_run())
@@ -261,10 +260,7 @@ def minimize_cmd(app_name: str):
 
     async def _run():
         m = MaestroUI(engine=get_engine())
-        await _run_window_op(
-            f"{app_name} minimizado",
-            m.minimize_window(AppTarget(name=app_name))
-        )
+        await _run_window_op(f"{app_name} minimizado", m.minimize_window(AppTarget(name=app_name)))
 
     asyncio.run(_run())
 
@@ -277,8 +273,7 @@ def fullscreen_cmd(app_name: str):
     async def _run():
         m = MaestroUI(engine=get_engine())
         await _run_window_op(
-            f"{app_name} pantalla completa alternada",
-            m.fullscreen_window(AppTarget(name=app_name))
+            f"{app_name} pantalla completa alternada", m.fullscreen_window(AppTarget(name=app_name))
         )
 
     asyncio.run(_run())

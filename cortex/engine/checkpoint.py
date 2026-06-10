@@ -9,6 +9,7 @@ computing a Merkle Root for each block, we enable:
 2. Fast-forwarding state without full replay verification.
 3. Cryptographic proofs of inclusion for individual mutations (O(log N)).
 """
+
 import json
 import logging
 from collections.abc import Iterator
@@ -19,6 +20,7 @@ from cortex.engine.evolution_ledger import EvolutionLedger
 from cortex.ledger.merkle import MerkleTree
 
 logger = logging.getLogger("cortex.checkpoint")
+
 
 @dataclass
 class Checkpoint:
@@ -53,7 +55,7 @@ class Checkpoint:
 
 class CheckpointManager:
     """Manages Merkle checkpoints for an EvolutionLedger."""
-    
+
     def __init__(self, ledger: EvolutionLedger, chunk_size: int = 1000):
         self.ledger = ledger
         self.chunk_size = chunk_size
@@ -69,20 +71,20 @@ class CheckpointManager:
                 start_seq = last_cp.sequence_end
 
         mode = "w" if force_rebuild else "a"
-        
+
         current_chunk_hashes = []
         chunk_start_seq = start_seq + 1
         last_hash = EvolutionLedger.GENESIS_HASH
-        
+
         try:
             with open(self._index_path, mode) as out_f:
                 for record in self.ledger.replay(verify=False):
                     if record.sequence <= start_seq:
                         continue
-                    
+
                     current_chunk_hashes.append(record.hash)
                     last_hash = record.hash
-                    
+
                     if len(current_chunk_hashes) == self.chunk_size:
                         tree = MerkleTree(current_chunk_hashes)
                         cp = Checkpoint(
@@ -95,7 +97,7 @@ class CheckpointManager:
                         )
                         out_f.write(json.dumps(cp.to_payload()) + "\n")
                         out_f.flush()
-                        
+
                         current_chunk_hashes = []
                         chunk_start_seq = record.sequence + 1
 
@@ -112,7 +114,7 @@ class CheckpointManager:
                     )
                     out_f.write(json.dumps(cp.to_payload()) + "\n")
                     out_f.flush()
-                    
+
         except Exception as e:
             logger.error(f"Failed to generate index: {e}")
 
@@ -120,7 +122,7 @@ class CheckpointManager:
         """Iterate over all stored checkpoints."""
         if not self._index_path.exists():
             return
-            
+
         with open(self._index_path) as f:
             for line in f:
                 line = line.strip()
@@ -136,13 +138,14 @@ class CheckpointManager:
 
     def verify_ledger_with_checkpoints(self) -> dict[str, Any]:
         """Verify the ledger using the chunked Merkle roots.
-        
+
         This enables validating blocks independently. For a full check,
         it still reads the records, but groups them by checkpoint.
         """
         import time
+
         start = time.monotonic()
-        
+
         checkpoints = list(self.iter_checkpoints())
         if not checkpoints:
             return {"status": "NO_INDEX", "verified_chunks": 0}
@@ -150,7 +153,7 @@ class CheckpointManager:
         cp_idx = 0
         current_cp = checkpoints[cp_idx]
         current_chunk_hashes = []
-        
+
         errors = []
         records_read = 0
 
@@ -159,15 +162,17 @@ class CheckpointManager:
             records_read += 1
             if record.sequence < current_cp.sequence_start:
                 continue
-                
+
             current_chunk_hashes.append(record.hash)
-            
+
             if record.sequence == current_cp.sequence_end:
                 # Verify chunk Merkle Root
                 tree = MerkleTree(current_chunk_hashes)
                 if tree.root_hash != current_cp.merkle_root:
-                    errors.append(f"Merkle Root mismatch at chunk {current_cp.sequence_start}-{current_cp.sequence_end}")
-                
+                    errors.append(
+                        f"Merkle Root mismatch at chunk {current_cp.sequence_start}-{current_cp.sequence_end}"
+                    )
+
                 cp_idx += 1
                 if cp_idx < len(checkpoints):
                     current_cp = checkpoints[cp_idx]
@@ -176,11 +181,11 @@ class CheckpointManager:
                     break
 
         elapsed = time.monotonic() - start
-        
+
         return {
             "status": "VALID" if not errors else "CORRUPTED",
             "verified_chunks": len(checkpoints),
             "records_read": records_read,
             "errors": errors,
-            "elapsed_seconds": round(elapsed, 4)
+            "elapsed_seconds": round(elapsed, 4),
         }
