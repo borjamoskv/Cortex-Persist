@@ -50,6 +50,18 @@ class ConnectionMixin:
             conn = await self._get_or_create_conn()
             yield conn
 
+    @asynccontextmanager
+    async def transaction(self) -> AsyncIterator[aiosqlite.Connection]:
+        """Provides a transactional context, committing on success or rolling back on error."""
+        async with self.session() as conn:
+            try:
+                await conn.execute("BEGIN")
+                yield conn
+                await conn.commit()
+            except Exception:
+                await conn.rollback()
+                raise
+
     async def get_conn(self) -> aiosqlite.Connection:
         """Returns the async database connection.
         DEPRECATED: Use 'async with engine.session() as conn:' instead.

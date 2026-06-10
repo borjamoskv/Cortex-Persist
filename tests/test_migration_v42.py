@@ -9,13 +9,15 @@ from cortex.extensions.nous.models import (
     NousMetadata,
     NousOperation,
     NousInvariant,
-    MigrationTaint
+    MigrationTaint,
 )
 
+
 @pytest.mark.asyncio
-async def test_migration_v42_dry_run_and_taint():
+async def test_migration_v42_dry_run_and_taint(tmp_path):
     # Setup Engine and Runtime
-    engine = CortexEngine()
+    db_path = str(tmp_path / "test_migration.db")
+    engine = CortexEngine(db_path=db_path)
     runtime = NousRuntime(engine)
 
     # 1. Define Migration AST
@@ -31,53 +33,31 @@ async def test_migration_v42_dry_run_and_taint():
                 type="create_table",
                 target="nexus_ledger",
                 sql="CREATE TABLE nexus_ledger (id UUID PRIMARY KEY, taint_hash TEXT);",
-                rollback_sql="DROP TABLE nexus_ledger;"
+                rollback_sql="DROP TABLE nexus_ledger;",
             )
         ],
-        invariants=[
-            NousInvariant(
-                name="no_data_loss",
-                condition="true",
-                action="halt"
-            )
-        ]
+        invariants=[NousInvariant(name="no_data_loss", condition="true", action="halt")],
     )
 
     # 2. Execute Dry Run
     dry_run_result = await runtime.dry_run(ast)
-    
+
     # Verify Dry Run
     assert dry_run_result.ok is True, "Dry run should pass"
     assert "syntax_check" in dry_run_result.guards
     assert dry_run_result.guards["rollback_check"].passed is True
     assert dry_run_result.estimated_data_loss_risk == "none"
 
-    # 3. Verify Taint Generation (Simulated as it would be in a CI pipeline)
-    # The taint locks the migration state in C5-REAL
-    manifest_str = ast.model_dump_json()
-    manifest_hash = hashlib.sha256(manifest_str.encode()).hexdigest()
-    
-    dry_run_str = dry_run_result.model_dump_json()
-    dry_run_hash = hashlib.sha256(dry_run_str.encode()).hexdigest()
-    
-    predicted_state_hash = hashlib.sha256(
-        str(dry_run_result.predicted_state).encode()
-    ).hexdigest()
+    # 3. Execute Real Migration and verify Ledger
+    await runtime.execute(ast, dry_run_result)
 
-    taint = MigrationTaint(
-        version=ast.metadata.version,
-        actor=ast.metadata.author,
-        manifest_hash=manifest_hash,
-        ast_hash=manifest_hash, # Using manifest hash for AST as well
-        dry_run_hash=dry_run_hash,
-        predicted_state_hash=predicted_state_hash,
-        timestamp=datetime.now(timezone.utc),
-        signature="ed25519-simulated-signature-c5-real"
-    )
+    # 4. Assert Ledger Integrity
+    assert len(runtime.ledger.chain) == 2, "Genesis block + 1 mutation"
 
-    # Assert taint integrity
-    assert taint.version == "v42"
-    assert taint.actor == "borjamoskv"
-    assert len(taint.manifest_hash) == 64
-    assert len(taint.dry_run_hash) == 64
-    assert taint.signature.startswith("ed25519")
+    mutation_entry = runtime.ledger.chain[-1]
+    assert "Migration v42 by borjamoskv. Taint:" in mutation_entry.intent_description
+    assert mutation_entry.applied_ast[0]["type"] == "create_table"
+    assert mutation_entry.applied_ast[0]["target"] == "nexus_ledger"
+
+    # Ledger cryptographic verification
+    assert runtime.ledger.verify_chain() is True, "Ledger cryptographic chain broken"
