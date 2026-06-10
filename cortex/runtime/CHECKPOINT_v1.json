@@ -1,0 +1,27 @@
+{
+  "version": "cortex-runtime-v1",
+  "tag": "cortex-runtime-v1",
+  "tests": "24/24",
+  "core_loop": "EventBus → SystemStateVector → Supervisor → Agents → EventBus",
+  "determinism": true,
+  "hash_chain": "SHA-256 append-only causal ledger",
+  "dispatch_model": "instance-bound handlers (Python 3.14+ safe)",
+  "phase_model": "deterministic derivation from numeric state",
+  "components": {
+    "system_state.py": "Event-sourced causal state vector",
+    "orchestrator.py": "Rule-based micro-kernel controller",
+    "agents.py": "HealthMonitorAgent (daemon) + TaskWorkerAgent (reactive)",
+    "__init__.py": "Public API exports"
+  },
+  "invariants": [
+    "exergy = 1 - entropy (always)",
+    "tick is strictly monotonic",
+    "hash chain is append-only, unforkable",
+    "0 <= entropy <= 1",
+    "0 <= error_pressure <= 1",
+    "all counters >= 0",
+    "phase transitions are deterministic from numeric state"
+  ],
+  "freeze_rule": "No feature that alters SystemStateVector semantics without replay compatibility",
+  "freeze_reason": "Baseline for replay VM and divergence control"
+}

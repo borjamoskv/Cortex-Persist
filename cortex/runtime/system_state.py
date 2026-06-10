@@ -119,6 +119,16 @@ class SystemStateVector:
 
     # ── Core mutation ────────────────────────────────────────────
 
+    @classmethod
+    def bootstrap(cls) -> SystemStateVector:
+        """Bootstrap a new SystemStateVector instance."""
+        return cls()
+
+    def apply_event(self, event_type: str, source: str,
+                    payload: dict[str, Any] | None = None) -> StateEvent:
+        """Alias for apply to maintain API compatibility."""
+        return self.apply(event_type, source, payload)
+
     def apply(self, event_type: str, source: str,
               payload: dict[str, Any] | None = None) -> StateEvent:
         """Apply a causal event to the state vector.
@@ -267,6 +277,44 @@ class SystemStateVector:
     @property
     def is_healthy(self) -> bool:
         return self.phase in (SystemPhase.NOMINAL, SystemPhase.WARMING)
+
+    def hash_chain_valid(self) -> bool:
+        """Verify the integrity of the entire ledger hash chain.
+
+        Walks every event in the ledger and confirms:
+            1. Each event's hash matches its recomputed hash from prev_hash.
+            2. The chain links are contiguous (event.prev_hash == previous event.hash).
+            3. The final hash in the chain matches self.hash.
+
+        Returns True if the chain is intact, False on any break.
+        """
+        if not self._ledger:
+            return True  # Empty ledger, genesis only
+
+        expected_prev = self._genesis_hash()
+        for event in self._ledger:
+            if event.prev_hash != expected_prev:
+                logger.error(
+                    "Hash chain break at tick %d: expected prev=%s, got=%s",
+                    event.tick, expected_prev[:16], event.prev_hash[:16],
+                )
+                return False
+            recomputed = event.compute_hash(event.prev_hash)
+            if event.hash != recomputed:
+                logger.error(
+                    "Hash mismatch at tick %d: stored=%s, recomputed=%s",
+                    event.tick, event.hash[:16], recomputed[:16],
+                )
+                return False
+            expected_prev = event.hash
+
+        if self.hash != expected_prev:
+            logger.error(
+                "Final hash mismatch: state=%s, chain_tail=%s",
+                self.hash[:16], expected_prev[:16],
+            )
+            return False
+        return True
 
     def _genesis_hash(self) -> str:
         return hashlib.sha256(b"CORTEX_GENESIS_STATE_v1").hexdigest()
