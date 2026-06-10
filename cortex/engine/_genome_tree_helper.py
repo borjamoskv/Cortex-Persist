@@ -18,6 +18,8 @@ def replace_target(tree: AgentOp, old_target: str, new_target: str) -> AgentOp:
     for variant, data in tree.items():
         if variant == "Dispatch" and isinstance(data, dict):
             if data.get("target") == old_target:
+                if isinstance(new_target, dict):
+                    return new_target
                 result[variant] = {**data, "target": new_target}
             else:
                 result[variant] = data

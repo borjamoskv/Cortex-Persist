@@ -57,9 +57,11 @@ class GenomeMutator:
             mutation_type = force_type
         elif failure_trace and failure_trace.get("failed_target") and random.random() < genome.mutation_rates.get(MutationType.CAUSAL_PATCH, 0.20):
             mutation_type = MutationType.CAUSAL_PATCH
-            child.parameters["_causal_target"] = failure_trace["failed_target"]
         else:
             mutation_type = self._select_mutation_type(child)
+
+        if mutation_type == MutationType.CAUSAL_PATCH and failure_trace and failure_trace.get("failed_target"):
+            child.parameters["_causal_target"] = failure_trace["failed_target"]
 
         ast_mutation_types = {
             MutationType.SUBTREE_SWAP,
