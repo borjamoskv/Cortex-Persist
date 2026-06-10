@@ -49,4 +49,12 @@ if [ ${#PYTHON_FILES[@]} -gt 0 ]; then
     fi
 fi
 
+# ── Update Article Signatures ─────────────────────────────────
+echo "⚡ [SOVEREIGN] Updating article signatures..."
+python3 scripts/update_signatures.py
+
+if [ "$USING_STAGED" -eq 1 ]; then
+    git add src/pages/blog/*.astro 2>/dev/null || true
+fi
+
 exit 0

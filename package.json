@@ -3,9 +3,9 @@
   "type": "module",
   "version": "0.3.2b1",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "python3 scripts/update_signatures.py && astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "python3 scripts/update_signatures.py && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
