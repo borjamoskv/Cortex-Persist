@@ -72,3 +72,63 @@ No code is needed at this time."""
 
     assert "Causal Closure" in str(exc_info.value)
     assert "AX-VIII Violation" in str(exc_info.value)
+
+
+def test_causal_closure_guard_robust_json_array(closure_guard: CausalClosureGuard) -> None:
+    """A costly operation with valid JSON array of dicts or python ast literal list of dicts should pass."""
+    # 1. Standard JSON dict array
+    proposal_json = SwarmProposal(
+        agent_id="test",
+        mission_statement="test",
+        content='[{"key": "value", "nested": {"ok": true}}]',
+        token_cost=5000,
+    )
+    assert closure_guard.verify_closure(proposal_json)
+
+    # 2. Single quotes Python literal dict array (fails json.loads, passes ast.literal_eval)
+    proposal_python = SwarmProposal(
+        agent_id="test",
+        mission_statement="test",
+        content="[{'key': 'value', 'nested': {'ok': True}}]",
+        token_cost=5000,
+    )
+    assert closure_guard.verify_closure(proposal_python)
+
+    # 3. Non-dict list should fail
+    proposal_invalid = SwarmProposal(
+        agent_id="test",
+        mission_statement="test",
+        content="[1, 2, 3]",
+        token_cost=5000,
+    )
+    with pytest.raises(RuntimeError):
+        closure_guard.verify_closure(proposal_invalid)
+
+    # 4. Empty list should fail
+    proposal_empty = SwarmProposal(
+        agent_id="test",
+        mission_statement="test",
+        content="[]",
+        token_cost=5000,
+    )
+    with pytest.raises(RuntimeError):
+        closure_guard.verify_closure(proposal_empty)
+
+
+def test_causal_closure_guard_generic_code_blocks(closure_guard: CausalClosureGuard) -> None:
+    """A costly operation with any generic code block should pass."""
+    proposal_generic = SwarmProposal(
+        agent_id="test",
+        mission_statement="test",
+        content="Here is some random data:\n```\nsome raw non-highlighted text\n```",
+        token_cost=5000,
+    )
+    assert closure_guard.verify_closure(proposal_generic)
+
+    proposal_js = SwarmProposal(
+        agent_id="test",
+        mission_statement="test",
+        content="Here is some js:\n```javascript\nconsole.log(123);\n```",
+        token_cost=5000,
+    )
+    assert closure_guard.verify_closure(proposal_js)

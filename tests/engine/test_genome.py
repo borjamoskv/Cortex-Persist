@@ -61,3 +61,42 @@ def test_causal_patch_mutation_probability():
     # Since random.random() < 1.0 is always True (or rate is 1.0), this should select CAUSAL_PATCH
     child = mutator.mutate(genome, failure_trace=failure_trace)
     assert "Cond" in child.dispatch_tree
+
+
+def test_ast_mutation_fallback(monkeypatch):
+    """Verify that if cortex_rs fails or is missing, GenomeMutator falls back to Python operators."""
+    import sys
+    import types
+
+    genome = StrategyGenome(
+        name="test_fallback",
+        dispatch_tree=dispatch("target_a", {}),
+        parameters={},
+    )
+
+    mutator = GenomeMutator()
+
+    # Simulate Rust mutation failure
+    class FakeGenomeMutatorRs:
+        @staticmethod
+        def mutate_tree(*args, **kwargs):
+            raise RuntimeError("Simulated Rust failure")
+
+    fake_cortex_rs = types.ModuleType("cortex_rs")
+    fake_cortex_rs.GenomeMutatorRs = FakeGenomeMutatorRs
+
+    monkeypatch.setitem(sys.modules, "cortex_rs", fake_cortex_rs)
+
+    # Force an AST mutation type (e.g. NODE_INSERT)
+    child = mutator.mutate(genome, force_type=MutationType.NODE_INSERT)
+
+    # Check that it mutated and updated generation
+    assert child.lineage.generation == 1
+
+    # Log should indicate python fallback was called (does NOT have " [Rust]" suffix)
+    last_log = child.lineage.mutation_log[-1]
+    assert "node_insert" in last_log
+    assert "[Rust]" not in last_log
+
+    # Check that dispatch tree actually changed
+    assert child.dispatch_tree != genome.dispatch_tree

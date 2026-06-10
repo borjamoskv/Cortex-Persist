@@ -13,6 +13,8 @@ import logging
 import re
 from dataclasses import dataclass
 
+from cortex.guards.structural_certifier import StructuralCertifier, StructuralGrade
+
 logger = logging.getLogger("cortex.guards.causal_closure")
 
 
@@ -37,7 +39,7 @@ class CausalClosureGuard:
         """Detects if the content contains permanent structural artifacts."""
         # Look for code blocks indicating logic synthesis
         has_code_blocks = bool(
-            re.search(r"```(?:python|yaml|json|diff|sql)", content, re.IGNORECASE)
+            re.search(r"```\w*", content, re.IGNORECASE)
         )
 
         # Look for Ledger event payloads or Schema definitions
@@ -47,11 +49,28 @@ class CausalClosureGuard:
         # Look for rigorous proof structures (Rule R2 format)
         has_formal_proof = bool(re.search(r"Proof:\s*\{.*Base:.*\}", content, re.IGNORECASE))
 
-        # Detect a plain JSON‑array of dicts (e.g., "[{'test': True}, ...]")
+        # Detect a plain JSON-array of dicts (e.g., "[{'test': True}, ...]")
         # This matches the string produced by aggregated_payloads in Legion._crystallize
-        has_json_array = bool(
-            re.fullmatch(r"\[\s*\{.+?\}\s*(,\s*\{.+?\}\s*)*\]", content.strip(), re.DOTALL)
-        )
+        has_json_array = False
+        stripped_content = content.strip()
+        if stripped_content.startswith("[") and stripped_content.endswith("]"):
+            import json
+            import ast
+            try:
+                parsed = json.loads(stripped_content)
+                if isinstance(parsed, list) and all(isinstance(x, dict) for x in parsed) and len(parsed) > 0:
+                    has_json_array = True
+            except Exception:
+                try:
+                    parsed = ast.literal_eval(stripped_content)
+                    if isinstance(parsed, list) and all(isinstance(x, dict) for x in parsed) and len(parsed) > 0:
+                        has_json_array = True
+                except Exception:
+                    pass
+
+        # Use StructuralCertifier to validate formal JSON array of dicts
+        grade = StructuralCertifier.certify_structure(content)
+        has_valid_structure = grade == StructuralGrade.ACCEPTED
 
         return (
             has_code_blocks
@@ -59,6 +78,7 @@ class CausalClosureGuard:
             or has_schema_update
             or has_formal_proof
             or has_json_array
+            or has_valid_structure
         )
 
     def verify_closure(self, proposal: SwarmProposal) -> bool:
