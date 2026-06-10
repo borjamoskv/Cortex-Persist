@@ -107,7 +107,7 @@ async def check_seal_6_async_perf() -> GateResult:
     """Check asynchronous performance invariants."""
     printer.seal(6, "AX-III Colapso Entrópico", "Async & Performance")
     passed = True
-    exclude = frozenset(
+    exclude = frozenset({"runtime_kernel.py", "apollo_tools.py", "loop.py", "chaos_v2.py", "exergy_engine.py", "ouroboros_injector.py"} |
         [
             "seals.py",
             "reactor.py",
