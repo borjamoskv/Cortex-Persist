@@ -201,10 +201,10 @@ def mock_postgres_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("cortex.storage.get_storage_mode", lambda: StorageMode.POSTGRES)
     monkeypatch.setattr("cortex.search.vector.get_storage_mode", lambda: StorageMode.POSTGRES)
     monkeypatch.setattr("cortex.search.text.get_storage_mode", lambda: StorageMode.POSTGRES)
+    monkeypatch.setattr("cortex.config.DEPLOY_MODE", "cloud")
 
 
-@pytest.mark.asyncio
-async def test_postgres_api_endpoints(mock_postgres_env: None) -> None:
+def test_postgres_api_endpoints(mock_postgres_env: None) -> None:
     mock_conn = MockPostgresConnection()
     mock_pool = MockPostgresPool(mock_conn)
 
