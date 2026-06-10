@@ -89,6 +89,6 @@ class NousMetadata(BaseModel):
 
 class NousAST(BaseModel):
     metadata: NousMetadata
-    ensures: List[str]
-    operations: List[NousOperation]
-    invariants: List[NousInvariant]
+    ensures: list[str]
+    operations: list[NousOperation]
+    invariants: list[NousInvariant]

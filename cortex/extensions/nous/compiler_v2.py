@@ -6,8 +6,8 @@ Reality Level: C5-REAL
 
 import instructor
 from openai import AsyncOpenAI
-from typing import List, Optional, Any
-from .models import NousAST, NousMetadata, NousOperation, NousInvariant
+
+from cortex.extensions.nous.models import NousAST
 
 
 class NousCompilerV2:

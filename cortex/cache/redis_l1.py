@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import os
 import threading
 import time
 from collections.abc import Callable
@@ -60,19 +61,28 @@ class RedisL1Cache:
         self._client: Any = _client
 
         if self._client is None and HAS_REDIS:
-            try:
-                self._client = redis.Redis(  # pyright: ignore[reportOptionalMemberAccess]
-                    host=host,
-                    port=port,
-                    db=db,
-                    socket_connect_timeout=2.0,
-                    socket_timeout=1.0,
-                    decode_responses=False,
-                )
-                logger.info("Redis L1 cache instance created: %s:%d/%d", host, port, db)
-            except (OSError, ConnectionError, TimeoutError, RedisError) as exc:
-                logger.warning("Redis L1 unavailable (%s), operating in pass-through mode", exc)
+            # Skip Redis connection in standard test suites unless explicitly enabled
+            if os.environ.get("CORTEX_TESTING") == "1" and os.environ.get("CORTEX_TEST_REDIS") != "1":
                 self._client = None
+            else:
+                try:
+                    connect_timeout = 0.1 if os.environ.get("CORTEX_TESTING") == "1" else 2.0
+                    socket_timeout = 0.1 if os.environ.get("CORTEX_TESTING") == "1" else 1.0
+                    client = redis.Redis(  # pyright: ignore[reportOptionalMemberAccess]
+                        host=host,
+                        port=port,
+                        db=db,
+                        socket_connect_timeout=connect_timeout,
+                        socket_timeout=socket_timeout,
+                        decode_responses=False,
+                    )
+                    # Eagerly ping to check availability and avoid downstream connection delays
+                    client.ping()
+                    self._client = client
+                    logger.info("Redis L1 cache instance created: %s:%d/%d", host, port, db)
+                except (OSError, ConnectionError, TimeoutError, RedisError, Exception) as exc:
+                    logger.warning("Redis L1 unavailable (%s), operating in pass-through mode", exc)
+                    self._client = None
 
     @classmethod
     def singleton(cls, **kwargs: Any) -> RedisL1Cache:
