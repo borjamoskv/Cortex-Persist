@@ -41,3 +41,16 @@ class RuntimeState:
         self.version += 1
         self.hash = self._compute_hash()
         return self
+
+    @classmethod
+    def bootstrap(cls) -> "RuntimeState":
+        """Bootstrap a fresh state."""
+        return cls()
+
+    def snapshot(self) -> dict[str, Any]:
+        """Produce a deterministic snapshot dictionary for validation."""
+        return {
+            "version": self.version,
+            "state_hash": self.hash,
+            "data": dict(self.data)
+        }
