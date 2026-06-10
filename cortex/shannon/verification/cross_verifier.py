@@ -8,7 +8,6 @@ from enum import Enum
 from typing import Any
 
 from cortex.runtime.replay.divergence import DivergenceCoordinates, DivergenceMetricEngine
-
 from cortex.shannon.env.trace import EpisodeTrace
 
 
