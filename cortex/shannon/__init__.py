@@ -8,6 +8,8 @@ from .entropy import (
 )
 from .exergy import ActionRisk, ExergyInput, ExergyResult, calculate_exergy, enforce_exergy
 from .maxwell import MaxwellDemonResult, filter_context
+from .registry import make
+from .benchmark import run_episode, replay_episode
 
 __all__ = [
     "ShannonReport",
@@ -21,4 +23,7 @@ __all__ = [
     "enforce_exergy",
     "MaxwellDemonResult",
     "filter_context",
+    "make",
+    "run_episode",
+    "replay_episode",
 ]

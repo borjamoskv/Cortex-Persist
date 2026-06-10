@@ -28,6 +28,7 @@ node_modules/
 .venv/
 venv/
 env/
+!cortex/shannon/env/
 .venv_transcript/
 .astro/
 .playwright-cli/

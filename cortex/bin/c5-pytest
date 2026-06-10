@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# c5-pytest - A wrapper to run pytest with strict C5-REAL determinism validation
+
+# Ensure we have the cortex module available
+export PYTHONPATH="$(pwd):${PYTHONPATH:-}"
+
+# Check for uncommitted changes if required (R4 - Git Sentinel style, but we only warn for test running)
+if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+    echo "⚠️  [C5-WARNING] Working directory is not clean. Determinism might be affected by uncommitted changes."
+fi
+
+echo "🛡️  [C5-REAL] Initializing deterministic test environment..."
+export PYTHONHASHSEED=42
+export CORTEX_TEST_DETERMINISM_LOCKED="true"
+
+# Execute pytest and pass through any arguments
+exec pytest "$@"
