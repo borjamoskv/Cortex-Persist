@@ -5,10 +5,11 @@ import pytest
 from cortex.extensions.nous.models import MigrationOperation
 from cortex.extensions.nous.dry_run import DryRunEngine
 
+
 @pytest.mark.asyncio
 async def test_dry_run_engine_safe_operations() -> None:
     engine = DryRunEngine()
-    
+
     ops = [
         MigrationOperation(
             op="create_table",
@@ -17,19 +18,20 @@ async def test_dry_run_engine_safe_operations() -> None:
             sql_down="DROP TABLE users",
         )
     ]
-    
+
     result = await engine.simulate(ops)
-    
+
     assert result.ok is True
     assert result.estimated_data_loss_risk == "none"
     assert len(result.warnings) == 0
     assert result.guards["rollback_check"].passed is True
     assert result.guards["syntax_check"].passed is True
 
+
 @pytest.mark.asyncio
 async def test_dry_run_engine_destructive_operations() -> None:
     engine = DryRunEngine()
-    
+
     ops = [
         MigrationOperation(
             op="drop_table",
@@ -38,9 +40,9 @@ async def test_dry_run_engine_destructive_operations() -> None:
             sql_down="",  # irreversible
         )
     ]
-    
+
     result = await engine.simulate(ops)
-    
+
     assert result.ok is True
     assert result.estimated_data_loss_risk == "high"
     assert len(result.warnings) == 2
