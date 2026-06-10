@@ -1,0 +1,6 @@
+// NOUS-Lang Migration Manifest v42
+intent Migration_v42 {
+  ensure schema migrated to v42
+  preserve audit_ledger
+  require downtime == 0
+}

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from cortex.extensions.ui_control.accessibility import AccessibilityEngine
 from cortex.extensions.ui_control.applescript import (
@@ -76,7 +76,7 @@ class MaestroUI:
             error=f"Fallido tras {retries} intentos: {last_error}",
         )
 
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str) -> Any:
         # Mapping for renamed methods in legacy facade
         aliases = {
             "move_window": (self.window, "move"),
