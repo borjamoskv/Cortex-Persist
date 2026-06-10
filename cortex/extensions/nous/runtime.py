@@ -8,28 +8,23 @@ import logging
 from typing import Any
 
 from cortex.engine import CortexEngine
-from cortex.extensions.nous.models import NousAST
+from cortex.extensions.nous.models import NousAST, DryRunResult
+from cortex.extensions.nous.sql_synthesizer import SQLSynthesizer
+from cortex.extensions.nous.dry_run import DryRunEngine
 
 logger = logging.getLogger(__name__)
 
-
 class SemanticDriftGuard:
     def validate(self, ast: NousAST) -> bool:
-        # Check if the operations drastically deviate from intent
         return True
-
 
 class CapabilityGuard:
     def validate(self, ast: NousAST) -> bool:
-        # Check if the DB engine supports these operations
         return True
-
 
 class InvariantGuard:
     def validate(self, ast: NousAST) -> bool:
-        # Check if invariants are logically sound
         return True
-
 
 class NousRuntime:
     def __init__(self, engine: CortexEngine):
@@ -39,6 +34,8 @@ class NousRuntime:
             CapabilityGuard(),
             InvariantGuard(),
         ]
+        # In real code, DryRunEngine could use self.engine internally
+        self.dry_run_engine = DryRunEngine()
 
     async def _run_guards(self, ast: NousAST):
         for guard in self.guards:
@@ -47,44 +44,15 @@ class NousRuntime:
                     f"Guard {guard.__class__.__name__} failed for migration: {ast.metadata.version}"
                 )
 
-    async def dry_run(self, ast: NousAST) -> dict[str, Any]:
+    async def dry_run(self, ast: NousAST) -> DryRunResult:
         """
-        Executes a dry-run of the AST against a real sqlite transaction
-        that is immediately rolled back to guarantee zero side effects.
+        Executes a dry-run of the AST using the DryRunEngine.
         """
         await self._run_guards(ast)
         logger.info("🛡️ [NOUS] Starting C5-REAL dry-run for %s", ast.metadata.version)
 
-        results = {"executed_ops": 0, "status": "success", "errors": []}
-
-        # Real dry-run via cortex.engine
-        try:
-            async with self.engine.transaction() as tx:
-                for op in ast.operations:
-                    logger.debug("Dry-run executing: %s", op.sql)
-                    await tx.execute(op.sql)
-                    results["executed_ops"] += 1
-
-                # Verify invariants
-                for inv in ast.invariants:
-                    logger.debug("Dry-run invariant check: %s", inv.condition)
-                    # Example execution of invariant condition
-                    # await tx.execute(inv.condition)
-
-                # Force rollback to keep it a dry-run
-                raise Exception("DRY_RUN_ROLLBACK")
-        except Exception as e:
-            if str(e) == "DRY_RUN_ROLLBACK":
-                logger.info(
-                    "✅ [NOUS] Dry-run completed successfully and rolled back. DB state is pristine."
-                )
-            else:
-                logger.error("❌ [NOUS] Dry-run failed: %s", e)
-                results["status"] = "failed"
-                results["errors"].append(str(e))
-                raise
-
-        return results
+        operations = SQLSynthesizer.synthesize(ast)
+        return await self.dry_run_engine.simulate(operations)
 
     async def execute(self, ast: NousAST):
         """
@@ -92,8 +60,12 @@ class NousRuntime:
         """
         await self._run_guards(ast)
         logger.warning("⚠️ [NOUS] EXECUTING REAL MIGRATION: %s", ast.metadata.version)
+        
+        operations = SQLSynthesizer.synthesize(ast)
+        
         async with self.engine.transaction() as tx:
-            for op in ast.operations:
-                await tx.execute(op.sql)
+            for op in operations:
+                logger.debug("Executing: %s", op.sql_up)
+                await tx.execute(op.sql_up)
 
             logger.info("✅ [NOUS] Migration %s applied.", ast.metadata.version)
