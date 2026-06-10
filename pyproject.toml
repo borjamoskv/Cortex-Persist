@@ -27,15 +27,15 @@ classifiers = [
     "Typing :: Typed",
 ]
 
-dependencies = [
-    "sqlite-vec>=0.1.6",
-    "click>=8.0",
-    "rich>=13.0",
-    "aiosqlite>=0.20.0",
-    "cryptography>=46.0.7",
-    "pydantic>=2.0",
-    "keyring>=25.7.0",
-]
+# Updated core dependencies without keyring
+    dependencies = [
+        "sqlite-vec>=0.1.6",
+        "click>=8.0",
+        "rich>=13.0",
+        "aiosqlite>=0.20.0",
+        "cryptography>=46.0.7",
+        "pydantic>=2.0",
+    ]
 
 [project.urls]
 Homepage = "https://cortexpersist.com"

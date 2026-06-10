@@ -137,13 +137,36 @@ Check out the `examples/` directory for ready-to-run scenarios:
 ```bash
 pip install cortex-persist
 
-# Optional Core Modules
-pip install "cortex-persist[embeddings]"     # Local semantic embeddings
-pip install "cortex-persist[knowledge]"      # Chroma-backed knowledge sync
+# Optional core modules
+pip install "cortex-persist[embeddings]"   # Local semantic embeddings
+pip install "cortex-persist[knowledge]"    # Chroma-backed knowledge sync
 pip install "cortex-persist[api,mcp,daemon]" # Web Server & MCP endpoints
 pip install "cortex-persist[cloud]"          # PostgreSQL, Redis, & Qdrant scaling
 
+# Secure credential backend (optional)
+# Installs the OS keyring integration for encrypted master keys
+pip install "cortex-persist[secure]"
 ```
+
+---
+
+## ▀▄ SECURE CREDENTIAL BACKEND
+
+The secure credential backend relies on the optional `secure` extra, which installs the `keyring` package. It enables encrypted storage of the master encryption key in the host OS vault.
+
+```bash
+# Install core package + secure extra
+pip install "cortex-persist[secure]"
+```
+
+When the `keyring` dependency is not present, the system degrades gracefully: functions such as `cortex.crypto.keyring.get_master_key()` simply return `None` instead of raising `ModuleNotFoundError`. This allows a minimal installation to work without the secure backend.
+
+```python
+from cortex.crypto.keyring import get_master_key
+print(get_master_key())  # → None if keyring is not installed
+```
+
+---
 
 ---
 
