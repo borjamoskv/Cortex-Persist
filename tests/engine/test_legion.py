@@ -48,14 +48,20 @@ async def test_async_signal_bus():
     sig1 = SwarmSignal("a1", "t1", "SUCCESS", {"key": "val"}, {})
     await bus.emit(sig1)
 
-    # Empty payload -> VOID
+    # Empty payload with SUCCESS -> Raises ValueError (P0 Violation)
     sig2 = SwarmSignal("a2", "t2", "SUCCESS", {}, {})
-    await bus.emit(sig2)
+    with pytest.raises(ValueError, match="SUCCESS signal emitted with empty payload"):
+        await bus.emit(sig2)
+
+    # Empty payload with other status -> Converted to VOID
+    sig3 = SwarmSignal("a3", "t3", "UNKNOWN", {}, {})
+    await bus.emit(sig3)
 
     signals = await bus.get_all()
     assert len(signals) == 2
     assert signals[0].status == "SUCCESS"
     assert signals[1].status == "VOID"
+
 
 
 @pytest.mark.asyncio
