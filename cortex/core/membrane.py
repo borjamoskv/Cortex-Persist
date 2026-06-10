@@ -102,7 +102,7 @@ class Z3Guard:
             return
 
         for k, v in value.items():
-            if isinstance(v, (int, float)):
+            if isinstance(v, int | float):
                 var_type = "Int" if isinstance(v, int) else "Real"
                 var = self.declare_var(k, var_type)
                 self.solver.add(var == v)

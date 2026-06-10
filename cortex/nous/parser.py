@@ -5,24 +5,32 @@ Reality Level: C5-REAL
 """
 
 import json
-from typing import List, Optional, Any, Dict
+from typing import Any
+
 from pydantic import BaseModel, Field
 
+
 class MigrationAction(BaseModel):
-    action_type: str = Field(..., description="Type of migration action: CREATE_TABLE, ADD_COLUMN, DROP_COLUMN")
+    action_type: str = Field(
+        ..., description="Type of migration action: CREATE_TABLE, ADD_COLUMN, DROP_COLUMN"
+    )
     table_name: str = Field(..., description="Target table name")
-    parameters: Dict[str, Any] = Field(default_factory=dict, description="Parameters for the action")
+    parameters: dict[str, Any] = Field(
+        default_factory=dict, description="Parameters for the action"
+    )
+
 
 class MigrationIntent(BaseModel):
     description: str = Field(..., description="Original human intent description")
-    actions: List[MigrationAction] = Field(..., description="List of declarative actions (AST)")
+    actions: list[MigrationAction] = Field(..., description="List of declarative actions (AST)")
+
 
 class IntentParser:
     """
     Parses LLM output (assumed to be a JSON string matching the schema)
     into a typed declarative plan.
     """
-    
+
     @staticmethod
     def parse_llm_json(raw_json: str) -> MigrationIntent:
         """
