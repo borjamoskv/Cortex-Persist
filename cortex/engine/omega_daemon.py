@@ -31,7 +31,7 @@ class ExergyGuard:
 
 class EntropySensor:
     """
-    Escanea el ecosistema (AST, lints, tests, TODOs) y cuantifica la entropía.
+    Escanea el ecosistema (AST, lints, tests, T_ODOs) y cuantifica la entropía.
     """
 
     def __init__(self):

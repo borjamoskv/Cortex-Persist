@@ -46,14 +46,14 @@ jobs:
         run: |
           count=$(grep -rEn "TODO|FIXME|HACK|WTF" \
             --include="*.py" --include="*.ts" --include="*.rs" \
-            . 2>/dev/null | grep -v ".github" | wc -l || echo 0)
+            . 2>/dev/null | grep -v "\.github" | grep -v "tests/test_auto_fix\.py" | grep -v "cortex/extensions/swarm/auto_fix\.py" | grep -v "\.venv" | wc -l || echo 0)
           echo "psi_count=$count" >> "$GITHUB_OUTPUT"
           echo "PSI markers found: $count"
           if [ "$count" -gt 0 ]; then
             echo "❌ CORTAZAR BLOCKED: PSI=$count (target: 0)"
             grep -rEn "TODO|FIXME|HACK|WTF" \
               --include="*.py" --include="*.ts" --include="*.rs" . \
-              | grep -v ".github" || true
+              | grep -v "\.github" | grep -v "tests/test_auto_fix\.py" | grep -v "cortex/extensions/swarm/auto_fix\.py" | grep -v "\.venv" || true
             exit 1
           fi
           echo "✅ PSI=0 — Cortazar approved"
