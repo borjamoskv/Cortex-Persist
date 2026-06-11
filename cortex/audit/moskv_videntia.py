@@ -19,7 +19,7 @@ class Vulnerability:
     description: str
 
 
-class CassandraOracle:
+class MoskvVidentiaOracle:
     """Generates potential/simulated exploit patterns based on constraints."""
 
     def generate(self, constraints: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -77,7 +77,7 @@ class CassandraOracle:
         return attacks
 
 
-class CassandraChainBuilder:
+class MoskvVidentiaChainBuilder:
     """Combines attacks into logical exploit chains representing structural weaknesses."""
 
     def chain(self, attacks: List[Dict[str, Any]]) -> List[str]:

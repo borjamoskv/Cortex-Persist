@@ -1,12 +1,12 @@
 # [C5-REAL] Exergy-Maximized
 """
-Comprehensive tests for cortex.audit.mythos and cortex.audit.cassandra.
+Comprehensive tests for cortex.audit.moskv_aegis and cortex.audit.moskv_videntia.
 
 Covers:
-  - MythosModeler: rule building, default ruleset fallback
-  - CassandraOracle: threat pattern generation
-  - CassandraChainBuilder: attack chaining
-  - MythosEngine: ensure_table, run_adversarial_audit, cryptographic signature and hash chaining
+  - MoskvAegisModeler: rule building, default ruleset fallback
+  - MoskvVidentiaOracle: threat pattern generation
+  - MoskvVidentiaChainBuilder: attack chaining
+  - MoskvAegisEngine: ensure_table, run_adversarial_audit, cryptographic signature and hash chaining
 """
 
 from __future__ import annotations
@@ -56,44 +56,44 @@ async def ledger(audit_conn):
 
 
 @pytest.fixture
-async def mythos(ledger):
-    """Creates a MythosEngine auditor instance."""
-    from cortex.audit.mythos import MythosEngine
+async def aegis(ledger):
+    """Creates a MoskvAegisEngine auditor instance."""
+    from cortex.audit.moskv_aegis import MoskvAegisEngine
 
-    return MythosEngine(ledger)
+    return MoskvAegisEngine(ledger)
 
 
-class TestMythosEngine:
-    """Test suite for the MYTHOS adversarial C4-SIM audit engine and CASSANDRA oracle."""
+class TestMoskvAegisEngine:
+    """Test suite for the MOSKV-AEGIS adversarial C4-SIM audit engine and MOSKV-VIDENTIA oracle."""
 
     def test_constraint_modeler_fallback(self):
-        """MythosModeler should fallback to default ruleset if file does not exist."""
-        from cortex.audit.mythos import MythosModeler
+        """MoskvAegisModeler should fallback to default ruleset if file does not exist."""
+        from cortex.audit.moskv_aegis import MoskvAegisModeler
 
-        modeler = MythosModeler(agents_md_path="/nonexistent/path/AGENTS.md")
+        modeler = MoskvAegisModeler(agents_md_path="/nonexistent/path/AGENTS.md")
         ruleset = modeler.build_from_agents_md()
         assert "constraints" in ruleset
         assert "Treat Generative Output as Conjecture" in ruleset["constraints"]
         assert ruleset["constraints"]["Treat Generative Output as Conjecture"]["priority"] == "P0"
 
     def test_constraint_modeler_default(self):
-        """MythosModeler.get_default_ruleset returns expected dictionary."""
-        from cortex.audit.mythos import MythosModeler
+        """MoskvAegisModeler.get_default_ruleset returns expected dictionary."""
+        from cortex.audit.moskv_aegis import MoskvAegisModeler
 
-        modeler = MythosModeler()
+        modeler = MoskvAegisModeler()
         ruleset = modeler.get_default_ruleset()
         assert "constraints" in ruleset
         assert "Never Bypass Guards" in ruleset["constraints"]
 
     def test_symbolic_attack_generator(self):
-        """CassandraOracle should generate specific attacks based on constraints."""
-        from cortex.audit.mythos import MythosModeler
-        from cortex.audit.cassandra import CassandraOracle
+        """MoskvVidentiaOracle should generate specific attacks based on constraints."""
+        from cortex.audit.moskv_aegis import MoskvAegisModeler
+        from cortex.audit.moskv_videntia import MoskvVidentiaOracle
 
-        modeler = MythosModeler()
+        modeler = MoskvAegisModeler()
         constraints = modeler.get_default_ruleset()
         
-        generator = CassandraOracle()
+        generator = MoskvVidentiaOracle()
         attacks = generator.generate(constraints)
         
         assert len(attacks) > 0
@@ -103,14 +103,14 @@ class TestMythosEngine:
         assert "context_poisoning" in attack_names
 
     def test_exploit_chain_constructor(self):
-        """CassandraChainBuilder chains generated attacks into paths."""
-        from cortex.audit.cassandra import CassandraChainBuilder
+        """MoskvVidentiaChainBuilder chains generated attacks into paths."""
+        from cortex.audit.moskv_videntia import MoskvVidentiaChainBuilder
 
         attacks = [
             {"attack": "A", "target": "T1"},
             {"attack": "B", "target": "T2"}
         ]
-        constructor = CassandraChainBuilder()
+        constructor = MoskvVidentiaChainBuilder()
         chains = constructor.chain(attacks)
         
         assert len(chains) == 2
@@ -118,20 +118,20 @@ class TestMythosEngine:
         assert "CHAIN::B@T2 -> A@T1" in chains
 
     @pytest.mark.asyncio
-    async def test_ensure_table_creates_schema(self, mythos):
-        """ensure_table should create the mythos_ledger_log table."""
-        await mythos.ensure_table()
-        cursor = await mythos._conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='mythos_ledger_log'"
+    async def test_ensure_table_creates_schema(self, aegis):
+        """ensure_table should create the moskv_aegis_log table."""
+        await aegis.ensure_table()
+        cursor = await aegis._conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='moskv_aegis_log'"
         )
         row = await cursor.fetchone()
         assert row is not None
-        assert row[0] == "mythos_ledger_log"
+        assert row[0] == "moskv_aegis_log"
 
     @pytest.mark.asyncio
-    async def test_run_adversarial_audit_persists(self, mythos):
+    async def test_run_adversarial_audit_persists(self, aegis):
         """run_adversarial_audit should persist findings, chains, and signatures in SQLite."""
-        report = await mythos.run_adversarial_audit()
+        report = await aegis.run_adversarial_audit()
         
         assert "audit_id" in report
         assert "timestamp" in report
@@ -142,8 +142,8 @@ class TestMythosEngine:
         assert "prev_hash" in report
         
         # Verify db persistence
-        cursor = await mythos._conn.execute(
-            "SELECT risk_score, prev_hash, signature FROM mythos_ledger_log"
+        cursor = await aegis._conn.execute(
+            "SELECT risk_score, prev_hash, signature FROM moskv_aegis_log"
         )
         rows = await cursor.fetchall()
         assert len(rows) == 1
@@ -152,14 +152,14 @@ class TestMythosEngine:
         assert rows[0][2] == report["signature"]
 
     @pytest.mark.asyncio
-    async def test_cryptographic_chaining(self, mythos):
+    async def test_cryptographic_chaining(self, aegis):
         """Successive runs should form a cryptographically chained prev_hash sequence."""
-        r1 = await mythos.run_adversarial_audit()
-        r2 = await mythos.run_adversarial_audit()
+        r1 = await aegis.run_adversarial_audit()
+        r2 = await aegis.run_adversarial_audit()
         
         # Verify signatures of r1 and r2 are valid
-        assert mythos.verify_entry(r1, mythos.ledger.public_key) is True
-        assert mythos.verify_entry(r2, mythos.ledger.public_key) is True
+        assert aegis.verify_entry(r1, aegis.ledger.public_key) is True
+        assert aegis.verify_entry(r2, aegis.ledger.public_key) is True
         
         # Verify that r2's prev_hash matches the computed entry_hash of r1
         import json
@@ -178,8 +178,8 @@ class TestMythosEngine:
         assert r2["prev_hash"] != r1["signature"]
         
         # Verify from database order
-        cursor = await mythos._conn.execute(
-            "SELECT prev_hash, signature FROM mythos_ledger_log ORDER BY rowid ASC"
+        cursor = await aegis._conn.execute(
+            "SELECT prev_hash, signature FROM moskv_aegis_log ORDER BY rowid ASC"
         )
         rows = await cursor.fetchall()
         assert len(rows) == 2

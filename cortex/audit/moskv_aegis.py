@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """
-MYTHOS: The Adversarial C4-SIM Audit Layer and Ledger.
+MOSKV-AEGIS: The Proprietary C4-SIM Audit Layer and Ledger.
 
 Implements inverted formal verification, simulating policy shadowing, context
 poisoning, and rule conflicts on CORTEX rulesets. Authenticates all reports
@@ -21,12 +21,12 @@ from typing import Any, Dict, List
 
 import aiosqlite
 from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.audit.cassandra import CassandraOracle, CassandraChainBuilder
+from cortex.audit.moskv_videntia import MoskvVidentiaOracle, MoskvVidentiaChainBuilder
 
-logger = logging.getLogger("cortex.audit.mythos")
+logger = logging.getLogger("cortex.audit.moskv_aegis")
 
 _CREATE_ADVERSARIAL_LOG_SQL = """
-CREATE TABLE IF NOT EXISTS mythos_ledger_log (
+CREATE TABLE IF NOT EXISTS moskv_aegis_log (
     audit_id TEXT PRIMARY KEY,
     timestamp TEXT NOT NULL,
     risk_score REAL NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS mythos_ledger_log (
 """
 
 
-class MythosModeler:
+class MoskvAegisModeler:
     """Parses system rules (e.g. AGENTS.md) to build constraint definitions."""
 
     def __init__(self, agents_md_path: str | None = None) -> None:
@@ -63,7 +63,6 @@ class MythosModeler:
             with open(self.agents_md_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            # Markdown table parser for priority directives
             pattern = re.compile(
                 r"\|\s*\*\*\[?(P\d)\]?\*\*\s*\|\s*\*\*(.*?)\*\*\s*—\s*(.*?)\s*\|"
             )
@@ -75,7 +74,6 @@ class MythosModeler:
                     "source": "AGENTS.md",
                 }
 
-            # Robust fallback table parser for variance/edge-cases
             for line in content.splitlines():
                 if "|" in line:
                     parts = [p.strip() for p in line.split("|") if p.strip()]
@@ -125,15 +123,15 @@ class MythosModeler:
         }
 
 
-class MythosEngine:
+class MoskvAegisEngine:
     """Sovereign C4-SIM Adversarial Auditor and Ledger for CORTEX rulesets."""
 
     def __init__(self, ledger: EnterpriseAuditLedger) -> None:
         self.ledger = ledger
         self._conn = ledger._conn
-        self.modeler = MythosModeler()
-        self.oracle = CassandraOracle()
-        self.chain_builder = CassandraChainBuilder()
+        self.modeler = MoskvAegisModeler()
+        self.oracle = MoskvVidentiaOracle()
+        self.chain_builder = MoskvVidentiaChainBuilder()
         self._ready = False
         self._last_hash = "GENESIS"
         self._lock = asyncio.Lock()
@@ -147,7 +145,7 @@ class MythosEngine:
             await self._conn.execute(_CREATE_ADVERSARIAL_LOG_SQL)
             await self._conn.commit()
             cursor = await self._conn.execute(
-                "SELECT timestamp, risk_score, findings, exploit_chains, prev_hash FROM mythos_ledger_log ORDER BY rowid DESC LIMIT 1"
+                "SELECT timestamp, risk_score, findings, exploit_chains, prev_hash FROM moskv_aegis_log ORDER BY rowid DESC LIMIT 1"
             )
             row = await cursor.fetchone()
             if row:
@@ -171,22 +169,14 @@ class MythosEngine:
         """Runs the adversarial audit pipeline, signs findings, and appends to immutable ledger."""
         await self.ensure_table()
 
-        # 1. Constraint Modeling
         if ruleset_override:
             constraints = ruleset_override
         else:
             constraints = self.modeler.build_from_agents_md()
 
-        # 2. Symbolic Attack Generation via Cassandra Oracle
         attacks = self.oracle.generate(constraints)
-
-        # 3. Exploit Chain Construction
         chains = self.chain_builder.chain(attacks)
-
-        # 4. Score calculation & Stability Layer Guardrails: weighted non-linear entropy model
         risk_score = min(1.0, sum(a.get("severity", 0.5) ** 1.5 for a in attacks))
-
-        # Stability filters
         findings = [a for a in attacks if a.get("severity", 0.0) >= 0.6]
 
         timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
@@ -195,7 +185,6 @@ class MythosEngine:
         findings_json = json.dumps(findings)
         chains_json = json.dumps(chains)
 
-        # 6. Cryptographic Sealing: canonical JSON serialization
         payload_obj = {
             "timestamp": timestamp,
             "risk_score": round(risk_score, 6),
@@ -208,9 +197,8 @@ class MythosEngine:
         
         signature = self.ledger.private_key.sign(entry_hash.encode("utf-8")).hex()
 
-        # Insert transaction
         await self._conn.execute(
-            """INSERT INTO mythos_ledger_log 
+            """INSERT INTO moskv_aegis_log 
                (audit_id, timestamp, risk_score, findings, exploit_chains, prev_hash, signature)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (
