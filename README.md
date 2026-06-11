@@ -19,6 +19,7 @@
   <a href="https://pypi.org/project/cortex-persist/"><img src="https://img.shields.io/pypi/dm/cortex-persist?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="PyPI Downloads"></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10%2B-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="Python"></a>
   <a href="https://github.com/borjamoskv/cortex-persist/actions"><img src="https://img.shields.io/github/actions/workflow/status/borjamoskv/cortex-persist/ci.yml?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="CI"></a>
+  <a href="https://github.com/borjamoskv/cortex-persist/actions/workflows/bench.yml"><img src="https://img.shields.io/github/actions/workflow/status/borjamoskv/cortex-persist/bench.yml?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5&label=Criterion%20Bench" alt="Criterion Bench"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="License"></a>
   <a href="docs/mcp.md"><img src="https://img.shields.io/badge/MCP-compatible-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="MCP Compatible"></a>
 </p>

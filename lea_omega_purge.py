@@ -5,7 +5,10 @@ from pathlib import Path
 # Destroys all files in scratch/ directories of past conversations.
 
 BRAIN_DIR = Path("/Users/borjafernandezangulo/.gemini/antigravity/brain")
-CURRENT_CONVERSATION_ID = "d1cf3b0e-795d-431e-9b1b-16a850263b53"
+EXCLUDED_CONVERSATION_IDS = {
+    "d1cf3b0e-795d-431e-9b1b-16a850263b53",  # Active Antigravity session
+    "d3c86edd-a327-4422-8b1c-6fcf4beb7f29"   # User-specified active session
+}
 
 
 def purge_scratch_entropy():
@@ -16,7 +19,7 @@ def purge_scratch_entropy():
     total_bytes_freed = 0
 
     for scratch_dir in scratch_dirs:
-        if CURRENT_CONVERSATION_ID in str(scratch_dir):
+        if any(exc_id in str(scratch_dir) for exc_id in EXCLUDED_CONVERSATION_IDS):
             print(f"[SKIP] Bypassing active session: {scratch_dir}")
             continue
 
