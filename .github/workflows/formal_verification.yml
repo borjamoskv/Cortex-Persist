@@ -1,0 +1,67 @@
+name: Formal Verification Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  formal-verification:
+    name: Formal Verification (Z3 + AST)
+    runs-on: ubuntu-latest
+    env:
+      CORTEX_FV: "1"
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Determine scope
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --prune origin "${{ github.base_ref }}"
+            git diff --name-only --diff-filter=ACMR "origin/${{ github.base_ref }}...HEAD" | sort -u > .changed_files
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ] && git cat-file -e "${{ github.event.before }}" 2>/dev/null; then
+            git diff --name-only --diff-filter=ACMR "${{ github.event.before }}" HEAD | sort -u > .changed_files
+          else
+            git ls-files | sort -u > .changed_files
+          fi
+
+          python_files="$(grep -E '\.py$' .changed_files || true)"
+          if [ -z "${python_files}" ]; then
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            echo "No python files changed."
+            exit 0
+          fi
+
+          count=$(echo "${python_files}" | wc -l | tr -d ' ')
+          echo "count=${count}" >> "$GITHUB_OUTPUT"
+
+          echo "${python_files}" > .fv_files.txt
+          echo "Files to verify:"
+          cat .fv_files.txt
+
+      - name: Run Formal Verification Gate
+        if: steps.scope.outputs.count != '0' && steps.scope.outputs.count != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < .fv_files.txt
+          cortex verify-files "${files[@]}"
