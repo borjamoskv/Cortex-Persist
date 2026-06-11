@@ -129,7 +129,7 @@ class HDCVectorStoreL2:
                     )
                 """)
             else:
-                self._conn.execute(f"""
+                self._conn.execute("""
                     CREATE TABLE IF NOT EXISTS hdc_vec_facts (
                         rowid INTEGER PRIMARY KEY,
                         embedding BLOB
@@ -137,7 +137,7 @@ class HDCVectorStoreL2:
                 """)
 
                 # Specular Vector Table (G10 Intent Alignment)
-                self._conn.execute(f"""
+                self._conn.execute("""
                     CREATE TABLE IF NOT EXISTS hdc_specular_vec_facts (
                         rowid INTEGER PRIMARY KEY,
                         embedding BLOB
