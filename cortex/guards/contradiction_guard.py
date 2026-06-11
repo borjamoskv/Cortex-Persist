@@ -390,9 +390,9 @@ async def detect_contradictions(
 
     report = ConflictReport(new_content, new_project)
 
-    async with connect_async_ctx(str(db_path)) as conn:
-        conn.row_factory = aiosqlite.Row
-        try:
+    try:
+        async with connect_async_ctx(str(db_path)) as conn:
+            conn.row_factory = aiosqlite.Row
             rows = await _fetch_decision_rows(
                 conn,
                 new_tokens,
@@ -415,8 +415,8 @@ async def detect_contradictions(
             ]
             candidates.sort(key=lambda x: -x.overlap_score)
             report.candidates = candidates[:max_candidates]
-        except aiosqlite.OperationalError:
-            logger.warning("Contradiction scan failed (DB error)", exc_info=True)
+    except aiosqlite.OperationalError:
+        logger.warning("Contradiction scan failed (DB error)", exc_info=True)
 
     return report
 
@@ -432,9 +432,9 @@ async def scan_all_contradictions(
     """
     Batch scanner: find pairs of potentially contradicting decisions.
     """
-    async with connect_async_ctx(str(db_path)) as conn:
-        conn.row_factory = aiosqlite.Row
-        try:
+    try:
+        async with connect_async_ctx(str(db_path)) as conn:
+            conn.row_factory = aiosqlite.Row
             cursor = await conn.execute(
                 """
                 SELECT id, project, content, created_at
@@ -461,9 +461,9 @@ async def scan_all_contradictions(
             pairs.sort(key=lambda x: -x[0])
             return [(a, b) for _, a, b in pairs[:limit]]
 
-        except aiosqlite.OperationalError:
-            logger.warning("Batch contradiction scan failed", exc_info=True)
-            return []
+    except aiosqlite.OperationalError:
+        logger.warning("Batch contradiction scan failed", exc_info=True)
+        return []
 
 
 def _process_token_bucket(
