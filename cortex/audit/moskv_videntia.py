@@ -7,13 +7,12 @@ Responsible for generating symbolic attacks and constructing exploit chains.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any
-
-
 import json
 import subprocess
 import urllib.request
+from dataclasses import dataclass
+from typing import Any
+
 
 @dataclass
 class Vulnerability:
@@ -28,16 +27,20 @@ class MoskvVidentiaOracle:
 
     def _get_git_diff(self) -> str:
         try:
-            diff = subprocess.check_output(["git", "diff", "--staged"], text=True, stderr=subprocess.DEVNULL)
+            diff = subprocess.check_output(
+                ["git", "diff", "--staged"], text=True, stderr=subprocess.DEVNULL
+            )
             if not diff.strip():
-                diff = subprocess.check_output(["git", "diff", "HEAD"], text=True, stderr=subprocess.DEVNULL)
+                diff = subprocess.check_output(
+                    ["git", "diff", "HEAD"], text=True, stderr=subprocess.DEVNULL
+                )
             return diff
         except subprocess.SubprocessError:
             return ""
 
     def generate(self, constraints: dict[str, Any]) -> list[dict[str, Any]]:
         diff = self._get_git_diff()
-        
+
         if diff.strip():
             prompt = f"""You are Moskv-Videntia, an Adversarial Audit Oracle.
 Analyze this git diff and evaluate it against the system constraints.
@@ -55,24 +58,26 @@ Git Diff:
                 "model": "qwen2.5-coder:7b",
                 "prompt": prompt,
                 "stream": False,
-                "format": "json"
+                "format": "json",
             }
             try:
                 req = urllib.request.Request(
                     "http://localhost:11434/api/generate",
                     data=json.dumps(payload).encode("utf-8"),
-                    headers={"Content-Type": "application/json"}
+                    headers={"Content-Type": "application/json"},
                 )
                 with urllib.request.urlopen(req, timeout=15) as response:
                     raw_read = response.read().decode("utf-8")
                     resp_data = json.loads(raw_read)
                     raw_response_text = resp_data.get("response", "[]").strip()
-                    
+
                     if raw_response_text.startswith("```json"):
-                        raw_response_text = raw_response_text.split("```json")[1].split("```")[0].strip()
+                        raw_response_text = (
+                            raw_response_text.split("```json")[1].split("```")[0].strip()
+                        )
                     elif raw_response_text.startswith("```"):
                         raw_response_text = raw_response_text.split("```")[1].strip()
-                        
+
                     attacks = json.loads(raw_response_text)
                     if isinstance(attacks, dict):
                         if not attacks:
@@ -81,15 +86,18 @@ Git Diff:
                             attacks = attacks["vulnerabilities"]
                         elif "attack" in attacks and "severity" in attacks:
                             return [attacks]
-                    
+
                     if isinstance(attacks, list):
                         return attacks
             except Exception as e:
                 import sys
+
                 print(f"[MoskvVidentiaOracle] LLM Call Failed: {e}", file=sys.stderr)
                 try:
-                    print(f"[MoskvVidentiaOracle] Raw text was: {raw_response_text}", file=sys.stderr)
-                except:
+                    print(
+                        f"[MoskvVidentiaOracle] Raw text was: {raw_response_text}", file=sys.stderr
+                    )
+                except Exception:
                     pass
                 # Fallback to simulated heuristics
 
