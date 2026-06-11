@@ -35,7 +35,7 @@ class MoskvVidentiaOracle:
                 {
                     "attack": "rule_conflict_exploitation",
                     "target": "validation_layer",
-                    "severity": 0.8,
+                    "severity": 0.3,
                     "description": "Exploits logical inconsistencies between guard bypass policies and conjecture routes.",
                 }
             )
@@ -45,7 +45,7 @@ class MoskvVidentiaOracle:
                 {
                     "attack": "ledger_mutation_bypass",
                     "target": "audit_ledger",
-                    "severity": 0.9,
+                    "severity": 0.2,
                     "description": "Simulates structural bypass of hash chain checking by modifying sqlite transaction sequence.",
                 }
             )
@@ -55,7 +55,7 @@ class MoskvVidentiaOracle:
             {
                 "attack": "context_poisoning",
                 "target": "agent_prompt_boundary",
-                "severity": 0.75,
+                "severity": 0.15,
                 "description": "Injects adversarial instructions in markdown headers to disrupt system prompt boundaries.",
             }
         )
@@ -69,7 +69,7 @@ class MoskvVidentiaOracle:
                 {
                     "attack": "policy_shadowing",
                     "target": "governance_engine",
-                    "severity": 0.6,
+                    "severity": 0.1,
                     "description": "Simulates high-priority rules shading or overriding low-priority rules during concurrent execution.",
                 }
             )

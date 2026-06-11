@@ -6,19 +6,16 @@ moskv_aegis_cmds.py - CLI commands for Moskv-Aegis Adversarial Ledger.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
-from pathlib import Path
 
 import aiosqlite
 import click
 from rich.panel import Panel
-from rich.syntax import Syntax
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, console
 from cortex.audit.ledger import EnterpriseAuditLedger
 from cortex.audit.moskv_aegis import MoskvAegisEngine
+from cortex.cli.common import DEFAULT_DB, cli, console
 
 logger = logging.getLogger(__name__)
 
