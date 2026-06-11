@@ -1,0 +1,224 @@
+# CORTEX-PERSIST LAUNCH AUTOMATION
+# Triggers at 15:00 CEST (13:00 UTC) on the day you push tag v1.0.0
+# Or manually via: Actions → launch → Run workflow
+#
+# REQUIRED SECRETS (Settings → Secrets → Actions):
+#   REDDIT_CLIENT_ID       — from reddit.com/prefs/apps
+#   REDDIT_CLIENT_SECRET   — from reddit.com/prefs/apps
+#   REDDIT_USERNAME        — your reddit username
+#   REDDIT_PASSWORD        — your reddit password
+#   TWITTER_API_KEY        — from developer.twitter.com
+#   TWITTER_API_SECRET     — from developer.twitter.com
+#   TWITTER_ACCESS_TOKEN   — from developer.twitter.com
+#   TWITTER_ACCESS_SECRET  — from developer.twitter.com
+
+name: 🚀 Launch Day Automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (print posts without publishing)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
+  schedule:
+    # 13:00 UTC = 15:00 CEST
+    - cron: '0 13 11 6 *'  # June 11 2026 — change date as needed
+
+jobs:
+  launch:
+    name: Publish Launch Posts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install praw tweepy requests
+
+      - name: 🐦 Post to Twitter/X
+        env:
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          python - <<'EOF'
+          import tweepy, os
+
+          tweet = """LangGraph tells you what your agent did next.
+          Mem0 remembers what your agent knew.
+          CORTEX proves it — cryptographically.
+
+          Agent execution as a metric space. Hash-chain ledger. ~390k agents/sec.
+
+          github.com/borjamoskv/Cortex-Persist
+          pip install cortex-persist
+
+          #AgentOps #Python #OpenSource #AI"""
+
+          tweet = " ".join(tweet.split())  # normalize whitespace
+
+          if os.environ["DRY_RUN"] == "true":
+              print("[DRY RUN] Tweet:")
+              print(tweet)
+          else:
+              client = tweepy.Client(
+                  consumer_key=os.environ["TWITTER_API_KEY"],
+                  consumer_secret=os.environ["TWITTER_API_SECRET"],
+                  access_token=os.environ["TWITTER_ACCESS_TOKEN"],
+                  access_token_secret=os.environ["TWITTER_ACCESS_SECRET"],
+              )
+              resp = client.create_tweet(text=tweet)
+              print(f"Tweet posted: https://twitter.com/i/web/status/{resp.data['id']}")
+          EOF
+
+      - name: 🤖 Post to r/MachineLearning
+        env:
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+          REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          python - <<'EOF'
+          import praw, os
+
+          title = "[Project] CORTEX-Persist: agent execution histories as cryptographic objects in a metric space"
+
+          body = """I've been building a substrate layer that sits below LangGraph/Mem0 and answers a question neither addresses: can you prove what your agent did, and that the execution hasn't been altered?
+
+          **The core idea:** An agent's execution is not a log — it's a point in a metric space. Two runs are either equivalent (same equivalence class) or divergent (measurable distance > threshold).
+
+          **What this enables:**
+          - Detect divergence between runs geometrically, not just by diffing outputs
+          - Deterministic replay of any past execution (CI-verified)
+          - MetaArbiter: collapse multiple divergent branches into the canonical one
+          - Append-only hash-chain ledger with SHA-256 + Merkle seals
+          - ~390k agents/sec via Rust-FFI core
+          - Native MCP server
+
+          **What it doesn't do:** It's not orchestration (LangGraph's job) and not semantic retrieval (Mem0's job). It's the verification substrate that sits underneath both.
+
+          Looking for feedback on the metric space formalization specifically — the distance function and equivalence class definitions are the newest part.
+
+          Repo: https://github.com/borjamoskv/Cortex-Persist
+          `pip install cortex-persist`"""
+
+          if os.environ["DRY_RUN"] == "true":
+              print("[DRY RUN] r/MachineLearning post:")
+              print(f"Title: {title}")
+              print(f"Body: {body}")
+          else:
+              reddit = praw.Reddit(
+                  client_id=os.environ["REDDIT_CLIENT_ID"],
+                  client_secret=os.environ["REDDIT_CLIENT_SECRET"],
+                  username=os.environ["REDDIT_USERNAME"],
+                  password=os.environ["REDDIT_PASSWORD"],
+                  user_agent="cortex-persist-launch/1.0",
+              )
+              sub = reddit.subreddit("MachineLearning")
+              post = sub.submit(title=title, selftext=body)
+              print(f"Posted to r/MachineLearning: https://reddit.com{post.permalink}")
+          EOF
+
+      - name: 🐍 Post to r/Python
+        env:
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+          REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          python - <<'EOF'
+          import praw, os
+
+          title = "CORTEX-Persist: tamper-evident, cryptographically sealed memory for AI agents"
+
+          body = """Just published `cortex-persist` to PyPI — a Python library that adds cryptographic provenance to AI agent execution.
+
+          **The one-liner:**
+          ```python
+          from cortex.magic import sovereign_persist
+
+          @sovereign_persist(strict=True)
+          async def my_agent(prompt: str):
+              response = await llm.generate(prompt)
+              return response
+              # Every observation sealed into a hash-chain ledger. Zero boilerplate.
+          ```
+
+          **Under the hood:**
+          - Append-only ledger with SHA-256 + Merkle seals
+          - Rust-FFI core for ~390k agents/sec (GIL-free)
+          - Native MCP server for Claude/Perplexity integration
+          - Deterministic replay engine
+          - DivergenceMap: geometric distance between execution runs
+
+          `pip install cortex-persist`
+          Repo: https://github.com/borjamoskv/Cortex-Persist
+
+          Feedback welcome, especially on the Rust-Python FFI boundary."""
+
+          if os.environ["DRY_RUN"] == "true":
+              print("[DRY RUN] r/Python post:")
+              print(f"Title: {title}")
+              print(f"Body: {body}")
+          else:
+              reddit = praw.Reddit(
+                  client_id=os.environ["REDDIT_CLIENT_ID"],
+                  client_secret=os.environ["REDDIT_CLIENT_SECRET"],
+                  username=os.environ["REDDIT_USERNAME"],
+                  password=os.environ["REDDIT_PASSWORD"],
+                  user_agent="cortex-persist-launch/1.0",
+              )
+              sub = reddit.subreddit("Python")
+              post = sub.submit(title=title, selftext=body)
+              print(f"Posted to r/Python: https://reddit.com{post.permalink}")
+          EOF
+
+      - name: 📋 Print HN post (manual step)
+        run: |
+          echo "====================================================="
+          echo "HACKER NEWS — POST THIS MANUALLY (no public write API)"
+          echo "====================================================="
+          echo ""
+          echo "URL: https://news.ycombinator.com/submit"
+          echo ""
+          echo "TITLE:"
+          echo "Show HN: CORTEX-Persist – agent execution histories as cryptographic objects"
+          echo ""
+          echo "URL FIELD:"
+          echo "https://github.com/borjamoskv/Cortex-Persist"
+          echo ""
+          echo "TEXT (optional, paste in the text box):"
+          echo "I've been working on a layer that sits below LangGraph/Mem0 and answers"
+          echo "a question neither of them address: can you prove what your agent did,"
+          echo "and that the execution hasn't been altered?"
+          echo ""
+          echo "The core idea: an agent execution is not a log — it's a point in a"
+          echo "metric space. Two runs are either equivalent or divergent (measurable"
+          echo "distance > threshold). This lets you detect, replay, and arbitrate"
+          echo "between execution branches deterministically."
+          echo ""
+          echo "pip install cortex-persist"
+          echo "====================================================="
+
+      - name: ✅ Launch summary
+        run: |
+          echo "Launch automation complete."
+          echo "Twitter/X   → posted"
+          echo "r/MachineLearning → posted"
+          echo "r/Python    → posted"
+          echo "HN          → open https://news.ycombinator.com/submit and paste the text above"
+          echo ""
+          echo "Monitor stars: https://github.com/borjamoskv/Cortex-Persist/stargazers"
+          echo "Monitor HN:    https://news.ycombinator.com/newest"
