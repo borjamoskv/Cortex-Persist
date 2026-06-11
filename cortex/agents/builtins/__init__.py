@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 
-from cortex.agents.builtins.moskv_videntia_agent import MoskvVidentiaAgent
 from cortex.agents.builtins.copilot_agent import CopilotAgent
 from cortex.agents.builtins.handoff_agent import HandoffAgent
 from cortex.agents.builtins.memory_agent import MemoryAgent
+from cortex.agents.builtins.moskv_videntia_agent import MoskvVidentiaAgent
 from cortex.agents.builtins.nightshift_agent import NightshiftAgent
 from cortex.agents.builtins.omega_prime import OmegaPrimeAgent
 from cortex.agents.builtins.security_agent import SecurityAgent

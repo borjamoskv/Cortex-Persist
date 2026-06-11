@@ -2,7 +2,7 @@
 import json
 import logging
 import os
-from typing import Any, Final
+from typing import Final
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException

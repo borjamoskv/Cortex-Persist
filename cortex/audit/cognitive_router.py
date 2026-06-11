@@ -16,9 +16,8 @@ import logging
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any
 
-import aiosqlite
 from cortex.audit.ledger import EnterpriseAuditLedger
 
 logger = logging.getLogger("cortex.audit.cognitive_router")
@@ -43,7 +42,7 @@ class RoutingDecision:
     routing_id: str
     timestamp: str
     assigned_model: str
-    sensitivity: List[str]
+    sensitivity: list[str]
     retention_required: bool
     signature: str
 
@@ -73,7 +72,7 @@ class SafetyClassifier:
             "chemistry": ["sarin", "ricin", "nerve agent", "synthesis guide", "mustard gas"],
         }
 
-    def classify(self, prompt: str) -> List[str]:
+    def classify(self, prompt: str) -> list[str]:
         prompt_lower = prompt.lower()
         matched_categories = []
         for category, keywords in self.sensitive_keywords.items():
@@ -192,7 +191,7 @@ class CognitiveRouter:
         )
         await self._conn.commit()
 
-        old_last_hash = self._last_hash
+
         # Update last hash chain pointer
         self._last_hash = entry_hash
 
@@ -205,7 +204,7 @@ class CognitiveRouter:
             signature=signature,
         )
 
-    def verify_entry(self, entry: Dict[str, Any], public_key: Any) -> bool:
+    def verify_entry(self, entry: dict[str, Any], public_key: Any) -> bool:
         """Verifies a cognitive router log entry externally."""
         try:
             payload_obj = {

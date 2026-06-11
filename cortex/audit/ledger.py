@@ -36,8 +36,9 @@ CREATE TABLE IF NOT EXISTS security_audit_log (
 """
 
 
-import fcntl
 import asyncio
+import fcntl
+
 
 class AsyncFileLock:
     """Non-blocking asynchronous cross-process file lock using fcntl."""
@@ -45,7 +46,7 @@ class AsyncFileLock:
         self.lock_path = lock_path
         self.fp = None
 
-    async def __aenter__(self) -> AsyncFileLock:
+    async def __aenter__(self) -> "AsyncFileLock":
         self.fp = open(self.lock_path, "w")
         while True:
             try:

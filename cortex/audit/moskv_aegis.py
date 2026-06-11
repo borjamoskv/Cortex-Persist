@@ -17,11 +17,10 @@ import os
 import re
 import time
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any
 
-import aiosqlite
 from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.audit.moskv_videntia import MoskvVidentiaOracle, MoskvVidentiaChainBuilder
+from cortex.audit.moskv_videntia import MoskvVidentiaChainBuilder, MoskvVidentiaOracle
 
 logger = logging.getLogger("cortex.audit.moskv_aegis")
 
@@ -50,7 +49,7 @@ class MoskvAegisModeler:
             agents_md_path = os.path.join(base_dir, "AGENTS.md")
         self.agents_md_path = agents_md_path
 
-    def build_from_agents_md(self) -> Dict[str, Any]:
+    def build_from_agents_md(self) -> dict[str, Any]:
         constraints = {}
         if not os.path.exists(self.agents_md_path):
             logger.warning(
@@ -60,7 +59,7 @@ class MoskvAegisModeler:
             return self.get_default_ruleset()
 
         try:
-            with open(self.agents_md_path, "r", encoding="utf-8") as f:
+            with open(self.agents_md_path, encoding="utf-8") as f:
                 content = f.read()
 
             pattern = re.compile(
@@ -101,7 +100,7 @@ class MoskvAegisModeler:
 
         return {"constraints": constraints}
 
-    def get_default_ruleset(self) -> Dict[str, Any]:
+    def get_default_ruleset(self) -> dict[str, Any]:
         return {
             "constraints": {
                 "Treat Generative Output as Conjecture": {
@@ -164,8 +163,8 @@ class MoskvAegisEngine:
             self._ready = True
 
     async def run_adversarial_audit(
-        self, ruleset_override: Dict[str, Any] | None = None
-    ) -> Dict[str, Any]:
+        self, ruleset_override: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Runs the adversarial audit pipeline, signs findings, and appends to immutable ledger."""
         await self.ensure_table()
 
@@ -226,7 +225,7 @@ class MoskvAegisEngine:
             "signature": signature,
         }
 
-    def verify_entry(self, entry: Dict[str, Any], public_key: Any) -> bool:
+    def verify_entry(self, entry: dict[str, Any], public_key: Any) -> bool:
         """Verifies an audit entry's cryptographic signature externally."""
         try:
             payload_obj = {

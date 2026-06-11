@@ -8,7 +8,7 @@ Responsible for generating symbolic attacks and constructing exploit chains.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 
 @dataclass
@@ -22,7 +22,7 @@ class Vulnerability:
 class MoskvVidentiaOracle:
     """Generates potential/simulated exploit patterns based on constraints."""
 
-    def generate(self, constraints: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def generate(self, constraints: dict[str, Any]) -> list[dict[str, Any]]:
         attacks = []
         rule_items = constraints.get("constraints", {})
 
@@ -80,9 +80,9 @@ class MoskvVidentiaOracle:
 class MoskvVidentiaChainBuilder:
     """Combines attacks into logical exploit chains representing structural weaknesses."""
 
-    def chain(self, attacks: List[Dict[str, Any]]) -> List[str]:
+    def chain(self, attacks: list[dict[str, Any]]) -> list[str]:
         # Group attacks by target
-        target_map: Dict[str, List[Dict[str, Any]]] = {}
+        target_map: dict[str, list[dict[str, Any]]] = {}
         for a in attacks:
             target_map.setdefault(a["target"], []).append(a)
             

@@ -33,6 +33,7 @@ __all__ = [
     "DEFAULT_TIMEOUT",
     "RETRY_BACKOFF",
     "STATUS_FILE",
+    "ASTAlert",
     "AetherAlert",
     "CertAlert",
     "CloudSyncAlert",
@@ -171,6 +172,15 @@ class EntropyAlert:
 
 
 @dataclass
+class ASTAlert:
+    """Alerta de deuda estructural por Pyright en el AST."""
+
+    project: str
+    entropy_score: int
+    message: str
+
+
+@dataclass
 class CloudSyncAlert:
     """Alert triggered on successful edge sync to Turso."""
 
@@ -291,6 +301,7 @@ class DaemonStatus:
     mejoralo_alerts: list[MejoraloAlert] = field(default_factory=list)
     evaluation_alerts: list[EvaluationAlert] = field(default_factory=list)
     entropy_alerts: list[EntropyAlert] = field(default_factory=list)
+    ast_alerts: list[ASTAlert] = field(default_factory=list)
     compaction_alerts: list[CompactionAlert] = field(default_factory=list)
     cloud_sync_alerts: list[CloudSyncAlert] = field(default_factory=list)
     perception_alerts: list[PerceptionAlert] = field(default_factory=list)
@@ -302,6 +313,7 @@ class DaemonStatus:
     trends_alerts: list[TrendsAlert] = field(default_factory=list)
     aether_alerts: list[AetherAlert] = field(default_factory=list)
     workflow_alerts: list[WorkflowAlert] = field(default_factory=list)
+    epistemic_alerts: list[WorkflowAlert] = field(default_factory=list)
     auto_immune_alerts: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -327,6 +339,8 @@ class DaemonStatus:
                 self.trends_alerts,
                 self.aether_alerts,
                 self.workflow_alerts,
+                self.epistemic_alerts,
+                self.ast_alerts,
                 self.auto_immune_alerts,
                 self.errors,
             )
