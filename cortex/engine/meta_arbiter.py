@@ -22,9 +22,10 @@ import hashlib
 import json
 import logging
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Final, Iterable
+from typing import Any, Final
 
 from cortex.tools.trace_adapter import ExecutionTrace
 
@@ -515,9 +516,9 @@ class MetaArbiterKernel:
         - else `hash(state)` or `repr(state)`.
         """
         if hasattr(state, "id"):
-            return getattr(state, "id")
+            return state.id
         if hasattr(state, "height"):
-            return getattr(state, "height")
+            return state.height
         try:
             return hash(state)
         except Exception:
