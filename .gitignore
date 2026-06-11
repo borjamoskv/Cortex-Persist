@@ -254,6 +254,7 @@ sovereign_watchdog.sh
 notebooklm_domains/
 data/legal_dossiers/
 data/bandcamp_profiles.*
+data/apollo_leads*.json
 docs-ui/
 economia-humor/
 filete-cumbia/
