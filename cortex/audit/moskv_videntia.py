@@ -64,12 +64,34 @@ Git Diff:
                     headers={"Content-Type": "application/json"}
                 )
                 with urllib.request.urlopen(req, timeout=15) as response:
-                    resp_data = json.loads(response.read().decode("utf-8"))
-                    attacks = json.loads(resp_data.get("response", "[]"))
+                    raw_read = response.read().decode("utf-8")
+                    resp_data = json.loads(raw_read)
+                    raw_response_text = resp_data.get("response", "[]").strip()
+                    
+                    if raw_response_text.startswith("```json"):
+                        raw_response_text = raw_response_text.split("```json")[1].split("```")[0].strip()
+                    elif raw_response_text.startswith("```"):
+                        raw_response_text = raw_response_text.split("```")[1].strip()
+                        
+                    attacks = json.loads(raw_response_text)
+                    if isinstance(attacks, dict):
+                        if not attacks:
+                            return []
+                        if "vulnerabilities" in attacks:
+                            attacks = attacks["vulnerabilities"]
+                        elif "attack" in attacks and "severity" in attacks:
+                            return [attacks]
+                    
                     if isinstance(attacks, list):
                         return attacks
-            except Exception:
-                pass # Fallback to simulated heuristics
+            except Exception as e:
+                import sys
+                print(f"[MoskvVidentiaOracle] LLM Call Failed: {e}", file=sys.stderr)
+                try:
+                    print(f"[MoskvVidentiaOracle] Raw text was: {raw_response_text}", file=sys.stderr)
+                except:
+                    pass
+                # Fallback to simulated heuristics
 
         attacks = []
         rule_items = constraints.get("constraints", {})
