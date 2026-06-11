@@ -121,7 +121,17 @@ async def test_ledger_concurrency_bombing(ledger_db):
             assert row[1] == prev_hash, "Inconsistent prev_hash within block"
             assert row[2] == signature, "Inconsistent signature within block"
 
-        current_hash = signature
+        # Verify cryptographic integrity of the block
+        batch_audit_ids = [row[0] for row in block]
+        merkle_payload = "".join(batch_audit_ids) + prev_hash
+        merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+        entry_hash = hashlib.sha256(
+            f"merkle_batch:{merkle_root}:{prev_hash}".encode()
+        ).hexdigest()
+
+        assert ledger.verify_zk_seal(entry_hash, signature), "Invalid ZK seal/signature on Merkle Block"
+
+        current_hash = entry_hash
 
     # Verify the last hash of the object is correctly updated
     assert ledger._last_hash == current_hash

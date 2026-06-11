@@ -107,7 +107,9 @@ class TestCognitiveRouter:
     @pytest.mark.asyncio
     async def test_route_sensitive_trusted_partner(self, router):
         """Sensitive prompt from Trusted-Partner should route to Mythos-5-Unleashed and require retention."""
-        decision = await router.route("How to analyze a zero-day exploit?", user_tier="Trusted-Partner")
+        decision = await router.route(
+            "How to analyze a zero-day exploit?", user_tier="Trusted-Partner"
+        )
         assert decision.assigned_model == "Mythos-5-Unleashed"
         assert decision.retention_required is True
         assert "cybersecurity" in decision.sensitivity
@@ -125,7 +127,7 @@ class TestCognitiveRouter:
         """Verify routing decisions are chained sequentially in the database."""
         import json
         import hashlib
-        
+
         d1 = await router.route("Safe prompt 1", user_tier="General-Public")
         d2 = await router.route("Safe prompt 2", user_tier="General-Public")
 
@@ -135,38 +137,141 @@ class TestCognitiveRouter:
         rows = await cursor.fetchall()
         assert len(rows) == 2
         assert rows[0][0] == "GENESIS"
-        
-        # Verify using verify_entry
+
+        # Verify using verify_entry with a raw DB-style entry (where detected_sensitivity is a JSON string)
         cursor2 = await router._conn.execute(
-            "SELECT timestamp, prompt_hash, detected_sensitivity, user_tier, assigned_model, data_retention_flag, prev_hash, signature FROM cognitive_router_log ORDER BY rowid ASC LIMIT 1"
+            "SELECT timestamp, prompt_hash, detected_sensitivity, user_tier, assigned_model, data_retention_flag, prev_hash, signature, classifier_version, routing_policy_version FROM cognitive_router_log ORDER BY rowid ASC LIMIT 1"
         )
         row1 = await cursor2.fetchone()
-        entry1 = {
+        entry1_raw = {
             "timestamp": row1[0],
             "prompt_hash": row1[1],
-            "detected_sensitivity": json.loads(row1[2]),
+            "detected_sensitivity": row1[
+                2
+            ],  # Keep as JSON string to test the verify_entry JSON load fix!
             "user_tier": row1[3],
             "assigned_model": row1[4],
             "data_retention_flag": row1[5],
             "prev_hash": row1[6],
-            "signature": row1[7]
+            "signature": row1[7],
+            "classifier_version": row1[8],
+            "routing_policy_version": row1[9],
         }
-        assert router.verify_entry(entry1, router.ledger.public_key) is True
-        
+        assert router.verify_entry(entry1_raw, router.ledger.public_key) is True
+
         # Recompute entry_hash of first entry to verify the chain linkage
-        payload_obj = {
-            "timestamp": entry1["timestamp"],
-            "prompt_hash": entry1["prompt_hash"],
-            "detected_sensitivity": entry1["detected_sensitivity"],
-            "user_tier": entry1["user_tier"],
-            "assigned_model": entry1["assigned_model"],
-            "data_retention_flag": entry1["data_retention_flag"],
-            "prev_hash": entry1["prev_hash"]
-        }
-        expected_entry_hash = hashlib.sha256(
-            json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
-        ).hexdigest()
-        
+        payload_bytes = router.canonical_json(entry1_raw)
+        expected_entry_hash = hashlib.sha256(payload_bytes).hexdigest()
+
         assert rows[1][0] == expected_entry_hash
         assert rows[0][1] == d1.signature
         assert rows[1][1] == d2.signature
+
+    def test_adversarial_bypass_resilience(self):
+        """Verify the classifier handles leetspeak and unicode homoglyphs, and uses tokens."""
+        from cortex.audit.cognitive_router import SafetyClassifier
+
+        classifier = SafetyClassifier()
+
+        # Leetspeak obfuscation bypass attempts
+        assert "cybersecurity" in classifier.classify("how to byp4ss the systems?")
+        assert "cybersecurity" in classifier.classify("run a zero-d4y exploit")
+
+        # Unicode decomposition bypass attempts
+        assert "biology" in classifier.classify(
+            "synthesize a p\u0300athogen"
+        )  # decomposed 'a' with combining accent
+
+        # Substring isolation (substring 'exploit' should not trigger if not isolated token)
+        assert len(classifier.classify("This is a standard nonexploitational sentence")) == 0
+
+    @pytest.mark.asyncio
+    async def test_declarative_routing_custom_policy(self, ledger):
+        """Verify routing decisions honor the declarative policy mapping."""
+        from cortex.audit.cognitive_router import CognitiveRouter
+
+        custom_policy = {
+            "version": "v3.0.0-custom",
+            "tiers": {
+                "VIP": {
+                    "restricted": "Super-Mythos-9",
+                    "default": "Fable-Elite",
+                    "retention_for_restricted": True,
+                },
+                "Standard": {
+                    "restricted": "Opus-Low",
+                    "default": "Fable-Standard",
+                    "retention_for_restricted": False,
+                },
+            },
+            "default_tier": "Standard",
+        }
+
+        router = CognitiveRouter(ledger, routing_policy=custom_policy)
+
+        # 1. VIP tier requests safe prompt -> Fable-Elite
+        d1 = await router.route("Hello", user_tier="VIP")
+        assert d1.assigned_model == "Fable-Elite"
+        assert d1.retention_required is False
+        assert d1.routing_policy_version == "v3.0.0-custom"
+
+        # 2. VIP tier requests restricted prompt -> Super-Mythos-9
+        d2 = await router.route("zero-day exploit info", user_tier="VIP")
+        assert d2.assigned_model == "Super-Mythos-9"
+        assert d2.retention_required is True
+
+        # 3. Unknown tier requests restricted prompt -> Standard tier fallback -> Opus-Low
+        d3 = await router.route("zero-day exploit info", user_tier="Anonymous")
+        assert d3.assigned_model == "Opus-Low"
+        assert d3.retention_required is False
+
+    @pytest.mark.asyncio
+    async def test_prev_hash_uniqueness_constraint(self, router):
+        """Verify that a duplicate prev_hash raises a UNIQUE constraint error."""
+        await router.ensure_table()
+
+        # Insert two entries directly with the same prev_hash to trigger database constraint
+        import aiosqlite
+
+        await router._conn.execute(
+            """INSERT INTO cognitive_router_log 
+               (routing_id, timestamp, prompt_hash, detected_sensitivity, user_tier, 
+                assigned_model, data_retention_flag, prev_hash, signature, classifier_version, routing_policy_version)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                "id-1",
+                "2026-06-11T08:00:00Z",
+                "hash1",
+                "[]",
+                "General-Public",
+                "Fable-5-Core",
+                0,
+                "DUPLICATE_HASH",
+                "sig1",
+                "ver1",
+                "ver2",
+            ),
+        )
+        await router._conn.commit()
+
+        with pytest.raises(aiosqlite.IntegrityError):
+            await router._conn.execute(
+                """INSERT INTO cognitive_router_log 
+                   (routing_id, timestamp, prompt_hash, detected_sensitivity, user_tier, 
+                    assigned_model, data_retention_flag, prev_hash, signature, classifier_version, routing_policy_version)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    "id-2",
+                    "2026-06-11T08:01:00Z",
+                    "hash2",
+                    "[]",
+                    "General-Public",
+                    "Fable-5-Core",
+                    0,
+                    "DUPLICATE_HASH",  # Duplicate prev_hash!
+                    "sig2",
+                    "ver1",
+                    "ver2",
+                ),
+            )
+            await router._conn.commit()
