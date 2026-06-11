@@ -168,6 +168,7 @@ SKIP_DIRS = {
     "node_modules",
     "__pycache__",
     ".venv",
+    ".venv-docs",
     ".venv-audit",
     "venv",
     "dist",
