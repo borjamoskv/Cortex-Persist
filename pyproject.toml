@@ -43,6 +43,7 @@ Documentation = "https://github.com/borjamoskv/Cortex-Persist/tree/main/docs"
 Repository = "https://github.com/borjamoskv/Cortex-Persist"
 Issues = "https://github.com/borjamoskv/Cortex-Persist/issues"
 Changelog = "https://github.com/borjamoskv/Cortex-Persist/releases"
+
 [project.optional-dependencies]
 compute = [
     "numpy",
@@ -140,6 +141,27 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 include = ["cortex", "cortex.*"]
 
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+branch = "main"
+commit_parser = "conventional"
+upload_to_vcs_release = true
+changelog_file = "CHANGELOG.md"
+build_command = "pip install build && python -m build"
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = ["feat", "fix", "perf", "refactor", "docs", "style", "test", "chore", "ci", "build"]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf", "refactor"]
+
+[tool.semantic_release.changelog]
+exclude_commit_patterns = [
+    "^ci\\(release\\):",
+    "^chore\\(release\\):",
+    "Merge pull request",
+    "Merge branch",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
@@ -149,7 +171,6 @@ asyncio_default_fixture_loop_scope = "function"
 markers = [
     "slow: marks tests that exercise slower integration paths",
 ]
-
 
 [tool.ruff]
 target-version = "py310"

@@ -1,0 +1,73 @@
+name: Semantic Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: semantic-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  semantic-release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install semantic-release
+        run: |
+          python -m pip install --upgrade pip
+          pip install python-semantic-release build
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run semantic-release
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          semantic-release version
+
+      - name: Build distribution artifacts
+        if: steps.release.outputs.released == 'true'
+        run: python -m build
+
+      - name: Upload artifacts to GitHub Release
+        if: steps.release.outputs.released == 'true'
+        uses: python-semantic-release/publish-action@v9
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+
+      - name: Job summary
+        if: steps.release.outputs.released == 'true'
+        run: |
+          echo "## 🚀 New release published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: \`${{ steps.release.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag**: \`${{ steps.release.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Released**: ${{ steps.release.outputs.released }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: No release needed
+        if: steps.release.outputs.released != 'true'
+        run: echo "No releasable commits found — skipping." >> $GITHUB_STEP_SUMMARY
