@@ -11,6 +11,10 @@ from dataclasses import dataclass
 from typing import Any
 
 
+import json
+import subprocess
+import urllib.request
+
 @dataclass
 class Vulnerability:
     id: str
@@ -22,7 +26,51 @@ class Vulnerability:
 class MoskvVidentiaOracle:
     """Generates potential/simulated exploit patterns based on constraints."""
 
+    def _get_git_diff(self) -> str:
+        try:
+            diff = subprocess.check_output(["git", "diff", "--staged"], text=True, stderr=subprocess.DEVNULL)
+            if not diff.strip():
+                diff = subprocess.check_output(["git", "diff", "HEAD"], text=True, stderr=subprocess.DEVNULL)
+            return diff
+        except subprocess.SubprocessError:
+            return ""
+
     def generate(self, constraints: dict[str, Any]) -> list[dict[str, Any]]:
+        diff = self._get_git_diff()
+        
+        if diff.strip():
+            prompt = f"""You are Moskv-Videntia, an Adversarial Audit Oracle.
+Analyze this git diff and evaluate it against the system constraints.
+Return ONLY a valid JSON array of vulnerabilities. No markdown, no prose.
+Each vulnerability MUST be a dictionary with keys: "attack" (string), "target" (string), "severity" (float 0.0-1.0), "description" (string).
+If no structural flaws violate the constraints, return an empty array: []
+
+Constraints:
+{json.dumps(constraints)}
+
+Git Diff:
+{diff[:4000]}
+"""
+            payload = {
+                "model": "qwen2.5-coder:7b",
+                "prompt": prompt,
+                "stream": False,
+                "format": "json"
+            }
+            try:
+                req = urllib.request.Request(
+                    "http://localhost:11434/api/generate",
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=15) as response:
+                    resp_data = json.loads(response.read().decode("utf-8"))
+                    attacks = json.loads(resp_data.get("response", "[]"))
+                    if isinstance(attacks, list):
+                        return attacks
+            except Exception:
+                pass # Fallback to simulated heuristics
+
         attacks = []
         rule_items = constraints.get("constraints", {})
 
