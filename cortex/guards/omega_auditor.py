@@ -37,7 +37,6 @@ class OmegaAuditor:
     """Sovereign Auditor for deep semantic health."""
 
     def __init__(self, provider: str = "ollama"):
-
         if LLMProvider is not None:
             self._llm = LLMProvider(provider=provider)
             # Dynamic fallback selector enforced to Local Autarchy (Ollama / MLX)
