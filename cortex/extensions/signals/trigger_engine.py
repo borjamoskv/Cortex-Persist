@@ -192,6 +192,22 @@ class TriggerEngine:
         self._triggers: dict[str, TriggerCondition] = {}
         self._accumulators: dict[str, _AccumulatorEntry] = defaultdict(_AccumulatorEntry)
         self._handler = handler or TriggerActionHandler()
+        self._exact_routes: dict[str, list[TriggerCondition]] = defaultdict(list)
+        self._wildcard_routes: list[tuple[str, TriggerCondition]] = []
+
+    def _rebuild_routing_indexes(self) -> None:
+        """Rebuild exact and wildcard matching indexes for fast routing.
+
+        Must be called under self._lock.
+        """
+        self._exact_routes = defaultdict(list)
+        self._wildcard_routes = []
+        for trigger in self._triggers.values():
+            for pattern in trigger.event_types:
+                if any(char in pattern for char in "*?["):
+                    self._wildcard_routes.append((pattern, trigger))
+                else:
+                    self._exact_routes[pattern].append(trigger)
 
     # ── Registration ───────────────────────────────────────────────
 
@@ -199,6 +215,7 @@ class TriggerEngine:
         """Register a trigger condition. Overwrites if id already exists."""
         with self._lock:
             self._triggers[trigger.id] = trigger
+            self._rebuild_routing_indexes()
         logger.info(
             "Trigger registered: [%s] %s (priority=%s, threshold=%d)",
             trigger.id,
@@ -212,6 +229,8 @@ class TriggerEngine:
         with self._lock:
             removed = self._triggers.pop(trigger_id, None) is not None
             self._accumulators.pop(trigger_id, None)
+            if removed:
+                self._rebuild_routing_indexes()
         return removed
 
     def list_triggers(self) -> list[TriggerCondition]:
@@ -231,13 +250,24 @@ class TriggerEngine:
         now = time.monotonic()
 
         with self._lock:
-            triggers = list(self._triggers.values())
+            # 1. Gather matching triggers preserving original insertion order
+            matched: dict[str, TriggerCondition] = {}
+            
+            # Exact match lookup
+            for trigger in self._exact_routes.get(signal.event_type, []):
+                matched[trigger.id] = trigger
+                
+            # Wildcard match lookup
+            for pattern, trigger in self._wildcard_routes:
+                if fnmatch.fnmatch(signal.event_type, pattern):
+                    matched[trigger.id] = trigger
+                    
+            # Preserve registration order (order of keys in self._triggers)
+            trigger_ids_order = {tid: idx for idx, tid in enumerate(self._triggers.keys())}
+            triggers = sorted(matched.values(), key=lambda t: trigger_ids_order[t.id])
 
         for trigger in triggers:
             if not trigger.enabled:
-                continue
-
-            if not self._event_matches(signal.event_type, trigger.event_types):
                 continue
 
             # Predicate evaluation (fine-grained payload filter)

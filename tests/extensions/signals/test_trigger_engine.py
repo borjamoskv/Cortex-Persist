@@ -437,3 +437,36 @@ class TestStats:
         engine.register(cond)
         # Stats still show it
         assert engine.stats()["registered_triggers"] == 1
+
+
+# ---------------------------------------------------------------------------
+# SignalReactor integration
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+class TestSignalReactor:
+    async def test_reactor_dispatches_to_trigger_engine(self) -> None:
+        from unittest.mock import MagicMock
+        from cortex.extensions.signals.reactor import SignalReactor
+        from cortex.extensions.signals.bus import SignalBus
+
+        # Mock bus to return a signal
+        mock_bus = MagicMock(spec=SignalBus)
+        signal = _fake_signal(event_type="test:event")
+        mock_bus.poll.return_value = [signal]
+
+        # Initialize reactor
+        reactor = SignalReactor(bus=mock_bus)
+
+        # Mock the trigger engine
+        mock_te = AsyncMock()
+        mock_te.evaluate = AsyncMock(return_value=[])
+        mock_te.list_triggers = MagicMock(return_value=[])
+
+        # Inject mock trigger engine getter or mock it
+        reactor._get_trigger_engine = MagicMock(return_value=mock_te)
+
+        processed = await reactor.process_once()
+        assert processed == 1
+        mock_te.evaluate.assert_called_once_with(signal)
