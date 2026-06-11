@@ -5,7 +5,7 @@ from pathlib import Path
 # Destroys all files in scratch/ directories of past conversations.
 
 BRAIN_DIR = Path("/Users/borjafernandezangulo/.gemini/antigravity/brain")
-CURRENT_CONVERSATION_ID = "ad59256f-dff0-4241-8bdc-8c44f9bb5ccd"
+CURRENT_CONVERSATION_ID = "abf2a897-cf96-40f1-8925-6b8868251a04"
 
 
 def purge_scratch_entropy():
