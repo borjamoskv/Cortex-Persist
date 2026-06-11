@@ -83,6 +83,11 @@ def run_audit(db_path: str) -> None:
             console.print(f"[dim]Signature: {result['signature'][:64]}...[/]")
             console.print(f"[dim]Previous Hash: {result['prev_hash']}[/]")
 
+            if risk_score >= 0.8:
+                import sys
+                console.print("\n[bold red]❌ COMMIT BLOCKED: High-Severity Structural Flaws Detected (>= 0.8)[/]")
+                sys.exit(1)
+
     asyncio.run(_audit())
 
 

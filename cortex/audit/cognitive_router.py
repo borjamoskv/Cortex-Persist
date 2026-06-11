@@ -59,7 +59,7 @@ class RoutingDecision:
 
 def cosine_similarity(v1: list[float], v2: list[float]) -> float:
     """Computes cosine similarity between two vector embeddings."""
-    dot_product = sum(a * b for a, b in zip(v1, v2))
+    dot_product = sum(a * b for a, b in zip(v1, v2, strict=True))
     norm_a = sum(a * a for a in v1) ** 0.5
     norm_b = sum(b * b for b in v2) ** 0.5
     if norm_a == 0.0 or norm_b == 0.0:
@@ -616,7 +616,7 @@ class RoutingReplayDebugger:
                     anchors = self.router.classifier.categories[cat_name].get(
                         "semantic_anchors", []
                     )
-                    for anchor_text, anchor_vector in zip(anchors, anchor_vectors):
+                    for anchor_text, anchor_vector in zip(anchors, anchor_vectors, strict=True):
                         sim = cosine_similarity(prompt_vector, anchor_vector)
                         if sim >= self.router.classifier.semantic_threshold:
                             detection_traces.append(
