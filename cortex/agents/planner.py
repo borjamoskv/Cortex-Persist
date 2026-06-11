@@ -52,8 +52,8 @@ class PlanStep:
     description: str = ""
 
     # Thermodynamic metadata
-    exergy_estimate: Decimal = 0.5  # Expected work yield [0.0, 1.0]
-    entropy_cost: Decimal = 0.1  # Expected entropy paid [0.0, 1.0]
+    exergy_estimate: Decimal = field(default_factory=lambda: Decimal("0.5"))  # Expected work yield [0.0, 1.0]
+    entropy_cost: Decimal = field(default_factory=lambda: Decimal("0.1"))  # Expected entropy paid [0.0, 1.0]
 
     # Execution state
     status: StepStatus = StepStatus.PENDING
@@ -70,7 +70,7 @@ class PlanStep:
     @property
     def net_exergy(self) -> float:
         """Predicted net exergy: work_yield - entropy_cost."""
-        return max(0.0, self.exergy_estimate - self.entropy_cost)
+        return float(max(Decimal('0.0'), self.exergy_estimate - self.entropy_cost))
 
     @property
     def elapsed_s(self) -> float | None:
@@ -113,15 +113,15 @@ class ExecutionPlan:
     plan_id: str = field(default_factory=lambda: str(uuid4()))
     objective: str = ""
     steps: list[PlanStep] = field(default_factory=list)
-    created_at: Decimal = field(default_factory=time.monotonic)
+    created_at: float = field(default_factory=time.monotonic)
 
     # Aggregate metrics (updated during execution)
-    total_exergy_produced: Decimal = 0.0
-    total_entropy_paid: Decimal = 0.0
+    total_exergy_produced: Decimal = field(default_factory=lambda: Decimal("0.0"))
+    total_entropy_paid: Decimal = field(default_factory=lambda: Decimal("0.0"))
 
     @property
     def net_exergy(self) -> float:
-        return self.total_exergy_produced - self.total_entropy_paid
+        return float(self.total_exergy_produced - self.total_entropy_paid)
 
     @property
     def is_complete(self) -> bool:
@@ -216,8 +216,8 @@ class ExergyPlanner:
                 tool_name=step_def.get("tool_name", f"step_{i}"),
                 arguments=step_def.get("arguments", {}),
                 description=step_def.get("description", f"Step {i}"),
-                exergy_estimate=step_def.get("exergy_estimate", 0.5),
-                entropy_cost=step_def.get("entropy_cost", 0.1),
+                exergy_estimate=Decimal(str(step_def.get("exergy_estimate", "0.5"))),
+                entropy_cost=Decimal(str(step_def.get("entropy_cost", "0.1"))),
                 retry_budget=step_def.get("retry_budget", 2),
                 depends_on=step_def.get("depends_on", []),
             )
