@@ -1,7 +1,7 @@
 import os
 import subprocess
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 # C5-REAL | SOVEREIGN AGENT
 # ROLE: IMPLACABLE-OMEGA (Absolute Exergy Maximizer)
@@ -14,7 +14,7 @@ class ImplacableOmegaAgent:
         self.state = "C5-REAL"
 
     def _log(self, message: str):
-        timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+        timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         entry = f"[{timestamp}] [IMPLACABLE-OMEGA] {message}\n"
         print(entry.strip())
         with open(self.log_file, "a") as f:
