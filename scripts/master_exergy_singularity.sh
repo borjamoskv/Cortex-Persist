@@ -1,5 +1,5 @@
 #!/bin/bash
-# SYSTEM_STATE: C5-REAL
+set -euo pipefail
 # INTENTION: Absolute Exergy Maximization of all final conversational vectors.
 
 LOG_FILE="/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/exergy_singularity.log"

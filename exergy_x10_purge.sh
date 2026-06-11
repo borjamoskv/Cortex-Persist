@@ -1,5 +1,5 @@
 #!/bin/bash
-# SYSTEM_STATE: C5-REAL
+set -euo pipefail
 # MULTIPLIER: x10 (Centuria Deep Purge)
 # TARGET: Ultimate Entropy Annihilation
 
