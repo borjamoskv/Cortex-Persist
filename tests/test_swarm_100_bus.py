@@ -21,7 +21,10 @@ class MockAgent(SwarmAgent):
             agent_id=self.agent_id,
             target=target,
             status="SUCCESS",
-            payload={"result": "ok"},
+            payload={
+                "result": "ok",
+                "proof": "Proof: { Base: 'Test', Range: [0,1], Confidence: C5-REAL }"
+            },
             metrics={"latency": 100},
         )
 
