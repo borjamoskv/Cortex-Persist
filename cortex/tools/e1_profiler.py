@@ -23,16 +23,14 @@ It does NOT touch the live engine, ledger, or database.
 from __future__ import annotations
 
 import json
-import math
 import statistics
-from dataclasses import dataclass, field
+from collections.abc import Iterable
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 from cortex.engine.meta_arbiter import MetaArbiterKernel, TrajectoryScore
 from cortex.tools.trace_adapter import ExecutionTrace
 from cortex.tools.trace_builder import TraceBuilder
-
 
 # ---------------------------------------------------------------------------
 # Report types
@@ -179,7 +177,7 @@ class E1Profiler:
         # positive dE rate: fraction of steps where energy increases
         positive_dE = sum(
             1
-            for a, b in zip(energies, energies[1:])
+            for a, b in zip(energies, energies[1:], strict=False)
             if b > a + self._kernel.eps
         )
         positive_dE_rate = positive_dE / max(1, n - 1)

@@ -7,8 +7,9 @@ Does NOT import from cortex.engine to avoid circular dependencies.
 """
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import Any, Iterator
+from typing import Any
 
 
 @dataclass
