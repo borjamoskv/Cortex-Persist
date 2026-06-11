@@ -37,56 +37,77 @@ class CausalClosureGuard:
 
     def _contains_structural_condensation(self, content: str) -> bool:
         """Detects if the content contains permanent structural artifacts."""
-        # Look for code blocks indicating logic synthesis
-        has_code_blocks = bool(re.search(r"```\w*", content, re.IGNORECASE))
+        # Check if the content is a serialized LedgerPayload
+        inner_contents = [content]
 
-        # Look for Ledger event payloads or Schema definitions
-        has_ledger_payload = "LedgerPayload" in content or "CORTEX-TAINT" in content
-        has_schema_update = "ALTER TABLE" in content or "CREATE TABLE" in content
-
-        # Look for rigorous proof structures (Rule R2 format)
-        has_formal_proof = bool(re.search(r"Proof:\s*\{.*Base:.*\}", content, re.IGNORECASE))
-
-        # Detect a plain JSON-array of dicts (e.g., "[{'test': True}, ...]")
-        # This matches the string produced by aggregated_payloads in Legion._crystallize
-        has_json_array = False
-        stripped_content = content.strip()
-        if stripped_content.startswith("[") and stripped_content.endswith("]"):
-            import ast
+        try:
             import json
+            parsed = json.loads(content)
+            if isinstance(parsed, dict):
+                # If it's a LedgerPayload wrapper, inspect the actual inner payloads
+                if parsed.get("type") == "LedgerPayload" and "payloads" in parsed:
+                    inner_contents = []
+                    for p in parsed["payloads"]:
+                        if isinstance(p, dict):
+                            # Extract all string values from the dictionary payload
+                            inner_contents.extend(str(v) for v in p.values() if isinstance(v, str))
+                        elif isinstance(p, str):
+                            inner_contents.append(p)
+        except Exception:
+            pass
 
-            try:
-                parsed = json.loads(stripped_content)
-                if (
-                    isinstance(parsed, list)
-                    and all(isinstance(x, dict) for x in parsed)
-                    and len(parsed) > 0
-                ):
-                    has_json_array = True
-            except Exception:
+        for c in inner_contents:
+            # Look for code blocks indicating logic synthesis
+            has_code_blocks = bool(re.search(r"```\w*", c, re.IGNORECASE))
+
+            # Look for Ledger event payloads or Schema definitions
+            # Check for CORTEX-TAINT in the payload, or LedgerPayload in actual payload text
+            has_ledger_payload = "CORTEX-TAINT" in c or ("LedgerPayload" in c and c != content)
+            has_schema_update = "ALTER TABLE" in c or "CREATE TABLE" in c
+
+            # Look for rigorous proof structures (Rule R2 format)
+            has_formal_proof = bool(re.search(r"Proof:\s*\{.*Base:.*\}", c, re.IGNORECASE))
+
+            # Detect a plain JSON-array of dicts
+            has_json_array = False
+            stripped_c = c.strip()
+            if stripped_c.startswith("[") and stripped_c.endswith("]"):
+                import ast
                 try:
-                    parsed = ast.literal_eval(stripped_content)
+                    parsed_arr = json.loads(stripped_c)
                     if (
-                        isinstance(parsed, list)
-                        and all(isinstance(x, dict) for x in parsed)
-                        and len(parsed) > 0
+                        isinstance(parsed_arr, list)
+                        and all(isinstance(x, dict) for x in parsed_arr)
+                        and len(parsed_arr) > 0
                     ):
                         has_json_array = True
                 except Exception:
-                    pass
+                    try:
+                        parsed_arr = ast.literal_eval(stripped_c)
+                        if (
+                            isinstance(parsed_arr, list)
+                            and all(isinstance(x, dict) for x in parsed_arr)
+                            and len(parsed_arr) > 0
+                        ):
+                            has_json_array = True
+                    except Exception:
+                        pass
 
-        # Use StructuralCertifier to validate formal JSON array of dicts
-        grade = StructuralCertifier.certify_structure(content)
-        has_valid_structure = grade == StructuralGrade.ACCEPTED
+            # Use StructuralCertifier to validate formal JSON structure
+            grade = StructuralCertifier.certify_structure(c)
+            has_valid_structure = grade == StructuralGrade.ACCEPTED
 
-        return (
-            has_code_blocks
-            or has_ledger_payload
-            or has_schema_update
-            or has_formal_proof
-            or has_json_array
-            or has_valid_structure
-        )
+            if (
+                has_code_blocks
+                or has_ledger_payload
+                or has_schema_update
+                or has_formal_proof
+                or has_json_array
+                or has_valid_structure
+            ):
+                return True
+
+        return False
 
     def verify_closure(self, proposal: SwarmProposal) -> bool:
         """Evaluates if the swarm execution achieved causal closure.
