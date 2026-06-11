@@ -85,7 +85,7 @@ class SignalReactor:
         te = self._get_trigger_engine()
         if te is not None:
             try:
-                te.evaluate(signal)
+                await te.evaluate(signal)
             except Exception:
                 logger.debug(
                     "TriggerEngine evaluation failed for %s",
@@ -124,7 +124,7 @@ class SignalReactor:
             self._trigger_engine = te
             logger.info(
                 "TriggerEngine initialized with %d conditions",
-                len(te._conditions),  # pyright: ignore
+                len(te.list_triggers()),
             )
             return te
         except Exception:
