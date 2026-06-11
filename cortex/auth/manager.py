@@ -28,7 +28,7 @@ class AuthManager:
 
     KEY_LENGTH = 32  # 256-bit keys
 
-    def __init__(self, backend: BaseAuthBackend | str | None = None):
+    def __init__(self, backend: BaseAuthBackend | str | None = None) -> None:
         """Initialize with an optional backend or db_path.
 
         Args:
