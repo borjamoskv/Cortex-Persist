@@ -92,10 +92,10 @@ class TestMoskvAegisEngine:
 
         modeler = MoskvAegisModeler()
         constraints = modeler.get_default_ruleset()
-        
+
         generator = MoskvVidentiaOracle()
         attacks = generator.generate(constraints)
-        
+
         assert len(attacks) > 0
         attack_names = [a["attack"] for a in attacks]
         assert "rule_conflict_exploitation" in attack_names
@@ -106,13 +106,10 @@ class TestMoskvAegisEngine:
         """MoskvVidentiaChainBuilder chains generated attacks into paths."""
         from cortex.audit.moskv_videntia import MoskvVidentiaChainBuilder
 
-        attacks = [
-            {"attack": "A", "target": "T1"},
-            {"attack": "B", "target": "T2"}
-        ]
+        attacks = [{"attack": "A", "target": "T1"}, {"attack": "B", "target": "T2"}]
         constructor = MoskvVidentiaChainBuilder()
         chains = constructor.chain(attacks)
-        
+
         assert len(chains) == 2
         assert "CHAIN::A@T1 -> B@T2" in chains
         assert "CHAIN::B@T2 -> A@T1" in chains
@@ -132,7 +129,7 @@ class TestMoskvAegisEngine:
     async def test_run_adversarial_audit_persists(self, aegis):
         """run_adversarial_audit should persist findings, chains, and signatures in SQLite."""
         report = await aegis.run_adversarial_audit()
-        
+
         assert "audit_id" in report
         assert "timestamp" in report
         assert "risk_score" in report
@@ -140,7 +137,7 @@ class TestMoskvAegisEngine:
         assert "exploit_chains" in report
         assert "signature" in report
         assert "prev_hash" in report
-        
+
         # Verify db persistence
         cursor = await aegis._conn.execute(
             "SELECT risk_score, prev_hash, signature FROM moskv_aegis_log"
@@ -156,27 +153,30 @@ class TestMoskvAegisEngine:
         """Successive runs should form a cryptographically chained prev_hash sequence."""
         r1 = await aegis.run_adversarial_audit()
         r2 = await aegis.run_adversarial_audit()
-        
+
         # Verify signatures of r1 and r2 are valid
         assert aegis.verify_entry(r1, aegis.ledger.public_key) is True
         assert aegis.verify_entry(r2, aegis.ledger.public_key) is True
-        
+
         # Verify that r2's prev_hash matches the computed entry_hash of r1
         import json
         import hashlib
+
         payload_obj = {
             "timestamp": r1["timestamp"],
             "risk_score": round(r1["risk_score"], 6),
             "findings": r1["findings"],
             "exploit_chains": r1["exploit_chains"],
-            "prev_hash": r1["prev_hash"]
+            "prev_hash": r1["prev_hash"],
         }
-        payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode(
+            "utf-8"
+        )
         expected_entry_hash = hashlib.sha256(payload_bytes).hexdigest()
-        
+
         assert r2["prev_hash"] == expected_entry_hash
         assert r2["prev_hash"] != r1["signature"]
-        
+
         # Verify from database order
         cursor = await aegis._conn.execute(
             "SELECT prev_hash, signature FROM moskv_aegis_log ORDER BY rowid ASC"

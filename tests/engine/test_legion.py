@@ -242,7 +242,7 @@ async def test_squadron_crystallize_cross_system_invariance():
                     "observation_hex": "010203",
                     "reward": 1.0,
                     "done": False,
-                    "proof": "Proof: { Base: 'Test', Range: [0,1], Confidence: C5-REAL }"
+                    "proof": "Proof: { Base: 'Test', Range: [0,1], Confidence: C5-REAL }",
                 },
                 metrics={},
             )

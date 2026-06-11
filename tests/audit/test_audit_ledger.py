@@ -156,8 +156,7 @@ class TestEnterpriseAuditLedger:
         # If batch flushed as two separate batches, second should chain to the entry_hash of the first
         if len(rows) == 2:
             cursor2 = await ledger._conn.execute(
-                "SELECT audit_id FROM security_audit_log WHERE signature = ?",
-                (rows[0][1],)
+                "SELECT audit_id FROM security_audit_log WHERE signature = ?", (rows[0][1],)
             )
             batch1_rows = await cursor2.fetchall()
             batch1_ids = [r[0] for r in batch1_rows]

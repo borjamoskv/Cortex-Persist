@@ -456,7 +456,9 @@ class CognitiveRouter:
         if not tier_policy:
             tier_policy = self.routing_policy["tiers"][self.routing_policy["default_tier"]]
 
-        assigned_model = tier_policy.get("default_model") or tier_policy.get("default", "Fable-5-Core")
+        assigned_model = tier_policy.get("default_model") or tier_policy.get(
+            "default", "Fable-5-Core"
+        )
         retention_required = False
 
         if sensitivity:
@@ -470,7 +472,9 @@ class CognitiveRouter:
                     break
             if not matched:
                 # Default restricted fallback
-                assigned_model = tier_policy.get("restricted_fallback_model") or tier_policy.get("restricted", "Opus-4.8-Fallback")
+                assigned_model = tier_policy.get("restricted_fallback_model") or tier_policy.get(
+                    "restricted", "Opus-4.8-Fallback"
+                )
                 retention_required = tier_policy.get("retention_for_restricted", False)
 
         timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()

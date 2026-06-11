@@ -42,6 +42,7 @@ import fcntl
 
 class AsyncFileLock:
     """Non-blocking asynchronous cross-process file lock using fcntl."""
+
     def __init__(self, lock_path: str = "/tmp/cortex_audit_ledger.lock") -> None:
         self.lock_path = lock_path
         self.fp = None
@@ -132,7 +133,7 @@ class EnterpriseAuditLedger:
                     # Reconstruct the last batch using its signature to compute its entry_hash
                     cursor2 = await self._conn.execute(
                         "SELECT audit_id FROM security_audit_log WHERE signature = ? ORDER BY rowid ASC",
-                        (sig,)
+                        (sig,),
                     )
                     rows2 = await cursor2.fetchall()
                     batch_audit_ids = [r[0] for r in rows2]
@@ -269,11 +270,8 @@ class EnterpriseAuditLedger:
             entry_hash = hashlib.sha256(
                 f"merkle_batch:{merkle_root}:{prev_hash}".encode()
             ).hexdigest()
-            
-            self.public_key.verify(
-                bytes.fromhex(signature_hex),
-                entry_hash.encode("utf-8")
-            )
+
+            self.public_key.verify(bytes.fromhex(signature_hex), entry_hash.encode("utf-8"))
             return True
         except (InvalidSignature, ValueError):
             return False

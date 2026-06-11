@@ -23,7 +23,7 @@ class MockAgent(SwarmAgent):
             status="SUCCESS",
             payload={
                 "result": "ok",
-                "proof": "Proof: { Base: 'Test', Range: [0,1], Confidence: C5-REAL }"
+                "proof": "Proof: { Base: 'Test', Range: [0,1], Confidence: C5-REAL }",
             },
             metrics={"latency": 100},
         )

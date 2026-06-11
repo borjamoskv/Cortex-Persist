@@ -43,9 +43,7 @@ class MoskvAegisModeler:
     def __init__(self, agents_md_path: str | None = None) -> None:
         if agents_md_path is None:
             # Look in parent directories
-            base_dir = os.path.dirname(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            )
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
             agents_md_path = os.path.join(base_dir, "AGENTS.md")
         self.agents_md_path = agents_md_path
 
@@ -62,9 +60,7 @@ class MoskvAegisModeler:
             with open(self.agents_md_path, encoding="utf-8") as f:
                 content = f.read()
 
-            pattern = re.compile(
-                r"\|\s*\*\*\[?(P\d)\]?\*\*\s*\|\s*\*\*(.*?)\*\*\s*—\s*(.*?)\s*\|"
-            )
+            pattern = re.compile(r"\|\s*\*\*\[?(P\d)\]?\*\*\s*\|\s*\*\*(.*?)\*\*\s*—\s*(.*?)\s*\|")
             matches = pattern.findall(content)
             for priority, title, description in matches:
                 constraints[title.strip()] = {
@@ -154,9 +150,11 @@ class MoskvAegisEngine:
                     "risk_score": round(risk_score, 6),
                     "findings": json.loads(findings_json),
                     "exploit_chains": json.loads(chains_json),
-                    "prev_hash": prev_hash
+                    "prev_hash": prev_hash,
                 }
-                payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                payload_bytes = json.dumps(
+                    payload_obj, sort_keys=True, separators=(",", ":")
+                ).encode("utf-8")
                 self._last_hash = hashlib.sha256(payload_bytes).hexdigest()
             else:
                 self._last_hash = "GENESIS"
@@ -189,11 +187,13 @@ class MoskvAegisEngine:
             "risk_score": round(risk_score, 6),
             "findings": findings,
             "exploit_chains": chains,
-            "prev_hash": self._last_hash
+            "prev_hash": self._last_hash,
         }
-        payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode(
+            "utf-8"
+        )
         entry_hash = hashlib.sha256(payload_bytes).hexdigest()
-        
+
         signature = self.ledger.private_key.sign(entry_hash.encode("utf-8")).hex()
 
         await self._conn.execute(
@@ -233,15 +233,14 @@ class MoskvAegisEngine:
                 "risk_score": round(entry["risk_score"], 6),
                 "findings": entry["findings"],
                 "exploit_chains": entry["exploit_chains"],
-                "prev_hash": entry["prev_hash"]
+                "prev_hash": entry["prev_hash"],
             }
-            payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
-            entry_hash = hashlib.sha256(payload_bytes).hexdigest()
-            
-            public_key.verify(
-                bytes.fromhex(entry["signature"]),
-                entry_hash.encode("utf-8")
+            payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode(
+                "utf-8"
             )
+            entry_hash = hashlib.sha256(payload_bytes).hexdigest()
+
+            public_key.verify(bytes.fromhex(entry["signature"]), entry_hash.encode("utf-8"))
             return True
         except Exception:
             return False

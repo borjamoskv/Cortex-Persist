@@ -69,7 +69,7 @@ def run_audit(db_path: str) -> None:
             if chains:
                 c_table = Table(title="[bold yellow]Exploit Chains[/]", show_lines=True)
                 c_table.add_column("Chain Steps", style="yellow")
-                
+
                 for c in chains:
                     c_table.add_row(c)
                 console.print(c_table)
@@ -82,7 +82,10 @@ def run_audit(db_path: str) -> None:
 
             if risk_score >= 0.8:
                 import sys
-                console.print("\n[bold red]❌ COMMIT BLOCKED: High-Severity Structural Flaws Detected (>= 0.8)[/]")
+
+                console.print(
+                    "\n[bold red]❌ COMMIT BLOCKED: High-Severity Structural Flaws Detected (>= 0.8)[/]"
+                )
                 sys.exit(1)
 
     asyncio.run(_audit())

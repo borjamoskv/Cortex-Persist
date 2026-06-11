@@ -94,16 +94,18 @@ def _execute_translation(request: TranslateRequest) -> TranslateResponse:
         "model": MODEL_NAME,
         "messages": [
             {"role": "system", "content": system_instruction},
-            {"role": "user", "content": prompt}
+            {"role": "user", "content": prompt},
         ],
         "temperature": 0.1,
-        "response_format": {"type": "json_object"}
+        "response_format": {"type": "json_object"},
     }
-    
+
     headers = {"Content-Type": "application/json"}
     try:
         with httpx.Client() as client:
-            resp = client.post(f"{LOCAL_API_URL}/chat/completions", json=payload, headers=headers, timeout=120.0)
+            resp = client.post(
+                f"{LOCAL_API_URL}/chat/completions", json=payload, headers=headers, timeout=120.0
+            )
             resp.raise_for_status()
             data = resp.json()
             content = data["choices"][0]["message"]["content"]

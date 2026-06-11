@@ -45,7 +45,9 @@ class MoskvVidentiaAgent(BaseAgent):
             if "map" in objective_lower or "problem" in objective_lower:
                 await self._map_vulnerabilities(message, task)
             else:
-                await self._fail_task(message, task, "Objective not supported by MoskvVidentiaAgent")
+                await self._fail_task(
+                    message, task, "Objective not supported by MoskvVidentiaAgent"
+                )
         except Exception as exc:
             logger.exception("MoskvVidentiaAgent failed to process message")
             await self._fail_task(message, task, f"Internal failure: {exc}")

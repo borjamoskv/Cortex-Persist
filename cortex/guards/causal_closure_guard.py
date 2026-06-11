@@ -42,6 +42,7 @@ class CausalClosureGuard:
 
         try:
             import json
+
             parsed = json.loads(content)
             if isinstance(parsed, dict):
                 # If it's a LedgerPayload wrapper, inspect the actual inner payloads
@@ -73,6 +74,7 @@ class CausalClosureGuard:
             stripped_c = c.strip()
             if stripped_c.startswith("[") and stripped_c.endswith("]"):
                 import ast
+
                 try:
                     parsed_arr = json.loads(stripped_c)
                     if (

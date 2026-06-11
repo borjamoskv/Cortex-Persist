@@ -85,18 +85,20 @@ class MoskvVidentiaChainBuilder:
         target_map: dict[str, list[dict[str, Any]]] = {}
         for a in attacks:
             target_map.setdefault(a["target"], []).append(a)
-            
+
         # Define target dependency flow for cognitive/adversarial chain
         dependencies = {
             "validation_layer": ["agent_prompt_boundary"],
             "audit_ledger": ["validation_layer"],
-            "governance_engine": ["validation_layer", "agent_prompt_boundary"]
+            "governance_engine": ["validation_layer", "agent_prompt_boundary"],
         }
-        
+
         # Check if we have any known targets to filter by graph-based clustering
-        known_targets = set(dependencies.keys()) | {t for deps in dependencies.values() for t in deps}
+        known_targets = set(dependencies.keys()) | {
+            t for deps in dependencies.values() for t in deps
+        }
         has_known_targets = any(t in known_targets for t in target_map)
-        
+
         chains = []
         if has_known_targets:
             # Construct causal chains where target has a dependency on other_target
