@@ -285,10 +285,60 @@ class MHCAntigenRouter:
     C5-REAL Implementation of the Adaptive Immunity Task Router.
     Bypasses LLM coordinator completely by matching deterministic
     SHA3 signatures and Regex Antigens to specific T-Cell Daemons.
+
+    Includes a Dynamic Antigen Evolution loop:
+    - Tracks routing misses (when a payload goes to LLM/fallback).
+    - If a signature (normalized payload template) repeats >= promotion_threshold times,
+      it compiles a new antigen pattern, promotes it to the active mesh, and persists it.
     """
 
-    def __init__(self):
+    def __init__(self, db_path=None, dynamic_antigens_path=None, promotion_threshold=3):
+        from pathlib import Path
         self._t_cells = {}  # Daemon registry mapping antigen signatures to agent IDs
+        self.promotion_threshold = promotion_threshold
+        
+        # Paths
+        if dynamic_antigens_path is None:
+            self.dynamic_antigens_path = Path.home() / ".cortex/dynamic_antigens.json"
+        else:
+            self.dynamic_antigens_path = Path(dynamic_antigens_path)
+            
+        # Signature tracking: signature_string -> {"agent_id": str, "hits": int}
+        self._miss_tracker = {}
+        
+        # Load pre-compiled/promoted dynamic antigens
+        self._load_dynamic_antigens()
+
+    def _load_dynamic_antigens(self):
+        """Loads previously promoted dynamic antigens from local storage."""
+        if not self.dynamic_antigens_path.exists():
+            return
+        try:
+            with open(self.dynamic_antigens_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                for item in data.get("promoted_antigens", []):
+                    agent_id = item["agent_id"]
+                    pattern = item["pattern"]
+                    self.register_t_cell(agent_id, pattern)
+            logger.info(f"[MHC] Loaded dynamic antigens from {self.dynamic_antigens_path}")
+        except Exception as e:
+            logger.error(f"[MHC] Failed to load dynamic antigens: {e}")
+
+    def _save_dynamic_antigens(self):
+        """Persists promoted dynamic antigens to local storage."""
+        try:
+            self.dynamic_antigens_path.parent.mkdir(parents=True, exist_ok=True)
+            promoted_list = []
+            for agent_id, pattern in self._t_cells.items():
+                promoted_list.append({
+                    "agent_id": agent_id,
+                    "pattern": pattern.pattern
+                })
+            with open(self.dynamic_antigens_path, "w", encoding="utf-8") as f:
+                json.dump({"promoted_antigens": promoted_list}, f, indent=2)
+            logger.info(f"[MHC] Successfully persisted antigens to {self.dynamic_antigens_path}")
+        except Exception as e:
+            logger.error(f"[MHC] Failed to persist dynamic antigens: {e}")
 
     def register_t_cell(self, agent_id: str, antigen_regex: str):
         """Registers a specific daemon to awaken ONLY upon antigen detection."""
@@ -310,3 +360,39 @@ class MHCAntigenRouter:
 
         logger.warning(f"[MHC] No T-Cell match for antigen signature {payload_hash}")
         return None
+
+    def record_miss(self, payload: str, resolved_agent_id: str) -> bool:
+        """
+        Records a routing miss where the mesh failed to match, but an agent was resolved.
+        If hits for this normalized signature >= threshold, promotes it to the active mesh.
+        Returns True if promoted, False otherwise.
+        """
+        # Clean/normalize template to catch structural recurrence
+        cleaned = re.sub(r'[^a-zA-Z0-9\s]', '', payload.lower())
+        sig = " ".join(cleaned.split())
+        if not sig:
+            return False
+
+        if sig not in self._miss_tracker:
+            self._miss_tracker[sig] = {"agent_id": resolved_agent_id, "hits": 0}
+            
+        self._miss_tracker[sig]["hits"] += 1
+        hits = self._miss_tracker[sig]["hits"]
+        
+        logger.info(
+            f"[MHC] Miss recorded for signature: '{sig[:40]}...' -> resolved to {resolved_agent_id} "
+            f"(hits: {hits}/{self.promotion_threshold})"
+        )
+        
+        if hits >= self.promotion_threshold:
+            escaped_sig = re.escape(sig)
+            pattern = rf"(?i)\b{escaped_sig}\b"
+            
+            logger.info(f"[MHC] 🔥 PROMOTING ANTIGEN to active mesh: {pattern} -> {resolved_agent_id}")
+            self.register_t_cell(resolved_agent_id, pattern)
+            self._save_dynamic_antigens()
+            
+            self._miss_tracker.pop(sig, None)
+            return True
+            
+        return False
