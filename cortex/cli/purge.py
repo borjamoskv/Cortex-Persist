@@ -28,7 +28,7 @@ def _purge_short_facts(conn, dry_run: bool) -> int:
     if not dry_run:
         conn.execute(
             "UPDATE facts SET valid_until = datetime('now'), "
-            "meta = json_set(COALESCE(meta, '{}'), "
+            "metadata = json_set(COALESCE(metadata, '{}'), "
             "'$.deprecation_reason', 'purge-too-short') "
             "WHERE length(content) < 15 AND valid_until IS NULL",
         )
@@ -74,7 +74,7 @@ def purge_duplicates(dry_run, db) -> None:
             if not dry_run:
                 conn.execute(
                     "UPDATE facts SET valid_until = datetime('now'), "
-                    "meta = json_set(COALESCE(meta, '{}'), "
+                    "metadata = json_set(COALESCE(metadata, '{}'), "
                     "'$.deprecation_reason', 'purge-duplicate') "
                     "WHERE content = ? AND project = ? AND id != ? "
                     "AND valid_until IS NULL",
@@ -123,7 +123,7 @@ def purge_empty(dry_run, db) -> None:
                 if not dry_run:
                     conn.execute(
                         "UPDATE facts SET valid_until = datetime('now'), "
-                        "meta = json_set(COALESCE(meta, '{}'), "
+                        "metadata = json_set(COALESCE(metadata, '{}'), "
                         "'$.deprecation_reason', 'purge-empty') "
                         "WHERE content LIKE ? AND valid_until IS NULL",
                         (pattern,),
@@ -177,7 +177,7 @@ def purge_project(project_name, dry_run, db) -> None:
         else:
             conn.execute(
                 "UPDATE facts SET valid_until = datetime('now'), "
-                "meta = json_set(COALESCE(meta, '{}'), "
+                "metadata = json_set(COALESCE(metadata, '{}'), "
                 "'$.deprecation_reason', 'purge-project') "
                 "WHERE project = ? AND valid_until IS NULL",
                 (project_name,),
