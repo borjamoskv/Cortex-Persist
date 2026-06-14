@@ -45,6 +45,7 @@ class HDCVectorStoreL2:
 
     __slots__ = (
         "_conn",
+        "_vec_loaded",
         "_db_path",
         "_encoder",
         "_half_life",
@@ -82,8 +83,13 @@ class HDCVectorStoreL2:
             )
             # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
             self._conn.execute("PRAGMA busy_timeout=5000")
-            self._conn.enable_load_extension(True)
-            sqlite_vec.load(self._conn)
+            self._vec_loaded = False
+            try:
+                self._conn.enable_load_extension(True)
+                sqlite_vec.load(self._conn)
+                self._vec_loaded = True
+            except (AttributeError, OSError, sqlite3.Error):
+                pass
             self._conn.row_factory = sqlite3.Row
 
             # Register Sovereign Functions
@@ -108,18 +114,30 @@ class HDCVectorStoreL2:
 
             # Vector Table (sqlite-vec uses float[N])
             dim = self._encoder.dimension
-            self._conn.execute(f"""
-                CREATE VIRTUAL TABLE IF NOT EXISTS hdc_vec_facts USING vec0(
-                    embedding float[{dim}]
-                )
-            """)
+            try:
+                self._conn.execute(f"""
+                    CREATE VIRTUAL TABLE IF NOT EXISTS hdc_vec_facts USING vec0(
+                        embedding float[{dim}]
+                    )
+                """)
+            except sqlite3.OperationalError as e:
+                if "no such module: vec0" in str(e):
+                    pass
+                else:
+                    raise
 
             # Specular Vector Table (G10 Intent Alignment)
-            self._conn.execute(f"""
-                CREATE VIRTUAL TABLE IF NOT EXISTS hdc_specular_vec_facts USING vec0(
-                    embedding float[{dim}]
-                )
-            """)
+            try:
+                self._conn.execute(f"""
+                    CREATE VIRTUAL TABLE IF NOT EXISTS hdc_specular_vec_facts USING vec0(
+                        embedding float[{dim}]
+                    )
+                """)
+            except sqlite3.OperationalError as e:
+                if "no such module: vec0" in str(e):
+                    pass
+                else:
+                    raise
 
             # Indexes
             self._conn.execute(
@@ -177,10 +195,11 @@ class HDCVectorStoreL2:
             )
             rowid = cursor.lastrowid
 
-            cursor.execute(
-                "INSERT INTO hdc_vec_facts(rowid, embedding) VALUES (?, ?)",
-                (rowid, embedding_bytes),
-            )
+            if self._vec_loaded:
+                cursor.execute(
+                    "INSERT INTO hdc_vec_facts(rowid, embedding) VALUES (?, ?)",
+                    (rowid, embedding_bytes),
+                )
 
             # 3. Store Specular Trace if available
             if getattr(fact, "specular_embedding", None):

@@ -126,8 +126,8 @@ class CognitiveRouter:
         if isinstance(sensitivity, str):
             try:
                 sensitivity = json.loads(sensitivity)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Failed to load sensitivity from string: %s", e)
         if not isinstance(sensitivity, list):
             sensitivity = []
 
@@ -203,7 +203,7 @@ class CognitiveRouter:
                             select_cols.append(f"'{self.routing_policy['version']}'")
                             insert_cols.append("routing_policy_version")
 
-                        query = f"INSERT INTO cognitive_router_log ({', '.join(insert_cols)}) SELECT {', '.join(select_cols)} FROM _cognitive_router_log_old"
+                        query = f"INSERT INTO cognitive_router_log ({', '.join(insert_cols)}) SELECT {', '.join(select_cols)} FROM _cognitive_router_log_old"  # noqa: S608
                         await self._conn.execute(query)
                         await self._conn.execute("DROP TABLE _cognitive_router_log_old")
                         await self._conn.commit()

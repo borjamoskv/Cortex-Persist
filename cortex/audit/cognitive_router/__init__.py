@@ -10,5 +10,5 @@ __all__ = [
     "CognitiveRouter",
     "RoutingReplayDebugger",
     "AdversarialPromptSimulator",
-    "cosine_similarity"
+    "cosine_similarity",
 ]
