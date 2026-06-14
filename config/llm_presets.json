@@ -440,5 +440,19 @@
     "intent_model_map": {
       "general": "grok-2"
     }
+  },
+  "nvidia": {
+    "base_url": "https://integrate.api.nvidia.com/v1",
+    "default_model": "nvidia/nemotron-3-ultra-550b",
+    "env_key": "NVIDIA_API_KEY",
+    "context_window": 128000,
+    "tier": "frontier",
+    "cost_class": "free",
+    "specialization": ["reasoning", "code", "general"],
+    "intent_model_map": {
+      "code":      "nvidia/nemotron-3-ultra-550b",
+      "reasoning": "nvidia/nemotron-3-ultra-550b",
+      "general":   "nvidia/nemotron-3-ultra-550b"
+    }
   }
 }
