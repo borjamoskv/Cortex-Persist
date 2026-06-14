@@ -294,18 +294,19 @@ class MHCAntigenRouter:
 
     def __init__(self, db_path=None, dynamic_antigens_path=None, promotion_threshold=3):
         from pathlib import Path
+
         self._t_cells = {}  # Daemon registry mapping antigen signatures to agent IDs
         self.promotion_threshold = promotion_threshold
-        
+
         # Paths
         if dynamic_antigens_path is None:
             self.dynamic_antigens_path = Path.home() / ".cortex/dynamic_antigens.json"
         else:
             self.dynamic_antigens_path = Path(dynamic_antigens_path)
-            
+
         # Signature tracking: signature_string -> {"agent_id": str, "hits": int}
         self._miss_tracker = {}
-        
+
         # Load pre-compiled/promoted dynamic antigens
         self._load_dynamic_antigens()
 
@@ -314,7 +315,7 @@ class MHCAntigenRouter:
         if not self.dynamic_antigens_path.exists():
             return
         try:
-            with open(self.dynamic_antigens_path, "r", encoding="utf-8") as f:
+            with open(self.dynamic_antigens_path, encoding="utf-8") as f:
                 data = json.load(f)
                 for item in data.get("promoted_antigens", []):
                     agent_id = item["agent_id"]
@@ -330,10 +331,7 @@ class MHCAntigenRouter:
             self.dynamic_antigens_path.parent.mkdir(parents=True, exist_ok=True)
             promoted_list = []
             for agent_id, pattern in self._t_cells.items():
-                promoted_list.append({
-                    "agent_id": agent_id,
-                    "pattern": pattern.pattern
-                })
+                promoted_list.append({"agent_id": agent_id, "pattern": pattern.pattern})
             with open(self.dynamic_antigens_path, "w", encoding="utf-8") as f:
                 json.dump({"promoted_antigens": promoted_list}, f, indent=2)
             logger.info(f"[MHC] Successfully persisted antigens to {self.dynamic_antigens_path}")
@@ -368,31 +366,33 @@ class MHCAntigenRouter:
         Returns True if promoted, False otherwise.
         """
         # Clean/normalize template to catch structural recurrence
-        cleaned = re.sub(r'[^a-zA-Z0-9\s]', '', payload.lower())
+        cleaned = re.sub(r"[^a-zA-Z0-9\s]", "", payload.lower())
         sig = " ".join(cleaned.split())
         if not sig:
             return False
 
         if sig not in self._miss_tracker:
             self._miss_tracker[sig] = {"agent_id": resolved_agent_id, "hits": 0}
-            
+
         self._miss_tracker[sig]["hits"] += 1
         hits = self._miss_tracker[sig]["hits"]
-        
+
         logger.info(
             f"[MHC] Miss recorded for signature: '{sig[:40]}...' -> resolved to {resolved_agent_id} "
             f"(hits: {hits}/{self.promotion_threshold})"
         )
-        
+
         if hits >= self.promotion_threshold:
             escaped_sig = re.escape(sig)
             pattern = rf"(?i)\b{escaped_sig}\b"
-            
-            logger.info(f"[MHC] 🔥 PROMOTING ANTIGEN to active mesh: {pattern} -> {resolved_agent_id}")
+
+            logger.info(
+                f"[MHC] 🔥 PROMOTING ANTIGEN to active mesh: {pattern} -> {resolved_agent_id}"
+            )
             self.register_t_cell(resolved_agent_id, pattern)
             self._save_dynamic_antigens()
-            
+
             self._miss_tracker.pop(sig, None)
             return True
-            
+
         return False

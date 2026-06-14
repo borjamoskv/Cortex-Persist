@@ -581,26 +581,28 @@ def test_mhc_antigen_router_evolution(tmp_path):
     from cortex.engine.causal.taint_engine import MHCAntigenRouter
 
     temp_antigens_file = tmp_path / "dynamic_antigens_test.json"
-    
+
     # Initialize with a threshold of 2 hits
     router = MHCAntigenRouter(dynamic_antigens_path=temp_antigens_file, promotion_threshold=2)
-    
+
     # 1. Check initially it has no pre-compiled antigens
     assert router.present_antigen("trigger build pipeline") is None
-    
+
     # 2. Record first miss
     promoted = router.record_miss("trigger build pipeline", "code-engineer")
     assert promoted is False
     assert router.present_antigen("trigger build pipeline") is None
-    
+
     # 3. Record second miss (hitting threshold)
     promoted = router.record_miss("trigger build pipeline", "code-engineer")
     assert promoted is True
-    
+
     # 4. It should now be promoted and route automatically!
     assert router.present_antigen("trigger build pipeline") == "code-engineer"
-    assert router.present_antigen("Trigger Build Pipeline!!!") == "code-engineer" # normalized match
-    
+    assert (
+        router.present_antigen("Trigger Build Pipeline!!!") == "code-engineer"
+    )  # normalized match
+
     # 5. Check persistence: create new router loading the same temp file
     new_router = MHCAntigenRouter(dynamic_antigens_path=temp_antigens_file)
     assert new_router.present_antigen("trigger build pipeline") == "code-engineer"
