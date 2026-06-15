@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
+
 from cortex.config import DB_PATH
 from cortex.database.core import connect_async_ctx
 
@@ -33,7 +34,7 @@ class BillingIntegrityGateway:
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "schema", "events_log.sql"
         )
         if os.path.exists(schema_path):
-            with open(schema_path, "r") as f:
+            with open(schema_path) as f:
                 schema_sql = f.read()
             async with connect_async_ctx(self.db_path) as conn:
                 await conn.executescript(schema_sql)
@@ -106,7 +107,7 @@ class BillingIntegrityGateway:
             plan = session.get("metadata", {}).get("plan", "pro")
 
             if api_state.auth_manager:
-                from cortex.routes.stripe import PLAN_CONFIG, _generate_api_key
+                from cortex.routes.stripe import PLAN_CONFIG
 
                 plan_cfg = PLAN_CONFIG.get(plan, PLAN_CONFIG["pro"])
                 await api_state.auth_manager.create_key(

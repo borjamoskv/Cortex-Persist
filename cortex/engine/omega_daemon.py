@@ -9,7 +9,6 @@ import os
 import re
 import subprocess
 from decimal import Decimal
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -335,7 +334,7 @@ class OmegaDaemon:
             logger.debug("Homeostasis mantenida. Sistema estable.")
             self.events.append(f"[{timestamp}] Homeostasis mantenida. Sistema estable.")
 
-    async def start(self, interval_s: Optional[float] = None):
+    async def start(self, interval_s: float | None = None):
         """OmegaDaemon ciclo continuo."""
         if interval_s is not None:
             self.tick_rate = int(interval_s)

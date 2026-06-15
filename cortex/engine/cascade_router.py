@@ -5,8 +5,12 @@ Tactical routing logic to delegate heavy LLM tasks to local CLI engines:
 Gemini (Antigravity), Claude Code, and Codex.
 """
 
+import hashlib
 import logging
+import os
+import sqlite3
 import subprocess
+from pathlib import Path
 
 logger = logging.getLogger("cortex_cascade.router")
 
@@ -18,7 +22,11 @@ class CascadeRouter:
         pass
 
     def route_task(
-        self, prompt: str, task_type: str = "general", files: list[str] | None = None
+        self,
+        prompt: str,
+        task_type: str = "general",
+        files: list[str] | None = None,
+        task_id: str | None = None,
     ) -> str:
         """
         Routes the task based on heuristics.
@@ -26,7 +34,7 @@ class CascadeRouter:
         """
         engine = self._select_engine(task_type, files)
         logger.info(f"🧠 [ROUTER] Selected engine: {engine} for task: {task_type}")
-        return self._execute(engine, prompt, files)
+        return self._execute(engine, prompt, files, task_id)
 
     def _select_engine(self, task_type: str, files: list[str] | None) -> str:
         num_files = len(files) if files else 0
@@ -41,10 +49,11 @@ class CascadeRouter:
         else:
             return "claude"  # default fallback
 
-    def _execute(self, engine: str, prompt: str, files: list[str] | None) -> str:
+    def _execute(
+        self, engine: str, prompt: str, files: list[str] | None, task_id: str | None
+    ) -> str:
         try:
             if engine == "gemini":
-                # gemini-cli supports context loading via flags
                 cmd = ["npx", "-y", "@google/gemini-cli"]
                 if files:
                     for f in files:
@@ -52,26 +61,68 @@ class CascadeRouter:
                 cmd.append(prompt)
 
             elif engine == "claude":
-                # claude-code run non-interactively to stdout
                 cmd = ["npx", "-y", "@anthropic-ai/claude-code", "--print", "-q", prompt]
 
             elif engine == "codex":
-                # codex binary in path
                 cmd = ["codex", prompt]
 
             else:
                 raise ValueError(f"Unknown engine: {engine}")
 
             logger.info(f"🚀 [ROUTER] Dispatching to {engine}...")
-            # 5 minute timeout for complex generation
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+
+            # Selectively pass API keys from parent environment
+            child_env = {**os.environ}
+
+            result = subprocess.run(cmd, env=child_env, capture_output=True, text=True, timeout=300)
 
             if result.returncode != 0:
                 logger.error(f"❌ [ROUTER] {engine} failed. STDERR: {result.stderr.strip()}")
                 return f"Error ({engine}): {result.stderr.strip()}"
 
-            return result.stdout.strip()
+            stdout = result.stdout.strip()
 
+            # Log to DB for BM25 indexing
+            if task_id:
+                try:
+                    db_path = Path("~/.cortex/cortex.db").expanduser()
+                    if db_path.exists():
+                        conn = sqlite3.connect(db_path)
+                        digest = hashlib.sha256(stdout.encode("utf-8")).hexdigest()[:16]
+                        # Escribir en la tabla de episodios/BM25
+                        conn.execute(
+                            "INSERT INTO episodes (event_type, project, content) VALUES (?, ?, ?)",
+                            (
+                                "llm_task_result",
+                                "cortex-engine",
+                                f"task_id:{task_id} engine:{engine} digest:{digest}\n{stdout[:500]}",
+                            ),
+                        )
+                        # Opcional: Actualizar la tarea original
+                        try:
+                            conn.execute(
+                                "UPDATE tasks SET status='completed' WHERE id=?", (task_id,)
+                            )
+                        except sqlite3.OperationalError:
+                            pass  # Ignorar si la tabla tasks no tiene esa estructura
+                        conn.commit()
+                        conn.close()
+                except Exception as db_e:
+                    logger.error(f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}")
+
+            return stdout
+
+        except FileNotFoundError:
+            logger.error(
+                f"🔌 [ROUTER] CLI no encontrado en PATH: {cmd[0]}. Activando circuit breaker..."
+            )
+            try:
+                from cortex.engine.circuit_breaker import CircuitBreaker
+
+                cb = CircuitBreaker()
+                return cb.fallback_response(engine, prompt)
+            except ImportError:
+                return f"Error: {cmd[0]} not found and circuit breaker unavailable."
         except subprocess.TimeoutExpired:
             logger.error(f"⏱️ [ROUTER] {engine} execution timed out (300s).")
             return f"Error: {engine} timed out."

@@ -1,7 +1,9 @@
 # [C5-REAL] Exergy-Maximized Benchmark for Gossip Federation Convergence
 import asyncio
 import time
+
 from cortex.extensions.federation.gossip import GossipNode
+
 
 async def run_gossip_benchmark(node_count=6):
     print(f"🚀 Initializing Gossip Federation Convergence Benchmark with {node_count} nodes...")

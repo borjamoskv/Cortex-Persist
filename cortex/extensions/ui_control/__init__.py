@@ -22,6 +22,8 @@ from cortex.extensions.ui_control.applescript import (
     run_applescript,
     set_clipboard,
 )
+from cortex.extensions.ui_control.bootstrapper import PermsBootstrapper
+from cortex.extensions.ui_control.feedback_loop import UIFeedbackLoop
 from cortex.extensions.ui_control.keyboard import KeyboardEngine
 from cortex.extensions.ui_control.maestro import MaestroUI
 from cortex.extensions.ui_control.models import (
@@ -36,8 +38,6 @@ from cortex.extensions.ui_control.models import (
 from cortex.extensions.ui_control.mouse import MouseEngine
 from cortex.extensions.ui_control.vision import VisionEngine
 from cortex.extensions.ui_control.window import WindowEngine
-from cortex.extensions.ui_control.feedback_loop import UIFeedbackLoop
-from cortex.extensions.ui_control.bootstrapper import PermsBootstrapper
 
 __all__ = [
     "AXElement",

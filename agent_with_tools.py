@@ -5,12 +5,11 @@ Zero-dependency agent (ollama-python + math/re).
 Optimizado para M3 Pro 18GB: 100% local, VRAM cero, indexación instantánea.
 """
 
+import math
 import os
 import re
-import math
 import subprocess
 from collections import Counter
-from typing import List, Tuple, Optional
 
 import ollama
 
@@ -35,7 +34,7 @@ MAX_REACT_STEPS = 6
 
 class SimpleBM25:
     """Motor BM25 ultraligero y rápido para búsqueda en código sin dependencias ni VRAM."""
-    def __init__(self, documents: List[str], metadatas: List[dict], b: float = 0.75, k1: float = 1.5):
+    def __init__(self, documents: list[str], metadatas: list[dict], b: float = 0.75, k1: float = 1.5):
         self.documents = documents
         self.metadatas = metadatas
         self.b = b
@@ -46,7 +45,7 @@ class SimpleBM25:
         self.idf = {}
         self._initialize()
 
-    def tokenize(self, text: str) -> List[str]:
+    def tokenize(self, text: str) -> list[str]:
         # Extrae palabras clave e identificadores de código (variables, funciones)
         return re.findall(r'[a-zA-Z0-9_]+', text.lower())
 
@@ -64,7 +63,7 @@ class SimpleBM25:
         for doc in self.documents:
             self.doc_freqs.append(Counter(self.tokenize(doc)))
 
-    def query(self, query_text: str, k: int = 3) -> List[Tuple[str, dict]]:
+    def query(self, query_text: str, k: int = 3) -> list[tuple[str, dict]]:
         query_words = self.tokenize(query_text)
         scores = []
         for i in range(len(self.documents)):
@@ -89,7 +88,7 @@ class SimpleBM25:
 
 # ==================== RAG INGESTION ====================
 
-def chunk_code(code: str, max_words: int = CHUNK_SIZE) -> List[str]:
+def chunk_code(code: str, max_words: int = CHUNK_SIZE) -> list[str]:
     """Segmenta código por bloques de líneas."""
     lines = code.split("\n")
     chunks, current, count = [], [], 0
@@ -119,7 +118,7 @@ def build_search_index() -> SimpleBM25:
                     continue
                 fpath = os.path.join(root, fname)
                 try:
-                    with open(fpath, "r", encoding="utf-8") as f:
+                    with open(fpath, encoding="utf-8") as f:
                         code = f.read()
                 except Exception:
                     continue

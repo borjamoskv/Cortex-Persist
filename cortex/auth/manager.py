@@ -9,9 +9,9 @@ import logging
 import secrets
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import Any
-from concurrent.futures import ThreadPoolExecutor
 
 import cortex_rs
 from cortex.auth.backends import BaseAuthBackend
