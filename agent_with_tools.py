@@ -220,7 +220,10 @@ def parse_react(text: str) -> dict:
 
 
 def should_use_rag(query: str) -> bool:
-    trigger_words = ["buscar", "¿cómo", "explica", "¿qué", "código", "implementación"]
+    """RAG solo se activa para queries de búsqueda/exploración de codebase."""
+    trigger_words = ["buscar", "¿cómo", "explica", "¿qué", "código", "implementación",
+                     "cómo se", "qué hace", "funciona", "persistencia", "estado",
+                     "conexión", "api", "database", "db", "postgres", "fastapi"]
     return any(word in query.lower() for word in trigger_words)
 
 def react_loop(query: str, index: SimpleBM25) -> str:
