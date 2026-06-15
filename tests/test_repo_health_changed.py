@@ -6,8 +6,8 @@ from pathlib import Path
 
 
 def _load_module():
-    script_path = Path(__file__).resolve().parents[1] / "scripts" / "repo_health_changed.py"
-    spec = importlib.util.spec_from_file_location("repo_health_changed", script_path)
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "repo_health.py"
+    spec = importlib.util.spec_from_file_location("repo_health", script_path)
     assert spec is not None
     assert spec.loader is not None
     module = importlib.util.module_from_spec(spec)

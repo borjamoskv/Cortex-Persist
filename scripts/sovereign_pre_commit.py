@@ -12,7 +12,37 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from _changed_files import changed_files, run_git
+from repo_health import changed_files, run_git
+
+import time
+try:
+    from cortex.ledger.models import LedgerEvent
+    from cortex.ledger.queue import EnrichmentQueue
+    from cortex.ledger.store import LedgerStore
+    from cortex.ledger.writer import LedgerWriter
+except ImportError:
+    LedgerEvent = None
+    LedgerWriter = None
+
+def log_audit_trail(action: str, payload: dict):
+    if LedgerEvent and LedgerWriter and LedgerStore and EnrichmentQueue:
+        try:
+            store = LedgerStore()
+            queue = EnrichmentQueue()
+            writer = LedgerWriter(store, queue)
+            event = LedgerEvent(
+                event_id=f"precommit-{int(time.time())}",
+                ts=int(time.time()),
+                tool="sovereign_pre_commit",
+                actor="SYSTEM_DAEMON",
+                action=action,
+                payload=payload,
+                semantic_status="SUCCESS" if action == "COMMIT_ALLOWED" else "BLOCKED",
+            )
+            writer.append(event)
+        except Exception:
+            pass
+
 
 # ── Forbidden patterns (case-insensitive) ─────────────────────
 FORBIDDEN_PATTERNS: list[re.Pattern] = [
@@ -126,8 +156,10 @@ def main() -> int:
         )
         for v in violations:
             print(v)
+        log_audit_trail("COMMIT_BLOCKED", {"violations": violations, "scope": scope})
         return 1
 
+    log_audit_trail("COMMIT_ALLOWED", {"files_scanned": len(files)})
     return 0
 
 

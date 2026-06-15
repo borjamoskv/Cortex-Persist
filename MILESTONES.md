@@ -866,3 +866,18 @@ Proof:
 
 
 
+### Hito 52: Deterministic Swarm Routing Topology & Memory Handler Alignment
+- **Target**: [cortex/types/swarm.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/types/swarm.py), [cortex/routes/agents.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/routes/agents.py), [cortex/swarm/runtime.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/runtime.py)
+- **Objective**: Implementación de topología determinista para el registro de agentes (V2) integrando el motor persistente y la memoria volátil del Swarm (`AgentRegistry`). Se inyecta `agent_id` de forma transversal a través del objeto `meta` en `AgentCapability` para asegurar el puente causal entre SQLite y el bus de eventos en memoria.
+- **Yield Target**: Cero fragmentación del ledger entre la BD de CORTEX y el registro dinámico de agentes (SwarmRunner).
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits `99069e0dd` y la suite de tests `/v2/agents` pasando correctamente.
+```yaml
+Claim: Topología determinista de enrutamiento de Swarm y alineación de Memory Handler
+Proof:
+  Base: "Inyección del SwarmRegistry en lifespan() y validación Pydantic estricta sin mutar models.py"
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-15
+```
+

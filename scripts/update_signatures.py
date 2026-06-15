@@ -8,8 +8,31 @@ import re
 import sys
 from pathlib import Path
 
+import time
+
 BLOG_DIR = Path(__file__).resolve().parents[1] / "src" / "pages" / "blog"
 
+def log_audit_trail(action: str, payload: dict):
+    try:
+        from cortex.ledger.models import LedgerEvent
+        from cortex.ledger.queue import EnrichmentQueue
+        from cortex.ledger.store import LedgerStore
+        from cortex.ledger.writer import LedgerWriter
+        store = LedgerStore()
+        queue = EnrichmentQueue()
+        writer = LedgerWriter(store, queue)
+        event = LedgerEvent(
+            event_id=f"signatures-{int(time.time())}",
+            ts=int(time.time()),
+            tool="update_signatures",
+            actor="SYSTEM_DAEMON",
+            action=action,
+            payload=payload,
+            semantic_status="SUCCESS",
+        )
+        writer.append(event)
+    except Exception:
+        pass
 
 def main() -> int:
     if not BLOG_DIR.exists():
@@ -100,6 +123,7 @@ def main() -> int:
             try:
                 current["path"].write_text(updated_content, encoding="utf-8")
                 print(f"Updated signature in: {current['path'].name}")
+                log_audit_trail("SIGNATURE_UPDATED", {"file": current["path"].name})
             except OSError as e:
                 print(f"Error writing to {current['path'].name}: {e}")
                 return 1
