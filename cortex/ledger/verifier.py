@@ -76,22 +76,96 @@ class LedgerVerifier:
 
     def _get_mldsa_private_key(self):
         import os
-
+        import stat
+        import base64
         from cryptography.hazmat.primitives.asymmetric import mldsa
+        from cortex.crypto.aes import get_default_encrypter
+        from cortex.crypto.keyring import keyring
 
         db_dir = os.path.dirname(self.store.db_path) if self.store.db_path else "."
         if not db_dir:
             db_dir = "."
         key_path = os.path.join(db_dir, "cortex_mldsa_sovereign.bin")
+        encrypter = get_default_encrypter()
+
+        seed = None
+
+        # 1. Try to load from disk
         if os.path.exists(key_path):
+            # Enforce chmod 600 permissions
+            os.chmod(key_path, 0o600)
+            
             with open(key_path, "rb") as key_file:
-                seed = key_file.read()
-            return mldsa.MLDSA44PrivateKey.from_seed_bytes(seed)
-        private_key = mldsa.MLDSA44PrivateKey.generate()
-        os.makedirs(db_dir, exist_ok=True)
-        with open(key_path, "wb") as key_file:
-            key_file.write(private_key.private_bytes_raw())
-        return private_key
+                content = key_file.read()
+            
+            if content.startswith(b"v6_aesgcm:"):
+                decrypted_str = encrypter.decrypt_str(content.decode("utf-8"), tenant_id="default")
+                if decrypted_str:
+                    seed = base64.b64decode(decrypted_str)
+            else:
+                # Legacy raw format
+                seed = content
+                
+                # If master key is active, migrate to encrypted format
+                if encrypter.is_active:
+                    seed_b64 = base64.b64encode(seed).decode("utf-8")
+                    encrypted_str = encrypter.encrypt_str(seed_b64, tenant_id="default")
+                    if encrypted_str:
+                        with open(key_path, "wb") as key_file:
+                            key_file.write(encrypted_str.encode("utf-8"))
+                        os.chmod(key_path, 0o600)
+
+        # 2. If not on disk, try to get from keyring
+        if seed is None:
+            if keyring is not None and not os.environ.get("CORTEX_TESTING"):
+                try:
+                    keyring_b64 = keyring.get_password("cortex_v6", "mldsa_sovereign_seed")
+                    if keyring_b64:
+                        seed = base64.b64decode(keyring_b64)
+                        # Write to disk
+                        os.makedirs(db_dir, exist_ok=True)
+                        if encrypter.is_active:
+                            seed_b64 = base64.b64encode(seed).decode("utf-8")
+                            encrypted_str = encrypter.encrypt_str(seed_b64, tenant_id="default")
+                            if encrypted_str:
+                                with open(key_path, "wb") as key_file:
+                                    key_file.write(encrypted_str.encode("utf-8"))
+                        else:
+                            with open(key_path, "wb") as key_file:
+                                key_file.write(seed)
+                        os.chmod(key_path, 0o600)
+                except Exception:
+                    pass
+
+        # 3. If still not found, generate new key
+        if seed is None:
+            private_key = mldsa.MLDSA44PrivateKey.generate()
+            seed = private_key.private_bytes_raw()
+            
+            # Vault in keyring if available
+            if keyring is not None and not os.environ.get("CORTEX_TESTING"):
+                try:
+                    seed_b64 = base64.b64encode(seed).decode("utf-8")
+                    keyring.set_password("cortex_v6", "mldsa_sovereign_seed", seed_b64)
+                except Exception:
+                    pass
+            
+            # Write to disk
+            os.makedirs(db_dir, exist_ok=True)
+            if encrypter.is_active:
+                seed_b64 = base64.b64encode(seed).decode("utf-8")
+                encrypted_str = encrypter.encrypt_str(seed_b64, tenant_id="default")
+                if encrypted_str:
+                    with open(key_path, "wb") as key_file:
+                        key_file.write(encrypted_str.encode("utf-8"))
+            else:
+                with open(key_path, "wb") as key_file:
+                    key_file.write(seed)
+            os.chmod(key_path, 0o600)
+            return private_key
+
+        return mldsa.MLDSA44PrivateKey.from_seed_bytes(seed)
+
 
     def create_checkpoint(self, batch_size: int = 10) -> int | None:
         from cortex.consensus.merkle import MerkleTree
