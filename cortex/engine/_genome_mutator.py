@@ -90,6 +90,9 @@ class GenomeMutator:
             try:
                 import cortex_rs
 
+                if not hasattr(cortex_rs, "GenomeMutatorRs"):
+                    raise ImportError("GenomeMutatorRs not available in cortex_rs")
+
                 tree_json = json.dumps(child.dispatch_tree, default=str)
                 new_tree_json = cortex_rs.GenomeMutatorRs.mutate_tree(  # pyright: ignore[reportAttributeAccessIssue]
                     tree_json, mutation_type.value, child.lineage.generation
