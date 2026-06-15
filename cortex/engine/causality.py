@@ -109,7 +109,7 @@ class AsyncCausalGraph:
         self.conn = conn
         try:
             self.atms = AtmsAdapter() if AtmsAdapter else None
-        except RuntimeError as e:
+        except (RuntimeError, AttributeError) as e:
             logger.warning(f"Rust ATMS disabled: {e}")
             self.atms = None
 

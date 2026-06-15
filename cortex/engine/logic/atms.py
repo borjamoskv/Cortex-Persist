@@ -4,6 +4,12 @@ import logging
 # Attempt to load the Rust PyO3 extension
 try:
     import cortex_rs
+
+    if not hasattr(cortex_rs, "AtmsGraph"):
+        logging.getLogger(__name__).warning(
+            "cortex_rs is not installed. AtmsGraph will not be hardware-accelerated."
+        )
+        cortex_rs = None
 except ImportError:
     cortex_rs = None
     logging.getLogger(__name__).warning(
@@ -20,7 +26,7 @@ class AtmsAdapter:
     def __init__(self):
         if cortex_rs is None:
             raise RuntimeError("cortex_rs PyO3 extension is required for ATMS operations.")
-        self._graph = cortex_rs.AtmsGraph()
+        self._graph = cortex_rs.AtmsGraph()  # AtmsGraph presence verified at import time
 
     def add_node(self, node_id: str) -> None:
         """Add a causal or logical node to the ATMS graph."""
