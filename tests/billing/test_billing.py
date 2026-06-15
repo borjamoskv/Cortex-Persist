@@ -11,6 +11,9 @@ import os
 import tempfile
 import pytest
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts" / "lab"))
 from stripe_config import StripeBillingConfig
 from cortex.extensions.billing.models import BillingEvent, FailureType, StripeInvoice
 from cortex.extensions.billing.gateway import StripeBillingGateway
