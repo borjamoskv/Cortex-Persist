@@ -10,11 +10,19 @@ import asyncio
 import logging
 from typing import Any
 
-from pythonosc.dispatcher import Dispatcher
-from pythonosc.osc_message_builder import OscMessageBuilder
-from pythonosc.osc_server import AsyncIOOSCUDPServer
-
 logger = logging.getLogger("cortex.bci.osc_bridge")
+
+try:
+    from pythonosc.dispatcher import Dispatcher
+    from pythonosc.osc_message_builder import OscMessageBuilder
+    from pythonosc.osc_server import AsyncIOOSCUDPServer
+    pythonosc_available = True
+except ImportError:
+    Dispatcher = None  # type: ignore
+    OscMessageBuilder = None  # type: ignore
+    AsyncIOOSCUDPServer = None  # type: ignore
+    pythonosc_available = False
+    logger.warning("python-osc library not installed; AetherOscBridge is running in fallback/offline mode.")
 
 
 class AetherOscBridge:
@@ -30,8 +38,11 @@ class AetherOscBridge:
         self.tx_ip = tx_ip
         self.tx_port = tx_port
 
-        self.dispatcher = Dispatcher()
-        self.dispatcher.map("/cortex/physical/*", self._handle_physical_telemetry)
+        if Dispatcher is not None:
+            self.dispatcher = Dispatcher()
+            self.dispatcher.map("/cortex/physical/*", self._handle_physical_telemetry)
+        else:
+            self.dispatcher = None
 
         self.server: AsyncIOOSCUDPServer | None = None
         self.transport = None
@@ -44,6 +55,10 @@ class AetherOscBridge:
 
     async def start(self) -> None:
         """Binds the asynchronous OSC server to listen for hardware inputs."""
+        if AsyncIOOSCUDPServer is None:
+            logger.warning("python-osc is not installed. OSC Bridge RX/TX binding skipped.")
+            return
+
         loop = asyncio.get_running_loop()
         self.server = AsyncIOOSCUDPServer((self.rx_ip, self.rx_port), self.dispatcher, loop)
 
@@ -72,6 +87,9 @@ class AetherOscBridge:
         if not self.tx_transport:
             logger.warning("OSC Bridge TX not active. Dropping telemetry.")
             return
+        if OscMessageBuilder is None:
+            logger.warning("python-osc missing; cannot emit ledger mutation telemetry.")
+            return
 
         msg = OscMessageBuilder(address="/cortex/ledger/mutation")
         msg.add_arg(tx_id)
@@ -87,6 +105,8 @@ class AetherOscBridge:
     def emit_swarm_consensus(self, agent_id: str, vote: str, confidence: float) -> None:
         """Emits Byzantine Swarm Votes to the physical layer (e.g. for light sequencing)."""
         if not self.tx_transport:
+            return
+        if OscMessageBuilder is None:
             return
 
         msg = OscMessageBuilder(address=f"/cortex/swarm/vote/{agent_id}")
