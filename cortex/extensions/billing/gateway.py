@@ -10,8 +10,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.extensions.billing.models import BillingEvent, FailureType
 from stripe_config import StripeBillingConfig, load_stripe_billing_config
+
+from cortex.extensions.billing.models import BillingEvent, FailureType
 
 logger = logging.getLogger(__name__)
 

@@ -65,12 +65,14 @@ def calculate_exergy(inp: ExergyInput, threshold_min_work: float) -> ExergyResul
     if inp.touched_persistent_state:
         reversibility_penalty += 0.05
 
-    exergy_score = (
-        (signal_gain * (1.0 + inp.utility_delta)) + (inp.causal_gap * 0.1) - reversibility_penalty
-    )
+    impact = (signal_gain * (1.0 + inp.utility_delta)) + (inp.causal_gap * 0.1)
+    effective_risk = max(reversibility_penalty, 0.01)  # epsilon for safe division
+
+    # Proportional Exergy Equation: E = Impact / Risk
+    exergy_score = impact / effective_risk
 
     waste_ratio = (
-        0.0 if signal_gain == 0 else max(0.0, reversibility_penalty / max(signal_gain, 1e-9))
+        0.0 if signal_gain == 0 else max(0.0, effective_risk / max(signal_gain, 1e-9))
     )
 
     return ExergyResult(

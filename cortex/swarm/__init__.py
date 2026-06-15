@@ -1,7 +1,9 @@
 """Cortex swarm — SubagentRunner, AgentRegistry and built-in handlers."""
 import asyncio
 import threading
+
 from cortex.swarm.autopulse import process_queue
+
 
 def start_swarm_daemon():
     """Start the Swarm Autopoiesis engine in a background thread."""
