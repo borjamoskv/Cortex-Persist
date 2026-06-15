@@ -87,6 +87,7 @@ class MutationRecord:
     performance_delta: float | None  # ops/sec delta if benchmark is active
     source: str  # caller identity: "substrate", "evolution_engine", "manual"
     metadata: dict[str, Any] = field(default_factory=dict)
+    hash_version: int = 2
 
     def to_payload(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -102,6 +103,7 @@ class MutationRecord:
                 "cpu_load": self.vector_after.cpu_load,
             },
             "source": self.source,
+            "hash_version": self.hash_version,
         }
         if self.vector_before is not None:
             d["vector_before"] = {
@@ -131,6 +133,7 @@ class MutationRecord:
             performance_delta=payload.get("perf_delta"),
             source=payload["source"],
             metadata=payload.get("meta", {}),
+            hash_version=payload.get("hash_version", 1),
         )
 
 
@@ -153,15 +156,27 @@ def _compute_mutation_hash(
     timestamp: float,
     vector_after: ControlVector,
     source: str,
+    hash_version: int = 2,
 ) -> str:
-    """Compute SHA-256 hash for a mutation record.
-
-    Format: v1\x00{prev}\x00{seq}\x00{agent}\x00{ts}\x00{vector_bytes_hex}\x00{source}
+    """Compute SHA-256 hash for a mutation record deterministically.
+    
+    Format v1: v1\x00{prev}\x00{seq}\x00{agent}\x00{ts}\x00{vector_bytes_hex}\x00{source}
+    Format v2: v2\x00{prev}\x00{seq}\x00{agent}\x00{ts_hex}\x00{vector_bytes_hex}\x00{source}
     """
     vec_hex = vector_after.to_bytes().hex()
-    h_input = (
-        f"v1\x00{prev_hash}\x00{sequence}\x00{agent_idx}\x00{timestamp}\x00{vec_hex}\x00{source}"
-    )
+    if hash_version == 1:
+        h_input = (
+            f"v1\x00{prev_hash}\x00{sequence}\x00{agent_idx}\x00"
+            f"{timestamp}\x00{vec_hex}\x00{source}"
+        )
+    elif hash_version == 2:
+        ts_hex = struct.pack("!d", timestamp).hex()
+        h_input = (
+            f"v2\x00{prev_hash}\x00{sequence}\x00{agent_idx}\x00"
+            f"{ts_hex}\x00{vec_hex}\x00{source}"
+        )
+    else:
+        raise ValueError(f"Unsupported hash version: {hash_version}")
     return hashlib.sha256(h_input.encode("utf-8")).hexdigest()
 
 
@@ -270,6 +285,7 @@ class EvolutionLedger:
             timestamp=ts,
             vector_after=vector_after,
             source=source,
+            hash_version=2,
         )
 
         record = MutationRecord(
@@ -283,6 +299,7 @@ class EvolutionLedger:
             performance_delta=performance_delta,
             source=source,
             metadata=metadata or {},
+            hash_version=2,
         )
 
         # Atomic append
@@ -352,6 +369,7 @@ class EvolutionLedger:
                         timestamp=record.timestamp,
                         vector_after=record.vector_after,
                         source=record.source,
+                        hash_version=record.hash_version,
                     )
                     if recomputed != record.hash:
                         raise ReplayVerificationError(
