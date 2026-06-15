@@ -14,12 +14,13 @@ Usage from anywhere in CORTEX:
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-__all__ = ["notch_hub", "router"]
+__all__ = ["notch_hub", "router", "HUB"]
 
 router = APIRouter(tags=["notch"])
 logger = logging.getLogger("cortex.notch_ws")
@@ -55,8 +56,10 @@ class NotchHub:
         self._clients.discard(ws)  # type: ignore[reportAttributeAccessIssue]
         logger.info("Notch client disconnected (%d remaining)", self.client_count)
 
-    async def broadcast(self, message: str) -> None:
+    async def broadcast(self, message: str | dict[str, Any]) -> None:
         """Send a command to ALL connected notch clients."""
+        if isinstance(message, dict):
+            message = json.dumps(message)
         dead: list[WebSocket] = []
         for ws in self._clients:  # type: ignore[reportAttributeAccessIssue]
             try:
@@ -66,8 +69,10 @@ class NotchHub:
         for ws in dead:
             self._clients.discard(ws)  # type: ignore[reportAttributeAccessIssue]
 
-    async def send_to_first(self, message: str) -> bool:
+    async def send_to_first(self, message: str | dict[str, Any]) -> bool:
         """Send to the first connected client (primary notch). Returns False if none."""
+        if isinstance(message, dict):
+            message = json.dumps(message)
         for ws in self._clients:  # type: ignore[reportAttributeAccessIssue]
             try:
                 await ws.send_text(message)
@@ -79,6 +84,7 @@ class NotchHub:
 
 # Global singleton - importable from anywhere
 notch_hub = NotchHub()
+HUB = notch_hub
 
 
 # ── WebSocket Endpoint ──────────────────────────────────────────────
@@ -113,6 +119,8 @@ async def notch_websocket(ws: WebSocket) -> None:
             else:
                 logger.debug("Notch message: %s", msg)
 
+    except WebSocketDisconnect:
+        logger.info("Notch WS client disconnected cleanly")
     except (OSError, RuntimeError) as exc:
         logger.warning("Notch WS error: %s", exc)
     except Exception as exc:
@@ -146,4 +154,4 @@ async def notify_notch_model(model: str) -> None:
 
 async def notify_notch_pruning() -> None:
     """Shortcut: tell the notch we just pruned/filtered memory (Entropy Shockwave)."""
-    await notch_hub.broadcast('{"command": "shockwave", "intensity": 1.0}')
+    await notch_hub.broadcast({"command": "shockwave", "intensity": 1.0})
