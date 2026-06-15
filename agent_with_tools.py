@@ -162,11 +162,16 @@ def execute_bash(command: str) -> str:
 
 
 def execute_git(command: str) -> str:
-    """Ejecuta un comando git."""
+    """Ejecuta un comando git robustamente, soportando encadenamientos."""
     command = command.strip()
-    if not command.startswith("git"):
-        command = f"git {command}"
-    return execute_bash(command)
+    parts = []
+    for part in command.split("&&"):
+        part = part.strip()
+        if part and not part.startswith("git"):
+            part = f"git {part}"
+        parts.append(part)
+    full_command = " && ".join(parts)
+    return execute_bash(full_command)
 
 
 def execute_tests(command: str) -> str:
