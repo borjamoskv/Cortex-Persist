@@ -112,7 +112,8 @@ trends = [
 ]
 embeddings = [
     "sentence-transformers>=3.0",
-    "onnxruntime>=1.25.0",
+    "onnxruntime>=1.25.0; python_version>='3.11'",
+    "onnxruntime>=1.17,<1.25.0; python_version<'3.11'",
     "optimum[onnxruntime]>=1.17,<2.0.0",
     "chromadb>=1.5.9",
 ]

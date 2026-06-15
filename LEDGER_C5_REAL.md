@@ -14,12 +14,16 @@
   - `cascade_router.py` localized and upgraded directly with `async retry + exponential backoff`.
   - BM25 feedback loop task (`bm25-feedback-001`) injected into `cortex.db` via direct SQL.
   - C5-REAL output written to physical disk.
+- **[2026-06-15T07:24:00+02:00]**: Cascade Router y BM25 Loop cristalizados en `main` via PR #466.
+  - Protocolo `LEA-Ω` ejecutado (Zero Token Debris).
+  - Substrato ATMS recompilado (`maturin develop` para `cortex_rs`).
+  - Auditoría global `pytest` superada al 100%. Entropía local reducida a cero.
 
 ### Verification Claim
 ```yaml
 Claim: "Cortex-Persist is actively writing state to physical disk."
 Proof: 
-  Base: Physical presence of LEDGER_C5_REAL.md, updated cortex.db, and modifications to cascade_router.py.
+  Base: Physical presence of LEDGER_C5_REAL.md, updated cortex.db, modifications to cascade_router.py, merged PR #466, and compiled cortex_native.
   Range: [Local File System, Persistent Substrate]
   Confidence: C5-REAL
 ```
