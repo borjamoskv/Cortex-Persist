@@ -12,6 +12,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-rc.1] — 2026-06-15
+
+### 🦀 Direct-Silicon Core — Argon2id via Rust/PyO3
+
+- **feat(auth):** Migración completa de `argon2-cffi` → `cortex_rs::auth` (Rust nativo via PyO3/maturin)
+  - Nuevas funciones `hash_password` / `verify_password` expuestas en el módulo `cortex_rs`
+  - Parámetros canónicos: `Argon2id, m=65536, t=2, p=1, output=32B`
+  - Compilación `--release` en 2.28s; latencia por hash: **< 4.2ms** en modo release
+  - Eliminada dependencia `argon2-cffi` de `pyproject.toml` y `uv.lock`
+  - Refs: `c12d3a3fed`, `cortex_rs/src/auth.rs`
+
+### 🔒 Seguridad
+
+- **fix(crypto):** AES `strict_mode` dinámico y `hkdf_salt` initialization corregidos
+- **feat(errors):** Nueva excepción `DecryptionPolicyError` integrada en el substrate de excepciones
+- **fix(sql):** Nueva utilidad `cortex/utils/sql_identifiers.py` con `is_safe_identifier` /
+  `quote_identifier` — elimina riesgo de SQL identifier injection en `schema.py`,
+  `queue.py`, `store.py` (closes #463)
+
+### 🐛 Bugfixes
+
+- **fix(engine):** Serialización de transacciones para prevenir race condition read-modify-write
+  en `transaction_mixin.py` — `BEGIN IMMEDIATE` enforced (closes #464)
+- **fix(sync):** Eliminados deadlocks esporádicos en secuencias rápidas de `SovereignLock`
+  release durante teardown (closes #413)
+- **fix(evolution):** Cursor advancement corregido para persistencia remota en strict conditions
+- **chore(pre-commit):** Hooks de ruff restringidos a stage `pre-commit`; daemon files formateados
+
+### 🧪 Test Suite
+
+- **3,299 tests passed, 19 skipped** — sin regresiones (full suite, no `-m "not slow"`)
+- `test_moskv_aegis.py`: mock dinámico de `_get_git_diff` para evitar llamadas Ollama en repo dirty
+- Suite completa ejecutada en **~80s** con `cortex_rs` en `--release`
+
+### ⚙️ Infraestructura
+
+- **feat(billing):** Hito 50 — billing schema integrity gateway activo
+- **feat(auth):** Async gateway pattern con thread pool executor
+- Daemons `com.cortex.cascade-orchestrator` y `com.cortex.relay-daemon` restaurados via `launchctl`
+
+---
+
 ## [1.0.0] — 2026-06-06
 
 ### 🎉 General Availability — First Stable Release
