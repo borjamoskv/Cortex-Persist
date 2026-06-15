@@ -830,3 +830,30 @@ Proof:
   Date: 2026-06-15
 ```
 
+
+---
+
+### Hito 50: Zero-Simulation Enclave & 10000 Agent Forge (Sortu-APEX)
+- **Target**: `run_sortu_10k.py`, `cortex/cli/swarm_10k_cmds.py`
+- **Objective**: Despliegue de 10,000 entidades agénticas en paralelo bajo estricta Zero-Simulation Policy. Cada agente debe ejecutar inferencia o cálculo local sin falsificaciones temporales (`C4-SIM` sleep hacks abolidos).
+- **Yield Target**: Zero-crash execution under maximum FD limits (Semaphores) and SQLite WAL concurrency.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits ejecutados por Agente Vanguardia 4.
+
+---
+
+### Hito 51: Ouroboros Autopoiesis: Thermodynamic Deadlock Eradication
+- **Target**: `cortex/database/core.py`, `run_stress_test.py`
+- **Objective**: Creación e imposición autopoietica de la Ley Inmutable #10 ("Soberanía Base de Datos"). Erradicación del anti-patrón `sqlite3.connect` puro a favor de `CortexEngine` para prevenir asfixia térmica (deadlocks en masa).
+- **Yield Target**: 1524 Test suite OSErrors purgados a 0.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commit `500ce790f` y `chore(anergy): exergy maximization purge`.
+
+---
+
+### Hito 52: Zero-Network Hard Boundary (Inference Fallback Airgap)
+- **Target**: `CascadeRouter`, `Local-Inference-OMEGA`
+- **Objective**: Sellado termodinámico de la capa de inferencia. El router de cascada se degrada grácilmente a modelos locales más ligeros (llama3:8b) pero se prohíbe físicamente la escalada a redes externas en caso de caída del daemon local.
+- **Yield Target**: Absolute offline sovereignty. 0 bytes leaking to external proxy APIs during local failures.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Mutación de `SKILL.md` inyectada por Agente Vanguardia 3.
