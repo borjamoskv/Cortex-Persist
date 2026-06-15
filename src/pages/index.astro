@@ -82,6 +82,9 @@ const pricingCards = [
 
 const githubUrl = 'https://github.com/borjamoskv/Cortex-Persist';
 const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
+
+// C5-REAL Edge Personalization
+const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 ---
 
 <SiteLayout
@@ -111,6 +114,9 @@ const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
 			</nav>
 
 			<div class="masthead-actions">
+				<span class="microcopy" style="color: var(--accent-soft); font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; margin-right: 1rem; text-transform: uppercase; letter-spacing: 0.05em; display: none; @media (min-width: 768px) { display: inline-block; }">
+					EDGE: {country}
+				</span>
 				<a class="button-tertiary" href={githubUrl} target="_blank" rel="noreferrer">
 					Docs
 				</a>
@@ -265,7 +271,7 @@ const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
 		</section>
 
 		<footer class="site-footer">
-			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers. <span style="opacity:0.5; margin-left:8px;">| Powered by Cloudflare Edge</span></p>
 			<div class="footer-links">
 				<a href={githubUrl} target="_blank" rel="noreferrer">GitHub</a>
 				<a href={docsUrl} target="_blank" rel="noreferrer">Docs</a>
