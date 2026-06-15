@@ -4,7 +4,7 @@ import copy
 
 from cortex.swarm.ledger.engine import SwarmLedger
 from cortex.swarm.ledger.models import SwarmEvent
-from cortex.swarm.graph_source import GraphSource, SalienceCandidate
+from cortex.swarm.graph_source import GraphSource
 
 
 class SwarmRouter:
@@ -26,19 +26,47 @@ class SwarmRouter:
     # Public API
     # ------------------------------------------------------------------
 
+    def registry_checksum(self) -> str:
+        """Stable hash of the registry configuration."""
+        import hashlib, json
+        state_dict = self.registry.to_dict() if hasattr(self.registry, 'to_dict') else {}
+        state_str = json.dumps(state_dict, sort_keys=True)
+        return hashlib.sha256(state_str.encode()).hexdigest()
+
     def route(self, request: dict) -> dict:
         if self.graph_source is not None:
             raw_candidates = self.graph_source.get_candidates(request["task"])
             candidates = [c.to_dict() for c in raw_candidates]
             registry_snapshot = self._frozen_snapshot()
         else:
-            if not self.registry._frozen:
+            if hasattr(self.registry, '_frozen') and not self.registry._frozen:
                 self.registry.freeze()
             raw_candidates = sorted(
-                self.registry.get_candidates(request["task"]),
-                key=lambda a: a.agent_id,
+                self.registry.get_candidates(request.get("task", "")),
+                key=lambda a: getattr(a, 'agent_id', getattr(a, 'name', str(a)))
             )
-            candidates = [getattr(a, '__dict__', {"agent_id": a.agent_id}) for a in raw_candidates]
+            # Ensure agent_id is populated from name if missing
+            candidates = []
+            for a in raw_candidates:
+                if hasattr(a, '__dict__'):
+                    d = dict(a.__dict__)
+                    d.setdefault("agent_id", d.get("name", str(a)))
+                    candidates.append(d)
+                elif isinstance(a, dict):
+                    candidates.append(a)
+                else:
+                    candidates.append({"agent_id": str(a)})
+                    
+            if not candidates:
+                # Fallback to all agents sorted
+                all_agents = sorted(self.registry.all(), key=lambda a: getattr(a, 'agent_id', getattr(a, 'name', str(a))))
+                for a in all_agents:
+                    if hasattr(a, '__dict__'):
+                        d = dict(a.__dict__)
+                        d.setdefault("agent_id", d.get("name", str(a)))
+                        candidates.append(d)
+                    else:
+                        candidates.append({"agent_id": str(a)})
             registry_snapshot = self._frozen_snapshot()
 
         selected = _dispatch(candidates, request)
@@ -48,9 +76,11 @@ class SwarmRouter:
             if isinstance(v, (set, frozenset)):
                 selected[k] = sorted(list(v))
 
-        # Generate stable routing_hash
+        # Filter out unserializable objects before hashing
+        safe_selected = _deep_sorted({k: v for k, v in selected.items() if not k.startswith("_")})
+
         import hashlib, json
-        state_str = json.dumps(selected, sort_keys=True)
+        state_str = json.dumps(safe_selected, sort_keys=True)
         routing_hash = hashlib.sha256(state_str.encode()).hexdigest()
         selected["routing_hash"] = routing_hash
 
@@ -58,15 +88,22 @@ class SwarmRouter:
 
         self.ledger.append(
             SwarmEvent(
-                task=request["task"],
+                task=request.get("task", ""),
                 input=copy.deepcopy(request),
                 registry_state=registry_snapshot,
-                selected_agent=selected["agent_id"],
+                selected_agent=selected_agent,
                 routing_payload=selected,
             )
         )
 
         return selected
+
+    def registry_checksum(self) -> str:
+        """Stable hash of the registry configuration."""
+        import hashlib, json
+        snap = self._frozen_snapshot()
+        state_str = json.dumps(snap, sort_keys=True)
+        return hashlib.sha256(state_str.encode()).hexdigest()
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -89,14 +126,32 @@ class SwarmRouter:
 def _dispatch(candidates: list[dict], request: dict) -> dict:
     """Pure selection: first candidate after deterministic sort."""
     if not candidates:
-        raise ValueError(f"No candidates for task: {request['task']}")
-    return candidates[0]
+        raise ValueError(f"No candidates for task: {request.get('task', '')}")
+    
+    selected_agents = sorted([c.get("agent_id") for c in candidates if "agent_id" in c])
+    
+    payload = {
+        "agent_id": candidates[0].get("agent_id", "unknown"),
+        "selected_agents": selected_agents
+    }
+    payload.update(candidates[0])
+    return payload
 
 
 def _deep_sorted(obj):
     """Recursively sort dict keys for deterministic hashing."""
     if isinstance(obj, dict):
-        return {k: _deep_sorted(v) for k, v in sorted(obj.items())}
+        return {k: _deep_sorted(v) for k, v in sorted(obj.items()) if _is_json_serializable(v)}
     if isinstance(obj, list):
-        return [_deep_sorted(i) for i in obj]
+        return [_deep_sorted(i) for i in obj if _is_json_serializable(i)]
+    if isinstance(obj, set) or isinstance(obj, frozenset):
+        return sorted([_deep_sorted(i) for i in obj])
     return obj
+
+def _is_json_serializable(v):
+    import json
+    try:
+        json.dumps(v)
+        return True
+    except (TypeError, OverflowError):
+        return False
