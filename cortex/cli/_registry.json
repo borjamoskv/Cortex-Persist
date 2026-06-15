@@ -1,0 +1,7 @@
+{
+  "commands": {},
+  "failed": {
+    "auth_cmds": "cannot import name 'run_async' from 'cortex.cli.common' (/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/cli/common.py)",
+    "nous_cmds": "No module named 'instructor'"
+  }
+}
