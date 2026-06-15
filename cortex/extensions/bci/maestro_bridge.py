@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
+import inspect
 import json
 import logging
 from typing import Any
@@ -59,7 +60,7 @@ class BCIMaestroBridge:
 
         try:
             # Handle if method is a coroutine or normal function
-            if asyncio.iscoroutinefunction(method):
+            if inspect.iscoroutinefunction(method):
                 result = await method(**args)
             elif callable(method):
                 # Check if it returns a coroutine (e.g. wrapped in lambda)

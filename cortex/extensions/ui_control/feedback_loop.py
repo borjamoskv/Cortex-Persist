@@ -9,6 +9,7 @@ decision making, and MaestroUI execution to close the loop on desktop automation
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import os
 import time
@@ -183,7 +184,7 @@ class UIFeedbackLoop:
                 if hasattr(self.maestro, action_name):
                     method = getattr(self.maestro, action_name)
                     try:
-                        if asyncio.iscoroutinefunction(method):
+                        if inspect.iscoroutinefunction(method):
                             res = await method(**args)
                         elif callable(method):
                             res = method(**args)

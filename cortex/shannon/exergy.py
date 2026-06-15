@@ -62,17 +62,26 @@ def calculate_exergy(inp: ExergyInput, threshold_min_work: float) -> ExergyResul
     }:
         reversibility_penalty += 0.35
 
-    if inp.touched_persistent_state:
-        reversibility_penalty += 0.05
+    # AX-047: Limerence penalty. Read-only without persistent state change gets a severe discount.
+    # Exergy is maximized when we mutate persistent state successfully with low risk.
+    if inp.action_risk == ActionRisk.READ_ONLY and not inp.touched_persistent_state:
+        limerence_penalty = 0.5 
+    else:
+        limerence_penalty = 0.0
 
+    total_penalty = min(0.99, reversibility_penalty + limerence_penalty)
+
+    # Base impact from signal and causal gap
     impact = (signal_gain * (1.0 + inp.utility_delta)) + (inp.causal_gap * 0.1)
-    effective_risk = max(reversibility_penalty, 0.01)  # epsilon for safe division
+    
+    # State mutation bonus (rewarding deterministic state changes)
+    mutation_bonus = 1.5 if inp.touched_persistent_state else 1.0
 
-    # Proportional Exergy Equation: E = Impact / Risk
-    exergy_score = impact / effective_risk
+    # Thermodynamically aligned Exergy formula: Impact discounted by entropy/risk
+    exergy_score = (impact * mutation_bonus) * (1.0 - total_penalty)
 
     waste_ratio = (
-        0.0 if signal_gain == 0 else max(0.0, effective_risk / max(signal_gain, 1e-9))
+        0.0 if signal_gain == 0 else max(0.0, total_penalty / max(signal_gain, 1e-9))
     )
 
     return ExergyResult(
