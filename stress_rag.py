@@ -2,10 +2,8 @@
 # stress_rag.py
 # Mide latencia real y degradación de RAM bajo carga del agente RAG
 
-import time
 import subprocess
-import resource
-import sys
+import time
 
 PYTHON = "/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
 AGENT  = "agent_with_tools.py"

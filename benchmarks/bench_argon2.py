@@ -1,8 +1,11 @@
 # [C5-REAL] Exergy-Maximized Benchmark for Argon2id Hashing
 import time
-import numpy as np
+
 import argon2
+import numpy as np
+
 import cortex_rs
+
 
 def run_benchmarks(iterations=50):
     password = "Sovereign_Agent_Passphrase_2026!"

@@ -1,6 +1,5 @@
-import os
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
-from langchain_core.messages import SystemMessage, HumanMessage
 
 # Configuración de LangChain con backend local Ollama
 # Modelos disponibles: qwen2.5-coder:7b
@@ -19,7 +18,7 @@ except Exception as e:
     exit(1)
 
 def run_pipeline():
-    print(f"[C5-REAL] LangChain Pipeline inicializado.")
+    print("[C5-REAL] LangChain Pipeline inicializado.")
     print(f"Modelo objetivo: {model_name} via Ollama (Localhost)")
     
     # Iniciar flujo de prueba (C5-REAL Execution)

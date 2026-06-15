@@ -10,11 +10,9 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import Any
 
-from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-from cortex.extensions.billing.models import BillingEvent, FailureType
 from cortex.extensions.billing.gateway import StripeBillingGateway
+from cortex.extensions.billing.models import BillingEvent, FailureType
 
 logger = logging.getLogger(__name__)
 
