@@ -1,5 +1,5 @@
 import os
-from langchain_community.chat_models import ChatOllama
+from langchain_ollama import ChatOllama
 from langchain_core.messages import SystemMessage, HumanMessage
 
 # Configuración de LangChain con backend local Ollama
