@@ -7,7 +7,15 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
 
-import cortex_rs
+try:
+    import cortex_rs
+
+    if not hasattr(cortex_rs, "FitnessOracleRs"):
+        FitnessOracleRs = None
+    else:
+        FitnessOracleRs = cortex_rs.FitnessOracleRs
+except ImportError:
+    FitnessOracleRs = None
 from cortex.engine.genome import FitnessRecord, StrategyGenome
 from cortex.isa.builder import AgentOp
 
@@ -86,13 +94,21 @@ class FitnessOracle:
             metadata = result.get("metadata", {})
 
             # Composite fitness: weighted combination (C5-REAL: Native Rust calculation)
-            score = cortex_rs.FitnessOracleRs.composite_fitness(  # pyright: ignore[reportAttributeAccessIssue]
-                raw_score=score,
-                latency_ms=latency_ms,
-                error_rate=error_rate,
-                throughput=throughput,
-                complexity=genome.complexity,
-            )
+            if FitnessOracleRs is not None:
+                score = FitnessOracleRs.composite_fitness(  # pyright: ignore[reportAttributeAccessIssue]
+                    raw_score=score,
+                    latency_ms=latency_ms,
+                    error_rate=error_rate,
+                    throughput=throughput,
+                    complexity=genome.complexity,
+                )
+            else:
+                # Python fallback composite calculation
+                score = (
+                    score * (1.0 - error_rate)
+                    - (latency_ms / 1000.0) * 0.1
+                    - (genome.complexity / 100.0) * 0.05
+                )
 
         except asyncio.TimeoutError:
             latency_ms = (time.perf_counter_ns() - start_ns) / 1e6

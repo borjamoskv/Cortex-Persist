@@ -83,15 +83,21 @@ class CascadeRouter:
             logger.info(f"🚀 [ROUTER] Dispatching to {engine}...")
 
             # Selectively pass API keys from parent environment
-            child_env = {**os.environ}
+            child_env = {
+                **os.environ,
+                "ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY", "sk-ant-fallback"),
+                "GEMINI_API_KEY": os.environ.get("GEMINI_API_KEY", "gemini-fallback"),
+            }
 
             result = subprocess.run(cmd, env=child_env, capture_output=True, text=True, timeout=300)
 
-            if result.returncode != 0:
-                logger.error(f"❌ [ROUTER] {engine} failed. STDERR: {result.stderr.strip()}")
-                return f"Error ({engine}): {result.stderr.strip()}"
-
             stdout = result.stdout.strip()
+            stderr = result.stderr.strip()
+
+            output_content = stdout if result.returncode == 0 else f"ERROR:\n{stderr}\n{stdout}"
+
+            if result.returncode != 0:
+                logger.error(f"❌ [ROUTER] {engine} failed. STDERR: {stderr}")
 
             # Log to DB for BM25 indexing
             if task_id:
@@ -99,7 +105,7 @@ class CascadeRouter:
                     db_path = Path("~/.cortex/cortex.db").expanduser()
                     if db_path.exists():
                         conn = sqlite3.connect(db_path)
-                        digest = hashlib.sha256(stdout.encode("utf-8")).hexdigest()[:16]
+                        digest = hashlib.sha256(output_content.encode("utf-8")).hexdigest()[:16]
                         # Escribir en la tabla de episodios/BM25
                         conn.execute(
                             "INSERT INTO episodes (session_id, event_type, project, content) VALUES (?, ?, ?, ?)",
@@ -107,14 +113,13 @@ class CascadeRouter:
                                 "cascade-sys",
                                 "llm_task_result",
                                 "cortex-engine",
-                                f"task_id:{task_id} engine:{engine} digest:{digest}\n{stdout[:500]}",
+                                f"task_id:{task_id} engine:{engine} digest:{digest}\n{output_content[:500]}",
                             ),
                         )
                         # Opcional: Actualizar la tarea original
                         try:
-                            conn.execute(
-                                "UPDATE tasks SET status='completed' WHERE id=?", (task_id,)
-                            )
+                            status = "completed" if result.returncode == 0 else "failed"
+                            conn.execute("UPDATE tasks SET status=? WHERE id=?", (status, task_id))
                         except sqlite3.OperationalError:
                             pass  # Ignorar si la tabla tasks no tiene esa estructura
                         conn.commit()
@@ -122,12 +127,13 @@ class CascadeRouter:
                 except Exception as db_e:
                     logger.error(f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}")
 
+            if result.returncode != 0:
+                return f"Error ({engine}): {stderr}"
+
             return stdout
 
         except FileNotFoundError:
-            logger.error(
-                "🔌 [ROUTER] CLI no encontrado en PATH. Activando fallback..."
-            )
+            logger.error("🔌 [ROUTER] CLI no encontrado en PATH. Activando fallback...")
             return self.fallback_response(engine, prompt)
         except subprocess.TimeoutExpired:
             logger.error(f"⏱️ [ROUTER] {engine} execution timed out (300s).")
