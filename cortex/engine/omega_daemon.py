@@ -306,13 +306,17 @@ class OmegaDaemon:
                     logger.debug("Desplegando formación PHOENIX vía SwarmCommander...")
                     # Dispatch asíncrono para sanación técnica
                     if hasattr(commander, "deploy"):
-                        await commander.deploy(
+                        res_deploy = commander.deploy(
                             formation="PHOENIX", mission="Sanar Entropía", cycles=1
                         )
+                        if asyncio.iscoroutine(res_deploy):
+                            await res_deploy
 
                     logger.debug("Iniciando mutación recursiva vía AutopoiesisEngine...")
                     if hasattr(ouroboros, "mutate"):
-                        await ouroboros.mutate(target="entropy_resolution")
+                        res_mutate = ouroboros.mutate(target="entropy_resolution")
+                        if asyncio.iscoroutine(res_mutate):
+                            await res_mutate
 
                 except (ImportError, RuntimeError, ValueError) as e:
                     logger.exception("Fallo al desatar el Enjambre o Ouroboros: %s", e)
