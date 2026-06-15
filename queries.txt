@@ -1,0 +1,6 @@
+Lista archivos .py en el directorio actual y cuenta cuántos hay.
+Muestra git status.
+Corre pytest --collect-only.
+¿Cómo se gestiona la persistencia de estado en Cortex-Persist?
+Busca la función update_agent_position en el codebase.
+q
