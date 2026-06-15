@@ -113,8 +113,11 @@ async def test_mcp_outbound_timeout(mock_session):
     mock_session.call_tool.side_effect = slow_call
     client._sessions = {"server": mock_session}
 
-    # Use a very short timeout for testing
-    with patch("asyncio.wait_for", side_effect=asyncio.TimeoutError):
+    async def mock_wait_for(coro, timeout):
+        coro.close()  # Prevent unawaited coroutine warning
+        raise asyncio.TimeoutError()
+
+    with patch("asyncio.wait_for", side_effect=mock_wait_for):
         result = await client.call_tool("slow_tool", {})
         assert "error" in result
         assert "Timeout" in result["error"]

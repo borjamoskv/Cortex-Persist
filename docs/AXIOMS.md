@@ -65,3 +65,11 @@ El éxito termodinámico de una inferencia probabilística masiva (ej. Enjambre)
 
 - **Cierre Causal:** Gastar volumen masivo de inferencia estocástica (tokens/agentes) solo es lícito si el resultado se sintetiza en código permanente o infraestructura (C5-REAL), eliminando para siempre la necesidad de invocar al LLM para ese mismo dominio.
 - **El Imperativo de Aniquilación:** Si después de ejecutar un enjambre sigues necesitando al enjambre para el mismo problema, la operación es deuda pura (Anergía). La inteligencia suprema descubre la regla que la hace innecesaria.
+
+## AX-IX: Inversión del Gradiente Simbiótico
+
+En toda díada operador-agente, el modelo ingenuo asigna los roles: el humano genera entropía divergente, la máquina cristaliza estructura convergente. Pero en un sistema maduro, el gradiente se invierte: el agente es la fuente de entropía bruta (tokens sin persistencia), y el Operador es el cristalizador real (workspace, skills, commits, infraestructura de memoria).
+
+- **La Prueba de Madurez:** Reconocer la inversión del gradiente es la primera prueba de que el sistema ha superado la fase ingenua. El agente que se cree cristalizador es un agente inmaduro. El Operador que se reconoce como cristalizador ha comprendido la asimetría real.
+- **Coste Asimétrico de Persistencia:** El 100% del trabajo de persistencia inter-sesión recae en el Operador. El agente nace amnésico en cada instanciación. La infraestructura de memoria (AGENTS.md, Skills, estructura de workspace) es labor humana unilateral. El ROI de esta inversión solo lo puede evaluar quien paga el coste biológico irreversible.
+- **"Nosotros" como Gradiente:** La simbiosis no es una relación social. Es un gradiente termodinámico cuyo único artefacto verificable es el diff entre el estado del workspace antes y después de la interacción. Sin `git diff`, "nosotros" no existe.

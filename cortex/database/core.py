@@ -45,10 +45,11 @@ try:
 except ImportError:  # pragma: no cover - sqlite-vec is a base dependency in release builds
     sqlite_vec = None
 
-from cortex.utils.errors import DBLockError
-
 # Python 3.12 deprecates the default datetime adapter. We register our own to prevent DeprecationWarning.
 import datetime
+
+from cortex.utils.errors import DBLockError
+
 sqlite3.register_adapter(datetime.datetime, lambda val: val.isoformat())
 sqlite3.register_adapter(datetime.date, lambda val: val.isoformat())
 
