@@ -27,6 +27,7 @@ import json
 import logging
 import os
 import struct
+import threading
 import time
 from collections.abc import Iterator
 from dataclasses import dataclass, field
@@ -229,6 +230,7 @@ class EvolutionLedger:
         self._head_hash: str = self.GENESIS_HASH
         self._record_count: int = 0
         self._last_write_latency_ms: float = 0.0
+        self._lock = threading.Lock()
 
         # Recover state from existing log
         self._recover_head()
@@ -283,59 +285,60 @@ class EvolutionLedger:
 
         Returns the MutationRecord with computed hash.
         """
-        self._sequence += 1
-        ts = time.time()
-
-        new_hash = _compute_mutation_hash(
-            prev_hash=self._head_hash,
-            sequence=self._sequence,
-            agent_idx=agent_idx,
-            timestamp=ts,
-            vector_after=vector_after,
-            source=source,
-            hash_version=2,
-        )
-
-        record = MutationRecord(
-            sequence=self._sequence,
-            agent_idx=agent_idx,
-            timestamp=ts,
-            prev_hash=self._head_hash,
-            hash=new_hash,
-            vector_before=vector_before,
-            vector_after=vector_after,
-            performance_delta=performance_delta,
-            source=source,
-            metadata=metadata or {},
-            hash_version=2,
-        )
-
-        # Atomic append
-        payload_line = _canonical_json(record.to_payload()) + "\n"
         start_write = time.perf_counter()
-        try:
-            with open(self._log_path, "a") as f:
-                f.write(payload_line)
-                f.flush()
-                os.fsync(f.fileno())
-        except OSError as e:
-            self._sequence -= 1  # rollback sequence
-            logger.error("Evolution ledger write failed: %s", e)
-            raise
-        
-        self._last_write_latency_ms = (time.perf_counter() - start_write) * 1000.0
-        self._head_hash = new_hash
-        self._record_count += 1
+        with self._lock:
+            self._sequence += 1
+            ts = time.time()
 
-        logger.debug(
-            "EVO-LEDGER seq=%d agent=%d hash=%s…%s (write: %.2fms)",
-            self._sequence,
-            agent_idx,
-            new_hash[:8],
-            new_hash[-4:],
-            self._last_write_latency_ms,
-        )
-        return record
+            new_hash = _compute_mutation_hash(
+                prev_hash=self._head_hash,
+                sequence=self._sequence,
+                agent_idx=agent_idx,
+                timestamp=ts,
+                vector_after=vector_after,
+                source=source,
+                hash_version=2,
+            )
+
+            record = MutationRecord(
+                sequence=self._sequence,
+                agent_idx=agent_idx,
+                timestamp=ts,
+                prev_hash=self._head_hash,
+                hash=new_hash,
+                vector_before=vector_before,
+                vector_after=vector_after,
+                performance_delta=performance_delta,
+                source=source,
+                metadata=metadata or {},
+                hash_version=2,
+            )
+
+            # Atomic append
+            payload_line = _canonical_json(record.to_payload()) + "\n"
+            try:
+                with open(self._log_path, "a") as f:
+                    f.write(payload_line)
+                    f.flush()
+                    os.fsync(f.fileno())
+            except OSError as e:
+                self._sequence -= 1  # rollback sequence
+                logger.error("Evolution ledger write failed: %s", e)
+                raise
+            
+            self._last_write_latency_ms = (time.perf_counter() - start_write) * 1000.0
+            self._head_hash = new_hash
+            self._record_count += 1
+
+            logger.debug(
+                "EVO-LEDGER seq=%d agent=%d hash=%s…%s (write: %.2fms)",
+                self._sequence,
+                agent_idx,
+                new_hash[:8],
+                new_hash[-4:],
+                self._last_write_latency_ms,
+            )
+            return record
 
     def replay(self, mode: ReplayMode = ReplayMode.STRICT) -> Iterator[MutationRecord]:
         """Replay the entire ledger.
