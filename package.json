@@ -12,6 +12,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^13.7.0",
     "@astrojs/react": "^4.2.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
@@ -23,7 +24,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.1",
-    "three": "^0.183.2"
+    "three": "^0.183.2",
+    "wrangler": "^4.100.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.2",
