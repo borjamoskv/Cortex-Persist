@@ -57,16 +57,7 @@ class GenomeMutator:
         child = genome.clone()
         child.lineage.generation += 1
 
-        if force_type:
-            mutation_type = force_type
-        elif (
-            failure_trace
-            and failure_trace.get("failed_target")
-            and random.random() < genome.mutation_rates.get(MutationType.CAUSAL_PATCH, 0.20)
-        ):
-            mutation_type = MutationType.CAUSAL_PATCH
-        else:
-            mutation_type = self._select_mutation_type(child)
+        mutation_type = self._determine_mutation_type(child, force_type, failure_trace)
 
         if (
             mutation_type == MutationType.CAUSAL_PATCH
@@ -75,6 +66,26 @@ class GenomeMutator:
         ):
             child.parameters["_causal_target"] = failure_trace["failed_target"]
 
+        self._apply_mutation(child, mutation_type, genome.genome_hash)
+        return child
+
+    def _determine_mutation_type(
+        self,
+        child: StrategyGenome,
+        force_type: MutationType | None,
+        failure_trace: dict[str, Any] | None,
+    ) -> MutationType:
+        if force_type:
+            return force_type
+        if (
+            failure_trace
+            and failure_trace.get("failed_target")
+            and random.random() < child.mutation_rates.get(MutationType.CAUSAL_PATCH, 0.20)
+        ):
+            return MutationType.CAUSAL_PATCH
+        return self._select_mutation_type(child)
+
+    def _apply_mutation(self, child: StrategyGenome, mutation_type: MutationType, parent_hash: str) -> None:
         ast_mutation_types = {
             MutationType.SUBTREE_SWAP,
             MutationType.NODE_INSERT,
@@ -88,56 +99,53 @@ class GenomeMutator:
 
         if mutation_type in ast_mutation_types:
             try:
-                import cortex_rs
-
-                if not hasattr(cortex_rs, "GenomeMutatorRs"):
-                    raise ImportError("GenomeMutatorRs not available in cortex_rs")
-
-                tree_json = json.dumps(child.dispatch_tree, default=str)
-                new_tree_json = cortex_rs.GenomeMutatorRs.mutate_tree(  # pyright: ignore[reportAttributeAccessIssue]
-                    tree_json, mutation_type.value, child.lineage.generation
-                )
-                child.dispatch_tree = json.loads(new_tree_json)
-                child.lineage.mutation_log.append(
-                    f"gen={child.lineage.generation} type={mutation_type.value} [Rust]"
-                )
-                child._invalidate_hash()
+                self._apply_rust_ast_mutation(child, mutation_type)
+                return
             except Exception as e:
                 logger.error("Rust AST mutation failed: %s", e)
-                # Fallback to Python-based implementation
-                method_name = self._OPERATORS.get(mutation_type)
-                if method_name and hasattr(self, method_name):
-                    getattr(self, method_name)(child)
-                    child.lineage.mutation_log.append(
-                        f"gen={child.lineage.generation} type={mutation_type.value}"
-                    )
-                    child._invalidate_hash()
-                    logger.debug(
-                        "GENOME MUTATION FALLBACK: %s on %s → %s (gen %d)",
-                        mutation_type.value,
-                        genome.genome_hash[:8],
-                        child.genome_hash[:8],
-                        child.lineage.generation,
-                    )
-        else:
-            method_name = self._OPERATORS.get(mutation_type)
-            if method_name and hasattr(self, method_name):
-                getattr(self, method_name)(child)
-                child.lineage.mutation_log.append(
-                    f"gen={child.lineage.generation} type={mutation_type.value}"
-                )
-                child._invalidate_hash()
-                logger.debug(
-                    "GENOME MUTATION: %s on %s → %s (gen %d)",
-                    mutation_type.value,
-                    genome.genome_hash[:8],
-                    child.genome_hash[:8],
-                    child.lineage.generation,
-                )
-            else:
-                logger.warning("Unknown mutation type: %s", mutation_type)
+                # Fallback to python
 
-        return child
+        self._apply_python_mutation(
+            child, mutation_type, parent_hash, is_fallback=(mutation_type in ast_mutation_types)
+        )
+
+    def _apply_rust_ast_mutation(self, child: StrategyGenome, mutation_type: MutationType) -> None:
+        import cortex_rs
+
+        if not hasattr(cortex_rs, "GenomeMutatorRs"):
+            raise ImportError("GenomeMutatorRs not available in cortex_rs")
+
+        tree_json = json.dumps(child.dispatch_tree, default=str)
+        new_tree_json = cortex_rs.GenomeMutatorRs.mutate_tree(  # pyright: ignore[reportAttributeAccessIssue]
+            tree_json, mutation_type.value, child.lineage.generation
+        )
+        child.dispatch_tree = json.loads(new_tree_json)
+        child.lineage.mutation_log.append(
+            f"gen={child.lineage.generation} type={mutation_type.value} [Rust]"
+        )
+        child._invalidate_hash()
+
+    def _apply_python_mutation(
+        self, child: StrategyGenome, mutation_type: MutationType, parent_hash: str, is_fallback: bool
+    ) -> None:
+        method_name = self._OPERATORS.get(mutation_type)
+        if method_name and hasattr(self, method_name):
+            getattr(self, method_name)(child)
+            child.lineage.mutation_log.append(
+                f"gen={child.lineage.generation} type={mutation_type.value}"
+            )
+            child._invalidate_hash()
+            log_prefix = "GENOME MUTATION FALLBACK" if is_fallback else "GENOME MUTATION"
+            logger.debug(
+                "%s: %s on %s → %s (gen %d)",
+                log_prefix,
+                mutation_type.value,
+                parent_hash[:8],
+                child.genome_hash[:8],
+                child.lineage.generation,
+            )
+        else:
+            logger.warning("Unknown mutation type: %s", mutation_type)
 
     def crossover(self, parent_a: StrategyGenome, parent_b: StrategyGenome) -> StrategyGenome:
         """Sexual recombination: merge traits from two parent genomes."""
