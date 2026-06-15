@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Living Website Organism</title>
+
+  <meta http-equiv="Cache-Control" content="no-store" />
+
+  <style>
+    body {
+      margin: 0;
+      background: #05070a;
+      color: #7ef9ff;
+      font-family: monospace;
+      overflow: hidden;
+    }
+    #root { position: relative; width: 100vw; height: 100vh; }
+    .node {
+      position: absolute;
+      padding: 6px 10px;
+      border: 1px solid rgba(126,249,255,0.25);
+      background: rgba(126,249,255,0.06);
+      border-radius: 8px;
+      transition: transform 0.4s ease;
+    }
+    .pulse { box-shadow: 0 0 18px rgba(126,249,255,0.5); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script>
+    const root = document.getElementById('root');
+
+    let state = {
+      nodes: Array.from({length: 10}).map((_, i) => ({
+        id: i,
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        energy: Math.random()
+      })),
+      tick: 0
+    };
+
+    function mutate() {
+      state.tick++;
+      state.nodes = state.nodes.map(n => ({
+        ...n,
+        x: (n.x + (Math.random()-0.5)*30 + window.innerWidth) % window.innerWidth,
+        y: (n.y + (Math.random()-0.5)*30 + window.innerHeight) % window.innerHeight,
+        energy: Math.abs(Math.sin(state.tick*0.1 + n.id))
+      }));
+    }
+
+    function render() {
+      root.innerHTML = '';
+      state.nodes.forEach((n,i) => {
+        const el = document.createElement('div');
+        el.className = 'node' + (n.energy > 0.7 ? ' pulse' : '');
+        el.style.transform = `translate(${n.x}px,${n.y}px)`;
+        el.textContent = `node-${i} :: ${n.energy.toFixed(2)}`;
+        root.appendChild(el);
+      });
+    }
+
+    function loop() {
+      mutate();
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
+</html>
