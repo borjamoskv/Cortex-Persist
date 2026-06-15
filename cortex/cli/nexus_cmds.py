@@ -7,6 +7,7 @@ from pathlib import Path
 import click
 from rich.console import Console
 
+from cortex.cli.common import cli
 from cortex.cli.errors import err_execution_failed, err_skill_not_found
 
 __all__ = [
@@ -49,7 +50,7 @@ def run_nexus_skill(args: list[str]):
         err_execution_failed(" ".join(cmd), str(e))
 
 
-@click.group(name="nexus")
+@cli.group(name="nexus")
 def nexus_cmds():
     """🌌 Singularity Nexus v∞: Cross-Project Unification."""
 

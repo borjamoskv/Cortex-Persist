@@ -137,12 +137,18 @@ async def register_agent_v2(
     # ── 3. Inyección en swarm_registry ───────────────────────────────
     registry = _get_swarm_registry(request)
     try:
-        await registry.register(
-            agent_id=agent_id,
-            name=req.name,
-            kinds=req.kinds,
-            priority=req.priority,
-            meta=meta,
+        from cortex.swarm.runtime import AgentCapability
+
+        meta["agent_id"] = agent_id  # Aseguramos el cruce con BD
+        
+        registry.register(
+            AgentCapability(
+                name=req.name,
+                kinds=req.kinds,  # type: ignore
+                tags=req.tags or [],
+                priority=req.priority,
+                meta=meta,
+            )
         )
         logger.info(
             "Agent %s registered in swarm_registry with kinds=%s priority=%d",

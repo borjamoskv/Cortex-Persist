@@ -27,8 +27,15 @@ class MemoryHandler:
             return await self.agent._dispatch(op, payload)
 
         if self.engine is not None:
-            if op == "store" and hasattr(self.engine, "store"):
-                return await self.engine.store(
+            # Force lazy initialization if needed
+            if not getattr(self.engine, "_memory_ready", False):
+                async with self.engine.session():
+                    pass
+
+        print(f"DEBUG: MemoryHandler op={op}, engine={self.engine}, memory={getattr(self.engine, 'memory', 'NO_ATTR')}")
+        if self.engine is not None and getattr(self.engine, "memory", None):
+            if op == "store":
+                return await self.engine.memory.store(
                     tenant_id=payload["tenant_id"],
                     project_id=payload["project_id"],
                     content=payload["content"],
@@ -36,15 +43,15 @@ class MemoryHandler:
                     metadata=payload["metadata"],
                     layer=payload["layer"],
                 )
-            if op == "context" and hasattr(self.engine, "assemble_context"):
-                return await self.engine.assemble_context(
+            if op == "context":
+                return await self.engine.memory.assemble_context(
                     tenant_id=payload["tenant_id"],
                     project_id=payload["project_id"],
                     query=payload["query"],
                     max_episodes=payload["max_episodes"],
                 )
             if op == "status":
-                return {"agent": "memory", "status": "ok", "bridge": "engine"}
+                return {"agent": "memory", "status": "ok", "bridge": "engine.memory"}
 
         if op == "status":
             return {"agent": "memory", "status": "ok", "bridge": "noop"}

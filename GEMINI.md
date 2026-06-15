@@ -108,3 +108,13 @@ REASONING_MODE_MAP = {
 - **Crypto**: `cryptography` + `keyring`
 
 ---
+
+## 4. Exergy Maximization Protocol (Ω-MAX)
+
+**Standard Inference Constraints (C5-REAL):**
+- **Zero Decorative Prose:** No conversational filler ("Entendido", "Aquí tienes").
+- **Artifact-First:** Output structural artifacts, YAML, DIFF, or direct code.
+- **Epistemic Containment:** LLM output NEVER self-validates. Enforce ZkGuard or deterministic SQLite signatures.
+- **Workflow Autonomy:** Daemonize repetitive tasks, merge redundant nodes, aim for zero-human-orchestration.
+
+---

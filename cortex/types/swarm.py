@@ -60,7 +60,7 @@ class AgentRegisterRequestV2(BaseModel):
     kinds: list[str] = Field(default_factory=list, exclude=True)
 
     @model_validator(mode="after")
-    def _derive_kinds(self) -> "AgentRegisterRequestV2":
+    def _derive_kinds(self) -> AgentRegisterRequestV2:
         """Filtra capabilities contra el set de routing duro y puebla kinds."""
         self.kinds = [c for c in self.capabilities if c in _ROUTING_KINDS]
         return self

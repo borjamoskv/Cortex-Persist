@@ -78,6 +78,12 @@ class DelegatesMixin:
         self._synthesize_skill("query")  # pyright: ignore[reportAttributeAccessIssue]
         return await super().query(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
 
+    async def assemble_context(self, *args, **kwargs):
+        self._synthesize_skill("query")  # pyright: ignore[reportAttributeAccessIssue]
+        if not self.memory:  # pyright: ignore[reportAttributeAccessIssue]
+            return {"error": "Memory subsystem not initialized (sqlite-vec/numpy missing or auto_embed=False)"}
+        return await self.memory.assemble_context(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
+
     async def write_optimized(self, *args, **kwargs):
         self._synthesize_skill("optimization")  # pyright: ignore[reportAttributeAccessIssue]
         return await super().write_optimized(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]

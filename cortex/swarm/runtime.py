@@ -15,6 +15,7 @@ class AgentCapability:
     tags: list[str] = field(default_factory=list)
     priority: int = 0
     max_concurrent: int = 1
+    meta: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(slots=True)
