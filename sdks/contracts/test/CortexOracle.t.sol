@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Test, console} from "forge-std/Test.sol";
 import {CortexOracle} from "../src/CortexOracle.sol";
+import {CortexLineageRegistry} from "../src/CortexLineageRegistry.sol";
 
 contract MockFunctionsRouter {
     function sendRequest(
@@ -18,12 +19,15 @@ contract MockFunctionsRouter {
 
 contract CortexOracleTest is Test {
     CortexOracle public oracle;
+    CortexLineageRegistry public registry;
     MockFunctionsRouter public mockRouter;
     bytes32 public dummyDonId = bytes32("fun-ethereum-mainnet-1");
 
     function setUp() public {
         mockRouter = new MockFunctionsRouter();
-        oracle = new CortexOracle(address(mockRouter), dummyDonId);
+        registry = new CortexLineageRegistry();
+        oracle = new CortexOracle(address(mockRouter), dummyDonId, address(registry));
+        registry.setOracle(address(oracle));
     }
 
     function test_RequestTelemetryVerification() public {
@@ -41,6 +45,9 @@ contract CortexOracleTest is Test {
     }
 
     function test_FulfillRequestSuccess() public {
+        bytes32 mockHash = keccak256("c5-real-telemetry-success");
+        oracle.requestTelemetryVerification("source", mockHash, 1, 300000);
+
         bytes32 reqId = keccak256("req1");
         
         // The FunctionsClient requires the caller to be the router
@@ -48,9 +55,14 @@ contract CortexOracleTest is Test {
         oracle.handleOracleFulfillment(reqId, hex"01", new bytes(0));
         
         assertTrue(oracle.lastVerificationResult());
+        assertTrue(registry.isVerified(mockHash));
+        assertTrue(oracle.verifyTelemetry(mockHash, new bytes(0)));
     }
 
     function test_FulfillRequestFailure() public {
+        bytes32 mockHash = keccak256("c5-real-telemetry-failure");
+        oracle.requestTelemetryVerification("source", mockHash, 1, 300000);
+
         bytes32 reqId = keccak256("req2");
         
         // The FunctionsClient requires the caller to be the router
@@ -58,5 +70,7 @@ contract CortexOracleTest is Test {
         oracle.handleOracleFulfillment(reqId, hex"00", new bytes(0));
         
         assertFalse(oracle.lastVerificationResult());
+        assertFalse(registry.isVerified(mockHash));
     }
 }
+

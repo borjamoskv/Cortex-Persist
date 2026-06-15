@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import {ICortexMemoryVerifier} from "./interfaces/ICortexMemoryVerifier.sol";
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
+import {CortexLineageRegistry} from "./CortexLineageRegistry.sol";
 
 // C5-REAL telemetry Oracle using Chainlink Functions paradigm
 contract CortexOracle is ICortexMemoryVerifier, FunctionsClient {
@@ -12,13 +13,29 @@ contract CortexOracle is ICortexMemoryVerifier, FunctionsClient {
     bytes32 public immutable donId;
     bytes32 public lastTelemetryHash;
     bool public lastVerificationResult;
+    
+    address public owner;
+    address public registry;
 
     event TelemetryVerificationRequested(bytes32 indexed requestId, bytes32 indexed telemetryHash);
     event TelemetryVerificationCompleted(bytes32 indexed requestId, bool success);
     event TelemetryVerificationFailed(bytes32 indexed requestId, bytes error);
+    event RegistryUpdated(address indexed oldRegistry, address indexed newRegistry);
 
-    constructor(address _functionsRouter, bytes32 _donId) FunctionsClient(_functionsRouter) {
+    modifier onlyOwner() {
+        require(msg.sender == owner, "CortexOracle: Only owner");
+        _;
+    }
+
+    constructor(address _functionsRouter, bytes32 _donId, address _registry) FunctionsClient(_functionsRouter) {
         donId = _donId;
+        owner = msg.sender;
+        registry = _registry;
+    }
+
+    function setRegistry(address _registry) external onlyOwner {
+        emit RegistryUpdated(registry, _registry);
+        registry = _registry;
     }
 
     // Function to trigger off-chain C5-REAL telemetry verification
@@ -32,8 +49,6 @@ contract CortexOracle is ICortexMemoryVerifier, FunctionsClient {
         req.initializeRequestForInlineJavaScript(source);
         
         string[] memory args = new string[](1);
-        // Simple string conversion of bytes32 for demo purposes, 
-        // in production we encode this properly for the JS runtime
         args[0] = "telemetry_hash"; 
         if (args.length > 0) req.setArgs(args);
 
@@ -56,27 +71,36 @@ contract CortexOracle is ICortexMemoryVerifier, FunctionsClient {
         bytes memory response,
         bytes memory err
     ) internal override {
+        bool success = false;
         if (err.length == 0) {
-            // Assuming response represents a boolean (1 byte for true/false)
             if (response.length > 0 && response[0] == 0x01) {
-                lastVerificationResult = true;
-            } else {
-                lastVerificationResult = false;
+                success = true;
             }
-            emit TelemetryVerificationCompleted(requestId, lastVerificationResult);
+            lastVerificationResult = success;
+            emit TelemetryVerificationCompleted(requestId, success);
         } else {
             lastVerificationResult = false;
             emit TelemetryVerificationFailed(requestId, err);
         }
+
+        // Registrar el resultado en el Ledger inmutable on-chain
+        if (registry != address(0)) {
+            CortexLineageRegistry(registry).registerRecord(lastTelemetryHash, success);
+        }
     }
 
-    function verifyTelemetry(bytes32 telemetryHash, bytes calldata proof) external pure returns (bool) {
-        // Fallback for direct proof injection
+    function verifyTelemetry(bytes32 telemetryHash, bytes calldata proof) external view returns (bool) {
+        if (registry != address(0)) {
+            return CortexLineageRegistry(registry).isVerified(telemetryHash);
+        }
         return telemetryHash == keccak256(proof);
     }
 
-    function verifyLineage(bytes32 rootHash, bytes calldata proof) external pure returns (bool) {
-        // Fallback for lineage
+    function verifyLineage(bytes32 rootHash, bytes calldata proof) external view returns (bool) {
+        if (registry != address(0)) {
+            return CortexLineageRegistry(registry).isVerified(rootHash);
+        }
         return rootHash == keccak256(proof);
     }
 }
+

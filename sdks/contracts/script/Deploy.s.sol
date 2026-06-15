@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Script, console} from "forge-std/Script.sol";
 import {CortexOracle} from "../src/CortexOracle.sol";
+import {CortexLineageRegistry} from "../src/CortexLineageRegistry.sol";
 
 contract DeployCortexOracle is Script {
     function run() public {
@@ -12,8 +13,14 @@ contract DeployCortexOracle is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        CortexOracle oracle = new CortexOracle(functionsRouter, donId);
+        CortexLineageRegistry registry = new CortexLineageRegistry();
+        console.log("CortexLineageRegistry deployed at:", address(registry));
+
+        CortexOracle oracle = new CortexOracle(functionsRouter, donId, address(registry));
         console.log("CortexOracle deployed at:", address(oracle));
+
+        registry.setOracle(address(oracle));
+        console.log("CortexOracle authorized in Registry.");
 
         vm.stopBroadcast();
     }
