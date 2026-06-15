@@ -791,7 +791,6 @@ version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
-    { name = "chromadb" },
     { name = "click" },
     { name = "cryptography" },
     { name = "langchain-community" },
@@ -815,6 +814,7 @@ all = [
     { name = "arq" },
     { name = "asyncpg" },
     { name = "beautifulsoup4" },
+    { name = "chromadb" },
     { name = "email-validator" },
     { name = "fastapi" },
     { name = "google-antigravity" },
@@ -897,6 +897,7 @@ dev = [
     { name = "z3-solver" },
 ]
 embeddings = [
+    { name = "chromadb" },
     { name = "onnxruntime", version = "1.24.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "onnxruntime", version = "1.26.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "optimum", extra = ["onnxruntime"] },
@@ -945,7 +946,7 @@ requires-dist = [
     { name = "arq", marker = "extra == 'daemon'" },
     { name = "asyncpg", marker = "extra == 'cloud'", specifier = ">=0.29" },
     { name = "beautifulsoup4", marker = "extra == 'mcp'" },
-    { name = "chromadb", specifier = ">=1.5.9" },
+    { name = "chromadb", marker = "extra == 'embeddings'", specifier = ">=1.5.9" },
     { name = "click", specifier = ">=8.0" },
     { name = "cortex-persist", extras = ["compute", "secure", "api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "acceleration", "bci", "graph", "quality"], marker = "extra == 'all'" },
     { name = "cryptography", specifier = ">=46.0.7" },

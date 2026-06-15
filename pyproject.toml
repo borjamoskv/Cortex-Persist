@@ -38,7 +38,6 @@ classifiers = [
         "langchain-community>=0.4.2",
         "langchain-core>=1.4.7",
         "langchain-ollama>=1.1.0",
-        "chromadb>=1.5.9",
 ]
 
 [project.urls]
@@ -115,6 +114,7 @@ embeddings = [
     "sentence-transformers>=3.0",
     "onnxruntime>=1.17",
     "optimum[onnxruntime]>=1.17,<2.0.0",
+    "chromadb>=1.5.9",
 ]
 acceleration = [
     "numba>=0.65.0",

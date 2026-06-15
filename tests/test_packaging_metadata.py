@@ -46,6 +46,7 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
         "sentence-transformers",
         "onnxruntime",
         "optimum",
+        "chromadb",
     }
     assert _dependency_names(extras["acceleration"]) == {"numba"}
     assert _dependency_names(extras["bci"]) == {"python-osc"}
