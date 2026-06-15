@@ -788,3 +788,20 @@ Proof:
   Date: 2026-06-15
 ```
 
+---
+
+### Hito 49: Memory Resilience & Local Swarm Autarchy (SIGBUS + Lazy RAG)
+- **Target**: `cortex_rs/src/ultramap.rs`, `agent_with_tools.py`
+- **Objective**: Blindar el núcleo de memoria compartida contra invalidación de páginas en macOS (SIGBUS) encapsulando lecturas/escrituras de mmap en `catch_unwind` con operaciones `flush()`, y optimizar el consumo de RAM del React Agent integrando BM25 RAG en modo *Lazy* (VRAM cero).
+- **Yield Target**: Cero caídas SIGBUS bajo stress tests, reducción drástica de la fricción de memoria y consolidación para hardware local (18GB).
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits `fix(ultramap): add catch_unwind SIGBUS protection on mmap reads/writes` y `feat(agent): lazy RAG — only activate on codebase search queries`.
+```yaml
+Claim: CORTEX Node es resistente a SIGBUS y eficiente en memoria para ejecución local continua
+Proof:
+  Base: "Stress test de Rust compilado con maturin y React BM25 agent validado en modo Lazy."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-15
+```
+
