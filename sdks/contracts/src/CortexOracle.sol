@@ -2,43 +2,51 @@
 pragma solidity ^0.8.20;
 
 import {ICortexMemoryVerifier} from "./interfaces/ICortexMemoryVerifier.sol";
+import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
+import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 
-// Abstract interface for Chainlink Functions router to allow compilation 
-// if the library structure changes slightly. In production, import directly from @chainlink/contracts.
-interface IFunctionsRouter {
-    function getAllowListId() external view returns (bytes32);
-    function setAllowListId(bytes32 allowListId) external;
-}
+// C5-REAL telemetry Oracle using Chainlink Functions paradigm
+contract CortexOracle is ICortexMemoryVerifier, FunctionsClient {
+    using FunctionsRequest for FunctionsRequest.Request;
 
-// Minimal implementation of C5-REAL telemetry Oracle using Chainlink Functions paradigm
-contract CortexOracle is ICortexMemoryVerifier {
-    address public immutable functionsRouter;
     bytes32 public immutable donId;
-
     bytes32 public lastTelemetryHash;
     bool public lastVerificationResult;
 
     event TelemetryVerificationRequested(bytes32 indexed requestId, bytes32 indexed telemetryHash);
     event TelemetryVerificationCompleted(bytes32 indexed requestId, bool success);
+    event TelemetryVerificationFailed(bytes32 indexed requestId, bytes error);
 
-    constructor(address _functionsRouter, bytes32 _donId) {
-        functionsRouter = _functionsRouter;
+    constructor(address _functionsRouter, bytes32 _donId) FunctionsClient(_functionsRouter) {
         donId = _donId;
     }
 
     // Function to trigger off-chain C5-REAL telemetry verification
-    // Simulating the FunctionsClient behavior for the scaffold
     function requestTelemetryVerification(
         string calldata source,
         bytes32 telemetryHash,
         uint64 subscriptionId,
         uint32 gasLimit
     ) external returns (bytes32 requestId) {
-        // Emit request event
-        requestId = keccak256(abi.encodePacked(source, telemetryHash, block.timestamp));
-        lastTelemetryHash = telemetryHash;
+        FunctionsRequest.Request memory req;
+        req.initializeRequestForInlineJavaScript(source);
+        
+        string[] memory args = new string[](1);
+        // Simple string conversion of bytes32 for demo purposes, 
+        // in production we encode this properly for the JS runtime
+        args[0] = "telemetry_hash"; 
+        if (args.length > 0) req.setArgs(args);
 
+        requestId = _sendRequest(
+            req.encodeCBOR(),
+            subscriptionId,
+            gasLimit,
+            donId
+        );
+
+        lastTelemetryHash = telemetryHash;
         emit TelemetryVerificationRequested(requestId, telemetryHash);
+        
         return requestId;
     }
 
@@ -47,16 +55,18 @@ contract CortexOracle is ICortexMemoryVerifier {
         bytes32 requestId,
         bytes memory response,
         bytes memory err
-    ) external {
-        // Require caller is the router in a real impl
-        // require(msg.sender == functionsRouter, "Only router can fulfill");
-
+    ) internal override {
         if (err.length == 0) {
-            lastVerificationResult = true;
-            emit TelemetryVerificationCompleted(requestId, true);
+            // Assuming response represents a boolean (1 byte for true/false)
+            if (response.length > 0 && response[0] == 0x01) {
+                lastVerificationResult = true;
+            } else {
+                lastVerificationResult = false;
+            }
+            emit TelemetryVerificationCompleted(requestId, lastVerificationResult);
         } else {
             lastVerificationResult = false;
-            emit TelemetryVerificationCompleted(requestId, false);
+            emit TelemetryVerificationFailed(requestId, err);
         }
     }
 

@@ -4,13 +4,26 @@ pragma solidity ^0.8.20;
 import {Test, console} from "forge-std/Test.sol";
 import {CortexOracle} from "../src/CortexOracle.sol";
 
+contract MockFunctionsRouter {
+    function sendRequest(
+        uint64 subscriptionId,
+        bytes calldata data,
+        uint16 dataVersion,
+        uint32 callbackGasLimit,
+        bytes32 donId
+    ) external returns (bytes32) {
+        return keccak256(abi.encodePacked(subscriptionId, data, dataVersion, callbackGasLimit, donId));
+    }
+}
+
 contract CortexOracleTest is Test {
     CortexOracle public oracle;
-    address public dummyRouter = address(1);
+    MockFunctionsRouter public mockRouter;
     bytes32 public dummyDonId = bytes32("fun-ethereum-mainnet-1");
 
     function setUp() public {
-        oracle = new CortexOracle(dummyRouter, dummyDonId);
+        mockRouter = new MockFunctionsRouter();
+        oracle = new CortexOracle(address(mockRouter), dummyDonId);
     }
 
     function test_RequestTelemetryVerification() public {
@@ -19,7 +32,6 @@ contract CortexOracleTest is Test {
         
         // Ensure it emits
         vm.expectEmit(false, true, false, true);
-        // The first argument is random so we skip check, second is the hash
         emit CortexOracle.TelemetryVerificationRequested(bytes32(0), mockHash);
         
         bytes32 reqId = oracle.requestTelemetryVerification(source, mockHash, 1, 300000);
@@ -31,8 +43,20 @@ contract CortexOracleTest is Test {
     function test_FulfillRequestSuccess() public {
         bytes32 reqId = keccak256("req1");
         
-        oracle.fulfillRequest(reqId, bytes("verified"), new bytes(0));
+        // The FunctionsClient requires the caller to be the router
+        vm.prank(address(mockRouter));
+        oracle.handleOracleFulfillment(reqId, hex"01", new bytes(0));
         
         assertTrue(oracle.lastVerificationResult());
+    }
+
+    function test_FulfillRequestFailure() public {
+        bytes32 reqId = keccak256("req2");
+        
+        // The FunctionsClient requires the caller to be the router
+        vm.prank(address(mockRouter));
+        oracle.handleOracleFulfillment(reqId, hex"00", new bytes(0));
+        
+        assertFalse(oracle.lastVerificationResult());
     }
 }
