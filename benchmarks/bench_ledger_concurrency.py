@@ -14,17 +14,18 @@ from typing import Any
 from cortex.engine.checkpoint import CheckpointManager
 from cortex.engine.evolution_ledger import ControlVector, EvolutionLedger
 
+
 def worker_task(ledger: EvolutionLedger, agent_idx: int, mutations_per_worker: int) -> list[float]:
     latencies = []
     vector = ControlVector(1.0, 0.05, 0.1, 0.5)
-    for i in range(mutations_per_worker):
+    for _ in range(mutations_per_worker):
         new_vector = ControlVector(
             vector.queue_depth + 0.1,
             vector.error_rate,
             vector.causal_entropy,
             vector.cpu_load
         )
-        record = ledger.record_mutation(
+        ledger.record_mutation(
             agent_idx=agent_idx,
             vector_before=vector,
             vector_after=new_vector,

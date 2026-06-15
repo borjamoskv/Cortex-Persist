@@ -3,9 +3,8 @@ CORTEX-NATIVE: Edge Cloudflare Bridge
 Synchronizes the local Master Ledger with the Cloudflare D1/Hyperdrive Edge nodes.
 Execution: C5-REAL
 """
-import logging
 import asyncio
-from typing import Dict, Any
+import logging
 
 logger = logging.getLogger(__name__)
 

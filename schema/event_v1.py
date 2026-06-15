@@ -1,7 +1,8 @@
 # [C5-REAL] Exergy-Maximized
-from dataclasses import dataclass, field
 import uuid
+from dataclasses import dataclass, field
 from typing import Any
+
 
 @dataclass(slots=True)
 class EventV1:

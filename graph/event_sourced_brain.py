@@ -1,10 +1,11 @@
 # Cortex-Persist :: Event-Sourced Brain Simulator (C4-SIM)
 # Deterministic replayable connectome execution model
 
-from dataclasses import dataclass, asdict
-from typing import List, Dict, Any
-import time
 import json
+import time
+from dataclasses import asdict, dataclass
+from typing import Any
+
 
 @dataclass
 class BrainEvent:
@@ -12,11 +13,11 @@ class BrainEvent:
     source: str
     target: str
     event_type: str
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
 
 class EventStore:
     def __init__(self):
-        self.events: List[BrainEvent] = []
+        self.events: list[BrainEvent] = []
 
     def append(self, event: BrainEvent):
         self.events.append(event)

@@ -36,7 +36,7 @@ def test_repo_health_artifact_is_json_serializable():
     try:
         json.dumps(artifact)
     except TypeError as e:
-        assert False, f"Artifact is not JSON serializable: {e}"
+        raise AssertionError(f"Artifact is not JSON serializable: {e}")
 
 
 def test_repo_health_trace_id_propagates():

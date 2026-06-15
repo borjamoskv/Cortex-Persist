@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import copy
+import hashlib
+import json
 
+from cortex.swarm.graph_source import GraphSource
 from cortex.swarm.ledger.engine import SwarmLedger
 from cortex.swarm.ledger.models import SwarmEvent
-from cortex.swarm.graph_source import GraphSource
 
 
 class SwarmRouter:
@@ -26,12 +28,6 @@ class SwarmRouter:
     # Public API
     # ------------------------------------------------------------------
 
-    def registry_checksum(self) -> str:
-        """Stable hash of the registry configuration."""
-        import hashlib, json
-        state_dict = self.registry.to_dict() if hasattr(self.registry, 'to_dict') else {}
-        state_str = json.dumps(state_dict, sort_keys=True)
-        return hashlib.sha256(state_str.encode()).hexdigest()
 
     def route(self, request: dict) -> dict:
         if self.graph_source is not None:
@@ -79,7 +75,6 @@ class SwarmRouter:
         # Filter out unserializable objects before hashing
         safe_selected = _deep_sorted({k: v for k, v in selected.items() if not k.startswith("_")})
 
-        import hashlib, json
         state_str = json.dumps(safe_selected, sort_keys=True)
         routing_hash = hashlib.sha256(state_str.encode()).hexdigest()
         selected["routing_hash"] = routing_hash
@@ -100,7 +95,6 @@ class SwarmRouter:
 
     def registry_checksum(self) -> str:
         """Stable hash of the registry configuration."""
-        import hashlib, json
         snap = self._frozen_snapshot()
         state_str = json.dumps(snap, sort_keys=True)
         return hashlib.sha256(state_str.encode()).hexdigest()
@@ -111,11 +105,12 @@ class SwarmRouter:
 
     def _frozen_snapshot(self) -> dict:
         """Deep-frozen, sorted snapshot of registry state."""
-        raw = (
-            self.registry.snapshot()
-            if hasattr(self.registry, 'snapshot')
-            else {}
-        )
+        if hasattr(self.registry, 'snapshot'):
+            raw = self.registry.snapshot()
+        elif hasattr(self.registry, 'to_dict'):
+            raw = self.registry.to_dict()
+        else:
+            raw = {}
         return _deep_sorted(copy.deepcopy(raw))
 
 
@@ -149,7 +144,6 @@ def _deep_sorted(obj):
     return obj
 
 def _is_json_serializable(v):
-    import json
     try:
         json.dumps(v)
         return True

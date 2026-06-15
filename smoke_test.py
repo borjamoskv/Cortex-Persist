@@ -1,8 +1,9 @@
-import sqlite3
-import json
-import time
-import os
 import asyncio
+import json
+import os
+import sqlite3
+import time
+
 
 async def main():
     db_path = os.path.expanduser("~/.cortex/cortex.db")

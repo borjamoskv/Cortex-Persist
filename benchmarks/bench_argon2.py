@@ -27,7 +27,7 @@ def run_benchmarks(iterations=50):
     rs_hashes = []
     
     print(f"🚀 Running Hashing Benchmarks ({iterations} iterations)...")
-    for i in range(iterations):
+    for _ in range(iterations):
         # argon2-cffi
         t0 = time.perf_counter()
         h_cffi = ph.hash(password)
