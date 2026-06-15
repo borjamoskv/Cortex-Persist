@@ -225,7 +225,7 @@ def parse_react(text: str) -> dict:
 
 def should_use_rag(query: str) -> bool:
     """RAG solo se activa para queries de búsqueda/exploración de codebase."""
-    trigger_words = ["buscar", "¿cómo", "explica", "¿qué", "código", "implementación",
+    trigger_words = ["buscar", "busca", "¿cómo", "explica", "¿qué", "código", "implementación",
                      "cómo se", "qué hace", "funciona", "persistencia", "estado",
                      "conexión", "api", "database", "db", "postgres", "fastapi"]
     return any(word in query.lower() for word in trigger_words)
@@ -260,6 +260,8 @@ def react_loop(query: str, index: SimpleBM25) -> str:
             _, fn = TOOLS[action]
             observation = fn(action_input)
             print(f"  -> [OBS]: {observation[:500]}")
+            if len(observation) > 2000:
+                observation = observation[:2000] + "\n...[TRUNCATED_DUE_TO_LENGTH]..."
             messages.append({"role": "user", "content": f"Observation: {observation}"})
         else:
             messages.append({

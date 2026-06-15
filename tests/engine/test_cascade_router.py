@@ -5,8 +5,9 @@ Unit tests for CascadeRouter routing logic.
 
 from __future__ import annotations
 
+import asyncio
 import subprocess
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
 import pytest
 
@@ -46,77 +47,89 @@ class TestCascadeRouter:
         # Refactor task with 6 files -> gemini (normally claude)
         assert router._select_engine("refactor", ["f1", "f2", "f3", "f4", "f5", "f6"]) == "gemini"
 
-    @patch("cortex.engine.cascade_router.subprocess.run")
-    def test_execute_gemini_with_files(self, mock_run):
+    @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
+    async def test_execute_gemini_with_files(self, mock_create):
         """Should call npx @google/gemini-cli with file flags."""
         router = CascadeRouter()
 
         mock_process = MagicMock()
         mock_process.returncode = 0
-        mock_process.stdout = "Gemini Response"
-        mock_run.return_value = mock_process
+        mock_process.communicate = AsyncMock(return_value=(b"Gemini Response", b""))
+        mock_create.return_value = mock_process
 
-        response = router.route_task("Check this code", "architecture", ["app.py", "utils.py"])
+        response = await router.route_task("Check this code", "architecture", ["app.py", "utils.py"])
         assert response == "Gemini Response"
 
         # Check call arguments
-        mock_run.assert_called_once()
-        args, kwargs = mock_run.call_args
-        cmd = args[0]
-        assert cmd[:3] == ["npx", "-y", "@google/gemini-cli"]
+        mock_create.assert_called_once()
+        args, kwargs = mock_create.call_args
+        cmd = args
+        assert cmd[:3] == ("npx", "-y", "@google/gemini-cli")
         assert "--file" in cmd
         assert "app.py" in cmd
         assert "utils.py" in cmd
         assert "Check this code" in cmd
 
-    @patch("cortex.engine.cascade_router.subprocess.run")
-    def test_execute_claude(self, mock_run):
+    @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
+    async def test_execute_claude(self, mock_create):
         """Should call npx @anthropic-ai/claude-code."""
         router = CascadeRouter()
 
         mock_process = MagicMock()
         mock_process.returncode = 0
-        mock_process.stdout = "Claude Response"
-        mock_run.return_value = mock_process
+        mock_process.communicate = AsyncMock(return_value=(b"Claude Response", b""))
+        mock_create.return_value = mock_process
 
-        response = router.route_task("Fix this typo", "refactor")
+        response = await router.route_task("Fix this typo", "refactor")
         assert response == "Claude Response"
 
-        mock_run.assert_called_once()
-        cmd = mock_run.call_args[0][0]
-        assert cmd[:3] == ["npx", "-y", "@anthropic-ai/claude-code"]
+        mock_create.assert_called_once()
+        cmd = mock_create.call_args[0]
+        assert cmd[:3] == ("npx", "-y", "@anthropic-ai/claude-code")
         assert "Fix this typo" in cmd
 
-    @patch("cortex.engine.cascade_router.subprocess.run")
-    def test_execute_timeout(self, mock_run):
+    @patch("cortex.engine.cascade_router.asyncio.sleep")
+    @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
+    async def test_execute_timeout(self, mock_create, mock_sleep):
         """Should return timeout error message on subprocess timeout."""
         router = CascadeRouter()
-        mock_run.side_effect = subprocess.TimeoutExpired(cmd=["codex"], timeout=300)
 
-        response = router.route_task("Generate large file", "snippet")
+        mock_process = MagicMock()
+        mock_process.communicate = AsyncMock(side_effect=[
+            asyncio.TimeoutError(), (b"", b""),
+            asyncio.TimeoutError(), (b"", b""),
+            asyncio.TimeoutError(), (b"", b"")
+        ])
+        mock_process.kill = MagicMock()
+        mock_create.return_value = mock_process
+
+        response = await router.route_task("Generate large file", "snippet")
         assert "timed out" in response
+        assert mock_create.call_count == 3
 
-    @patch("cortex.engine.cascade_router.subprocess.run")
-    def test_execute_error_code(self, mock_run):
+    @patch("cortex.engine.cascade_router.asyncio.sleep")
+    @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
+    async def test_execute_error_code(self, mock_create, mock_sleep):
         """Should return stderr error message on non-zero exit code."""
         router = CascadeRouter()
 
         mock_process = MagicMock()
         mock_process.returncode = 1
-        mock_process.stderr = "Permission Denied"
-        mock_run.return_value = mock_process
+        mock_process.communicate = AsyncMock(return_value=(b"Some output", b"Permission Denied"))
+        mock_create.return_value = mock_process
 
-        response = router.route_task("Run unauthorized command", "snippet")
-        assert "Error" in response
-        assert "Permission Denied" in response
+        response = await router.route_task("Run unauthorized command", "snippet")
+        assert response == "Error (codex): Permission Denied"
+        assert mock_create.call_count == 3
 
-    @patch("cortex.engine.cascade_router.subprocess.run")
-    def test_execute_file_not_found(self, mock_run):
+    @patch("cortex.engine.cascade_router.asyncio.sleep")
+    @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
+    async def test_execute_file_not_found(self, mock_create, mock_sleep):
         """Should handle FileNotFoundError gracefully."""
         router = CascadeRouter()
-        mock_run.side_effect = FileNotFoundError()
+        mock_create.side_effect = FileNotFoundError()
 
         # Let's see what happens when the executable is not found
-        response = router.route_task("Check this code", "snippet")
+        response = await router.route_task("Check this code", "snippet")
+        assert "CLI tool" in response
         assert "not found in PATH" in response
-

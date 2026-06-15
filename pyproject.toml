@@ -38,6 +38,7 @@ classifiers = [
         "langchain-community>=0.4.2",
         "langchain-core>=1.4.7",
         "langchain-ollama>=1.1.0",
+        "confluent-kafka>=2.1.0",
 ]
 
 [project.urls]

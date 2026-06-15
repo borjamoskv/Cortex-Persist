@@ -5,6 +5,7 @@ Tactical routing logic to delegate heavy LLM tasks to local CLI engines:
 Gemini (Antigravity), Claude Code, and Codex.
 """
 
+import asyncio
 import hashlib
 import logging
 import os
@@ -130,7 +131,7 @@ class CascadeRouter:
                 # Log to DB for BM25 indexing (done only on success or exhaustion of retries)
                 if task_id:
                     try:
-                        db_path = Path("~/.cortex/cortex.db").expanduser()
+                        db_path = Path(os.environ.get("CORTEX_DB_PATH", "~/.cortex/cortex.db")).expanduser()
                         if db_path.exists():
                             conn = sqlite3.connect(db_path)
                             digest = hashlib.sha256(output_content.encode("utf-8")).hexdigest()[:16]

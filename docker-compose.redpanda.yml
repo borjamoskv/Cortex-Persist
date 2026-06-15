@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   redpanda:
-    image: docker.vectorized.io/vectorized/redpanda:latest
+    image: redpandadata/redpanda:latest
     container_name: cortex-redpanda
     command:
       - redpanda
