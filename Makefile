@@ -81,3 +81,6 @@ typecheck: ## Run type checker
 
 mcp: ## Start MCP server
 	python run_mcp_server.py
+
+deploy: ## Validate and orchestrate deployment
+	python -c "from schema.event_v1 import EventV1; from daemon.execution_bus import run; import skills.deploy; result = run(EventV1(event_type='command_received', source='cli', skill_id='deploy', payload={'command': 'validate'})); print(result.artifact)"
