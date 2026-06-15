@@ -36,6 +36,7 @@ class TransactionMixin(EngineMixinBase):
         tenant_id: str = "default",
     ) -> int:
         from cortex.utils.canonical import canonical_json, compute_tx_hash
+        from cortex.utils.locks import get_loop_lock
 
         # JIS (SOC 2 / C5 / GDPR) Audit Policy Check
         try:
@@ -55,46 +56,43 @@ class TransactionMixin(EngineMixinBase):
         dj = canonical_json(detail)
         ts = now_iso()
 
-        # Enforce write lock promotion to prevent read-modify-write race
-        if not conn.in_transaction:
-            await conn.execute("BEGIN IMMEDIATE")
+        async with get_loop_lock(self, "write"):
+            # Enforce write lock promotion to prevent read-modify-write race
+            if not conn.in_transaction:
+                await conn.execute("BEGIN IMMEDIATE")
 
-        cursor = await conn.execute(
-            "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
-            (tenant_id,),
-        )
-        prev = await cursor.fetchone()
-        await cursor.close()
-        ph = prev[0] if prev else "GENESIS"
-        th = compute_tx_hash(ph, project, action, dj, ts, tenant_id=tenant_id)
+            cursor = await conn.execute(
+                "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
+                (tenant_id,),
+            )
+            prev = await cursor.fetchone()
+            await cursor.close()
+            ph = prev[0] if prev else "GENESIS"
+            th = compute_tx_hash(ph, project, action, dj, ts, tenant_id=tenant_id)
 
-        c = await conn.execute(
-            "INSERT INTO transactions "
-            "(tenant_id, project, action, detail, prev_hash, hash, timestamp) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (tenant_id, project, action, dj, ph, th, ts),
-        )
-        tx_id = c.lastrowid
+            c = await conn.execute(
+                "INSERT INTO transactions "
+                "(tenant_id, project, action, detail, prev_hash, hash, timestamp) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (tenant_id, project, action, dj, ph, th, ts),
+            )
+            tx_id = c.lastrowid
 
+            if getattr(self, "_ledger", None):
+                try:
+                    self._ledger.record_write()
+                    if not getattr(self, "_closing", False):
+                        await self._ledger.create_checkpoint_async(conn)
+                except (sqlite3.Error, OSError, RuntimeError, AttributeError, ValueError) as e:
+                    logger.warning("Auto-checkpoint failed: %s", e)
+                    from cortex.telemetry.metrics import metrics
 
+                    metrics.inc(
+                        "cortex_ledger_checkpoint_failures_total",
+                        meta={"error": str(e)},
+                    )
 
-
-
-        if getattr(self, "_ledger", None):
-            try:
-                self._ledger.record_write()
-                if not getattr(self, "_closing", False):
-                    await self._ledger.create_checkpoint_async(conn)
-            except (sqlite3.Error, OSError, RuntimeError, AttributeError, ValueError) as e:
-                logger.warning("Auto-checkpoint failed: %s", e)
-                from cortex.telemetry.metrics import metrics
-
-                metrics.inc(
-                    "cortex_ledger_checkpoint_failures_total",
-                    meta={"error": str(e)},
-                )
-
-        return int(tx_id) if tx_id is not None else 0
+            return int(tx_id) if tx_id is not None else 0
 
     async def verify_ledger(self) -> dict[str, Any]:
         """Verify the integrity of the sovereign ledger (Operation Void)."""

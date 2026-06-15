@@ -168,11 +168,18 @@ class ConnectionMixin:
             except Exception as e:
                 logger.warning("Failed to load tenant_isolation_salt: %s", e)
 
+            # Ensure we do not leave a read transaction open on the connection
+            try:
+                await conn.commit()
+            except Exception:
+                pass
+
             if self._ledger is None:
                 from cortex.ledger import ImmutableLedger
 
                 self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
             self._schema_ready = True
+
 
     async def _get_or_create_ledger(self):
         """Return the transaction ledger, initializing it on demand."""
