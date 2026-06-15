@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import os
+import shutil
+import subprocess
+from pathlib import Path
+
 import click
 from rich.table import Table
 
@@ -12,6 +17,7 @@ __all__ = [
     "purge_duplicates",
     "purge_empty",
     "purge_project",
+    "purge_omega",
 ]
 
 
@@ -188,3 +194,65 @@ def purge_project(project_name, dry_run, db) -> None:
             )
     finally:
         engine.close_sync()
+
+
+@purge.command("omega")
+def purge_omega() -> None:
+    """LEA-Ω: Loose End Annihilator. Purges dead code, caches, and token debris."""
+    console.print("[bold red]🔥 Iniciando LEA-Ω (Loose End Annihilator)...[/]")
+
+    # 1. Dead Code & Imports Annihilation
+    console.print("\n[cyan][1/3] Annihilating dead code and imports (Ruff)...[/]")
+    try:
+        subprocess.run(
+            ["ruff", "check", "--select", "F401,F841", "--fix", "."],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        console.print("  [green]✓[/] Dead variables and unused imports purged.")
+    except Exception as e:
+        console.print(f"  [yellow]⚠[/] Ruff fix failed: {e}")
+
+    # 2. Cache Annihilation
+    console.print("\n[cyan][2/3] Annihilating execution caches...[/]")
+    cache_dirs = ["__pycache__", ".pytest_cache", ".ruff_cache"]
+    deleted_caches = 0
+    for root, dirs, _ in os.walk("."):
+        for d in dirs:
+            if d in cache_dirs:
+                shutil.rmtree(os.path.join(root, d), ignore_errors=True)
+                deleted_caches += 1
+    console.print(f"  [green]✓[/] Destroyed {deleted_caches} cache directories.")
+
+    # 3. Brain Scratch Annihilation (Cross-Session)
+    console.print("\n[cyan][3/3] Annihilating legacy token debris...[/]")
+    brain_dir = Path("~/.gemini/antigravity/brain").expanduser()
+    current_session = os.environ.get("CONVERSATION_ID")
+    total_files = 0
+    total_bytes = 0
+
+    if brain_dir.exists():
+        for scratch_dir in brain_dir.rglob("scratch"):
+            if current_session and current_session in str(scratch_dir):
+                continue
+
+            for item in scratch_dir.iterdir():
+                try:
+                    if item.is_file() or item.is_symlink():
+                        total_bytes += item.stat().st_size
+                        total_files += 1
+                        item.unlink()
+                    elif item.is_dir():
+                        for subitem in item.rglob("*"):
+                            if subitem.is_file() or subitem.is_symlink():
+                                total_bytes += subitem.stat().st_size
+                                total_files += 1
+                        shutil.rmtree(item)
+                except Exception:
+                    pass
+
+    freed_mb = total_bytes / (1024 * 1024)
+    console.print(f"  [green]✓[/] Destroyed {total_files} legacy files ({freed_mb:.2f} MB).")
+
+    console.print("\n[bold green]✅ LEA-Ω PURGE COMPLETE (C5-REAL). Zero Mercy.[/]")

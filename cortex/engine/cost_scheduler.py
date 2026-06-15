@@ -9,6 +9,7 @@ based on antigravity_routing_policy.yaml.
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -184,3 +185,28 @@ class ExergyCostScheduler:
             return True
 
         return False
+
+    def select_backend(self, domain: str, intent_kind: str) -> BackendConfig:
+        """Resolves backend configuration based on intent evaluation."""
+        state_config = self.determine_state(intent_kind, {"domain": domain})
+        state_name = state_config["state"]
+
+        if state_name == "APEX_STATE":
+            backend_name = "AX"
+        elif state_name == "CONSTRUCT_STATE":
+            backend_name = "CDP"
+        else:
+            backend_name = "HITL"
+
+        return BackendConfig(name=backend_name, state_config=state_config)
+
+
+@dataclass
+class BackendConfig:
+    name: str
+    state_config: dict[str, Any]
+
+    def total_cost(self, domain: str) -> float:
+        max_tokens = self.state_config.get("max_tokens", 4096)
+        # Empirical exergy cost proxy (USD per 1k tokens)
+        return float(max_tokens) / 1000.0 * 0.01
