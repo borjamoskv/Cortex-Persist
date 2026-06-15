@@ -7,14 +7,24 @@ class SwarmRouter:
         self.registry = registry
         self.ledger = SwarmLedger()
 
-    def route(self, request: dict):
-        if not self.registry._frozen:
-            self.registry.freeze()
+    def registry_checksum(self) -> str:
+        """Stable hash of the registry configuration."""
+        import json, hashlib
+        state_str = json.dumps(self.registry.to_dict(), sort_keys=True)
+        return hashlib.sha256(state_str.encode()).hexdigest()
 
-        candidates = sorted(
-            self.registry.get_candidates(request["task"]),
-            key=lambda a: a.agent_id
-        )
+    def route(self, request: dict):
+        # In V2, registry is naturally deterministic via sorted keys and frozen specs.
+        # We find candidates by matching words in task to capabilities, or fallback to all.
+        task = request.get("task", "").lower()
+        candidates = []
+        for agent in self.registry.all():
+            if any(cap in task for cap in agent.capabilities):
+                candidates.append(agent)
+        
+        if not candidates:
+            # Deterministic fallback: all agents sorted
+            candidates = self.registry.all()
 
         selected = self._dispatch(candidates, request)
 
@@ -22,7 +32,7 @@ class SwarmRouter:
             SwarmEvent(
                 task=request["task"],
                 input=request,
-                registry_state=self.registry.snapshot(),
+                registry_state=self.registry.to_dict(),
                 selected_agent=selected["agent_id"],
                 routing_payload=selected,
             )

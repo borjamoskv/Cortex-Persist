@@ -212,6 +212,9 @@ class ConnectionMixin:
             conn.enable_load_extension(False)
         except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
+        if not hasattr(self, "_sync_conns"):
+            self._sync_conns = []
+        self._sync_conns.append(conn)
         return conn
 
     async def init_db(self) -> None:

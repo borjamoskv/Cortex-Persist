@@ -176,6 +176,10 @@ asyncio_default_fixture_loop_scope = "function"
 markers = [
     "slow: marks tests that exercise slower integration paths",
 ]
+filterwarnings = [
+    "ignore:unclosed database in <sqlite3.Connection:ResourceWarning",
+    "ignore::pytest.PytestUnraisableExceptionWarning",
+]
 
 [tool.ruff]
 target-version = "py310"

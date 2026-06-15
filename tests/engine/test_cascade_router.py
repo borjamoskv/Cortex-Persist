@@ -48,8 +48,9 @@ class TestCascadeRouter:
         assert router._select_engine("refactor", ["f1", "f2", "f3", "f4", "f5", "f6"]) == "gemini"
 
     @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
+    @patch.dict("os.environ", {"CORTEX_LLM_LOCAL_FIRST": "1"})
     async def test_execute_gemini_with_files(self, mock_create):
-        """Should call npx @google/gemini-cli with file flags."""
+        """Should call ollama qwen2.5-coder:32b when local_first is enabled."""
         router = CascadeRouter()
 
         mock_process = MagicMock()
@@ -64,6 +65,25 @@ class TestCascadeRouter:
         mock_create.assert_called_once()
         args, kwargs = mock_create.call_args
         cmd = args
+        assert cmd[:3] == ("ollama", "run", "qwen2.5-coder:32b")
+        assert "Check this code" in cmd
+
+    @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
+    @patch.dict("os.environ", {"CORTEX_LLM_LOCAL_FIRST": "0"})
+    async def test_execute_gemini_with_files_npx(self, mock_create):
+        """Should call npx gemini-cli with file flags when local_first is disabled."""
+        router = CascadeRouter()
+
+        mock_process = MagicMock()
+        mock_process.returncode = 0
+        mock_process.communicate = AsyncMock(return_value=(b"Gemini Response", b""))
+        mock_create.return_value = mock_process
+
+        response = await router.route_task("Check this code", "architecture", ["app.py", "utils.py"])
+        assert response == "Gemini Response"
+
+        mock_create.assert_called_once()
+        cmd = mock_create.call_args[0]
         assert cmd[:3] == ("npx", "-y", "@google/gemini-cli")
         assert "--file" in cmd
         assert "app.py" in cmd
@@ -71,8 +91,28 @@ class TestCascadeRouter:
         assert "Check this code" in cmd
 
     @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
+    @patch.dict("os.environ", {"CORTEX_LLM_LOCAL_FIRST": "1"})
     async def test_execute_claude(self, mock_create):
-        """Should call npx @anthropic-ai/claude-code."""
+        """Should call ollama qwen2.5-coder:32b when local_first is enabled."""
+        router = CascadeRouter()
+
+        mock_process = MagicMock()
+        mock_process.returncode = 0
+        mock_process.communicate = AsyncMock(return_value=(b"Claude Response", b""))
+        mock_create.return_value = mock_process
+
+        response = await router.route_task("Fix this typo", "refactor")
+        assert response == "Claude Response"
+
+        mock_create.assert_called_once()
+        cmd = mock_create.call_args[0]
+        assert cmd[:3] == ("ollama", "run", "qwen2.5-coder:32b")
+        assert "Fix this typo" in cmd
+
+    @patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
+    @patch.dict("os.environ", {"CORTEX_LLM_LOCAL_FIRST": "0"})
+    async def test_execute_claude_npx(self, mock_create):
+        """Should call npx claude-code when local_first is disabled."""
         router = CascadeRouter()
 
         mock_process = MagicMock()

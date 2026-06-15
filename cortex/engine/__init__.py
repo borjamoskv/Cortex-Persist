@@ -209,6 +209,14 @@ class CortexEngine(
             self._memory_manager = None
 
     async def _close_connections(self):
+        if hasattr(self, "_sync_conns"):
+            for conn in self._sync_conns:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+            self._sync_conns.clear()
+
         if not hasattr(self, "_conns_by_loop"):
             return
         conns = list(self._conns_by_loop.values())
