@@ -190,3 +190,26 @@ class SearchMixin(EngineMixinBase):
 
             if results and (subgraph.get("nodes") or subgraph.get("edges")):
                 results[0].graph_context = {"graph": subgraph, "seeds": seeds}
+
+    def record_bm25_feedback(
+        self, engine_used: str, response_digest: str, tenant_id: str = "default"
+    ) -> None:
+        """Inject (engine_used, response_digest) into BM25 feedback loop as a fire-and-forget async task."""
+        import asyncio
+
+        async def _inject_feedback():
+            try:
+                # Inyectar logica de retroalimentacion BM25 (ej. tabla FTS o tabla de tracking)
+                async with self.session() as conn:
+                    # Ejemplo asumiendo esquema FTS5 genérico en cortex.db
+                    await conn.execute(
+                        "INSERT INTO llm_telemetry (engine_used, response_digest, tenant_id) VALUES (?, ?, ?)",
+                        (engine_used, response_digest, tenant_id)
+                    )
+                    await conn.commit()
+                logger.debug("BM25 feedback injected: %s", engine_used)
+            except Exception as e:
+                logger.error("Failed to inject BM25 feedback: %s", e)
+
+        # Disparar tarea fire-and-forget sin bloquear el event loop principal
+        asyncio.create_task(_inject_feedback())

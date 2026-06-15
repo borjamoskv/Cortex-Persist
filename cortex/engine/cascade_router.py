@@ -32,7 +32,7 @@ class CascadeRouter:
             logger.debug(f"Could not update circuit breaker: {cb_err}")
         return f"Error: CLI tool '{engine}' not found in PATH. Subprocess execution failed."
 
-    def route_task(
+    async def route_task(
         self,
         prompt: str,
         task_type: str = "general",
@@ -45,7 +45,7 @@ class CascadeRouter:
         """
         engine = self._select_engine(task_type, files)
         logger.info(f"🧠 [ROUTER] Selected engine: {engine} for task: {task_type}")
-        return self._execute(engine, prompt, files, task_id)
+        return await self._execute(engine, prompt, files, task_id)
 
     def _select_engine(self, task_type: str, files: list[str] | None) -> str:
         num_files = len(files) if files else 0
@@ -60,96 +60,131 @@ class CascadeRouter:
         else:
             return "claude"  # default fallback
 
-    def _execute(
+    async def _execute(
         self, engine: str, prompt: str, files: list[str] | None, task_id: str | None
     ) -> str:
-        try:
-            if engine == "gemini":
-                cmd = ["npx", "-y", "@google/gemini-cli"]
-                if files:
-                    for f in files:
-                        cmd.extend(["--file", f])
-                cmd.append(prompt)
+        import asyncio
+        max_retries = 3
+        base_delay = 2
 
-            elif engine == "claude":
-                cmd = ["npx", "-y", "@anthropic-ai/claude-code", "--print", "-q", prompt]
+        for attempt in range(1, max_retries + 1):
+            try:
+                if engine == "gemini":
+                    cmd = ["npx", "-y", "@google/gemini-cli"]
+                    if files:
+                        for f in files:
+                            cmd.extend(["--file", f])
+                    cmd.append(prompt)
 
-            elif engine == "codex":
-                cmd = ["codex", prompt]
+                elif engine == "claude":
+                    cmd = ["npx", "-y", "@anthropic-ai/claude-code", "--print", "-q", prompt]
 
-            else:
-                raise ValueError(f"Unknown engine: {engine}")
+                elif engine == "codex":
+                    cmd = ["codex", prompt]
 
-            logger.info(f"🚀 [ROUTER] Dispatching to {engine}...")
+                else:
+                    raise ValueError(f"Unknown engine: {engine}")
 
-            # Selectively pass API keys from parent environment
-            child_env = {
-                **os.environ,
-                "ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY", "sk-ant-fallback"),
-                "GEMINI_API_KEY": os.environ.get("GEMINI_API_KEY", "gemini-fallback"),
-            }
+                logger.info(f"🚀 [ROUTER] Dispatching to {engine} (Attempt {attempt}/{max_retries})...")
 
-            result = subprocess.run(cmd, env=child_env, capture_output=True, text=True, timeout=300)
+                # Selectively pass API keys from parent environment
+                child_env = {
+                    **os.environ,
+                    "ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY", "sk-ant-fallback"),
+                    "GEMINI_API_KEY": os.environ.get("GEMINI_API_KEY", "gemini-fallback"),
+                }
 
-            stdout = result.stdout.strip()
-            stderr = result.stderr.strip()
+                process = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    env=child_env,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
 
-            output_content = stdout if result.returncode == 0 else f"ERROR:\n{stderr}\n{stdout}"
-
-            if result.returncode != 0:
-                logger.error(f"❌ [ROUTER] {engine} failed. STDERR: {stderr}")
-
-            # Log to DB for BM25 indexing
-            if task_id:
                 try:
-                    db_path = Path("~/.cortex/cortex.db").expanduser()
-                    if db_path.exists():
-                        conn = sqlite3.connect(db_path)
-                        digest = hashlib.sha256(output_content.encode("utf-8")).hexdigest()[:16]
-                        # Escribir en la tabla de episodios/BM25
-                        conn.execute(
-                            "INSERT INTO episodes (session_id, event_type, project, content) VALUES (?, ?, ?, ?)",
-                            (
-                                "cascade-sys",
-                                "llm_task_result",
-                                "cortex-engine",
-                                f"task_id:{task_id} engine:{engine} digest:{digest}\n{output_content[:500]}",
-                            ),
-                        )
-                        # Opcional: Actualizar la tarea original
-                        try:
-                            status = "completed" if result.returncode == 0 else "failed"
-                            conn.execute("UPDATE tasks SET status=? WHERE id=?", (status, task_id))
-                        except sqlite3.OperationalError:
-                            pass  # Ignorar si la tabla tasks no tiene esa estructura
-                        conn.commit()
-                        conn.close()
-                except Exception as db_e:
-                    logger.error(f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}")
+                    stdout_bytes, stderr_bytes = await asyncio.wait_for(process.communicate(), timeout=300)
+                except asyncio.TimeoutError:
+                    process.kill()
+                    await process.communicate()
+                    logger.error(f"⏱️ [ROUTER] {engine} execution timed out (300s).")
+                    if attempt < max_retries:
+                        delay = base_delay ** attempt
+                        logger.info(f"⏳ [ROUTER] Retrying in {delay} seconds...")
+                        await asyncio.sleep(delay)
+                        continue
+                    return f"Error: {engine} timed out."
 
-            if result.returncode != 0:
-                return f"Error ({engine}): {stderr}"
+                stdout = stdout_bytes.decode('utf-8').strip()
+                stderr = stderr_bytes.decode('utf-8').strip()
 
-            return stdout
+                output_content = stdout if process.returncode == 0 else f"ERROR:\n{stderr}\n{stdout}"
 
-        except FileNotFoundError:
-            logger.error("🔌 [ROUTER] CLI no encontrado en PATH. Activando fallback...")
-            return self.fallback_response(engine, prompt)
-        except subprocess.TimeoutExpired:
-            logger.error(f"⏱️ [ROUTER] {engine} execution timed out (300s).")
-            return f"Error: {engine} timed out."
-        except Exception as e:
-            logger.error(f"🔥 [ROUTER] Subprocess execution exception: {e}")
-            return f"Error: {e}"
+                if process.returncode != 0:
+                    logger.error(f"❌ [ROUTER] {engine} failed. STDERR: {stderr}")
+                    if attempt < max_retries:
+                        delay = base_delay ** attempt
+                        logger.info(f"⏳ [ROUTER] Retrying in {delay} seconds...")
+                        await asyncio.sleep(delay)
+                        continue
+
+                # Log to DB for BM25 indexing (done only on success or exhaustion of retries)
+                if task_id:
+                    try:
+                        db_path = Path("~/.cortex/cortex.db").expanduser()
+                        if db_path.exists():
+                            conn = sqlite3.connect(db_path)
+                            digest = hashlib.sha256(output_content.encode("utf-8")).hexdigest()[:16]
+                            # Escribir en la tabla de episodios/BM25
+                            conn.execute(
+                                "INSERT INTO episodes (session_id, event_type, project, content) VALUES (?, ?, ?, ?)",
+                                (
+                                    "cascade-sys",
+                                    "llm_task_result",
+                                    "cortex-engine",
+                                    f"task_id:{task_id} engine:{engine} digest:{digest}\n{output_content[:500]}",
+                                ),
+                            )
+                            # Opcional: Actualizar la tarea original
+                            try:
+                                status = "completed" if process.returncode == 0 else "failed"
+                                conn.execute("UPDATE tasks SET status=? WHERE id=?", (status, task_id))
+                            except sqlite3.OperationalError:
+                                pass  # Ignorar si la tabla tasks no tiene esa estructura
+                            conn.commit()
+                            conn.close()
+                    except Exception as db_e:
+                        logger.error(f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}")
+
+                if process.returncode != 0:
+                    return f"Error ({engine}): {stderr}"
+
+                return stdout
+
+            except FileNotFoundError:
+                logger.error("🔌 [ROUTER] CLI no encontrado en PATH. Activando fallback...")
+                return self.fallback_response(engine, prompt)
+            except Exception as e:
+                logger.error(f"🔥 [ROUTER] Subprocess execution exception: {e}")
+                if attempt < max_retries:
+                    delay = base_delay ** attempt
+                    logger.info(f"⏳ [ROUTER] Retrying in {delay} seconds due to exception...")
+                    await asyncio.sleep(delay)
+                    continue
+                return f"Error: {e}"
 
 
 if __name__ == "__main__":
+    import asyncio
     # Test stub
     logging.basicConfig(level=logging.INFO)
     router = CascadeRouter()
-    logger.info(
-        "Test Routing (Architecture): %s",
-        router._select_engine("architecture", ["f1", "f2", "f3", "f4", "f5", "f6"]),
-    )
-    logger.info("Test Routing (Refactor): %s", router._select_engine("refactor", ["f1"]))
-    logger.info("Test Routing (Snippet): %s", router._select_engine("snippet", []))
+    
+    async def run_tests():
+        logger.info(
+            "Test Routing (Architecture): %s",
+            router._select_engine("architecture", ["f1", "f2", "f3", "f4", "f5", "f6"]),
+        )
+        logger.info("Test Routing (Refactor): %s", router._select_engine("refactor", ["f1"]))
+        logger.info("Test Routing (Snippet): %s", router._select_engine("snippet", []))
+        
+    asyncio.run(run_tests())
