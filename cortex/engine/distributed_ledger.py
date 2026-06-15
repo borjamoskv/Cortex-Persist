@@ -9,7 +9,13 @@ import logging
 from collections.abc import Iterator
 from typing import Any
 
-from confluent_kafka import Consumer, Producer
+try:
+    from confluent_kafka import Consumer, Producer
+    KAFKA_AVAILABLE = True
+except ImportError:
+    Consumer = Any
+    Producer = Any
+    KAFKA_AVAILABLE = False
 
 from cortex.engine.evolution_ledger import (
     ControlVector,
