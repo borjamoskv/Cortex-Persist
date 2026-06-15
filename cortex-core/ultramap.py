@@ -18,6 +18,7 @@ except ImportError as e:
 
 # Evolution Ledger — replay-safe mutation tracking
 try:
+    from cortex.engine.checkpoint import CheckpointManager
     from cortex.engine.evolution_ledger import ControlVector, EvolutionLedger
 
     HAS_EVOLUTION_LEDGER = True
@@ -25,6 +26,7 @@ except ImportError:
     HAS_EVOLUTION_LEDGER = False
     ControlVector = None  # type: ignore[assignment,misc]
     EvolutionLedger = None  # type: ignore[assignment,misc]
+    CheckpointManager = None  # type: ignore[assignment,misc]
 
 DB_PATH = os.getenv(
     "CORTEX_DB_PATH",
@@ -81,10 +83,12 @@ class UltramapSubstrate:
 
         # Evolution Ledger — hash-chained mutation log
         self._evolution_ledger = None
+        self._checkpoint_manager = None
         if HAS_EVOLUTION_LEDGER:
             ledger_path = os.path.join(os.path.dirname(self.bin_path), "evolution_ledger.jsonl")
             try:
                 self._evolution_ledger = EvolutionLedger(ledger_path)
+                self._checkpoint_manager = CheckpointManager(self._evolution_ledger, chunk_size=1000)
                 logger.info(
                     f"EVO-LEDGER Active. Head: {self._evolution_ledger.head_hash[:12]}… Seq: {self._evolution_ledger.sequence}"
                 )
@@ -115,6 +119,14 @@ class UltramapSubstrate:
                 )
 
     def close(self):
+        if hasattr(self, "_checkpoint_manager") and self._checkpoint_manager is not None:
+            try:
+                self._checkpoint_manager.generate_index()
+                logger.info("EVO-LEDGER Checkpoints synced on shutdown.")
+            except Exception as e:
+                logger.warning(f"EVO-LEDGER Checkpoint sync failed: {e}")
+            self._checkpoint_manager = None
+
         if hasattr(self, "_finalizer") and self._finalizer.alive:
             self._finalizer.detach()
         if hasattr(self, "_rs") and self._rs is not None:
