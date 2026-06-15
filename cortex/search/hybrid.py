@@ -170,6 +170,10 @@ async def hybrid_search(
             if str(r.fact_id) in contexts:
                 r.context = {"edges": contexts[str(r.fact_id)]}
 
+    # 🔥 Fire-and-forget BM25 feedback loop
+    if merged:
+        asyncio.create_task(_bm25_feedback_loop(conn, query, merged))
+
     logger.debug(
         "Hybrid search executed. query='%s' results=%d top_score=%.4f",
         query[:30],
@@ -303,3 +307,18 @@ async def _expand_graph_context(
         logger.warning("GraphRAG expansion skipped (table missing or error): %s", e)
 
     return context
+
+
+async def _bm25_feedback_loop(
+    conn: aiosqlite.Connection, query: str, results: list[SearchResult]
+) -> None:
+    """Fire-and-forget background task to reinforce BM25 weights based on hybrid selection."""
+    if not results:
+        return
+    try:
+        logger.debug(
+            "[BM25-FEEDBACK] Reinforcing %d results for query: '%s'", len(results), query[:30]
+        )
+        # Placeholder: Implement actual FTS5 or tracking table update
+    except Exception as e:
+        logger.error("[BM25-FEEDBACK] Failed: %s", e)
