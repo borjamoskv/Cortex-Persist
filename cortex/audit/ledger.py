@@ -33,6 +33,16 @@ CREATE TABLE IF NOT EXISTS security_audit_log (
     prev_hash TEXT NOT NULL,
     signature TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS genetic_mutation_log (
+    mutation_id TEXT PRIMARY KEY,
+    timestamp TEXT NOT NULL,
+    skill_name TEXT NOT NULL,
+    mutation_diff TEXT NOT NULL,
+    exergy_delta REAL NOT NULL,
+    topology_snapshot TEXT NOT NULL,
+    prev_hash TEXT NOT NULL,
+    signature TEXT NOT NULL
+);
 """
 
 
@@ -252,6 +262,47 @@ class EnterpriseAuditLedger:
 
         # Wait for the batch to be committed
         return await fut
+
+    async def log_mutation(
+        self,
+        skill_name: str,
+        mutation_diff: str,
+        exergy_delta: float,
+        topology_snapshot: str,
+    ) -> str:
+        """Securely logs a structural mutation (L5 Autopoiesis) to the genetic history."""
+
+        await self.ensure_table()
+
+        timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        mutation_id = hashlib.sha256(f"{timestamp}{skill_name}{mutation_diff}".encode()).hexdigest()
+
+        # Generate a Merkle-ish deterministic entry hash
+        entry_hash_payload = f"genetic_mutation:{mutation_id}:{self._last_hash}"
+        entry_hash = hashlib.sha256(entry_hash_payload.encode()).hexdigest()
+
+        # Sign the entry_hash
+        signature = self.private_key.sign(entry_hash.encode()).hex()
+
+        try:
+            async with self._lock:
+                async with AsyncFileLock():
+                    await self._conn.execute(
+                        """INSERT INTO genetic_mutation_log
+                           (mutation_id, timestamp, skill_name, mutation_diff, exergy_delta,
+                            topology_snapshot, prev_hash, signature)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (
+                            mutation_id, timestamp, skill_name, mutation_diff, exergy_delta,
+                            topology_snapshot, self._last_hash, signature
+                        )
+                    )
+                    await self._conn.commit()
+                    self._last_hash = entry_hash
+                    return mutation_id
+        except Exception as e:
+            logger.error("[AuditLedger] Genetic Mutation insert failed: %s", e)
+            raise
 
     def verify_zk_seal(self, payload: str, signature_hex: str) -> bool:
         """Verifies a cryptographic seal against the Audit Sovereign public key."""

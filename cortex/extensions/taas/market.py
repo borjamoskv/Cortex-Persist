@@ -35,6 +35,7 @@ class JobExecutionResult(BaseModel):
     result: dict[str, Any] | None
     proof: str | None
     executed_at: str
+    friction_metrics: dict[str, float] | None = None
 
 
 class TaaSMarketplace:
@@ -81,6 +82,11 @@ class TaaSMarketplace:
             result={"status": "success", "processed_bytes": len(str(req.payload))},
             proof=proof_payload,
             executed_at=datetime.now(timezone.utc).isoformat(),
+            friction_metrics={
+                "latency_ms": 120.0,
+                "llm_redundancy": 1.0,
+                "memory_blocks": 0.0
+            }
         )
         self._results[job_id] = res
         return res
