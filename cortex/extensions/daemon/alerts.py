@@ -332,6 +332,32 @@ class AlertHandlerMixin:
                     sound="Glass",
                 )
 
+                if a.workflow == "/autodidact":
+                    logger.info("🔮 Epistemic degradation detected. Auto-triggering Ouroboros Absorb actuator.")
+                    self._dispatch_ouroboros_absorb()
+
+    def _dispatch_ouroboros_absorb(self) -> None:
+        """Spawn background Ouroboros absorb runner to process reflections and evolve skills."""
+        try:
+            import subprocess
+            import sys
+            from pathlib import Path
+
+            scripts_dir = Path(__file__).resolve().parents[3] / "scripts"
+            runner_script = scripts_dir / "ouroboros_absorb_runner.py"
+
+            if runner_script.exists():
+                logger.info("🦾 [ACTUATOR] Dispatching Ouroboros Absorb Runner...")
+                subprocess.Popen(
+                    [sys.executable, str(runner_script)],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            else:
+                logger.error("🦾 [ACTUATOR] Ouroboros absorb script not found at %s", runner_script)
+        except Exception as e:
+            logger.exception("🦾 [ACTUATOR] Failed to dispatch Ouroboros Absorb: %s", e)
+
     def _flush_timer(self) -> None:
         """Flush accumulated time tracker heartbeats."""
         if not getattr(self, "tracker", None):
