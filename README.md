@@ -226,7 +226,7 @@ graph TD
 
     subgraph Stochastic Space
         LLM[Agent Stochastic Output]:::default
-        LG[LangGraph / any orchestrator]:::default
+        LG["LangGraph / any orchestrator"]:::default
         MCP[MCP Client]:::mcp
     end
 
