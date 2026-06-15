@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
 """
-agent_with_tools.py — C5-REAL ReAct Agent + RAG Codebase
-Zero-dependency agent (ollama-python + chromadb).
-Optimizado para M3 Pro 18GB: ingesta selectiva, chunks pequeños, k=3.
+agent_with_tools.py — C5-REAL ReAct Agent + Local BM25 RAG Codebase
+Zero-dependency agent (ollama-python + math/re).
+Optimizado para M3 Pro 18GB: 100% local, VRAM cero, indexación instantánea.
 """
 
 import os
 import re
+import math
 import subprocess
-from typing import Optional
+from collections import Counter
+from typing import List, Tuple, Optional
 
-import chromadb
 import ollama
 
 # ==================== CONFIG ====================
 MODEL_CHAT = "qwen2.5-coder:7b"
 CODEBASE_ROOT = "."
-# Solo ingestar módulos core (evita 2000 archivos)
+# Módulos core a indexar
 INGEST_DIRS = [
     "cortex/database",
     "cortex/pipeline",
@@ -26,19 +27,75 @@ INGEST_DIRS = [
     "cortex/api",
     "cortex/cli",
 ]
-CHUNK_SIZE = 500  # tokens aprox por chunk
+CHUNK_SIZE = 500  # tokens/palabras aprox por chunk
 TOP_K = 3
 MAX_REACT_STEPS = 6
 
-# ==================== RAG ====================
+# ==================== BM25 ENGINE ====================
 
-def chunk_code(code: str, max_tokens: int = CHUNK_SIZE) -> list[str]:
-    """Chunking por bloques de líneas."""
+class SimpleBM25:
+    """Motor BM25 ultraligero y rápido para búsqueda en código sin dependencias ni VRAM."""
+    def __init__(self, documents: List[str], metadatas: List[dict], b: float = 0.75, k1: float = 1.5):
+        self.documents = documents
+        self.metadatas = metadatas
+        self.b = b
+        self.k1 = k1
+        self.doc_len = [len(self.tokenize(doc)) for doc in documents]
+        self.avg_doc_len = sum(self.doc_len) / len(documents) if documents else 1.0
+        self.doc_freqs = []
+        self.idf = {}
+        self._initialize()
+
+    def tokenize(self, text: str) -> List[str]:
+        # Extrae palabras clave e identificadores de código (variables, funciones)
+        return re.findall(r'[a-zA-Z0-9_]+', text.lower())
+
+    def _initialize(self):
+        df = Counter()
+        for doc in self.documents:
+            words = set(self.tokenize(doc))
+            for word in words:
+                df[word] += 1
+        
+        N = len(self.documents)
+        for word, freq in df.items():
+            self.idf[word] = math.log((N - freq + 0.5) / (freq + 0.5) + 1.0)
+            
+        for doc in self.documents:
+            self.doc_freqs.append(Counter(self.tokenize(doc)))
+
+    def query(self, query_text: str, k: int = 3) -> List[Tuple[str, dict]]:
+        query_words = self.tokenize(query_text)
+        scores = []
+        for i in range(len(self.documents)):
+            score = 0.0
+            doc_len = self.doc_len[i]
+            freqs = self.doc_freqs[i]
+            for word in query_words:
+                if word not in self.idf:
+                    continue
+                tf = freqs[word]
+                num = tf * (self.k1 + 1)
+                den = tf + self.k1 * (1.0 - self.b + self.b * (doc_len / self.avg_doc_len))
+                score += self.idf[word] * (num / den)
+            scores.append((score, i))
+        
+        scores.sort(reverse=True, key=lambda x: x[0])
+        results = []
+        for score, idx in scores[:k]:
+            if score > 0.0:
+                results.append((self.documents[idx], self.metadatas[idx]))
+        return results
+
+# ==================== RAG INGESTION ====================
+
+def chunk_code(code: str, max_words: int = CHUNK_SIZE) -> List[str]:
+    """Segmenta código por bloques de líneas."""
     lines = code.split("\n")
     chunks, current, count = [], [], 0
     for line in lines:
         words = len(line.split())
-        if count + words > max_tokens and current:
+        if count + words > max_words and current:
             chunks.append("\n".join(current))
             current, count = [], 0
         current.append(line)
@@ -48,17 +105,9 @@ def chunk_code(code: str, max_tokens: int = CHUNK_SIZE) -> list[str]:
     return chunks
 
 
-def build_vectorstore() -> chromadb.Collection:
-    """Ingesta selectiva de .py en Chroma in-memory."""
-    client = chromadb.Client()
-    try:
-        client.delete_collection("cortex")
-    except Exception:
-        pass
-    col = client.create_collection("cortex")
-
-    all_docs, all_ids, all_meta = [], [], []
-    idx = 0
+def build_search_index() -> SimpleBM25:
+    """Ingesta selectiva de código en el motor BM25."""
+    all_docs, all_meta = [], []
 
     for subdir in INGEST_DIRS:
         dirpath = os.path.join(CODEBASE_ROOT, subdir)
@@ -76,28 +125,17 @@ def build_vectorstore() -> chromadb.Collection:
                     continue
                 for chunk in chunk_code(code):
                     all_docs.append(chunk)
-                    all_ids.append(f"c_{idx}")
                     all_meta.append({"source": fpath})
-                    idx += 1
 
-    if all_docs:
-        # Chroma acepta batch de hasta 5461
-        for i in range(0, len(all_docs), 5000):
-            col.add(
-                ids=all_ids[i : i + 5000],
-                documents=all_docs[i : i + 5000],
-                metadatas=all_meta[i : i + 5000],
-            )
-    return col
+    return SimpleBM25(all_docs, all_meta)
 
 
-def retrieve(col: chromadb.Collection, query: str, k: int = TOP_K) -> str:
-    """Retrieval con Chroma default embeddings."""
-    results = col.query(query_texts=[query], n_results=k)
-    if not results["documents"] or not results["documents"][0]:
+def retrieve(index: SimpleBM25, query: str, k: int = TOP_K) -> str:
+    results = index.query(query, k=k)
+    if not results:
         return "(Sin contexto relevante del codebase)"
     parts = []
-    for doc, meta in zip(results["documents"][0], results["metadatas"][0]):
+    for doc, meta in results:
         src = meta.get("source", "?")
         parts.append(f"# {src}\n{doc}")
     return "\n\n".join(parts)
@@ -181,17 +219,19 @@ def parse_react(text: str) -> dict:
     return result
 
 
-def react_loop(query: str, col: chromadb.Collection) -> str:
-    """Bucle ReAct con RAG retrieval."""
-    context = retrieve(col, query)
+def should_use_rag(query: str) -> bool:
+    trigger_words = ["buscar", "¿cómo", "explica", "¿qué", "código", "implementación"]
+    return any(word in query.lower() for word in trigger_words)
 
-    prompt = REACT_SYSTEM.format(tools=TOOL_LIST) + f"""
---- CONTEXTO CODEBASE ---
-{context}
---- FIN CONTEXTO ---
+def react_loop(query: str, index: SimpleBM25) -> str:
+    """Bucle ReAct con RAG retrieval (Lazy mode)."""
+    if should_use_rag(query):
+        context = retrieve(index, query)
+        context_block = f"---\nCONTEXTO CODEBASE\n{context}\n--- FIN CONTEXTO ---\n"
+    else:
+        context_block = ""
 
-Pregunta del usuario: {query}
-"""
+    prompt = REACT_SYSTEM.format(tools=TOOL_LIST) + f"\n{context_block}\nPregunta del usuario: {query}\n"
     messages = [{"role": "user", "content": prompt}]
 
     for step in range(MAX_REACT_STEPS):
@@ -226,11 +266,10 @@ Pregunta del usuario: {query}
 # ==================== MAIN ====================
 
 def main():
-    print(f"[C5-REAL] ReAct Agent + RAG | Model: {MODEL_CHAT}")
-    print("Ingestando codebase (módulos core)...")
-    col = build_vectorstore()
-    n = col.count()
-    print(f"Ingestados {n} chunks de {len(INGEST_DIRS)} módulos.")
+    print(f"[C5-REAL] ReAct Agent + BM25 RAG | Model: {MODEL_CHAT}")
+    print("Ingestando codebase...")
+    index = build_search_index()
+    print(f"Ingestados {len(index.documents)} chunks.")
     print(f"Herramientas: {', '.join(TOOLS.keys())}")
     print("=" * 60)
     print("Escribe tu pregunta (q para salir):\n")
@@ -242,7 +281,7 @@ def main():
             break
         if query.lower() in ("q", "quit", "exit", ""):
             break
-        answer = react_loop(query, col)
+        answer = react_loop(query, index)
         print(f"\n{'=' * 60}")
         print(f"[FINAL]: {answer}")
         print(f"{'=' * 60}\n")
