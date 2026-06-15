@@ -126,6 +126,11 @@ def start_translator(
     type=float,
     help="Time in seconds to wait for translation response.",
 )
+@click.option(
+    "--direct",
+    is_flag=True,
+    help="Perform translation synchronously in-process, bypassing the sharded bus entirely.",
+)
 def request_translation(
     shards_dir: str,
     text: str,
@@ -133,9 +138,63 @@ def request_translation(
     source_lang: str | None,
     routing_key: str,
     timeout: float,
+    direct: bool,
 ):
     """Submit a translation task to the sharded bus and wait for result."""
     shards_path = Path(shards_dir).expanduser()
+
+    if direct:
+
+        async def _direct_run():
+            daemon = ShardedTranslationDaemon(
+                shards_dir=shards_path,
+                worker_id="direct_translator",
+                model="gemini-2.0-flash",
+            )
+            console.print(
+                "⚡ [bold green]Bypassing Bus: Performing in-process direct sync translation[/]..."
+            )
+            start_t = time.perf_counter()
+            try:
+                # Detect source lang if not provided
+                resolved_src = source_lang
+                if not resolved_src:
+                    from cortex.compaction.lang_compress import detect_language
+
+                    try:
+                        resolved_src = detect_language(text)
+                    except Exception:
+                        resolved_src = "unknown"
+
+                translated = await daemon.translate_text(text, target_lang, resolved_src)
+                duration_ms = (time.perf_counter() - start_t) * 1000
+                is_fallback = "[OFFLINE FALLBACK]:" in translated
+
+                res_table = Table(
+                    title="📊 Translation Stats (Direct Sync)",
+                    show_header=False,
+                    border_style="cyan",
+                )
+                res_table.add_row("Source Lang", resolved_src)
+                res_table.add_row("Target Lang", target_lang)
+                res_table.add_row("Execution Time", f"{duration_ms:.1f} ms")
+                res_table.add_row("Offline Fallback", str(is_fallback))
+                console.print(res_table)
+                console.print(
+                    Panel(
+                        f"[bold white]{translated}[/bold white]",
+                        title="✨ Translation Result",
+                        border_style="green",
+                    )
+                )
+            except Exception as e:
+                console.print(
+                    Panel(f"[red]Error: {e}[/]", title="❌ Translation Failed", border_style="red")
+                )
+
+        asyncio.run(_direct_run())
+        return
+
     correlation_id = f"tr-req-{uuid.uuid4().hex[:12]}"
 
     async def _run():
@@ -158,6 +217,7 @@ def request_translation(
         console.print(f"⏳ Waiting for worker to process request (timeout {timeout}s)...")
         start = time.monotonic()
         response_sig = None
+        poll_delay = 0.02  # Start polling at 20ms for ultra-low latency
 
         while time.monotonic() - start < timeout:
             signals = await bus.history(routing_key=correlation_id)
@@ -170,7 +230,8 @@ def request_translation(
                     break
             if response_sig:
                 break
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(poll_delay)
+            poll_delay = min(0.5, poll_delay * 1.5)  # Adaptive backoff to max 500ms
 
         await bus.close()
 
@@ -198,6 +259,7 @@ def request_translation(
         res_table.add_row("Target Lang", payload.get("target_lang"))
         res_table.add_row("Execution Time", f"{payload.get('duration_ms', 0):.1f} ms")
         res_table.add_row("Worker ID", payload.get("worker_id"))
+        res_table.add_row("Offline Fallback", str(payload.get("offline_fallback", False)))
         if payload.get("tokens_saved", 0) > 0:
             res_table.add_row(
                 "Token Savings (Est)",

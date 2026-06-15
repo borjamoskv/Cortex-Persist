@@ -130,35 +130,119 @@ class ShardedTranslationDaemon:
     async def translate_text(
         self, text: str, target_lang: str, source_lang: str | None = None
     ) -> str:
-        """Call Gemini to perform high-fidelity technical translation."""
-        client = self._get_client()
+        """Translate text with robust three-tier fallback logic (Gemini -> LLMManager -> Heuristic)."""
+        # Tier 1: Gemini API
+        try:
+            client = self._get_client()
+            system_instruction = (
+                "You are a precise technical translator for a distributed AI agent ecosystem (CORTEX).\n"
+                f"Translate the provided text into '{target_lang}'.\n"
+                "Rules:\n"
+                "1. Preserve all technical variables, symbols, markdown elements, and identifiers unchanged.\n"
+                "2. Preserve code blocks and file paths exactly as in the source.\n"
+                "3. Use concise, professional, and dense translation (no conversational fluff).\n"
+                "4. Output ONLY the translated content, with absolutely no preamble or explanation."
+            )
+            if source_lang:
+                system_instruction += f"\nSource language: {source_lang}"
 
-        system_instruction = (
-            "You are a precise technical translator for a distributed AI agent ecosystem (CORTEX).\n"
-            f"Translate the provided text into '{target_lang}'.\n"
-            "Rules:\n"
-            "1. Preserve all technical variables, symbols, markdown elements, and identifiers unchanged.\n"
-            "2. Preserve code blocks and file paths exactly as in the source.\n"
-            "3. Use concise, professional, and dense translation (no conversational fluff).\n"
-            "4. Output ONLY the translated content, with absolutely no preamble or explanation."
-        )
+            response = await asyncio.to_thread(
+                client.models.generate_content,
+                model=self.model,
+                contents=text,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    temperature=0.1,
+                ),
+            )
+            if response.text:
+                return response.text.strip()
+        except Exception as e:
+            logger.warning(f"Tier 1 (Gemini API) failed: {e}. Trying Tier 2 (LLMManager)...")
 
-        if source_lang:
-            system_instruction += f"\nSource language: {source_lang}"
+        # Tier 2: Local LLMManager (Ollama / vLLM / OpenRouter)
+        try:
+            from cortex.extensions.llm.manager import LLMManager
 
-        response = await asyncio.to_thread(
-            client.models.generate_content,
-            model=self.model,
-            contents=text,
-            config=types.GenerateContentConfig(
-                system_instruction=system_instruction,
-                temperature=0.1,
-            ),
-        )
+            llm = LLMManager()
+            if llm.available:
+                prompt = f"Translate the following text to '{target_lang}'. Output ONLY the translation without any preamble:\n\n{text}"
+                system = "You are a precise technical translator. Translate and preserve variables/code as-is."
+                res = await llm.complete(prompt=prompt, system=system, temperature=0.1)
+                if res:
+                    return res.strip()
+        except Exception as e:
+            logger.warning(f"Tier 2 (LLMManager) failed: {e}. Falling back to Tier 3 Heuristic...")
 
-        if not response.text:
-            raise ValueError("LLM returned an empty translation response")
-        return response.text.strip()
+        # Tier 3: Sovereign Heuristic Fallback
+        return self.local_heuristic_translate(text, target_lang, source_lang)
+
+    def local_heuristic_translate(
+        self, text: str, target_lang: str, source_lang: str | None = None
+    ) -> str:
+        """Sovereign local heuristic translation fallback."""
+        mapping = {
+            "es": {
+                "en": {
+                    "hola": "hello",
+                    "mundo": "world",
+                    "adiós": "goodbye",
+                    "gracias": "thanks",
+                    "error": "error",
+                    "éxito": "success",
+                    "servidor": "server",
+                    "demonio": "daemon",
+                    "sistema": "system",
+                    "distribuido": "distributed",
+                    "memoria": "memory",
+                    "hecho": "fact",
+                    "hechos": "facts",
+                }
+            },
+            "en": {
+                "es": {
+                    "hello": "hola",
+                    "world": "mundo",
+                    "goodbye": "adiós",
+                    "thanks": "gracias",
+                    "error": "error",
+                    "success": "éxito",
+                    "server": "servidor",
+                    "daemon": "demonio",
+                    "system": "sistema",
+                    "distributed": "distribuido",
+                    "memory": "memoria",
+                    "fact": "hecho",
+                    "facts": "hechos",
+                }
+            },
+        }
+
+        source = (source_lang or "es").lower()
+        target = target_lang.lower()
+
+        import re
+
+        words = text.split()
+        translated_words = []
+        lang_map = mapping.get(source, {}).get(target, {})
+
+        for w in words:
+            clean_w = w.lower().strip(".,!?()[]{}:;\"'")
+            if clean_w in lang_map:
+                sub = lang_map[clean_w]
+                if w.istitle():
+                    sub = sub.title()
+                elif w.isupper():
+                    sub = sub.upper()
+
+                # Case-insensitive replacement of clean_w
+                pattern = re.compile(re.escape(clean_w), re.IGNORECASE)
+                translated_words.append(pattern.sub(sub, w) if clean_w else w)
+            else:
+                translated_words.append(w)
+
+        return "[OFFLINE FALLBACK]: " + " ".join(translated_words)
 
     async def process_request(self, signal: Signal) -> None:
         """Process a single translation:request signal."""
@@ -186,6 +270,7 @@ class ShardedTranslationDaemon:
 
         try:
             translated_text = await self.translate_text(text, target_lang, source_lang)
+            is_offline_fallback = "[OFFLINE FALLBACK]:" in translated_text
             duration_ms = (time.perf_counter() - start_time) * 1000
 
             # Estimate token savings if translating to English
@@ -211,6 +296,7 @@ class ShardedTranslationDaemon:
                     "tokens_saved": tokens_saved,
                     "savings_pct": savings_pct,
                     "worker_id": self.worker_id,
+                    "offline_fallback": is_offline_fallback,
                 },
                 source=self.worker_id,
                 project=signal.project,
@@ -242,12 +328,13 @@ class ShardedTranslationDaemon:
             logger.error(f"Failed to emit translation:failed signal: {e}")
 
     async def run_loop(self) -> None:
-        """Core execution loop for the daemon."""
+        """Core execution loop for the daemon with adaptive polling."""
         logger.info(
             f"🚀 {self.worker_id} starting. Shards path={self.shards_dir}, partition_indices={self.shard_indices}"
         )
         await self.bus.initialize()
 
+        current_interval = self.poll_interval_s
         while not self._shutdown:
             try:
                 # Poll translation requests using partitioned polling
@@ -262,11 +349,17 @@ class ShardedTranslationDaemon:
                     # Process signals concurrently in parallel tasks
                     tasks = [asyncio.create_task(self.process_request(sig)) for sig in signals]
                     await asyncio.gather(*tasks)
+                    # Adaptive polling: if we just processed signals, set a tiny poll interval
+                    current_interval = 0.1
+                else:
+                    # No signals: back to standard poll interval
+                    current_interval = self.poll_interval_s
 
             except Exception as e:
                 logger.error(f"[{self.worker_id}] Error in translation poll cycle: {e}")
+                current_interval = self.poll_interval_s
 
-            await asyncio.sleep(self.poll_interval_s)
+            await asyncio.sleep(current_interval)
 
     def stop(self) -> None:
         logger.info(f"Shutting down translator worker {self.worker_id}...")

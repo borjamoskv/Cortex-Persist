@@ -84,5 +84,28 @@ async def test_translation_daemon_flow():
         assert completed_sig.payload["translated_text"] == "Hello World"
         assert completed_sig.payload["correlation_id"] == correlation_id
         assert completed_sig.payload["worker_id"] == "test_worker_1"
+        assert completed_sig.payload["offline_fallback"] is False
 
         await daemon.bus.close()
+
+
+@pytest.mark.asyncio
+async def test_translation_fallback():
+    """Verify three-tier fallback behaves correctly when LLM API is unavailable."""
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        daemon = ShardedTranslationDaemon(
+            shards_dir=tmp_dir,
+            worker_id="test_worker_fallback",
+            shard_indices=[0],
+            poll_interval_s=0.1,
+        )
+
+        # Force Gemini API client lookup failure and LLMManager unavailability
+        with (
+            patch.object(daemon, "_get_client", side_effect=RuntimeError("No API Key")),
+            patch("cortex.extensions.llm.manager.LLMManager._get_provider", return_value=None),
+        ):
+            # Translate text using fallback
+            res = await daemon.translate_text("Hola Mundo", "en", "es")
+            assert "[OFFLINE FALLBACK]:" in res
+            assert "hello world" in res.lower()
