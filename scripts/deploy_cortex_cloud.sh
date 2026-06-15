@@ -32,6 +32,18 @@ if [ ! -f "vercel.json" ]; then
 fi
 echo "✓ vercel.json detected."
 
+echo "[2.5/4] Validating Custom Domain DNS Binding..."
+DOMAIN="cortexpersist.dev"
+DOMAIN_STATUS=$(vercel domains inspect $DOMAIN 2>&1 || true)
+
+if echo "$DOMAIN_STATUS" | grep -q "WARN! This Domain is not configured properly"; then
+    echo "[!] Anergy Detectada: El dominio $DOMAIN no está resolviendo hacia Vercel."
+    echo ">> Nameservers actuales apuntando incorrectamente o Registros A/CNAME ausentes."
+    echo "$DOMAIN_STATUS" | grep -A 4 "Current Nameservers"
+    exit 1
+fi
+echo "✓ DNS Binding Confirmado para $DOMAIN."
+
 echo "[3/4] Validating API Dependencies..."
 if [ ! -f "api/requirements.txt" ]; then
     echo "[!] Error: api/requirements.txt not found."
