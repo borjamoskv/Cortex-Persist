@@ -19,7 +19,12 @@ class CloudflareEdgeBridge:
         self.base_url = f"https://api.cloudflare.com/client/v4/accounts/{account_id}/d1/database"
         if self.database_id:
             self.base_url += f"/{self.database_id}/query"
+        self._client = httpx.AsyncClient(timeout=10.0)
         logger.info("[C5-REAL] Cloudflare Edge Bridge Initialized")
+
+    async def close(self):
+        """Close the underlying HTTPX client."""
+        await self._client.aclose()
 
     async def sync_ledger_to_edge(self, taint: str, payload_hash: str, payload: str = "") -> bool:
         """
@@ -46,16 +51,15 @@ class CloudflareEdgeBridge:
         }
         
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.post(self.base_url, headers=headers, json=body)
-                response.raise_for_status()
-                data = response.json()
-                if data.get("success"):
-                    logger.debug(f"[C5-REAL] Edge D1 sync successful for taint {taint}")
-                    return True
-                else:
-                    logger.error(f"Edge D1 sync failed: {data.get('errors')}")
-                    return False
+            response = await self._client.post(self.base_url, headers=headers, json=body)
+            response.raise_for_status()
+            data = response.json()
+            if data.get("success"):
+                logger.debug(f"[C5-REAL] Edge D1 sync successful for taint {taint}")
+                return True
+            else:
+                logger.error(f"Edge D1 sync failed: {data.get('errors')}")
+                return False
         except httpx.HTTPError as e:
             logger.error(f"HTTP error during Edge D1 sync: {e}")
             return False

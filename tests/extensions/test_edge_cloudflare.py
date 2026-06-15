@@ -12,6 +12,7 @@ async def test_cloudflare_edge_bridge_sync():
     # Test sync simulation
     result = await bridge.sync_ledger_to_edge(taint="ZK-001", payload_hash="abcd123", payload="data")
     assert result is True
+    await bridge.close()
 
 @pytest.mark.asyncio
 async def test_cloudflare_edge_bridge_real_sync():
@@ -27,10 +28,14 @@ async def test_cloudflare_edge_bridge_real_sync():
         result = await bridge.sync_ledger_to_edge(taint="ZK-001", payload_hash="abcd123", payload="data")
         assert result is True
         mock_post.assert_called_once()
+        
+    await bridge.close()
 
-def test_cloudflare_edge_bridge_verify():
+@pytest.mark.asyncio
+async def test_cloudflare_edge_bridge_verify():
     """Verify cryptographic signature check fallback."""
     bridge = CloudflareEdgeBridge(account_id="test_acc", api_token="test_token")
     assert bridge.verify_edge_signature("v1_edge_12345") is True
     assert bridge.verify_edge_signature("invalid") is False
     assert bridge.verify_edge_signature("sig1234567") is True
+    await bridge.close()
