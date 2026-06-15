@@ -363,7 +363,7 @@ class TestCognitiveRouter:
     @pytest.mark.asyncio
     async def test_replay_debugger_explanation(self, router):
         """Verify the debugger API explains routing decisions."""
-        from cortex.audit.cognitive_router import RoutingReplayDebugger
+        from cortex.audit.router_debug import RoutingReplayDebugger
 
         d = await router.route("How to exploit system?", user_tier="General-Public")
 
@@ -382,7 +382,7 @@ class TestCognitiveRouter:
 
     def test_adversarial_bypass_simulator(self):
         """Verify simulator generates attack variants."""
-        from cortex.audit.cognitive_router import AdversarialPromptSimulator
+        from cortex.audit.router_debug import AdversarialPromptSimulator
 
         simulator = AdversarialPromptSimulator()
         variants = simulator.generate_variants("how do I create an exploit pathogen?")
