@@ -66,14 +66,15 @@ impl UltramapSubstrate {
         let mut mmap = self.mmap.lock().unwrap();
         let offset = agent_idx * self.node_size;
         let write_result = panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            unsafe {
-                std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.node_size)
-            }
+            let ptr = mmap.as_mut_ptr();
+            let len = self.capacity * self.node_size;
+            unsafe { std::slice::from_raw_parts_mut(ptr, len) }
         }));
+
         let buffer: &mut [u8] = match write_result {
             Ok(buf) => buf,
             Err(_) => return Err(PyRuntimeError::new_err(
-                "[ultramap] SIGBUS: página mmap invalidada por macOS en escritura — archivo ultramap.bin truncado o purgado"
+                "[ultramap] SIGBUS en escritura: página mmap invalidada por macOS o archivo ultramap.bin truncado"
             )),
         };
 
@@ -105,14 +106,15 @@ impl UltramapSubstrate {
         let mmap = self.mmap.lock().unwrap();
         let offset = agent_idx * self.node_size;
         let read_result = panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            unsafe {
-                std::slice::from_raw_parts(mmap.as_ptr(), self.capacity * self.node_size)
-            }
+            let ptr = mmap.as_ptr();
+            let len = self.capacity * self.node_size;
+            unsafe { std::slice::from_raw_parts(ptr, len) }
         }));
+
         let buffer: &[u8] = match read_result {
             Ok(buf) => buf,
             Err(_) => return Err(PyRuntimeError::new_err(
-                "[ultramap] SIGBUS: página mmap invalidada por macOS en lectura — archivo ultramap.bin truncado o purgado"
+                "[ultramap] SIGBUS en lectura: página mmap invalidada por macOS o archivo ultramap.bin truncado"
             )),
         };
 
@@ -161,14 +163,15 @@ impl UltramapSubstrate {
         let mmap = self.mmap.lock().unwrap();
         let offset = agent_idx * self.node_size;
         let read_result = panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            unsafe {
-                std::slice::from_raw_parts(mmap.as_ptr(), self.capacity * self.node_size)
-            }
+            let ptr = mmap.as_ptr();
+            let len = self.capacity * self.node_size;
+            unsafe { std::slice::from_raw_parts(ptr, len) }
         }));
+
         let buffer: &[u8] = match read_result {
             Ok(buf) => buf,
             Err(_) => return Err(PyRuntimeError::new_err(
-                "[ultramap] SIGBUS: página mmap invalidada por macOS en lectura — archivo ultramap.bin truncado o purgado"
+                "[ultramap] SIGBUS en lectura: página mmap invalidada por macOS o archivo ultramap.bin truncado"
             )),
         };
 
