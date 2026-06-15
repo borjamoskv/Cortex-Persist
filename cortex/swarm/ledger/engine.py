@@ -1,12 +1,17 @@
+import os
 import sqlite3
 
 from .models import SwarmEvent
 
 
 class SwarmLedger:
-    def __init__(self, path="cortex_swarm.db"):
-        self.conn = sqlite3.connect(path)
+    def __init__(self, path=None):
+        if path is None:
+            path = os.getenv("CORTEX_SWARM_DB_PATH", "cortex_swarm.db")
+        self.conn = sqlite3.connect(path, timeout=10, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
+        self.conn.execute("PRAGMA journal_mode=WAL;")
+        self.conn.execute("PRAGMA synchronous=NORMAL;")
         self._init()
 
     def _init(self):

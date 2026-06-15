@@ -1,11 +1,17 @@
 import hashlib
 import json
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
+
+
+def default_serializer(obj):
+    if isinstance(obj, (set, frozenset)):
+        return sorted(list(obj))
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 
 def sha256(obj: dict) -> str:
-    payload = json.dumps(obj, sort_keys=True).encode()
+    payload = json.dumps(obj, sort_keys=True, default=default_serializer).encode()
     return hashlib.sha256(payload).hexdigest()
 
 
@@ -30,12 +36,13 @@ class SwarmEvent:
             "version": self.version,
         }
 
-        event_id = sha256(base)
+        ts = datetime.now(timezone.utc).isoformat()
+        event_id = sha256({**base, "timestamp": ts})
 
         return {
             "event_id": event_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": ts,
             **base,
-            "routing_payload": json.dumps(self.routing_payload, sort_keys=True),
+            "routing_payload": json.dumps(self.routing_payload, sort_keys=True, default=default_serializer),
             "deterministic_signature": sha256({**base, "routing": self.routing_payload}),
         }

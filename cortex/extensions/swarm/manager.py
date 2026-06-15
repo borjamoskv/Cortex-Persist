@@ -257,9 +257,7 @@ class CapatazOrchestrator:
         # Ω₁: RISK DETECTION
         risk = RiskLevel.LOW
         if changed_files:
-            from cortex.extensions.swarm.verification_gate import VerificationGate
-
-            verifier = VerificationGate()
+            verifier = get_swarm_manager().verifier
             risk = verifier.check_risk(changed_files)
 
         logger.info(
@@ -322,9 +320,7 @@ class CapatazOrchestrator:
 
             # Ω₁: ELDER VERIFICATION GATE
             if risk != RiskLevel.LOW:
-                from cortex.extensions.swarm.verification_gate import VerificationGate
-
-                verifier = VerificationGate()
+                verifier = get_swarm_manager().verifier
                 v_res = await verifier.verify_proposal(str(result), risk)
                 if not v_res.approved:
                     logger.critical("🛑 [Ω₁] ELDER REJECTION: %s", v_res.reason)

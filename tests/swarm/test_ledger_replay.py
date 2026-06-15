@@ -1,7 +1,13 @@
 import pytest
 from cortex.swarm.router import SwarmRouter
+from cortex.swarm.registry import AgentRegistry
 
-
+@pytest.fixture
+def router() -> SwarmRouter:
+    registry = AgentRegistry()
+    registry.register("memory", capabilities=["read", "write"])
+    registry.register("oracle", capabilities=["audit", "analyze"])
+    return SwarmRouter(registry=registry)
 def test_swarm_replay_consistency(router):
     """Critical: identical inputs must produce identical event signatures."""
     req = {

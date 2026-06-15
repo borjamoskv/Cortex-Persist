@@ -6,6 +6,7 @@ SQLite WAL Backend (Multi-Process Safe)
 import json
 import os
 import sqlite3
+import threading
 import time
 from typing import Any
 
@@ -20,19 +21,21 @@ class NexusDB:
     to the same database concurrently without locks.
     """
 
-    __slots__ = ("_db_path",)
+    __slots__ = ("_db_path", "_local")
 
     def __init__(self, db_path: str) -> None:
         self._db_path = db_path
+        self._local = threading.local()
         self._init_schema()
 
     def _get_conn(self) -> sqlite3.Connection:
-        conn = db_connect(
-            self._db_path,
-            timeout=10,
-            row_factory=sqlite3.Row,
-        )
-        return conn
+        if not hasattr(self._local, "conn"):
+            self._local.conn = db_connect(
+                self._db_path,
+                timeout=10,
+                row_factory=sqlite3.Row,
+            )
+        return self._local.conn
 
     def _init_schema(self) -> None:
         os.makedirs(os.path.dirname(self._db_path), exist_ok=True)
@@ -63,7 +66,6 @@ class NexusDB:
                 ON nexus_mutations(priority);
         """)
         conn.commit()
-        conn.close()
 
     def insert(self, mutation: WorldMutation) -> bool:
         """Insert a mutation. Returns False if deduplicated (already exists)."""
@@ -90,8 +92,6 @@ class NexusDB:
         except sqlite3.IntegrityError:
             # Duplicate idempotency_key → already processed
             return False
-        finally:
-            conn.close()
 
     def query(
         self,
@@ -126,13 +126,11 @@ class NexusDB:
             f"SELECT * FROM nexus_mutations {where} ORDER BY priority ASC, timestamp DESC LIMIT ?",
             params,
         ).fetchall()
-        conn.close()
         return [dict(r) for r in rows]
 
     def count(self) -> int:
         conn = self._get_conn()
         n = conn.execute("SELECT COUNT(*) FROM nexus_mutations").fetchone()[0]
-        conn.close()
         return n
 
     def purge_old(self, older_than: float | None = None) -> int:
@@ -142,5 +140,4 @@ class NexusDB:
         cursor = conn.execute("DELETE FROM nexus_mutations WHERE timestamp < ?", (cutoff,))
         conn.commit()
         deleted = cursor.rowcount
-        conn.close()
         return deleted

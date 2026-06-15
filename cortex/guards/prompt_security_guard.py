@@ -6,10 +6,10 @@ Protects LLM agent iterations against system prompt leakage and direct prompt ex
 Implements multi-turn trajectory-aware input classification and semantic output auditing.
 """
 
+import base64
 import logging
 import os
 import re
-import base64
 from collections import deque
 from typing import Any
 
