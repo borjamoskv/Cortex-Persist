@@ -162,13 +162,18 @@ def commit_and_persist(patch_data: dict):
                 ["git", "push", "origin", "main"], capture_output=True, text=True, timeout=30
             )
             if push_result.returncode != 0:
-                logger.error(f"Push failed: {push_result.stderr}")
+                logger.error(f"Push failed: {push_result.stderr}. Rolling back local commit.")
+                subprocess.run(["git", "reset", "--hard", "HEAD~1"], check=False)
+                return
             else:
                 logger.info("Git push successful.")
         except subprocess.TimeoutExpired:
-            logger.error("Git push timed out.")
+            logger.error("Git push timed out. Rolling back local commit.")
+            subprocess.run(["git", "reset", "--hard", "HEAD~1"], check=False)
+            return
     else:
         logger.warning("Git commit failed or nothing to commit. Skipping push.")
+        return
 
     # Ledger persistence
     if LedgerStore and EnrichmentQueue:
