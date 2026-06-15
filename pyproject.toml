@@ -31,9 +31,9 @@ classifiers = [
     dependencies = [
         "sqlite-vec>=0.1.6",
         "click>=8.0",
-        "rich>=13.0",
-        "aiosqlite>=0.20.0",
-        "cryptography>=46.0.7",
+        "rich>=13.4.1",
+        "aiosqlite>=0.21.0",
+        "cryptography>=47.0.0",
         "pydantic>=2.0",
         "langchain-community>=0.4.2",
         "langchain-core>=1.4.7",
@@ -99,7 +99,7 @@ toolbox = [
     "toolbox-core>=0.1.0",
 ]
 billing = [
-    "stripe>=8.0",
+    "stripe>=9.2.0",
 ]
 cloud = [
     "asyncpg>=0.29",
