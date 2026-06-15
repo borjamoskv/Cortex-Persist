@@ -2,8 +2,21 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any, Literal, Optional, Protocol
+
+try:
+    from opentelemetry import trace
+    tracer = trace.get_tracer(__name__)
+except ImportError:
+    class DummySpan:
+        def set_attribute(self, *args, **kwargs): pass
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+    class DummyTracer:
+        def start_as_current_span(self, *args, **kwargs): return DummySpan()
+    tracer = DummyTracer()
 
 TaskKind = Literal["reason", "retrieve", "plan", "execute", "audit", "summarize", "memory"]
 
@@ -76,10 +89,15 @@ class AgentRegistry:
 
 
 class SubagentRunner:
-    def __init__(self, registry: AgentRegistry) -> None:
+    def __init__(
+        self,
+        registry: AgentRegistry,
+        audit_callback: Callable[[dict[str, Any]], Awaitable[None]] | None = None,
+    ) -> None:
         self.registry = registry
         self._handlers: dict[str, AgentHandler] = {}
         self._locks: dict[str, asyncio.Semaphore] = {}
+        self.audit_callback = audit_callback
 
     def register_handler(self, name: str, handler: AgentHandler, max_concurrent: int = 1) -> None:
         self._handlers[name] = handler
@@ -87,42 +105,86 @@ class SubagentRunner:
 
     async def invoke_subagent(self, req: SubagentRequest) -> SubagentResponse:
         target = req.target_agent or self.registry.resolve(req.kind, req.require_capability)
-        handler = self._handlers.get(target)
-        if handler is None:
+        
+        with tracer.start_as_current_span("swarm.dispatch") as span:
+            span.set_attribute("swarm.task_id", req.task_id)
+            span.set_attribute("swarm.target", target)
+            span.set_attribute("swarm.kind", req.kind)
+
+            if self.audit_callback:
+                await self.audit_callback({
+                    "task_id": req.task_id,
+                    "target_agent": target,
+                    "kind": req.kind,
+                    "action": "SWARM_DISPATCH",
+                    "status": "PENDING"
+                })
+
+            handler = self._handlers.get(target)
+            if handler is None:
+                err_msg = f"No handler registered for agent={target!r}"
+                span.set_attribute("error", True)
+                span.set_attribute("swarm.error", err_msg)
+                if self.audit_callback:
+                    await self.audit_callback({
+                        "task_id": req.task_id,
+                        "target_agent": target,
+                        "action": "SWARM_DISPATCH",
+                        "status": "ERROR"
+                    })
+                return SubagentResponse(
+                    task_id=req.task_id,
+                    ok=False,
+                    target_agent=target,
+                    error=err_msg,
+                )
+
+            lock = self._locks.get(target) or asyncio.Semaphore(1)
+            last_error: str | None = None
+
+            for attempt in range(req.max_retries + 1):
+                t0 = time.monotonic()
+                try:
+                    async with lock:
+                        output = await asyncio.wait_for(handler.run(req), timeout=req.timeout_ms / 1000)
+                    
+                    if self.audit_callback:
+                        await self.audit_callback({
+                            "task_id": req.task_id,
+                            "target_agent": target,
+                            "action": "SWARM_DISPATCH",
+                            "status": "SUCCESS"
+                        })
+                        
+                    return SubagentResponse(
+                        task_id=req.task_id,
+                        ok=True,
+                        target_agent=target,
+                        output=output,
+                        duration_ms=(time.monotonic() - t0) * 1000,
+                        trace={"attempt": attempt + 1},
+                    )
+                except asyncio.TimeoutError:
+                    last_error = f"timeout after {req.timeout_ms}ms"
+                except TimeoutError as e:
+                    last_error = f"timeout: {e}"
+                except Exception as e:
+                    last_error = str(e)
+            
+            span.set_attribute("error", True)
+            span.set_attribute("swarm.error", last_error or "unknown error")
+            if self.audit_callback:
+                await self.audit_callback({
+                    "task_id": req.task_id,
+                    "target_agent": target,
+                    "action": "SWARM_DISPATCH",
+                    "status": "ERROR"
+                })
+
             return SubagentResponse(
                 task_id=req.task_id,
                 ok=False,
                 target_agent=target,
-                error=f"No handler registered for agent={target!r}",
+                error=last_error or "unknown error",
+                trace={"attempts": req.max_retries + 1},
             )
-
-        lock = self._locks.get(target) or asyncio.Semaphore(1)
-        last_error: str | None = None
-
-        for attempt in range(req.max_retries + 1):
-            t0 = time.monotonic()
-            try:
-                async with lock:
-                    output = await asyncio.wait_for(handler.run(req), timeout=req.timeout_ms / 1000)
-                return SubagentResponse(
-                    task_id=req.task_id,
-                    ok=True,
-                    target_agent=target,
-                    output=output,
-                    duration_ms=(time.monotonic() - t0) * 1000,
-                    trace={"attempt": attempt + 1},
-                )
-            except asyncio.TimeoutError:
-                last_error = f"timeout after {req.timeout_ms}ms"
-            except TimeoutError as e:
-                last_error = f"timeout: {e}"
-            except Exception as e:
-                last_error = str(e)
-
-        return SubagentResponse(
-            task_id=req.task_id,
-            ok=False,
-            target_agent=target,
-            error=last_error or "unknown error",
-            trace={"attempts": req.max_retries + 1},
-        )

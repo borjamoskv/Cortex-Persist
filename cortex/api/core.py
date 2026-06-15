@@ -138,9 +138,22 @@ async def lifespan(app: FastAPI):
     from cortex.routes.oracle import ORACLE_SYSTEM_PROMPT, _llm_manager
     from cortex.swarm.handlers import MemoryHandler, OracleHandler
     from cortex.swarm.runtime import AgentCapability, AgentRegistry, SubagentRunner
-
     swarm_registry = AgentRegistry()
-    swarm_runner = SubagentRunner(swarm_registry)
+
+    async def swarm_audit_callback(data: dict) -> None:
+        try:
+            await engine.ledger.record_action(
+                tenant_id="SYSTEM",
+                actor_role="SWARM_RUNNER",
+                actor_id=data.get("target_agent", "unknown"),
+                action=data.get("action", "SWARM_DISPATCH"),
+                resource=data.get("task_id", "unknown"),
+                status=data.get("status", "UNKNOWN"),
+            )
+        except Exception as e:
+            logger.error(f"Failed to record swarm audit: {e}")
+
+    swarm_runner = SubagentRunner(swarm_registry, audit_callback=swarm_audit_callback)
     swarm_registry.register(
         AgentCapability(
             name="oracle",
