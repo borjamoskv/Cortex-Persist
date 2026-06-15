@@ -5,6 +5,7 @@ use std::fs::OpenOptions;
 use std::sync::{Arc, Mutex};
 use memmap2::{MmapMut, MmapOptions};
 use sha2::{Sha256, Digest};
+use std::panic;
 
 fn strip_trailing_nulls(bytes: &[u8]) -> &[u8] {
     let mut len = bytes.len();
@@ -64,8 +65,16 @@ impl UltramapSubstrate {
 
         let mut mmap = self.mmap.lock().unwrap();
         let offset = agent_idx * self.node_size;
-        let buffer: &mut [u8] = unsafe {
-            std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.node_size)
+        let write_result = panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            unsafe {
+                std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.node_size)
+            }
+        }));
+        let buffer: &mut [u8] = match write_result {
+            Ok(buf) => buf,
+            Err(_) => return Err(PyRuntimeError::new_err(
+                "[ultramap] SIGBUS: página mmap invalidada por macOS en escritura — archivo ultramap.bin truncado o purgado"
+            )),
         };
 
         // Pack x, y, z
@@ -82,6 +91,9 @@ impl UltramapSubstrate {
         // Entropy
         buffer[offset + 88..offset + 96].copy_from_slice(&entropy.to_ne_bytes());
 
+        mmap.flush()
+            .map_err(|e| PyRuntimeError::new_err(format!("[ultramap] msync failed: {}", e)))?;
+
         Ok(true)
     }
 
@@ -92,8 +104,16 @@ impl UltramapSubstrate {
 
         let mmap = self.mmap.lock().unwrap();
         let offset = agent_idx * self.node_size;
-        let buffer: &[u8] = unsafe {
-            std::slice::from_raw_parts(mmap.as_ptr(), self.capacity * self.node_size)
+        let read_result = panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            unsafe {
+                std::slice::from_raw_parts(mmap.as_ptr(), self.capacity * self.node_size)
+            }
+        }));
+        let buffer: &[u8] = match read_result {
+            Ok(buf) => buf,
+            Err(_) => return Err(PyRuntimeError::new_err(
+                "[ultramap] SIGBUS: página mmap invalidada por macOS en lectura — archivo ultramap.bin truncado o purgado"
+            )),
         };
 
         let mut x_bytes = [0u8; 8];
@@ -140,8 +160,16 @@ impl UltramapSubstrate {
 
         let mmap = self.mmap.lock().unwrap();
         let offset = agent_idx * self.node_size;
-        let buffer: &[u8] = unsafe {
-            std::slice::from_raw_parts(mmap.as_ptr(), self.capacity * self.node_size)
+        let read_result = panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            unsafe {
+                std::slice::from_raw_parts(mmap.as_ptr(), self.capacity * self.node_size)
+            }
+        }));
+        let buffer: &[u8] = match read_result {
+            Ok(buf) => buf,
+            Err(_) => return Err(PyRuntimeError::new_err(
+                "[ultramap] SIGBUS: página mmap invalidada por macOS en lectura — archivo ultramap.bin truncado o purgado"
+            )),
         };
 
         let mut x_bytes = [0u8; 8];
@@ -201,8 +229,16 @@ impl UltramapSubstrate {
 
         let mut mmap = self.mmap.lock().unwrap();
         let offset = agent_idx * self.node_size;
-        let buffer: &mut [u8] = unsafe {
-            std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.node_size)
+        let write_result = panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            unsafe {
+                std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.node_size)
+            }
+        }));
+        let buffer: &mut [u8] = match write_result {
+            Ok(buf) => buf,
+            Err(_) => return Err(PyRuntimeError::new_err(
+                "[ultramap] SIGBUS: página mmap invalidada por macOS en escritura — archivo ultramap.bin truncado o purgado"
+            )),
         };
 
         // Extract x, y, z to verify initialization
@@ -227,6 +263,9 @@ impl UltramapSubstrate {
         buffer[offset + 104..offset + 112].copy_from_slice(&error_rate.to_ne_bytes());
         buffer[offset + 112..offset + 120].copy_from_slice(&causal_entropy.to_ne_bytes());
         buffer[offset + 120..offset + 128].copy_from_slice(&cpu_load.to_ne_bytes());
+
+        mmap.flush()
+            .map_err(|e| PyRuntimeError::new_err(format!("[ultramap] msync failed: {}", e)))?;
 
         Ok(true)
     }
