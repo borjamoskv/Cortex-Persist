@@ -12,7 +12,7 @@ from typing import Any
 import aiosqlite
 
 
-class CausalGraph:
+class ExecutionTraceGraph:
     """DAG de ejecución (node = trace, edge = lineage)."""
 
     def __init__(self, db_path: str):

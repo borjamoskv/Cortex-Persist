@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 
 import aiosqlite
 
-from cortex.ledger.causal_graph import CausalGraph
+from cortex.ledger.causal_graph import ExecutionTraceGraph
 
 if TYPE_CHECKING:
     from cortex.ledger.cost_field import CostField
@@ -28,7 +28,7 @@ class CausalRollbackEngine:
         self.db_path = db_path
         self.ledger = ledger
         self.cost_field = cost_field
-        self.graph = CausalGraph(db_path)
+        self.graph = ExecutionTraceGraph(db_path)
 
     async def simulate_reversal_cost(
         self, event_id: str, tenant_id: str = "default"

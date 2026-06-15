@@ -13,21 +13,13 @@ from typing import Any
 import aiosqlite
 
 from cortex.crypto import get_default_encrypter
-from cortex.database.core import connect
 from cortex.engine.causality_models import (
-    CONFIDENCE_LEVELS,
-    EDGE_DERIVED_FROM,
     EDGE_TAINTED_BY,
-    EDGE_TRIGGERED_BY,
-    EDGE_UPDATED_FROM,
     Confidence,
-    EpistemicStatus,
-    LedgerEvent,
     TaintReport,
     TaintStatus,
     _downgrade_confidence,
 )
-from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 
 try:
     from cortex.engine.logic.atms import AtmsAdapter
@@ -36,72 +28,7 @@ except ImportError:
 
 logger = logging.getLogger("cortex.engine.causality")
 
-__all__ = [
-    "EDGE_DERIVED_FROM",
-    "EDGE_TAINTED_BY",
-    "EDGE_TRIGGERED_BY",
-    "EDGE_UPDATED_FROM",
-    "AsyncCausalGraph",
-    "AsyncCausalOracle",
-    "CausalGraph",
-    "CausalOracle",
-    "Confidence",
-    "CONFIDENCE_LEVELS",
-    "EpistemicStatus",
-    "LedgerEvent",
-    "TaintReport",
-    "TaintStatus",
-    "_downgrade_confidence",
-    "link_causality",
-]
 
-
-class CausalGraph:
-    def __init__(self) -> None:
-        self._events: dict[str, LedgerEvent] = {}
-        self._children: dict[str, list[str]] = {}
-
-    def get_event(self, event_id: str) -> LedgerEvent:
-        return self._events[event_id]
-
-    def add_event(self, event: LedgerEvent) -> None:
-        self._events[event.event_id] = event
-        self._children.setdefault(event.event_id, [])
-        for parent_id in event.parent_ids:
-            self._children.setdefault(parent_id, []).append(event.event_id)
-
-    def get_descendants(self, node_id: str) -> list[str]:
-        return self._children.get(node_id, [])
-
-    def __getitem__(self, node_id: str) -> LedgerEvent:
-        return self.get_event(node_id)
-
-
-def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay: float = 0.35) -> None:
-    queue = deque([(refuted_event_id, 0)])
-    visited: set[str] = set()
-
-    while queue:
-        node_id, depth = queue.popleft()
-        if node_id in visited:
-            continue
-        visited.add(node_id)
-
-        try:
-            event = graph[node_id]
-        except KeyError:
-            continue
-
-        if depth == 0:
-            event.status = EpistemicStatus.REFUTED
-            event.trust_score = 0.0
-        else:
-            event.trust_score = max(0.0, event.trust_score * (1.0 - decay / max(depth, 1)))
-            event.tainted = True
-
-        for child_id in graph.get_descendants(node_id):
-            if child_id not in visited:
-                queue.append((child_id, depth + 1))
 
 
 class AsyncCausalGraph:
@@ -171,7 +98,6 @@ class AsyncCausalGraph:
     ) -> None:
         await self.ensure_table(commit=False)
 
-        import sqlite3
 
         # 1. Look up missing hashes via DIP
         if not fact_hash:
@@ -657,58 +583,3 @@ class AsyncCausalGraph:
         return int(row[0]) if row and row[0] is not None else 0
 
 
-class AsyncCausalOracle:
-    """Interprets the Signal Bus to find the parent of a fact asynchronously."""
-
-    @staticmethod
-    async def find_parent_signal(
-        conn: aiosqlite.Connection,
-        tenant_id: str = "default",
-        project: str | None = None,
-    ) -> int | None:
-        try:
-            bus = AsyncSignalBus(conn)
-            recent = await bus.history(tenant_id=tenant_id, project=project, limit=5)
-            for sig in recent:
-                if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
-                    return sig.id
-        except (sqlite3.Error, ValueError, RuntimeError) as e:
-            logger.debug("Async causal lookup failed: %s", e)
-        return None
-
-
-class CausalOracle:
-    """Interprets the Signal Bus to find the parent of a fact (sync)."""
-
-    @staticmethod
-    def find_parent_signal(
-        db_path: str,
-        tenant_id: str = "default",
-        project: str | None = None,
-    ) -> int | None:
-        try:
-            with connect(db_path) as conn:
-                bus = SignalBus(conn)
-                recent = bus.history(tenant_id=tenant_id, project=project, limit=5)
-                for sig in recent:
-                    if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
-                        return sig.id
-        except (sqlite3.Error, ValueError, RuntimeError) as e:
-            logger.debug("Sync causal lookup failed: %s", e)
-        return None
-
-
-def link_causality(
-    meta: dict[str, Any] | None,
-    signal_id: int | None,
-) -> dict[str, Any]:
-    """Attach causal metadata to a fact's meta dictionary."""
-    m = meta or {}
-    if signal_id:
-        m["causal_parent"] = signal_id
-        m["axiomatic_integrity"] = "Ω₁"
-    return m
-
-
-def rowless_json(data: dict[str, Any]) -> str:
-    return json.dumps(data)

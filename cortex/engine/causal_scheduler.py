@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.engine.rollback_engine import CausalRollbackEngine
-    from cortex.ledger.causal_graph import CausalGraph
+    from cortex.ledger.causal_graph import ExecutionTraceGraph
     from cortex.ledger.execution_trace import ExecutionTraceLedger
 
 logger = logging.getLogger("cortex.engine.causal_scheduler")
@@ -24,7 +24,7 @@ class CausalScheduler:
 
     def __init__(
         self,
-        causal_graph: CausalGraph,
+        causal_graph: ExecutionTraceGraph,
         rollback_engine: CausalRollbackEngine,
         ledger: ExecutionTraceLedger,
         rollback_threshold: float = 100.0,
