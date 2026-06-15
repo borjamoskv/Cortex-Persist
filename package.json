@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "python3 scripts/update_signatures.py && astro dev",
     "start": "astro dev",
-    "build": "python3 scripts/update_signatures.py && astro build",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
     "test": "make test-fast",

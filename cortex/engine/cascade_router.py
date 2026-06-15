@@ -93,6 +93,7 @@ class CascadeRouter:
                     **os.environ,
                     "ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY", "sk-ant-fallback"),
                     "GEMINI_API_KEY": os.environ.get("GEMINI_API_KEY", "gemini-fallback"),
+                    "GEMINI_CLI_HOME": os.environ.get("GEMINI_CLI_HOME", "/tmp/gemini_home"),
                 }
 
                 process = await asyncio.create_subprocess_exec(
