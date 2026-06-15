@@ -16,38 +16,65 @@ export default function HeroCanvas() {
     renderer.setPixelRatio(window.devicePixelRatio);
     mountRef.current.appendChild(renderer.domElement);
 
-    // Particles
-    const geometry = new THREE.BufferGeometry();
-    const particlesCount = 2000;
-    const posArray = new Float32Array(particlesCount * 3);
+    // Network Particles (Swarm Nodes)
+    const particlesCount = 400; // Optimal for O(N^2) distance calculations
+    const positions = new Float32Array(particlesCount * 3);
+    const velocities: { x: number; y: number; z: number }[] = [];
 
-    for (let i = 0; i < particlesCount * 3; i++) {
-      // Spread particles across a wide area
-      posArray[i] = (Math.random() - 0.5) * 12;
+    for (let i = 0; i < particlesCount; i++) {
+      // Spread nodes in a sphere-like area
+      positions[i * 3] = (Math.random() - 0.5) * 10;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+      
+      // Gentle drift velocities
+      velocities.push({
+        x: (Math.random() - 0.5) * 0.015,
+        y: (Math.random() - 0.5) * 0.015,
+        z: (Math.random() - 0.5) * 0.015,
+      });
     }
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-    // Material matching Industrial Noir aesthetic (YInMn Blue / White)
+    // Material matching Industrial Noir aesthetic (YInMn Blue)
     const material = new THREE.PointsMaterial({
-      size: 0.015,
-      color: 0x2b3be5, // YInMn Blue
+      size: 0.04,
+      color: 0x2b3be5, // YInMn Blue Accent
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.8,
       blending: THREE.AdditiveBlending
     });
 
     const particlesMesh = new THREE.Points(geometry, material);
     scene.add(particlesMesh);
 
-    camera.position.z = 3;
+    // Cryptographic Hash-Chains (Connecting Lines)
+    const linesGeometry = new THREE.BufferGeometry();
+    // Maximum possible connections = N * (N - 1) / 2
+    const maxConnections = (particlesCount * (particlesCount - 1)) / 2;
+    const linePositions = new Float32Array(maxConnections * 6);
+    
+    // We use dynamic draw hint if possible
+    const posAttribute = new THREE.BufferAttribute(linePositions, 3);
+    linesGeometry.setAttribute('position', posAttribute);
 
-    // Mouse interaction
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: 0x2b3be5,
+      transparent: true,
+      opacity: 0.15,
+      blending: THREE.AdditiveBlending
+    });
+
+    const linesMesh = new THREE.LineSegments(linesGeometry, lineMaterial);
+    scene.add(linesMesh);
+
+    camera.position.z = 4;
+
+    // Mouse interaction parallax
     let mouseX = 0;
     let mouseY = 0;
-    let targetX = 0;
-    let targetY = 0;
-
     const windowHalfX = window.innerWidth / 2;
     const windowHalfY = window.innerHeight / 2;
 
@@ -67,23 +94,62 @@ export default function HeroCanvas() {
 
     window.addEventListener('resize', onWindowResize);
 
-    // Animation loop
-    const clock = new THREE.Clock();
-
+    // Animation loop (Swarm Consensus)
     const animate = () => {
       requestAnimationFrame(animate);
-      const elapsedTime = clock.getElapsedTime();
+      
+      let vertexpos = 0;
+      let numConnected = 0;
 
-      // Slow rotation
-      particlesMesh.rotation.y = elapsedTime * 0.05;
-      particlesMesh.rotation.x = elapsedTime * 0.02;
+      // Kintsugi Kinetic: Pulsing and moving
+      for (let i = 0; i < particlesCount; i++) {
+        const i3 = i * 3;
+        // Drift
+        positions[i3] += velocities[i].x;
+        positions[i3 + 1] += velocities[i].y;
+        positions[i3 + 2] += velocities[i].z;
+        
+        // Bounding box bounce
+        if (Math.abs(positions[i3]) > 5) velocities[i].x *= -1;
+        if (Math.abs(positions[i3 + 1]) > 5) velocities[i].y *= -1;
+        if (Math.abs(positions[i3 + 2]) > 5) velocities[i].z *= -1;
+        
+        // Calculate hash-chain links (distances)
+        for (let j = i + 1; j < particlesCount; j++) {
+          const j3 = j * 3;
+          const dx = positions[i3] - positions[j3];
+          const dy = positions[i3 + 1] - positions[j3 + 1];
+          const dz = positions[i3 + 2] - positions[j3 + 2];
+          const distSq = dx*dx + dy*dy + dz*dz;
+          
+          // Connect nodes if they are close enough
+          if (distSq < 2.5) {
+            linePositions[vertexpos++] = positions[i3];
+            linePositions[vertexpos++] = positions[i3 + 1];
+            linePositions[vertexpos++] = positions[i3 + 2];
+            
+            linePositions[vertexpos++] = positions[j3];
+            linePositions[vertexpos++] = positions[j3 + 1];
+            linePositions[vertexpos++] = positions[j3 + 2];
+            numConnected++;
+          }
+        }
+      }
+      
+      // Update buffers
+      linesMesh.geometry.setDrawRange(0, numConnected * 2);
+      linesMesh.geometry.attributes.position.needsUpdate = true;
+      particlesMesh.geometry.attributes.position.needsUpdate = true;
 
-      // Mouse parallax
-      targetX = mouseX * 0.0005;
-      targetY = mouseY * 0.0005;
+      // Parallax rotation
+      const targetX = mouseX * 0.0005;
+      const targetY = mouseY * 0.0005;
 
-      particlesMesh.rotation.y += 0.05 * (targetX - particlesMesh.rotation.y);
-      particlesMesh.rotation.x += 0.05 * (targetY - particlesMesh.rotation.x);
+      scene.rotation.y += 0.05 * (targetX - scene.rotation.y);
+      scene.rotation.x += 0.05 * (targetY - scene.rotation.x);
+      
+      // Slow constant spin
+      scene.rotation.y += 0.001;
 
       renderer.render(scene, camera);
     };
@@ -97,7 +163,9 @@ export default function HeroCanvas() {
         mountRef.current.removeChild(renderer.domElement);
       }
       geometry.dispose();
+      linesGeometry.dispose();
       material.dispose();
+      lineMaterial.dispose();
       renderer.dispose();
     };
   }, []);
