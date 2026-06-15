@@ -110,6 +110,21 @@ class AgentRegistry:
             if capability in self._agents[k].capabilities
         ]
 
+    def get_candidates(self, task: str) -> list[AgentSpec]:
+        """
+        Get list of candidate agents for a given task string.
+        Matches task text against capabilities. If no match, returns all.
+        """
+        task_lower = task.lower()
+        candidates = []
+        for agent in self.all():
+            if any(cap in task_lower for cap in agent.capabilities):
+                candidates.append(agent)
+        
+        if not candidates:
+            return self.all()
+        return candidates
+
     def to_dict(self) -> dict[str, Any]:
         """Stable serialization of registry state (for checksum / replay)."""
         return {

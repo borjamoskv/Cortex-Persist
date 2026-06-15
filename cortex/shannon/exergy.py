@@ -62,15 +62,13 @@ def calculate_exergy(inp: ExergyInput, threshold_min_work: float) -> ExergyResul
     }:
         reversibility_penalty += 0.35
 
-    # AX-047: Limerence penalty. Read-only without persistent state change gets a severe discount.
-    # Exergy is maximized when we mutate persistent state successfully with low risk.
+    # AX-047 Limerence Penalty: "La limerencia epistémica quema cuota sin mutar el estado"
     if inp.action_risk == ActionRisk.READ_ONLY and not inp.touched_persistent_state:
-        limerence_penalty = 0.5 
+        limerence_penalty = 0.5
     else:
         limerence_penalty = 0.0
 
     total_penalty = min(0.99, reversibility_penalty + limerence_penalty)
-
     # Base impact from signal and causal gap
     impact = (signal_gain * (1.0 + inp.utility_delta)) + (inp.causal_gap * 0.1)
     
