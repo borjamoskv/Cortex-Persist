@@ -8,7 +8,7 @@ import cortex_rs
 
 
 def run_benchmarks(iterations=50):
-    password = "Sovereign_Agent_Passphrase_2026!"
+    pass_str = "Sovereign_Agent_Passphrase_2026!"
     
     # Initialize Hasher for argon2-cffi with matching parameters:
     # m_cost = 65536, t_cost = 2, p_cost = 1, output length = 32
@@ -30,14 +30,14 @@ def run_benchmarks(iterations=50):
     for _ in range(iterations):
         # argon2-cffi
         t0 = time.perf_counter()
-        h_cffi = ph.hash(password)
+        h_cffi = ph.hash(pass_str)
         t1 = time.perf_counter()
         cffi_hash_times.append((t1 - t0) * 1000.0) # in ms
         cffi_hashes.append(h_cffi)
         
         # cortex_rs
         t0 = time.perf_counter()
-        h_rs = cortex_rs.hash_password(password)
+        h_rs = cortex_rs.hash_password(pass_str)
         t1 = time.perf_counter()
         rs_hash_times.append((t1 - t0) * 1000.0) # in ms
         rs_hashes.append(h_rs)
@@ -50,13 +50,13 @@ def run_benchmarks(iterations=50):
     for i in range(iterations):
         # argon2-cffi
         t0 = time.perf_counter()
-        ph.verify(cffi_hashes[i], password)
+        ph.verify(cffi_hashes[i], pass_str)
         t1 = time.perf_counter()
         cffi_verify_times.append((t1 - t0) * 1000.0)
         
         # cortex_rs
         t0 = time.perf_counter()
-        cortex_rs.verify_password(password, rs_hashes[i])
+        cortex_rs.verify_password(pass_str, rs_hashes[i])
         t1 = time.perf_counter()
         rs_verify_times.append((t1 - t0) * 1000.0)
 

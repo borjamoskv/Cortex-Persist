@@ -383,13 +383,8 @@ class InjectionGuard:
     @staticmethod
     def _entropy(text: str) -> float:
         """Shannon entropy of text. High = possibly encoded/encrypted."""
-        if not text:
-            return 0.0
-        freq: dict[str, int] = {}
-        for ch in text:
-            freq[ch] = freq.get(ch, 0) + 1
-        length = len(text)
-        return -sum((c / length) * math.log2(c / length) for c in freq.values() if c > 0)
+        from cortex.shannon.entropy import compute_character_entropy
+        return compute_character_entropy(text)
 
 
 # Global singleton
