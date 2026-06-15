@@ -847,4 +847,22 @@ Proof:
   Date: 2026-06-15
 ```
 
+---
+
+### Hito 51: Automated Agent Substrate Audit (Hook & Daemon Integration)
+- **Target**: [scripts/auto_agent_audit.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/auto_agent_audit.py), [scripts/sovereign_pre_commit.sh](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/sovereign_pre_commit.sh), [.pre-commit-config.yaml](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.pre-commit-config.yaml)
+- **Objective**: Automatización del proceso de auditoría agéntica (conectando a SQLite `cortex.db`, validando reglas en `AGENTS.md` y verificando la cadena criptográfica `cassandra_audit_ledger.jsonl`) integrándolo de forma síncrona en los pre-commit hooks de Git y mediante tareas recurrentes de sistema crontab.
+- **Yield Target**: Ejecución instantánea (<0.1s) en cada confirmación de código (bloqueante ante fallos) y reportes periódicos actualizados en la bóveda de la sesión.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Registro en crontab y paso exitoso en la suite de pre-commit (`cortex-agent-audit Passed`).
+```yaml
+Claim: Automatización de la auditoría agéntica en Git hook y Daemon crontab
+Proof:
+  Base: "pre-commit run cortex-agent-audit --all-files passing y crontab verificado"
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-15
+```
+
+
 
