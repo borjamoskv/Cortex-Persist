@@ -28,6 +28,15 @@ class MorphSnapshot:
 class MorphRegistry:
     def __init__(self) -> None:
         self.chain: list[dict[str, Any]] = []
+        self.handlers: dict[str, Any] = {}
+
+    def register_handler(self, name: str, handler: Any) -> None:
+        if name in self.handlers:
+            raise ValueError(f"Handler '{name}' already registered")
+        self.handlers[name] = handler
+
+    def get_handler(self, name: str) -> Any:
+        return self.handlers.get(name)
 
     def load_agents_md(self, path: Path) -> str:
         return path.read_text(encoding="utf-8")

@@ -17,6 +17,7 @@ class DivergenceReport:
     route_deltas: list[dict[str, Any]]
     severity: str
     timestamp: float
+    proof_hash: str
 
 
 class DivergenceAuditor:
@@ -80,6 +81,18 @@ class DivergenceAuditor:
     ) -> DivergenceReport:
         deltas = self.diff_capabilities(expected, actual)
         severity = self.severity_for(deltas)
+        import json
+        payload = {
+            "agent_id": agent_id,
+            "observed_fingerprint": observed_fingerprint,
+            "expected_fingerprint": expected_fingerprint,
+            "route_deltas": deltas,
+            "severity": severity,
+            "timestamp": timestamp,
+        }
+        proof_payload = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+        proof_hash = hashlib.sha256(proof_payload.encode()).hexdigest()
+
         return DivergenceReport(
             agent_id=agent_id,
             observed_fingerprint=observed_fingerprint,
@@ -87,4 +100,5 @@ class DivergenceAuditor:
             route_deltas=deltas,
             severity=severity,
             timestamp=timestamp,
+            proof_hash=proof_hash,
         )

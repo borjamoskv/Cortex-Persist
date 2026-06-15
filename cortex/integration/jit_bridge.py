@@ -34,14 +34,17 @@ class JITBridgeCompiler:
         expected_signature: dict[str, Any],
         actual_signature: dict[str, Any],
     ) -> BridgeArtifact:
-        t0 = time.perf_counter()
         adapter_code = self._generate_adapter_code(expected_signature, actual_signature)
-        ast.parse(adapter_code)
-        latency_ms = (time.perf_counter() - t0) * 1000.0
-
         bridge_id = _sha256_text(
             f"{agent_id}:{expected_signature}:{actual_signature}:{adapter_code}"
         )
+        if bridge_id in self.cache:
+            return self.cache[bridge_id]
+
+        t0 = time.perf_counter()
+        ast.parse(adapter_code)
+        latency_ms = (time.perf_counter() - t0) * 1000.0
+
         artifact = BridgeArtifact(
             bridge_id=bridge_id,
             agent_id=agent_id,
@@ -56,6 +59,9 @@ class JITBridgeCompiler:
             self.output_dir.mkdir(parents=True, exist_ok=True)
             (self.output_dir / f"{bridge_id}.py").write_text(adapter_code, encoding="utf-8")
         return artifact
+
+    def invalidate_cache(self) -> None:
+        self.cache.clear()
 
     def _generate_adapter_code(
         self,
