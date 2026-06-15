@@ -95,13 +95,29 @@ def stage_3_and_4_weismann_and_inject(patch_data: dict) -> bool:
     logger.info(f"Applying patch: {patch_data['heuristic_patch']}")
     
     try:
-        # SKILL.md is markdown. The Weismann barrier's py_compile fails on markdown.
-        # So we directly inject for .md files. If it was python, we'd use enforce_weismann_barrier.
+        with open(SKILL_PATH, "r", encoding="utf-8") as f:
+            pre_lines = len(f.readlines())
+
         inject_patch_callback(str(SKILL_PATH), patch_data)
-        logger.info("[WEISMANN Bypassed for MD] Injection successful.")
+        
+        with open(SKILL_PATH, "r", encoding="utf-8") as f:
+            post_lines = len(f.readlines())
+            
+        diff_lines = abs(post_lines - pre_lines)
+        
+        # WEISMANN BARRIER (MD Circuit Breaker): Max 50 lines of drift per cycle
+        if diff_lines > 50:
+            logger.error(f"[WEISMANN REJECTED] Entropy bounds exceeded: {diff_lines} lines. Reverting.")
+            subprocess.run(["git", "checkout", "--", str(SKILL_PATH)], check=False)
+            with open("/tmp/cortex-ouroboros-error.log", "a") as ef:
+                ef.write(f"[{time.time()}] WEISMANN REJECT: Mutation too large ({diff_lines} lines).\n")
+            return False
+
+        logger.info(f"[WEISMANN ACCEPTED] LineDelta={diff_lines}. Injection successful.")
         return True
     except Exception as e:
         logger.error(f"Failed to inject: {e}")
+        subprocess.run(["git", "checkout", "--", str(SKILL_PATH)], check=False)
         return False
 
 def commit_and_persist(patch_data: dict):
