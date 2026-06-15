@@ -54,6 +54,7 @@ class TransactionMixin(EngineMixinBase):
 
         dj = canonical_json(detail)
         ts = now_iso()
+
         cursor = await conn.execute(
             "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
             (tenant_id,),
@@ -79,6 +80,7 @@ class TransactionMixin(EngineMixinBase):
             if actual_ph != ph:
                 th = compute_tx_hash(actual_ph, project, action, dj, ts, tenant_id=tenant_id)
                 await conn.execute("UPDATE transactions SET hash = ? WHERE id = ?", (th, tx_id))
+
 
         if getattr(self, "_ledger", None):
             try:

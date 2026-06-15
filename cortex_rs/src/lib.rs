@@ -4,6 +4,7 @@ pub mod atms;
 pub mod smt;
 pub mod storage_guard;
 pub mod ctre_guardian;
+pub mod auth;
 use pyo3::prelude::*;
 use belief_object::{BeliefObject, BeliefState, RelationType, ProvenanceEnvelope, BeliefRelation};
 use atms::AtmsGraph;
@@ -22,5 +23,7 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(storage_guard::validate_proposal, m)?)?;
     m.add_function(wrap_pyfunction!(storage_guard::detect_poisoning, m)?)?;
     m.add_function(wrap_pyfunction!(ctre_guardian::ctre_atomic_commit, m)?)?;
+    m.add_function(wrap_pyfunction!(auth::hash_password, m)?)?;
+    m.add_function(wrap_pyfunction!(auth::verify_password, m)?)?;
     Ok(())
 }

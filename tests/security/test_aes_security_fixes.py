@@ -16,7 +16,7 @@ from cortex.core.config import reload as reload_config
 def test_strict_crypto_mode():
     """Verify that STRICT_CRYPTO_MODE raises ValueError on decrypt and RuntimeError on encrypt."""
     enc = CortexEncrypter(master_key=b"1" * 32, strict_mode=True)
-    assert enc._strict_mode is True
+    assert enc.strict_mode is True
 
     # Decrypting plaintext should raise ValueError in strict mode
     with pytest.raises(ValueError) as excinfo:

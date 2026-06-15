@@ -11,9 +11,9 @@ import threading
 import time
 from datetime import datetime, timezone
 from typing import Any
+from concurrent.futures import ThreadPoolExecutor
 
-from argon2 import PasswordHasher
-
+import cortex_rs
 from cortex.auth.backends import BaseAuthBackend
 from cortex.auth.models import APIKey, AuthResult
 
@@ -73,12 +73,7 @@ class AuthManager:
                 logger.info("AuthManager: Using Local Sovereign (SQLite) backend")
                 backend = SQLiteAuthBackend(DB_PATH)
         self.backend = backend
-        self.ph = PasswordHasher(
-            time_cost=2,
-            memory_cost=65536,
-            parallelism=1,
-            hash_len=32,
-        )
+        self._executor = ThreadPoolExecutor(max_workers=4)
         self._background_tasks: set[asyncio.Task[Any]] = set()
 
     async def initialize(self) -> None:
@@ -107,10 +102,15 @@ class AuthManager:
     def hash_key_legacy_sha256(key: str) -> str:
         return hashlib.sha256(key.encode()).hexdigest()
 
-    def hash_key_argon2id(self, key: str) -> str:
+    async def hash_key_argon2id_async(self, key: str) -> str:
         from cortex.config import AUTH_PEPPER
 
-        return self.ph.hash(key + AUTH_PEPPER)
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            self._executor,
+            cortex_rs.hash_password,
+            key + AUTH_PEPPER
+        )
 
     async def close(self) -> None:
         """Close the backend connections."""
@@ -131,7 +131,7 @@ class AuthManager:
 
         raw_key = f"ctx_{secrets.token_hex(self.KEY_LENGTH)}"
         key_hash = self.hash_key_legacy_sha256(raw_key)
-        key_hash_argon2 = self.hash_key_argon2id(raw_key)
+        key_hash_argon2 = await self.hash_key_argon2id_async(raw_key)
         key_prefix = raw_key[:12]
 
         key_id = await self.backend.store_key(
@@ -270,10 +270,15 @@ class AuthManager:
             for cand in candidates:
                 if cand.get("hash_algo") == "argon2id" and cand.get("key_hash_argon2"):
                     try:
-                        if self.ph.verify(cand["key_hash_argon2"], raw_key + AUTH_PEPPER):
+                        loop = asyncio.get_running_loop()
+                        is_valid = await loop.run_in_executor(
+                            self._executor,
+                            cortex_rs.verify_password,
+                            raw_key + AUTH_PEPPER,
+                            cand["key_hash_argon2"]
+                        )
+                        if is_valid:
                             row = cand
-                            if self.ph.check_needs_rehash(cand["key_hash_argon2"]):
-                                needs_migration = True
                             break
                     except Exception:
                         pass
@@ -283,7 +288,7 @@ class AuthManager:
 
         # 3. Migrate if needed
         if needs_migration:
-            new_hash_argon2 = self.hash_key_argon2id(raw_key)
+            new_hash_argon2 = await self.hash_key_argon2id_async(raw_key)
             task_mig = asyncio.create_task(
                 self.backend.migrate_key_to_argon2(row["id"], new_hash_argon2)
             )

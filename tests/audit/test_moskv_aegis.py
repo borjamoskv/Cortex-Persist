@@ -60,7 +60,9 @@ async def aegis(ledger):
     """Creates a MoskvAegisEngine auditor instance."""
     from cortex.audit.moskv_aegis import MoskvAegisEngine
 
-    return MoskvAegisEngine(ledger)
+    engine = MoskvAegisEngine(ledger)
+    engine.oracle._get_git_diff = lambda: ""
+    return engine
 
 
 class TestMoskvAegisEngine:
@@ -94,6 +96,7 @@ class TestMoskvAegisEngine:
         constraints = modeler.get_default_ruleset()
 
         generator = MoskvVidentiaOracle()
+        generator._get_git_diff = lambda: ""
         attacks = generator.generate(constraints)
 
         assert len(attacks) > 0

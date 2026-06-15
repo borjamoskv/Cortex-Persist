@@ -34,7 +34,6 @@ classifiers = [
         "rich>=13.0",
         "aiosqlite>=0.20.0",
         "cryptography>=46.0.7",
-        "argon2-cffi>=23.1.0",
         "pydantic>=2.0",
     ]
 

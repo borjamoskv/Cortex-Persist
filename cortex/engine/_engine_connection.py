@@ -137,6 +137,37 @@ class ConnectionMixin:
                     (k, v),
                 )
             await conn.commit()
+
+            # Dynamic tenant isolation salt resolution
+            cursor = await conn.execute(
+                "SELECT value FROM cortex_meta WHERE key = 'tenant_isolation_salt'"
+            )
+            row = await cursor.fetchone()
+            if row:
+                import cortex.core.config as config
+                config.HKDF_SALT = row[0]
+            else:
+                import cortex.core.config as config
+                # Store the default config salt in the DB if not present
+                await conn.execute(
+                    "INSERT INTO cortex_meta (key, value) VALUES ('tenant_isolation_salt', ?)",
+                    (config.HKDF_SALT,),
+                )
+                await conn.commit()
+            
+            # Query dynamic salt if present to reload config dynamically
+            try:
+                async with conn.execute(
+                    "SELECT value FROM cortex_meta WHERE key = ?", ("tenant_isolation_salt",)
+                ) as cursor:
+                    row = await cursor.fetchone()
+                    if row:
+                        import cortex.core.config as config
+                        config.HKDF_SALT = row[0]
+                        config._cfg.HKDF_SALT = row[0]
+            except Exception as e:
+                logger.warning("Failed to load tenant_isolation_salt: %s", e)
+
             if self._ledger is None:
                 from cortex.ledger import ImmutableLedger
 

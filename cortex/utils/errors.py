@@ -28,6 +28,7 @@ __all__ = [
     "AuthError",
     "PermissionDeniedError",
     "SovereignViolation",
+    "DecryptionPolicyError",
 ]
 
 
@@ -115,3 +116,8 @@ class PermissionDeniedError(AuthError):
 
 class SovereignViolation(CortexError):
     """Raised when a sovereign policy is violated (e.g., Rule 1.3 model tier)."""
+
+
+class DecryptionPolicyError(CortexError, ValueError):
+    """Raised when decryption fails due to a policy violation (e.g., strict mode)."""
+

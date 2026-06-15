@@ -18,6 +18,8 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
+from cortex.utils.errors import DecryptionPolicyError
+
 logger = logging.getLogger("cortex.crypto")
 
 _NONCE_LENGTH = 12  # 96-bit nonce for GCM
@@ -31,10 +33,24 @@ class CortexEncrypter:
 
     PREFIX = "v6_aesgcm:"
 
-    def __init__(self, master_key: bytes | None) -> None:
+    def __init__(
+        self,
+        master_key: bytes | None,
+        strict_mode: bool = False,
+        hkdf_salt: bytes | None = None,
+    ) -> None:
         if master_key is not None and len(master_key) != _KEY_LENGTH:
             raise ValueError(f"AES-256 requires a {_KEY_LENGTH}-byte master key.")
         self._master_key = master_key
+        self.strict_mode = strict_mode
+        if hkdf_salt is None:
+            try:
+                import cortex.core.config as config
+                self.hkdf_salt = config.HKDF_SALT.encode("utf-8")
+            except (ImportError, AttributeError):
+                self.hkdf_salt = b"cortex_v6_tenant_isolation_salt"
+        else:
+            self.hkdf_salt = hkdf_salt
         # Cache of derived keys per tenant
         self._tenant_keys: dict[str, bytes] = {}
 
@@ -54,7 +70,7 @@ class CortexEncrypter:
         hkdf = HKDF(
             algorithm=hashes.SHA256(),
             length=_KEY_LENGTH,
-            salt=b"cortex_v6_tenant_isolation_salt",
+            salt=self.hkdf_salt,
             info=tenant_id.encode("utf-8"),
         )
         tenant_key = hkdf.derive(self._master_key)  # type: ignore[reportArgumentType]
@@ -68,6 +84,8 @@ class CortexEncrypter:
         if not data:
             return data
         if not self.is_active:
+            if self.strict_mode:
+                raise RuntimeError("Strict crypto mode active: cannot encrypt data without a loaded Master Key.")
             return data
 
         key = self._get_tenant_key(tenant_id)
@@ -87,9 +105,12 @@ class CortexEncrypter:
         # Legacy support: if it's not starting with our prefix, we assume it's plaintext
         # This allows seamless migration for existing dbs
         if not encrypted_data.startswith(self.PREFIX):
+            if self.strict_mode:
+                raise DecryptionPolicyError("Strict crypto mode active: data lacks encryption prefix in strict mode")
             return encrypted_data
 
         if not self.is_active:
+
             raise RuntimeError("Database contains encrypted data but no Master Key is loaded.")
 
         try:
