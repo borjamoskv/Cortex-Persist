@@ -7,7 +7,8 @@
     "start": "astro dev",
     "build": "python3 scripts/update_signatures.py && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "prepare": "husky"
   },
   "dependencies": {
     "@astrojs/react": "^4.2.0",
@@ -22,5 +23,10 @@
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.1",
     "three": "^0.183.2"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
+    "husky": "^9.1.7"
   }
 }
