@@ -9,6 +9,8 @@ EXCLUDED_CONVERSATION_IDS = {
     "d1cf3b0e-795d-431e-9b1b-16a850263b53",  # Active Antigravity session
     "d3c86edd-a327-4422-8b1c-6fcf4beb7f29",  # User-specified active session
     "17abd324-6ef0-46f6-aede-7b5ecad6276f",  # Current active session
+    "e7e2b83d-fa38-44ec-94bc-b20fa8e7dd43",  # Active conversation ID
+    "6e67c164-e977-4d8a-9f1f-679d3a222efb",  # Current session ID
 }
 
 
