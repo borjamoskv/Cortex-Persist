@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from cortex.ledger.models import (
     ActionResult,
@@ -75,97 +75,116 @@ class LedgerVerifier:
             "enrichment_stats": stats,
         }
 
-    def _get_mldsa_private_key(self):
+    def _load_mldsa_seed_from_disk(self, key_path: str, encrypter: Any) -> bytes | None:
         import base64
         import os
+        if not os.path.exists(key_path):
+            return None
+            
+        os.chmod(key_path, 0o600)
+        with open(key_path, "rb") as key_file:
+            content = key_file.read()
 
-        from cryptography.hazmat.primitives.asymmetric import mldsa
+        if content.startswith(b"v6_aesgcm:"):
+            decrypted_str = encrypter.decrypt_str(content.decode("utf-8"), tenant_id="default")
+            if decrypted_str:
+                return base64.b64decode(decrypted_str)
+            return None
 
-        from cortex.crypto.aes import get_default_encrypter
-        from cortex.crypto.keyring import keyring
+        # Legacy raw format
+        seed = content
+        if encrypter.is_active:
+            seed_b64 = base64.b64encode(seed).decode("utf-8")
+            encrypted_str = encrypter.encrypt_str(seed_b64, tenant_id="default")
+            if encrypted_str:
+                with open(key_path, "wb") as key_file:
+                    key_file.write(encrypted_str.encode("utf-8"))
+                os.chmod(key_path, 0o600)
+        return seed
 
-        db_dir = os.path.dirname(self.store.db_path) if self.store.db_path else "."
-        if not db_dir:
-            db_dir = "."
-        key_path = os.path.join(db_dir, "cortex_mldsa_sovereign.bin")
-        encrypter = get_default_encrypter()
-
-        seed = None
-
-        # 1. Try to load from disk
-        if os.path.exists(key_path):
-            # Enforce chmod 600 permissions
-            os.chmod(key_path, 0o600)
-
-            with open(key_path, "rb") as key_file:
-                content = key_file.read()
-
-            if content.startswith(b"v6_aesgcm:"):
-                decrypted_str = encrypter.decrypt_str(content.decode("utf-8"), tenant_id="default")
-                if decrypted_str:
-                    seed = base64.b64decode(decrypted_str)
-            else:
-                # Legacy raw format
-                seed = content
-
-                # If master key is active, migrate to encrypted format
+    def _load_mldsa_seed_from_keyring(self, db_dir: str, key_path: str, encrypter: Any) -> bytes | None:
+        import base64
+        import os
+        try:
+            from cortex.crypto.keyring import keyring
+        except ImportError:
+            keyring = None
+            
+        if keyring is None or os.environ.get("CORTEX_TESTING"):
+            return None
+        try:
+            keyring_b64 = keyring.get_password("cortex_v6", "mldsa_sovereign_seed")
+            if keyring_b64:
+                seed = base64.b64decode(keyring_b64)
+                os.makedirs(db_dir, exist_ok=True)
                 if encrypter.is_active:
                     seed_b64 = base64.b64encode(seed).decode("utf-8")
                     encrypted_str = encrypter.encrypt_str(seed_b64, tenant_id="default")
                     if encrypted_str:
                         with open(key_path, "wb") as key_file:
                             key_file.write(encrypted_str.encode("utf-8"))
-                        os.chmod(key_path, 0o600)
-
-        # 2. If not on disk, try to get from keyring
-        if seed is None:
-            if keyring is not None and not os.environ.get("CORTEX_TESTING"):
-                try:
-                    keyring_b64 = keyring.get_password("cortex_v6", "mldsa_sovereign_seed")
-                    if keyring_b64:
-                        seed = base64.b64decode(keyring_b64)
-                        # Write to disk
-                        os.makedirs(db_dir, exist_ok=True)
-                        if encrypter.is_active:
-                            seed_b64 = base64.b64encode(seed).decode("utf-8")
-                            encrypted_str = encrypter.encrypt_str(seed_b64, tenant_id="default")
-                            if encrypted_str:
-                                with open(key_path, "wb") as key_file:
-                                    key_file.write(encrypted_str.encode("utf-8"))
-                        else:
-                            with open(key_path, "wb") as key_file:
-                                key_file.write(seed)
-                        os.chmod(key_path, 0o600)
-                except Exception as e:
-                    logger.warning("Failed to retrieve or store keyring seed: %s", e)
-
-        # 3. If still not found, generate new key
-        if seed is None:
-            private_key = mldsa.MLDSA44PrivateKey.generate()
-            seed = private_key.private_bytes_raw()
-
-            # Vault in keyring if available
-            if keyring is not None and not os.environ.get("CORTEX_TESTING"):
-                try:
-                    seed_b64 = base64.b64encode(seed).decode("utf-8")
-                    keyring.set_password("cortex_v6", "mldsa_sovereign_seed", seed_b64)
-                except Exception as e:
-                    logger.warning("Failed to save generated seed to keyring: %s", e)
-
-            # Write to disk
-            os.makedirs(db_dir, exist_ok=True)
-            if encrypter.is_active:
-                seed_b64 = base64.b64encode(seed).decode("utf-8")
-                encrypted_str = encrypter.encrypt_str(seed_b64, tenant_id="default")
-                if encrypted_str:
+                else:
                     with open(key_path, "wb") as key_file:
-                        key_file.write(encrypted_str.encode("utf-8"))
-            else:
-                with open(key_path, "wb") as key_file:
-                    key_file.write(seed)
-            os.chmod(key_path, 0o600)
-            return private_key
+                        key_file.write(seed)
+                os.chmod(key_path, 0o600)
+                return seed
+        except Exception as e:
+            logger.warning("Failed to retrieve or store keyring seed: %s", e)
+        return None
 
+    def _generate_mldsa_seed(self, db_dir: str, key_path: str, encrypter: Any) -> Any:
+        import base64
+        import os
+
+        from cryptography.hazmat.primitives.asymmetric import mldsa
+        try:
+            from cortex.crypto.keyring import keyring
+        except ImportError:
+            keyring = None
+            
+        private_key = mldsa.MLDSA44PrivateKey.generate()
+        seed = private_key.private_bytes_raw()
+
+        if keyring is not None and not os.environ.get("CORTEX_TESTING"):
+            try:
+                seed_b64 = base64.b64encode(seed).decode("utf-8")
+                keyring.set_password("cortex_v6", "mldsa_sovereign_seed", seed_b64)
+            except Exception as e:
+                logger.warning("Failed to save generated seed to keyring: %s", e)
+
+        os.makedirs(db_dir, exist_ok=True)
+        if encrypter.is_active:
+            seed_b64 = base64.b64encode(seed).decode("utf-8")
+            encrypted_str = encrypter.encrypt_str(seed_b64, tenant_id="default")
+            if encrypted_str:
+                with open(key_path, "wb") as key_file:
+                    key_file.write(encrypted_str.encode("utf-8"))
+        else:
+            with open(key_path, "wb") as key_file:
+                key_file.write(seed)
+        os.chmod(key_path, 0o600)
+        return private_key
+
+    def _get_mldsa_private_key(self):
+        import os
+
+        from cryptography.hazmat.primitives.asymmetric import mldsa
+
+        from cortex.crypto.aes import get_default_encrypter
+        
+        db_dir = os.path.dirname(self.store.db_path) if self.store.db_path else "."
+        if not db_dir:
+            db_dir = "."
+        key_path = os.path.join(db_dir, "cortex_mldsa_sovereign.bin")
+        encrypter = get_default_encrypter()
+
+        seed = self._load_mldsa_seed_from_disk(key_path, encrypter)
+        if seed is None:
+            seed = self._load_mldsa_seed_from_keyring(db_dir, key_path, encrypter)
+            
+        if seed is None:
+            return self._generate_mldsa_seed(db_dir, key_path, encrypter)
+            
         return mldsa.MLDSA44PrivateKey.from_seed_bytes(seed)
 
     def create_checkpoint(self, batch_size: int = 10) -> int | None:
