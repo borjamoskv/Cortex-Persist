@@ -310,48 +310,41 @@ def _extract_from_from_stmt(line: str, imports: set[str]) -> None:
         imports.add(pkg)
 
 
-async def check_seal_8_dependency_impl(
-    cached_files: dict[Path, str],
-) -> tuple[bool, str]:
-    """Dependency Ghost Check + Shannon Entropy Budget.
+def _run_dependency_ghost_check(cached_files: dict[Path, str]) -> None:
+    declared = _parse_pyproject_deps()
+    if not declared:
+        printer.warn("No pyproject.toml deps - skipping dependency check.")
+        return
 
-    Warn-only - never blocks the pipeline.
-    """
+    all_imports: set[str] = set()
+    for _path, content in cached_files.items():
+        all_imports |= _extract_imports(content)
+
+    external_imports: set[str] = set()
+    for imp in all_imports:
+        if imp in _STDLIB_TOP or imp in _FIRST_PARTY:
+            continue
+        normalized = _IMPORT_TO_PKG.get(imp, imp).lower().replace("-", "_")
+        external_imports.add(normalized)
+
+    undeclared = external_imports - declared
+    _FP_FILTER = frozenset(
+        {"pytest", "hypothesis", "_pytest", "setuptools", "pip", "pkg_resources"}
+    )
+    undeclared -= _FP_FILTER
+
+    if undeclared:
+        printer.warn(f"Potentially undeclared imports: {sorted(undeclared)[:10]}")
+    else:
+        printer.success(f"Dependency Ghost Check: {len(external_imports)} externals verified.")
+
+def _run_shannon_entropy_budget(cached_files: dict[Path, str]) -> None:
     import math
     from collections import Counter
 
-    # ── Dependency Ghost Check ──
-    declared = _parse_pyproject_deps()
-    if declared:
-        all_imports: set[str] = set()
-        for _path, content in cached_files.items():
-            all_imports |= _extract_imports(content)
-
-        external_imports: set[str] = set()
-        for imp in all_imports:
-            if imp in _STDLIB_TOP or imp in _FIRST_PARTY:
-                continue
-            normalized = _IMPORT_TO_PKG.get(imp, imp).lower().replace("-", "_")
-            external_imports.add(normalized)
-
-        undeclared = external_imports - declared
-        _FP_FILTER = frozenset(
-            {"pytest", "hypothesis", "_pytest", "setuptools", "pip", "pkg_resources"}
-        )
-        undeclared -= _FP_FILTER
-
-        if undeclared:
-            printer.warn(f"Potentially undeclared imports: {sorted(undeclared)[:10]}")
-        else:
-            printer.success(f"Dependency Ghost Check: {len(external_imports)} externals verified.")
-    else:
-        printer.warn("No pyproject.toml deps - skipping dependency check.")
-
-    # ── Shannon Entropy Budget ──
     def _entropy(text: str) -> float:
         if not text:
             return 0.0
-        # Global bypass: # no-audit
         if "# no-audit" in text:
             return 0.0
         counts = Counter(text)
@@ -371,17 +364,19 @@ async def check_seal_8_dependency_impl(
     else:
         printer.success("Shannon Entropy Budget intact (<6.5 bits/char).")
 
-    return True, "verified"
-
-
-async def check_seal_9_compliance_impl() -> tuple[bool, str]:
-    """Aesthetic Gate + EU AI Act Audit Trail.
+async def check_seal_8_dependency_impl(
+    cached_files: dict[Path, str],
+) -> tuple[bool, str]:
+    """Dependency Ghost Check + Shannon Entropy Budget.
 
     Warn-only - never blocks the pipeline.
     """
-    import asyncio
+    _run_dependency_ghost_check(cached_files)
+    _run_shannon_entropy_budget(cached_files)
+    return True, "verified"
 
-    # ── Aesthetic Gate ──
+async def _run_aesthetic_gate() -> None:
+    import asyncio
     forbidden = [
         "FI" + "XME",
         "TO" + "DO: placeholder",
@@ -396,7 +391,6 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
     for t in targets:
         if t.exists():
             content = (await asyncio.to_thread(t.read_text, encoding="utf-8")).lower()
-            # Global bypass: # no-audit
             if "# no-audit" in content:
                 continue
             for f in forbidden:
@@ -408,7 +402,7 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
     else:
         printer.success("Aesthetic Gate intact - no placeholders.")
 
-    # ── EU AI Act Audit Trail ──
+async def _run_eu_ai_act_audit_trail() -> None:
     try:
         from cortex.engine import CortexEngine
 
@@ -427,18 +421,31 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
     except (ImportError, RuntimeError, ValueError, TypeError, OSError):
         printer.warn("EU AI Act audit check skipped (engine not available).")
 
-    # ── SSRF URLGuard Verification (CodeQL #95) ──
+def _run_ssrf_urlguard() -> tuple[bool, str]:
     try:
         from cortex.guards.url_guard import is_safe_url
 
         if is_safe_url("https://sunoapi.org/api/v1"):
             printer.success("SSRF URLGuard: Logic active and functional.")
+            return True, "verified"
         else:
             printer.fail("SSRF URLGuard: Misconfigured or non-functional.")
             return False, "URLGuard failure"
     except ImportError:
         printer.fail("SSRF URLGuard: Module missing - CodeQL #95 vulnerability risk.")
         return False, "URLGuard missing"
+
+async def check_seal_9_compliance_impl() -> tuple[bool, str]:
+    """Aesthetic Gate + EU AI Act Audit Trail.
+
+    Warn-only - never blocks the pipeline.
+    """
+    await _run_aesthetic_gate()
+    await _run_eu_ai_act_audit_trail()
+    
+    ok, msg = _run_ssrf_urlguard()
+    if not ok:
+        return False, msg
 
     return True, "verified"
 
