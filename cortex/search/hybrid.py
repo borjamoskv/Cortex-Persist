@@ -71,6 +71,43 @@ def _apply_temporal_decay(results: list[SearchResult], recency_weight: float) ->
     return results
 
 
+def _apply_rrf(
+    sem_results: list[SearchResult],
+    txt_results: list[SearchResult],
+    vector_weight: float,
+    text_weight: float,
+    top_k: int,
+) -> list[SearchResult]:
+    """Applies Reciprocal Rank Fusion on two result sets."""
+    total_w = vector_weight + text_weight
+    w_vec = vector_weight / total_w if total_w > 0 else 0.5
+    w_txt = text_weight / total_w if total_w > 0 else 0.5
+
+    rrf_scores: dict[int, float] = {}
+    result_map: dict[int, SearchResult] = {}
+
+    for rank, res in enumerate(sem_results):
+        score = w_vec / (RRF_K + rank + 1)
+        rrf_scores[res.fact_id] = rrf_scores.get(res.fact_id, 0.0) + score
+        result_map[res.fact_id] = res
+
+    for rank, res in enumerate(txt_results):
+        score = w_txt / (RRF_K + rank + 1)
+        rrf_scores[res.fact_id] = rrf_scores.get(res.fact_id, 0.0) + score
+        if res.fact_id not in result_map:
+            result_map[res.fact_id] = res
+
+    sorted_ids = sorted(rrf_scores, key=lambda fid: rrf_scores[fid], reverse=True)[:top_k]
+    
+    merged: list[SearchResult] = []
+    for fid in sorted_ids:
+        r = result_map[fid]
+        r.score = round(rrf_scores[fid], 6)
+        merged.append(r)
+        
+    return merged
+
+
 async def hybrid_search(
     conn: aiosqlite.Connection,
     query: str,
@@ -124,36 +161,7 @@ async def hybrid_search(
         return []
 
     # 2. Rank Fusion Logic (RRF)
-    # Weights should ideally sum to 1.0 but we normalize them here
-    total_w = vector_weight + text_weight
-    w_vec = vector_weight / total_w
-    w_txt = text_weight / total_w
-
-    rrf_scores: dict[int, float] = {}
-    result_map: dict[int, SearchResult] = {}
-
-    # Standardize Semantic Results
-    for rank, res in enumerate(sem_results):
-        score = w_vec / (RRF_K + rank + 1)
-        rrf_scores[res.fact_id] = rrf_scores.get(res.fact_id, 0.0) + score
-        result_map[res.fact_id] = res
-
-    # Standardize Text Results
-    for rank, res in enumerate(txt_results):
-        score = w_txt / (RRF_K + rank + 1)
-        rrf_scores[res.fact_id] = rrf_scores.get(res.fact_id, 0.0) + score
-        if res.fact_id not in result_map:
-            result_map[res.fact_id] = res
-
-    # 3. Final Ranking & Selection
-    # Sort by the aggregated RRF score
-    sorted_ids = sorted(rrf_scores, key=lambda fid: rrf_scores[fid], reverse=True)[:top_k]
-
-    merged: list[SearchResult] = []
-    for fid in sorted_ids:
-        r = result_map[fid]
-        r.score = round(rrf_scores[fid], 6)
-        merged.append(r)
+    merged = _apply_rrf(sem_results, txt_results, vector_weight, text_weight, top_k)
 
     # Ω₁₃: Temporal decay - older facts naturally discounted
     if recency_weight > 0 and merged:
@@ -205,30 +213,7 @@ def hybrid_search_sync(
         conn, query, tenant_id=tenant_id, project=project, limit=fetch_limit
     )
 
-    total_w = vector_weight + text_weight
-    w_vec = vector_weight / total_w
-    w_txt = text_weight / total_w
-
-    rrf_scores: dict[int, float] = {}
-    result_map: dict[int, SearchResult] = {}
-
-    for rank, res in enumerate(sem_results):
-        score = w_vec / (RRF_K + rank + 1)
-        rrf_scores[res.fact_id] = rrf_scores.get(res.fact_id, 0.0) + score
-        result_map[res.fact_id] = res
-
-    for rank, res in enumerate(txt_results):
-        score = w_txt / (RRF_K + rank + 1)
-        rrf_scores[res.fact_id] = rrf_scores.get(res.fact_id, 0.0) + score
-        if res.fact_id not in result_map:
-            result_map[res.fact_id] = res
-
-    sorted_ids = sorted(rrf_scores, key=lambda fid: rrf_scores[fid], reverse=True)[:top_k]
-    merged: list[SearchResult] = []
-    for fid in sorted_ids:
-        r = result_map[fid]
-        r.score = round(rrf_scores[fid], 6)
-        merged.append(r)
+    merged = _apply_rrf(sem_results, txt_results, vector_weight, text_weight, top_k)
 
     # Ω₁₃: Temporal decay
     if recency_weight > 0 and merged:

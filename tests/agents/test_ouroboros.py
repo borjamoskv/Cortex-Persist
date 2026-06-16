@@ -5,7 +5,7 @@ from cortex.runtime.vesicular import VesicularRuntime
 
 @pytest.mark.asyncio
 async def test_ouroboros_legion_orchestrator():
-    orchestrator = LegionOrchestrator()
+    orchestrator = LegionOrchestrator(session_id="test_session")
     proposal = await orchestrator.spawn_ephemeral_agent(
         task_prompt="Calculate the meaning of life", 
         context_hash="abc123hash"
