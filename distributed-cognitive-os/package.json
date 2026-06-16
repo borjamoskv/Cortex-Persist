@@ -1,0 +1,21 @@
+{
+  "name": "distributed-cognitive-os",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Distributed cognitive OS with multi-node brain swarm, Neo4j graph state, and event-sourced routing",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start:coordinator": "node src/index.js coordinator",
+    "start:node": "node src/index.js node",
+    "start:swarm": "node src/index.js swarm",
+    "demo": "node src/index.js demo"
+  },
+  "dependencies": {
+    "brain.js": "^2.0.0-beta.24",
+    "neo4j-driver": "^5.27.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
