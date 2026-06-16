@@ -5,7 +5,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import _run_async, console, get_engine
+from cortex.cli.common import _run_async, cli, console, get_engine
 from cortex.engine.decalcifier import SovereignDecalcifier
 from cortex.extensions.songlines.sensor import TopographicSensor
 
@@ -110,3 +110,6 @@ def prune():
             border_style="green",
         )
     )
+
+
+cli.add_command(radar_cmds)

@@ -28,6 +28,79 @@ class SwarmProposal:
     token_cost: int = 0
 
 
+def _extract_inner_contents(content: str) -> list[str]:
+    import json
+    inner_contents = [content]
+    try:
+        parsed = json.loads(content)
+        if isinstance(parsed, dict):
+            # If it's a LedgerPayload wrapper, inspect the actual inner payloads
+            if parsed.get("type") == "LedgerPayload" and "payloads" in parsed:
+                inner_contents = []
+                for p in parsed["payloads"]:
+                    if isinstance(p, dict):
+                        # Extract all string values from the dictionary payload
+                        inner_contents.extend(str(v) for v in p.values() if isinstance(v, str))
+                    elif isinstance(p, str):
+                        inner_contents.append(p)
+    except (json.JSONDecodeError, TypeError, ValueError):
+        pass
+    return inner_contents
+
+def _has_json_array(c: str) -> bool:
+    import json
+    import ast
+    stripped_c = c.strip()
+    if not (stripped_c.startswith("[") and stripped_c.endswith("]")):
+        return False
+    try:
+        parsed_arr = json.loads(stripped_c)
+        if (
+            isinstance(parsed_arr, list)
+            and all(isinstance(x, dict) for x in parsed_arr)
+            and len(parsed_arr) > 0
+        ):
+            return True
+    except Exception:
+        try:
+            parsed_arr = ast.literal_eval(stripped_c)
+            if (
+                isinstance(parsed_arr, list)
+                and all(isinstance(x, dict) for x in parsed_arr)
+                and len(parsed_arr) > 0
+            ):
+                return True
+        except Exception:
+            pass
+    return False
+
+def _check_inner_content_structural(c: str, original_content: str) -> bool:
+    # Look for code blocks indicating logic synthesis
+    has_code_blocks = bool(re.search(r"```\w*", c, re.IGNORECASE))
+
+    # Look for Ledger event payloads or Schema definitions
+    has_ledger_payload = "CORTEX-TAINT" in c or ("LedgerPayload" in c and c != original_content)
+    has_schema_update = "ALTER TABLE" in c or "CREATE TABLE" in c
+
+    # Look for rigorous proof structures (Rule R2 format)
+    has_formal_proof = bool(re.search(r"Proof:\s*\{.*Base:.*\}", c, re.IGNORECASE))
+
+    # Detect a plain JSON-array of dicts
+    has_json_array = _has_json_array(c)
+
+    # Use StructuralCertifier to validate formal JSON structure
+    grade = StructuralCertifier.certify_structure(c)
+    has_valid_structure = grade == StructuralGrade.ACCEPTED
+
+    return (
+        has_code_blocks
+        or has_ledger_payload
+        or has_schema_update
+        or has_formal_proof
+        or has_json_array
+        or has_valid_structure
+    )
+
 class CausalClosureGuard:
     """Enforces Axiom VIII: Massive execution must yield deterministic artifacts."""
 
@@ -37,76 +110,10 @@ class CausalClosureGuard:
 
     def _contains_structural_condensation(self, content: str) -> bool:
         """Detects if the content contains permanent structural artifacts."""
-        # Check if the content is a serialized LedgerPayload
-        inner_contents = [content]
-
-        try:
-            import json
-
-            parsed = json.loads(content)
-            if isinstance(parsed, dict):
-                # If it's a LedgerPayload wrapper, inspect the actual inner payloads
-                if parsed.get("type") == "LedgerPayload" and "payloads" in parsed:
-                    inner_contents = []
-                    for p in parsed["payloads"]:
-                        if isinstance(p, dict):
-                            # Extract all string values from the dictionary payload
-                            inner_contents.extend(str(v) for v in p.values() if isinstance(v, str))
-                        elif isinstance(p, str):
-                            inner_contents.append(p)
-        except (json.JSONDecodeError, TypeError, ValueError):
-            pass
+        inner_contents = _extract_inner_contents(content)
 
         for c in inner_contents:
-            # Look for code blocks indicating logic synthesis
-            has_code_blocks = bool(re.search(r"```\w*", c, re.IGNORECASE))
-
-            # Look for Ledger event payloads or Schema definitions
-            # Check for CORTEX-TAINT in the payload, or LedgerPayload in actual payload text
-            has_ledger_payload = "CORTEX-TAINT" in c or ("LedgerPayload" in c and c != content)
-            has_schema_update = "ALTER TABLE" in c or "CREATE TABLE" in c
-
-            # Look for rigorous proof structures (Rule R2 format)
-            has_formal_proof = bool(re.search(r"Proof:\s*\{.*Base:.*\}", c, re.IGNORECASE))
-
-            # Detect a plain JSON-array of dicts
-            has_json_array = False
-            stripped_c = c.strip()
-            if stripped_c.startswith("[") and stripped_c.endswith("]"):
-                import ast
-
-                try:
-                    parsed_arr = json.loads(stripped_c)
-                    if (
-                        isinstance(parsed_arr, list)
-                        and all(isinstance(x, dict) for x in parsed_arr)
-                        and len(parsed_arr) > 0
-                    ):
-                        has_json_array = True
-                except Exception:
-                    try:
-                        parsed_arr = ast.literal_eval(stripped_c)
-                        if (
-                            isinstance(parsed_arr, list)
-                            and all(isinstance(x, dict) for x in parsed_arr)
-                            and len(parsed_arr) > 0
-                        ):
-                            has_json_array = True
-                    except Exception:
-                        pass
-
-            # Use StructuralCertifier to validate formal JSON structure
-            grade = StructuralCertifier.certify_structure(c)
-            has_valid_structure = grade == StructuralGrade.ACCEPTED
-
-            if (
-                has_code_blocks
-                or has_ledger_payload
-                or has_schema_update
-                or has_formal_proof
-                or has_json_array
-                or has_valid_structure
-            ):
+            if _check_inner_content_structural(c, content):
                 return True
 
         return False
