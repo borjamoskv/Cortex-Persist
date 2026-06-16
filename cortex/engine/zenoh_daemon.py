@@ -8,7 +8,10 @@ from __future__ import annotations
 import logging
 
 # Ensure cortex_rs is installed (maturin develop)
-from cortex_rs import ZenohOrchestrator
+try:
+    from cortex_rs import ZenohOrchestrator
+except ImportError:
+    ZenohOrchestrator = None
 
 logger = logging.getLogger(__name__)
 

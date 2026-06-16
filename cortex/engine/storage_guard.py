@@ -19,6 +19,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from cortex_rs import MemoryScheduler
+
 __all__ = ["GuardViolation", "StorageGuard"]
 
 logger = logging.getLogger("cortex.guard.storage")
@@ -40,6 +42,8 @@ class StorageGuard:
     BEFORE the fact touches the database. Guards are non-bypassable:
     they run inside _store_impl, not in an optional wrapper.
     """
+    
+    _scheduler = MemoryScheduler()
 
     @classmethod
     def validate(
@@ -81,6 +85,21 @@ class StorageGuard:
         if error_tuple is not None:
             rule, detail = error_tuple
             raise GuardViolation(rule, detail)
+
+        # [C5-REAL] Belief Plane Structural Hard Fault Barrier
+        try:
+            # Simulate a risk evaluation via the native Rust Memory Scheduler.
+            # Returns 0.0 if structural Risk_contam >= 0.9
+            score = cls._scheduler.compute_injection_score(effective_source, project, fact_type, 1.0)
+            if score == 0.0:
+                raise GuardViolation(
+                    "STRUCTURAL_CONTRA_RISK",
+                    "Belief plane rejected insertion: Structural contradiction Risk_contam >= 0.9 (Hard Fault Barrier)."
+                )
+        except GuardViolation:
+            raise
+        except Exception as e:
+            logger.warning(f"[StorageGuard] Native MemoryScheduler evaluation failed: {e}")
 
         logger.debug(
             "StorageGuard PASS: project=%s, type=%s, source=%s, len=%d",
