@@ -13,8 +13,9 @@ from __future__ import annotations
 import json
 import logging
 import time
-from typing import Final
+from typing import Any, Final
 
+import dateutil.parser
 import redis
 
 from cortex.memory.guardrails import SessionGuardrail
@@ -53,7 +54,7 @@ class RedisWorkingMemoryL1:
         self._max_tokens = max_tokens
         self._guardrail = guardrail
         self._prefix = prefix
-        self._redis = redis.Redis.from_url(redis_url, decode_responses=True)
+        self._redis: Any = redis.Redis.from_url(redis_url, decode_responses=True)
 
     def _buffer_key(self, tenant_id: str) -> str:
         return f"{self._prefix}buffer:{tenant_id}"
@@ -116,7 +117,6 @@ class RedisWorkingMemoryL1:
             buffer = []
             for item in buffer_data:
                 data = json.loads(item)
-                import dateutil.parser
 
                 if "timestamp" in data and isinstance(data["timestamp"], str):
                     data["timestamp"] = dateutil.parser.isoparse(data["timestamp"])
@@ -202,7 +202,6 @@ class RedisWorkingMemoryL1:
             buffer_data = self._redis.lrange(bkey, 0, -1)
             for item in buffer_data:
                 data = json.loads(item)
-                import dateutil.parser
 
                 if "timestamp" in data and isinstance(data["timestamp"], str):
                     data["timestamp"] = dateutil.parser.isoparse(data["timestamp"])
@@ -214,7 +213,6 @@ class RedisWorkingMemoryL1:
                 buffer_data = self._redis.lrange(bkey, 0, -1)
                 for item in buffer_data:
                     data = json.loads(item)
-                    import dateutil.parser
 
                     if "timestamp" in data and isinstance(data["timestamp"], str):
                         data["timestamp"] = dateutil.parser.isoparse(data["timestamp"])

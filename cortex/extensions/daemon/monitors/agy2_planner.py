@@ -61,6 +61,7 @@ class AGY2PlannerMonitor:
                     continue
         except Exception as e:
             logger.error("AGY2PlannerMonitor error: %s", e)
+        return alerts
 
     async def run_loop(self) -> None:
         """Run continuously as a background loop daemon."""

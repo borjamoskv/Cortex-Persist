@@ -117,7 +117,7 @@ class StripeBillingGateway:
             return
 
         try:
-            stripe.SubscriptionItem.create_usage_record(
+            stripe.SubscriptionItem.create_usage_record(  # pyright: ignore[reportAttributeAccessIssue]
                 subscription_item_id,
                 quantity=quantity,
                 timestamp="now",

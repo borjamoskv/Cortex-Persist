@@ -5,13 +5,13 @@ A stateless ReAct delegate that fetches the structural World Model from the Cent
 before acting upon the DOM, and publishes cryptographic belief objects back via Zenoh.
 """
 
-import uuid
-import logging
 import json
+import logging
+import uuid
 from typing import Any
 
+from cortex.crypto.keys import AgentKeyPair, ZKSwarmIdentity
 from cortex.engine.zenoh_daemon import ZenohSwarmDaemon
-from cortex.crypto.keys import ZKSwarmIdentity, AgentKeyPair
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class WorldModelWebAgent:
         2. Combine with DOM observation
         3. Propose action
         """
-        world_model = self.fetch_world_model()
+        self.fetch_world_model()
         
         logger.info(f"[{self.agent_id}] Aligning DOM observation with World Model...")
         

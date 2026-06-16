@@ -47,7 +47,7 @@ class AetherOscBridge:
         else:
             self.dispatcher = None
 
-        self.server: AsyncIOOSCUDPServer | None = None
+        self.server: Any = None
         self.transport = None
         self.tx_transport = None
 
@@ -66,7 +66,8 @@ class AetherOscBridge:
         self.server = AsyncIOOSCUDPServer((self.rx_ip, self.rx_port), self.dispatcher, loop)
 
         # Start receiver
-        self.transport, _ = await self.server.create_serve_endpoint()
+        if self.server is not None:
+            self.transport, _ = await self.server.create_serve_endpoint()
         logger.info(f"Aether OSC Bridge RX Bound to udp://{self.rx_ip}:{self.rx_port}")
 
         # Start generic UDP sender for TX

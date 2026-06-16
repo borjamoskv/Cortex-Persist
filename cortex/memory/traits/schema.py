@@ -86,10 +86,11 @@ class SchemaTrait:
             """)
             if self._vector_enabled:
                 # pyright: ignore[reportAttributeAccessIssue]
+                dim = getattr(self, "_encoder").dimension if hasattr(self, "_encoder") else 768
                 conn.executescript(
                     f"""
                     CREATE VIRTUAL TABLE IF NOT EXISTS vec_facts USING vec0(
-                        embedding int8[{self._encoder.dimension}]
+                        embedding int8[{dim}]
                     );
                     CREATE TABLE IF NOT EXISTS vec_void (
                         rowid INTEGER PRIMARY KEY,

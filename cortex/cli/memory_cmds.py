@@ -37,8 +37,11 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
             import keyring
 
             priv_b64 = keyring.get_password("cortex_v6", "ed25519_private_key")
-        except Exception:
+        except ImportError:
             pass
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).debug("Keyring access failed: %s", e)
 
     if not priv_b64:
         priv_b64 = os.environ.get("CORTEX_ED25519_PRIVATE_KEY")

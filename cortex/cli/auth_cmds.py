@@ -27,13 +27,12 @@ async def submit_vote(req_id: str) -> None:
 
     # 1. Fetch payload to sign
     try:
-        conn = engine.pool.get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT state_payload FROM quorum_requests WHERE id = ? AND status = 'PENDING'",
-            (req_id,),
-        )
-        row = cursor.fetchone()
+        async with engine.session() as conn:
+            cursor = await conn.execute(
+                "SELECT state_payload FROM quorum_requests WHERE id = ? AND status = 'PENDING'",
+                (req_id,),
+            )
+            row = await cursor.fetchone()
         if not row:
             console.print(f"[bold red]✗ Request {req_id} not found or not PENDING.[/bold red]")
             return
@@ -61,7 +60,7 @@ async def submit_vote(req_id: str) -> None:
     # 3. Submit Vote
     # For CLI purposes, the operator implies semantic_truth = True by explicitly voting
     success = await auth_gw.submit_vote(
-        req_id, signature_b64=signature, public_key_b64=pub_key, semantic_truth=True
+        req_id, signature_b64=signature, public_key_b64=pub_key or "", semantic_truth=True
     )
     if success:
         console.print(f"[bold green]✓ Vote registered for {req_id}.[/bold green]")
@@ -90,12 +89,11 @@ async def list_requests() -> None:
     """Lists pending BFT quorum requests."""
     engine = CortexEngine()
     try:
-        conn = engine.pool.get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT id, status, hypothesis, signatures_json FROM quorum_requests WHERE status = 'PENDING'"
-        )
-        rows = cursor.fetchall()
+        async with engine.session() as conn:
+            cursor = await conn.execute(
+                "SELECT id, status, hypothesis, signatures_json FROM quorum_requests WHERE status = 'PENDING'"
+            )
+            rows = await cursor.fetchall()
 
         if not rows:
             console.print("[green]No pending consensus requests.[/green]")

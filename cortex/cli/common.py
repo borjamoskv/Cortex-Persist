@@ -83,6 +83,17 @@ def _run_async(coro):
     return sovereign_run(asyncio.wait_for(coro, timeout=GLOBAL_CLI_TIMEOUT))
 
 
+def run_async(f):
+    """Decorator to run click commands asynchronously."""
+    from functools import wraps
+
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        return _run_async(f(*args, **kwargs))
+
+    return wrapper
+
+
 def _show_tip(engine=None) -> None:
     """Show a random contextual tip after CLI operations."""
     try:

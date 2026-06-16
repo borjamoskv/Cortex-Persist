@@ -51,7 +51,7 @@ class MemoryArchaeologist:
         if not l3_map:
             return {"condensed": 0, "tombstoned": 0}
 
-        facts, vecs_matrix = self._extract_vectors(project, tenant_id, l3_map)  # pyright: ignore[reportArgumentType]
+        facts, vecs_matrix = self._extract_vectors(project, tenant_id,  l3_map)  # pyright: ignore[reportArgumentType]
         if vecs_matrix is None:
             return {"condensed": 0, "tombstoned": 0}
 
@@ -61,7 +61,7 @@ class MemoryArchaeologist:
 
         condensed, tombstoned = await self._synthesize_and_update(
             project,
-            tenant_id,
+            tenant_id,  # pyright: ignore[reportArgumentType]
             clusters,
             facts,
             simulate,  # pyright: ignore[reportArgumentType]
@@ -142,7 +142,7 @@ class MemoryArchaeologist:
     def _build_clusters(
         self,
         facts: list[dict[str, Any]],
-        vecs_matrix: np.ndarray,
+        vecs_matrix: "Any",
         threshold: float,  # pyright: ignore[reportInvalidTypeForm]
     ) -> list[list[int]]:
         # O(N^2) dot product for cosine similarity is unavoidable here without approximate KNN.
@@ -216,7 +216,7 @@ class MemoryArchaeologist:
                 try:
                     await self._apply_db_updates(
                         project,
-                        tenant_id,
+                        tenant_id,  # pyright: ignore[reportArgumentType]
                         condensed_content,
                         cluster_facts,
                         primary_parent_id,
@@ -246,7 +246,7 @@ class MemoryArchaeologist:
         ts = datetime.now(timezone.utc).isoformat()
         new_fact_id = await self.engine.store(
             project=project,
-            tenant_id=tenant_id,
+            tenant_id=tenant_id,  # pyright: ignore[reportArgumentType]
             content=condensed_content,
             fact_type="knowledge",
             confidence="C5",

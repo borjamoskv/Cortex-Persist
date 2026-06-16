@@ -50,7 +50,7 @@ def check_dependencies() -> dict:
         # This is a heuristic, real check depends on how it's loaded
         deps["sqlite3_version"] = sqlite3.sqlite_version
         conn.close()
-    except Exception:
+    except (ImportError, sqlite3.Error):
         deps["sqlite3"] = "error"
 
     return deps

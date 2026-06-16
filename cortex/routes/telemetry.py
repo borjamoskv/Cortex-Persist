@@ -486,7 +486,8 @@ async def broadcast_nodes_update(new_node: str):
     for ws in _nodes_websockets:
         try:
             await ws.send_json(payload)
-        except Exception:
+        except Exception as e:
+            logger.debug("WS send failed: %s", e)
             disconnected.add(ws)
     for ws in disconnected:
         _nodes_websockets.discard(ws)

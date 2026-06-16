@@ -23,7 +23,9 @@ def run_cortex(tick_delay: float):
     click.echo(f"🚀 Booting CORTEX Runtime Kernel (Tick: {tick_delay}s)")
     runtime = CortexRuntime()
 
+    from cortex.events.loop import sovereign_run
+
     try:
-        runtime.run_forever(tick_delay=tick_delay)
+        sovereign_run(runtime.run_forever(tick_delay=tick_delay))
     except KeyboardInterrupt:
         click.echo("\n🛑 Cortex Runtime interrupted by user. Shutting down gracefully.")

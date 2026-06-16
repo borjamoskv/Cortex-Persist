@@ -72,7 +72,11 @@ def check_entropy(workflow: str) -> None:
 def predict_exergy(workflow: str) -> None:
     """Nivel 3: Predice el tiempo y exergía esperada de un workflow."""
     engine = ExergyEngine()
-    pred = engine.predict(workflow)
+    stats = engine.get_task_stats(workflow)
+    pred = {
+        "predicted_runtime": round(stats.runtime_mean, 2),
+        "predicted_exergy": round(stats.exergy_mean, 3)
+    }
 
     console.print(f"[bold #2B3BE5]Predicción para: {workflow}[/bold #2B3BE5]")
     console.print(f"  Expected Runtime: {pred['predicted_runtime']}m")

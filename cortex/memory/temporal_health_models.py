@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Any, Literal
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
@@ -67,7 +67,7 @@ class HealthReport:
 
     # PULSE - always populated after write 1
     centroid_drift: float | None = None
-    running_centroid: np.ndarray | None = (
+    running_centroid: "Any" = (
         None  # not serialized  # pyright: ignore[reportInvalidTypeForm]
     )
 

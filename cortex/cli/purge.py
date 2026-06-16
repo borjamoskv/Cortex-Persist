@@ -250,7 +250,7 @@ def purge_omega() -> None:
                                 total_bytes += subitem.stat().st_size
                                 total_files += 1
                         shutil.rmtree(item)
-                except Exception:
+                except OSError:
                     pass
 
     freed_mb = total_bytes / (1024 * 1024)
