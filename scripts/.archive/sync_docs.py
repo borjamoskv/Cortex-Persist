@@ -70,19 +70,8 @@ def extract_tables(content: str) -> list[list[str]]:
     return tables
 
 
-def verify_file_parity(source_path: Path, target_path: Path) -> list[str]:
-    """Checks target file structure against source file."""
+def _verify_headings(source_content: str, target_content: str, source_name: str, target_name: str) -> list[str]:
     errors = []
-    source_name = source_path.name
-    target_name = target_path.name
-
-    if not target_path.exists():
-        return [f"File {target_name} does not exist."]
-
-    source_content = source_path.read_text(encoding="utf-8")
-    target_content = target_path.read_text(encoding="utf-8")
-
-    # 1. Verify Headings Hierarchy
     source_headings = extract_headings(source_content)
     target_headings = extract_headings(target_content)
 
@@ -100,8 +89,11 @@ def verify_file_parity(source_path: Path, target_path: Path) -> list[str]:
                     f"Heading level mismatch at index {idx}: "
                     f"'{s_text}' (L{s_level}) vs '{t_text}' (L{t_level})"
                 )
+    return errors
 
-    # 2. Verify Code Blocks
+
+def _verify_code_blocks(source_content: str, target_content: str, source_name: str, target_name: str) -> list[str]:
+    errors = []
     source_code = extract_code_blocks(source_content)
     target_code = extract_code_blocks(target_content)
 
@@ -120,7 +112,6 @@ def verify_file_parity(source_path: Path, target_path: Path) -> list[str]:
                     f"'{s_lang}' in {source_name} vs '{t_lang}' in {target_name}."
                 )
 
-            # Extract clean lines (no comments, no empty lines) to verify script logic is matching
             s_clean = [
                 line.strip()
                 for line in s_content.splitlines()
@@ -134,17 +125,18 @@ def verify_file_parity(source_path: Path, target_path: Path) -> list[str]:
                 and not line.strip().startswith(("#", "//", "/*", "*", "'''", '"""'))
             ]
 
-            # Only compare logic lines if code languages match and are script-based (python, bash, rust)
             if s_lang == t_lang and s_lang in ("python", "bash", "rust", "sh"):
-                # Normalize common differences in translation strings if matching code examples
                 if len(s_clean) != len(t_clean):
                     errors.append(
                         f"Code block logical lines count mismatch at index {idx} ({s_lang}): "
                         f"source={len(s_clean)} vs target={len(t_clean)} lines.\n"
                         f"Source clean content:\n{s_content}\nTarget clean content:\n{t_content}"
                     )
+    return errors
 
-    # 3. Verify Tables
+
+def _verify_tables(source_content: str, target_content: str, source_name: str, target_name: str) -> list[str]:
+    errors = []
     source_tables = extract_tables(source_content)
     target_tables = extract_tables(target_content)
 
@@ -167,6 +159,24 @@ def verify_file_parity(source_path: Path, target_path: Path) -> list[str]:
                             f"Table column count mismatch at table index {idx}, row {row_idx}: "
                             f"source={len(s_row)} columns vs target={len(t_row)} columns."
                         )
+    return errors
+
+
+def verify_file_parity(source_path: Path, target_path: Path) -> list[str]:
+    """Checks target file structure against source file."""
+    source_name = source_path.name
+    target_name = target_path.name
+
+    if not target_path.exists():
+        return [f"File {target_name} does not exist."]
+
+    source_content = source_path.read_text(encoding="utf-8")
+    target_content = target_path.read_text(encoding="utf-8")
+
+    errors = []
+    errors.extend(_verify_headings(source_content, target_content, source_name, target_name))
+    errors.extend(_verify_code_blocks(source_content, target_content, source_name, target_name))
+    errors.extend(_verify_tables(source_content, target_content, source_name, target_name))
 
     return errors
 
