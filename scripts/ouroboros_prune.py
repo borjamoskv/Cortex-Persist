@@ -112,6 +112,47 @@ def _build_topological_barrier(conn: sqlite3.Connection) -> set[int]:
     return protected
 
 
+def _apply_purge_mutations(
+    cursor: sqlite3.Cursor,
+    tombstone_ids: list[int],
+    warm_ids: list[int],
+    cold_ids: list[int],
+    exergy_updates: list[tuple[float, int]],
+) -> None:
+    if tombstone_ids:
+        placeholders = ",".join("?" for _ in tombstone_ids)
+        cursor.execute(
+            f"UPDATE facts SET is_tombstoned = 1, quadrant = 'VOID', "
+            f"storage_tier = 'VOID', updated_at = datetime('now') "
+            f"WHERE id IN ({placeholders})",
+            tombstone_ids,
+        )
+
+    if warm_ids:
+        placeholders = ",".join("?" for _ in warm_ids)
+        cursor.execute(
+            f"UPDATE facts SET storage_tier = 'WARM', "
+            f"updated_at = datetime('now') "
+            f"WHERE id IN ({placeholders})",
+            warm_ids,
+        )
+
+    if cold_ids:
+        placeholders = ",".join("?" for _ in cold_ids)
+        cursor.execute(
+            f"UPDATE facts SET storage_tier = 'COLD', "
+            f"quadrant = 'ARCHIVE', updated_at = datetime('now') "
+            f"WHERE id IN ({placeholders})",
+            cold_ids,
+        )
+
+    if exergy_updates:
+        cursor.executemany(
+            "UPDATE facts SET exergy_score = ? WHERE id = ?",
+            exergy_updates,
+        )
+
+
 def execute_thermal_purge(
     db_path: str = "~/.cortex/cortex.db",
     *,
@@ -210,43 +251,9 @@ def execute_thermal_purge(
 
             # Phase 2: Apply mutations (unless dry-run)
             if not dry_run:
-                # Tombstone
-                if tombstone_ids:
-                    placeholders = ",".join("?" for _ in tombstone_ids)
-                    cursor.execute(
-                        f"UPDATE facts SET is_tombstoned = 1, quadrant = 'VOID', "
-                        f"storage_tier = 'VOID', updated_at = datetime('now') "
-                        f"WHERE id IN ({placeholders})",
-                        tombstone_ids,
-                    )
-
-                # Transition to WARM
-                if warm_ids:
-                    placeholders = ",".join("?" for _ in warm_ids)
-                    cursor.execute(
-                        f"UPDATE facts SET storage_tier = 'WARM', "
-                        f"updated_at = datetime('now') "
-                        f"WHERE id IN ({placeholders})",
-                        warm_ids,
-                    )
-
-                # Transition to COLD
-                if cold_ids:
-                    placeholders = ",".join("?" for _ in cold_ids)
-                    cursor.execute(
-                        f"UPDATE facts SET storage_tier = 'COLD', "
-                        f"quadrant = 'ARCHIVE', updated_at = datetime('now') "
-                        f"WHERE id IN ({placeholders})",
-                        cold_ids,
-                    )
-
-                # Update exergy scores for all scanned facts
-                if exergy_updates:
-                    cursor.executemany(
-                        "UPDATE facts SET exergy_score = ? WHERE id = ?",
-                        exergy_updates,
-                    )
-
+                _apply_purge_mutations(
+                    cursor, tombstone_ids, warm_ids, cold_ids, exergy_updates
+                )
                 conn.commit()
 
             stats.tombstoned = len(tombstone_ids)
