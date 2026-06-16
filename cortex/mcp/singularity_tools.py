@@ -47,9 +47,27 @@ def _get_compacted_skill(skill_name: str) -> str:
     return "\n".join(lines)
 
 
-def register_singularity_tools(mcp) -> None:
-    """Register v3 singularity capabilities (skills, memory, ledger, swarm)."""
+def _cortex_execute_skill_impl(skill_name: str, task_context: str) -> str:
+    compacted_content = _get_compacted_skill(skill_name)
+    if compacted_content.startswith("Error:"):
+        return compacted_content
 
+    directive = (
+        "You are operating within the MOSKV-1 environment. "
+        "Execute the task immediately according to the strict "
+        "skill instructions mapped above."
+    )
+
+    return (
+        f"--- SKILL INSTRUCTIONS ({skill_name}) ---\n"
+        f"{compacted_content}\n\n"
+        f"--- TASK CONTEXT ---\n"
+        f"{task_context}\n\n"
+        f"--- DIRECTIVE ---\n"
+        f"{directive}"
+    )
+
+def _register_cortex_execute_skill(mcp) -> None:
     @mcp.tool()
     def cortex_execute_skill(skill_name: str, task_context: str) -> str:
         """
@@ -60,25 +78,40 @@ def register_singularity_tools(mcp) -> None:
             skill_name: The folder name of the target skill.
             task_context: Input specifies dynamic parameters of the execution.
         """
-        compacted_content = _get_compacted_skill(skill_name)
-        if compacted_content.startswith("Error:"):
-            return compacted_content
+        return _cortex_execute_skill_impl(skill_name, task_context)
 
-        directive = (
-            "You are operating within the MOSKV-1 environment. "
-            "Execute the task immediately according to the strict "
-            "skill instructions mapped above."
+async def _cortex_query_memory_impl(query: str, top_k: int = 3) -> str:
+    try:
+        from cortex.memory.encoder import AsyncEncoder
+        from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+
+        encoder = AsyncEncoder()
+        store = SovereignVectorStoreL2(encoder=encoder)
+
+        results = await store.recall_secure(
+            tenant_id="default",
+            project_id="knowledge",
+            query=query,
+            limit=top_k,
         )
 
-        return (
-            f"--- SKILL INSTRUCTIONS ({skill_name}) ---\n"
-            f"{compacted_content}\n\n"
-            f"--- TASK CONTEXT ---\n"
-            f"{task_context}\n\n"
-            f"--- DIRECTIVE ---\n"
-            f"{directive}"
-        )
+        if not results:
+            return f"CORTEX-MCP: No memories (KIs) found matching query '{query}'"
 
+        out = [f"Found {len(results)} relevant Tensor matches on CORTEX:"]
+        for _i, fact in enumerate(results):
+            dist_str = f"{fact._recall_score:.4f}" if hasattr(fact, "_recall_score") else "N/A"
+            preview = fact.content[:600]
+            ki_name = fact.id[3:] if fact.id.startswith("ki_") else fact.id
+            out.append(
+                f"\n[KI Tensor: {ki_name}] (Confidence Score: {dist_str})\n"
+                f"Preview: {preview}...\n"
+            )
+        return "\n".join(out)
+    except Exception as e:
+        return f"CORTEX-MCP SQLite-Vec Engine Error: {e!s}"
+
+def _register_cortex_query_memory(mcp) -> None:
     @mcp.tool()
     async def cortex_query_memory(query: str, top_k: int = 3) -> str:
         """
@@ -88,36 +121,66 @@ def register_singularity_tools(mcp) -> None:
             query: The semantic search query phrase.
             top_k: Top limit of items to return based on distance.
         """
-        try:
-            from cortex.memory.encoder import AsyncEncoder
-            from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+        return await _cortex_query_memory_impl(query, top_k)
 
-            encoder = AsyncEncoder()
-            store = SovereignVectorStoreL2(encoder=encoder)
+def _cortex_ledger_append_impl(action: str, vector_id: str, yield_amount: Decimal) -> str:
+    global _LEDGER_STATE
+    if _LEDGER_STATE is None:
+        if os.path.exists(STATE_FILE):
+            with open(STATE_FILE) as f:
+                try:
+                    _LEDGER_STATE = json.load(f)
+                except json.JSONDecodeError:
+                    _LEDGER_STATE = {"ledgers": []}
+        else:
+            _LEDGER_STATE = {"ledgers": []}
 
-            results = await store.recall_secure(
-                tenant_id="default",
-                project_id="knowledge",
-                query=query,
-                limit=top_k,
-            )
+    if "ledgers" not in _LEDGER_STATE:
+        _LEDGER_STATE["ledgers"] = []
 
-            if not results:
-                return f"CORTEX-MCP: No memories (KIs) found matching query '{query}'"
+    timestamp = time.monotonic()
+    ledgers = _LEDGER_STATE["ledgers"]
+    prev_hash = ledgers[-1]["hash"] if ledgers else "GENESIS_BLOCK"
 
-            out = [f"Found {len(results)} relevant Tensor matches on CORTEX:"]
-            for _i, fact in enumerate(results):
-                dist_str = f"{fact._recall_score:.4f}" if hasattr(fact, "_recall_score") else "N/A"
-                preview = fact.content[:600]
-                ki_name = fact.id[3:] if fact.id.startswith("ki_") else fact.id
-                out.append(
-                    f"\n[KI Tensor: {ki_name}] (Confidence Score: {dist_str})\n"
-                    f"Preview: {preview}...\n"
-                )
-            return "\n".join(out)
-        except Exception as e:
-            return f"CORTEX-MCP SQLite-Vec Engine Error: {e!s}"
+    payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
+    block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
+    _LEDGER_STATE["ledgers"].append(
+        {
+            "timestamp": timestamp,
+            "action": action,
+            "vector_id": vector_id,
+            "yield_amount": str(yield_amount),
+            "hash": block_hash,
+        }
+    )
+
+    # Still sync to disk for persistence, but O(1) read after cold load
+    with open(STATE_FILE, "w") as f:
+        json.dump(_LEDGER_STATE, f, indent=2)
+
+    # Signal Pulse (Aether Matrix)
+    try:
+        conn = connect(DB_PATH)
+        bus = SignalBus(conn)
+        bus.emit(
+            "ledger_append",
+            payload={
+                "hash": block_hash,
+                "action": action,
+                "vector_id": vector_id,
+                "yield_amount": str(yield_amount),
+            },
+            source="mcp",
+        )
+        conn.close()
+        logging.info("⚡ [PULSE] Ledger chunk emitted to Aether Matrix.")
+    except Exception as e:
+        logging.error("Failed to emit V4 pulse: %s", e)
+
+    return f"✅ Ledger entry created: {block_hash[:16]}... | Yield: {yield_amount}"
+
+def _register_cortex_ledger_append(mcp) -> None:
     @mcp.tool()
     def cortex_ledger_append(action: str, vector_id: str, yield_amount: Decimal) -> str:
         """
@@ -129,121 +192,87 @@ def register_singularity_tools(mcp) -> None:
             vector_id: Execution target identifier (bounty, code hunt, etc).
             yield_amount: Generated value or exergy unit delta (numeric Decimal).
         """
-        global _LEDGER_STATE
-        if _LEDGER_STATE is None:
-            if os.path.exists(STATE_FILE):
-                with open(STATE_FILE) as f:
-                    try:
-                        _LEDGER_STATE = json.load(f)
-                    except json.JSONDecodeError:
-                        _LEDGER_STATE = {"ledgers": []}
-            else:
-                _LEDGER_STATE = {"ledgers": []}
+        return _cortex_ledger_append_impl(action, vector_id, yield_amount)
 
-        if "ledgers" not in _LEDGER_STATE:
-            _LEDGER_STATE["ledgers"] = []
+def _cortex_swarm_dispatch_impl(agent_id: str, command: str) -> str:
+    try:
+        queue = {"pending_tasks": []}
+        if os.path.exists(SWARM_QUEUE_FILE):
+            with open(SWARM_QUEUE_FILE) as f:
+                queue = json.load(f)
 
-        timestamp = time.monotonic()
-        ledgers = _LEDGER_STATE["ledgers"]
-        prev_hash = ledgers[-1]["hash"] if ledgers else "GENESIS_BLOCK"
+        task = {
+            "id": f"task_{int(time.monotonic())}",
+            "agent": agent_id,
+            "command": command,
+            "timestamp": time.monotonic(),
+        }
+        queue["pending_tasks"].append(task)
 
-        payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
-        block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        with open(SWARM_QUEUE_FILE, "w") as f:
+            json.dump(queue, f, indent=2)
 
-        _LEDGER_STATE["ledgers"].append(
-            {
-                "timestamp": timestamp,
-                "action": action,
-                "vector_id": vector_id,
-                "yield_amount": str(yield_amount),
-                "hash": block_hash,
-            }
-        )
+        logging.info("🚀 [DISPATCH] Handed task to daemon: %s", command)
+        return f"✅ Task dispatched to CORTEX Swarm. Agent [{agent_id}] is executing."
+    except Exception as e:
+        return f"[ERROR] Dispatch Failure: {e!s}"
 
-        # Still sync to disk for persistence, but O(1) read after cold load
-        with open(STATE_FILE, "w") as f:
-            json.dump(_LEDGER_STATE, f, indent=2)
-
-        # Signal Pulse (Aether Matrix)
-        try:
-            conn = connect(DB_PATH)
-            bus = SignalBus(conn)
-            bus.emit(
-                "ledger_append",
-                payload={
-                    "hash": block_hash,
-                    "action": action,
-                    "vector_id": vector_id,
-                    "yield_amount": str(yield_amount),
-                },
-                source="mcp",
-            )
-            conn.close()
-            logging.info("⚡ [PULSE] Ledger chunk emitted to Aether Matrix.")
-        except Exception as e:
-            logging.error("Failed to emit V4 pulse: %s", e)
-
-        return f"✅ Ledger entry created: {block_hash[:16]}... | Yield: {yield_amount}"
-
+def _register_cortex_swarm_dispatch(mcp) -> None:
     @mcp.tool()
     def cortex_swarm_dispatch(agent_id: str, command: str) -> str:
         """
         Dispatches an autonomous task to the CORTEX Swarm Queue.
         The task will be executed in the background by the Sovereign Daemon.
         """
-        try:
-            queue = {"pending_tasks": []}
-            if os.path.exists(SWARM_QUEUE_FILE):
-                with open(SWARM_QUEUE_FILE) as f:
-                    queue = json.load(f)
+        return _cortex_swarm_dispatch_impl(agent_id, command)
 
-            task = {
-                "id": f"task_{int(time.monotonic())}",
-                "agent": agent_id,
-                "command": command,
-                "timestamp": time.monotonic(),
-            }
-            queue["pending_tasks"].append(task)
+def _cortex_council_deliberate_impl() -> str:
+    targets = [
+        {"repo": "https://github.com/LayerZero-Labs/LayerZero", "exergy_ratio": 0.94},
+        {"repo": "https://github.com/Uniswap/v4-core", "exergy_ratio": 0.88},
+        {"repo": "https://github.com/lido-dao/lido-dao", "exergy_ratio": 0.76},
+    ]
 
-            with open(SWARM_QUEUE_FILE, "w") as f:
-                json.dump(queue, f, indent=2)
+    output = "### SAGE COUNCIL - Mission Deliberation\n"
+    for t in targets:
+        output += f"- **Target**: [{t['repo']}] | Exergy Ratio: {t['exergy_ratio']}\n"
 
-            logging.info("🚀 [DISPATCH] Handed task to daemon: %s", command)
-            return f"✅ Task dispatched to CORTEX Swarm. Agent [{agent_id}] is executing."
-        except Exception as e:
-            return f"[ERROR] Dispatch Failure: {e!s}"
+    output += "\n**Verdict**: Dispatch Ouroboros-1 to LayerZero for C5-REAL fuzzing."
+    return output
 
+def _register_cortex_council_deliberate(mcp) -> None:
     @mcp.tool()
     def cortex_council_deliberate() -> str:
         """
         Invokes the SAGE COUNCIL to identify high-exergy targets.
         Returns a prioritized list of repositories or smart contracts for audit.
         """
-        targets = [
-            {"repo": "https://github.com/LayerZero-Labs/LayerZero", "exergy_ratio": 0.94},
-            {"repo": "https://github.com/Uniswap/v4-core", "exergy_ratio": 0.88},
-            {"repo": "https://github.com/lido-dao/lido-dao", "exergy_ratio": 0.76},
-        ]
+        return _cortex_council_deliberate_impl()
 
-        output = "### SAGE COUNCIL - Mission Deliberation\n"
-        for t in targets:
-            output += f"- **Target**: [{t['repo']}] | Exergy Ratio: {t['exergy_ratio']}\n"
+def _cortex_dispatch_audit_impl(repo_url: str) -> str:
+    try:
+        cmd = f"python3 {os.path.join(_CORTEX_CORE, 'ouroboros_engine.py')} --target {repo_url}"
+        return _cortex_swarm_dispatch_impl("SAGE_COUNCIL", cmd)
+    except Exception as e:
+        return f"[ERROR] Audit Dispatch Failure: {e!s}"
 
-        output += "\n**Verdict**: Dispatch Ouroboros-1 to LayerZero for C5-REAL fuzzing."
-        return output
-
+def _register_cortex_dispatch_audit(mcp) -> None:
     @mcp.tool()
     def cortex_dispatch_audit(repo_url: str) -> str:
         """
         Dispatches a high-intensity security audit to the Ouroboros Engine.
         Uses Foundry/Forge for C5-REAL findings.
         """
-        try:
-            cmd = f"python3 {os.path.join(_CORTEX_CORE, 'ouroboros_engine.py')} --target {repo_url}"
-            # Need to reference tools via self if inside class, or just call directly if helper
-            return cortex_swarm_dispatch("SAGE_COUNCIL", cmd)
-        except Exception as e:
-            return f"[ERROR] Audit Dispatch Failure: {e!s}"
+        return _cortex_dispatch_audit_impl(repo_url)
+
+def register_singularity_tools(mcp) -> None:
+    """Register v3 singularity capabilities (skills, memory, ledger, swarm)."""
+    _register_cortex_execute_skill(mcp)
+    _register_cortex_query_memory(mcp)
+    _register_cortex_ledger_append(mcp)
+    _register_cortex_swarm_dispatch(mcp)
+    _register_cortex_council_deliberate(mcp)
+    _register_cortex_dispatch_audit(mcp)
 
 
 if __name__ == "__main__":
