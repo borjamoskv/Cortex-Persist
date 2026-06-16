@@ -35,7 +35,7 @@ class AutopoiesisEngine:
     def __init__(self, observation_window_ms: int = 100):
         self.observation_window_ms = observation_window_ms
         self._history: dict[str, MutationHistory] = {}
-        self._compiler: typing.Any = None
+        self._compiler: Any = None
         self._pending_targets: list[str] = []
 
     def observe_and_mutate(self, func: Callable[P, R]) -> Callable[P, R]:

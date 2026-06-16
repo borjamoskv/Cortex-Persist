@@ -299,7 +299,6 @@ class OmegaDaemon:
                     # Dispatch asíncrono para sanación técnica
                     if hasattr(commander, "deploy"):
                         res_deploy = commander.deploy(  # type: ignore[reportAttributeAccessIssue]
-                            
                             formation="PHOENIX", mission="Sanar Entropía", cycles=1
                         )
                         if asyncio.iscoroutine(res_deploy):

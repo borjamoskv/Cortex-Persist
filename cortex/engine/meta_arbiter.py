@@ -244,7 +244,7 @@ class MetaArbiter:
             winning = self._dominant_layer(signals)
             reasoning = (
                 f"Consensus reached. Fused score={fused_score:.3f}. "
-                f"Dominant layer: {(winning.value if winning else "Unknown")}."
+                f"Dominant layer: {(winning.value if winning else 'Unknown')}."
             )
         elif any(c.divergence > 0.70 for c in conflicts):
             # Severe divergence — flag for review
@@ -266,7 +266,7 @@ class MetaArbiter:
             reasoning = (
                 f"Weighted fusion resolved {len(conflicts)} conflict(s). "
                 f"Fused score={fused_score:.3f}. "
-                f"Dominant layer: {(winning.value if winning else "Unknown")}."
+                f"Dominant layer: {(winning.value if winning else 'Unknown')}."
             )
 
         verdict = ArbiterVerdict(

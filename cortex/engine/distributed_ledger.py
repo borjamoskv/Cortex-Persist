@@ -14,8 +14,33 @@ try:
 
     KAFKA_AVAILABLE = True
 except ImportError:
-    Consumer = Any
-    Producer = Any
+
+    class Consumer:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def subscribe(self, *args, **kwargs):
+            pass
+
+        def poll(self, *args, **kwargs):
+            return None
+
+        def close(self):
+            pass
+
+    class Producer:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def produce(self, *args, **kwargs):
+            pass
+
+        def poll(self, *args, **kwargs):
+            pass
+
+        def flush(self):
+            pass
+
     KAFKA_AVAILABLE = False
 
 from cortex.engine.evolution_ledger import (

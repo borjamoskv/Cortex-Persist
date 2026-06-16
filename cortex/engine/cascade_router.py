@@ -90,9 +90,7 @@ class CascadeRouter:
         self, task_id: str, engine: str, process_returncode: int, output_content: str
     ) -> None:
         try:
-            db_path = Path(
-                os.environ.get("CORTEX_DB_PATH", "~/.cortex/cortex.db")
-            ).expanduser()
+            db_path = Path(os.environ.get("CORTEX_DB_PATH", "~/.cortex/cortex.db")).expanduser()
             if not db_path.exists():
                 return
             conn = sqlite3.connect(db_path)
@@ -108,17 +106,13 @@ class CascadeRouter:
             )
             try:
                 status = "completed" if process_returncode == 0 else "failed"
-                conn.execute(
-                    "UPDATE tasks SET status=? WHERE id=?", (status, task_id)
-                )
+                conn.execute("UPDATE tasks SET status=? WHERE id=?", (status, task_id))
             except sqlite3.OperationalError:
                 pass
             conn.commit()
             conn.close()
         except Exception as db_e:
-            logger.error(
-                f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}"
-            )
+            logger.error(f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}")
 
     async def _execute(
         self, engine: str, prompt: str, files: list[str] | None, task_id: str | None
@@ -178,7 +172,12 @@ class CascadeRouter:
                         continue
 
                 if task_id:
-                    self._log_to_db(task_id, engine, process.returncode, output_content)
+                    self._log_to_db(
+                        task_id,
+                        engine,
+                        process.returncode if process.returncode is not None else -1,
+                        output_content,
+                    )
 
                 if process.returncode != 0:
                     return f"Error ({engine}): {stderr}"
@@ -196,7 +195,6 @@ class CascadeRouter:
                 return f"Error: {e}"
         return "Error: Execution failed."
         return "Error: Execution failed."
-
 
 
 if __name__ == "__main__":

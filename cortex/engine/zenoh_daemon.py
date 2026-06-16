@@ -25,10 +25,10 @@ class ZenohSwarmDaemon:
     def __init__(self, session_id: str, router_endpoint: str = "tcp/localhost:7447"):
         self.session_id = session_id
         self.router_endpoint = router_endpoint
-        
+
         # Initialize native Rust Substrate for IPC
         try:
-            self._rs_orchestrator = ZenohOrchestrator(self.session_id, self.router_endpoint)
+            self._rs_orchestrator = ZenohOrchestrator(self.session_id, self.router_endpoint)  # type: ignore
             logger.info(f"[SwarmDaemon] Zenoh Orchestrator Bound: Session {session_id}")
         except Exception as e:
             logger.error(f"[SwarmDaemon] Failed to bind Rust Zenoh Orchestrator: {e}")
