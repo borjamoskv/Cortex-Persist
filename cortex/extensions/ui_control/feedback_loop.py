@@ -167,45 +167,7 @@ class UIFeedbackLoop:
 
             # Step 5: Execute actions
             for action in actions:
-                action_name = action.get("action")
-                if not action_name:
-                    continue
-
-                logger.info("[FeedbackLoop] Executing decided action: %s", action_name)
-                args = action.get("args", {})
-
-                # Map 'app' or 'app_name' to target AppTarget if expected
-                app_name = args.get("app") or args.get("app_name") or args.get("target")
-                if app_name and isinstance(app_name, str):
-                    args["target"] = AppTarget(name=app_name)
-                    args.pop("app", None)
-                    args.pop("app_name", None)
-
-                if hasattr(self.maestro, action_name):
-                    method = getattr(self.maestro, action_name)
-                    try:
-                        if inspect.iscoroutinefunction(method):
-                            res = await method(**args)
-                        elif callable(method):
-                            res = method(**args)
-                            if asyncio.iscoroutine(res) or asyncio.isfuture(res):
-                                res = await res
-                        else:
-                            res = method
-
-                        # Check result type
-                        if isinstance(res, InteractionResult) and not res.success:
-                            logger.warning(
-                                "[FeedbackLoop] Action execution warning: %s failed: %s",
-                                action_name,
-                                res.error,
-                            )
-                    except Exception as exc:
-                        logger.error(
-                            "[FeedbackLoop] Exception executing action %s: %s", action_name, exc
-                        )
-                else:
-                    logger.error("[FeedbackLoop] MaestroUI has no method %s", action_name)
+                await self._execute_single_action(action)
 
             # Step 6: Step delay to allow GUI to render / update
             await asyncio.sleep(step_delay)
@@ -217,3 +179,46 @@ class UIFeedbackLoop:
             success=False,
             error=f"Goal not met/verified within max iterations ({max_iterations}).",
         )
+
+    async def _execute_single_action(self, action: dict[str, Any]) -> None:
+        action_name = action.get("action")
+        if not action_name:
+            return
+
+        logger.info("[FeedbackLoop] Executing decided action: %s", action_name)
+        args = action.get("args", {})
+
+        # Map 'app' or 'app_name' to target AppTarget if expected
+        app_name = args.get("app") or args.get("app_name") or args.get("target")
+        if app_name and isinstance(app_name, str):
+            args["target"] = AppTarget(name=app_name)
+            args.pop("app", None)
+            args.pop("app_name", None)
+
+        if hasattr(self.maestro, action_name):
+            method = getattr(self.maestro, action_name)
+            try:
+                if inspect.iscoroutinefunction(method):
+                    res = await method(**args)
+                elif callable(method):
+                    res = method(**args)
+                    if asyncio.iscoroutine(res) or asyncio.isfuture(res):
+                        res = await res
+                else:
+                    res = method
+
+                # Check result type
+                if isinstance(res, InteractionResult) and not res.success:
+                    logger.warning(
+                        "[FeedbackLoop] Action execution warning: %s failed: %s",
+                        action_name,
+                        res.error,
+                    )
+            except Exception as exc:
+                logger.error(
+                    "[FeedbackLoop] Exception executing action %s: %s", action_name, exc
+                )
+        else:
+            logger.error("[FeedbackLoop] MaestroUI has no method %s", action_name)
+
+
