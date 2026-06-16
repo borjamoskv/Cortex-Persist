@@ -61,6 +61,44 @@ class CrossSystemInvariantCompiler:
         return hasher.hexdigest()
 
     @classmethod
+    def _verify_substrate_alignment(
+        cls,
+        cortex_steps: list[dict[str, Any]],
+        records: list[MutationRecord],
+        details: list[str],
+    ) -> None:
+        if len(cortex_steps) > 0 and len(records) == 0:
+            details.append(
+                "[SUBSTRATE DIVERGENCE] Cortex recorded active steps, but Ultramap substrate evolution is empty."
+            )
+        elif len(cortex_steps) != len(records) and len(records) > 0:
+            details.append(
+                f"[SUBSTRATE DIVERGENCE] Sequence mismatch: Cortex has {len(cortex_steps)} steps, "
+                f"but Ultramap has {len(records)} mutations."
+            )
+
+        for idx, (cortex_step, record) in enumerate(zip(cortex_steps, records, strict=False)):
+            meta = cortex_step.get("metadata", cortex_step)
+            expected_agent_idx = meta.get("agent_idx")
+            if expected_agent_idx is not None and record.agent_idx != expected_agent_idx:
+                details.append(
+                    f"[SUBSTRATE DIVERGENCE] Step {idx}: Agent index mismatch. "
+                    f"Cortex expected agent {expected_agent_idx}, Substrate mutated agent {record.agent_idx}."
+                )
+
+            vector = record.vector_after
+            if vector.error_rate > 0.95:
+                details.append(
+                    f"[THERMODYNAMIC VIOLATION] Step {idx} (Agent {record.agent_idx}): "
+                    f"Substrate error rate is critical ({vector.error_rate:.4f})."
+                )
+            if vector.causal_entropy < 0.0:
+                details.append(
+                    f"[THERMODYNAMIC VIOLATION] Step {idx} (Agent {record.agent_idx}): "
+                    f"Negative causal entropy ({vector.causal_entropy:.4f}) detected on substrate."
+                )
+
+    @classmethod
     def verify_global_invariance(
         cls,
         shannon_trace: EpisodeTrace,
@@ -103,43 +141,7 @@ class CrossSystemInvariantCompiler:
         # 3. Verify Cortex ≡ Ultramap Substrate Evolution
         # Check that control vector updates in the substrate match the step transitions.
         cortex_steps = CrossVerifier.extract_shannon_steps(cortex_ledger)
-
-        # In a closed causal system, every semantic step involving an agent
-        # must result in a corresponding control vector mutation in the substrate.
-        if len(cortex_steps) > 0 and len(records) == 0:
-            details.append(
-                "[SUBSTRATE DIVERGENCE] Cortex recorded active steps, but Ultramap substrate evolution is empty."
-            )
-        elif len(cortex_steps) != len(records) and len(records) > 0:
-            # Note: We allow partial evaluation but flag sequence mismatches.
-            details.append(
-                f"[SUBSTRATE DIVERGENCE] Sequence mismatch: Cortex has {len(cortex_steps)} steps, "
-                f"but Ultramap has {len(records)} mutations."
-            )
-
-        # Stepwise alignment check
-        for idx, (cortex_step, record) in enumerate(zip(cortex_steps, records, strict=False)):
-            # Verify agent index correlation if present in metadata
-            meta = cortex_step.get("metadata", cortex_step)
-            expected_agent_idx = meta.get("agent_idx")
-            if expected_agent_idx is not None and record.agent_idx != expected_agent_idx:
-                details.append(
-                    f"[SUBSTRATE DIVERGENCE] Step {idx}: Agent index mismatch. "
-                    f"Cortex expected agent {expected_agent_idx}, Substrate mutated agent {record.agent_idx}."
-                )
-
-            # Invariants on Control Vector: error_rate and causal_entropy must not drift to extremes
-            vector = record.vector_after
-            if vector.error_rate > 0.95:
-                details.append(
-                    f"[THERMODYNAMIC VIOLATION] Step {idx} (Agent {record.agent_idx}): "
-                    f"Substrate error rate is critical ({vector.error_rate:.4f})."
-                )
-            if vector.causal_entropy < 0.0:
-                details.append(
-                    f"[THERMODYNAMIC VIOLATION] Step {idx} (Agent {record.agent_idx}): "
-                    f"Negative causal entropy ({vector.causal_entropy:.4f}) detected on substrate."
-                )
+        cls._verify_substrate_alignment(cortex_steps, records, details)
 
         # 4. Generate Global Proof Hash
         consistent = (len(details) == 0) and verdict.consistent
