@@ -1,0 +1,74 @@
+services:
+  coordinator:
+    build:
+      context: ..
+      dockerfile: brain-swarm/Dockerfile
+    environment:
+      SWARM_MODE: coordinator
+      SWARM_HOST: 0.0.0.0
+      SWARM_PORT: 5050
+      SWARM_HEARTBEAT_MS: 5000
+      SWARM_NODE_TIMEOUT_MS: 15000
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: password
+    ports:
+      - "5050:5050"
+    depends_on:
+      - neo4j
+
+  sn:
+    build:
+      context: ..
+      dockerfile: brain-swarm/Dockerfile
+    command: ["npm", "run", "node"]
+    environment:
+      SWARM_MODE: node
+      SWARM_ROLE: SN
+      SWARM_NODE_ID: sn-1
+      SWARM_COORDINATOR_HOST: coordinator
+      SWARM_COORDINATOR_PORT: 5050
+
+  cen:
+    build:
+      context: ..
+      dockerfile: brain-swarm/Dockerfile
+    command: ["npm", "run", "node"]
+    environment:
+      SWARM_MODE: node
+      SWARM_ROLE: CEN
+      SWARM_NODE_ID: cen-1
+      SWARM_COORDINATOR_HOST: coordinator
+      SWARM_COORDINATOR_PORT: 5050
+
+  dmn:
+    build:
+      context: ..
+      dockerfile: brain-swarm/Dockerfile
+    command: ["npm", "run", "node"]
+    environment:
+      SWARM_MODE: node
+      SWARM_ROLE: DMN
+      SWARM_NODE_ID: dmn-1
+      SWARM_COORDINATOR_HOST: coordinator
+      SWARM_COORDINATOR_PORT: 5050
+
+  memory:
+    build:
+      context: ..
+      dockerfile: brain-swarm/Dockerfile
+    command: ["npm", "run", "node"]
+    environment:
+      SWARM_MODE: node
+      SWARM_ROLE: MEMORY
+      SWARM_NODE_ID: memory-1
+      SWARM_COORDINATOR_HOST: coordinator
+      SWARM_COORDINATOR_PORT: 5050
+
+  neo4j:
+    image: neo4j:5
+    environment:
+      NEO4J_AUTH: neo4j/password
+    ports:
+      - "7474:7474"
+      - "7687:7687"
