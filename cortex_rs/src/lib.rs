@@ -6,11 +6,13 @@ pub mod storage_guard;
 pub mod ctre_guardian;
 pub mod auth;
 pub mod ultramap;
+pub mod belief_scheduler;
 use pyo3::prelude::*;
 use belief_object::{BeliefObject, BeliefState, RelationType, ProvenanceEnvelope, BeliefRelation};
 use atms::AtmsGraph;
-use smt::SmtLeaf;
+use smt::{SmtLeaf, SparseMerkleTree};
 use ultramap::UltramapSubstrate;
+use belief_scheduler::MemoryScheduler;
 
 /// CORTEX-Persist Cognitive Core Rust Extension
 #[pymodule]
@@ -22,7 +24,9 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<BeliefObject>()?;
     m.add_class::<AtmsGraph>()?;
     m.add_class::<SmtLeaf>()?;
+    m.add_class::<SparseMerkleTree>()?;
     m.add_class::<UltramapSubstrate>()?;
+    m.add_class::<MemoryScheduler>()?;
     m.add_function(wrap_pyfunction!(storage_guard::validate_proposal, m)?)?;
     m.add_function(wrap_pyfunction!(storage_guard::detect_poisoning, m)?)?;
     m.add_function(wrap_pyfunction!(ctre_guardian::ctre_atomic_commit, m)?)?;
