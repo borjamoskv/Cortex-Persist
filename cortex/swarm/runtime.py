@@ -161,6 +161,43 @@ class SubagentRunner:
         
         return self.registry.resolve(req.kind, req.require_capability)
 
+    async def _execute_with_retries(
+        self, req: SubagentRequest, target: str, handler: AgentHandler, lock: asyncio.Semaphore
+    ) -> SubagentResponse | str:
+        last_error: str | None = None
+        for attempt in range(req.max_retries + 1):
+            t0 = time.monotonic()
+            try:
+                async with lock:
+                    output = await asyncio.wait_for(handler.run(req), timeout=req.timeout_ms / 1000)
+
+                if self.audit_callback:
+                    await self.audit_callback(
+                        {
+                            "task_id": req.task_id,
+                            "target_agent": target,
+                            "action": "SWARM_DISPATCH",
+                            "status": "SUCCESS",
+                        }
+                    )
+
+                return SubagentResponse(
+                    task_id=req.task_id,
+                    ok=True,
+                    target_agent=target,
+                    output=output,
+                    duration_ms=(time.monotonic() - t0) * 1000,
+                    trace={"attempt": attempt + 1},
+                )
+            except asyncio.TimeoutError:
+                last_error = f"timeout after {req.timeout_ms}ms"
+            except TimeoutError as e:
+                last_error = f"timeout: {e}"
+            except Exception as e:
+                last_error = str(e)
+
+        return last_error or "unknown error"
+
     async def invoke_subagent(self, req: SubagentRequest) -> SubagentResponse:
         try:
             target = self._resolve_target(req)
@@ -210,43 +247,14 @@ class SubagentRunner:
                 )
 
             lock = self._locks.get(target) or asyncio.Semaphore(1)
-            last_error: str | None = None
+            result = await self._execute_with_retries(req, target, handler, lock)
+            
+            if isinstance(result, SubagentResponse):
+                return result
 
-            for attempt in range(req.max_retries + 1):
-                t0 = time.monotonic()
-                try:
-                    async with lock:
-                        output = await asyncio.wait_for(
-                            handler.run(req), timeout=req.timeout_ms / 1000
-                        )
-
-                    if self.audit_callback:
-                        await self.audit_callback(
-                            {
-                                "task_id": req.task_id,
-                                "target_agent": target,
-                                "action": "SWARM_DISPATCH",
-                                "status": "SUCCESS",
-                            }
-                        )
-
-                    return SubagentResponse(
-                        task_id=req.task_id,
-                        ok=True,
-                        target_agent=target,
-                        output=output,
-                        duration_ms=(time.monotonic() - t0) * 1000,
-                        trace={"attempt": attempt + 1},
-                    )
-                except asyncio.TimeoutError:
-                    last_error = f"timeout after {req.timeout_ms}ms"
-                except TimeoutError as e:
-                    last_error = f"timeout: {e}"
-                except Exception as e:
-                    last_error = str(e)
-
+            last_error = result
             span.set_attribute("error", True)
-            span.set_attribute("swarm.error", last_error or "unknown error")
+            span.set_attribute("swarm.error", last_error)
             if self.audit_callback:
                 await self.audit_callback(
                     {
@@ -261,6 +269,6 @@ class SubagentRunner:
                 task_id=req.task_id,
                 ok=False,
                 target_agent=target,
-                error=last_error or "unknown error",
+                error=last_error,
                 trace={"attempts": req.max_retries + 1},
             )
