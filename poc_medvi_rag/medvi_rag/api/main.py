@@ -38,3 +38,19 @@ def process_intent(req: IntentRequest):
             raise HTTPException(status_code=400, detail="Failed to process intent. Check logs.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+import sqlite3
+
+CORTEX_DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../cortex.db'))
+
+@app.get("/api/incubator")
+def get_incubator_concepts():
+    if not os.path.exists(CORTEX_DB_PATH):
+        return {"concepts": []}
+    try:
+        with sqlite3.connect(CORTEX_DB_PATH) as conn:
+            cursor = conn.execute("SELECT concept_hash, crystallized_data, timestamp FROM cortex_concepts ORDER BY id DESC LIMIT 5")
+            rows = cursor.fetchall()
+            return {"concepts": [{"hash": r[0], "data": r[1], "timestamp": r[2]} for r in rows]}
+    except Exception as e:
+        return {"error": str(e), "concepts": []}

@@ -44,16 +44,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function typeWriterEffect(text) {
+    function typeWriterEffect(str, outputEl) {
         let i = 0;
-        jsonOutput.textContent = '';
-        function type() {
-            if (i < text.length) {
-                jsonOutput.textContent += text.charAt(i);
-                i++;
-                setTimeout(type, 10); // Speed
-            }
-        }
-        type();
+        outputEl.textContent = '';
+        const interval = setInterval(() => {
+            outputEl.textContent += str[i];
+            i++;
+            if (i >= str.length) clearInterval(interval);
+        }, 10);
     }
+
+    // Poll Incubator endpoint
+    const incubatorOutputEl = document.getElementById('incubatorOutput');
+    async function pollIncubator() {
+        try {
+            const res = await fetch('/api/incubator');
+            const data = await res.json();
+            if (data.concepts && data.concepts.length > 0) {
+                incubatorOutputEl.textContent = JSON.stringify(data.concepts, null, 2);
+            } else {
+                incubatorOutputEl.textContent = "// No concepts crystallized yet...";
+            }
+        } catch (err) {
+            console.error("Incubator fetch error:", err);
+        }
+    }
+    setInterval(pollIncubator, 3000);
+    pollIncubator();
 });

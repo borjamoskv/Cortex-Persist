@@ -9,6 +9,7 @@ from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 
 from cortex.observability.prometheus_exporter import CortexPrometheusExporter
+from cortex.extensions.daemon.incubator import AGIIncubatorDaemon
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +119,7 @@ class CortexRuntime:
         self.wal_mgr = WALManager()
         self.recovery_mgr = RecoveryManager(self.snapshot_mgr, self.wal_mgr)
         self.exporter = CortexPrometheusExporter()
+        self.incubator = AGIIncubatorDaemon()
         self.running = False
 
     def load_state(self):
@@ -172,6 +174,8 @@ class CortexRuntime:
         logger.info(
             f"[RUNTIME] Cortex Kernel Started at Tick {self.state.tick_count}. Awaiting physical workload."
         )
+        
+        incubator_task = asyncio.create_task(self.incubator.start())
 
         while self.running:
             try:
@@ -190,3 +194,6 @@ class CortexRuntime:
                 self.state.entropy *= Decimal("0.5")
                 self.persist(self.state)  # Force WAL entry of the dampened state
                 await asyncio.sleep(tick_delay)
+
+        self.incubator.stop()
+        await incubator_task
