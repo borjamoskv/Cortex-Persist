@@ -210,6 +210,51 @@ class ExergyConfigAdapter:
 
         return decision
 
+    def _eval_gate_ultra(self, ctx: RoutingContext, mode: Any, rule: dict) -> RoutingDecision | None:
+        if ctx.severity == Severity.CRITICAL or ctx.blast_radius >= 3:
+            return RoutingDecision(
+                mode=mode,
+                gate_id="GATE_ULTRA",
+                rationale=(
+                    f"severity={ctx.severity.value}, "
+                    f"blast_radius={ctx.blast_radius}. "
+                    f"YAML rule: {rule.get('rationale', 'N/A')}"
+                ),
+                source="adapter",
+            )
+        return None
+
+    def _eval_gate_research(self, ctx: RoutingContext, mode: Any, rule: dict) -> RoutingDecision | None:
+        if ctx.info_state.has_deficit:
+            deficits = []
+            if not ctx.info_state.exists_internally:
+                deficits.append("missing")
+            if not ctx.info_state.is_reliable:
+                deficits.append("unreliable")
+            if not ctx.info_state.is_current:
+                deficits.append("stale")
+            return RoutingDecision(
+                mode=mode,
+                gate_id="GATE_RESEARCH",
+                rationale=f"Information deficit: {', '.join(deficits)}.",
+                source="adapter",
+            )
+        return None
+
+    def _eval_gate_deep(self, ctx: RoutingContext, mode: Any, rule: dict) -> RoutingDecision | None:
+        if ctx.blast_radius == 2 or ctx.severity == Severity.HIGH:
+            return RoutingDecision(
+                mode=mode,
+                gate_id="GATE_DEEP",
+                rationale=(
+                    f"severity={ctx.severity.value}, "
+                    f"blast_radius={ctx.blast_radius}. "
+                    f"Structural decision requires explicit CoT."
+                ),
+                source="adapter",
+            )
+        return None
+
     def _evaluate_gates(self, ctx: RoutingContext) -> RoutingDecision:
         """Evaluate YAML gates in precedence order. First match wins."""
         for rule in self._policy.routing_rules:
@@ -217,47 +262,14 @@ class ExergyConfigAdapter:
             mode = _YAML_MODE_MAP[rule["result"]]
 
             if gate_id == "GATE_ULTRA":
-                if ctx.severity == Severity.CRITICAL or ctx.blast_radius >= 3:
-                    return RoutingDecision(
-                        mode=mode,
-                        gate_id=gate_id,
-                        rationale=(
-                            f"severity={ctx.severity.value}, "
-                            f"blast_radius={ctx.blast_radius}. "
-                            f"YAML rule: {rule.get('rationale', 'N/A')}"
-                        ),
-                        source="adapter",
-                    )
-
+                res = self._eval_gate_ultra(ctx, mode, rule)
+                if res: return res
             elif gate_id == "GATE_RESEARCH":
-                if ctx.info_state.has_deficit:
-                    deficits = []
-                    if not ctx.info_state.exists_internally:
-                        deficits.append("missing")
-                    if not ctx.info_state.is_reliable:
-                        deficits.append("unreliable")
-                    if not ctx.info_state.is_current:
-                        deficits.append("stale")
-                    return RoutingDecision(
-                        mode=mode,
-                        gate_id=gate_id,
-                        rationale=f"Information deficit: {', '.join(deficits)}.",
-                        source="adapter",
-                    )
-
+                res = self._eval_gate_research(ctx, mode, rule)
+                if res: return res
             elif gate_id == "GATE_DEEP":
-                if ctx.blast_radius == 2 or ctx.severity == Severity.HIGH:
-                    return RoutingDecision(
-                        mode=mode,
-                        gate_id=gate_id,
-                        rationale=(
-                            f"severity={ctx.severity.value}, "
-                            f"blast_radius={ctx.blast_radius}. "
-                            f"Structural decision requires explicit CoT."
-                        ),
-                        source="adapter",
-                    )
-
+                res = self._eval_gate_deep(ctx, mode, rule)
+                if res: return res
             elif gate_id == "GATE_NORMAL":
                 return RoutingDecision(
                     mode=mode,
