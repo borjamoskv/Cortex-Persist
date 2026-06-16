@@ -10,7 +10,7 @@ import pytest
 import aiosqlite
 from pathlib import Path
 
-from cortex.forensics.detective import InspectorGadget
+from cortex.forensics.detective import InspectorGadgetΩ
 from cortex.forensics.autodidact import AutodidactReverseEngineer
 
 pytestmark = [pytest.mark.asyncio]
@@ -18,7 +18,7 @@ pytestmark = [pytest.mark.asyncio]
 
 @pytest.fixture
 async def omega_db(tmp_path: Path):
-    """Provide a temporal SQLite database for InspectorGadget topology testing."""
+    """Provide a temporal SQLite database for InspectorGadgetΩ topology testing."""
     db_path = tmp_path / "test_inspector_omega.db"
     async with aiosqlite.connect(db_path) as conn:
         # Minimal schema for get_graph_sync mockability
@@ -58,14 +58,14 @@ async def omega_db(tmp_path: Path):
 
 async def test_inspector_gadget_topology_stress_omega(omega_db):
     """
-    [Ω-Protocol] Concurrently spams the InspectorGadget with topology analysis requests
+    [Ω-Protocol] Concurrently spams the InspectorGadgetΩ with topology analysis requests
     to test deterministic locks and connection pooling limits.
     """
-    inspector = InspectorGadget(conn=omega_db, tenant_id="default")
+    inspector = InspectorGadgetΩ(conn=omega_db, tenant_id="default")
 
     async def _run_topology_scan():
         # In a real environment, get_graph_sync is called. Since it's sync but SQLite in async can be tricky,
-        # we wrap the invocation in to_thread or assume InspectorGadget handles it via backend.
+        # we wrap the invocation in to_thread or assume InspectorGadgetΩ handles it via backend.
         # But for this stress test, we will just call the method (which internally uses sync DB if not handled properly).
         # We'll just trace causal chains concurrently since it's truly async.
         return await inspector.trace_causal_chain(source_entity="Node_1", target_entity="Node_5", max_depth=3)

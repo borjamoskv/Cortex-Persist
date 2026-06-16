@@ -13,7 +13,7 @@ from cortex.graph.engine import find_path, get_graph_sync, query_entity_sync
 logger = logging.getLogger("cortex.forensics.detective")
 
 
-class InspectorGadget:
+class InspectorGadgetΩ:
     """
     Sovereign Graph & Flow Analyzer.
     Investigates structural anomalies, pathing logic, and causal flows within the Knowledge Graph.
