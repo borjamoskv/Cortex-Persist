@@ -12,6 +12,7 @@ import asyncio
 import logging
 import subprocess
 from pathlib import Path
+from typing import Any
 
 try:
     from mcp.server.fastmcp import FastMCP
@@ -85,6 +86,193 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
         return False
 
 
+async def _cortex_search_memory_impl(query: str, project: str, top_k: int, ctx: Any) -> str:
+    await ctx.ensure_ready()
+
+    cache_key = f"aether:{query}:{project}:{top_k}"
+    cached_result = ctx.search_cache.get(cache_key)
+    if cached_result:
+        return cached_result
+
+    async with ctx.pool.acquire() as conn:
+        engine = CortexEngine(ctx.db_path, auto_embed=False)
+        engine._conn = conn
+
+        results = await engine.search(
+            query=query,
+            tenant_id="default",
+            project=project or None,
+            top_k=min(max(top_k, 5), 50),
+        )
+
+    if not results:
+        return "No memory records found."
+
+    ctx.metrics.record_request()
+
+    output = [f"Found {len(results)} context chunks:"]
+    for r in results:
+        output.append(
+            f"[FACT #{getattr(r, 'fact_id', '?')} | PROJECT: {r.project} | "
+            f"TYPE: {r.fact_type} | SCORE: {r.score:.3f}]\n{r.content}\n---"
+        )
+
+    final_str = "\n".join(output)
+    ctx.search_cache.set(cache_key, final_str)
+    return final_str
+
+def _register_cortex_search_memory(mcp: Any, ctx: Any) -> None:
+    @mcp.tool()
+    async def cortex_search_memory(query: str, project: str = "", top_k: int = 20) -> str:
+        """Search CORTEX local memory using vector embeddings."""
+        return await _cortex_search_memory_impl(query, project, top_k, ctx)
+
+async def _cortex_read_file_impl(filepath: str, max_lines: int) -> str:
+    path = Path(filepath).resolve()
+    if not path.exists() or not path.is_file():
+        return f"❌ File not found: {filepath}"
+
+    limit = min(abs(max_lines), 50000)
+
+    def _read() -> str:
+        content_lines = []
+        total_lines = 0
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                if total_lines < limit:
+                    content_lines.append(line)
+                total_lines += 1
+        if total_lines > limit:
+            content = "".join(content_lines)
+            return (
+                f"⚠️ Output truncated to first {limit} lines "
+                f"(total length was {total_lines} lines).\n\n{content}"
+            )
+        return "".join(content_lines)
+
+    try:
+        return await asyncio.to_thread(_read)
+    except UnicodeDecodeError:
+        return f"❌ File {filepath} is binary or not UTF-8."
+    except Exception as e:
+        return f"❌ Error reading file: {e}"
+
+def _register_cortex_read_file(mcp: Any, ctx: Any) -> None:
+    @mcp.tool()
+    async def cortex_read_file(filepath: str, max_lines: int = 5000) -> str:
+        """Read a massive system file. Tuned for Gemini 3's 1M context window.
+
+        Args:
+            filepath: Absolute path to the file.
+            max_lines: Max lines to return to avoid stalling the buffer. Max 50,000.
+        """
+        return await _cortex_read_file_impl(filepath, max_lines)
+
+async def _cortex_store_decision_impl(project: str, decision: str, ctx: Any) -> str:
+    await ctx.ensure_ready()
+
+    # Axiom 3 verification loop
+    if not _axiom_3_verify("Database Write (Decision)", f"[{project}] {decision}"):
+        return "❌ Operation aborted: Axiom 3 user physical authorization DENIED."
+
+    async with ctx.pool.acquire() as conn:
+        engine = CortexEngine(ctx.db_path, auto_embed=False)
+        engine._conn = conn
+
+        fact_id = await engine.store(
+            project=project,
+            content=decision,
+            fact_type="decision",
+            tags=["mcp-aether"],
+            confidence="stated",
+            source="agent:gemini:aether",
+        )
+
+    ctx.search_cache.clear()
+    ctx.metrics.record_request()
+    return f"✅ Verified and Stored decision #{fact_id} in project '{project}'"
+
+def _register_cortex_store_decision(mcp: Any, ctx: Any) -> None:
+    @mcp.tool()
+    async def cortex_store_decision(project: str, decision: str) -> str:
+        """Persist an architectural decision or ghost directly to the local CORTEX DB.
+
+        Requires physical user verification (Axiom 3).
+        """
+        return await _cortex_store_decision_impl(project, decision, ctx)
+
+async def _cortex_get_swarm_report_impl(tenant_id: str, ctx: Any) -> str:
+    await ctx.ensure_ready()
+
+    async with (
+        ctx.pool.acquire() as conn,
+        conn.execute(
+            "SELECT COUNT(*), AVG(reputation_score), COUNT(DISTINCT agent_type) "
+            "FROM agents WHERE tenant_id = ?",
+            (tenant_id,),
+        ) as cursor,
+    ):
+        row = await cursor.fetchone()
+        if not row or row[0] == 0:
+            return "Swarm is currently inactive (0 agents)."
+
+        count, avg_rep, types = row
+
+    return (
+        f"🔱 CORTEX Swarm Report [{tenant_id}]\n"
+        f"Active Nucleus: {count} agents across {types} specialized types\n"
+        f"Exergy/Reputation Mean: {avg_rep:.4f}\n"
+        f"Status: VOID-GATE CRYSTALLIZED"
+    )
+
+def _register_cortex_get_swarm_report(mcp: Any, ctx: Any) -> None:
+    @mcp.tool()
+    async def cortex_get_swarm_report(tenant_id: str = "default") -> str:
+        """Get a high-level summary of the entire CORTEX agent swarm.
+
+        Analyzes the persistent registry for density, agent types, and
+        reputation health (The Gavel status).
+        """
+        return await _cortex_get_swarm_report_impl(tenant_id, ctx)
+
+async def _cortex_execute_bash_impl(command: str, cwd: str) -> str:
+    if not _axiom_3_verify("Shell Execution", f"cd {cwd} && {command}"):
+        return "❌ Shell execution aborted: Axiom 3 user physical authorization DENIED."
+
+    logger.warning("Executing authorized bash command: %s", command)
+
+    try:
+        process = await asyncio.create_subprocess_shell(
+            command,
+            cwd=cwd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await process.communicate()
+
+        output = stdout.decode().strip()
+        err_output = stderr.decode().strip()
+
+        res = f"Exit code: {process.returncode}\n"
+        if output:
+            res += f"STDOUT:\n{output}\n"
+        if err_output:
+            res += f"STDERR:\n{err_output}\n"
+
+        return res
+    except Exception as e:
+        return f"❌ Subprocess error: {e}"
+
+def _register_cortex_execute_bash(mcp: Any, ctx: Any) -> None:
+    @mcp.tool()
+    async def cortex_execute_bash(command: str, cwd: str = ".") -> str:
+        """Execute a bash command on the host macOS machine.
+
+        WARNING: Highly destructive. Will trigger an immediate OS-level authorization
+        prompt (Axiom 3 validation). Ensure the command is 100% accurate.
+        """
+        return await _cortex_execute_bash_impl(command, cwd)
+
 def create_aether_server(
     db_path: str = DB_PATH, host: str = "127.0.0.1", port: int = 5001
 ) -> FastMCP:  # type: ignore[reportInvalidTypeForm]
@@ -95,172 +283,11 @@ def create_aether_server(
     mcp = FastMCP("MOSKV-Aether Sovereign Engine", host=host, port=port)
     ctx = AetherContext(db_path)
 
-    @mcp.tool()
-    async def cortex_search_memory(query: str, project: str = "", top_k: int = 20) -> str:
-        """Search CORTEX local memory using vector embeddings."""
-        await ctx.ensure_ready()
-
-        cache_key = f"aether:{query}:{project}:{top_k}"
-        cached_result = ctx.search_cache.get(cache_key)
-        if cached_result:
-            return cached_result
-
-        async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.db_path, auto_embed=False)
-            engine._conn = conn
-
-            results = await engine.search(
-                query=query,
-                tenant_id="default",
-                project=project or None,
-                top_k=min(max(top_k, 5), 50),
-            )
-
-        if not results:
-            return "No memory records found."
-
-        ctx.metrics.record_request()
-
-        output = [f"Found {len(results)} context chunks:"]
-        for r in results:
-            output.append(
-                f"[FACT #{getattr(r, 'fact_id', '?')} | PROJECT: {r.project} | "
-                f"TYPE: {r.fact_type} | SCORE: {r.score:.3f}]\n{r.content}\n---"
-            )
-
-        final_str = "\n".join(output)
-        ctx.search_cache.set(cache_key, final_str)
-        return final_str
-
-    @mcp.tool()
-    async def cortex_read_file(filepath: str, max_lines: int = 5000) -> str:
-        """Read a massive system file. Tuned for Gemini 3's 1M context window.
-
-        Args:
-            filepath: Absolute path to the file.
-            max_lines: Max lines to return to avoid stalling the buffer. Max 50,000.
-        """
-        path = Path(filepath).resolve()
-        if not path.exists() or not path.is_file():
-            return f"❌ File not found: {filepath}"
-
-        limit = min(abs(max_lines), 50000)
-
-        def _read() -> str:
-            content_lines = []
-            total_lines = 0
-            with open(path, encoding="utf-8") as f:
-                for line in f:
-                    if total_lines < limit:
-                        content_lines.append(line)
-                    total_lines += 1
-            if total_lines > limit:
-                content = "".join(content_lines)
-                return (
-                    f"⚠️ Output truncated to first {limit} lines "
-                    f"(total length was {total_lines} lines).\n\n{content}"
-                )
-            return "".join(content_lines)
-
-        try:
-            return await asyncio.to_thread(_read)
-        except UnicodeDecodeError:
-            return f"❌ File {filepath} is binary or not UTF-8."
-        except Exception as e:
-            return f"❌ Error reading file: {e}"
-
-    @mcp.tool()
-    async def cortex_store_decision(project: str, decision: str) -> str:
-        """Persist an architectural decision or ghost directly to the local CORTEX DB.
-
-        Requires physical user verification (Axiom 3).
-        """
-        await ctx.ensure_ready()
-
-        # Axiom 3 verification loop
-        if not _axiom_3_verify("Database Write (Decision)", f"[{project}] {decision}"):
-            return "❌ Operation aborted: Axiom 3 user physical authorization DENIED."
-
-        async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.db_path, auto_embed=False)
-            engine._conn = conn
-
-            fact_id = await engine.store(
-                project=project,
-                content=decision,
-                fact_type="decision",
-                tags=["mcp-aether"],
-                confidence="stated",
-                source="agent:gemini:aether",
-            )
-
-        ctx.search_cache.clear()
-        ctx.metrics.record_request()
-        return f"✅ Verified and Stored decision #{fact_id} in project '{project}'"
-
-    @mcp.tool()
-    async def cortex_get_swarm_report(tenant_id: str = "default") -> str:
-        """Get a high-level summary of the entire CORTEX agent swarm.
-
-        Analyzes the persistent registry for density, agent types, and
-        reputation health (The Gavel status).
-        """
-        await ctx.ensure_ready()
-
-        async with (
-            ctx.pool.acquire() as conn,
-            conn.execute(
-                "SELECT COUNT(*), AVG(reputation_score), COUNT(DISTINCT agent_type) "
-                "FROM agents WHERE tenant_id = ?",
-                (tenant_id,),
-            ) as cursor,
-        ):
-            row = await cursor.fetchone()
-            if not row or row[0] == 0:
-                return "Swarm is currently inactive (0 agents)."
-
-            count, avg_rep, types = row
-
-        return (
-            f"🔱 CORTEX Swarm Report [{tenant_id}]\n"
-            f"Active Nucleus: {count} agents across {types} specialized types\n"
-            f"Exergy/Reputation Mean: {avg_rep:.4f}\n"
-            f"Status: VOID-GATE CRYSTALLIZED"
-        )
-
-    @mcp.tool()
-    async def cortex_execute_bash(command: str, cwd: str = ".") -> str:
-        """Execute a bash command on the host macOS machine.
-
-        WARNING: Highly destructive. Will trigger an immediate OS-level authorization
-        prompt (Axiom 3 validation). Ensure the command is 100% accurate.
-        """
-        if not _axiom_3_verify("Shell Execution", f"cd {cwd} && {command}"):
-            return "❌ Shell execution aborted: Axiom 3 user physical authorization DENIED."
-
-        logger.warning("Executing authorized bash command: %s", command)
-
-        try:
-            process = await asyncio.create_subprocess_shell(
-                command,
-                cwd=cwd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-            stdout, stderr = await process.communicate()
-
-            output = stdout.decode().strip()
-            err_output = stderr.decode().strip()
-
-            res = f"Exit code: {process.returncode}\n"
-            if output:
-                res += f"STDOUT:\n{output}\n"
-            if err_output:
-                res += f"STDERR:\n{err_output}\n"
-
-            return res
-        except Exception as e:
-            return f"❌ Subprocess error: {e}"
+    _register_cortex_search_memory(mcp, ctx)
+    _register_cortex_read_file(mcp, ctx)
+    _register_cortex_store_decision(mcp, ctx)
+    _register_cortex_get_swarm_report(mcp, ctx)
+    _register_cortex_execute_bash(mcp, ctx)
 
     return mcp
 
