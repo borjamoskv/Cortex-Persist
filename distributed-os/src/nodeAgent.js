@@ -2,6 +2,7 @@ const http = require('node:http');
 const { EventEmitter } = require('node:events');
 const { createEnvelope, MESSAGE_TYPES } = require('./protocol');
 const { SwarmNeo4jStore } = require('./neo4j');
+const { createSwarmBus, makeEnvelope } = require('./bus');
 
 let NeuralNetwork;
 try {
@@ -11,7 +12,7 @@ try {
 }
 
 class BrainNode extends EventEmitter {
-  constructor({ id, role, port, coordinatorUrl, neo4j }) {
+  constructor({ id, role, port, coordinatorUrl, neo4j, natsUrl }) {
     super();
     this.id = id;
     this.role = role;
@@ -19,6 +20,8 @@ class BrainNode extends EventEmitter {
     this.coordinatorUrl = coordinatorUrl;
     this.store = new SwarmNeo4jStore(neo4j || {});
     this.server = null;
+    this.bus = null;
+    this.natsUrl = natsUrl || process.env.NATS_URL || null;
     this.state = {
       id,
       role,
@@ -32,11 +35,33 @@ class BrainNode extends EventEmitter {
     };
     this.prevHash = 'GENESIS';
     this.net = NeuralNetwork ? new NeuralNetwork({ hiddenLayers: [6, 4] }) : null;
+    this.commandSubscription = null;
   }
 
   async init() {
     await this.store.ensureSchema();
     this.train();
+    this.bus = await createSwarmBus({ natsUrl: this.natsUrl });
+    this.commandSubscription = await this.bus.subscribe('brain.commands', async (command) => {
+      try {
+        if (command && command.targetNodeId && command.targetNodeId !== this.id) return;
+        if (command && command.targetRole && command.targetRole !== this.role) return;
+        if (command && command.action) {
+          await this.handleEnvelope({
+            type: command.action,
+            source: command.meta?.source || 'coordinator',
+            target: this.id,
+            payload: command.payload || {},
+            meta: command.meta || {},
+            timestamp: command.timestamp || new Date().toISOString(),
+            hash: command.hash || null,
+            prevHash: command.prevHash || 'GENESIS',
+          });
+        }
+      } catch (error) {
+        await this.emit(MESSAGE_TYPES.STATE_CHANGE, { error: error.message, phase: 'command_handler' });
+      }
+    });
     await this.persistNode();
     return this;
   }
@@ -90,6 +115,23 @@ class BrainNode extends EventEmitter {
     return event;
   }
 
+  async emit(type, payload = {}, meta = {}) {
+    const envelope = makeEnvelope({
+      nodeId: this.id,
+      type,
+      payload,
+      meta: { ...meta, role: this.role },
+      prevHash: this.prevHash,
+    });
+    this.prevHash = envelope.hash;
+    this.state.memory.push(envelope);
+    await this.store.writeEvent(envelope);
+    if (this.bus) {
+      await this.bus.publish('brain.events', envelope);
+    }
+    return envelope;
+  }
+
   async handleEnvelope(envelope) {
     if (!envelope || !envelope.type) {
       throw new Error('Invalid envelope');
@@ -111,6 +153,9 @@ class BrainNode extends EventEmitter {
         derivedFrom: envelope.id,
       });
       await this.store.writeEvent(derived);
+      if (this.bus) {
+        await this.bus.publish('brain.events', derived);
+      }
     }
 
     await this.persistNode();
@@ -139,6 +184,15 @@ class BrainNode extends EventEmitter {
   async heartbeat() {
     this.state.lastHeartbeatAt = new Date().toISOString();
     await this.persistNode();
+    if (this.bus) {
+      await this.bus.publish('brain.telemetry', {
+        type: MESSAGE_TYPES.HEARTBEAT,
+        source: this.id,
+        target: 'coordinator',
+        payload: this.snapshot(),
+        timestamp: new Date().toISOString(),
+      });
+    }
     if (!this.coordinatorUrl) return;
 
     await fetch(`${this.coordinatorUrl}/heartbeat`, {
@@ -149,6 +203,15 @@ class BrainNode extends EventEmitter {
   }
 
   async register() {
+    if (this.bus) {
+      await this.bus.publish('brain.telemetry', {
+        type: MESSAGE_TYPES.REGISTER,
+        source: this.id,
+        target: 'coordinator',
+        payload: { id: this.id, role: this.role, port: this.port },
+        timestamp: new Date().toISOString(),
+      });
+    }
     if (!this.coordinatorUrl) return;
     await fetch(`${this.coordinatorUrl}/register`, {
       method: 'POST',
@@ -218,8 +281,15 @@ class BrainNode extends EventEmitter {
   async stop() {
     this.state.status = 'offline';
     if (this.heartbeatLoop) clearInterval(this.heartbeatLoop);
+    if (this.commandSubscription) {
+      try { this.commandSubscription.unsubscribe(); } catch {}
+      this.commandSubscription = null;
+    }
     await this.persistNode();
     await this.store.close();
+    if (this.bus) {
+      await this.bus.close().catch(() => null);
+    }
     if (this.server) {
       await new Promise((resolve) => this.server.close(resolve));
     }
