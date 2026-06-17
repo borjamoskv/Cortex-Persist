@@ -1,6 +1,6 @@
 {
   "name": "cortex-persist-distributed-os",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Distributed cognitive OS for a multi-node brain swarm",
   "main": "src/index.js",
@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "brain.js": "^2.0.0-beta.24",
-    "neo4j-driver": "^5.27.0"
+    "neo4j-driver": "^5.27.0",
+    "nats": "^2.29.1"
   },
   "engines": {
     "node": ">=18"
