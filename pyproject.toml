@@ -193,6 +193,7 @@ ignore = ["E501", "E402", "B008", "W291", "W293", "S", "UP045", "TID251", "G004"
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S", "E402", "F821", "BLE001", "T20", "B017", "TID251", "F401", "F841", "I001"]
 "open-cortex/tests/**/*.py" = ["S", "E402", "F821", "BLE001", "T20"]
+"cortex/extensions/zkortex/test_integration.py" = ["S"]
 "scripts/**/*.py" = ["S", "T20"]
 "sdks/**/*.py" = ["S", "T20"]
 "cortex/**/__init__.py" = ["F401"]

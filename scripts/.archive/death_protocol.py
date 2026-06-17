@@ -34,7 +34,7 @@ def check_file_entropy(filepath):
     todos = len(re.findall(r"(?i)\b([t]odo|[f]ixme)\b", content))
     if todos > 0:
         penalties += todos * 2
-        issues.append(f"AI Slop detected (TO" + "DOs/FIX" + "MEs). Penalty: +{todos * 2}")
+        issues.append("AI Slop detected (TO" + "DOs/FIX" + f"MEs). Penalty: +{todos * 2}")
 
     class NestingDepthVisitor(ast.NodeVisitor):
         def __init__(self):

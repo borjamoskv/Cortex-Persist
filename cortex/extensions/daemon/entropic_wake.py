@@ -92,7 +92,7 @@ class EntropicWakeDaemon:
         try:
             # Singularidad Headless: Detached background process
             logger.info("Executing: %s", " ".join(command))
-            subprocess.Popen(
+            subprocess.Popen(  # noqa: S603
                 command,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
