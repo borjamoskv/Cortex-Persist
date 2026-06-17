@@ -35,7 +35,7 @@ class EntropicWakeDaemon:
     def check_entropy(self) -> float:
         """
         Calculate current τ_z (Zenón's Entropy).
-        This integrates RADAR metrics: aging TODOs, inactive ghost facts, and complexity ratios.
+        This integrates RADAR metrics: aging pending items, inactive ghost facts, and complexity ratios.
         """
         logger.info("RADAR-Ω: Calculating codebase entropy...")
         # Placeholder for actual RADAR metric calculation logic
