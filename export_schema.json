@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BABYLON-60 Proof Harness Export Artifact",
+  "type": "object",
+  "properties": {
+    "initial_state_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the initial F60 tensor state."
+    },
+    "tick_sequence": {
+      "type": "array",
+      "description": "Log inmutable de opcodes y transiciones",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tick": { "type": "integer" },
+          "opcode": { "type": "string" },
+          "registers_snapshot": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          }
+        },
+        "required": ["tick", "opcode", "registers_snapshot"]
+      }
+    },
+    "op_trace": {
+      "type": "array",
+      "description": "Registro asíncrono de bifurcaciones causales",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": { "type": "string", "enum": ["FORK", "AWAIT", "EXECUTE"] },
+          "symbol": { "type": "string" },
+          "status": { "type": "string", "enum": ["PENDING", "RESOLVED", "TIMEOUT"] }
+        },
+        "required": ["action", "symbol", "status"]
+      }
+    },
+    "f60_deltas": {
+      "type": "array",
+      "description": "Histórico de cambios fraccionales exactos",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cell_id": { "type": "string" },
+          "delta_numerator": { "type": "integer" },
+          "delta_scale": { "type": "integer" }
+        },
+        "required": ["cell_id", "delta_numerator", "delta_scale"]
+      }
+    },
+    "energy_vector": {
+      "type": "array",
+      "description": "Trazabilidad de conservación de energía/vorticidad cinética",
+      "items": { "type": "string" }
+    },
+    "replay_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Firma determinista para garantizar reproducibilidad 1:1"
+    },
+    "theorem_prover_payload": {
+      "type": "string",
+      "description": "Código de aserción (Lean 4/Coq) auto-generado"
+    }
+  },
+  "required": [
+    "initial_state_hash",
+    "tick_sequence",
+    "op_trace",
+    "f60_deltas",
+    "energy_vector",
+    "replay_hash",
+    "theorem_prover_payload"
+  ]
+}

@@ -1,0 +1,41 @@
+DUB
+# -----------------------------------------------------
+# FALSATION TEST SUITE: Pruebas de Auto-Destrucción Causal
+# -----------------------------------------------------
+
+# TEST 1: PÉRDIDA DE EXACTITUD (Saturación Base60_Scale)
+MUB TEST_SATURATION
+ALLOC F60 R0
+ALLOC I64 R1
+
+# Forzamos una división recursiva infinita para desbordar la tupla F60
+NIG R0 [ Y ] 
+NIG R1 [ << ]  # 20
+MUB DIV_LOOP
+BA.EXACT R0 R1
+
+# Criterio de Falsación: El motor debe interceptar el desbordamiento de `Base60_Scale`
+# y ejecutar un CRITICAL HALT emitiendo FALSATION_ERROR: TRUNCATION.
+# Si el bucle continúa truncando el F60, el log entero se invalida silenciosamente.
+GIN DIV_LOOP
+
+
+# TEST 2: INVERSIÓN CAUSAL EN EL EVENT LEDGER
+MUB TEST_CAUSALITY
+FORK THREAD_A
+FORK THREAD_B
+HALT
+
+MUB THREAD_A
+# Esperamos un evento sincrónico (Dependency Lock)
+AWAIT "PARTICLE_COLLISION" CAUSAL_ACK
+MUB CAUSAL_ACK
+EXECUTE "VALID_STATE"
+HALT
+
+MUB THREAD_B
+# Simulamos un Data Race del Scheduler. 
+# Si el motor permite que este evento se asimile fuera del orden topológico del AWAIT,
+# el `replay_hash` debe divergir automáticamente.
+EXECUTE "PARTICLE_COLLISION"
+HALT

@@ -1,0 +1,23 @@
+DUB
+# SECUENCIA FIBONACCI EN BASE-60 (Demostracion Turing Completa)
+
+NIG A [ - ]         # A = 0
+NIG B [ Y ]         # B = 1
+NIG COUNT [ <v ]    # COUNT = 11 ciclos (11 terminos)
+
+MUB LOOP
+SAR.B60 A
+
+# TEMP = A + B
+NIG TEMP A
+DAH TEMP B
+
+# Shift
+NIG A B
+NIG B TEMP
+
+# COUNT -= 1
+LAL COUNT [ Y ]
+
+# Bucle condicional: Si COUNT != 0, ir a LOOP
+TUKU COUNT LOOP

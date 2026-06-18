@@ -1,0 +1,58 @@
+DUB
+# -----------------------------------------------------
+# TEST SUITE CAUSAL: Enjambre y Dominio Temporal Nativo
+# -----------------------------------------------------
+
+# 1. PRUEBA DE CONCURRENCIA (TIMERS PARALELOS) Y FORK ASÍNCRONO
+FORK TIMELINE_A
+FORK TIMELINE_B
+
+# El hilo principal despacha el evento root y muere.
+EXECUTE "ROOT_SPAWNED"
+HALT
+
+MUB TIMELINE_A
+ALLOC TIME R0
+NIG R0 [ Y ] UNIT.HOUR
+# Semántica: Congela el frame. Despierta asíncronamente en 1 hora real.
+AFTER R0 ALARM_A
+
+MUB ALARM_A
+EXECUTE "1H_REACHED"
+HALT
+
+MUB TIMELINE_B
+ALLOC TIME R1
+NIG R1 [ <<< ] UNIT.MINUTE
+# Semántica: Despierta asíncronamente en 30 minutos reales.
+AFTER R1 ALARM_B
+
+MUB ALARM_B
+EXECUTE "30M_REACHED"
+HALT
+
+# -----------------------------------------------------
+# 2. PRUEBA DE AWAIT (REANUDACIÓN TRAS ACK)
+# -----------------------------------------------------
+MUB RPC_TEST
+EXECUTE "DB_SYNC_INIT"
+# Congela el frame hasta que el evento retorne completitud.
+AWAIT "DB_SYNC_COMPLETE" RESUME_DB
+
+MUB RESUME_DB
+EXECUTE "DB_SYNC_ACKNOWLEDGED"
+HALT
+
+# -----------------------------------------------------
+# 3. PRUEBA DE FRACCIÓN EXACTA (F60) Y CÁLCULO
+# -----------------------------------------------------
+MUB MATH_TEST
+ALLOC F60 R2
+ALLOC I64 R3
+
+# 1 hora base dividida entre 3 = F60 Tuple(0;20 exacto) sin pérdida f64
+NIG R2 [ Y ] UNIT.HOUR
+NIG R3 [ YYY ] 
+BA.EXACT R2 R3 
+SAR.B60 R2
+HALT
