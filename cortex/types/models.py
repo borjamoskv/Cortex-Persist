@@ -6,9 +6,22 @@ Centralized Pydantic models for request/response validation.
 
 from __future__ import annotations
 
+from enum import Enum
 from typing import Any, Literal, TypedDict
 
 from pydantic import BaseModel, Field, field_validator
+
+class FactType(str, Enum):
+    FACT = "fact"
+    DECISION = "decision"
+    TASK = "task"
+    MEMORY = "memory"
+    ERROR = "error"
+    GHOST = "ghost"
+    BRIDGE = "bridge"
+    OBSERVATION = "observation"
+    EVENT = "event"
+
 
 __all__ = [
     "AcceptanceResult",
@@ -132,16 +145,26 @@ class EventEnvelope(BaseModel):
     payload: dict
 
 
+class MetadataSchema(BaseModel):
+    """Explicit contract for CORTEX fact metadata."""
+    source: str | None = Field(None, description="Source of the fact")
+    agent_id: str | None = Field(None, description="Agent ID that created the fact")
+    consensus_score: float | None = Field(None, description="Consensus score from quorum")
+    valence: float | None = Field(None, description="Emotional valence")
+    project_id: str | None = Field(None, description="Associated project ID")
+    
+    model_config = {"extra": "allow"}
+
 class StoreRequest(BaseModel):
     project: str = Field(..., max_length=100, description="Project/namespace for the fact")
     content: str = Field(..., max_length=50000, description="The fact content")
-    fact_type: str = Field(
-        "knowledge", max_length=20, description="Type: knowledge, decision, mistake, bridge, ghost"
+    fact_type: FactType = Field(
+        FactType.FACT, description="Type of fact as defined in ADR-0001"
     )
     tags: list[str] = Field(default_factory=list, description="Optional tags")
     source: str = Field("", max_length=200, description="Origin of the fact (e.g. agent:vex)")
     confidence: str | None = Field(None, description="Optional confidence level (C1-C5)")
-    meta: dict | None = Field(None, description="Optional JSON metadata")
+    meta: MetadataSchema | dict | None = Field(None, description="Optional JSON metadata contract")
 
     @field_validator("project", "content")
     @classmethod
@@ -162,7 +185,7 @@ class SearchRequest(BaseModel):
     k: int = Field(5, ge=1, le=50, description="Number of results")
     project: str | None = Field(None, max_length=100, description="Filter by project")
     as_of: str | None = Field(None, description="Temporal filter (ISO 8601)")
-    fact_type: str | None = Field(None, description="Filter by fact type")
+    fact_type: FactType | None = Field(None, description="Filter by fact type")
     tags: list[str] | None = Field(None, description="Filter by tags")
     graph_depth: int = Field(
         0, ge=0, le=5, description="Enable Graph-RAG (0=off, >0=depth of context traversal)"
@@ -183,7 +206,7 @@ class SearchResult(BaseModel):
     fact_id: str
     project: str
     content: str
-    fact_type: str
+    fact_type: FactType
     score: float
     tags: list[str]
     created_at: str
@@ -240,7 +263,7 @@ class FactResponse(BaseModel):
     id: str
     project: str
     content: str
-    fact_type: str
+    fact_type: FactType
     tags: list[str]
     created_at: str
     updated_at: str

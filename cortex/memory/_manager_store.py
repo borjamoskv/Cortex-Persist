@@ -121,6 +121,17 @@ async def store_fact(
         return f"filtered:{dedup_id}" if dedup_id == "empty" else f"deduplicated:{dedup_id}"
 
     _meta = metadata or {}
+    
+    # [C5-REAL] Strict Schema Contract (Formal Physical Barrier)
+    from cortex.types.models import MetadataSchema
+    try:
+        validated_meta = MetadataSchema(**_meta).model_dump(exclude_unset=True)
+        # Ensure we keep extra fields while conforming to the contract
+        _meta.update(validated_meta)
+    except Exception as e:
+        logger.warning("CortexMemoryManager: Fact rejected due to schema validation failure: %s", e)
+        return f"filtered:invalid_schema"
+
     if "confidence_score" not in _meta:
         _meta["confidence_score"] = 0.8
 

@@ -9,7 +9,7 @@ def _migration_007_consensus_layer(conn: sqlite3.Connection):
     """Implement Neural Swarm Consensus (votes + scores)."""
     columns = {row[1] for row in conn.execute("PRAGMA table_info(facts)").fetchall()}
     if "consensus_score" not in columns:
-        conn.execute("ALTER TABLE facts ADD COLUMN consensus_score REAL DEFAULT 1.0")
+        conn.execute("ALTER TABLE facts ADD COLUMN consensus_score REAL DEFAULT 0.5")
         logger.info("Migration 007: Added 'consensus_score' column to facts")
 
     conn.executescript("""
