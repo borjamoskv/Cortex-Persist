@@ -9,6 +9,8 @@ try {
   nats = null;
 }
 
+let sharedLocalBus = null;
+
 function makeEnvelope({ nodeId, type, payload = {}, meta = {}, prevHash = 'GENESIS' }) {
   const timestamp = new Date().toISOString();
   const id = randomUUID();
@@ -89,8 +91,15 @@ class NatsSwarmBus {
 }
 
 async function createSwarmBus({ natsUrl } = {}) {
-  const transport = natsUrl ? new NatsSwarmBus(natsUrl) : new LocalSwarmBus();
-  return transport.connect();
+  if (natsUrl) {
+    const transport = new NatsSwarmBus(natsUrl);
+    return transport.connect();
+  }
+  if (!sharedLocalBus) {
+    sharedLocalBus = new LocalSwarmBus();
+    await sharedLocalBus.connect();
+  }
+  return sharedLocalBus;
 }
 
 module.exports = { createSwarmBus, makeEnvelope, LocalSwarmBus, NatsSwarmBus };
