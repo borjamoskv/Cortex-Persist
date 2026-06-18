@@ -5,14 +5,19 @@ function env(name, fallback) {
   return process.env[name] ?? fallback;
 }
 
+function neo4jConfig() {
+  return {
+    uri: env('NEO4J_URI', 'bolt://localhost:7687'),
+    username: env('NEO4J_USERNAME', 'neo4j'),
+    password: env('NEO4J_PASSWORD', 'neo4j'),
+  };
+}
+
 async function startCoordinator() {
   const coordinator = new SwarmCoordinator({
     port: Number(env('COORDINATOR_PORT', 4010)),
-    neo4j: {
-      uri: env('NEO4J_URI', 'bolt://localhost:7687'),
-      username: env('NEO4J_USERNAME', 'neo4j'),
-      password: env('NEO4J_PASSWORD', 'neo4j'),
-    },
+    neo4j: neo4jConfig(),
+    natsUrl: env('NATS_URL', null),
   });
 
   await coordinator.start();
@@ -26,11 +31,8 @@ async function startNode() {
     role: env('NODE_ROLE', 'DMN'),
     port: Number(env('NODE_PORT', 4020)),
     coordinatorUrl: env('COORDINATOR_URL', 'http://localhost:4010'),
-    neo4j: {
-      uri: env('NEO4J_URI', 'bolt://localhost:7687'),
-      username: env('NEO4J_USERNAME', 'neo4j'),
-      password: env('NEO4J_PASSWORD', 'neo4j'),
-    },
+    natsUrl: env('NATS_URL', null),
+    neo4j: neo4jConfig(),
   });
 
   await node.start();
@@ -38,33 +40,26 @@ async function startNode() {
   return node;
 }
 
+async function spawnNode({ id, role, port, coordinatorUrl }) {
+  return new BrainNode({
+    id,
+    role,
+    port,
+    coordinatorUrl,
+    natsUrl: env('NATS_URL', null),
+    neo4j: neo4jConfig(),
+  }).start();
+}
+
 async function demo() {
   const coordinator = await startCoordinator();
-  const nodeA = await new BrainNode({
-    id: 'dmn-01',
-    role: 'DMN',
-    port: 4021,
-    coordinatorUrl: 'http://localhost:4010',
-    neo4j: {
-      uri: env('NEO4J_URI', 'bolt://localhost:7687'),
-      username: env('NEO4J_USERNAME', 'neo4j'),
-      password: env('NEO4J_PASSWORD', 'neo4j'),
-    },
-  }).start();
-  const nodeB = await new BrainNode({
-    id: 'cen-01',
-    role: 'CEN',
-    port: 4022,
-    coordinatorUrl: 'http://localhost:4010',
-    neo4j: {
-      uri: env('NEO4J_URI', 'bolt://localhost:7687'),
-      username: env('NEO4J_USERNAME', 'neo4j'),
-      password: env('NEO4J_PASSWORD', 'neo4j'),
-    },
-  }).start();
+  const nodeA = await spawnNode({ id: 'dmn-01', role: 'DMN', port: 4021, coordinatorUrl: 'http://localhost:4010' });
+  const nodeB = await spawnNode({ id: 'cen-01', role: 'CEN', port: 4022, coordinatorUrl: 'http://localhost:4010' });
+  const nodeC = await spawnNode({ id: 'sn-01', role: 'SN', port: 4023, coordinatorUrl: 'http://localhost:4010' });
 
-  await new Promise((r) => setTimeout(r, 1000));
-  const result = await coordinator.dispatch('ATTENTION_SHIFT', {
+  await new Promise((r) => setTimeout(r, 1500));
+
+  const resultA = await coordinator.dispatch('ATTENTION_SHIFT', {
     salience: 0.93,
     latency: 0.22,
     reward: 0.77,
@@ -73,11 +68,25 @@ async function demo() {
     to_network: 'CEN',
   });
 
-  console.log(JSON.stringify({ demo: true, routedTo: result.node.id, snapshot: coordinator.snapshot() }, null, 2));
+  const resultB = await coordinator.dispatch('SPIKE', {
+    salience: 0.81,
+    latency: 0.12,
+    reward: 0.44,
+    arousal: 0.95,
+    region: 'Amígdala',
+    intensity: 0.91,
+  });
+
+  console.log(JSON.stringify({
+    demo: true,
+    routedTo: [resultA.node.id, resultB.node.id],
+    snapshot: coordinator.snapshot(),
+  }, null, 2));
 
   process.on('SIGINT', async () => {
     await nodeA.stop();
     await nodeB.stop();
+    await nodeC.stop();
     await coordinator.stop();
     process.exit(0);
   });
