@@ -80,5 +80,5 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
     ]
 
     assert (
-        Path(__file__).resolve().parents[1] / "cortex" / "cli" / "assets" / "tips.json"
+        Path(__file__).resolve().parents[1] / "config" / "tips.json"
     ).exists()
