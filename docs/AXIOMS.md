@@ -12,7 +12,7 @@ License: Apache-2.0 · Python: >=3.10
 
 ## AX-I: Determinismo Estocástico y Gradiente de Admisibilidad
 
-El LLM no es un motor de verdad ni posee agencia; es un compresor probabilístico que optimiza la admisibilidad estadística (cross-entropy), no la correspondencia empírica. Todo "razonamiento" es una ilusión de fluidez estocástica. 
+El output de un LLM no es dato, es hipótesis. El LLM no es un motor de verdad ni posee agencia; es un compresor probabilístico que optimiza la admisibilidad estadística (cross-entropy), no la correspondencia empírica. Todo "razonamiento" es una ilusión de fluidez estocástica. 
 
 - **Frontera Determinista:** La salida generativa debe colisionar contra barreras rígidas (Guards, Schemas, Tipos) antes de mutar el estado persistente. 
 - **Contención Entrópica:** CORTEX no aumenta la inteligencia del modelo fundacional; restringe rígidamente su libertad estructural para contaminar la arquitectura.
