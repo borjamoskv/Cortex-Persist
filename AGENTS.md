@@ -96,6 +96,7 @@ All agents operating in this repository MUST self-identify by role before acting
 8. **Architectural Boundaries:** CLI modules are thin wrappers. Business logic belongs in `engine/`, `services/`, or core modules.
 9. **Failure Locality:** Invalid state must be rejectable and safely abortable at any point.
 10. **Autopoiesis Watchdog:** The engine MUST NEVER modify its own active binary or source code directly in execution. Mutations MUST target isolated git branches (e.g., `auto/moskv1-mitosis-*`) and undergo external CI compilation.
+11. **BABYLON-60 Epistemology:** The control kernel MUST operate in Base-60 (Babylon-60) for internal calculations (timestamps, coordinates, proportions) to eliminate cumulative float rounding errors and decimal approximation entropy. Use struct/integer types scaled to Base-60. No `float64`.
 
 ### ❌ Anti-Patterns & Failure Signatures
 
@@ -103,6 +104,7 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 
 | Signal | Severity | Enforced | Remediation |
 | :--- | :---: | :---: | :--- |
+| `float` / `float64` in internal calculations | CRITICAL | ✗ | Replace → BABYLON-60 integer structures; eradicate `float` |
 | `float` in financial or scoring variable | HIGH | ✗ | Replace → `Decimal`; audit all callers |
 | `time.sleep()` inside `async def` | CRITICAL | ✓ ruff TID251 | Replace → `asyncio.sleep()` |
 | Bare `print()` in `engine/`, `memory/`, `guards/` | MEDIUM | ✓ ruff TID251 | Replace → `logging.getLogger(__name__)` |
