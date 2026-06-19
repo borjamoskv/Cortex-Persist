@@ -6,7 +6,7 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 ---
 
 <SiteLayout
-	title="CORTEX Persist | Planes y Precios (Core, Pro, Enterprise)"
+	title="CORTEX Persist | Planes y Precios"
 	description="Control plane de IA escalable desde el nivel de desarrollador hasta entornos empresariales regulados."
 	canonical="https://cortexpersist.com/pricing"
 	lang="es"
@@ -44,10 +44,10 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 			<div class="section-heading">
 				<p class="section-kicker" style="color: var(--accent, #2B3BE5);">C5-REAL PRICING SUBSTRATE</p>
 				<h1 style="font-size: clamp(2.4rem, 5vw, 4rem); max-width: 1000px; line-height: 1.1; margin-bottom: 1.5rem;">
-					Control plane de IA escalable. Sin fricción.
+					Control plane de IA Soberana. Auditoría Inmutable.
 				</h1>
-				<p style="font-size: 1.25rem; max-width: 800px; color: var(--text-muted, #a0a0a0); line-height: 1.6;">
-					Desde el desarrollo local en código abierto hasta infraestructuras soberanas en la nube para industrias reguladas. Paga por lo que usas, escala con confianza matemática.
+				<p style="font-size: 1.2rem; max-width: 800px; color: var(--text-muted, #a0a0a0); line-height: 1.6;">
+					Desde desarrollo local open-source hasta infraestructuras soberanas en la nube para entornos altamente regulados.
 				</p>
 			</div>
 
@@ -69,7 +69,7 @@ proof:
 		<section class="section-frame surface-sunken" style="margin-top: 4rem;">
 			<div class="section-heading" style="margin-bottom: 3rem;">
 				<p class="section-kicker">Planes y Tarifas</p>
-				<h2>Elige la edición que se adapte a tu escala</h2>
+				<h2>Elige tu edición</h2>
 			</div>
 
 			<div class="pricing-grid-4">
@@ -77,13 +77,13 @@ proof:
 				<article class="pricing-card-custom">
 					<h3 class="pricing-card-title">Core (Local)</h3>
 					<div class="pricing-card-price">$0 <span>(Apache-2.0)</span></div>
-					<p class="pricing-card-desc">Plan gratuito local. Ideal para desarrollo, pruebas y proyectos individuales. CLI integrado con base SQLite.</p>
+					<p class="pricing-card-desc">Ejecución desconectada local. CLI integrado con base de datos SQLite.</p>
 					<ul class="pricing-card-features">
-						<li>Uso <strong>ilimitado local</strong> (ej. 100k spans/mes)</li>
-						<li>Retención según capacidad local</li>
-						<li>Límite de <strong>1 seat</strong> (individual)</li>
-						<li>Evaluaciones limitadas (5 runs/mes)</li>
-						<li>Soporte comunitario y documentación</li>
+						<li><strong>CLI & SQLite</strong> locales</li>
+						<li>Retención local ilimitada</li>
+						<li><strong>1 seat</strong> individual</li>
+						<li>5 runs de evaluación / mes</li>
+						<li>Soporte comunitario</li>
 					</ul>
 					<a href="https://github.com/borjamoskv/Cortex-Persist" class="pricing-card-cta pricing-card-cta-secondary">Descarga OSS</a>
 				</article>
@@ -93,13 +93,13 @@ proof:
 					<span class="pricing-card-tag">Recomendado</span>
 					<h3 class="pricing-card-title">Pro (SaaS)</h3>
 					<div class="pricing-card-price">$49 <span>/ mes + uso</span></div>
-					<p class="pricing-card-desc">Equipo en crecimiento. Plataforma multiusuario en la nube con orquestación, retención histórica y métricas.</p>
+					<p class="pricing-card-desc">Plataforma multiusuario en la nube con orquestación y retención histórica.</p>
 					<ul class="pricing-card-features">
 						<li><strong>500k spans/mes</strong> incluidos</li>
 						<li>$0.10 por cada 10k spans extra</li>
 						<li>Retención de <strong>30 días</strong></li>
-						<li>Hasta <strong>10 seats</strong> multiusuario</li>
-						<li>~50 runs de evaluación/mes</li>
+						<li>Hasta <strong>10 seats</strong> de equipo</li>
+						<li>50 runs de evaluación / mes</li>
 						<li>SLA de 99.9% y soporte por email</li>
 					</ul>
 					<a href="/api-key" class="pricing-card-cta pricing-card-cta-primary">Regístrate Gratis</a>
@@ -109,14 +109,14 @@ proof:
 				<article class="pricing-card-custom">
 					<h3 class="pricing-card-title">Enterprise</h3>
 					<div class="pricing-card-price">$25k - 120k <span>/ año</span></div>
-					<p class="pricing-card-desc">Para empresas medianas o grandes que requieren seguridad extrema. Despliegue on-prem o VPC privado.</p>
+					<p class="pricing-card-desc">Despliegue privado en VPC u On-Premises para industrias reguladas.</p>
 					<ul class="pricing-card-features">
-						<li><strong>2M spans/mes</strong> incluidos (escalables)</li>
+						<li><strong>2M spans/mes</strong> incluidos</li>
 						<li>Retención de <strong>90 días</strong></li>
-						<li>Hasta <strong>50 seats</strong> (ampliables)</li>
-						<li>~500 runs de evaluación/mes</li>
+						<li>Hasta <strong>50 seats</strong> (expandibles)</li>
+						<li>500 runs de evaluación / mes</li>
 						<li>SLA de 99.99% y respuesta &lt;15 min</li>
-						<li>Soporte 24/7 con Pager y Account Manager</li>
+						<li>Soporte 24/7 con Pager y TAM</li>
 					</ul>
 					<a href="/pilot-scope" class="pricing-card-cta pricing-card-cta-secondary">Solicitar Demo</a>
 				</article>
@@ -125,14 +125,14 @@ proof:
 				<article class="pricing-card-custom">
 					<h3 class="pricing-card-title">Estratégico</h3>
 					<div class="pricing-card-price">Custom</div>
-					<p class="pricing-card-desc">Grandes corporaciones con requisitos críticos. Todo en Enterprise con desarrollo a medida y servicios.</p>
+					<p class="pricing-card-desc">Contratos a medida y servicios profesionales de onboarding e integración.</p>
 					<ul class="pricing-card-features">
 						<li>Volumen de spans <strong>ilimitado</strong></li>
-						<li>Retención personalizada (&gt;1 año)</li>
+						<li>Retención personalizada</li>
 						<li>Seats y evaluaciones <strong>ilimitados</strong></li>
-						<li>Soporte TAM dedicado y 24/7+</li>
-						<li>Auditoría SOC 2 Tipo II y contratos a medida</li>
-						<li>Integración, migración y talleres</li>
+						<li>Soporte TAM dedicado 24/7+</li>
+						<li>Auditorías y co-diseño de roadmap</li>
+						<li>SLA crítico a medida</li>
 					</ul>
 					<a href="/pilot-scope" class="pricing-card-cta pricing-card-cta-secondary">Contacto Ventas</a>
 				</article>
@@ -143,7 +143,7 @@ proof:
 		<section class="section-frame surface">
 			<div class="section-heading">
 				<p class="section-kicker">Matriz de características</p>
-				<h2>Comparativa Técnica Detallada</h2>
+				<h2>Comparativa Técnica</h2>
 			</div>
 
 			<div class="matrix-container">
@@ -163,7 +163,7 @@ proof:
 							<td>Gratuito (Apache-2.0)</td>
 							<td>$49/mes + uso</td>
 							<td>$25k – $120k/año</td>
-							<td>Personalizado (A convenir)</td>
+							<td>Personalizado</td>
 						</tr>
 						<tr>
 							<td><strong>Spans Incluidos</strong></td>
@@ -190,7 +190,7 @@ proof:
 							<td><strong>Seats / Usuarios</strong></td>
 							<td>1 usuario (CLI local)</td>
 							<td>Hasta 10 seats</td>
-							<td>Hasta 50 seats (expandible)</td>
+							<td>Hasta 50 seats</td>
 							<td>Ilimitados</td>
 						</tr>
 						<tr>
@@ -202,24 +202,24 @@ proof:
 						</tr>
 						<tr>
 							<td><strong>Despliegue</strong></td>
-							<td>Local (SQLite integrado)</td>
-							<td>Cloud (SaaS multiusuario)</td>
+							<td>Local (SQLite)</td>
+							<td>Cloud (SaaS)</td>
 							<td>VPC / On-Prem (Docker, Helm)</td>
-							<td>VPC, On-Prem, Híbrido, Kafka</td>
+							<td>Híbrido / Kafka / Dedicado</td>
 						</tr>
 						<tr>
 							<td><strong>SLA de Uptime</strong></td>
-							<td>N/A (Local)</td>
+							<td>N/A</td>
 							<td>99.9%</td>
 							<td>99.99%</td>
-							<td>Nivel máximo garantizado</td>
+							<td>Garantía Máxima</td>
 						</tr>
 						<tr>
 							<td><strong>Canal de Soporte</strong></td>
-							<td>Comunidad / GitHub</td>
+							<td>GitHub / Docs</td>
 							<td>Email</td>
-							<td>24/7 Pager & Account Manager</td>
-							<td>24/7 Dedicated TAM</td>
+							<td>24/7 Pager & TAM</td>
+							<td>24/7 TAM Dedicado</td>
 						</tr>
 						<tr>
 							<td><strong>Tiempo de Respuesta</strong></td>
@@ -244,29 +244,25 @@ proof:
 		<section class="section-frame surface-sunken" style="margin-top: 4rem;">
 			<div class="section-heading" style="margin-bottom: 3rem;">
 				<p class="section-kicker">Propuesta de Valor</p>
-				<h2>¿Por qué Cortex Persist?</h2>
+				<h2>Soberanía y Control Causal</h2>
 			</div>
 
 			<div class="arguments-grid">
-				<!-- Core -->
 				<div class="argument-card">
-					<h4>Core (Local): Gratis y sin riesgo</h4>
-					<p>Ideal para desarrolladores y pruebas de concepto. Permite evaluar toda la potencia de nuestra infraestructura local con SQLite sin realizar ninguna inversión inicial. La independencia de ejecución en un solo binario simplifica drásticamente tus pruebas iniciales.</p>
+					<h4>Autarquía Local (Core)</h4>
+					<p>Ejecución 100% desconectada con SQLite local. Evalúa flujos de control sin transferir telemetría ni datos sensibles fuera de tu entorno local.</p>
 				</div>
-				<!-- Pro -->
 				<div class="argument-card">
-					<h4>Pro (SaaS): Escalado para equipos</h4>
-					<p>Diseñado para startups y equipos de IA en pleno crecimiento. Habilita la colaboración multiusuario y proporciona total visibilidad sobre el costo y retención de tokens, protegiendo tus presupuestos de sorpresas imprevistas facturadas por consumo.</p>
+					<h4>Visibilidad Operativa (Pro)</h4>
+					<p>Colaboración multiusuario en la nube con histórico extendido. Controla el consumo y la deriva de costes de tokens en tiempo real sin sorpresas.</p>
 				</div>
-				<!-- Enterprise -->
 				<div class="argument-card">
-					<h4>Enterprise: Seguridad y control total</h4>
-					<p>Imprescindible para compañías medianas o grandes en entornos altamente regulados (fintech, e-health). Permite despliegues seguros dentro de tu VPC con integración LDAP/SSO, cifrado absoluto y cumplimiento de normativas de custodia como GDPR y LOPD.</p>
+					<h4>Soberanía Total (Enterprise)</h4>
+					<p>Despliegue privado en tu propia VPC o Kubernetes. Integración directa con tus políticas de SSO, RBAC e inmutabilidad estricta (GDPR/LOPD).</p>
 				</div>
-				<!-- Estratégico -->
 				<div class="argument-card">
-					<h4>Estratégico: Alianza y co-diseño</h4>
-					<p>Un traje a medida diseñado conjuntamente con grandes corporaciones. Obtén soporte prioritario de un Technical Account Manager (TAM) dedicado, auditoría continua SOC 2 Tipo II, integraciones a medida con colas distribuidas Kafka, y co-diseño de nuestro roadmap de producto.</p>
+					<h4>Co-diseño y Resiliencia (Estratégico)</h4>
+					<p>Soporte de TAM dedicado con guardias 24/7 y SLA garantizado por contrato. Integración nativa con colas distribuidas (Kafka) y auditoría SOC 2 Tipo II.</p>
 				</div>
 			</div>
 		</section>
@@ -276,7 +272,6 @@ proof:
 			<div class="section-heading">
 				<p class="section-kicker">FAQs</p>
 				<h2>Preguntas Frecuentes</h2>
-				<p>Resolución de dudas sobre facturación, límites y el funcionamiento del control plane.</p>
 			</div>
 
 			<div class="faq-list">
@@ -292,7 +287,7 @@ proof:
 
 				<div class="faq-item">
 					<h3 class="faq-question">¿Cómo se diferencia un “span” de una “traza”?</h3>
-					<p class="faq-answer">Cada <strong>span</strong> es una operation individual y discreta (como una llamada específica a una API de LLM, una consulta de vector o un paso intermedio de un agente). Una <strong>traza</strong> es el grafo dirigido completo que agrupa la secuencia de spans involucrados en una interacción o tarea final. El span es la unidad atómica de facturación de datos en CORTEX.</p>
+					<p class="faq-answer">Cada <strong>span</strong> es una operación individual y discreta (como una llamada específica a una API de LLM, una consulta de vector o un paso intermedio de un agente). Una <strong>traza</strong> es el grafo dirigido completo que agrupa la secuencia de spans involucrados en una interacción o tarea final. El span es la unidad atómica de facturación de datos en CORTEX.</p>
 				</div>
 
 				<div class="faq-item">
@@ -348,17 +343,22 @@ proof:
 	border: 1px solid rgba(255, 255, 255, 0.05);
 	border-radius: var(--radius-lg, 6px);
 	padding: 2.2rem 1.8rem;
-	transition: border-color 0.2s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+	transition: border-color 0.2s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
 	position: relative;
 }
 .pricing-card-custom:hover {
 	border-color: rgba(43, 59, 229, 0.35);
 	transform: translateY(-4px);
+	box-shadow: 0 12px 40px rgba(43, 59, 229, 0.1);
 }
 .pricing-card-featured-custom {
 	border-color: rgba(43, 59, 229, 0.45);
 	box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(43, 59, 229, 0.2);
 	background: linear-gradient(180deg, rgba(43, 59, 229, 0.04) 0%, rgba(15, 15, 18, 0.95) 100%);
+}
+.pricing-card-featured-custom:hover {
+	border-color: rgba(43, 59, 229, 0.7);
+	box-shadow: 0 20px 45px rgba(43, 59, 229, 0.25), 0 0 0 1px rgba(43, 59, 229, 0.35);
 }
 .pricing-card-tag {
 	position: absolute;
@@ -425,7 +425,7 @@ proof:
 }
 .pricing-card-features li::before {
 	content: '✓';
-	color: var(--success, #00e5a3);
+	color: var(--accent-soft, #6e7cff);
 	font-weight: bold;
 	flex-shrink: 0;
 	font-size: 0.9rem;
@@ -486,6 +486,13 @@ proof:
 	font-size: 0.78rem;
 	letter-spacing: 0.05em;
 }
+.matrix-table tr {
+	transition: background 0.15s ease;
+}
+.matrix-table tr:hover td {
+	background: rgba(255, 255, 255, 0.01);
+	color: #fff;
+}
 .matrix-table tr:last-child td {
 	border-bottom: none;
 }
@@ -510,10 +517,11 @@ proof:
 	border-left: 3px solid var(--accent, #2b3be5);
 	padding: 1.8rem;
 	border-radius: 0 var(--radius-lg, 6px) var(--radius-lg, 6px) 0;
-	transition: border-color 0.2s ease;
+	transition: border-color 0.2s ease, background 0.2s ease;
 }
 .argument-card:hover {
 	border-left-color: var(--accent-soft, #6e7cff);
+	background: rgba(43, 59, 229, 0.02);
 }
 .argument-card h4 {
 	font-size: 1.1rem;
@@ -538,6 +546,10 @@ proof:
 	border: 1px solid rgba(255, 255, 255, 0.04);
 	border-radius: var(--radius-lg, 6px);
 	padding: 1.8rem;
+	transition: border-color 0.2s ease;
+}
+.faq-item:hover {
+	border-color: rgba(43, 59, 229, 0.15);
 }
 .faq-question {
 	font-size: 1.05rem;
