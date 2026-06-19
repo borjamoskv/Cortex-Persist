@@ -16,9 +16,12 @@ import logging
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+import json
 from typing import Any
 
 from cortex.config import DEFAULT_DB_PATH
+from cortex.compliance.comply_signer import ComplySigner
+from cortex.compliance.policy_engine import PolicyEngine
 
 __all__ = ["ComplianceTracker"]
 
@@ -46,7 +49,7 @@ class ComplianceTracker:
         project: Default project namespace for all operations.
     """
 
-    __slots__ = ("_default_project", "_engine", "_initialized")
+    __slots__ = ("_default_project", "_engine", "_initialized", "_signer", "_policy_engine")
 
     def __init__(
         self,
@@ -57,6 +60,8 @@ class ComplianceTracker:
 
         self._engine = CortexEngine(db_path=str(db_path), auto_embed=False)
         self._default_project = project
+        self._signer = ComplySigner()
+        self._policy_engine = PolicyEngine()
         self._initialized = False
 
     def _ensure_init(self) -> None:
@@ -101,6 +106,23 @@ class ComplianceTracker:
         proj = project or self._default_project
         now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
+        # Policy Engine admission check
+        allowed, reason = self._policy_engine.evaluate_action(agent_id, "write", proj, meta)
+        if not allowed:
+            raise PermissionError(reason)
+
+        # Cryptographic signature of decision context
+        payload_to_sign = {
+            "project": proj,
+            "content": content,
+            "fact_type": "decision",
+            "source": agent_id,
+            "confidence": confidence,
+            "timestamp": now,
+        }
+        signature = self._signer.sign_payload(agent_id, payload_to_sign)
+        pub_key_hex = self._signer.export_public_key_hex(agent_id)
+
         eu_meta: dict[str, Any] = {
             "actor_id": agent_id,
             "archaeology_audited": True,
@@ -109,6 +131,8 @@ class ComplianceTracker:
                 "logged_at": now,
                 "agent_id": agent_id,
                 "decision_type": decision_type,
+                "signature": signature,
+                "public_key_hex": pub_key_hex,
             },
         }
         if meta:
@@ -146,6 +170,23 @@ class ComplianceTracker:
         proj = project or self._default_project
         now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
+        # Policy Engine admission check
+        allowed, reason = self._policy_engine.evaluate_action(agent_id, "write", proj, meta)
+        if not allowed:
+            raise PermissionError(reason)
+
+        # Cryptographic signature of decision context
+        payload_to_sign = {
+            "project": proj,
+            "content": content,
+            "fact_type": "decision",
+            "source": agent_id,
+            "confidence": confidence,
+            "timestamp": now,
+        }
+        signature = self._signer.sign_payload(agent_id, payload_to_sign)
+        pub_key_hex = self._signer.export_public_key_hex(agent_id)
+
         eu_meta: dict[str, Any] = {
             "actor_id": agent_id,
             "archaeology_audited": True,
@@ -154,6 +195,8 @@ class ComplianceTracker:
                 "logged_at": now,
                 "agent_id": agent_id,
                 "decision_type": decision_type,
+                "signature": signature,
+                "public_key_hex": pub_key_hex,
             },
         }
         if meta:
@@ -187,14 +230,23 @@ class ComplianceTracker:
 
         ledger = self._engine._ledger
         if ledger is None:
-            return {
+            res = {
                 "valid": True,
                 "tx_checked": 0,
                 "roots_checked": 0,
                 "violations": [],
             }
+        else:
+            res = self._engine._run_sync(ledger.audit_integrity_async())  # type: ignore[type-error]
 
-        return self._engine._run_sync(ledger.audit_integrity_async())  # type: ignore[type-error]
+        # Signature verification
+        sig_res = self._run_signature_audit_sync()
+        res["signatures_verified"] = sig_res["signatures_verified"]
+        if not sig_res["valid"]:
+            res["valid"] = False
+            res["violations"].extend(sig_res["violations"])
+
+        return res
 
     async def verify_chain_async(self) -> dict[str, Any]:
         """Async variant of verify_chain for zero-latency cryptographic verification."""
@@ -204,14 +256,91 @@ class ComplianceTracker:
 
         ledger = self._engine._ledger
         if ledger is None:
-            return {
+            res = {
                 "valid": True,
                 "tx_checked": 0,
                 "roots_checked": 0,
                 "violations": [],
             }
+        else:
+            res = await ledger.audit_integrity_async()  # pyright: ignore[reportGeneralTypeIssues]
 
-        return await ledger.audit_integrity_async()  # pyright: ignore[reportGeneralTypeIssues]
+        # Signature verification
+        sig_res = await self._run_signature_audit_async()
+        res["signatures_verified"] = sig_res["signatures_verified"]
+        if not sig_res["valid"]:
+            res["valid"] = False
+            res["violations"].extend(sig_res["violations"])
+
+        return res
+
+    def _run_signature_audit_sync(self) -> dict[str, Any]:
+        """Verify Ed25519 signatures on all compliance facts in the database."""
+        return self._engine._run_sync(self._run_signature_audit_async())
+
+    async def _run_signature_audit_async(self) -> dict[str, Any]:
+        """Verify Ed25519 signatures on all compliance facts in the database (async)."""
+        verified = 0
+        violations = []
+        valid = True
+
+        from cortex.crypto import get_default_encrypter
+        enc = get_default_encrypter()
+
+        async with self._engine.session() as conn:
+            cursor = await conn.execute(
+                "SELECT id, project, content, fact_type, source, confidence, metadata, tenant_id FROM facts"
+            )
+            rows = await cursor.fetchall()
+            for r in rows:
+                fact_id, project, content_enc, fact_type, source, confidence, metadata_str, tenant_id = r
+                if not metadata_str:
+                    continue
+                try:
+                    meta = json.loads(metadata_str)
+                except Exception:
+                    continue
+
+                if "eu_ai_act" in meta and "signature" in meta["eu_ai_act"]:
+                    eu = meta["eu_ai_act"]
+                    sig = eu["signature"]
+                    agent_id = eu.get("agent_id", source or "agent:unknown")
+                    logged_at = eu.get("logged_at")
+
+                    # Decrypt content if it is encrypted
+                    try:
+                        if content_enc and content_enc.startswith("v6_"):
+                            content_decrypted = enc.decrypt_str(content_enc, tenant_id=tenant_id)
+                        else:
+                            content_decrypted = content_enc
+                    except Exception:
+                        content_decrypted = content_enc
+
+                    payload = {
+                        "project": project,
+                        "content": content_decrypted,
+                        "fact_type": fact_type,
+                        "source": source,
+                        "confidence": confidence,
+                        "timestamp": logged_at,
+                    }
+
+                    if not self._signer.verify_payload(agent_id, payload, sig):
+                        valid = False
+                        violations.append({
+                            "type": "INVALID_SIGNATURE",
+                            "fact_id": fact_id,
+                            "agent_id": agent_id,
+                            "reason": f"Signature verification failed for fact #{fact_id}."
+                        })
+                    else:
+                        verified += 1
+
+        return {
+            "valid": valid,
+            "signatures_verified": verified,
+            "violations": violations
+        }
 
     # ─── 3. export_audit ──────────────────────────────────────────
 
