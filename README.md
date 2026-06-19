@@ -95,11 +95,12 @@ CORTEX is built strictly around 4 core modules that ensure production safety.
 ### 1. Identity & Access Layer (`SovereignIdentity`)
 Multi-tenant isolation and strict RBAC. Agents and pipelines operate within strict bounded scopes.
 
-### 2. Change Risk Engine (`EntropyCore`)
-Analyzes code churn, diff size, and structural logic changes to compute an `EntropyScore`. High scores indicate probabilistic drift and trigger automatic rejections.
+### 2. Change Risk Engine (`EntropyCore` & Epistemic Dependency Graph)
+Analyzes code churn, diff size, and structural logic changes to compute an `EntropyScore`. High scores indicate probabilistic drift.
+**Under the hood:** CORTEX compiles the codebase into an **Epistemic Dependency Graph (EDG)**. When a PR is submitted, it executes an *Epistemic Invalidation Propagation*. If an AI modifies a foundational node (e.g. Auth Logic), any dependent nodes are challenged, and the PR is flagged for massive blast radius.
 
 ### 3. Policy Gateway (`CodeGovernanceGateway`)
-The enforcement boundary. It intercepts pipeline execution (via CLI or SDK), reads the risk score, and natively blocks or approves changes based on configured enterprise policies.
+The enforcement boundary. It intercepts pipeline execution (via CLI or SDK), reads the risk score and EDG propagation tree, and natively blocks or approves changes based on configured enterprise policies.
 
 ### 4. Audit Ledger (`EnterpriseAuditLedger`)
 An append-only, tamper-evident hash chain. Every PR evaluation, accepted code block, and policy decision is committed to a cryptographically sealed SQLite file, creating an immutable paper trail for compliance.
