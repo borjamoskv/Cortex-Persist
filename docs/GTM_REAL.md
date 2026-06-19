@@ -40,11 +40,40 @@ graph TD
 
 ### 2.1 Pricing Matrix & SLA Commitments
 
-| Tier | Cost | Target | SLA / Commitments | Value Prop (Transitions) |
-| :--- | :--- | :--- | :--- | :--- |
-| **0. Core (Local)** | `$0` (Apache-2.0) | Indie Devs, Local R&D | None (Community support) | Single-binary, local SQLite db with WAL mode, CLI. |
-| **1. Pro SaaS** | `$49/mo` base + usage | Scaling Teams | 99.9% uptime, email support | Multi-Tenant Cloud (Fly.io/Neon), 30 days retention, `/replay` orchestration. |
-| **2. Enterprise Sovereign** | `$25k-$120k/yr` | B2B, Fintech, Health | 99.99% uptime, 24/7 pager, 15m response | On-prem/VPC Helm charts, Kafka event routing, Ed25519 signatures, ZK-guards. |
+> From local-first OSS to sovereign enterprise deployment, Cortex Persist scales from developer tracing to regulated AI control planes.
+
+| Tier | Cost | Target | SLA / Commitments | Value Prop / Transitions |
+| :--- | :---: | :--- | :--- | :--- |
+| **0. Core (Local)** | $0 (Apache-2.0) | Indie devs, local R&D | None; community support | Single-binary, local SQLite (WAL), CLI-first, offline traces, basic replay |
+| **1. Pro SaaS** | $49/mo base + usage | Scaling teams | 99.9% uptime, email support | Multi-tenant cloud, managed ingestion, 30-day retention, `/replay` orchestration, eval dashboards |
+| **2. Enterprise Sovereign** | $25k–$120k/yr | B2B, fintech, health, regulated ops | 99.99% uptime, 24/7 pager, 15m response | On-prem/VPC deployment, Helm charts, Kafka event routing, SSO/SAML, RBAC, audit logs, data residency, dedicated support |
+| **3. Strategic / Regulated** | Custom | Large enterprise, highly regulated, platform consolidations | Bespoke SLA, named TAM, security review, legal/procurement support | Private control plane, custom retention, bring-your-own-KMS, customer-managed keys, custom integrations, migration services, co-design roadmap |
+
+### 2.1.1 Landing Page Pricing Grid & Copy
+
+#### Tier 0: Core (Local-First)
+- **Positioning Headline:** *Zero-latency local diagnostics for the sovereign engineer.*
+- **Usage Limits:** Unlimited local tracing; 1 local tenant database.
+- **Copy:** Run the complete CORTEX memory and tracing engine on your local workstation. Fully offline, zero data leakage, zero latency.
+- **Call-To-Action (CTA):** `npx cortex-persist init`
+
+#### Tier 1: Pro SaaS (Team Scale)
+- **Positioning Headline:** *Collaborative agent tracing and regression testing.*
+- **Usage Limits:** Up to 5 tenants, 50 Million spans/month, 30-day hot retention.
+- **Copy:** Centrally ingest traces from your distributed swarms. Gain cross-team visibility, trace replay debugging, and evaluation dashboards for CI/CD.
+- **Call-To-Action (CTA):** `Start 14-Day Free Trial`
+
+#### Tier 2: Enterprise Sovereign (Isolated Infrastructure)
+- **Positioning Headline:** *Regulated AI governance on your own terms and VPC.*
+- **Usage Limits:** Unlimited tenants, custom retention limits, dedicated Postgres clusters.
+- **Copy:** Deploy CORTEX as an isolated sidecar within your AWS/GCP VPC or on-prem Kubernetes clusters. Retain 100% control of data residency and lifecycle audits.
+- **Call-To-Action (CTA):** `Request Architecture Review`
+
+#### Tier 3: Strategic / Regulated (Bespoke Consolidation)
+- **Positioning Headline:** *Platform governance and absolute compliance at global scale.*
+- **Usage Limits:** Custom deployment clusters, dedicated multi-region architectures.
+- **Copy:** For global institutions requiring private KMS keys, custom compliance policies, co-designed feature roadmaps, and 24/7 dedicated support.
+- **Call-To-Action (CTA):** `Contact Executive Briefing Desk`
 
 ### 2.2 Volume-Based Usage Pricing Schedules
 
