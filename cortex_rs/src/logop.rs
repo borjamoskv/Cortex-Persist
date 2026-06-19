@@ -31,15 +31,19 @@ impl LogOpEngine {
     /// - No active supports/discard but dependencies exist => Orphaned
     /// - Otherwise => Unknown
     pub fn resolve_outcome(&self, state: &SemanticState) -> BeliefOutcome {
-        if state.discard_evidence_len > 0 {
-            if state.active_supports_len > 0 {
+        let has_discard = state.evidence.discard_evidence_len > 0 || state.provenance.compacted_discard_evidence > 0;
+        let has_active = state.evidence.active_supports_len > 0 || state.provenance.compacted_active_supports > 0;
+        let has_deps = state.evidence.dependencies_len > 0 || state.provenance.compacted_dependencies > 0;
+
+        if has_discard {
+            if has_active {
                 BeliefOutcome::Contested
             } else {
                 BeliefOutcome::Rejected
             }
-        } else if state.active_supports_len > 0 {
+        } else if has_active {
             BeliefOutcome::Accepted
-        } else if state.dependencies_len > 0 {
+        } else if has_deps {
             BeliefOutcome::Orphaned
         } else {
             BeliefOutcome::Unknown

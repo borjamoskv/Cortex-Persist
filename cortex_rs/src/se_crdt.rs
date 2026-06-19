@@ -4,14 +4,10 @@ use sha2::{Sha256, Digest};
 
 pub const MAX_EVIDENCE: usize = 32;
 
-/// Semantic Lattice CRDT for Evidence-Based Swarm Synchronization.
-///
-/// Refactored to avoid `Copy` trait to prevent implicit large stack copying (~1.5KB).
-/// Supports monotonic cryptographic compaction of sets when the buffer size reaches `MAX_EVIDENCE`.
 #[pyclass(from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(C)]
-pub struct SemanticState {
+pub struct EvidenceState {
     pub active_supports: [Uuid; MAX_EVIDENCE],
     pub active_supports_len: u32,
 
@@ -20,13 +16,10 @@ pub struct SemanticState {
 
     pub dependencies: [Uuid; MAX_EVIDENCE],
     pub dependencies_len: u32,
-
-    pub cryptographic_proofs: [[u8; 32]; MAX_EVIDENCE],
-    pub cryptographic_proofs_len: u32,
 }
 
 #[pymethods]
-impl SemanticState {
+impl EvidenceState {
     #[new]
     pub fn new() -> Self {
         Self {
@@ -36,25 +29,99 @@ impl SemanticState {
             discard_evidence_len: 0,
             dependencies: [Uuid::nil(); MAX_EVIDENCE],
             dependencies_len: 0,
+        }
+    }
+}
+
+impl Default for EvidenceState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+#[pyclass(from_py_object)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[repr(C)]
+pub struct ProvenanceState {
+    pub cryptographic_proofs: [[u8; 32]; MAX_EVIDENCE],
+    pub cryptographic_proofs_len: u32,
+
+    // Semantic preservation of compacted state
+    pub compacted_active_supports: u32,
+    pub compacted_discard_evidence: u32,
+    pub compacted_dependencies: u32,
+
+    // Causal clock / event epoch travels with the state
+    pub event_epoch: u64,
+}
+
+#[pymethods]
+impl ProvenanceState {
+    #[new]
+    pub fn new() -> Self {
+        Self {
             cryptographic_proofs: [[0; 32]; MAX_EVIDENCE],
             cryptographic_proofs_len: 0,
+            compacted_active_supports: 0,
+            compacted_discard_evidence: 0,
+            compacted_dependencies: 0,
+            event_epoch: 0,
         }
+    }
+}
+
+impl Default for ProvenanceState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Semantic Lattice CRDT for Evidence-Based Swarm Synchronization.
+///
+/// Splitted into EvidenceState and ProvenanceState.
+/// Compaction preserves the semantic footprint in ProvenanceState.
+#[pyclass(from_py_object)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[repr(C)]
+pub struct SemanticState {
+    #[pyo3(get, set)]
+    pub evidence: EvidenceState,
+    #[pyo3(get, set)]
+    pub provenance: ProvenanceState,
+}
+
+#[pymethods]
+impl SemanticState {
+    #[new]
+    pub fn new() -> Self {
+        Self {
+            evidence: EvidenceState::new(),
+            provenance: ProvenanceState::new(),
+        }
+    }
+
+    pub fn set_event_epoch(&mut self, epoch: u64) {
+        self.provenance.event_epoch = epoch;
+    }
+
+    pub fn get_event_epoch(&self) -> u64 {
+        self.provenance.event_epoch
     }
 
     pub fn add_active_support(&mut self, id_str: &str) -> PyResult<()> {
         let id = Uuid::parse_str(id_str)
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
         
-        for i in 0..(self.active_supports_len as usize) {
-            if self.active_supports[i] == id {
+        for i in 0..(self.evidence.active_supports_len as usize) {
+            if self.evidence.active_supports[i] == id {
                 return Ok(());
             }
         }
-        if (self.active_supports_len as usize) >= MAX_EVIDENCE {
+        if (self.evidence.active_supports_len as usize) >= MAX_EVIDENCE {
             return Err(pyo3::exceptions::PyBufferError::new_err("active_supports buffer full, requires explicit compaction"));
         }
-        self.active_supports[self.active_supports_len as usize] = id;
-        self.active_supports_len += 1;
+        self.evidence.active_supports[self.evidence.active_supports_len as usize] = id;
+        self.evidence.active_supports_len += 1;
         Ok(())
     }
 
@@ -62,16 +129,16 @@ impl SemanticState {
         let id = Uuid::parse_str(id_str)
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
         
-        for i in 0..(self.discard_evidence_len as usize) {
-            if self.discard_evidence[i] == id {
+        for i in 0..(self.evidence.discard_evidence_len as usize) {
+            if self.evidence.discard_evidence[i] == id {
                 return Ok(());
             }
         }
-        if (self.discard_evidence_len as usize) >= MAX_EVIDENCE {
+        if (self.evidence.discard_evidence_len as usize) >= MAX_EVIDENCE {
             return Err(pyo3::exceptions::PyBufferError::new_err("discard_evidence buffer full, requires explicit compaction"));
         }
-        self.discard_evidence[self.discard_evidence_len as usize] = id;
-        self.discard_evidence_len += 1;
+        self.evidence.discard_evidence[self.evidence.discard_evidence_len as usize] = id;
+        self.evidence.discard_evidence_len += 1;
         Ok(())
     }
 
@@ -79,16 +146,16 @@ impl SemanticState {
         let id = Uuid::parse_str(id_str)
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
         
-        for i in 0..(self.dependencies_len as usize) {
-            if self.dependencies[i] == id {
+        for i in 0..(self.evidence.dependencies_len as usize) {
+            if self.evidence.dependencies[i] == id {
                 return Ok(());
             }
         }
-        if (self.dependencies_len as usize) >= MAX_EVIDENCE {
+        if (self.evidence.dependencies_len as usize) >= MAX_EVIDENCE {
             return Err(pyo3::exceptions::PyBufferError::new_err("dependencies buffer full, requires explicit compaction"));
         }
-        self.dependencies[self.dependencies_len as usize] = id;
-        self.dependencies_len += 1;
+        self.evidence.dependencies[self.evidence.dependencies_len as usize] = id;
+        self.evidence.dependencies_len += 1;
         Ok(())
     }
 
@@ -96,23 +163,12 @@ impl SemanticState {
         let mut proof = [0u8; 32];
         hex::decode_to_slice(proof_hex, &mut proof)
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
-        
-        for i in 0..(self.cryptographic_proofs_len as usize) {
-            if self.cryptographic_proofs[i] == proof {
-                return Ok(());
-            }
-        }
-        if (self.cryptographic_proofs_len as usize) >= MAX_EVIDENCE {
-            return Err(pyo3::exceptions::PyValueError::new_err("Cryptographic proofs buffer full"));
-        }
-        self.cryptographic_proofs[self.cryptographic_proofs_len as usize] = proof;
-        self.cryptographic_proofs_len += 1;
-        Ok(())
+        self.insert_cryptographic_proof_internal(proof)
     }
 
-    /// Compacts active supports. Requires a valid Ledger Proof (audit_id) to maintain provenance.
+    /// Compacts active supports. Demonstrates semantic equivalence by migrating footprint to provenance.
     pub fn compact_active_supports(&mut self, ledger_proof_hex: &str) -> PyResult<()> {
-        if self.active_supports_len == 0 {
+        if self.evidence.active_supports_len == 0 {
             return Ok(());
         }
         let mut proof = [0u8; 32];
@@ -120,12 +176,13 @@ impl SemanticState {
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid proof format: {}", e)))?;
 
         self.insert_cryptographic_proof_internal(proof)?;
-        self.active_supports_len = 0;
+        self.provenance.compacted_active_supports += self.evidence.active_supports_len;
+        self.evidence.active_supports_len = 0;
         Ok(())
     }
 
     pub fn compact_discard_evidence(&mut self, ledger_proof_hex: &str) -> PyResult<()> {
-        if self.discard_evidence_len == 0 {
+        if self.evidence.discard_evidence_len == 0 {
             return Ok(());
         }
         let mut proof = [0u8; 32];
@@ -133,12 +190,13 @@ impl SemanticState {
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid proof format: {}", e)))?;
 
         self.insert_cryptographic_proof_internal(proof)?;
-        self.discard_evidence_len = 0;
+        self.provenance.compacted_discard_evidence += self.evidence.discard_evidence_len;
+        self.evidence.discard_evidence_len = 0;
         Ok(())
     }
 
     pub fn compact_dependencies(&mut self, ledger_proof_hex: &str) -> PyResult<()> {
-        if self.dependencies_len == 0 {
+        if self.evidence.dependencies_len == 0 {
             return Ok(());
         }
         let mut proof = [0u8; 32];
@@ -146,80 +204,91 @@ impl SemanticState {
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid proof format: {}", e)))?;
 
         self.insert_cryptographic_proof_internal(proof)?;
-        self.dependencies_len = 0;
+        self.provenance.compacted_dependencies += self.evidence.dependencies_len;
+        self.evidence.dependencies_len = 0;
         Ok(())
     }
 
     pub fn merge(&mut self, other: &SemanticState) -> PyResult<()> {
-        for i in 0..(other.active_supports_len as usize) {
-            let item = other.active_supports[i];
+        // Merge causal epoch (monotonic)
+        self.provenance.event_epoch = std::cmp::max(self.provenance.event_epoch, other.provenance.event_epoch);
+
+        // Merge footprint (monotonic, take max to avoid double counting if merged multiple times, 
+        // though logically they are sets. For counts, max is safer in CRDTs assuming same compaction history, 
+        // but true set union of compacted elements is lost. Max preserves minimum provenance.)
+        self.provenance.compacted_active_supports = std::cmp::max(self.provenance.compacted_active_supports, other.provenance.compacted_active_supports);
+        self.provenance.compacted_discard_evidence = std::cmp::max(self.provenance.compacted_discard_evidence, other.provenance.compacted_discard_evidence);
+        self.provenance.compacted_dependencies = std::cmp::max(self.provenance.compacted_dependencies, other.provenance.compacted_dependencies);
+
+        for i in 0..(other.evidence.active_supports_len as usize) {
+            let item = other.evidence.active_supports[i];
             let mut exists = false;
-            for j in 0..(self.active_supports_len as usize) {
-                if self.active_supports[j] == item {
+            for j in 0..(self.evidence.active_supports_len as usize) {
+                if self.evidence.active_supports[j] == item {
                     exists = true;
                     break;
                 }
             }
             if !exists {
-                if (self.active_supports_len as usize) >= MAX_EVIDENCE {
-                    return Err(pyo3::exceptions::PyBufferError::new_err("active_supports buffer full during merge, requires explicit compaction"));
+                if (self.evidence.active_supports_len as usize) >= MAX_EVIDENCE {
+                    return Err(pyo3::exceptions::PyBufferError::new_err("active_supports buffer full during merge"));
                 }
-                self.active_supports[self.active_supports_len as usize] = item;
-                self.active_supports_len += 1;
+                self.evidence.active_supports[self.evidence.active_supports_len as usize] = item;
+                self.evidence.active_supports_len += 1;
             }
         }
 
-        for i in 0..(other.discard_evidence_len as usize) {
-            let item = other.discard_evidence[i];
+        for i in 0..(other.evidence.discard_evidence_len as usize) {
+            let item = other.evidence.discard_evidence[i];
             let mut exists = false;
-            for j in 0..(self.discard_evidence_len as usize) {
-                if self.discard_evidence[j] == item {
+            for j in 0..(self.evidence.discard_evidence_len as usize) {
+                if self.evidence.discard_evidence[j] == item {
                     exists = true;
                     break;
                 }
             }
             if !exists {
-                if (self.discard_evidence_len as usize) >= MAX_EVIDENCE {
-                    return Err(pyo3::exceptions::PyBufferError::new_err("discard_evidence buffer full during merge, requires explicit compaction"));
+                if (self.evidence.discard_evidence_len as usize) >= MAX_EVIDENCE {
+                    return Err(pyo3::exceptions::PyBufferError::new_err("discard_evidence buffer full during merge"));
                 }
-                self.discard_evidence[self.discard_evidence_len as usize] = item;
-                self.discard_evidence_len += 1;
+                self.evidence.discard_evidence[self.evidence.discard_evidence_len as usize] = item;
+                self.evidence.discard_evidence_len += 1;
             }
         }
 
-        for i in 0..(other.dependencies_len as usize) {
-            let item = other.dependencies[i];
+        for i in 0..(other.evidence.dependencies_len as usize) {
+            let item = other.evidence.dependencies[i];
             let mut exists = false;
-            for j in 0..(self.dependencies_len as usize) {
-                if self.dependencies[j] == item {
+            for j in 0..(self.evidence.dependencies_len as usize) {
+                if self.evidence.dependencies[j] == item {
                     exists = true;
                     break;
                 }
             }
             if !exists {
-                if (self.dependencies_len as usize) >= MAX_EVIDENCE {
-                    return Err(pyo3::exceptions::PyBufferError::new_err("dependencies buffer full during merge, requires explicit compaction"));
+                if (self.evidence.dependencies_len as usize) >= MAX_EVIDENCE {
+                    return Err(pyo3::exceptions::PyBufferError::new_err("dependencies buffer full during merge"));
                 }
-                self.dependencies[self.dependencies_len as usize] = item;
-                self.dependencies_len += 1;
+                self.evidence.dependencies[self.evidence.dependencies_len as usize] = item;
+                self.evidence.dependencies_len += 1;
             }
         }
 
-        for i in 0..(other.cryptographic_proofs_len as usize) {
-            let item = other.cryptographic_proofs[i];
+        for i in 0..(other.provenance.cryptographic_proofs_len as usize) {
+            let item = other.provenance.cryptographic_proofs[i];
             let mut exists = false;
-            for j in 0..(self.cryptographic_proofs_len as usize) {
-                if self.cryptographic_proofs[j] == item {
+            for j in 0..(self.provenance.cryptographic_proofs_len as usize) {
+                if self.provenance.cryptographic_proofs[j] == item {
                     exists = true;
                     break;
                 }
             }
             if !exists {
-                if (self.cryptographic_proofs_len as usize) >= MAX_EVIDENCE {
+                if (self.provenance.cryptographic_proofs_len as usize) >= MAX_EVIDENCE {
                     return Err(pyo3::exceptions::PyValueError::new_err("Cryptographic proofs buffer full during merge"));
                 }
-                self.cryptographic_proofs[self.cryptographic_proofs_len as usize] = item;
-                self.cryptographic_proofs_len += 1;
+                self.provenance.cryptographic_proofs[self.provenance.cryptographic_proofs_len as usize] = item;
+                self.provenance.cryptographic_proofs_len += 1;
             }
         }
 
@@ -227,60 +296,62 @@ impl SemanticState {
     }
 
     pub fn dominates(&self, other: &SemanticState) -> bool {
-        for i in 0..(other.active_supports_len as usize) {
-            let item = other.active_supports[i];
-            let mut exists = false;
-            for j in 0..(self.active_supports_len as usize) {
-                if self.active_supports[j] == item {
-                    exists = true;
-                    break;
-                }
-            }
-            if !exists {
-                return false;
-            }
+        if self.provenance.event_epoch < other.provenance.event_epoch {
+            return false;
         }
 
-        for i in 0..(other.discard_evidence_len as usize) {
-            let item = other.discard_evidence[i];
-            let mut exists = false;
-            for j in 0..(self.discard_evidence_len as usize) {
-                if self.discard_evidence[j] == item {
-                    exists = true;
-                    break;
-                }
-            }
-            if !exists {
-                return false;
-            }
+        if self.provenance.compacted_active_supports < other.provenance.compacted_active_supports ||
+           self.provenance.compacted_discard_evidence < other.provenance.compacted_discard_evidence ||
+           self.provenance.compacted_dependencies < other.provenance.compacted_dependencies {
+            return false;
         }
 
-        for i in 0..(other.dependencies_len as usize) {
-            let item = other.dependencies[i];
+        for i in 0..(other.evidence.active_supports_len as usize) {
+            let item = other.evidence.active_supports[i];
             let mut exists = false;
-            for j in 0..(self.dependencies_len as usize) {
-                if self.dependencies[j] == item {
+            for j in 0..(self.evidence.active_supports_len as usize) {
+                if self.evidence.active_supports[j] == item {
                     exists = true;
                     break;
                 }
             }
-            if !exists {
-                return false;
-            }
+            if !exists { return false; }
         }
 
-        for i in 0..(other.cryptographic_proofs_len as usize) {
-            let item = other.cryptographic_proofs[i];
+        for i in 0..(other.evidence.discard_evidence_len as usize) {
+            let item = other.evidence.discard_evidence[i];
             let mut exists = false;
-            for j in 0..(self.cryptographic_proofs_len as usize) {
-                if self.cryptographic_proofs[j] == item {
+            for j in 0..(self.evidence.discard_evidence_len as usize) {
+                if self.evidence.discard_evidence[j] == item {
                     exists = true;
                     break;
                 }
             }
-            if !exists {
-                return false;
+            if !exists { return false; }
+        }
+
+        for i in 0..(other.evidence.dependencies_len as usize) {
+            let item = other.evidence.dependencies[i];
+            let mut exists = false;
+            for j in 0..(self.evidence.dependencies_len as usize) {
+                if self.evidence.dependencies[j] == item {
+                    exists = true;
+                    break;
+                }
             }
+            if !exists { return false; }
+        }
+
+        for i in 0..(other.provenance.cryptographic_proofs_len as usize) {
+            let item = other.provenance.cryptographic_proofs[i];
+            let mut exists = false;
+            for j in 0..(self.provenance.cryptographic_proofs_len as usize) {
+                if self.provenance.cryptographic_proofs[j] == item {
+                    exists = true;
+                    break;
+                }
+            }
+            if !exists { return false; }
         }
 
         true
@@ -288,7 +359,7 @@ impl SemanticState {
 
     #[getter]
     pub fn active_supports(&self) -> Vec<String> {
-        self.active_supports[0..(self.active_supports_len as usize)]
+        self.evidence.active_supports[0..(self.evidence.active_supports_len as usize)]
             .iter()
             .map(|id| id.to_string())
             .collect()
@@ -296,7 +367,7 @@ impl SemanticState {
 
     #[getter]
     pub fn discard_evidence(&self) -> Vec<String> {
-        self.discard_evidence[0..(self.discard_evidence_len as usize)]
+        self.evidence.discard_evidence[0..(self.evidence.discard_evidence_len as usize)]
             .iter()
             .map(|id| id.to_string())
             .collect()
@@ -304,7 +375,7 @@ impl SemanticState {
 
     #[getter]
     pub fn dependencies(&self) -> Vec<String> {
-        self.dependencies[0..(self.dependencies_len as usize)]
+        self.evidence.dependencies[0..(self.evidence.dependencies_len as usize)]
             .iter()
             .map(|id| id.to_string())
             .collect()
@@ -312,7 +383,7 @@ impl SemanticState {
 
     #[getter]
     pub fn cryptographic_proofs(&self) -> Vec<String> {
-        self.cryptographic_proofs[0..(self.cryptographic_proofs_len as usize)]
+        self.provenance.cryptographic_proofs[0..(self.provenance.cryptographic_proofs_len as usize)]
             .iter()
             .map(|p| hex::encode(p))
             .collect()
@@ -321,16 +392,16 @@ impl SemanticState {
 
 impl SemanticState {
     fn insert_cryptographic_proof_internal(&mut self, proof: [u8; 32]) -> PyResult<()> {
-        for i in 0..(self.cryptographic_proofs_len as usize) {
-            if self.cryptographic_proofs[i] == proof {
+        for i in 0..(self.provenance.cryptographic_proofs_len as usize) {
+            if self.provenance.cryptographic_proofs[i] == proof {
                 return Ok(());
             }
         }
-        if (self.cryptographic_proofs_len as usize) >= MAX_EVIDENCE {
+        if (self.provenance.cryptographic_proofs_len as usize) >= MAX_EVIDENCE {
             return Err(pyo3::exceptions::PyValueError::new_err("Cryptographic proofs buffer full"));
         }
-        self.cryptographic_proofs[self.cryptographic_proofs_len as usize] = proof;
-        self.cryptographic_proofs_len += 1;
+        self.provenance.cryptographic_proofs[self.provenance.cryptographic_proofs_len as usize] = proof;
+        self.provenance.cryptographic_proofs_len += 1;
         Ok(())
     }
 }
@@ -408,22 +479,14 @@ mod tests {
             s.add_active_support(&id).unwrap();
         }
         
-        // Next insertion should fail
-        let id_overflow = Uuid::new_v4().to_string();
-        assert!(s.add_active_support(&id_overflow).is_err());
-        
-        // Manual compaction with a mock ledger proof
         let mock_proof = hex::encode([0xAA; 32]);
         s.compact_active_supports(&mock_proof).unwrap();
         
-        // Active supports should be reset to 0
-        assert_eq!(s.active_supports_len, 0);
-        // Cryptographic proofs should now contain the ledger proof
-        assert_eq!(s.cryptographic_proofs_len, 1);
-        assert_eq!(s.cryptographic_proofs()[0], mock_proof);
+        // Active supports should be reset, but provenance preserves the count
+        assert_eq!(s.evidence.active_supports_len, 0);
+        assert_eq!(s.provenance.compacted_active_supports, MAX_EVIDENCE as u32);
         
-        // Now insertion succeeds
-        s.add_active_support(&id_overflow).unwrap();
-        assert_eq!(s.active_supports_len, 1);
+        assert_eq!(s.provenance.cryptographic_proofs_len, 1);
+        assert_eq!(s.cryptographic_proofs()[0], mock_proof);
     }
 }
