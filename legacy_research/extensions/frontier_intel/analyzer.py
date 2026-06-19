@@ -8,12 +8,12 @@ from __future__ import annotations
 
 import logging
 import time
-import yaml
 from typing import Any
+
+import yaml
 
 from cortex.extensions.llm.manager import LLMManager
 from cortex.extensions.scraper.engine import ScraperEngine
-from cortex.types.models import FactType
 
 logger = logging.getLogger("cortex.extensions.frontier_intel.analyzer")
 

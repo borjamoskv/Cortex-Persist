@@ -5,6 +5,7 @@ from pathlib import Path
 try:
     from cortex.extensions.daemon.centaur.engine import CentauroEngine
     from cortex.extensions.daemon.centaur.entropic_queue import EntropicQueue
+
     from cortex.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
 
     _CENTAUR_AVAILABLE = True

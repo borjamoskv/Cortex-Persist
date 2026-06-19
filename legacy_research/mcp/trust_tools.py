@@ -23,9 +23,8 @@ from typing import TYPE_CHECKING
 __all__ = ["register_trust_tools"]
 
 if TYPE_CHECKING:
-    from mcp.server.fastmcp import FastMCP
-
     from cortex.mcp.server import _MCPContext
+    from mcp.server.fastmcp import FastMCP
 
 logger = logging.getLogger("cortex.mcp.trust")
 

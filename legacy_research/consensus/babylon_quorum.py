@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
-import logging
 import hashlib
+import logging
 import time
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class BabylonQuorum:
         logger.warning(f"Agent {agent_id} REJECTED invalid proof.")
         return False
 
-    def reach_consensus(self, proof_hash: str, payload_data: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+    def reach_consensus(self, proof_hash: str, payload_data: dict[str, Any]) -> tuple[bool, Optional[str]]:
         """
         Proposes a verified claim to the Quorum.
         Requires N >= required_signatures to commit.
@@ -48,7 +48,7 @@ class BabylonQuorum:
             logger.info(f"Consensus Reached ({signatures}/{self.required_signatures}). Committing to Ledger.")
             
             # Simulate Git Sentinel / SQLite WAL commit
-            commit_payload = f"{proof_hash}:{time.time()}:{str(payload_data)}".encode('utf-8')
+            commit_payload = f"{proof_hash}:{time.time()}:{str(payload_data)}".encode()
             commit_hash = hashlib.sha256(commit_payload).hexdigest()
             return True, commit_hash
             

@@ -237,8 +237,9 @@ def history(db_path: str | None, limit: int) -> None:
 @click.option("--dry-run", is_flag=True, default=False, help="Show what would be fixed.")
 def fix(db_path: str | None, dry_run: bool) -> None:
     """Auto-remediation for degraded metrics."""
-    from cortex.extensions.health import HealthCollector, HealthScorer
     from cortex.extensions.health.fix import FixRegistry  # pyright: ignore[reportMissingImports]
+
+    from cortex.extensions.health import HealthCollector, HealthScorer
 
     path = _resolve_db(db_path)
     collector = HealthCollector(db_path=path)

@@ -19,8 +19,8 @@ from cortex.auth.models import APIKey, AuthResult
 
 # Hashing fallback: use Rust-native if present, otherwise fall back to Python argon2-cffi
 try:
-    hash_password = getattr(cortex_rs, "hash_password")
-    verify_password = getattr(cortex_rs, "verify_password")
+    hash_password = cortex_rs.hash_password
+    verify_password = cortex_rs.verify_password
     HAS_RUST_AUTH = True
 except AttributeError:
     HAS_RUST_AUTH = False

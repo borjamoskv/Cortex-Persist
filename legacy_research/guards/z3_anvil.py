@@ -1,10 +1,10 @@
 # [C5-REAL] Exergy-Maximized
-import logging
 import hashlib
-from typing import Dict, Any, Tuple, Optional
+import logging
+from typing import Optional
 
 try:
-    from z3 import Solver, Bool, And, Or, Not, sat, unsat, unknown
+    from z3 import And, Bool, Not, Or, Solver, sat, unknown, unsat
     HAS_Z3 = True
 except ImportError:
     HAS_Z3 = False
@@ -23,10 +23,10 @@ class SovereignAnvil:
             
     def _hash_certificate(self, premise: str, theorem: str, result: str) -> str:
         """Generates a cryptographic hash for the Proof Certificate."""
-        payload = f"{premise}|{theorem}|{result}".encode('utf-8')
+        payload = f"{premise}|{theorem}|{result}".encode()
         return hashlib.sha3_256(payload).hexdigest()
 
-    def verify_rule(self, rule_name: str, logic_form: str) -> Tuple[bool, Optional[str], str]:
+    def verify_rule(self, rule_name: str, logic_form: str) -> tuple[bool, Optional[str], str]:
         """
         Parses a logical rule and attempts to find a contradiction.
         If satisfiable and non-contradictory, returns a Proof Certificate.

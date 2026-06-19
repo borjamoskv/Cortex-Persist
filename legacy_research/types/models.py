@@ -11,6 +11,7 @@ from typing import Any, Literal, TypedDict
 
 from pydantic import BaseModel, Field, field_validator
 
+
 class FactType(str, Enum):
     FACT = "fact"
     DECISION = "decision"

@@ -4,6 +4,10 @@ from unittest.mock import AsyncMock, MagicMock
 from cortex.engine.models import KnowledgeObject, Justification, EvidenceType
 from cortex.engine.guard_adapters import EFTVerificationGuardAdapter
 
+@pytest.fixture(autouse=True)
+def disable_exergy_skip(monkeypatch):
+    monkeypatch.delenv("CORTEX_SKIP_EXERGY_VALIDATION", raising=False)
+
 @pytest.mark.asyncio
 async def test_justification_structure_parsing():
     # Test converting justification dict to Justification object

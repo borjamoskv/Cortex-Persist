@@ -1,11 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 import random
-from typing import Dict, Any, Tuple, Optional
+from typing import Any, Optional
 
-from cortex.guards.z3_anvil import SovereignAnvil
 from cortex.consensus.babylon_quorum import BabylonQuorum
-from cortex_rs import EpistemicGraph, EpistemicNode
+from cortex.guards.z3_anvil import SovereignAnvil
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +18,7 @@ class SovereignAuditPipeline:
         self.anvil = SovereignAnvil()
         self.quorum = BabylonQuorum()
         
-    def phase_1_extraction(self, model_target: str, prompt: str) -> Dict[str, Any]:
+    def phase_1_extraction(self, model_target: str, prompt: str) -> dict[str, Any]:
         """
         Fase 1: Frontier-RevEng-OMEGA
         Extracts structural claims from a black-box LLM.
@@ -50,7 +49,7 @@ class SovereignAuditPipeline:
         logger.info(f"[PHASE 1] Extracted Dossier: {dossier['rule_name']} ({logic_form})")
         return dossier
 
-    def phase_2_destruction(self, dossier: Dict[str, Any]) -> bool:
+    def phase_2_destruction(self, dossier: dict[str, Any]) -> bool:
         """
         Fase 2: Agent-Ω
         Adversarial stochastic destruction. Injects 50 random seeds to break the claim.
@@ -73,7 +72,7 @@ class SovereignAuditPipeline:
             logger.error(f"[PHASE 2] DESTROYED: Rule failed in {50 - successes}/50 adversarial probes.")
             return False
 
-    def phase_3_logical_forge(self, dossier: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+    def phase_3_logical_forge(self, dossier: dict[str, Any]) -> tuple[bool, Optional[str]]:
         """
         Fase 3: Sovereign Anvil / Z3
         Formal mathematical verification.
@@ -93,12 +92,12 @@ class SovereignAuditPipeline:
             logger.error(f"[PHASE 3] REJECTED: {reason}")
             return False, None
 
-    def phase_4_consensus(self, dossier: Dict[str, Any], proof_hash: str) -> bool:
+    def phase_4_consensus(self, dossier: dict[str, Any], proof_hash: str) -> bool:
         """
         Fase 4: Babylon-60 BFT Quorum
         Byzantine Fault Tolerance consensus before persistence.
         """
-        logger.info(f"[PHASE 4] Submitting to Babylon-60 Quorum...")
+        logger.info("[PHASE 4] Submitting to Babylon-60 Quorum...")
         success, commit_hash = self.quorum.reach_consensus(proof_hash, dossier)
         
         if success:
@@ -110,7 +109,7 @@ class SovereignAuditPipeline:
             logger.error("[PHASE 4] REJECTED: Failed to reach quorum.")
             return False
 
-    def execute_pipeline(self, target_model: str, extraction_prompt: str) -> Tuple[bool, Dict[str, Any]]:
+    def execute_pipeline(self, target_model: str, extraction_prompt: str) -> tuple[bool, dict[str, Any]]:
         """
         Executes the full 4-Phase Sovereign Audit Pipeline.
         """

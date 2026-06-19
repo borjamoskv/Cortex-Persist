@@ -88,6 +88,21 @@ proof:
 					<a href="https://github.com/borjamoskv/Cortex-Persist" class="pricing-card-cta pricing-card-cta-secondary">Descarga OSS</a>
 				</article>
 
+				<!-- Starter SaaS -->
+				<article class="pricing-card-custom">
+					<h3 class="pricing-card-title">Starter SaaS</h3>
+					<div class="pricing-card-price">$15 <span>/ mes</span></div>
+					<p class="pricing-card-desc">Trazas inmutables para desarrolladores pragmáticos. Integración directa con Langfuse y LangChain.</p>
+					<ul class="pricing-card-features">
+						<li><strong>100k spans/mes</strong> incluidos</li>
+						<li>Retención de <strong>14 días</strong></li>
+						<li>Hasta <strong>3 seats</strong> de equipo</li>
+						<li>Sincronización con Langfuse</li>
+						<li>Soporte comunitario (Discord)</li>
+					</ul>
+					<a href="/api-key" class="pricing-card-cta pricing-card-cta-secondary">Start Free Plan</a>
+				</article>
+
 				<!-- Pro (SaaS) -->
 				<article class="pricing-card-custom pricing-card-featured-custom">
 					<span class="pricing-card-tag">Recomendado</span>
@@ -152,6 +167,7 @@ proof:
 						<tr>
 							<th>Característica</th>
 							<th>Core (Local)</th>
+							<th>Starter SaaS</th>
 							<th>Pro (SaaS)</th>
 							<th>Enterprise (Sovereign)</th>
 							<th>Estratégico / Regulador</th>
@@ -161,6 +177,7 @@ proof:
 						<tr>
 							<td><strong>Precio Base</strong></td>
 							<td>Gratuito (Apache-2.0)</td>
+							<td>$15/mes</td>
 							<td>$49/mes + uso</td>
 							<td>$25k – $120k/año</td>
 							<td>Personalizado (A convenir)</td>
@@ -168,13 +185,15 @@ proof:
 						<tr>
 							<td><strong>Spans Incluidos</strong></td>
 							<td>Ilimitado local (ej. 100k)</td>
-							<td>500k / mes</td>
+							<td>100k / mes</td>
+							<td>1M / mes</td>
 							<td>2M / mes (escalable)</td>
 							<td>Ilimitado</td>
 						</tr>
 						<tr>
 							<td><strong>Exceso de Spans</strong></td>
 							<td>N/A</td>
+							<td>N/A (Soft Limit)</td>
 							<td>$0.10 por 10k spans</td>
 							<td>Acordado por contrato</td>
 							<td>Personalizado</td>
@@ -182,6 +201,7 @@ proof:
 						<tr>
 							<td><strong>Retención de Datos</strong></td>
 							<td>Capacidad local</td>
+							<td>14 días</td>
 							<td>30 días</td>
 							<td>90 días</td>
 							<td>Personalizada (&gt;1 año)</td>
@@ -189,6 +209,7 @@ proof:
 						<tr>
 							<td><strong>Seats / Usuarios</strong></td>
 							<td>1 usuario (CLI local)</td>
+							<td>Hasta 3 seats</td>
 							<td>Hasta 10 seats</td>
 							<td>Hasta 50 seats (expandible)</td>
 							<td>Ilimitados</td>
@@ -196,6 +217,7 @@ proof:
 						<tr>
 							<td><strong>Evaluaciones / Runs</strong></td>
 							<td>~5 runs / mes</td>
+							<td>~10 runs / mes</td>
 							<td>~50 runs / mes</td>
 							<td>~500 runs / mes</td>
 							<td>Ilimitadas</td>
@@ -203,6 +225,7 @@ proof:
 						<tr>
 							<td><strong>Despliegue</strong></td>
 							<td>Local (SQLite integrado)</td>
+							<td>Cloud (SaaS)</td>
 							<td>Cloud (SaaS multiusuario)</td>
 							<td>VPC / On-Prem (Docker, Helm)</td>
 							<td>VPC, On-Prem, Híbrido, Kafka</td>
@@ -211,12 +234,14 @@ proof:
 							<td><strong>SLA de Uptime</strong></td>
 							<td>N/A (Local)</td>
 							<td>99.9%</td>
+							<td>99.9%</td>
 							<td>99.99%</td>
 							<td>Nivel máximo garantizado</td>
 						</tr>
 						<tr>
 							<td><strong>Canal de Soporte</strong></td>
 							<td>Comunidad / GitHub</td>
+							<td>Discord / Comunidad</td>
 							<td>Email</td>
 							<td>24/7 Pager & Account Manager</td>
 							<td>24/7 Dedicated TAM</td>
@@ -224,12 +249,14 @@ proof:
 						<tr>
 							<td><strong>Tiempo de Respuesta</strong></td>
 							<td>Soporte voluntario</td>
+							<td>Mejor esfuerzo</td>
 							<td>Standard</td>
 							<td>&lt;15 minutos</td>
 							<td>Inmediato (TAM)</td>
 						</tr>
 						<tr>
 							<td><strong>Servicios Profesionales</strong></td>
+							<td>No</td>
 							<td>No</td>
 							<td>No</td>
 							<td>Opcional</td>
@@ -252,6 +279,11 @@ proof:
 				<div class="argument-card">
 					<h4>Core (Local): Gratis y sin riesgo</h4>
 					<p>Ideal para desarrolladores y pruebas de concepto. Permite evaluar toda la potencia de nuestra infraestructura local con SQLite sin realizar ninguna inversión inicial. La independencia de ejecución en un solo binario simplifica drásticamente tus pruebas iniciales.</p>
+				</div>
+				<!-- Starter SaaS -->
+				<div class="argument-card">
+					<h4>Starter: Desarrolladores pragmáticos</h4>
+					<p>Trazas inmutables en la nube sin configurar infraestructura. Especialmente diseñado para sincronizarse nativamente con <strong>Langfuse</strong> u otras plataformas de observabilidad, convirtiendo logs estándar en evidencia criptográfica con una sola variable de entorno.</p>
 				</div>
 				<!-- Pro -->
 				<div class="argument-card">
@@ -336,7 +368,7 @@ proof:
 }
 @media (min-width: 1200px) {
 	.pricing-grid-4 {
-		grid-template-columns: repeat(4, 1fr);
+		grid-template-columns: repeat(5, 1fr);
 	}
 }
 

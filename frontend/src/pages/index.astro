@@ -55,35 +55,35 @@ const pricingCards = [
 	{
 		name: 'Core (Local)',
 		price: '$0 (Apache-2.0)',
-		body: 'Plan gratuito local para desarrollo y pruebas individuales.',
-		items: ['Uso local (100k spans/mes)', 'Retención local', '1 seat', '5 runs eval/mes'],
+		body: 'Plan local gratuito. Desarrollo y pruebas individuales sin conexión.',
+		items: ['Uso local (100k spans/mes)', 'Retención local', '1 seat', 'Cero fuga de datos'],
 		cta: 'Descarga OSS',
 		href: 'https://github.com/borjamoskv/Cortex-Persist',
+	},
+	{
+		name: 'Starter SaaS',
+		price: '$15/mo base',
+		body: 'Trazas a prueba de manipulación para desarrolladores pragmáticos.',
+		items: ['100k spans/mes + uso', '14 días retención', 'Hasta 3 seats', 'Sincronización Langfuse'],
+		cta: 'Start Free Plan',
+		href: '/api-key',
 	},
 	{
 		name: 'Pro (SaaS)',
 		price: 'From $49/mo',
 		tag: 'Recommended',
-		body: 'Para equipos en crecimiento y sistemas de producción ligeros.',
-		items: ['500k spans/mes + uso', '30 días retención', 'Hasta 10 seats', '50 runs eval/mes'],
-		cta: 'Regístrate Gratis',
+		body: 'Para equipos en crecimiento y validación de sistemas de producción.',
+		items: ['1M spans/mes + uso', '30 días retención', 'Hasta 10 seats', 'Replay orchestration'],
+		cta: 'Deploy Pro',
 		href: '/api-key',
 		featured: true,
 	},
 	{
 		name: 'Enterprise',
 		price: '$25k - 120k/yr',
-		body: 'Despliegues privados y VPC para industrias reguladas.',
-		items: ['2M spans/mes included', '90 días retención', 'Hasta 50 seats', '500 runs eval/mes'],
-		cta: 'Solicitar Demo',
-		href: '/pilot-scope',
-	},
-	{
-		name: 'Estratégico',
-		price: 'Custom',
-		body: 'Grandes corporaciones con requisitos críticos y soporte TAM.',
-		items: ['Spans ilimitados', 'Retención a medida', 'Seats ilimitados', 'SLA max & TAM'],
-		cta: 'Contacto Ventas',
+		body: 'Gobernanza de IA en VPC para industrias reguladas.',
+		items: ['Spans personalizables', 'Retención custom', 'SOC 2 Type II ready', 'EU AI Act Art. 12 compliance'],
+		cta: 'Architecture Review',
 		href: '/pilot-scope',
 	},
 ];
@@ -176,10 +176,10 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 				<article class="fit-card surface-sunken" style="border: 1px solid var(--accent);">
 					<p class="surface-label" style="color: var(--accent);">CORTEX Event Ledger</p>
 					<ul class="surface-list">
-						<li><strong>Cryptographically hash-linked</strong> events.</li>
-						<li><strong>Unified</strong> and structured event history.</li>
-						<li><strong>Deterministic state reconstruction</strong> API.</li>
-						<li><strong>Mathematical provenance</strong> you can show to an auditor.</li>
+						<li><strong>Cryptológicamente sellados</strong> con SHA-256 hash chains.</li>
+						<li><strong>Reconstrucción determinística</strong> (Replay) del estado del agente.</li>
+						<li><strong>MetaArbiter</strong> para resolver divergencias métricas de trayectorias.</li>
+						<li><strong>Compliance Nativo</strong>: SOC 2 Type II ready & EU AI Act Art. 12.</li>
 					</ul>
 				</article>
 			</div>
@@ -214,12 +214,23 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 				<article class="fit-card surface-sunken" style="min-height: auto;">
 					<p class="surface-label">Plugin</p>
 					<h3>cortex-persist-langchain</h3>
-					<p>Official integration to plug CORTEX event tracking directly into your LangChain agents.</p>
+					<p>Conecta la persistencia CORTEX directamente en el middleware de LangChain.</p>
 					<pre class="console-block"><code>npm install cortex-persist-langchain</code></pre>
 					<p class="microcopy" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; margin-top: 1rem; color: var(--accent-soft); line-height: 1.5;">
 						import &#123; CortexCallbackHandler &#125; from 'cortex-persist-langchain';
 						<br/><br/>
 						const handler = new CortexCallbackHandler(&#123; apiKey: process.env.CORTEX_API_KEY &#125;);
+					</p>
+				</article>
+
+				<!-- Langfuse Integration -->
+				<article class="fit-card surface-sunken" style="min-height: auto;">
+					<p class="surface-label">Integración</p>
+					<h3>Sincronización Langfuse</h3>
+					<p>Transforma trazas mutables de Langfuse en ledgers criptográficos inmutables sin cambiar tu UI.</p>
+					<pre class="console-block"><code>export CORTEX_LANGFUSE_SYNC=true</code></pre>
+					<p class="microcopy" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; margin-top: 1rem; color: var(--accent-soft); line-height: 1.5;">
+						[Agent] -> [Langfuse SDK] -> [CORTEX OTel Interceptor] -> Ledger Inmutable
 					</p>
 				</article>
 			</div>

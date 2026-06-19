@@ -15,9 +15,8 @@ from typing import TYPE_CHECKING
 from cortex.ledger import ImmutableLedger
 
 if TYPE_CHECKING:
-    from mcp.server.fastmcp import FastMCP
-
     from cortex.mcp.server import _MCPContext
+    from mcp.server.fastmcp import FastMCP
 
 __all__ = ["register_compliance_tools"]
 

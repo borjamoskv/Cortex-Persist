@@ -130,7 +130,7 @@ async def store_fact(
         _meta.update(validated_meta)
     except Exception as e:
         logger.warning("CortexMemoryManager: Fact rejected due to schema validation failure: %s", e)
-        return f"filtered:invalid_schema"
+        return "filtered:invalid_schema"
 
     if "confidence_score" not in _meta:
         _meta["confidence_score"] = 0.8

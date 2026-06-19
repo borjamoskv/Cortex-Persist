@@ -1,8 +1,6 @@
-import time
-import uuid
-import random
-import threading
 import logging
+import random
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 from cortex_rs import EpistemicGraph, EpistemicNode
