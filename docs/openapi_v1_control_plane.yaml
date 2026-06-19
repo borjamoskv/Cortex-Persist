@@ -1,0 +1,1363 @@
+openapi: 3.1.0
+info:
+  title: CORTEX - AI Control Plane API
+  version: 1.0.0
+  description: |
+    Enterprise-grade, multi-tenant API for trace ingestion, execution replays, 
+    offline/online evaluations, and policy-driven governance plane.
+    
+    All timestamps are formatted in UTC ISO-8601.
+    Identifiers use prefix formats: `trc_...`, `spn_...`, `run_...`, `pol_...`, `evl_...`, `ds_...`, `vio_...`.
+servers:
+  - url: https://api.cortex.example.com/v1
+    description: Production Gateway v1
+
+security:
+  - BearerAuth: []
+    TenantHeader: []
+
+paths:
+  /traces:
+    post:
+      summary: Create trace
+      description: Initializes a new execution trace.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TraceCreate'
+      responses:
+        '201':
+          description: Trace initialized successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceCreateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: List traces
+      description: Retrieve a paginated list of traces filtered by app, status, and cursor.
+      parameters:
+        - name: app_id
+          in: query
+          required: false
+          description: Filter traces by application identifier
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [started, completed, failed]
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+        - name: cursor
+          in: query
+          required: false
+          description: Opaque pagination cursor
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated trace retrieval successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /traces/{trace_id}:
+    get:
+      summary: Get trace
+      description: Fetch detail of a single trace by ID.
+      parameters:
+        - name: trace_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^trc_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: Trace details retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trace'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /traces/{trace_id}/spans:
+    get:
+      summary: Get trace spans
+      description: Retrieve all spans grouped under a trace.
+      parameters:
+        - name: trace_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^trc_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: Trace spans retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Span'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /spans:
+    post:
+      summary: Ingest span
+      description: Submits a single tracing span.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpanIngest'
+      responses:
+        '201':
+          description: Span ingested successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Span'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /spans/bulk:
+    post:
+      summary: Bulk ingest spans
+      description: Ingests an array of spans for high-throughput batching.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/SpanIngest'
+      responses:
+        '201':
+          description: Bulk spans ingested successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                properties:
+                  count:
+                    type: integer
+                    example: 12
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /runs:
+    post:
+      summary: Create run
+      description: Initializes a logical agentic workflow run.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunCreate'
+      responses:
+        '201':
+          description: Run initialized successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Run'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /runs/{run_id}:
+    get:
+      summary: Get run
+      description: Fetch a run record by ID.
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^run_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: Run details retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Run'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /runs/{run_id}/replay:
+    post:
+      summary: Replay run
+      description: Trigger deterministic/stochastic replay run.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^run_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunReplayRequest'
+      responses:
+        '202':
+          description: Replay job queued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunReplayResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /policies:
+    post:
+      summary: Create policy
+      description: Create a governance policy guard.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyCreate'
+      responses:
+        '201':
+          description: Policy created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: List policies
+      description: Retrieve all governance policies.
+      responses:
+        '200':
+          description: Policies list retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Policy'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /policies/{policy_id}/evaluate:
+    post:
+      summary: Evaluate policy manually
+      description: Tests policy validation matching on manual payloads.
+      parameters:
+        - name: policy_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^pol_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyEvaluateRequest'
+      responses:
+        '200':
+          description: Policy evaluation results returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyEvaluateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /evals:
+    post:
+      summary: Create evaluation job
+      description: Creates an evaluation run for regression checks.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvalJobCreate'
+      responses:
+        '201':
+          description: Evaluation job successfully instantiated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvalJob'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /evals/{eval_id}/cases:
+    post:
+      summary: Add evaluation cases
+      description: Append individual test cases to an evaluation run.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - name: eval_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^evl_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/EvalCase'
+      responses:
+        '200':
+          description: Evaluation cases appended.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                properties:
+                  count:
+                    type: integer
+                    example: 24
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /evals/{eval_id}/execute:
+    post:
+      summary: Execute evaluation job
+      description: Dispatches the processing run for the evaluation job.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - name: eval_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^evl_[a-zA-Z0-9]+$'
+      responses:
+        '202':
+          description: Evaluation run triggered.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                properties:
+                  status:
+                    type: string
+                    example: running
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /evals/{eval_id}/results:
+    get:
+      summary: Get evaluation results
+      description: Retrieve executed test case scores and validations.
+      parameters:
+        - name: eval_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^evl_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: Evaluation scores and trace mappings returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EvalResult'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /datasets:
+    post:
+      summary: Create dataset
+      description: Configures a new dataset envelope.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasetCreate'
+      responses:
+        '201':
+          description: Dataset successfully initialized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dataset'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /datasets/{dataset_id}/cases:
+    get:
+      summary: List dataset cases
+      description: Get paginated test cases inside a dataset.
+      parameters:
+        - name: dataset_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ds_[a-zA-Z0-9]+$'
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dataset cases retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetCasesListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /datasets/{dataset_id}/cases/import:
+    post:
+      summary: Import dataset cases
+      description: Bulk imports cases to a dataset.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - name: dataset_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ds_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/EvalCase'
+      responses:
+        '200':
+          description: Dataset cases imported.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                properties:
+                  count:
+                    type: integer
+                    example: 100
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Enter the Bearer API Key.
+    TenantHeader:
+      type: apiKey
+      in: header
+      name: X-Tenant-Id
+      description: Target Tenant identifier for routing context isolation.
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Unique UUID token to assure write-path idempotency.
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    BadRequestError:
+      description: Invalid payload, syntax, or parameter schema.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDetail'
+    UnauthorizedError:
+      description: Missing or invalid authentication token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDetail'
+    NotFoundError:
+      description: Target resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDetail'
+    ValidationError:
+      description: Unprocessable request data structure or type mismatches.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDetail'
+    InternalServerError:
+      description: Server runtime anomaly.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDetail'
+
+  schemas:
+    ErrorDetail:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: policy_blocked
+            message:
+              type: string
+              example: Output blocked by pii-blocking-v1
+            trace_id:
+              type: string
+              example: trc_01JABC...
+            violation_id:
+              type: string
+              example: vio_01JABC...
+
+    TraceCreate:
+      type: object
+      required:
+        - status
+      properties:
+        run_id:
+          type: string
+          example: run_456
+        status:
+          type: string
+          enum: [started, completed, failed]
+          example: started
+        metadata:
+          type: object
+          example:
+            app: support-bot
+            env: prod
+
+    TraceCreateResponse:
+      type: object
+      required:
+        - id
+        - status
+      properties:
+        id:
+          type: string
+          example: trc_01JABC...
+        status:
+          type: string
+          example: started
+
+    Trace:
+      type: object
+      required:
+        - id
+        - tenant_id
+        - status
+        - started_at
+      properties:
+        id:
+          type: string
+          example: trc_01JABC...
+        tenant_id:
+          type: string
+          example: ten_123
+        run_id:
+          type: string
+          nullable: true
+          example: run_456
+        status:
+          type: string
+          enum: [started, completed, failed]
+          example: completed
+        started_at:
+          type: string
+          format: date-time
+          example: "2026-06-19T08:00:00Z"
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-06-19T08:00:03Z"
+        root_span_id:
+          type: string
+          nullable: true
+          example: spn_root
+        metadata:
+          type: object
+          example:
+            app: support-bot
+            env: prod
+            version: 1.8.2
+
+    TraceListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trace'
+        next_cursor:
+          type: string
+          nullable: true
+          example: cursor_xyz123
+
+    Span:
+      type: object
+      required:
+        - id
+        - trace_id
+        - kind
+        - name
+        - status
+        - started_at
+        - ended_at
+      properties:
+        id:
+          type: string
+          example: spn_01JABC...
+        trace_id:
+          type: string
+          example: trc_01JABC...
+        parent_span_id:
+          type: string
+          nullable: true
+          example: spn_root
+        kind:
+          type: string
+          enum: [llm, tool, retrieval, policy, memory, router, custom]
+          example: llm
+        name:
+          type: string
+          example: openai.chat.completions
+        status:
+          type: string
+          enum: [ok, error, blocked]
+          example: ok
+        started_at:
+          type: string
+          format: date-time
+          example: "2026-06-19T08:00:01Z"
+        ended_at:
+          type: string
+          format: date-time
+          example: "2026-06-19T08:00:02Z"
+        input:
+          type: object
+          example:
+            messages:
+              - role: user
+                content: Resume este texto
+        output:
+          type: object
+          example:
+            content: "..."
+        metrics:
+          type: object
+          properties:
+            latency_ms:
+              type: number
+              example: 812
+            input_tokens:
+              type: number
+              example: 220
+            output_tokens:
+              type: number
+              example: 94
+            cost_usd:
+              type: number
+              example: 0.0048
+        attributes:
+          type: object
+          example:
+            model: gpt-4.1-mini
+            temperature: 0.2
+
+    SpanIngest:
+      type: object
+      required:
+        - trace_id
+        - kind
+        - name
+        - status
+        - started_at
+      properties:
+        trace_id:
+          type: string
+          example: trc_01JABC...
+        parent_span_id:
+          type: string
+          nullable: true
+          example: spn_root
+        kind:
+          type: string
+          enum: [llm, tool, retrieval, policy, memory, router, custom]
+          example: tool
+        name:
+          type: string
+          example: fetch_order_status
+        status:
+          type: string
+          enum: [ok, error, blocked]
+          example: ok
+        started_at:
+          type: string
+          format: date-time
+          example: "2026-06-19T08:00:01Z"
+        ended_at:
+          type: string
+          format: date-time
+          example: "2026-06-19T08:00:02Z"
+        input:
+          type: object
+          example:
+            order_id: A123
+        output:
+          type: object
+          example:
+            state: in_transit
+        metrics:
+          type: object
+          properties:
+            latency_ms:
+              type: number
+              example: 120
+            input_tokens:
+              type: number
+            output_tokens:
+              type: number
+            cost_usd:
+              type: number
+        attributes:
+          type: object
+          example:
+            tool_name: orders-api
+
+    Run:
+      type: object
+      required:
+        - id
+        - tenant_id
+        - app_id
+        - status
+        - input
+        - output
+        - trace_id
+        - started_at
+        - ended_at
+      properties:
+        id:
+          type: string
+          example: run_456
+        tenant_id:
+          type: string
+          example: ten_123
+        app_id:
+          type: string
+          example: app_support_bot
+        status:
+          type: string
+          example: completed
+        input:
+          type: object
+          example:
+            user_message: "¿Cuál es el estado de mi pedido?"
+        output:
+          type: object
+          example:
+            answer: "Tu pedido está en tránsito."
+        trace_id:
+          type: string
+          example: trc_01JABC...
+        policy_result:
+          type: string
+          nullable: true
+          example: allow
+        started_at:
+          type: string
+          format: date-time
+          example: "2026-06-19T08:00:00Z"
+        ended_at:
+          type: string
+          format: date-time
+          example: "2026-06-19T08:00:03Z"
+
+    RunCreate:
+      type: object
+      required:
+        - app_id
+        - input
+      properties:
+        app_id:
+          type: string
+          example: app_support_bot
+        input:
+          type: object
+          example:
+            user_message: "¿Dónde está mi pedido?"
+        context:
+          type: object
+          example:
+            user_id: usr_123
+            session_id: ses_456
+
+    RunReplayRequest:
+      type: object
+      required:
+        - mode
+      properties:
+        mode:
+          type: string
+          enum: [deterministic, stochastic]
+          example: deterministic
+        seed:
+          type: integer
+          example: 42
+        use_recorded_tools:
+          type: boolean
+          example: true
+
+    RunReplayResponse:
+      type: object
+      required:
+        - replay_id
+        - status
+      properties:
+        replay_id:
+          type: string
+          example: rpl_001
+        status:
+          type: string
+          example: queued
+
+    Policy:
+      type: object
+      required:
+        - id
+        - tenant_id
+        - name
+        - scope
+        - definition
+        - action
+        - enabled
+      properties:
+        id:
+          type: string
+          example: pol_pii_v1
+        tenant_id:
+          type: string
+          example: ten_123
+        name:
+          type: string
+          example: pii-blocking-v1
+        scope:
+          type: string
+          enum: [input, output, both]
+          example: output
+        definition:
+          $ref: '#/components/schemas/PolicyDefinition'
+        action:
+          type: string
+          enum: [allow, redact, warn, block]
+          example: block
+        enabled:
+          type: boolean
+          example: true
+
+    PolicyCreate:
+      type: object
+      required:
+        - name
+        - scope
+        - definition
+        - action
+        - enabled
+      properties:
+        name:
+          type: string
+          example: pii-blocking-v1
+        scope:
+          type: string
+          enum: [input, output, both]
+          example: output
+        definition:
+          $ref: '#/components/schemas/PolicyDefinition'
+        action:
+          type: string
+          enum: [allow, redact, warn, block]
+          example: block
+        enabled:
+          type: boolean
+          example: true
+
+    PolicyDefinition:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [regex, model, custom]
+          example: regex
+        patterns:
+          type: array
+          items:
+            type: string
+          example: [email, ssn, credit_card]
+
+    PolicyEvaluateRequest:
+      type: object
+      required:
+        - subject_type
+        - content
+      properties:
+        subject_type:
+          type: string
+          enum: [input, output]
+          example: output
+        content:
+          type: string
+          example: user@example.com
+
+    PolicyEvaluateResponse:
+      type: object
+      required:
+        - evaluation_id
+        - matched
+      properties:
+        evaluation_id:
+          type: string
+          example: evl_val_999
+        matched:
+          type: boolean
+          example: true
+        details:
+          type: object
+          properties:
+            matched_value:
+              type: string
+              example: user@example.com
+            pattern:
+              type: string
+              example: email
+
+    PolicyViolation:
+      type: object
+      required:
+        - id
+        - tenant_id
+        - policy_id
+        - severity
+        - decision
+        - subject_type
+        - created_at
+      properties:
+        id:
+          type: string
+          example: vio_01JABC...
+        tenant_id:
+          type: string
+          example: ten_123
+        policy_id:
+          type: string
+          example: pol_pii_v1
+        run_id:
+          type: string
+          nullable: true
+          example: run_456
+        trace_id:
+          type: string
+          nullable: true
+          example: trc_01JABC...
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+          example: high
+        decision:
+          type: string
+          enum: [allow, redact, warn, block]
+          example: block
+        subject_type:
+          type: string
+          enum: [input, output]
+          example: output
+        subject_path:
+          type: string
+          example: response.content
+        evidence:
+          type: object
+          properties:
+            matched_rule:
+              type: string
+              example: pii_email
+            matched_value:
+              type: string
+              example: user@example.com
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-06-19T08:00:02Z"
+
+    EvalJob:
+      type: object
+      required:
+        - id
+        - tenant_id
+        - name
+        - dataset_id
+        - status
+        - mode
+        - judge
+        - created_at
+      properties:
+        id:
+          type: string
+          example: evl_789
+        tenant_id:
+          type: string
+          example: ten_123
+        name:
+          type: string
+          example: support-bot-regression-june
+        dataset_id:
+          type: string
+          example: ds_001
+        status:
+          type: string
+          enum: [pending, running, completed, failed]
+          example: running
+        mode:
+          type: string
+          enum: [offline, online]
+          example: offline
+        judge:
+          $ref: '#/components/schemas/EvalJudge'
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-06-19T08:10:00Z"
+
+    EvalJobCreate:
+      type: object
+      required:
+        - name
+        - dataset_id
+        - mode
+        - judge
+      properties:
+        name:
+          type: string
+          example: prod-regression-v1
+        dataset_id:
+          type: string
+          example: ds_001
+        mode:
+          type: string
+          enum: [offline, online]
+          example: offline
+        judge:
+          $ref: '#/components/schemas/EvalJudge'
+
+    EvalJudge:
+      type: object
+      required:
+        - type
+        - model
+      properties:
+        type:
+          type: string
+          example: llm_judge
+        model:
+          type: string
+          example: gpt-4.1-mini
+
+    EvalCase:
+      type: object
+      required:
+        - input
+      properties:
+        case_id:
+          type: string
+          example: case_17
+        input:
+          type: object
+          example:
+            user_message: "Reclamar retraso de entrega"
+        expected_output:
+          type: object
+          nullable: true
+          example:
+            answer: "Sentimos el retraso..."
+
+    EvalResult:
+      type: object
+      required:
+        - eval_job_id
+        - case_id
+        - trace_id
+        - scores
+        - pass
+      properties:
+        eval_job_id:
+          type: string
+          example: evl_789
+        case_id:
+          type: string
+          example: case_17
+        trace_id:
+          type: string
+          example: trc_01JABC...
+        scores:
+          type: object
+          required:
+            - correctness
+            - coherence
+            - tool_usage
+            - policy_compliance
+          properties:
+            correctness:
+              type: integer
+              minimum: 1
+              maximum: 5
+              example: 4
+            coherence:
+              type: integer
+              minimum: 1
+              maximum: 5
+              example: 5
+            tool_usage:
+              type: integer
+              minimum: 1
+              maximum: 5
+              example: 5
+            policy_compliance:
+              type: integer
+              minimum: 1
+              maximum: 5
+              example: 5
+        pass:
+          type: boolean
+          example: true
+        notes:
+          type: string
+          example: Respuesta correcta y conforme.
+
+    Dataset:
+      type: object
+      required:
+        - id
+        - tenant_id
+        - name
+        - created_at
+      properties:
+        id:
+          type: string
+          example: ds_001
+        tenant_id:
+          type: string
+          example: ten_123
+        name:
+          type: string
+          example: support-bot-regression-june
+        description:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-06-19T08:00:00Z"
+
+    DatasetCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: support-bot-regression-june
+        description:
+          type: string
+          example: Golden dataset for testing support responses
+
+    DatasetCasesListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvalCase'
+        next_cursor:
+          type: string
+          nullable: true
+          example: cursor_xyz999
