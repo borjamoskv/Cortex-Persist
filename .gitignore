@@ -115,6 +115,8 @@ Thumbs.db
 .lsp/
 .qodo/
 .vercel/
+.wrangler/
+frontend/.wrangler/
 
 # ── Agent internals ──────────────────────────────
 .agent/
