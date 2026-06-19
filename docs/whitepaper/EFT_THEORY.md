@@ -38,3 +38,18 @@ class EFTVerificationGuardAdapter:
 ```
 
 **Resultado:** Una afirmación sin evidencia matemática o empírica (`justification` ausente) no llega a la fase de consenso (Sanedrín) ni toca el Ledger Criptográfico. Es incinerada por entropía ilegítima.
+
+---
+
+## 3. Defensa Epistemológica (Anti-Circularidad y Decaimiento)
+Para evitar los dos mayores vectores de ataque contra los repositorios de conocimiento (la tautología y la obsolescencia), la EFT impone dos fronteras inviolables:
+
+### 3.1. Guerra contra la Justificación Circular
+Un agente malicioso o alucinado puede generar una `justification` del tipo *"Esto es cierto porque el modelo lo deduce"*. Para destruir este ataque de *Epistemic Circularity*, el `EFTVerificationGuardAdapter` analiza la estructura de la justificación. Se exige que la evidencia contenga al menos un anclaje verificable (marcadores físicos o matemáticos):
+- Firma Criptográfica (`sha3_256:`, `ed25519:`)
+- Demostración Formal (`z3_proof:`)
+- Evidencia Empírica Medible (`metric:`, `test_hash:`)
+
+### 3.2. Decaimiento Epistémico (Half-Life)
+La Falsedad de la Verdad Permanente: En la ciencia estricta, ninguna verdad es eterna; solo ha sobrevivido a todos los intentos de falsación *hasta la fecha*. Por tanto, el estado `ACCEPTED` está prohibido si no incluye un `epistemic_half_life`.
+- Un *KnowledgeObject* `ACCEPTED` caduca (transición automática a `UNVERIFIED` o `FALSIFIED`) cuando su half-life expira, forzando al sistema a re-evaluar la premisa ante un mundo mutante. Un repositorio sin decaimiento epistémico es un dogma, no una base de conocimiento.

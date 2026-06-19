@@ -291,6 +291,25 @@ class EFTVerificationGuardAdapter:
                 "[EFT] Epistemic Fault: Rejecting naked claim. "
                 "KnowledgeObject requires explicit 'justification' to pass verification."
             )
+
+        # 1. Epistemic Half-Life Enforcement for ACCEPTED states
+        verification_status = meta.get("verification_status", "UNVERIFIED")
+        if verification_status == "ACCEPTED":
+            half_life = meta.get("epistemic_half_life")
+            if not half_life:
+                raise ValueError(
+                    "[EFT] Epistemic Fault: ACCEPTED state requires 'epistemic_half_life'. "
+                    "Permanent truths are forbidden. Set a temporal or cycle-based decay condition."
+                )
+
+        # 2. Anti-Circularity Check (Structural Evidence)
+        evidence_markers = ["sha3_256:", "ed25519:", "z3_proof:", "metric:", "test_hash:"]
+        has_evidence = any(marker in justification.lower() for marker in evidence_markers)
+        if not has_evidence:
+            raise ValueError(
+                "[EFT] Epistemic Circularity: Justification lacks structural evidence. "
+                f"Must include one of verifiable markers: {evidence_markers}."
+            )
             
         if fact_type == "code" and not provenance:
             raise ValueError(
