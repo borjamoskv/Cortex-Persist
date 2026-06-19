@@ -70,33 +70,42 @@ CORTEX-PERSIST intercepts stochastic text, enforces a deterministic shield via Z
 | **Agent Liability** | Ambiguous reconstruction | **Mathematically Defensible Lineage** |
 | **Verification** | Manual log diving | **O(1) Portable JSON Audit Packs** |
 
-### ZERO-FRICTION SOVEREIGN INTEGRATION
-Inject the CORTEX memory substrate into any existing agent pipeline via our magic decorator.
+### ZERO-FRICTION CI/CD GATEWAY INTEGRATION
+Audit and gate LLM code changes in your pipelines with minimal boilerplate.
 
 ```python
-from cortex import CortexEngine
+from cortex.gateway.code_governance import CodeGovernanceGateway
+from cortex.auth.enterprise_identity import SovereignIdentity
 
-engine = CortexEngine()
+# Initialize the CI Firewall
+gateway = CodeGovernanceGateway(ledger=ledger, rbac_guard=rbac)
 
-# Every observation is sealed into an append-only hash-chain
-engine.observe("user_query", "What is the capital of France?")
-engine.observe("agent_response", "Paris")
+# Evaluate an incoming AI-generated code change (Pull Request)
+audit = await gateway.evaluate_pull_request(
+    identity=SovereignIdentity(tenant_id="acme_corp", actor_id="ci_bot", role="CI_GATEWAY"),
+    pr_id="pr-102",
+    pr_payload={
+        "files_changed": 18,
+        "additions": 1500,
+        "deletions": 200,
+        "commits": 1,
+        "includes_tests": False
+    }
+)
 
-# Cryptographic proof of what happened
-proof = engine.seal()
-print(proof.hash)        # SHA-256 of the full execution trace
-print(proof.verify())    # True — tamper-evident by construction
+print(audit["status"])        # REJECTED (entropy exceeds policy threshold)
+print(audit["audit_proof"])    # SHA-256 cryptographic proof of the decision
 ```
 
 ```python
-# Or use the magic decorator — zero-friction drop-in for any agent
+# Decorate deployment tasks to enforce audit seals automatically
 from cortex.magic import sovereign_persist
 
 @sovereign_persist(strict=True)
-async def my_agent(prompt: str):
-    response = await llm.generate(prompt)
-    return response
-    # CORTEX intercepts, seals, and logs cryptographically. Zero boilerplate.
+async def deploy_patch(patch_payload: dict):
+    # CORTEX automatically intercepts, validates against policy guards, 
+    # logs the commit metadata to the ledger, and returns the sealed receipt.
+    return execute_deploy(patch_payload)
 ```
 
 ---
