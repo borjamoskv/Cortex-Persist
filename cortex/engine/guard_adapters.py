@@ -266,12 +266,80 @@ class ArchaeologyGuardAdapter:
             )
 
 
+class EFTValidatorGuard:
+    """Validator: checks structure and required metadata fields."""
+
+    async def verify(self, content: str, project: str, fact_type: str, meta: dict[str, Any]) -> None:
+        justification = meta.get("justification", "")
+        just_str = str(justification).strip()
+        if not just_str:
+            raise ValueError(
+                "[EFT-Validator] Rejecting naked claim. KnowledgeObject requires explicit 'justification'."
+            )
+
+        # Epistemic Half-Life Enforcement for ACCEPTED states
+        verification_status = meta.get("verification_status", "UNVERIFIED")
+        if verification_status == "ACCEPTED":
+            half_life = meta.get("epistemic_half_life") or meta.get("confidence_half_life")
+            if not half_life:
+                raise ValueError(
+                    "[EFT-Validator] ACCEPTED state requires 'epistemic_half_life' or 'confidence_half_life'."
+                )
+
+
+class EFTEpistemologistGuard:
+    """Epistemologist: checks for anti-circularity and structural evidence."""
+
+    async def verify(self, content: str, project: str, fact_type: str, meta: dict[str, Any]) -> None:
+        justification = meta.get("justification", "")
+        just_str = ""
+        evidence_links = []
+        if isinstance(justification, dict):
+            just_str = justification.get("description", "")
+            evidence_links = justification.get("evidence_links", [])
+        elif hasattr(justification, "description"):
+            just_str = getattr(justification, "description", "")
+            evidence_links = getattr(justification, "evidence_links", [])
+        else:
+            just_str = str(justification)
+
+        just_str_lower = just_str.lower()
+        evidence_markers = ["sha3_256:", "ed25519:", "z3_proof:", "metric:", "test_hash:"]
+        has_evidence = any(marker in just_str_lower for marker in evidence_markers) or len(evidence_links) > 0
+        if not has_evidence:
+            raise ValueError(
+                "[EFT-Epistemologist] Epistemic Circularity: Justification lacks structural evidence or links."
+            )
+
+
+class EFTCryptographerGuard:
+    """Cryptographer: checks provenance, CORTEX-TAINT and cryptographic signatures."""
+
+    async def verify(self, content: str, project: str, fact_type: str, meta: dict[str, Any]) -> None:
+        provenance = meta.get("provenance")
+        if fact_type == "code" and not provenance:
+            raise ValueError(
+                "[EFT-Cryptographer] Critical KnowledgeObject (code) lacks 'provenance'."
+            )
+        if provenance and not (provenance.startswith("taint:") or provenance.startswith("sig:") or len(provenance) > 10):
+            raise ValueError(
+                "[EFT-Cryptographer] Provenance format is invalid."
+            )
+
+
 class EFTVerificationGuardAdapter:
     """EFT Protocol -> StoreGuard protocol.
 
-    Rejects naked claims (KnowledgeObjects) without justification or evidence.
-    Implements the Epistemic Fault Tolerance (EFT) pipeline requirement.
+    Orchestrates a Quorum (2/3 consensus) of three sub-guards:
+    - EFTValidatorGuard: Syntax and metadata validation.
+    - EFTEpistemologistGuard: Evidence circularity and link checks.
+    - EFTCryptographerGuard: Provenance and taint checks.
     """
+
+    def __init__(self) -> None:
+        self.validator = EFTValidatorGuard()
+        self.epistemologist = EFTEpistemologistGuard()
+        self.cryptographer = EFTCryptographerGuard()
 
     async def check(
         self,
@@ -283,38 +351,29 @@ class EFTVerificationGuardAdapter:
         *,
         tenant_id: str = "default",
     ) -> None:
-        justification = meta.get("justification", "").strip()
-        provenance = meta.get("provenance")
+        guards = [
+            ("Validator", self.validator),
+            ("Epistemologist", self.epistemologist),
+            ("Cryptographer", self.cryptographer),
+        ]
 
-        if not justification:
+        failures = []
+        for name, guard in guards:
+            try:
+                await guard.verify(content, project, fact_type, meta)
+            except Exception as e:
+                failures.append((name, str(e)))
+
+        if len(failures) >= 2:
+            reasons = "; ".join(f"[{name}] {err}" for name, err in failures)
             raise ValueError(
-                "[EFT] Epistemic Fault: Rejecting naked claim. "
-                "KnowledgeObject requires explicit 'justification' to pass verification."
+                f"[EFT-Quorum] Epistemic Quorum failed (less than 2/3 passes). Failures: {reasons}"
             )
 
-        # 1. Epistemic Half-Life Enforcement for ACCEPTED states
-        verification_status = meta.get("verification_status", "UNVERIFIED")
-        if verification_status == "ACCEPTED":
-            half_life = meta.get("epistemic_half_life")
-            if not half_life:
-                raise ValueError(
-                    "[EFT] Epistemic Fault: ACCEPTED state requires 'epistemic_half_life'. "
-                    "Permanent truths are forbidden. Set a temporal or cycle-based decay condition."
-                )
-
-        # 2. Anti-Circularity Check (Structural Evidence)
-        evidence_markers = ["sha3_256:", "ed25519:", "z3_proof:", "metric:", "test_hash:"]
-        has_evidence = any(marker in justification.lower() for marker in evidence_markers)
-        if not has_evidence:
-            raise ValueError(
-                "[EFT] Epistemic Circularity: Justification lacks structural evidence. "
-                f"Must include one of verifiable markers: {evidence_markers}."
-            )
-            
-        if fact_type == "code" and not provenance:
-            raise ValueError(
-                "[EFT] Epistemic Fault: Critical KnowledgeObject (code) lacks 'provenance'. "
-                "SAGA aborted to prevent Context Rot."
+        if len(failures) == 1:
+            name, err = failures[0]
+            logger.warning(
+                f"[EFT-Quorum] Quorum met (2/3) but {name} rejected: {err}"
             )
 
 

@@ -1,19 +1,64 @@
-# [C5-REAL] Exergy-Maximized
+from __future__ import annotations
 import json
+import enum
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Union, List
 
-__all__ = ["Fact", "row_to_fact", "KnowledgeObject", "row_to_knowledge_object"]
+__all__ = ["Fact", "row_to_fact", "KnowledgeObject", "row_to_knowledge_object", "EvidenceType", "Justification"]
+
+
+class EvidenceType(str, enum.Enum):
+    OBSERVATION = "OBSERVATION"
+    DEDUCTION = "DEDUCTION"
+    SIMULATION = "SIMULATION"
+    AUTHORITY = "AUTHORITY"
 
 
 @dataclass
+class Justification:
+    evidence_type: EvidenceType
+    evidence_links: List[str] = field(default_factory=list)
+    confidence_score: float = 1.0
+    falsification_conditions: List[str] = field(default_factory=list)
+    description: str = ""
+
+    def to_dict(self) -> dict:
+        return {
+            "evidence_type": self.evidence_type.value if isinstance(self.evidence_type, EvidenceType) else self.evidence_type,
+            "evidence_links": self.evidence_links,
+            "confidence_score": self.confidence_score,
+            "falsification_conditions": self.falsification_conditions,
+            "description": self.description,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> Justification:
+        ev_type_str = data.get("evidence_type", "OBSERVATION")
+        try:
+            ev_type = EvidenceType(ev_type_str)
+        except ValueError:
+            ev_type = EvidenceType.OBSERVATION
+        
+        return cls(
+            evidence_type=ev_type,
+            evidence_links=data.get("evidence_links", []),
+            confidence_score=float(data.get("confidence_score", 1.0)),
+            falsification_conditions=data.get("falsification_conditions", []),
+            description=data.get("description", ""),
+        )
+
+    def __str__(self) -> str:
+        return self.description or f"{self.evidence_type.value} justification with {len(self.evidence_links)} links"
+
+
+@dataclass(init=False)
 class KnowledgeObject:
     id: int | str
     tenant_id: str
     project: str
     claim: str
     fact_type: str
-    justification: str = ""
+    justification: Justification | str = ""
     verification_status: str = "UNVERIFIED"
     evidence_links: list[str] = field(default_factory=list)
     provenance: str | None = None
@@ -40,6 +85,101 @@ class KnowledgeObject:
     semantic_status: str | None = None
     semantic_error: str | None = None
     causal_depth: int | str = 0
+    accepted_at: str | None = None
+    confidence_half_life: str | int | float | None = "24h"
+
+    def __init__(
+        self,
+        id: int | str,
+        tenant_id: str,
+        project: str,
+        claim: str = "",
+        fact_type: str = "knowledge",
+        justification: Union[Justification, str] = "",
+        verification_status: str = "UNVERIFIED",
+        evidence_links: list[str] = None,
+        provenance: str | None = None,
+        acceptance_certificate: dict = None,
+        tags: list[str] = None,
+        meta: dict = None,
+        created_at: str | None = None,
+        updated_at: str | None = None,
+        hash: str | None = None,
+        valid_from: str | None = None,
+        valid_until: str | None = None,
+        source: str | None = None,
+        confidence: str = "C3",
+        quadrant: str = "ACTIVE",
+        storage_tier: str = "HOT",
+        exergy_score: float = 1.0,
+        category: str = "general",
+        parent_id: int | str | None = None,
+        parent_decision_id: int | str | None = None,
+        relation_type: str | None = None,
+        yield_score: float = 1.0,
+        consensus_score: float = 1.0,
+        tx_id: int | None = None,
+        semantic_status: str | None = None,
+        semantic_error: str | None = None,
+        causal_depth: int | str = 0,
+        accepted_at: str | None = None,
+        confidence_half_life: str | int | float | None = "24h",
+        **kwargs: Any,
+    ):
+        self.id = id
+        self.tenant_id = tenant_id
+        self.project = project
+        self.fact_type = fact_type
+        
+        # Handle 'content' fallback to 'claim'
+        self.claim = kwargs.get("content", claim)
+        
+        # Handle is_tombstoned and is_quarantined fallbacks to verification_status
+        is_tombstoned = kwargs.get("is_tombstoned")
+        is_quarantined = kwargs.get("is_quarantined")
+        if is_tombstoned is not None:
+            if is_tombstoned:
+                verification_status = "FALSIFIED"
+            elif verification_status == "FALSIFIED":
+                verification_status = "UNVERIFIED"
+        if is_quarantined is not None:
+            if is_quarantined:
+                verification_status = "UNVERIFIED"
+            elif verification_status == "UNVERIFIED":
+                verification_status = "ACCEPTED"
+                
+        self.verification_status = verification_status
+        self.evidence_links = evidence_links if evidence_links is not None else []
+        self.provenance = provenance
+        self.acceptance_certificate = acceptance_certificate if acceptance_certificate is not None else {}
+        self.tags = tags if tags is not None else []
+        self.meta = meta if meta is not None else {}
+        self.created_at = created_at
+        self.updated_at = updated_at
+        self.hash = hash
+        self.valid_from = valid_from
+        self.valid_until = valid_until
+        self.source = source
+        self.confidence = confidence
+        self.quadrant = quadrant
+        self.storage_tier = storage_tier
+        self.exergy_score = exergy_score
+        self.category = category
+        self.parent_id = parent_id
+        self.parent_decision_id = parent_decision_id
+        self.relation_type = relation_type
+        self.yield_score = yield_score
+        self.consensus_score = consensus_score
+        self.tx_id = tx_id
+        self.semantic_status = semantic_status
+        self.semantic_error = semantic_error
+        self.causal_depth = causal_depth
+        self.accepted_at = accepted_at
+        self.confidence_half_life = confidence_half_life
+        
+        # Process justification mapping
+        self.justification = justification
+        self.__post_init__()
 
     @property
     def content(self) -> str:
@@ -57,11 +197,69 @@ class KnowledgeObject:
     def is_quarantined(self) -> bool:
         return self.verification_status == "UNVERIFIED"
 
+    @property
+    def is_stale(self) -> bool:
+        if self.verification_status != "ACCEPTED" or not self.accepted_at:
+            return False
+        from datetime import datetime, timezone
+        try:
+            # Parse accepted_at string
+            if isinstance(self.accepted_at, str):
+                clean_dt = self.accepted_at.replace("Z", "+00:00")
+                dt = datetime.fromisoformat(clean_dt)
+            else:
+                dt = self.accepted_at
+            
+            if dt.tzinfo is not None:
+                now = datetime.now(timezone.utc)
+            else:
+                now = datetime.utcnow()
+                
+            elapsed = (now - dt).total_seconds()
+            
+            # Determine half-life duration in seconds
+            half_life_seconds = 86400.0  # default 24h
+            if self.confidence_half_life:
+                if isinstance(self.confidence_half_life, (int, float)):
+                    half_life_seconds = float(self.confidence_half_life)
+                elif isinstance(self.confidence_half_life, str):
+                    hl_str = self.confidence_half_life.strip().lower()
+                    if hl_str.endswith("h"):
+                        half_life_seconds = float(hl_str[:-1]) * 3600
+                    elif hl_str.endswith("m"):
+                        half_life_seconds = float(hl_str[:-1]) * 60
+                    elif hl_str.endswith("s"):
+                        half_life_seconds = float(hl_str[:-1])
+                    elif hl_str.endswith("d"):
+                        half_life_seconds = float(hl_str[:-1]) * 86400
+                    else:
+                        try:
+                            half_life_seconds = float(hl_str)
+                        except ValueError:
+                            pass
+            return elapsed > half_life_seconds
+        except Exception:
+            return False
+
     def __post_init__(self) -> None:
         if self.parent_id is None and self.parent_decision_id is not None:
             self.parent_id = self.parent_decision_id
         if self.parent_decision_id is None and self.parent_id is not None:
             self.parent_decision_id = self.parent_id
+            
+        # Parse justification into a structured Justification object
+        if isinstance(self.justification, str):
+            val = self.justification.strip()
+            if val.startswith("{") and val.endswith("}"):
+                try:
+                    parsed = json.loads(val)
+                    self.justification = Justification.from_dict(parsed)
+                except Exception:
+                    self.justification = Justification(evidence_type=EvidenceType.OBSERVATION, description=val)
+            else:
+                self.justification = Justification(evidence_type=EvidenceType.OBSERVATION, description=val)
+        elif isinstance(self.justification, dict):
+            self.justification = Justification.from_dict(self.justification)
 
     def is_active(self) -> bool:
         """Evaluate logical validity using valid_until and physical state."""
@@ -74,7 +272,7 @@ class KnowledgeObject:
             "project": self.project,
             "claim": self.claim,
             "content": self.claim,
-            "justification": self.justification,
+            "justification": self.justification.to_dict() if isinstance(self.justification, Justification) else self.justification,
             "verification_status": self.verification_status,
             "evidence_links": self.evidence_links,
             "provenance": self.provenance,
@@ -105,6 +303,9 @@ class KnowledgeObject:
             "is_quarantined": self.is_quarantined,
             "semantic_status": self.semantic_status,
             "semantic_error": self.semantic_error,
+            "accepted_at": self.accepted_at,
+            "confidence_half_life": self.confidence_half_life,
+            "is_stale": self.is_stale,
         }
 
 Fact = KnowledgeObject
@@ -367,6 +568,8 @@ def row_to_knowledge_object(row: tuple) -> KnowledgeObject:
         tx_id=meta.get("tx_id") if isinstance(meta.get("tx_id"), int) else None,
         semantic_status=meta.get("semantic_status", v["semantic_status"]),
         semantic_error=meta.get("semantic_error", v["semantic_error"]),
+        accepted_at=meta.get("accepted_at"),
+        confidence_half_life=meta.get("confidence_half_life", "24h"),
     )
 
 row_to_fact = row_to_knowledge_object

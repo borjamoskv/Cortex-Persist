@@ -1,0 +1,1 @@
+../../legacy_research/cli/compact_cmds.py
