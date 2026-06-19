@@ -53,6 +53,10 @@ impl AtmsGraph {
         self.nodes.len()
     }
 
+    pub fn add_node(&mut self, id: &str) -> PyResult<()> {
+        self.add_belief(id)
+    }
+
     pub fn add_belief(&mut self, id: &str) -> PyResult<()> {
         let id_str = id.to_string();
         self.nodes.entry(id_str.clone()).or_insert(BeliefNode {
