@@ -9,8 +9,8 @@
 
 <h1 align="center">█ CORTEX-PERSIST</h1>
 <p align="center">
-  <strong>CORTEX prevents AI-generated changes from silently breaking production systems.</strong><br>
-  <em>The CI/CD Firewall and Governance Layer that turns probabilistic LLM output into policy-constrained, auditable code mutations.</em>
+  <strong>Cortex Persist is to AI agents what Git was to code.</strong><br>
+  <em>The AI Trust Infrastructure that turns probabilistic LLM output into cryptographically verifiable, tamper-evident decision lineages.</em>
 </p>
 
 <p align="center">
