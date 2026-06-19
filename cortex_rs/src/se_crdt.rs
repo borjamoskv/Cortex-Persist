@@ -1,6 +1,5 @@
 use pyo3::prelude::*;
 use uuid::Uuid;
-use sha2::{Sha256, Digest};
 
 pub const MAX_EVIDENCE: usize = 32;
 
