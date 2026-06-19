@@ -27,14 +27,10 @@ async def health_check():
     """Check resonance of the firewall."""
     return {"status": "resonant", "core": "CORTEX-MVP"}
 
-@app.post("/api/v1/webhook/github")
-async def github_webhook(request: Request):
-    """
-    Ingests GitHub webhook events, extracts the PR diff, and routes it to the 
-    Risk Scoring Engine.
-    """
-    # TODO: Implement webhook parsing -> diff extraction -> engine -> decision -> github comment
-    return {"status": "received"}
+from cortex.api.github_webhook import router as github_router
+
+app.include_router(github_router)
+
 
 @app.post("/api/v1/audit")
 async def audit_pr(payload: PullRequestPayload):
