@@ -20,6 +20,8 @@ def verify_signature(payload_body: bytes, signature_header: str) -> bool:
     expected_signature = "sha256=" + hash_object.hexdigest()
     return hmac.compare_digest(expected_signature, signature_header)
 
+from cortex.llm.evaluator import SemanticRiskEvaluator
+
 async def process_pull_request(payload: Dict[str, Any]):
     """Background task to process the PR risk scoring."""
     action = payload.get("action")
@@ -38,16 +40,19 @@ async def process_pull_request(payload: Dict[str, Any]):
     additions = pr.get("additions", 0)
     deletions = pr.get("deletions", 0)
     changed_files = pr.get("changed_files", 0)
-    commits = pr.get("commits", 0)
     
-    # In a real implementation: 
-    # 1. Fetch the actual diff using the GitHub API
-    # 2. Pass diff to the LLM Semantic Evaluator
-    # 3. Compute Structural Risk Score
-    # 4. Resolve Decision Engine policies
-    # 5. Post comment back to GitHub API
+    churn = additions + deletions
+    structural_entropy = min(1.0, churn / 1000.0) # Dummy proxy
     
-    logger.info(f"PR {pr_id} evaluated. Structural Churn: {additions+deletions} lines across {changed_files} files.")
+    # Evaluate semantics
+    evaluator = SemanticRiskEvaluator()
+    decision = evaluator.evaluate_pr(
+        intent=pr.get("title", "Unknown Intent"),
+        diff="...simulated diff...",
+        structural_entropy=structural_entropy
+    )
+    
+    logger.info(f"PR {pr_id} evaluated. Structural Churn: {churn} lines. Decision: {decision['suggested_action']} (Risk: {decision['risk_level']})")
 
 @router.post("/github")
 async def github_webhook(request: Request, background_tasks: BackgroundTasks):
