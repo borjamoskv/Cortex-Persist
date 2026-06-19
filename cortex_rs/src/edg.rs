@@ -53,7 +53,7 @@ impl EpistemicNode {
 
 #[pyclass]
 pub struct EpistemicGraph {
-    nodes: Arc<DashMap<String, EpistemicNode>>,
+    pub(crate) nodes: Arc<DashMap<String, EpistemicNode>>,
 }
 
 #[pymethods]
