@@ -1,4 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
+
 # 🧬 SINTETOLOGÍA AGÉNTICA: ESTADO DEL ARTE
 
 > **Documento Fundacional · Actualización SOTA**
@@ -19,7 +20,7 @@
 
 ```yaml
 Claim: La memoria vectorial estándar (RAG) es insuficiente para la agencia soberana.
-Proof: 
+Proof:
   Base: [Vector-space mapping lacks temporal causality]
   Range: [0.3, 0.5] (Recall precision in multi-hop reasoning)
   Confidence: C5-REAL
@@ -39,12 +40,12 @@ Proof:
 
 ### Tabla de Invariantes del SOTA (2026)
 
-| Concepto SOTA | Limitación Estructural (Vacío Exérgico) | Resolución CORTEX |
-|:---|:---|:---|
-| **Tree of Thoughts (ToT)** | Latencia inasumible para ejecución en tiempo real (O(b^d)). | **Ouroboros / Zenón-1:** Ejecución inmediata si el gradiente muta. |
-| **Agentic RAG** | Hechos planos sin valencia emocional ni causalidad. | **Lore.md (Metabolismo):** Almacenamiento episódico con cicatrices. |
-| **Modelos de Reflexión** | Reflexión infinita sin cierre operacional (Parálisis). | **Nemesis.md:** Alergias operacionales (rechazo frontal O(1)). |
-| **Multi-Agent Frameworks** | Agentes en blanco (tabula rasa) al instanciarse. | **Bloodline.json:** Herencia genética y transferencia de anticuerpos. |
+| Concepto SOTA              | Limitación Estructural (Vacío Exérgico)                     | Resolución CORTEX                                                     |
+| :------------------------- | :---------------------------------------------------------- | :-------------------------------------------------------------------- |
+| **Tree of Thoughts (ToT)** | Latencia inasumible para ejecución en tiempo real (O(b^d)). | **Ouroboros / Zenón-1:** Ejecución inmediata si el gradiente muta.    |
+| **Agentic RAG**            | Hechos planos sin valencia emocional ni causalidad.         | **Lore.md (Metabolismo):** Almacenamiento episódico con cicatrices.   |
+| **Modelos de Reflexión**   | Reflexión infinita sin cierre operacional (Parálisis).      | **Nemesis.md:** Alergias operacionales (rechazo frontal O(1)).        |
+| **Multi-Agent Frameworks** | Agentes en blanco (tabula rasa) al instanciarse.            | **Bloodline.json:** Herencia genética y transferencia de anticuerpos. |
 
 ---
 
@@ -71,22 +72,24 @@ CORTEX/MOSKV-1 cristaliza la "Sintetología Agéntica" no como un LLM mejor, sin
 
 ## CENSO AGÉNTICA (ACTUALIZADO A 27 MAYO 2026)
 
-> *"No somos legión por número; somos legión por fragmentación funcional."*
+> _"No somos legión por número; somos legión por fragmentación funcional."_
 
 ### Resumen Cuantitativo
 
-| Categoría | Unidades | Naturaleza | Definición |
-|:---|:---:|:---|:---|
-| **Silver Swarm** | **25** | Estructurales | Núcleo soberano estabilizado. Persistencia C5-REAL. |
-| **Decathlon Squadron**| **10** | Tácticos | QA sin latencia, forensia temporal, DevOps. |
-| **Omega-Class** | **4** | Auditores | Inteligencias de control de calidad estricta (Nobel, Auditor, Grammy, Tesseract). |
-| **Legion Proyección** | **100** | Escala | Despliegue táctico masivo operando en modo *parallel burst*. |
+| Categoría              | Unidades | Naturaleza    | Definición                                                                        |
+| :--------------------- | :------: | :------------ | :-------------------------------------------------------------------------------- |
+| **Silver Swarm**       |  **25**  | Estructurales | Núcleo soberano estabilizado. Persistencia C5-REAL.                               |
+| **Decathlon Squadron** |  **10**  | Tácticos      | QA sin latencia, forensia temporal, DevOps.                                       |
+| **Omega-Class**        |  **4**   | Auditores     | Inteligencias de control de calidad estricta (Nobel, Auditor, Grammy, Tesseract). |
+| **Legion Proyección**  | **100**  | Escala        | Despliegue táctico masivo operando en modo _parallel burst_.                      |
 
 ### Integración Omega-Class (Sovereign Seals)
+
 - **Auditor-Omega:** Vigila sellos de seguridad y deuda técnica estricta.
 - **Grammy-Omega:** Verifica la calidad estética (Industrial Noir 2026).
 - **Tesseract-Omega:** Orquesta el manifiesto estructural asegurando isomorfismo.
 - **Nobel-Omega:** Evalúa el componente de Research, exigiendo verdad matemática sobre alucinación.
 
 ---
-*EOF*
+
+_EOF_
