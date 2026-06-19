@@ -605,6 +605,30 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /events:
+    post:
+      summary: Ingest event stream
+      description: Ingests an event to the event stream/bus (Webhook/REST ingress proxy).
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '202':
+          description: Event accepted and queued.
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   securitySchemes:
     BearerAuth:
@@ -1361,3 +1385,42 @@ components:
           type: string
           nullable: true
           example: cursor_xyz999
+
+    Event:
+      type: object
+      required:
+        - event_id
+        - event_type
+        - tenant_id
+        - occurred_at
+        - schema_version
+        - payload
+      properties:
+        event_id:
+          type: string
+          example: evt_01JABC...
+        event_type:
+          type: string
+          enum: [trace.started, span.started, span.ended, policy.violation.detected, eval.job.completed]
+          example: trace.started
+        tenant_id:
+          type: string
+          example: ten_123
+        occurred_at:
+          type: string
+          format: date-time
+          example: "2026-06-19T08:00:00Z"
+        trace_id:
+          type: string
+          nullable: true
+          example: trc_01JABC...
+        run_id:
+          type: string
+          nullable: true
+          example: run_456
+        schema_version:
+          type: string
+          example: "1.0"
+        payload:
+          type: object
+          description: Event payload data mapped by event_type.
