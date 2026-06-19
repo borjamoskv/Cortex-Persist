@@ -1,5 +1,6 @@
 
 pub mod edg;
+pub mod event_schema;
 
 use pyo3::prelude::*;
 use edg::{EpistemicGraph, EpistemicNode, EpistemicStatus};
