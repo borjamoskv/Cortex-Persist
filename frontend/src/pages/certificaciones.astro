@@ -85,7 +85,7 @@ proof:
 					<p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
 						Los auditores de SOC 2 exigen pruebas de que los datos no se han modificado sin autorización y de que existe trazabilidad absoluta de las acciones de los usuarios y sistemas.
 					</p>
-					<ul class="surface-list" style="margin-top: 1.5rem; font-size: 0.9rem; line-height: 1.8;">
+					<ul style="list-style: none; padding: 0; margin-top: 1.5rem; font-size: 0.9rem; line-height: 1.8;">
 						<li>✓ <strong>Atribución Criptográfica:</strong> Cada entrada requiere una firma <code>CORTEX-TAINT</code> única asociada al ID del agente y sesión.</li>
 						<li>✓ <strong>Ledger Inmutable:</strong> La persistencia en SQLite-WAL con hash chain garantiza la imposibilidad de reescribir la historia.</li>
 						<li>✓ <strong>Alertas de Deriva:</strong> Detección inmediata de cualquier alteración en el histórico de decisiones.</li>
@@ -101,7 +101,7 @@ proof:
 					<p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
 						ISO 27001 exige controles estrictos de registro de operaciones (A.8.12) y protección de registros de auditoría. ISO 42001 establece directivas específicas de gobernanza para IA.
 					</p>
-					<ul class="surface-list" style="margin-top: 1.5rem; font-size: 0.9rem; line-height: 1.8;">
+					<ul style="list-style: none; padding: 0; margin-top: 1.5rem; font-size: 0.9rem; line-height: 1.8;">
 						<li>✓ <strong>Protección contra Modificaciones:</strong> Los registros de auditoría son inmutables a nivel lógico y físico.</li>
 						<li>✓ <strong>Mapeo de Dependencias Epistémicas (EDG):</strong> Visibilidad completa sobre las fuentes de datos y las asunciones del modelo.</li>
 						<li>✓ <strong>Gobernanza ISO 42001:</strong> Primitivas de control deterministas sobre decisiones tomadas por enjambres autónomos.</li>
@@ -117,7 +117,7 @@ proof:
 					<p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
 						La legislación europea obliga a los sistemas de IA de alto riesgo a incluir capacidades de registro de eventos automático (record-keeping) y trazabilidad.
 					</p>
-					<ul class="surface-list" style="margin-top: 1.5rem; font-size: 0.9rem; line-height: 1.8;">
+					<ul style="list-style: none; padding: 0; margin-top: 1.5rem; font-size: 0.9rem; line-height: 1.8;">
 						<li>✓ <strong>Log automático de decisiones:</strong> Captura transparente de estados, embeddings, y prompts en cada ciclo de inferencia.</li>
 						<li>✓ <strong>Reconstrucción Temporal:</strong> APIs nativas para recrear el estado exacto del agente en cualquier timestamp histórico.</li>
 						<li>✓ <strong>Score de Cumplimiento:</strong> Verificación de integridad y completitud de logs integrada directamente en la CLI.</li>
