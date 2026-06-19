@@ -11,7 +11,7 @@ pub mod belief_scheduler;
 use pyo3::prelude::*;
 use belief_object::{BeliefObject, BeliefState, RelationType, ProvenanceEnvelope, BeliefRelation};
 use atms::AtmsGraph;
-use smt::SmtLeaf;
+use smt::{SmtLeaf, SparseMerkleTree};
 use ultramap::UltramapSubstrate;
 use belief_scheduler::BeliefPlaneScheduler;
 
@@ -25,6 +25,7 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<BeliefObject>()?;
     m.add_class::<AtmsGraph>()?;
     m.add_class::<SmtLeaf>()?;
+    m.add_class::<SparseMerkleTree>()?;
     m.add_class::<UltramapSubstrate>()?;
     m.add_class::<BeliefPlaneScheduler>()?;
     m.add_function(wrap_pyfunction!(storage_guard::validate_proposal, m)?)?;
