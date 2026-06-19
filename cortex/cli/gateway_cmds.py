@@ -53,60 +53,106 @@ def health(db: str, as_json: bool) -> None:
 
 cli.add_command(gateway_cmds)
 
-@gateway_cmds.command("evaluate")
-@click.option("--diff", default="HEAD~1", help="Git reference to compare against")
-@click.option("--intent", default="", help="The original prompt/intent used to generate the change")
-def evaluate(diff: str, intent: str) -> None:
-    """Evaluates the entropy of the current changes against a git reference."""
+@gateway_cmds.command("audit")
+@click.option("--pr-id", required=True, help="Pull Request ID")
+@click.option("--tenant", default="acme_corp", help="Tenant ID")
+@click.option("--additions", type=int, default=None, help="Explicit additions override")
+@click.option("--deletions", type=int, default=None, help="Explicit deletions override")
+@click.option("--files-changed", type=int, default=None, help="Explicit files changed override")
+@click.option("--commits", type=int, default=None, help="Explicit commit count override")
+@click.option("--includes-tests", type=bool, is_flag=True, default=False, help="Flag if PR includes tests")
+@click.option("--target-branch", default="origin/main", help="Git branch to diff against if auto-detecting")
+@click.option("--db", default="/tmp/cortex_gateway.db", help="Database path (ephemeral by default)")
+def audit(pr_id: str, tenant: str, additions: int | None, deletions: int | None, files_changed: int | None, commits: int | None, includes_tests: bool, target_branch: str, db: str) -> None:
+    """Audits an AI-generated Pull Request for entropy and issues a cryptographic seal."""
+    import asyncio
+    import aiosqlite
+    from cortex.audit.ledger import EnterpriseAuditLedger
+    from cortex.auth.enterprise_identity import SovereignIdentity
+    from cortex.guards.enterprise_guard import EnterpriseRBACGuard
+    from cortex.gateway.code_governance import CodeGovernanceGateway
+
     workspace_root = os.getcwd()
     
+    # 1. HYBRID DIFF PARSING
+    auto_add = 0
+    auto_del = 0
+    auto_files = 0
+    auto_commits = 1
+    
     try:
-        diff_cmd = ["git", "diff", diff]
-        diff_output = subprocess.check_output(diff_cmd, text=True)
+        if additions is None or deletions is None or files_changed is None:
+            cmd = ["git", "diff", "--numstat", target_branch]
+            out = subprocess.check_output(cmd, cwd=workspace_root, text=True, stderr=subprocess.DEVNULL)
+            lines = out.strip().split("\n")
+            auto_files = len([l for l in lines if l.strip()])
+            for line in lines:
+                parts = line.split()
+                if len(parts) >= 2:
+                    auto_add += int(parts[0]) if parts[0].isdigit() else 0
+                    auto_del += int(parts[1]) if parts[1].isdigit() else 0
+                    
+        if commits is None:
+            c_cmd = ["git", "rev-list", "--count", f"{target_branch}..HEAD"]
+            c_out = subprocess.check_output(c_cmd, cwd=workspace_root, text=True, stderr=subprocess.DEVNULL)
+            auto_commits = int(c_out.strip())
+    except Exception:
+        # Fallback silently if git history is detached or shallow
+        pass
         
-        files_cmd = ["git", "diff", "--name-only", diff]
-        modified_files = subprocess.check_output(files_cmd, text=True).splitlines()
-    except subprocess.CalledProcessError as e:
-        console.print(f"[bold red]Failed to execute git diff: {e}[/bold red]")
-        exit(1)
-
-    if not modified_files:
-        console.print("[bold yellow]No modified files found. Entropy delta is zero.[/bold yellow]")
-        exit(0)
-
-    console.print(f"[bold blue]Evaluating Entropy Delta for {len(modified_files)} files...[/bold blue]")
-
-    core = EntropyCore(workspace_root)
-    guard = EntropyGuardEngine()
-    decision = DecisionEngine()
-
-    state = core.evaluate_entropy(diff_content=diff_output, intent_prompt=intent, modified_files=modified_files)
-    guard_decision = guard.evaluate(state)
-    resolution = decision.resolve(state, guard_decision)
-
-    table = Table(title="CORTEX Entropy State", show_header=True)
-    table.add_column("Metric", style="cyan")
-    table.add_column("Value", style="magenta")
+    payload = {
+        "additions": additions if additions is not None else auto_add,
+        "deletions": deletions if deletions is not None else auto_del,
+        "files_changed": files_changed if files_changed is not None else auto_files,
+        "commits": commits if commits is not None else auto_commits,
+        "includes_tests": includes_tests
+    }
     
-    table.add_row("Structural Entropy", f"{state.structural:.3f}")
-    table.add_row("Semantic Drift", f"{state.semantic:.3f}")
-    table.add_row("Operational Entropy", f"{state.operational:.3f}")
-    table.add_row("Total System Entropy", f"{state.total:.3f}")
-    table.add_row("Regime", f"{state.regime.value}")
+    async def run_audit():
+        async with aiosqlite.connect(db) as conn:
+            ledger = EnterpriseAuditLedger(conn)
+            await ledger.ensure_table()
+            rbac = EnterpriseRBACGuard()
+            gateway = CodeGovernanceGateway(ledger=ledger, rbac_guard=rbac)
+            
+            identity = SovereignIdentity(tenant_id=tenant, actor_id="ci_runner", role="CI_GATEWAY")
+            
+            return await gateway.evaluate_pull_request(identity, pr_id, payload)
+            
+    result = asyncio.run(run_audit())
     
-    console.print(table)
-
-    color = "green" if resolution.action == GuardAction.ALLOW else "red" if resolution.action == GuardAction.BLOCK else "yellow"
+    # 2. MARKDOWN GENERATION
+    md = [
+        f"## 🧯 CORTEX CI/CD Firewall Report",
+        f"**PR ID:** `{result['pr_id']}` | **Status:** `{'✅ APPROVED' if result['status'] == 'APPROVED' else '❌ REJECTED'}`",
+        f"**Entropy Score:** `{result['risk_profile']['score']} ({result['risk_profile']['level']})`",
+        f"",
+        f"### Cryptographic Audit Seal",
+        f"```",
+        f"SHA-256: {result['audit_proof']}",
+        f"```",
+        f"",
+        f"### Risk Diagnostics"
+    ]
     
-    panel = Panel(
-        f"[bold {color}]ACTION: {resolution.action.value}[/bold {color}]\n\n{resolution.feedback}",
-        title="Policy Resolution",
-        border_style=color
-    )
-    console.print(panel)
-
-    if resolution.action == GuardAction.BLOCK:
-        console.print("\n[bold red]MERGE BLOCKED due to critical entropy delta.[/bold red]")
-        exit(1)
+    if result["risk_profile"]["reasons"]:
+        for reason in result["risk_profile"]["reasons"]:
+            md.append(f"- ⚠️ {reason}")
     else:
-        exit(0)
+        md.append("- 🟢 No critical risk vectors detected.")
+        
+    md.extend([
+        f"",
+        f"### CHRONOS-1 ROI Receipt",
+        f"- **Autonomous Audit Saved:** {result['roi_receipt']['hours_saved']} human hours.",
+        f"- **Equivalent Dollar Value:** ${result['roi_receipt']['money_saved']:.2f} USD.",
+        f"- **Stats:** Mutated {result['roi_receipt']['file_count']} files across {result['roi_receipt']['git_commits']} commits."
+    ])
+    
+    markdown_output = "\n".join(md)
+    click.echo(markdown_output)
+    
+    # 3. REJECTION BEHAVIOR
+    if result["status"] == "REJECTED":
+        exit(1)
+    exit(0)
