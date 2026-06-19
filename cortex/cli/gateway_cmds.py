@@ -3,10 +3,17 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import os
 
 import click
+from rich.panel import Panel
+from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.engine.entropy_core import EntropyCore
+from cortex.guards.entropy_guard import EntropyGuardEngine, GuardAction
+from cortex.engine.decision_engine import DecisionEngine
 
 
 @click.group("gateway")
@@ -45,3 +52,61 @@ def health(db: str, as_json: bool) -> None:
 
 
 cli.add_command(gateway_cmds)
+
+@gateway_cmds.command("evaluate")
+@click.option("--diff", default="HEAD~1", help="Git reference to compare against")
+@click.option("--intent", default="", help="The original prompt/intent used to generate the change")
+def evaluate(diff: str, intent: str) -> None:
+    """Evaluates the entropy of the current changes against a git reference."""
+    workspace_root = os.getcwd()
+    
+    try:
+        diff_cmd = ["git", "diff", diff]
+        diff_output = subprocess.check_output(diff_cmd, text=True)
+        
+        files_cmd = ["git", "diff", "--name-only", diff]
+        modified_files = subprocess.check_output(files_cmd, text=True).splitlines()
+    except subprocess.CalledProcessError as e:
+        console.print(f"[bold red]Failed to execute git diff: {e}[/bold red]")
+        exit(1)
+
+    if not modified_files:
+        console.print("[bold yellow]No modified files found. Entropy delta is zero.[/bold yellow]")
+        exit(0)
+
+    console.print(f"[bold blue]Evaluating Entropy Delta for {len(modified_files)} files...[/bold blue]")
+
+    core = EntropyCore(workspace_root)
+    guard = EntropyGuardEngine()
+    decision = DecisionEngine()
+
+    state = core.evaluate_entropy(diff_content=diff_output, intent_prompt=intent, modified_files=modified_files)
+    guard_decision = guard.evaluate(state)
+    resolution = decision.resolve(state, guard_decision)
+
+    table = Table(title="CORTEX Entropy State", show_header=True)
+    table.add_column("Metric", style="cyan")
+    table.add_column("Value", style="magenta")
+    
+    table.add_row("Structural Entropy", f"{state.structural:.3f}")
+    table.add_row("Semantic Drift", f"{state.semantic:.3f}")
+    table.add_row("Operational Entropy", f"{state.operational:.3f}")
+    table.add_row("Total System Entropy", f"{state.total:.3f}")
+    table.add_row("Regime", f"{state.regime.value}")
+    
+    console.print(table)
+
+    color = "green" if resolution.action == GuardAction.ALLOW else "red" if resolution.action == GuardAction.BLOCK else "yellow"
+    
+    panel = Panel(
+        f"[bold {color}]ACTION: {resolution.action.value}[/bold {color}]\n\n{resolution.feedback}",
+        title="Policy Resolution",
+        border_style=color
+    )
+    console.print(panel)
+
+    if resolution.action == GuardAction.BLOCK:
+        console.print("\n[bold red]MERGE BLOCKED due to critical entropy delta.[/bold red]")
+        exit(1)
+    else:
+        exit(0)
