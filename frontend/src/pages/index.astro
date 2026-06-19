@@ -25,9 +25,8 @@ const heroProofs = [
 		label: 'Hash-chains guarantee the decision record is completely intact.',
 	},
 	{
-		value: 'Prove',
-		label: 'Tamper-evident record',
-		body: 'Every decision is cryptographically sealed. Detect silent mutation instantly.',
+		value: 'Deterministic Replay',
+		label: 'Reconstruct agent state exactly as it was during the failure.',
 	},
 ];
 
@@ -233,7 +232,7 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 				<p>Start free. Scale as your system grows.</p>
 			</div>
 
-			<div class="pricing-grid">
+			<div class="pricing-grid-home">
 				{
 					pricingCards.map((card) => (
 						<article class:list={['pricing-card', 'surface-sunken', card.featured && 'pricing-card-featured']}>
@@ -260,7 +259,31 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 					))
 				}
 			</div>
+
+			<div style="margin-top: 3rem; text-align: center;">
+				<a class="button-tertiary" href="/pricing" style="font-size: 1rem; border-bottom: 1px solid var(--accent); padding-bottom: 2px;">
+					Ver comparación detallada, argumentos de ventas y FAQs →
+				</a>
+			</div>
 		</section>
+
+		<style>
+			.pricing-grid-home {
+				display: grid;
+				gap: 1rem;
+				grid-template-columns: 1fr;
+			}
+			@media (min-width: 768px) {
+				.pricing-grid-home {
+					grid-template-columns: repeat(2, 1fr);
+				}
+			}
+			@media (min-width: 1200px) {
+				.pricing-grid-home {
+					grid-template-columns: repeat(4, 1fr);
+				}
+			}
+		</style>
 
 		<section class="cta-banner surface">
 			<div>

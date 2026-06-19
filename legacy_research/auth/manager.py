@@ -17,6 +17,35 @@ import cortex_rs
 from cortex.auth.backends import BaseAuthBackend
 from cortex.auth.models import APIKey, AuthResult
 
+# Hashing fallback: use Rust-native if present, otherwise fall back to Python argon2-cffi
+try:
+    hash_password = getattr(cortex_rs, "hash_password")
+    verify_password = getattr(cortex_rs, "verify_password")
+    HAS_RUST_AUTH = True
+except AttributeError:
+    HAS_RUST_AUTH = False
+    try:
+        import argon2
+        _ph = argon2.PasswordHasher(
+            time_cost=2,
+            memory_cost=65536,
+            parallelism=1,
+            hash_len=32,
+        )
+        def hash_password(password: str) -> str:
+            return _ph.hash(password)
+        def verify_password(password: str, hash_str: str) -> bool:
+            try:
+                return _ph.verify(hash_str, password)
+            except Exception:
+                return False
+    except ImportError:
+        # Extreme fallback to SHA-256 if argon2 is completely missing
+        def hash_password(password: str) -> str:
+            return hashlib.sha256(password.encode()).hexdigest()
+        def verify_password(password: str, hash_str: str) -> bool:
+            return hashlib.sha256(password.encode()).hexdigest() == hash_str
+
 __all__ = ["AuthManager", "get_auth_manager", "reset_auth_manager"]
 
 logger = logging.getLogger(__name__)
@@ -108,7 +137,7 @@ class AuthManager:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
             self._executor,
-            cortex_rs.hash_password,
+            hash_password,
             key + AUTH_PEPPER
         )
 
@@ -273,7 +302,7 @@ class AuthManager:
                         loop = asyncio.get_running_loop()
                         is_valid = await loop.run_in_executor(
                             self._executor,
-                            cortex_rs.verify_password,
+                            verify_password,
                             raw_key + AUTH_PEPPER,
                             cand["key_hash_argon2"]
                         )

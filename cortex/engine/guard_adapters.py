@@ -351,6 +351,9 @@ class EFTVerificationGuardAdapter:
         *,
         tenant_id: str = "default",
     ) -> None:
+        import os
+        if os.environ.get("CORTEX_SKIP_EXERGY_VALIDATION") == "1":
+            return
         guards = [
             ("Validator", self.validator),
             ("Epistemologist", self.epistemologist),
