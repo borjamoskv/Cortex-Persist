@@ -1,14 +1,15 @@
 use pyo3::prelude::*;
 use uuid::Uuid;
+use sha2::{Sha256, Digest};
 
-pub const MAX_EVIDENCE: usize = 64;
+pub const MAX_EVIDENCE: usize = 32;
 
-/// Zero-Copy Semantic Lattice CRDT for Evidence-Based Swarm Synchronization.
+/// Semantic Lattice CRDT for Evidence-Based Swarm Synchronization.
 ///
-/// Designed to be compatible with `iceoryx2` shared memory (no heap allocations,
-/// completely flat layout, implements `Copy`).
+/// Refactored to avoid `Copy` trait to prevent implicit large stack copying (~1.5KB).
+/// Supports monotonic cryptographic compaction of sets when the buffer size reaches `MAX_EVIDENCE`.
 #[pyclass(from_py_object)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SemanticState {
     pub active_supports: [Uuid; MAX_EVIDENCE],
     pub active_supports_len: u32,
@@ -49,7 +50,8 @@ impl SemanticState {
             }
         }
         if (self.active_supports_len as usize) >= MAX_EVIDENCE {
-            return Err(pyo3::exceptions::PyValueError::new_err("Active supports buffer full"));
+            // Auto-compact to free space deterministically
+            self.compact_active_supports()?;
         }
         self.active_supports[self.active_supports_len as usize] = id;
         self.active_supports_len += 1;
@@ -66,7 +68,7 @@ impl SemanticState {
             }
         }
         if (self.discard_evidence_len as usize) >= MAX_EVIDENCE {
-            return Err(pyo3::exceptions::PyValueError::new_err("Discard evidence buffer full"));
+            self.compact_discard_evidence()?;
         }
         self.discard_evidence[self.discard_evidence_len as usize] = id;
         self.discard_evidence_len += 1;
@@ -83,7 +85,7 @@ impl SemanticState {
             }
         }
         if (self.dependencies_len as usize) >= MAX_EVIDENCE {
-            return Err(pyo3::exceptions::PyValueError::new_err("Dependencies buffer full"));
+            self.compact_dependencies()?;
         }
         self.dependencies[self.dependencies_len as usize] = id;
         self.dependencies_len += 1;
@@ -108,6 +110,62 @@ impl SemanticState {
         Ok(())
     }
 
+    /// Compacts active supports into a single SHA-256 hash and clears the active array.
+    /// The computed hash is prepended to `cryptographic_proofs` to maintain subset logic.
+    pub fn compact_active_supports(&mut self) -> PyResult<()> {
+        if self.active_supports_len == 0 {
+            return Ok(());
+        }
+        let mut sorted = self.active_supports[0..(self.active_supports_len as usize)].to_vec();
+        sorted.sort();
+
+        let mut hasher = Sha256::new();
+        for id in &sorted {
+            hasher.update(id.as_bytes());
+        }
+        let hash: [u8; 32] = hasher.finalize().into();
+
+        self.insert_cryptographic_proof_internal(hash)?;
+        self.active_supports_len = 0;
+        Ok(())
+    }
+
+    pub fn compact_discard_evidence(&mut self) -> PyResult<()> {
+        if self.discard_evidence_len == 0 {
+            return Ok(());
+        }
+        let mut sorted = self.discard_evidence[0..(self.discard_evidence_len as usize)].to_vec();
+        sorted.sort();
+
+        let mut hasher = Sha256::new();
+        for id in &sorted {
+            hasher.update(id.as_bytes());
+        }
+        let hash: [u8; 32] = hasher.finalize().into();
+
+        self.insert_cryptographic_proof_internal(hash)?;
+        self.discard_evidence_len = 0;
+        Ok(())
+    }
+
+    pub fn compact_dependencies(&mut self) -> PyResult<()> {
+        if self.dependencies_len == 0 {
+            return Ok(());
+        }
+        let mut sorted = self.dependencies[0..(self.dependencies_len as usize)].to_vec();
+        sorted.sort();
+
+        let mut hasher = Sha256::new();
+        for id in &sorted {
+            hasher.update(id.as_bytes());
+        }
+        let hash: [u8; 32] = hasher.finalize().into();
+
+        self.insert_cryptographic_proof_internal(hash)?;
+        self.dependencies_len = 0;
+        Ok(())
+    }
+
     pub fn merge(&mut self, other: &SemanticState) -> PyResult<()> {
         for i in 0..(other.active_supports_len as usize) {
             let item = other.active_supports[i];
@@ -120,7 +178,7 @@ impl SemanticState {
             }
             if !exists {
                 if (self.active_supports_len as usize) >= MAX_EVIDENCE {
-                    return Err(pyo3::exceptions::PyValueError::new_err("Active supports buffer full during merge"));
+                    self.compact_active_supports()?;
                 }
                 self.active_supports[self.active_supports_len as usize] = item;
                 self.active_supports_len += 1;
@@ -138,7 +196,7 @@ impl SemanticState {
             }
             if !exists {
                 if (self.discard_evidence_len as usize) >= MAX_EVIDENCE {
-                    return Err(pyo3::exceptions::PyValueError::new_err("Discard evidence buffer full during merge"));
+                    self.compact_discard_evidence()?;
                 }
                 self.discard_evidence[self.discard_evidence_len as usize] = item;
                 self.discard_evidence_len += 1;
@@ -156,7 +214,7 @@ impl SemanticState {
             }
             if !exists {
                 if (self.dependencies_len as usize) >= MAX_EVIDENCE {
-                    return Err(pyo3::exceptions::PyValueError::new_err("Dependencies buffer full during merge"));
+                    self.compact_dependencies()?;
                 }
                 self.dependencies[self.dependencies_len as usize] = item;
                 self.dependencies_len += 1;
@@ -277,6 +335,22 @@ impl SemanticState {
     }
 }
 
+impl SemanticState {
+    fn insert_cryptographic_proof_internal(&mut self, proof: [u8; 32]) -> PyResult<()> {
+        for i in 0..(self.cryptographic_proofs_len as usize) {
+            if self.cryptographic_proofs[i] == proof {
+                return Ok(());
+            }
+        }
+        if (self.cryptographic_proofs_len as usize) >= MAX_EVIDENCE {
+            return Err(pyo3::exceptions::PyValueError::new_err("Cryptographic proofs buffer full"));
+        }
+        self.cryptographic_proofs[self.cryptographic_proofs_len as usize] = proof;
+        self.cryptographic_proofs_len += 1;
+        Ok(())
+    }
+}
+
 impl Default for SemanticState {
     fn default() -> Self {
         Self::new()
@@ -340,5 +414,19 @@ mod tests {
 
         assert!(s1.dominates(&s2));
         assert!(!s2.dominates(&s1));
+    }
+
+    #[test]
+    fn test_compaction() {
+        let mut s = SemanticState::new();
+        // Insert more than MAX_EVIDENCE items to trigger compaction
+        for i in 0..(MAX_EVIDENCE + 2) {
+            let id = Uuid::new_v4().to_string();
+            s.add_active_support(&id).unwrap();
+        }
+        // Active supports should be reset to 2 (the overflow items)
+        assert_eq!(s.active_supports_len, 2);
+        // Cryptographic proofs should now contain the compaction hash
+        assert_eq!(s.cryptographic_proofs_len, 1);
     }
 }

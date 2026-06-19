@@ -34,6 +34,7 @@ impl BeliefPlaneScheduler {
         let numerator = (rel * self.weight_rel) + (conf * self.weight_conf) + (rec * self.weight_rec);
         let denominator = 1.0 + cost + risk;
         
-        Ok(integrity_multiplier * (numerator / denominator))
+        let integrity_cubed = integrity_multiplier * integrity_multiplier * integrity_multiplier;
+        Ok(integrity_cubed * (numerator / denominator))
     }
 }
