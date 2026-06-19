@@ -10,6 +10,7 @@ pub enum BeliefState {
     Subsumed,
     Discarded,
     Archived,
+    Orphaned,
 }
 
 #[pyclass(from_py_object)]
@@ -117,6 +118,10 @@ pub struct BeliefObject {
     #[pyo3(get, set)]
     pub relations: Vec<BeliefRelation>,
     #[pyo3(get, set)]
+    pub supporting_roots: Vec<String>,
+    #[pyo3(get, set)]
+    pub dependency_epoch: u64,
+    #[pyo3(get, set)]
     pub timestamp_created: i64,
     #[pyo3(get, set)]
     pub timestamp_last_verified: i64,
@@ -150,6 +155,8 @@ impl BeliefObject {
             state,
             provenance,
             relations: Vec::new(),
+            supporting_roots: Vec::new(),
+            dependency_epoch: 0,
             timestamp_created,
             timestamp_last_verified,
             semantic_version,
