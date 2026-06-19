@@ -11,6 +11,7 @@ from typing import Optional
 
 import cortex_rs
 from cortex.audit.ledger import EnterpriseAuditLedger
+from cortex.auth.enterprise_identity import SovereignIdentity, TenantRBAC
 
 logger = logging.getLogger("cortex.engine.logic.semantic_crdt")
 
@@ -20,10 +21,9 @@ class SemanticOrchestrator:
     is maintained via the EnterpriseAuditLedger when the state undergoes compaction.
     """
 
-    def __init__(self, ledger: EnterpriseAuditLedger, tenant_id: str, actor_id: str, initial_state: Optional[cortex_rs.SemanticState] = None):
+    def __init__(self, ledger: EnterpriseAuditLedger, identity: SovereignIdentity, initial_state: Optional[cortex_rs.SemanticState] = None):
         self.ledger = ledger
-        self.tenant_id = tenant_id
-        self.actor_id = actor_id
+        self.identity = identity
         self.state = initial_state if initial_state else cortex_rs.SemanticState()
 
     async def add_active_support(self, id_str: str) -> None:
@@ -72,14 +72,17 @@ class SemanticOrchestrator:
                 # Retry merge in the next loop iteration
 
     async def _compact_active_supports(self) -> None:
+        if not TenantRBAC.validate_action(self.identity, "crdt:compact"):
+            raise PermissionError(f"Identity {self.identity.actor_id} lacks 'crdt:compact' scope for Tenant {self.identity.tenant_id}")
+
         items = self.state.active_supports
         resource = f"compact:active_supports:[{','.join(items)}]"
         
         # Step 1: Securely log the items being compacted to the Ledger to get a cryptographic proof
         audit_id = await self.ledger.log_action(
-            tenant_id=self.tenant_id,
-            actor_role="CRDT_ORCHESTRATOR",
-            actor_id=self.actor_id,
+            tenant_id=self.identity.tenant_id,
+            actor_role=self.identity.role,
+            actor_id=self.identity.actor_id,
             action="CRDT_COMPACT",
             resource=resource,
             status="SUCCESS"
@@ -89,13 +92,16 @@ class SemanticOrchestrator:
         self.state.compact_active_supports(audit_id)
 
     async def _compact_discard_evidence(self) -> None:
+        if not TenantRBAC.validate_action(self.identity, "crdt:compact"):
+            raise PermissionError("Permission denied: crdt:compact")
+
         items = self.state.discard_evidence
         resource = f"compact:discard_evidence:[{','.join(items)}]"
         
         audit_id = await self.ledger.log_action(
-            tenant_id=self.tenant_id,
-            actor_role="CRDT_ORCHESTRATOR",
-            actor_id=self.actor_id,
+            tenant_id=self.identity.tenant_id,
+            actor_role=self.identity.role,
+            actor_id=self.identity.actor_id,
             action="CRDT_COMPACT",
             resource=resource,
             status="SUCCESS"
@@ -103,13 +109,16 @@ class SemanticOrchestrator:
         self.state.compact_discard_evidence(audit_id)
 
     async def _compact_dependencies(self) -> None:
+        if not TenantRBAC.validate_action(self.identity, "crdt:compact"):
+            raise PermissionError("Permission denied: crdt:compact")
+
         items = self.state.dependencies
         resource = f"compact:dependencies:[{','.join(items)}]"
         
         audit_id = await self.ledger.log_action(
-            tenant_id=self.tenant_id,
-            actor_role="CRDT_ORCHESTRATOR",
-            actor_id=self.actor_id,
+            tenant_id=self.identity.tenant_id,
+            actor_role=self.identity.role,
+            actor_id=self.identity.actor_id,
             action="CRDT_COMPACT",
             resource=resource,
             status="SUCCESS"
