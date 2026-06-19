@@ -2,7 +2,11 @@
 import logging
 from typing import Any
 
-import numpy as np
+try:
+    import numpy as np
+    HAS_NUMPY = True
+except ImportError:
+    HAS_NUMPY = False
 
 logger = logging.getLogger("cortex.engine.causal.anomaly_bridge")
 
@@ -26,7 +30,7 @@ class AnomalyBridge:
 
     def __init__(self, window_size=50, anomaly_threshold=3.0, takens_dim=3, takens_tau=2):
         self.detector = None
-        if WindowedManifoldDetector:
+        if HAS_NUMPY and WindowedManifoldDetector:
             self.detector = WindowedManifoldDetector(
                 window_size=window_size,
                 anomaly_threshold=anomaly_threshold,
@@ -42,7 +46,7 @@ class AnomalyBridge:
         Receives a state dictionary, maps it to an n-dimensional vector,
         and evaluates its Mahalanobis distance in the Takens manifold.
         """
-        if not self.detector:
+        if not HAS_NUMPY or not self.detector:
             return False
 
         vector = []

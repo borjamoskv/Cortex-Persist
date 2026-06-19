@@ -354,6 +354,8 @@ class EFTVerificationGuardAdapter:
         import os
         if os.environ.get("CORTEX_SKIP_EXERGY_VALIDATION") == "1":
             return
+        if fact_type not in ("knowledge", "code"):
+            return
         guards = [
             ("Validator", self.validator),
             ("Epistemologist", self.epistemologist),
