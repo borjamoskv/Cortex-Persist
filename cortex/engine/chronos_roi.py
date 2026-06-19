@@ -84,11 +84,9 @@ class ChronosROI:
         self.hourly_rate = hourly_rate
         self.token_cost_per_m = 0.015
 
-    def calculate_hours_saved(self, files_affected: int, complexity: float) -> float:
-        """Calculate hours saved based on file count and complexity (Ω₂)."""
-        base = 15 + (files_affected * 10)
-        multiplier = (complexity**1.5) / 2.0
-        minutes = base * multiplier
+    def calculate_hours_saved(self, commits: int, lines_added: int, lines_deleted: int) -> float:
+        """Calculate hours saved based strictly on physical git mutations (Ω₂)."""
+        minutes = (commits * 15.0) + (lines_added * 2.0) + (lines_deleted * 1.0)
         return round(minutes / 60.0, 2)
 
     def get_git_stats(self, project_path: str) -> dict[str, int]:
@@ -141,31 +139,11 @@ class ChronosROI:
 
         Returns a ChronosReport (immutable, typed) instead of a raw dict.
         """
-        relevant_files: list[str] = []
-        for root, dirs, files in os.walk(project_path):
-            # Prune skip dirs in-place for performance
-            dirs[:] = [d for d in dirs if d not in _SKIP_DIRS]
-            for f in files:
-                if f.endswith(_CODE_EXTENSIONS):
-                    relevant_files.append(os.path.join(root, f))
-
-        file_count = len(relevant_files)
         git = self.get_git_stats(project_path)
+        file_count = git.get("files_changed", 0)
 
-        # Boost complexity based on git activity
-        base_complexity = 6.5
-        if git["commits"] > 10:
-            base_complexity += 1.5
-        if git["added"] > 1000:
-            base_complexity += 1.0
-
-        # Use files actually affected by commits instead of total project files
-        affected_count = git.get("files_changed", 0)
-        if affected_count == 0:
-            # Baseline interaction size if no commits/files changed in the git log
-            affected_count = 1
-
-        hours = self.calculate_hours_saved(affected_count, base_complexity)
+        # C5-REAL: Exergy is measured directly from physical mutations, not arbitrary complexity.
+        hours = self.calculate_hours_saved(git["commits"], git["added"], git["deleted"])
         monetary_value = round(hours * self.hourly_rate, 2)
 
         # Dynamic token estimation from DB if available
@@ -189,13 +167,11 @@ class ChronosROI:
             except Exception as e:
                 logger.warning("Dynamic token query failed: %s", e)
 
-        # Fallback logic
+        # Fallback logic: No arbitrary hallucination of tokens.
         if actual_tokens > 0:
             final_tokens = actual_tokens
-        elif tokens_used is not None:
-            final_tokens = tokens_used
         else:
-            final_tokens = 25000 if git["commits"] > 0 else 0
+            final_tokens = tokens_used or 0
 
         cost = (final_tokens / 1000.0) * self.token_cost_per_m
         roi_ratio = monetary_value / max(0.001, cost)
