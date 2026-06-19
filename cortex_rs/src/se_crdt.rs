@@ -10,6 +10,7 @@ pub const MAX_EVIDENCE: usize = 32;
 /// Supports monotonic cryptographic compaction of sets when the buffer size reaches `MAX_EVIDENCE`.
 #[pyclass(from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[repr(C)]
 pub struct SemanticState {
     pub active_supports: [Uuid; MAX_EVIDENCE],
     pub active_supports_len: u32,
@@ -50,8 +51,7 @@ impl SemanticState {
             }
         }
         if (self.active_supports_len as usize) >= MAX_EVIDENCE {
-            // Auto-compact to free space deterministically
-            self.compact_active_supports()?;
+            return Err(pyo3::exceptions::PyBufferError::new_err("active_supports buffer full, requires explicit compaction"));
         }
         self.active_supports[self.active_supports_len as usize] = id;
         self.active_supports_len += 1;
@@ -68,7 +68,7 @@ impl SemanticState {
             }
         }
         if (self.discard_evidence_len as usize) >= MAX_EVIDENCE {
-            self.compact_discard_evidence()?;
+            return Err(pyo3::exceptions::PyBufferError::new_err("discard_evidence buffer full, requires explicit compaction"));
         }
         self.discard_evidence[self.discard_evidence_len as usize] = id;
         self.discard_evidence_len += 1;
@@ -85,7 +85,7 @@ impl SemanticState {
             }
         }
         if (self.dependencies_len as usize) >= MAX_EVIDENCE {
-            self.compact_dependencies()?;
+            return Err(pyo3::exceptions::PyBufferError::new_err("dependencies buffer full, requires explicit compaction"));
         }
         self.dependencies[self.dependencies_len as usize] = id;
         self.dependencies_len += 1;
@@ -110,58 +110,42 @@ impl SemanticState {
         Ok(())
     }
 
-    /// Compacts active supports into a single SHA-256 hash and clears the active array.
-    /// The computed hash is prepended to `cryptographic_proofs` to maintain subset logic.
-    pub fn compact_active_supports(&mut self) -> PyResult<()> {
+    /// Compacts active supports. Requires a valid Ledger Proof (audit_id) to maintain provenance.
+    pub fn compact_active_supports(&mut self, ledger_proof_hex: &str) -> PyResult<()> {
         if self.active_supports_len == 0 {
             return Ok(());
         }
-        let mut sorted = self.active_supports[0..(self.active_supports_len as usize)].to_vec();
-        sorted.sort();
+        let mut proof = [0u8; 32];
+        hex::decode_to_slice(ledger_proof_hex, &mut proof)
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid proof format: {}", e)))?;
 
-        let mut hasher = Sha256::new();
-        for id in &sorted {
-            hasher.update(id.as_bytes());
-        }
-        let hash: [u8; 32] = hasher.finalize().into();
-
-        self.insert_cryptographic_proof_internal(hash)?;
+        self.insert_cryptographic_proof_internal(proof)?;
         self.active_supports_len = 0;
         Ok(())
     }
 
-    pub fn compact_discard_evidence(&mut self) -> PyResult<()> {
+    pub fn compact_discard_evidence(&mut self, ledger_proof_hex: &str) -> PyResult<()> {
         if self.discard_evidence_len == 0 {
             return Ok(());
         }
-        let mut sorted = self.discard_evidence[0..(self.discard_evidence_len as usize)].to_vec();
-        sorted.sort();
+        let mut proof = [0u8; 32];
+        hex::decode_to_slice(ledger_proof_hex, &mut proof)
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid proof format: {}", e)))?;
 
-        let mut hasher = Sha256::new();
-        for id in &sorted {
-            hasher.update(id.as_bytes());
-        }
-        let hash: [u8; 32] = hasher.finalize().into();
-
-        self.insert_cryptographic_proof_internal(hash)?;
+        self.insert_cryptographic_proof_internal(proof)?;
         self.discard_evidence_len = 0;
         Ok(())
     }
 
-    pub fn compact_dependencies(&mut self) -> PyResult<()> {
+    pub fn compact_dependencies(&mut self, ledger_proof_hex: &str) -> PyResult<()> {
         if self.dependencies_len == 0 {
             return Ok(());
         }
-        let mut sorted = self.dependencies[0..(self.dependencies_len as usize)].to_vec();
-        sorted.sort();
+        let mut proof = [0u8; 32];
+        hex::decode_to_slice(ledger_proof_hex, &mut proof)
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid proof format: {}", e)))?;
 
-        let mut hasher = Sha256::new();
-        for id in &sorted {
-            hasher.update(id.as_bytes());
-        }
-        let hash: [u8; 32] = hasher.finalize().into();
-
-        self.insert_cryptographic_proof_internal(hash)?;
+        self.insert_cryptographic_proof_internal(proof)?;
         self.dependencies_len = 0;
         Ok(())
     }
@@ -178,7 +162,7 @@ impl SemanticState {
             }
             if !exists {
                 if (self.active_supports_len as usize) >= MAX_EVIDENCE {
-                    self.compact_active_supports()?;
+                    return Err(pyo3::exceptions::PyBufferError::new_err("active_supports buffer full during merge, requires explicit compaction"));
                 }
                 self.active_supports[self.active_supports_len as usize] = item;
                 self.active_supports_len += 1;
@@ -196,7 +180,7 @@ impl SemanticState {
             }
             if !exists {
                 if (self.discard_evidence_len as usize) >= MAX_EVIDENCE {
-                    self.compact_discard_evidence()?;
+                    return Err(pyo3::exceptions::PyBufferError::new_err("discard_evidence buffer full during merge, requires explicit compaction"));
                 }
                 self.discard_evidence[self.discard_evidence_len as usize] = item;
                 self.discard_evidence_len += 1;
@@ -214,7 +198,7 @@ impl SemanticState {
             }
             if !exists {
                 if (self.dependencies_len as usize) >= MAX_EVIDENCE {
-                    self.compact_dependencies()?;
+                    return Err(pyo3::exceptions::PyBufferError::new_err("dependencies buffer full during merge, requires explicit compaction"));
                 }
                 self.dependencies[self.dependencies_len as usize] = item;
                 self.dependencies_len += 1;
@@ -419,14 +403,27 @@ mod tests {
     #[test]
     fn test_compaction() {
         let mut s = SemanticState::new();
-        // Insert more than MAX_EVIDENCE items to trigger compaction
-        for i in 0..(MAX_EVIDENCE + 2) {
+        for _ in 0..MAX_EVIDENCE {
             let id = Uuid::new_v4().to_string();
             s.add_active_support(&id).unwrap();
         }
-        // Active supports should be reset to 2 (the overflow items)
-        assert_eq!(s.active_supports_len, 2);
-        // Cryptographic proofs should now contain the compaction hash
+        
+        // Next insertion should fail
+        let id_overflow = Uuid::new_v4().to_string();
+        assert!(s.add_active_support(&id_overflow).is_err());
+        
+        // Manual compaction with a mock ledger proof
+        let mock_proof = hex::encode([0xAA; 32]);
+        s.compact_active_supports(&mock_proof).unwrap();
+        
+        // Active supports should be reset to 0
+        assert_eq!(s.active_supports_len, 0);
+        // Cryptographic proofs should now contain the ledger proof
         assert_eq!(s.cryptographic_proofs_len, 1);
+        assert_eq!(s.cryptographic_proofs()[0], mock_proof);
+        
+        // Now insertion succeeds
+        s.add_active_support(&id_overflow).unwrap();
+        assert_eq!(s.active_supports_len, 1);
     }
 }

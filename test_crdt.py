@@ -66,15 +66,31 @@ def test_semantic_state():
     print("Testing compaction on overflow...")
     s_overflow = cortex_rs.SemanticState()
     
-    # Add 35 items
-    for _ in range(35):
+    # Add 32 items
+    for _ in range(32):
         s_overflow.add_active_support(str(uuid.uuid4()))
         
+    try:
+        s_overflow.add_active_support(str(uuid.uuid4()))
+        assert False, "Should have thrown a BufferError on overflow"
+    except Exception as e:
+        assert "buffer full" in str(e)
+        
+    # Manual compaction
+    mock_proof = "a" * 64
+    s_overflow.compact_active_supports(mock_proof)
+    
     print(f"Overflow state supports count: {len(s_overflow.active_supports)}")
     print(f"Overflow state proofs count: {len(s_overflow.cryptographic_proofs)}")
     
     # Compaction should have triggered.
-    # 32 elements were compacted into 1 proof, leaving 3 elements in the active supports.
+    assert len(s_overflow.active_supports) == 0
+    assert len(s_overflow.cryptographic_proofs) == 1
+    
+    # Now adding 3 more items should work
+    for _ in range(3):
+        s_overflow.add_active_support(str(uuid.uuid4()))
+        
     assert len(s_overflow.active_supports) == 3
     assert len(s_overflow.cryptographic_proofs) == 1
     
