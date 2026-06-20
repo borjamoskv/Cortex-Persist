@@ -36,6 +36,19 @@ REFLECTIONS_PATH = Path(
 )
 SKILL_PATH = Path(os.path.expanduser("~/.gemini/antigravity/skills/ouroboros-infinity/SKILL.md"))
 
+# Resolve git working directory dynamically (it may be a symlink to config repo)
+_resolved = SKILL_PATH.resolve()
+_git_repo = None
+_curr = _resolved.parent
+while _curr != _curr.parent:
+    if (_curr / ".git").is_dir():
+        _git_repo = _curr
+        break
+    _curr = _curr.parent
+
+GIT_CWD = str(_git_repo) if _git_repo else None
+GIT_ADD_PATH = str(_resolved.relative_to(_git_repo)) if _git_repo else str(SKILL_PATH)
+
 PROMPT_TEMPLATE = """
 Eres el motor autopoietico de Ouroboros-Infinity.
 Aquí tienes el log de fricción operativa reciente:
@@ -132,7 +145,7 @@ def stage_3_and_4_weismann_and_inject(patch_data: dict) -> bool:
             logger.error(
                 f"[WEISMANN REJECTED] Entropy bounds exceeded: {diff_lines} lines. Reverting."
             )
-            subprocess.run(["git", "checkout", "--", str(SKILL_PATH)], check=False, timeout=30)
+            subprocess.run(["git", "checkout", "--", GIT_ADD_PATH], cwd=GIT_CWD, check=False, timeout=30)
             with open("/tmp/cortex-ouroboros-error.log", "a") as ef:
                 ef.write(
                     f"[{time.time()}] WEISMANN REJECT: Mutation too large ({diff_lines} lines).\n"
@@ -143,33 +156,33 @@ def stage_3_and_4_weismann_and_inject(patch_data: dict) -> bool:
         return True
     except Exception as e:
         logger.error(f"Failed to inject: {e}")
-        subprocess.run(["git", "checkout", "--", str(SKILL_PATH)], check=False, timeout=30)
+        subprocess.run(["git", "checkout", "--", GIT_ADD_PATH], cwd=GIT_CWD, check=False, timeout=30)
         return False
 
 
 def commit_and_persist(patch_data: dict):
     """Stage 5: Commit and Persist"""
     # Git commit
-    subprocess.run(["git", "add", str(SKILL_PATH)], check=False, timeout=30)
+    subprocess.run(["git", "add", GIT_ADD_PATH], cwd=GIT_CWD, check=False, timeout=30)
     commit_msg = f"ouro-absorb: inject heuristic from friction (C5-REAL autopoiesis)\n\nRoot Cause: {patch_data.get('root_cause')}"
-    commit_result = subprocess.run(["git", "commit", "-m", commit_msg], check=False, timeout=30)
+    commit_result = subprocess.run(["git", "commit", "-m", commit_msg], cwd=GIT_CWD, check=False, timeout=30)
 
     if commit_result.returncode == 0:
         logger.info("Git commit executed. Proceeding to push.")
         # Git push (condicional al éxito del commit)
         try:
             push_result = subprocess.run(
-                ["git", "push", "origin", "main"], capture_output=True, text=True, timeout=30
+                ["git", "push", "origin", "main"], cwd=GIT_CWD, capture_output=True, text=True, timeout=30
             )
             if push_result.returncode != 0:
                 logger.error(f"Push failed: {push_result.stderr}. Rolling back local commit.")
-                subprocess.run(["git", "reset", "--hard", "HEAD~1"], check=False)
+                subprocess.run(["git", "reset", "--hard", "HEAD~1"], cwd=GIT_CWD, check=False)
                 return
             else:
                 logger.info("Git push successful.")
         except subprocess.TimeoutExpired:
             logger.error("Git push timed out. Rolling back local commit.")
-            subprocess.run(["git", "reset", "--hard", "HEAD~1"], check=False)
+            subprocess.run(["git", "reset", "--hard", "HEAD~1"], cwd=GIT_CWD, check=False)
             return
     else:
         logger.warning("Git commit failed or nothing to commit. Skipping push.")

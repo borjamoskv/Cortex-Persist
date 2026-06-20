@@ -30,7 +30,6 @@ def prepare_stealth_headers(extra_headers: dict[str, str]) -> dict[str, str]:
             "User-Agent": profile["User-Agent"],
             "Accept": profile["Accept"],
             "Accept-Language": random.choice(_LANGS),
-            "Accept-Encoding": "gzip, deflate, br",
             "Sec-Ch-Ua": profile["Sec-Ch-Ua"],
             "Sec-Ch-Ua-Mobile": "?0",
             "Sec-Ch-Ua-Platform": profile["Sec-Ch-Ua-Platform"],
