@@ -171,6 +171,17 @@ def commit_and_persist(patch_data: dict):
         logger.info("Git commit executed. Proceeding to push.")
         # Git push (condicional al éxito del commit)
         try:
+            remote_check = subprocess.run(
+                ["git", "remote", "get-url", "origin"],
+                cwd=GIT_CWD,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            if remote_check.returncode != 0:
+                logger.info("No 'origin' remote configured. Preserving local commit.")
+                return
+
             branch_result = subprocess.run(
                 ["git", "rev-parse", "--abbrev-ref", "HEAD"],
                 cwd=GIT_CWD,
