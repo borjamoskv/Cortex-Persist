@@ -17,7 +17,8 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-console = Console()
+from cortex.cli.common import cli, console
+from rich.table import Table
 
 
 @click.group("agent")
@@ -148,3 +149,6 @@ def agent_run(config: str, dry_run: bool):
         return
 
     _run_interactive_agent_loop(agent)
+
+
+cli.add_command(agent_cmds)
