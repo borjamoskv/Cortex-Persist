@@ -264,14 +264,89 @@ def _audit_trail(project: str, limit: int, db: str) -> None:
 @cli.group("audit", invoke_without_command=True)
 @click.option("--calcification", is_flag=True, help="Run Landauer's Razor audit")
 @click.option("--frontend", is_flag=True, help="Run Zero-Latency UI Axiom audit (CC < 5)")
+@click.option("--demo", is_flag=True, help="Run CORTEX-PERSIST DEMO v0 audit")
 @click.option("--project", "-p", default="", help="Filter trail by project")
 @click.option("--limit", "-n", default=10, help="Max entries to show")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 @click.pass_context
-def audit(ctx, calcification: bool, frontend: bool, project: str, limit: int, db: str) -> None:
+def audit(ctx, calcification: bool, frontend: bool, demo: bool, project: str, limit: int, db: str) -> None:
     """Run audits or view Audit Trail."""
     if ctx.invoked_subcommand is None:
-        if frontend:
+        # Check if events table exists to automatically default to demo audit if it is the target
+        is_demo_db = False
+        if not calcification and not frontend and not project:
+            from cortex.database.core import connect
+            conn = None
+            try:
+                conn = connect(db)
+                table_exists = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='events'").fetchone()
+                if table_exists:
+                    is_demo_db = True
+            except Exception:
+                pass
+            finally:
+                if conn:
+                    conn.close()
+
+        if demo or is_demo_db:
+            # Run CORTEX-PERSIST DEMO v0 audit
+            from cortex.database.core import connect
+            import hashlib
+            conn = None
+            try:
+                conn = connect(db)
+                table_exists = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='events'").fetchone()
+                if not table_exists:
+                    click.echo("Error: demo events table not initialized. Run API init first.")
+                    return
+
+                rows = conn.execute("SELECT id, timestamp, type, actor, payload, parent_event, prev_hash, event_hash FROM events ORDER BY id ASC").fetchall()
+                events_count = len(rows)
+                broken_hashes = 0
+                expected_prev_hash = "0" * 64
+
+                for row in rows:
+                    eid, timestamp, event_type, actor, payload, parent_event, prev_hash, event_hash = row
+
+                    if prev_hash != expected_prev_hash:
+                        broken_hashes += 1
+
+                    parent_str = str(parent_event) if parent_event is not None else ""
+                    raw_str = (
+                        timestamp +
+                        event_type +
+                        actor +
+                        payload +
+                        parent_str +
+                        prev_hash
+                    )
+                    computed = hashlib.sha256(raw_str.encode("utf-8")).hexdigest()
+                    if computed != event_hash:
+                        broken_hashes += 1
+
+                    expected_prev_hash = event_hash
+
+                integrity = "valid" if broken_hashes == 0 and events_count > 0 else "compromised"
+                tampering = "true" if broken_hashes > 0 else "false"
+
+                # Output exactly as requested by the user
+                click.echo("events:")
+                click.echo(f"  {events_count}")
+                click.echo("")
+                click.echo("integrity:")
+                click.echo(f"  {integrity}")
+                click.echo("")
+                click.echo("broken_hashes:")
+                click.echo(f"  {broken_hashes}")
+                click.echo("")
+                click.echo("tampering:")
+                click.echo(f"  {tampering}")
+            except Exception as e:
+                click.echo(f"Audit failure: {e}")
+            finally:
+                if conn:
+                    conn.close()
+        elif frontend:
             from cortex.cli.audit_helpers import audit_frontend
 
             audit_frontend()

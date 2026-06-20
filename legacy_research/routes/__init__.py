@@ -16,6 +16,7 @@ _ROUTE_MODULES = {
     "benchmark",
     "daemon",
     "dashboard",
+    "demo",
     "events",
     "facts",
     "gate",
@@ -59,6 +60,7 @@ _API_ROUTE_SPECS: tuple[tuple[str, str], ...] = (
     ("trust", "router"),
     ("taas", "router"),
     ("benchmark", "router"),
+    ("demo", "router"),
 )
 
 
