@@ -261,7 +261,7 @@ class SovereignLLM:
                     timeout=self._timeout,
                 )
                 latency = (time.monotonic() - start) * 1000
-                if thought.content and len(thought.content.strip()) > 10:
+                if thought.content and len(thought.content.strip()) > 10 and not thought.content.startswith("Error:"):
                     return SovereignResult(
                         content=thought.content,
                         provider="orchestra",
@@ -269,7 +269,7 @@ class SovereignLLM:
                         latency_ms=latency,
                         fallback_chain=chain,
                     )
-                errors.append("orchestra: empty/short response")
+                errors.append(f"orchestra: {thought.content if thought.content else 'empty/short response'}")
         except ImportError:
             errors.append("orchestra: import failed")
         except asyncio.TimeoutError:
