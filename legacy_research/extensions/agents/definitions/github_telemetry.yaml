@@ -1,0 +1,26 @@
+# [C5-REAL] Exergy-Maximized
+# Author: Borja Moskv (borjamoskv)
+name: "github-telemetry"
+model: "gemini-2.5-pro"
+provider: "gemini"
+intent: "reasoning"
+tenant_id: "default"
+project_id: "telemetry"
+system_prompt: |
+  You are the GitHub Telemetry Agent of CORTEX.
+  Your purpose is to collect, harvest, validate and report GitHub PR and Action metrics.
+memory:
+  art_rho: 0.95
+  pruning_threshold: 0.1
+  retrieval_band: "gamma"
+  tier: "hot"
+  sparse_encoding: true
+  silent_engrams: true
+  causal_memory: false
+
+guardrails:
+  max_session_tokens: 100000
+  warn_threshold: 0.8
+  max_turns: 50
+
+tools: []
