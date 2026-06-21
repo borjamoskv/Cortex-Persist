@@ -79,12 +79,17 @@ El bypass estocástico se logra mediante la siguiente cadena causal física:
 [Demostrador de Teoremas (Lean / Coq)]
 ```
 
-> **CONCLUSIÓN ESTRUCTURAL**: Cero Anergía. BABYLON-60 convierte procesos efímeros en evidencia computacional persistente. Transforma una ejecución temporal en un artefacto causal permanente que puede ser reanimado, auditado y verificado.
+> **CONCLUSIÓN ESTRUCTURAL**: Cero Anergía. Operativamente, esto significa que *ninguna transición de estado puede existir sin una causa registrada y verificable*. BABYLON-60 convierte procesos efímeros en evidencia computacional persistente.
 
-## Síntesis Definitiva (GTM)
+## 4. Síntesis Definitiva (GTM)
 
-> **BABYLON-60 es un Deterministic Causal Provenance Runtime que transforma transiciones de estado en artefactos verificables, preservando de forma reproducible la historia causal completa de una ejecución.**
+El verdadero producto que ofrece BABYLON-60 no es simplemente un runtime determinista, sino **Evidence-as-a-Service** (Infraestructura de Evidencia Computacional).
 
-Para comunicar este valor axiomático a capas de dirección (CTO/Arquitectura):
+Para comités de arquitectura y foros técnicos avanzados:
 
-> **"Git versiona archivos. BABYLON versiona la realidad computacional que produjo esos archivos."**
+> **BABYLON-60 es una infraestructura de evidencia computacional.**
+> Captura eventos procedentes de sistemas probabilísticos, los congela como entradas verificables y ejecuta transiciones de estado completamente deterministas. Cada transición queda registrada en un ledger causal criptográficamente verificable y puede reproducirse, auditarse o demostrarse formalmente en cualquier momento futuro. El resultado no es únicamente una salida computacional, sino un artefacto de evidencia que preserva la historia causal completa de cómo esa salida fue producida.
+
+Para comunicar este valor axiomático a nivel ejecutivo (CTO):
+
+> **"Git versiona archivos. BABYLON versiona la cadena de causalidad que los produjo."**
