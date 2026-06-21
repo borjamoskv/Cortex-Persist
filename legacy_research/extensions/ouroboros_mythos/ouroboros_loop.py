@@ -89,8 +89,9 @@ class MythosOuroborosEngine:
 
     async def _criticize(self, action_result: Dict[str, Any]) -> int:
         """Scores the action outcome strictly from 0 to 100."""
-        # Mock critic evaluation
-        return 92 # 92nd Percentile minimum requirement (Primitive 20)
+        from .critic_prompts import ActionCritic
+        critic = ActionCritic()
+        return critic.evaluate_action(action_result)
 
     def stop(self):
         self.is_running = False
