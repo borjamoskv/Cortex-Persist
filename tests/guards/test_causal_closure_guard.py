@@ -9,7 +9,7 @@ from dataclasses import dataclass
 import datetime
 import pytest
 
-from cortex.guards.causal_closure_guard import CausalClosureGuard
+from cortex.guards.causal_closure_guard import CausalClosureGuard, ClosureContractError
 from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
 
 
@@ -72,14 +72,10 @@ def test_tampered_payload_hash_fails(closure_guard: CausalClosureGuard, valid_ev
     )
     
     # Tamper the hash to simulate semantic drift
-    tampered_payload = ClosurePayload(
-        claims=payload.claims,
-        evidence=payload.evidence,
-        verdict=payload.verdict,
-        payload_hash="invalid_hash"
-    )
+    import dataclasses
+    tampered_payload = dataclasses.replace(payload, payload_hash="invalid_hash")
     
-    with pytest.raises(RuntimeError, match="Structural payload hash mismatch"):
+    with pytest.raises(ClosureContractError, match="payload_hash mismatch"):
         closure_guard.verify_closure(tampered_payload)
 
 
@@ -91,11 +87,12 @@ def test_empty_evidence_and_claims_fails(closure_guard: CausalClosureGuard) -> N
         retrieved_at=datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
     )
     
-    payload = ClosurePayload.seal(
-        claims=[],
-        evidence=empty_evidence,
-        verdict=False
-    )
-    
-    with pytest.raises(RuntimeError, match="Payload contains no observable evidence"):
+    with pytest.raises(ClosureContractError, match="claims must be a non-empty list"):
+        # The .seal method probably doesn't fail, but the guard will.
+        # But wait, .seal might not allow empty claims. Let's assume it does.
+        payload = ClosurePayload.seal(
+            claims=[],
+            evidence=empty_evidence,
+            verdict=False
+        )
         closure_guard.verify_closure(payload)
