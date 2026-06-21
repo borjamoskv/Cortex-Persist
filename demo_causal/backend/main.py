@@ -42,6 +42,17 @@ def causal_query(event_id: int):
 def latest_events(limit: int = 50):
     return get_latest_events(limit)
 
+import os
+import json
+
+@app.get("/api/evidence")
+def get_runtime_evidence():
+    evidence_path = os.path.join(os.path.dirname(__file__), "artifacts", "runtime_evidence.json")
+    if not os.path.exists(evidence_path):
+        raise HTTPException(status_code=404, detail="Runtime evidence not found. Run golden path generation first.")
+    with open(evidence_path, "r") as f:
+        return json.load(f)
+
 @app.get("/api/status")
 def status():
     audit_res = audit_chain()

@@ -4,6 +4,11 @@ deployment:
   timestamp: "2026-06-21T04:18:00Z"
 
 checks:
-  git_sync: pass
-  tests: pending
-  runtime_demo: pending
+  git_sync:
+    source: git
+  tests:
+    source: pytest
+  audit:
+    source: cortex audit
+  runtime:
+    source: demo_causal_output.json
