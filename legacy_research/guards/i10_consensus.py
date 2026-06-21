@@ -43,28 +43,60 @@ class I10ConsensusGuard:
         return await self.embed_engine.embed(text)
 
     def _cosine_similarity(self, vec_a: list[float], vec_b: list[float]) -> float:
-        dot = sum(a * b for a, b in zip(vec_a, vec_b))
+        dot = sum(a * b for a, b in zip(vec_a, vec_b, strict=True))
         norm_a = sum(a * a for a in vec_a) ** 0.5
         norm_b = sum(b * b for b in vec_b) ** 0.5
         if norm_a == 0 or norm_b == 0:
             return 0.0
         return dot / (norm_a * norm_b)
 
+    def _jaccard_similarity(self, text_a: str, text_b: str, n: int = 3) -> float:
+        def get_ngrams(text: str, n: int) -> set[tuple[str, ...]]:
+            words = text.lower().split()
+            if len(words) < n:
+                return set([tuple(words)]) if words else set()
+            return set(tuple(words[i:i+n]) for i in range(len(words) - n + 1))
+        
+        set_a = get_ngrams(text_a, n)
+        set_b = get_ngrams(text_b, n)
+        
+        if not set_a or not set_b:
+            return 0.0
+            
+        intersection = len(set_a.intersection(set_b))
+        union = len(set_a.union(set_b))
+        return intersection / union if union > 0 else 0.0
+
     async def evaluate_epistemic_consensus(self, prompt: str, outputs: TriadOutputs) -> str:
         """
-        Executes Phase 1: Fast-Path ONNX
+        Executes Phase 1: Fast-Path ONNX + Discrete Jaccard
         If divergence > threshold, executes Phase 2: Deep-Path LLM-as-a-judge
         Returns the safe crystallized output or raises EpistemicConsensusError (Hard-Stop).
         """
-        # 1. FAST-PATH
+        # 1. FAST-PATH (CONTINUOUS)
         vec_alpha = await self._onnx_embed(outputs.alpha_llama)
         vec_beta = await self._onnx_embed(outputs.beta_mixtral)
         vec_gamma = await self._onnx_embed(outputs.gamma_qwen)
 
-        # 2. CÁLCULO GEOMÉTRICO
-        sim_ab = self._cosine_similarity(vec_alpha, vec_beta)
-        sim_ag = self._cosine_similarity(vec_alpha, vec_gamma)
-        sim_bg = self._cosine_similarity(vec_beta, vec_gamma)
+        # 2. CÁLCULO GEOMÉTRICO (HYBRID)
+        cos_ab = self._cosine_similarity(vec_alpha, vec_beta)
+        cos_ag = self._cosine_similarity(vec_alpha, vec_gamma)
+        cos_bg = self._cosine_similarity(vec_beta, vec_gamma)
+
+        jac_ab = self._jaccard_similarity(outputs.alpha_llama, outputs.beta_mixtral)
+        jac_ag = self._jaccard_similarity(outputs.alpha_llama, outputs.gamma_qwen)
+        jac_bg = self._jaccard_similarity(outputs.beta_mixtral, outputs.gamma_qwen)
+
+        # SEMANTIC COLLISION HARD-STOP (Active Adversarial Attack on Embedder)
+        for cos_val, jac_val, pair in [(cos_ab, jac_ab, "A-B"), (cos_ag, jac_ag, "A-G"), (cos_bg, jac_bg, "B-G")]:
+            if cos_val > 0.90 and jac_val < 0.20:
+                logger.error("🛑 [I10-FAST-PATH] Semantic Collision Detected! Pair %s (Cos: %.2f, Jac: %.2f)", pair, cos_val, jac_val)
+                raise EpistemicConsensusError("I10 Consensus Hard-Stop: Semantic Collision Attack on Embedding Space")
+
+        # HYBRID COHERENCE
+        sim_ab = (0.7 * cos_ab) + (0.3 * jac_ab)
+        sim_ag = (0.7 * cos_ag) + (0.3 * jac_ag)
+        sim_bg = (0.7 * cos_bg) + (0.3 * jac_bg)
 
         cluster_coherence = (sim_ab + sim_ag + sim_bg) / 3.0
 
