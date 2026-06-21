@@ -96,9 +96,9 @@ CORTEX is built strictly around 4 core modules that ensure production safety.
 ### 1. Identity & Access Layer (`SovereignIdentity`)
 Multi-tenant isolation and strict RBAC. Agents and pipelines operate within strict bounded scopes.
 
-### 2. Change Risk Engine (`EntropyCore` & Epistemic Dependency Graph)
+### 2. Change Risk Engine (`EntropyCore` & Keyed Retrieval Graph System)
 Analyzes code churn, diff size, and structural logic changes to compute an `EntropyScore`. High scores indicate probabilistic drift.
-**Under the hood:** CORTEX compiles the codebase into an **Epistemic Dependency Graph (EDG V6)**. When a PR is submitted, it executes an *Epistemic Invalidation Propagation*. If an AI modifies a foundational node (e.g. Auth Logic), any dependent nodes are challenged; it computes the blast radius and prunes the network, saving the infrastructure.
+**Under the hood:** CORTEX compiles the codebase into a **Keyed Retrieval Graph System (KRGS)**. When a PR is submitted, it executes an *Epistemic Invalidation Propagation* on the logical truth graph. If an AI modifies a foundational node (e.g. Auth Logic), any dependent nodes are challenged; it computes the blast radius and prunes the network, saving the infrastructure.
 
 ### 3. Policy Gateway (`CodeGovernanceGateway`)
 The enforcement boundary. It intercepts pipeline execution (via CLI or SDK), reads the risk score and EDG propagation tree, and natively blocks or approves changes based on configured enterprise policies.
@@ -164,7 +164,7 @@ pip install "cortex-persist[secure]"          # OS keyring credentials vault
 
 ```yaml
 AESTHETIC:    INDUSTRIAL NOIR 2026 (#0A0A0A / #2B3BE5)
-EPISTEMOLOGY: C5-REAL EDG V6 — Error Navigation System
+EPISTEMOLOGY: C5-REAL KRGS — Partitioned Vector Space
 CORE TENET:   Optimize for correction, not certainty. Uncertainty is telemetry, not weakness.
 UPDATED:      June 2026 — Falsifiable Memory Infrastructure
 ```

@@ -69,7 +69,7 @@ The persistence and trust layer is organized into sovereign domains matching the
 | Domain | Responsibility |
 |---|---|
 | `cortex/auth/` | **SovereignIdentity:** Tenant-aware isolation and Role-Based Access Control (RBAC). |
-| `cortex_rs/src/edg.rs` | **Epistemic Dependency Graph (Rust):** Lock-free DAG tracking Epistemic State Transitions. Computes blast radius and enforces Epistemic Consistency via Invalidation Propagation. |
+| `cortex_rs/src/krgs.rs` | **Keyed Retrieval Graph System (Rust):** Lock-free DAG (`G`) tracking logical transitions, orthogonal to the heuristic retrieval space (`R_K`). Enforces strict causal truth propagation. |
 | `cortex/gateway/` | **CodeGovernanceGateway:** The enforcement boundary. Blocks or approves code mutations based on Entropy Score and EDG traversal. |
 | `cortex/audit/` | **EnterpriseAuditLedger:** Immutable hash-chain recording every PR evaluation and state transition. |
 

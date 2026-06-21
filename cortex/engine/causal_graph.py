@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """
 Causal Graph Engine for CORTEX Audit System.
-Maintains the Epistemic Dependency Graph (EDG) and causal linkages for deterministic replay.
+Maintains the Keyed Retrieval Graph System (KRGS) and causal linkages for deterministic replay.
 """
 
 import json

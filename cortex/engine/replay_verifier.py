@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """
 Replay Engine for CORTEX Audit System.
-Verifies the Epistemic Dependency Graph deterministically.
+Verifies the Keyed Retrieval Graph System deterministically.
 """
 
 import json

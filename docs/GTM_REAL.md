@@ -19,7 +19,7 @@ graph TD
     classDef C5 fill:#0A0A0A,stroke:#2B3BE5,stroke-width:2px,color:#FFFFFF;
     
     A["Raw Agent Execution (Conjecture)"] --> B["OTel/Ingest Gateway (/spans)"]:::C5
-    B --> C["Epistemic Dependency Graph"]:::C5
+    B --> C["Keyed Retrieval Graph System"]:::C5
     C --> D["Policy Guard Engine (/policies)"]:::C5
     D -->|Violation| E["Inline Remediation (/events)"]:::C5
     D -->|Compliance| F["Sovereign Ledger (/traces)"]:::C5
