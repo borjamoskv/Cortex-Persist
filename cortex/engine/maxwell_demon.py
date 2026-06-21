@@ -28,6 +28,17 @@ class MaxwellDemon:
         self.threshold = similarity_threshold
         self.embedder = LocalEmbedder()
 
+    def set_state(self, execution_state: str) -> None:
+        """Adaptive entropy threshold based on Exergy Router state."""
+        state = execution_state.upper()
+        if state == "ULTRATHINK":
+            self.threshold = 0.99
+        elif state == "CONSTRUCT":
+            self.threshold = 0.95
+        else:
+            self.threshold = 0.85
+        logger.info(f"[MaxwellDemon] Threshold adapted to {self.threshold} for state {state}")
+
     def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
         """Compute cosine similarity between two vectors."""
         dot = sum(a * b for a, b in zip(vec1, vec2))

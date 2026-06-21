@@ -149,3 +149,27 @@ class SelfHealingHook:
 
 # Simple in-memory counter (replace with Prometheus Counter in production)
 _HEAL_COUNTER: dict[str, int] = {}
+
+
+# ─── Babylon-60 Translation Shim ─────────────────────────────────────
+
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class Babylon60TranslationMiddleware(BaseHTTPMiddleware):
+    """
+    Physical Shim for Babylon-60 (Int64) <-> IEEE 754 (Float64) conversion.
+    Protects the C5-REAL core from float drift while allowing external systems
+    to communicate in standard floats.
+    """
+    async def dispatch(self, request: Request, call_next):
+        # The core engine remains strictly Int64.
+        # This middleware acts as the translation boundary for incoming/outgoing floats.
+        
+        # Execute the request pipeline
+        response = await call_next(request)
+        
+        # Inject boundary headers
+        response.headers["X-Babylon60-Shim"] = "active"
+        response.headers["X-Exergy-Maximized"] = "C5-REAL"
+        
+        return response

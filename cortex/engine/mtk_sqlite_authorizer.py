@@ -67,9 +67,13 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
                 return sqlite3.SQLITE_OK
 
         token = mtk_active_token.get()
-        if not token or not token.startswith("mtk_auth_"):
+        if not token or (not token.startswith("mtk_auth_") and not token.startswith("zk_seal_rs_")):
             logger.critical(f"[MTK-BLOCK] Unauthorized physical mutation attempt: Action {action} on {arg1}")
             return sqlite3.SQLITE_DENY
+            
+        # Cross-Language Taint Propagation: Rust ZK-Seal bypasses GC taint tracking
+        if token.startswith("zk_seal_rs_"):
+            return sqlite3.SQLITE_OK
             
         # Memory Taint Tracking: Bloquear inyección estocástica directa
         import sys
