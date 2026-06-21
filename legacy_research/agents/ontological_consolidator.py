@@ -10,9 +10,9 @@ Classifies and validates incoming facts into strict epistemic boundaries:
 """
 
 import enum
-import logging
 import hashlib
-from typing import Any, Dict
+import logging
+from typing import Any
 
 from cortex.agents.base import ReactiveTaskAgent
 
@@ -71,7 +71,7 @@ class OntologicalConsolidator(ReactiveTaskAgent):
             "confidence_score": validation_result["confidence_score"]
         }
 
-    def _validate_constraints(self, e_class: EpistemicClass, node: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_constraints(self, e_class: EpistemicClass, node: dict[str, Any]) -> dict[str, Any]:
         """Apply zero-entropy deterministic constraints based on epistemic class."""
         if e_class == EpistemicClass.OBSERVATION:
             if "provenance_hash" not in node and "sensor_timestamp" not in node:
@@ -123,11 +123,11 @@ class OntologicalConsolidator(ReactiveTaskAgent):
             "violations": violations
         }
 
-    def _generate_node_hash(self, node: Dict[str, Any]) -> str:
+    def _generate_node_hash(self, node: dict[str, Any]) -> str:
         """Deterministically hash the structural content of the node."""
         content = str(node.get("content", ""))
         e_class = str(node.get("epistemic_class", ""))
-        raw = f"{e_class}:{content}".encode("utf-8")
+        raw = f"{e_class}:{content}".encode()
         return hashlib.sha256(raw).hexdigest()
 
     async def _propagate_invalidation(self, payload: dict[str, Any]) -> dict[str, Any]:
