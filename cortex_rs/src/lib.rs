@@ -15,6 +15,7 @@ pub mod causal;
 pub mod retrieval;
 pub mod babylon;
 pub mod mee;
+pub mod kv_gds;
 
 use serde::{Deserialize, Serialize};
 
@@ -188,6 +189,7 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(calculate_entropy_b60, m)?)?;
     m.add_function(wrap_pyfunction!(reality::reader::load_verified_reality, m)?)?;
     m.add_function(wrap_pyfunction!(mee::ffi::execute_mee_transfer, m)?)?;
+    m.add_class::<kv_gds::CufileGdsBridge>()?;
     Ok(())
 }
 
