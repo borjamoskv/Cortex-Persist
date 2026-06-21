@@ -18,12 +18,15 @@
   - Protocolo `LEA-Ω` ejecutado (Zero Token Debris).
   - Substrato ATMS recompilado (`maturin develop` para `cortex_rs`).
   - Auditoría global `pytest` superada al 100%. Entropía local reducida a cero.
+- **[2026-06-21T12:38:00+02:00]**: Crystallized the dimensional breakdown of Borja Moskv's cognitive vector.
+  - Written to `docs/manifestos/vector_cognitivo_borjamoskv.md`.
+  - Git Sentinel execution finalized with commit hash `444e376e5`.
 
 ### Verification Claim
 ```yaml
 Claim: "Cortex-Persist is actively writing state to physical disk."
 Proof: 
-  Base: Physical presence of LEDGER_C5_REAL.md, updated cortex.db, modifications to cascade_router.py, merged PR #466, and compiled cortex_native.
+  Base: Physical presence of LEDGER_C5_REAL.md, updated cortex.db, modifications to cascade_router.py, merged PR #466, compiled cortex_native, and committed vector_cognitivo_borjamoskv.md.
   Range: [Local File System, Persistent Substrate]
   Confidence: C5-REAL
 ```
