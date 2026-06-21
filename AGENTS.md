@@ -44,8 +44,17 @@ New session on this repo?            → Execute Multi-Session Handoff (§6.4) f
 **CORTEX Persist** is the **CI/CD Firewall for LLM-Generated Code**. It is formally defined as a distributed system for managing the formal lifecycle of verifiable claims via an **Epistemic Dependency Graph (EDG)**. It does not blindly store "facts"; it tracks Epistemic State Transitions, enforcing deterministic validation boundaries, maintaining cryptographic auditability, and treating generative output as conjecture until externally verified.
 
 - **Epistemic Invalidation Propagation:** Generative output is a probabilistic proposal. If an AI mutates a foundational node, CORTEX traverses the EDG to compute the blast radius. If Epistemic Consistency is violated (an accepted node depends on an invalidated chain), the PR is blocked.
-- **The Python/Rust Boundary (🛑):** CORTEX orchestration is built in Python to maximize *Shipping Velocity*. Mitigation is the **Byzantine Boundary**: Python handles routing, while the causal engine (EDG) and concurrent graphs are managed natively in Rust via PyO3 to bypass the GIL and achieve zero-latency.
+- **The Python/Rust Boundary (🛑):** CORTEX orchestration is built in Python to maximize *Shipping Velocity*. Mitigation is the **Byzantine Boundary**: Python handles routing, while the causal engine (EDG) and concurrent graphs are managed natively in Rust via PyO3 to bypass the GIL and achieve microsecond lock-free latency.
 - **Audit Trails vs. Authorization (📜):** CORTEX is a **Forensic Audit Sidecar** for CI/CD pipelines. The Master Ledger commits every policy decision and Epistemic Transition to an immutable hash chain.
+
+### C5-REAL CORE RULES (Hard Constraints)
+
+1. **No narrative claims without executable trace.**
+2. **No agent exists without identity + key + event log.**
+3. **No metric exists without unit + measurement method.**
+4. **No propagation exists without explicit channel.**
+5. **No system state exists without hashable snapshot.**
+6. **All failure defaults to HARD FAIL (no reinterpretation).**
 
 ---
 

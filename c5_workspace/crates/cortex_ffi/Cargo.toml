@@ -1,0 +1,12 @@
+[package]
+name = "cortex_ffi"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "cortex_ffi"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pyo3 = { workspace = true }
+cortex_rs = { path = "../cortex_rs" }

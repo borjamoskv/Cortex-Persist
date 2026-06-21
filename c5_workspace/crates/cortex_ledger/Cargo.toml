@@ -1,0 +1,6 @@
+[package]
+name = "cortex_ledger"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]

@@ -54,7 +54,14 @@ class JISAuditor:
                 )
 
         # 2. SOC 2 Check: Ensure 'actor_id' is present for accountability
-        if "actor_id" not in payload and "actor" not in payload:
+        meta = payload.get("meta") or {}
+        if isinstance(meta, str):
+            import json
+            try:
+                meta = json.loads(meta)
+            except Exception:
+                meta = {}
+        if "actor_id" not in payload and "actor" not in payload and "actor_id" not in meta:
             violations.append(
                 JISViolation(
                     policy="SOC2_ACCOUNTABILITY",
