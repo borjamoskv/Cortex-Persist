@@ -50,9 +50,11 @@ class MTKGuard:
         # TODO: Inject Ed25519 payload signature verification here.
         # if not verify_zk_seal(payload.payload_hash, payload.signature): raise ValueError(...)
         
-        # 1.3 Invariante Termodinámico/Complejidad (I_complexity)
-        # TODO: Inject Z3/AEON-0 resource bounding here.
-        # if payload.exergy_cost > MAX_JOULES: raise ValueError(...)
+        # 1.3 Invariante Termodinámico/Complejidad (I_complexity) (Ω₁₃)
+        # The MTK physically rejects transactions whose Informational Exergy is too low (Anergy).
+        # This acts as the Szilard Engine gate: no capability token is minted for pure entropy.
+        if hasattr(payload, "info_exergy") and payload.info_exergy < 0.1:
+            raise ValueError(f"MTK-REJECT: Informational Exergy too low ({payload.info_exergy} < 0.1). Entropy purge required before DB write.")
             
         # Step 2: Mint Ephemeral Token
         token = self._generate_ephemeral_token(payload)

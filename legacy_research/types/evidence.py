@@ -91,6 +91,7 @@ class ClosurePayload:
     evidence: EvidenceBundle
     verdict: bool
     payload_hash: str
+    info_exergy: float = 1.0
 
     @classmethod
     def seal(
@@ -101,6 +102,7 @@ class ClosurePayload:
         *,
         schema_version: str = "v1",
         proof_kind: str = "sealed-claim-set",
+        info_exergy: float = 1.0,
     ) -> "ClosurePayload":
         normalized_claims = tuple(_normalize_value(c) for c in claims)
         payload = {
@@ -120,6 +122,7 @@ class ClosurePayload:
             evidence=evidence,
             verdict=verdict,
             payload_hash=payload_hash,
+            info_exergy=info_exergy,
         )
 
     def canonical(self) -> dict[str, Any]:
@@ -129,6 +132,7 @@ class ClosurePayload:
             "claims": list(self.claims),
             "evidence_hash": self.evidence.evidence_hash,
             "verdict": self.verdict,
+            "info_exergy": self.info_exergy,
         }
         return {
             **payload,
