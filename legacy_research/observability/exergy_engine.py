@@ -157,52 +157,71 @@ class ExergyEngine:
         return genomes
 
     def get_entropy_drift(self, workflow: str) -> dict[str, Any]:
-        """Nivel 2: Detects entropy drift based on recent exergy vs historical."""
+        """Nivel 2: Detects entropy drift based on recent exergy vs historical.
+        [GOAT-MATH-026]: Implementación de Divergencia KL sobre distribuciones de Exergía.
+        """
         wf_history = [r for r in self.history if r.get("workflow") == workflow]
         if len(wf_history) < 3:
             return {"status": "INSUFFICIENT_DATA"}
 
-        scores = [r.get("exergy_score", 0) for r in wf_history]
+        scores = [r.get("exergy_score", 0.0) for r in wf_history]
         recent = scores[-1]
         baseline = scores[:-1]
 
-        avg = statistics.mean(baseline)
-        std = statistics.stdev(baseline) if len(baseline) > 1 else 0
+        mu_1 = statistics.mean(baseline)
+        sigma_1 = statistics.stdev(baseline) if len(baseline) > 1 else 1e-6
+        if sigma_1 == 0: sigma_1 = 1e-6
 
-        deviation_pct = ((recent - avg) / avg) * 100 if avg > 0 else 0
+        recent_window = scores[-3:] if len(scores) >= 3 else [recent]
+        mu_2 = statistics.mean(recent_window)
+        sigma_2 = statistics.stdev(recent_window) if len(recent_window) > 1 else sigma_1
+        if sigma_2 == 0: sigma_2 = 1e-6
 
-        # If recent is > 1.5 standard deviations below the mean, it's degraded
+        # KL Divergence: D_KL(P || Q) = log(sigma_2 / sigma_1) + (sigma_1^2 + (mu_1 - mu_2)^2) / (2 * sigma_2^2) - 0.5
+        kl_divergence = np.log(sigma_2 / sigma_1) + (sigma_1**2 + (mu_1 - mu_2)**2) / (2 * sigma_2**2) - 0.5
+
+        deviation_pct = ((mu_2 - mu_1) / mu_1) * 100 if mu_1 > 0 else 0
+
         status = "NOMINAL"
-        if std > 0 and recent < avg - (1.5 * std) or deviation_pct < -30:
+        if kl_divergence > 1.5 or deviation_pct < -30:
             status = "DEGRADED"
 
         return {
             "workflow": workflow,
-            "expected_exergy": round(avg, 4),
-            "actual_exergy": round(recent, 4),
+            "expected_exergy": round(mu_1, 4),
+            "actual_exergy": round(mu_2, 4),
+            "kl_divergence": round(float(kl_divergence), 4),
             "deviation_pct": round(deviation_pct, 1),
             "status": status,
         }
 
     def get_task_stats(self, workflow: str) -> TaskStats:
-        """Calculates stable statistical moments for a workflow."""
+        """Calculates stable statistical moments for a workflow.
+        [GOAT-MATH-072]: Rademacher Complexity Generalization Bound.
+        """
         wf_history = [r for r in self.history if r.get("workflow") == workflow]
-        if len(wf_history) < 2:
+        N = len(wf_history)
+        if N < 2:
             return TaskStats(workflow, 0.06, 0.0, 15.0, 0.0, 0.1)
 
         runtimes = [r.get("actual_minutes", 15.0) for r in wf_history]
         exergies = [r.get("exergy_score", 0.06) for r in wf_history]
 
         exergy_mean = statistics.mean(exergies)
-        exergy_var = statistics.variance(exergies) if len(exergies) > 1 else 0.0
+        exergy_var = statistics.variance(exergies) if N > 1 else 0.0
         runtime_mean = statistics.mean(runtimes)
-        runtime_var = statistics.variance(runtimes) if len(runtimes) > 1 else 0.0
+        runtime_var = statistics.variance(runtimes) if N > 1 else 0.0
 
-        # Confidence decays if variance is high relative to mean
+        # Base confidence from coefficient of variation
         cv = (exergy_var**0.5) / (exergy_mean + 1e-6)
-        confidence = max(0.1, 1.0 - min(cv, 0.9))
+        base_confidence = max(0.1, 1.0 - min(cv, 0.9))
+        
+        # Rademacher Complexity Penalty: O(1/sqrt(N))
+        # Reduce confidence based on empirical capacity to overfit
+        rademacher_penalty = 0.5 * (1.0 / np.sqrt(N))
+        confidence = max(0.1, base_confidence - rademacher_penalty)
 
-        return TaskStats(workflow, exergy_mean, exergy_var, runtime_mean, runtime_var, confidence)
+        return TaskStats(workflow, exergy_mean, exergy_var, runtime_mean, runtime_var, float(confidence))
 
     def lyapunov_scheduler(
         self, candidate_workflows: list[str], state: SystemState | None = None

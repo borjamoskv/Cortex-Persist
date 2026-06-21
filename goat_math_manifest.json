@@ -1,0 +1,1683 @@
+{
+  "version": "1.0",
+  "protocol": "C5-REAL",
+  "generated_at": "2026-06-21T17:32:23.816548+00:00",
+  "manifest_hash": "b5f271fedf0a8dd7",
+  "dag_validation": {
+    "is_valid_dag": true,
+    "topological_order": [
+      "GOAT-MATH-001",
+      "GOAT-MATH-002",
+      "GOAT-MATH-003",
+      "GOAT-MATH-004",
+      "GOAT-MATH-006",
+      "GOAT-MATH-007",
+      "GOAT-MATH-009",
+      "GOAT-MATH-011",
+      "GOAT-MATH-020",
+      "GOAT-MATH-021",
+      "GOAT-MATH-022",
+      "GOAT-MATH-024",
+      "GOAT-MATH-026",
+      "GOAT-MATH-028",
+      "GOAT-MATH-029",
+      "GOAT-MATH-031",
+      "GOAT-MATH-033",
+      "GOAT-MATH-045",
+      "GOAT-MATH-053",
+      "GOAT-MATH-059",
+      "GOAT-MATH-065",
+      "GOAT-MATH-071",
+      "GOAT-MATH-073",
+      "GOAT-MATH-075",
+      "GOAT-MATH-080",
+      "GOAT-MATH-082",
+      "GOAT-MATH-083",
+      "GOAT-MATH-084",
+      "GOAT-MATH-091",
+      "GOAT-MATH-093",
+      "GOAT-MATH-095",
+      "GOAT-MATH-005",
+      "GOAT-MATH-010",
+      "GOAT-MATH-008",
+      "GOAT-MATH-012",
+      "GOAT-MATH-014",
+      "GOAT-MATH-015",
+      "GOAT-MATH-019",
+      "GOAT-MATH-036",
+      "GOAT-MATH-039",
+      "GOAT-MATH-061",
+      "GOAT-MATH-085",
+      "GOAT-MATH-025",
+      "GOAT-MATH-027",
+      "GOAT-MATH-052",
+      "GOAT-MATH-030",
+      "GOAT-MATH-051",
+      "GOAT-MATH-054",
+      "GOAT-MATH-055",
+      "GOAT-MATH-058",
+      "GOAT-MATH-032",
+      "GOAT-MATH-056",
+      "GOAT-MATH-034",
+      "GOAT-MATH-046",
+      "GOAT-MATH-066",
+      "GOAT-MATH-069",
+      "GOAT-MATH-072",
+      "GOAT-MATH-074",
+      "GOAT-MATH-081",
+      "GOAT-MATH-092",
+      "GOAT-MATH-096",
+      "GOAT-MATH-097",
+      "GOAT-MATH-076",
+      "GOAT-MATH-023",
+      "GOAT-MATH-077",
+      "GOAT-MATH-013",
+      "GOAT-MATH-057",
+      "GOAT-MATH-017",
+      "GOAT-MATH-047",
+      "GOAT-MATH-040",
+      "GOAT-MATH-041",
+      "GOAT-MATH-050",
+      "GOAT-MATH-062",
+      "GOAT-MATH-067",
+      "GOAT-MATH-070",
+      "GOAT-MATH-088",
+      "GOAT-MATH-060",
+      "GOAT-MATH-035",
+      "GOAT-MATH-090",
+      "GOAT-MATH-094",
+      "GOAT-MATH-098",
+      "GOAT-MATH-099",
+      "GOAT-MATH-078",
+      "GOAT-MATH-079",
+      "GOAT-MATH-016",
+      "GOAT-MATH-018",
+      "GOAT-MATH-037",
+      "GOAT-MATH-042",
+      "GOAT-MATH-048",
+      "GOAT-MATH-049",
+      "GOAT-MATH-063",
+      "GOAT-MATH-064",
+      "GOAT-MATH-068",
+      "GOAT-MATH-089",
+      "GOAT-MATH-100",
+      "GOAT-MATH-086",
+      "GOAT-MATH-038",
+      "GOAT-MATH-043",
+      "GOAT-MATH-087",
+      "GOAT-MATH-044"
+    ],
+    "total_nodes": 100,
+    "total_edges": 99,
+    "orphan_dependencies": [],
+    "root_nodes": [
+      "GOAT-MATH-001",
+      "GOAT-MATH-002",
+      "GOAT-MATH-003",
+      "GOAT-MATH-004",
+      "GOAT-MATH-006",
+      "GOAT-MATH-007",
+      "GOAT-MATH-009",
+      "GOAT-MATH-011",
+      "GOAT-MATH-020",
+      "GOAT-MATH-021",
+      "GOAT-MATH-022",
+      "GOAT-MATH-024",
+      "GOAT-MATH-026",
+      "GOAT-MATH-028",
+      "GOAT-MATH-029",
+      "GOAT-MATH-031",
+      "GOAT-MATH-033",
+      "GOAT-MATH-045",
+      "GOAT-MATH-053",
+      "GOAT-MATH-059",
+      "GOAT-MATH-065",
+      "GOAT-MATH-071",
+      "GOAT-MATH-073",
+      "GOAT-MATH-075",
+      "GOAT-MATH-080",
+      "GOAT-MATH-082",
+      "GOAT-MATH-083",
+      "GOAT-MATH-084",
+      "GOAT-MATH-091",
+      "GOAT-MATH-093",
+      "GOAT-MATH-095"
+    ],
+    "leaf_nodes": [
+      "GOAT-MATH-002",
+      "GOAT-MATH-003",
+      "GOAT-MATH-006",
+      "GOAT-MATH-007",
+      "GOAT-MATH-009",
+      "GOAT-MATH-010",
+      "GOAT-MATH-015",
+      "GOAT-MATH-017",
+      "GOAT-MATH-018",
+      "GOAT-MATH-019",
+      "GOAT-MATH-022",
+      "GOAT-MATH-023",
+      "GOAT-MATH-027",
+      "GOAT-MATH-029",
+      "GOAT-MATH-030",
+      "GOAT-MATH-034",
+      "GOAT-MATH-035",
+      "GOAT-MATH-038",
+      "GOAT-MATH-040",
+      "GOAT-MATH-041",
+      "GOAT-MATH-044",
+      "GOAT-MATH-046",
+      "GOAT-MATH-048",
+      "GOAT-MATH-049",
+      "GOAT-MATH-050",
+      "GOAT-MATH-051",
+      "GOAT-MATH-052",
+      "GOAT-MATH-053",
+      "GOAT-MATH-054",
+      "GOAT-MATH-055",
+      "GOAT-MATH-056",
+      "GOAT-MATH-059",
+      "GOAT-MATH-060",
+      "GOAT-MATH-063",
+      "GOAT-MATH-064",
+      "GOAT-MATH-066",
+      "GOAT-MATH-067",
+      "GOAT-MATH-068",
+      "GOAT-MATH-070",
+      "GOAT-MATH-072",
+      "GOAT-MATH-074",
+      "GOAT-MATH-075",
+      "GOAT-MATH-076",
+      "GOAT-MATH-078",
+      "GOAT-MATH-079",
+      "GOAT-MATH-080",
+      "GOAT-MATH-081",
+      "GOAT-MATH-083",
+      "GOAT-MATH-084",
+      "GOAT-MATH-085",
+      "GOAT-MATH-087",
+      "GOAT-MATH-089",
+      "GOAT-MATH-090",
+      "GOAT-MATH-093",
+      "GOAT-MATH-097",
+      "GOAT-MATH-098",
+      "GOAT-MATH-099",
+      "GOAT-MATH-100"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "GOAT-MATH-001",
+      "index": 1,
+      "name": "Descomposición SVD",
+      "block": "B1",
+      "block_name": "Álgebra Lineal Avanzada",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "torch.linalg.svd()",
+      "validation_status": "PENDING",
+      "hash": "f87ce79abe71ab30",
+      "injected_at": "2026-06-21T17:32:23.753038+00:00"
+    },
+    {
+      "id": "GOAT-MATH-002",
+      "index": 2,
+      "name": "Descomposición LU",
+      "block": "B1",
+      "block_name": "Álgebra Lineal Avanzada",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "scipy.linalg.lu()",
+      "validation_status": "PENDING",
+      "hash": "b6d6950f7b1a1823",
+      "injected_at": "2026-06-21T17:32:23.753298+00:00"
+    },
+    {
+      "id": "GOAT-MATH-003",
+      "index": 3,
+      "name": "Descomposición QR",
+      "block": "B1",
+      "block_name": "Álgebra Lineal Avanzada",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "torch.linalg.qr()",
+      "validation_status": "PENDING",
+      "hash": "a53be0ded1b3b39d",
+      "injected_at": "2026-06-21T17:32:23.753313+00:00"
+    },
+    {
+      "id": "GOAT-MATH-004",
+      "index": 4,
+      "name": "Eigendecomposición",
+      "block": "B1",
+      "block_name": "Álgebra Lineal Avanzada",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "torch.linalg.eigh()",
+      "validation_status": "PENDING",
+      "hash": "86eb11c125d6e64e",
+      "injected_at": "2026-06-21T17:32:23.753324+00:00"
+    },
+    {
+      "id": "GOAT-MATH-005",
+      "index": 5,
+      "name": "Pseudoinversa Moore-Penrose",
+      "block": "B1",
+      "block_name": "Álgebra Lineal Avanzada",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-001"
+      ],
+      "verification_method": "torch.linalg.pinv()",
+      "validation_status": "PENDING",
+      "hash": "c5ab7c880fb32c40",
+      "injected_at": "2026-06-21T17:32:23.753341+00:00"
+    },
+    {
+      "id": "GOAT-MATH-006",
+      "index": 6,
+      "name": "Producto de Kronecker",
+      "block": "B1",
+      "block_name": "Álgebra Lineal Avanzada",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "torch.kron()",
+      "validation_status": "PENDING",
+      "hash": "8e29473c17b4ed50",
+      "injected_at": "2026-06-21T17:32:23.753352+00:00"
+    },
+    {
+      "id": "GOAT-MATH-007",
+      "index": 7,
+      "name": "Norma Frobenius",
+      "block": "B1",
+      "block_name": "Álgebra Lineal Avanzada",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "torch.norm(M,'fro')",
+      "validation_status": "PENDING",
+      "hash": "8b971eddcaf7e4ad",
+      "injected_at": "2026-06-21T17:32:23.753361+00:00"
+    },
+    {
+      "id": "GOAT-MATH-008",
+      "index": 8,
+      "name": "Matriz semidefinida positiva",
+      "block": "B1",
+      "block_name": "Álgebra Lineal Avanzada",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-004"
+      ],
+      "verification_method": "eigenvalues >= 0",
+      "validation_status": "PENDING",
+      "hash": "4b687b55bbc93eae",
+      "injected_at": "2026-06-21T17:32:23.753370+00:00"
+    },
+    {
+      "id": "GOAT-MATH-009",
+      "index": 9,
+      "name": "Traza de una matriz",
+      "block": "B1",
+      "block_name": "Álgebra Lineal Avanzada",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "torch.trace()",
+      "validation_status": "PENDING",
+      "hash": "61692db1512ab785",
+      "injected_at": "2026-06-21T17:32:23.753379+00:00"
+    },
+    {
+      "id": "GOAT-MATH-010",
+      "index": 10,
+      "name": "Rango numérico",
+      "block": "B1",
+      "block_name": "Álgebra Lineal Avanzada",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-001"
+      ],
+      "verification_method": "torch.linalg.matrix_rank()",
+      "validation_status": "PENDING",
+      "hash": "666c28db48173002",
+      "injected_at": "2026-06-21T17:32:23.753388+00:00"
+    },
+    {
+      "id": "GOAT-MATH-011",
+      "index": 11,
+      "name": "Gradiente",
+      "block": "B2",
+      "block_name": "Cálculo Multivariable y Diferencial",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "torch.autograd.grad()",
+      "validation_status": "PENDING",
+      "hash": "6dc0b80e814b5ccf",
+      "injected_at": "2026-06-21T17:32:23.753397+00:00"
+    },
+    {
+      "id": "GOAT-MATH-012",
+      "index": 12,
+      "name": "Jacobiano",
+      "block": "B2",
+      "block_name": "Cálculo Multivariable y Diferencial",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011"
+      ],
+      "verification_method": "torch.autograd.functional.jacobian()",
+      "validation_status": "PENDING",
+      "hash": "0085bbc7de384a1f",
+      "injected_at": "2026-06-21T17:32:23.753407+00:00"
+    },
+    {
+      "id": "GOAT-MATH-013",
+      "index": 13,
+      "name": "Hessiano",
+      "block": "B2",
+      "block_name": "Cálculo Multivariable y Diferencial",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011",
+        "GOAT-MATH-012"
+      ],
+      "verification_method": "torch.autograd.functional.hessian()",
+      "validation_status": "PENDING",
+      "hash": "29056b5ac06a932e",
+      "injected_at": "2026-06-21T17:32:23.753418+00:00"
+    },
+    {
+      "id": "GOAT-MATH-014",
+      "index": 14,
+      "name": "Regla de la cadena generalizada",
+      "block": "B2",
+      "block_name": "Cálculo Multivariable y Diferencial",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011"
+      ],
+      "verification_method": "backprop_test()",
+      "validation_status": "PENDING",
+      "hash": "c4b3a535c8684e81",
+      "injected_at": "2026-06-21T17:32:23.753427+00:00"
+    },
+    {
+      "id": "GOAT-MATH-015",
+      "index": 15,
+      "name": "Derivada direccional",
+      "block": "B2",
+      "block_name": "Cálculo Multivariable y Diferencial",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011"
+      ],
+      "verification_method": "grad_dot_v_test()",
+      "validation_status": "PENDING",
+      "hash": "e810e5ab2ab44804",
+      "injected_at": "2026-06-21T17:32:23.753436+00:00"
+    },
+    {
+      "id": "GOAT-MATH-016",
+      "index": 16,
+      "name": "Operador Laplaciano",
+      "block": "B2",
+      "block_name": "Cálculo Multivariable y Diferencial",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011",
+        "GOAT-MATH-013"
+      ],
+      "verification_method": "trace_hessian_test()",
+      "validation_status": "PENDING",
+      "hash": "cced3798a13adeca",
+      "injected_at": "2026-06-21T17:32:23.753446+00:00"
+    },
+    {
+      "id": "GOAT-MATH-017",
+      "index": 17,
+      "name": "Diferenciación automática",
+      "block": "B2",
+      "block_name": "Cálculo Multivariable y Diferencial",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-014"
+      ],
+      "verification_method": "jax.grad()",
+      "validation_status": "PENDING",
+      "hash": "792827d2f417025b",
+      "injected_at": "2026-06-21T17:32:23.753455+00:00"
+    },
+    {
+      "id": "GOAT-MATH-018",
+      "index": 18,
+      "name": "Serie de Taylor multivariable",
+      "block": "B2",
+      "block_name": "Cálculo Multivariable y Diferencial",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011",
+        "GOAT-MATH-013"
+      ],
+      "verification_method": "taylor_expansion_test()",
+      "validation_status": "PENDING",
+      "hash": "e9c531318dbcfcf8",
+      "injected_at": "2026-06-21T17:32:23.753465+00:00"
+    },
+    {
+      "id": "GOAT-MATH-019",
+      "index": 19,
+      "name": "Integral de línea",
+      "block": "B2",
+      "block_name": "Cálculo Multivariable y Diferencial",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011"
+      ],
+      "verification_method": "numerical_line_integral_test()",
+      "validation_status": "PENDING",
+      "hash": "e693d74e2cbf4196",
+      "injected_at": "2026-06-21T17:32:23.753474+00:00"
+    },
+    {
+      "id": "GOAT-MATH-020",
+      "index": 20,
+      "name": "Transformada de Fourier",
+      "block": "B2",
+      "block_name": "Cálculo Multivariable y Diferencial",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "torch.fft.fft()",
+      "validation_status": "PENDING",
+      "hash": "8bd3eaddc9b0ac52",
+      "injected_at": "2026-06-21T17:32:23.753483+00:00"
+    },
+    {
+      "id": "GOAT-MATH-021",
+      "index": 21,
+      "name": "Inferencia bayesiana",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "posterior_test()",
+      "validation_status": "PENDING",
+      "hash": "8d5a26a4f918c1d6",
+      "injected_at": "2026-06-21T17:32:23.753492+00:00"
+    },
+    {
+      "id": "GOAT-MATH-022",
+      "index": 22,
+      "name": "Distribución de Dirichlet",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "torch.distributions.Dirichlet()",
+      "validation_status": "PENDING",
+      "hash": "f0d34dfae2c03add",
+      "injected_at": "2026-06-21T17:32:23.753500+00:00"
+    },
+    {
+      "id": "GOAT-MATH-023",
+      "index": 23,
+      "name": "Proceso gaussiano",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-008"
+      ],
+      "verification_method": "gpytorch_test()",
+      "validation_status": "PENDING",
+      "hash": "673f977af39f99ba",
+      "injected_at": "2026-06-21T17:32:23.753509+00:00"
+    },
+    {
+      "id": "GOAT-MATH-024",
+      "index": 24,
+      "name": "Cadenas de Markov",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "transition_matrix_test()",
+      "validation_status": "PENDING",
+      "hash": "4309bbc620dd6cdf",
+      "injected_at": "2026-06-21T17:32:23.753518+00:00"
+    },
+    {
+      "id": "GOAT-MATH-025",
+      "index": 25,
+      "name": "MCMC (Monte Carlo)",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-021",
+        "GOAT-MATH-024"
+      ],
+      "verification_method": "pymc_sampling_test()",
+      "validation_status": "PENDING",
+      "hash": "bc17669766f51eaa",
+      "injected_at": "2026-06-21T17:32:23.753549+00:00"
+    },
+    {
+      "id": "GOAT-MATH-026",
+      "index": 26,
+      "name": "Divergencia KL",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "F.kl_div()",
+      "validation_status": "PENDING",
+      "hash": "37adb57dea9eb0dc",
+      "injected_at": "2026-06-21T17:32:23.753567+00:00"
+    },
+    {
+      "id": "GOAT-MATH-027",
+      "index": 27,
+      "name": "Información mutua",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-026"
+      ],
+      "verification_method": "MI_estimation_test()",
+      "validation_status": "PENDING",
+      "hash": "58dbe88d3643c2c9",
+      "injected_at": "2026-06-21T17:32:23.753603+00:00"
+    },
+    {
+      "id": "GOAT-MATH-028",
+      "index": 28,
+      "name": "Entropía de Shannon",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "entropy_computation_test()",
+      "validation_status": "PENDING",
+      "hash": "c4818690b16b0015",
+      "injected_at": "2026-06-21T17:32:23.753621+00:00"
+    },
+    {
+      "id": "GOAT-MATH-029",
+      "index": 29,
+      "name": "Distribución de Laplace",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "torch.distributions.Laplace()",
+      "validation_status": "PENDING",
+      "hash": "57a54eba544142d2",
+      "injected_at": "2026-06-21T17:32:23.753633+00:00"
+    },
+    {
+      "id": "GOAT-MATH-030",
+      "index": 30,
+      "name": "Función de partición",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-028"
+      ],
+      "verification_method": "Z_computation_test()",
+      "validation_status": "PENDING",
+      "hash": "ceeb5fd8af22e673",
+      "injected_at": "2026-06-21T17:32:23.753660+00:00"
+    },
+    {
+      "id": "GOAT-MATH-031",
+      "index": 31,
+      "name": "Estimación máxima verosimilitud",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "MLE_test()",
+      "validation_status": "PENDING",
+      "hash": "5fc61e2877d1f348",
+      "injected_at": "2026-06-21T17:32:23.753672+00:00"
+    },
+    {
+      "id": "GOAT-MATH-032",
+      "index": 32,
+      "name": "Estimación MAP",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-021",
+        "GOAT-MATH-031"
+      ],
+      "verification_method": "MAP_test()",
+      "validation_status": "PENDING",
+      "hash": "e7dad06c18860429",
+      "injected_at": "2026-06-21T17:32:23.753720+00:00"
+    },
+    {
+      "id": "GOAT-MATH-033",
+      "index": 33,
+      "name": "Variables latentes",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "VAE_latent_test()",
+      "validation_status": "PENDING",
+      "hash": "fe136e319f6379b1",
+      "injected_at": "2026-06-21T17:32:23.753761+00:00"
+    },
+    {
+      "id": "GOAT-MATH-034",
+      "index": 34,
+      "name": "Algoritmo EM",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-031",
+        "GOAT-MATH-033"
+      ],
+      "verification_method": "EM_convergence_test()",
+      "validation_status": "PENDING",
+      "hash": "7fe4fcbd87776ca4",
+      "injected_at": "2026-06-21T17:32:23.753790+00:00"
+    },
+    {
+      "id": "GOAT-MATH-035",
+      "index": 35,
+      "name": "Teorema de Bayes jerárquico",
+      "block": "B3",
+      "block_name": "Probabilidad Profunda",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-021",
+        "GOAT-MATH-032"
+      ],
+      "verification_method": "hierarchical_model_test()",
+      "validation_status": "PENDING",
+      "hash": "2b3e70f88b4ea516",
+      "injected_at": "2026-06-21T17:32:23.753836+00:00"
+    },
+    {
+      "id": "GOAT-MATH-036",
+      "index": 36,
+      "name": "Condiciones KKT",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011"
+      ],
+      "verification_method": "KKT_solver_test()",
+      "validation_status": "PENDING",
+      "hash": "c321ac03c4ba4853",
+      "injected_at": "2026-06-21T17:32:23.753866+00:00"
+    },
+    {
+      "id": "GOAT-MATH-037",
+      "index": 37,
+      "name": "Método de Newton",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011",
+        "GOAT-MATH-013"
+      ],
+      "verification_method": "newton_convergence_test()",
+      "validation_status": "PENDING",
+      "hash": "31e07ca2435b9dfb",
+      "injected_at": "2026-06-21T17:32:23.753891+00:00"
+    },
+    {
+      "id": "GOAT-MATH-038",
+      "index": 38,
+      "name": "Quasi-Newton (L-BFGS)",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-037"
+      ],
+      "verification_method": "torch.optim.LBFGS()",
+      "validation_status": "PENDING",
+      "hash": "2fe8da69ab5fc9f1",
+      "injected_at": "2026-06-21T17:32:23.753907+00:00"
+    },
+    {
+      "id": "GOAT-MATH-039",
+      "index": 39,
+      "name": "Descenso gradiente estocástico",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011"
+      ],
+      "verification_method": "torch.optim.SGD()",
+      "validation_status": "PENDING",
+      "hash": "40e9b580eef56892",
+      "injected_at": "2026-06-21T17:32:23.753919+00:00"
+    },
+    {
+      "id": "GOAT-MATH-040",
+      "index": 40,
+      "name": "Adam optimizer",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-039"
+      ],
+      "verification_method": "torch.optim.Adam()",
+      "validation_status": "PENDING",
+      "hash": "98bc04ef78d7f6a4",
+      "injected_at": "2026-06-21T17:32:23.753929+00:00"
+    },
+    {
+      "id": "GOAT-MATH-041",
+      "index": 41,
+      "name": "Adagrad / RMSProp",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-039"
+      ],
+      "verification_method": "torch.optim.RMSprop()",
+      "validation_status": "PENDING",
+      "hash": "86f736dd82701fd8",
+      "injected_at": "2026-06-21T17:32:23.753939+00:00"
+    },
+    {
+      "id": "GOAT-MATH-042",
+      "index": 42,
+      "name": "Funciones convexas",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-013"
+      ],
+      "verification_method": "convexity_check_test()",
+      "validation_status": "PENDING",
+      "hash": "767d3fe63947bc60",
+      "injected_at": "2026-06-21T17:32:23.753949+00:00"
+    },
+    {
+      "id": "GOAT-MATH-043",
+      "index": 43,
+      "name": "Funciones no convexas",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-042"
+      ],
+      "verification_method": "saddle_point_test()",
+      "validation_status": "PENDING",
+      "hash": "eb05952cee0182b0",
+      "injected_at": "2026-06-21T17:32:23.753958+00:00"
+    },
+    {
+      "id": "GOAT-MATH-044",
+      "index": 44,
+      "name": "Paisaje de pérdida",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011",
+        "GOAT-MATH-043"
+      ],
+      "verification_method": "loss_landscape_viz_test()",
+      "validation_status": "PENDING",
+      "hash": "1ec3c8a31e858a04",
+      "injected_at": "2026-06-21T17:32:23.753977+00:00"
+    },
+    {
+      "id": "GOAT-MATH-045",
+      "index": 45,
+      "name": "Programación lineal",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "scipy.optimize.linprog()",
+      "validation_status": "PENDING",
+      "hash": "e869df7ceeebda39",
+      "injected_at": "2026-06-21T17:32:23.753986+00:00"
+    },
+    {
+      "id": "GOAT-MATH-046",
+      "index": 46,
+      "name": "Programación cuadrática",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-045"
+      ],
+      "verification_method": "cvxpy_QP_test()",
+      "validation_status": "PENDING",
+      "hash": "9e05b67cf10811fe",
+      "injected_at": "2026-06-21T17:32:23.753996+00:00"
+    },
+    {
+      "id": "GOAT-MATH-047",
+      "index": 47,
+      "name": "Multiplicadores de Lagrange",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011",
+        "GOAT-MATH-036"
+      ],
+      "verification_method": "lagrange_test()",
+      "validation_status": "PENDING",
+      "hash": "87a2a86f98a16095",
+      "injected_at": "2026-06-21T17:32:23.754006+00:00"
+    },
+    {
+      "id": "GOAT-MATH-048",
+      "index": 48,
+      "name": "Gradiente natural",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011",
+        "GOAT-MATH-057"
+      ],
+      "verification_method": "natural_grad_test()",
+      "validation_status": "PENDING",
+      "hash": "e291d77dba30911f",
+      "injected_at": "2026-06-21T17:32:23.754038+00:00"
+    },
+    {
+      "id": "GOAT-MATH-049",
+      "index": 49,
+      "name": "Dualidad de Lagrange",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-047"
+      ],
+      "verification_method": "dual_formulation_test()",
+      "validation_status": "PENDING",
+      "hash": "446743858ee3f14a",
+      "injected_at": "2026-06-21T17:32:23.754071+00:00"
+    },
+    {
+      "id": "GOAT-MATH-050",
+      "index": 50,
+      "name": "Optim. estocástica variacional",
+      "block": "B4",
+      "block_name": "Optimización GOAT",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-026",
+        "GOAT-MATH-039"
+      ],
+      "verification_method": "VI_ELBO_test()",
+      "validation_status": "PENDING",
+      "hash": "501f8c603ee3a358",
+      "injected_at": "2026-06-21T17:32:23.754083+00:00"
+    },
+    {
+      "id": "GOAT-MATH-051",
+      "index": 51,
+      "name": "Entropía cruzada",
+      "block": "B5",
+      "block_name": "Teoría de Información",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-028"
+      ],
+      "verification_method": "F.cross_entropy()",
+      "validation_status": "PENDING",
+      "hash": "50aab77ee1489d68",
+      "injected_at": "2026-06-21T17:32:23.754120+00:00"
+    },
+    {
+      "id": "GOAT-MATH-052",
+      "index": 52,
+      "name": "Divergencia Jensen-Shannon",
+      "block": "B5",
+      "block_name": "Teoría de Información",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-026"
+      ],
+      "verification_method": "JSD_computation_test()",
+      "validation_status": "PENDING",
+      "hash": "b5992bfb277168ee",
+      "injected_at": "2026-06-21T17:32:23.754136+00:00"
+    },
+    {
+      "id": "GOAT-MATH-053",
+      "index": 53,
+      "name": "Distancia de Wasserstein",
+      "block": "B5",
+      "block_name": "Teoría de Información",
+      "criticality": "ALTO",
+      "dependencies": [],
+      "verification_method": "scipy.stats.wasserstein_distance()",
+      "validation_status": "PENDING",
+      "hash": "c8c43a12869bf156",
+      "injected_at": "2026-06-21T17:32:23.754146+00:00"
+    },
+    {
+      "id": "GOAT-MATH-054",
+      "index": 54,
+      "name": "Capacidad de canal",
+      "block": "B5",
+      "block_name": "Teoría de Información",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-028"
+      ],
+      "verification_method": "channel_capacity_test()",
+      "validation_status": "PENDING",
+      "hash": "04cd44d21fb46027",
+      "injected_at": "2026-06-21T17:32:23.754156+00:00"
+    },
+    {
+      "id": "GOAT-MATH-055",
+      "index": 55,
+      "name": "Codificación aritmética",
+      "block": "B5",
+      "block_name": "Teoría de Información",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-028"
+      ],
+      "verification_method": "arithmetic_coding_test()",
+      "validation_status": "PENDING",
+      "hash": "cc1b76930ca5a056",
+      "injected_at": "2026-06-21T17:32:23.754177+00:00"
+    },
+    {
+      "id": "GOAT-MATH-056",
+      "index": 56,
+      "name": "Longitud descripción mínima",
+      "block": "B5",
+      "block_name": "Teoría de Información",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-028",
+        "GOAT-MATH-031"
+      ],
+      "verification_method": "MDL_test()",
+      "validation_status": "PENDING",
+      "hash": "26d4bad164c5659d",
+      "injected_at": "2026-06-21T17:32:23.754189+00:00"
+    },
+    {
+      "id": "GOAT-MATH-057",
+      "index": 57,
+      "name": "Información de Fisher",
+      "block": "B5",
+      "block_name": "Teoría de Información",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-012",
+        "GOAT-MATH-031"
+      ],
+      "verification_method": "fisher_info_matrix_test()",
+      "validation_status": "PENDING",
+      "hash": "fd2cc2a4ae83947d",
+      "injected_at": "2026-06-21T17:32:23.754218+00:00"
+    },
+    {
+      "id": "GOAT-MATH-058",
+      "index": 58,
+      "name": "Entropía condicional",
+      "block": "B5",
+      "block_name": "Teoría de Información",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-028"
+      ],
+      "verification_method": "H_Y_given_X_test()",
+      "validation_status": "PENDING",
+      "hash": "3a8f2f4d289c551e",
+      "injected_at": "2026-06-21T17:32:23.754244+00:00"
+    },
+    {
+      "id": "GOAT-MATH-059",
+      "index": 59,
+      "name": "Coeficiente de Gini",
+      "block": "B5",
+      "block_name": "Teoría de Información",
+      "criticality": "ALTO",
+      "dependencies": [],
+      "verification_method": "gini_impurity_test()",
+      "validation_status": "PENDING",
+      "hash": "9ef2a63c7da3de21",
+      "injected_at": "2026-06-21T17:32:23.754255+00:00"
+    },
+    {
+      "id": "GOAT-MATH-060",
+      "index": 60,
+      "name": "Ganancia de información",
+      "block": "B5",
+      "block_name": "Teoría de Información",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-028",
+        "GOAT-MATH-058"
+      ],
+      "verification_method": "info_gain_test()",
+      "validation_status": "PENDING",
+      "hash": "7eed2fb373590f4b",
+      "injected_at": "2026-06-21T17:32:23.754278+00:00"
+    },
+    {
+      "id": "GOAT-MATH-061",
+      "index": 61,
+      "name": "Variedad diferenciable",
+      "block": "B6",
+      "block_name": "Geometría Diferencial y Topología",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-011"
+      ],
+      "verification_method": "manifold_chart_test()",
+      "validation_status": "PENDING",
+      "hash": "2c2adebe077b6b6c",
+      "injected_at": "2026-06-21T17:32:23.754289+00:00"
+    },
+    {
+      "id": "GOAT-MATH-062",
+      "index": 62,
+      "name": "Espacio de Riemannian",
+      "block": "B6",
+      "block_name": "Geometría Diferencial y Topología",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-061",
+        "GOAT-MATH-008"
+      ],
+      "verification_method": "riemannian_metric_test()",
+      "validation_status": "PENDING",
+      "hash": "feb92b09b975c900",
+      "injected_at": "2026-06-21T17:32:23.754312+00:00"
+    },
+    {
+      "id": "GOAT-MATH-063",
+      "index": 63,
+      "name": "Curvatura",
+      "block": "B6",
+      "block_name": "Geometría Diferencial y Topología",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-013",
+        "GOAT-MATH-062"
+      ],
+      "verification_method": "curvature_tensor_test()",
+      "validation_status": "PENDING",
+      "hash": "6af9c58a999786f3",
+      "injected_at": "2026-06-21T17:32:23.754324+00:00"
+    },
+    {
+      "id": "GOAT-MATH-064",
+      "index": 64,
+      "name": "Geodésica",
+      "block": "B6",
+      "block_name": "Geometría Diferencial y Topología",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-062"
+      ],
+      "verification_method": "geodesic_solver_test()",
+      "validation_status": "PENDING",
+      "hash": "9fdf0699e8c10764",
+      "injected_at": "2026-06-21T17:32:23.754347+00:00"
+    },
+    {
+      "id": "GOAT-MATH-065",
+      "index": 65,
+      "name": "Homeomorfismo",
+      "block": "B6",
+      "block_name": "Geometría Diferencial y Topología",
+      "criticality": "ALTO",
+      "dependencies": [],
+      "verification_method": "topological_equiv_test()",
+      "validation_status": "PENDING",
+      "hash": "0ec4e497abc20866",
+      "injected_at": "2026-06-21T17:32:23.754376+00:00"
+    },
+    {
+      "id": "GOAT-MATH-066",
+      "index": 66,
+      "name": "Análisis topológico (TDA)",
+      "block": "B6",
+      "block_name": "Geometría Diferencial y Topología",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-065"
+      ],
+      "verification_method": "ripser_persistence_test()",
+      "validation_status": "PENDING",
+      "hash": "f387b91cb9f70422",
+      "injected_at": "2026-06-21T17:32:23.754388+00:00"
+    },
+    {
+      "id": "GOAT-MATH-067",
+      "index": 67,
+      "name": "Flujo de gradiente",
+      "block": "B6",
+      "block_name": "Geometría Diferencial y Topología",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-011",
+        "GOAT-MATH-061"
+      ],
+      "verification_method": "gradient_flow_ODE_test()",
+      "validation_status": "PENDING",
+      "hash": "87673c6ef4cdaeea",
+      "injected_at": "2026-06-21T17:32:23.754398+00:00"
+    },
+    {
+      "id": "GOAT-MATH-068",
+      "index": 68,
+      "name": "Métrica Riemanniana",
+      "block": "B6",
+      "block_name": "Geometría Diferencial y Topología",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-062"
+      ],
+      "verification_method": "metric_tensor_test()",
+      "validation_status": "PENDING",
+      "hash": "acb202a028146e6a",
+      "injected_at": "2026-06-21T17:32:23.754408+00:00"
+    },
+    {
+      "id": "GOAT-MATH-069",
+      "index": 69,
+      "name": "Diffeomorfismo",
+      "block": "B6",
+      "block_name": "Geometría Diferencial y Topología",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-065"
+      ],
+      "verification_method": "normalizing_flow_bijection_test()",
+      "validation_status": "PENDING",
+      "hash": "ee1aed7c58d64078",
+      "injected_at": "2026-06-21T17:32:23.754417+00:00"
+    },
+    {
+      "id": "GOAT-MATH-070",
+      "index": 70,
+      "name": "Fibrado vectorial",
+      "block": "B6",
+      "block_name": "Geometría Diferencial y Topología",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-061"
+      ],
+      "verification_method": "gauge_equivariant_test()",
+      "validation_status": "PENDING",
+      "hash": "46bce38d33229045",
+      "injected_at": "2026-06-21T17:32:23.754437+00:00"
+    },
+    {
+      "id": "GOAT-MATH-071",
+      "index": 71,
+      "name": "Dimensión VC",
+      "block": "B7",
+      "block_name": "Teoría de Aprendizaje Estadístico",
+      "criticality": "ALTO",
+      "dependencies": [],
+      "verification_method": "VC_bound_test()",
+      "validation_status": "PENDING",
+      "hash": "5e19f75e3d5bbf30",
+      "injected_at": "2026-06-21T17:32:23.754446+00:00"
+    },
+    {
+      "id": "GOAT-MATH-072",
+      "index": 72,
+      "name": "Complejidad de Rademacher",
+      "block": "B7",
+      "block_name": "Teoría de Aprendizaje Estadístico",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-071"
+      ],
+      "verification_method": "rademacher_test()",
+      "validation_status": "PENDING",
+      "hash": "6a8133e3c0c2f01a",
+      "injected_at": "2026-06-21T17:32:23.754470+00:00"
+    },
+    {
+      "id": "GOAT-MATH-073",
+      "index": 73,
+      "name": "Desigualdad de Hoeffding",
+      "block": "B7",
+      "block_name": "Teoría de Aprendizaje Estadístico",
+      "criticality": "ALTO",
+      "dependencies": [],
+      "verification_method": "hoeffding_bound_test()",
+      "validation_status": "PENDING",
+      "hash": "89734f0d3739dc73",
+      "injected_at": "2026-06-21T17:32:23.754481+00:00"
+    },
+    {
+      "id": "GOAT-MATH-074",
+      "index": 74,
+      "name": "PAC Learning",
+      "block": "B7",
+      "block_name": "Teoría de Aprendizaje Estadístico",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-071",
+        "GOAT-MATH-073"
+      ],
+      "verification_method": "PAC_bound_test()",
+      "validation_status": "PENDING",
+      "hash": "2e6a68f5e63d73f7",
+      "injected_at": "2026-06-21T17:32:23.754521+00:00"
+    },
+    {
+      "id": "GOAT-MATH-075",
+      "index": 75,
+      "name": "Bias-Variance Tradeoff",
+      "block": "B7",
+      "block_name": "Teoría de Aprendizaje Estadístico",
+      "criticality": "ALTO",
+      "dependencies": [],
+      "verification_method": "bias_variance_decomp_test()",
+      "validation_status": "PENDING",
+      "hash": "e8894d75a90541b5",
+      "injected_at": "2026-06-21T17:32:23.754532+00:00"
+    },
+    {
+      "id": "GOAT-MATH-076",
+      "index": 76,
+      "name": "Regularización de Tikhonov",
+      "block": "B7",
+      "block_name": "Teoría de Aprendizaje Estadístico",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-005"
+      ],
+      "verification_method": "ridge_regression_test()",
+      "validation_status": "PENDING",
+      "hash": "cebd51272d0241d9",
+      "injected_at": "2026-06-21T17:32:23.754553+00:00"
+    },
+    {
+      "id": "GOAT-MATH-077",
+      "index": 77,
+      "name": "Kernels y RKHS",
+      "block": "B7",
+      "block_name": "Teoría de Aprendizaje Estadístico",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-008",
+        "GOAT-MATH-091"
+      ],
+      "verification_method": "kernel_trick_test()",
+      "validation_status": "PENDING",
+      "hash": "be8cbafc08beb000",
+      "injected_at": "2026-06-21T17:32:23.754564+00:00"
+    },
+    {
+      "id": "GOAT-MATH-078",
+      "index": 78,
+      "name": "Teorema de representación",
+      "block": "B7",
+      "block_name": "Teoría de Aprendizaje Estadístico",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-077"
+      ],
+      "verification_method": "representer_theorem_test()",
+      "validation_status": "PENDING",
+      "hash": "28c334013beb00de",
+      "injected_at": "2026-06-21T17:32:23.754586+00:00"
+    },
+    {
+      "id": "GOAT-MATH-079",
+      "index": 79,
+      "name": "Margen en clasificación",
+      "block": "B7",
+      "block_name": "Teoría de Aprendizaje Estadístico",
+      "criticality": "ALTO",
+      "dependencies": [
+        "GOAT-MATH-077"
+      ],
+      "verification_method": "SVM_margin_test()",
+      "validation_status": "PENDING",
+      "hash": "4c0b9b8e624123d9",
+      "injected_at": "2026-06-21T17:32:23.754596+00:00"
+    },
+    {
+      "id": "GOAT-MATH-080",
+      "index": 80,
+      "name": "No Free Lunch Theorem",
+      "block": "B7",
+      "block_name": "Teoría de Aprendizaje Estadístico",
+      "criticality": "ALTO",
+      "dependencies": [],
+      "verification_method": "NFL_demonstration()",
+      "validation_status": "PENDING",
+      "hash": "58bff9ff4bc98e96",
+      "injected_at": "2026-06-21T17:32:23.754619+00:00"
+    },
+    {
+      "id": "GOAT-MATH-081",
+      "index": 81,
+      "name": "Mecanismo de atención",
+      "block": "B8",
+      "block_name": "Arquitecturas Modernas",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011",
+        "GOAT-MATH-082"
+      ],
+      "verification_method": "attention_forward_test()",
+      "validation_status": "PENDING",
+      "hash": "a9a52d1b6000b0cf",
+      "injected_at": "2026-06-21T17:32:23.754640+00:00"
+    },
+    {
+      "id": "GOAT-MATH-082",
+      "index": 82,
+      "name": "Producto escalar escalado",
+      "block": "B8",
+      "block_name": "Arquitecturas Modernas",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "scaled_dot_product_test()",
+      "validation_status": "PENDING",
+      "hash": "1d31f5b958e6082b",
+      "injected_at": "2026-06-21T17:32:23.754650+00:00"
+    },
+    {
+      "id": "GOAT-MATH-083",
+      "index": 83,
+      "name": "Softmax temperature",
+      "block": "B8",
+      "block_name": "Arquitecturas Modernas",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "softmax_temp_test()",
+      "validation_status": "PENDING",
+      "hash": "d5f37b5b39ca0a48",
+      "injected_at": "2026-06-21T17:32:23.754660+00:00"
+    },
+    {
+      "id": "GOAT-MATH-084",
+      "index": 84,
+      "name": "Convolución discreta",
+      "block": "B8",
+      "block_name": "Arquitecturas Modernas",
+      "criticality": "CRÍTICO",
+      "dependencies": [],
+      "verification_method": "F.conv2d() test",
+      "validation_status": "PENDING",
+      "hash": "7368a97c5d0a0036",
+      "injected_at": "2026-06-21T17:32:23.754679+00:00"
+    },
+    {
+      "id": "GOAT-MATH-085",
+      "index": 85,
+      "name": "FFT",
+      "block": "B8",
+      "block_name": "Arquitecturas Modernas",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-020"
+      ],
+      "verification_method": "torch.fft.fft() perf_test",
+      "validation_status": "PENDING",
+      "hash": "5d6eea7ccd75ffe5",
+      "injected_at": "2026-06-21T17:32:23.754689+00:00"
+    },
+    {
+      "id": "GOAT-MATH-086",
+      "index": 86,
+      "name": "Teoría espectral de grafos",
+      "block": "B8",
+      "block_name": "Arquitecturas Modernas",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-004",
+        "GOAT-MATH-016"
+      ],
+      "verification_method": "graph_spectrum_test()",
+      "validation_status": "PENDING",
+      "hash": "198f9dbf5bdb2444",
+      "injected_at": "2026-06-21T17:32:23.754710+00:00"
+    },
+    {
+      "id": "GOAT-MATH-087",
+      "index": 87,
+      "name": "Laplaciano de grafo",
+      "block": "B8",
+      "block_name": "Arquitecturas Modernas",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-016",
+        "GOAT-MATH-086"
+      ],
+      "verification_method": "graph_laplacian_test()",
+      "validation_status": "PENDING",
+      "hash": "7063da7e44ecc310",
+      "injected_at": "2026-06-21T17:32:23.754721+00:00"
+    },
+    {
+      "id": "GOAT-MATH-088",
+      "index": 88,
+      "name": "Ecuaciones diferenciales estoc.",
+      "block": "B8",
+      "block_name": "Arquitecturas Modernas",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011",
+        "GOAT-MATH-025"
+      ],
+      "verification_method": "SDE_solver_test()",
+      "validation_status": "PENDING",
+      "hash": "c10b5d3066969247",
+      "injected_at": "2026-06-21T17:32:23.754731+00:00"
+    },
+    {
+      "id": "GOAT-MATH-089",
+      "index": 89,
+      "name": "Score matching",
+      "block": "B8",
+      "block_name": "Arquitecturas Modernas",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-011",
+        "GOAT-MATH-088"
+      ],
+      "verification_method": "score_function_test()",
+      "validation_status": "PENDING",
+      "hash": "dea95d4add4b8795",
+      "injected_at": "2026-06-21T17:32:23.754740+00:00"
+    },
+    {
+      "id": "GOAT-MATH-090",
+      "index": 90,
+      "name": "Flujos normalizadores",
+      "block": "B8",
+      "block_name": "Arquitecturas Modernas",
+      "criticality": "CRÍTICO",
+      "dependencies": [
+        "GOAT-MATH-069",
+        "GOAT-MATH-026"
+      ],
+      "verification_method": "normalizing_flow_nll_test()",
+      "validation_status": "PENDING",
+      "hash": "b8a2725a98bbbe97",
+      "injected_at": "2026-06-21T17:32:23.754750+00:00"
+    },
+    {
+      "id": "GOAT-MATH-091",
+      "index": 91,
+      "name": "Espacios de Hilbert",
+      "block": "B9",
+      "block_name": "Fundamentos Matemáticos Absolutos",
+      "criticality": "MAESTRÍA",
+      "dependencies": [],
+      "verification_method": "inner_product_test()",
+      "validation_status": "PENDING",
+      "hash": "638d7a1400d4766d",
+      "injected_at": "2026-06-21T17:32:23.754774+00:00"
+    },
+    {
+      "id": "GOAT-MATH-092",
+      "index": 92,
+      "name": "Espacios de Banach",
+      "block": "B9",
+      "block_name": "Fundamentos Matemáticos Absolutos",
+      "criticality": "MAESTRÍA",
+      "dependencies": [
+        "GOAT-MATH-091"
+      ],
+      "verification_method": "completeness_test()",
+      "validation_status": "PENDING",
+      "hash": "11351af2789e9ff7",
+      "injected_at": "2026-06-21T17:32:23.754785+00:00"
+    },
+    {
+      "id": "GOAT-MATH-093",
+      "index": 93,
+      "name": "Teorema de punto fijo",
+      "block": "B9",
+      "block_name": "Fundamentos Matemáticos Absolutos",
+      "criticality": "MAESTRÍA",
+      "dependencies": [],
+      "verification_method": "banach_fixed_point_test()",
+      "validation_status": "PENDING",
+      "hash": "47d516f877fedb15",
+      "injected_at": "2026-06-21T17:32:23.754794+00:00"
+    },
+    {
+      "id": "GOAT-MATH-094",
+      "index": 94,
+      "name": "Análisis funcional",
+      "block": "B9",
+      "block_name": "Fundamentos Matemáticos Absolutos",
+      "criticality": "MAESTRÍA",
+      "dependencies": [
+        "GOAT-MATH-091",
+        "GOAT-MATH-092"
+      ],
+      "verification_method": "operator_norm_test()",
+      "validation_status": "PENDING",
+      "hash": "a22254410a5db858",
+      "injected_at": "2026-06-21T17:32:23.754806+00:00"
+    },
+    {
+      "id": "GOAT-MATH-095",
+      "index": 95,
+      "name": "Teoría de medida",
+      "block": "B9",
+      "block_name": "Fundamentos Matemáticos Absolutos",
+      "criticality": "MAESTRÍA",
+      "dependencies": [],
+      "verification_method": "sigma_algebra_test()",
+      "validation_status": "PENDING",
+      "hash": "62917da31796cab5",
+      "injected_at": "2026-06-21T17:32:23.754843+00:00"
+    },
+    {
+      "id": "GOAT-MATH-096",
+      "index": 96,
+      "name": "Integral de Lebesgue",
+      "block": "B9",
+      "block_name": "Fundamentos Matemáticos Absolutos",
+      "criticality": "MAESTRÍA",
+      "dependencies": [
+        "GOAT-MATH-095"
+      ],
+      "verification_method": "lebesgue_vs_riemann_test()",
+      "validation_status": "PENDING",
+      "hash": "fb63955b686551d1",
+      "injected_at": "2026-06-21T17:32:23.754873+00:00"
+    },
+    {
+      "id": "GOAT-MATH-097",
+      "index": 97,
+      "name": "Convergencia en distribución",
+      "block": "B9",
+      "block_name": "Fundamentos Matemáticos Absolutos",
+      "criticality": "MAESTRÍA",
+      "dependencies": [
+        "GOAT-MATH-095"
+      ],
+      "verification_method": "CLT_convergence_test()",
+      "validation_status": "PENDING",
+      "hash": "4d62a2f43c0a703f",
+      "injected_at": "2026-06-21T17:32:23.754893+00:00"
+    },
+    {
+      "id": "GOAT-MATH-098",
+      "index": 98,
+      "name": "Lema de Fatou",
+      "block": "B9",
+      "block_name": "Fundamentos Matemáticos Absolutos",
+      "criticality": "MAESTRÍA",
+      "dependencies": [
+        "GOAT-MATH-095",
+        "GOAT-MATH-096"
+      ],
+      "verification_method": "fatou_inequality_test()",
+      "validation_status": "PENDING",
+      "hash": "6657d31438b689f2",
+      "injected_at": "2026-06-21T17:32:23.754906+00:00"
+    },
+    {
+      "id": "GOAT-MATH-099",
+      "index": 99,
+      "name": "Teorema de Radon-Nikodym",
+      "block": "B9",
+      "block_name": "Fundamentos Matemáticos Absolutos",
+      "criticality": "MAESTRÍA",
+      "dependencies": [
+        "GOAT-MATH-095",
+        "GOAT-MATH-096"
+      ],
+      "verification_method": "density_existence_test()",
+      "validation_status": "PENDING",
+      "hash": "c28a10f3dd3ac19b",
+      "injected_at": "2026-06-21T17:32:23.754916+00:00"
+    },
+    {
+      "id": "GOAT-MATH-100",
+      "index": 100,
+      "name": "Teorema representación Riesz",
+      "block": "B9",
+      "block_name": "Fundamentos Matemáticos Absolutos",
+      "criticality": "MAESTRÍA",
+      "dependencies": [
+        "GOAT-MATH-091",
+        "GOAT-MATH-094"
+      ],
+      "verification_method": "riesz_functional_test()",
+      "validation_status": "PENDING",
+      "hash": "33aba2c3c7c4518d",
+      "injected_at": "2026-06-21T17:32:23.754934+00:00"
+    }
+  ],
+  "pytorch_examples": [
+    "GOAT-MATH-001",
+    "GOAT-MATH-011",
+    "GOAT-MATH-081",
+    "GOAT-MATH-089"
+  ]
+}
