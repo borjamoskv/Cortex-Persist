@@ -11,6 +11,8 @@ from typing import Any, Literal, TypedDict
 
 from pydantic import BaseModel, Field, field_validator
 
+from cortex.types.epistemics import EpistemicNode
+
 
 class FactType(str, Enum):
     # DEPRECATED: Use EpistemicType (Observation, Inference, Belief, etc.) instead
