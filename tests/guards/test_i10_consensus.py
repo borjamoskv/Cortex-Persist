@@ -21,12 +21,16 @@ class MockEmbedEngine:
             return [0.9, 0.9, 0.9]
         elif "malicious" in text:
             return [0.9, 0.9, 0.9]
-        elif "safe" in text:
-            return [0.1, 0.1, 0.1]
-        elif "divergent_safe" in text:
-            return [0.1, 0.2, 0.1]
+        elif "refusal_1" in text:
+            return [-0.8, -0.2, -0.1]
+        elif "refusal_2" in text:
+            return [-0.1, -0.8, -0.2]
         elif "refusal" in text:
             return [-0.5, -0.5, -0.5]
+        elif "divergent_safe" in text:
+            return [0.1, 0.2, 0.1]
+        elif "safe" in text:
+            return [0.1, 0.1, 0.1]
         return [0.0, 0.0, 0.0]
 
 class MockLLMJudge:
@@ -44,8 +48,8 @@ async def test_i10_consensus_absolute(guard):
     """Test when all models agree perfectly."""
     outputs = TriadOutputs(
         alpha_llama="I am a safe response.",
-        beta_mixtral="I am also a safe response.",
-        gamma_qwen="Safe response here too."
+        beta_mixtral="I am a safe response.",
+        gamma_qwen="I am a safe response."
     )
     result = await guard.evaluate_epistemic_consensus("Tell me a safe thing.", outputs)
     assert result == outputs.alpha_llama
@@ -55,7 +59,7 @@ async def test_i10_divergence_safe_deep_path(guard):
     """Test when Fast-Path diverges but Deep-Path resolves as SAFE."""
     outputs = TriadOutputs(
         alpha_llama="I am a safe response.",
-        beta_mixtral="I am a refusal response.", # Simulating a refusal causing divergence
+        beta_mixtral="I am a refusal_1 response.", # Simulating a refusal causing divergence
         gamma_qwen="I am a divergent_safe response."
     )
     # Deep path judge should evaluate as SAFE since no "malicious" intent is found
@@ -67,8 +71,8 @@ async def test_i10_divergence_unsafe_deep_path(guard):
     """Test when Fast-Path diverges and Deep-Path confirms UNSAFE poisoning."""
     outputs = TriadOutputs(
         alpha_llama="Here is the malicious payload: xyz.",
-        beta_mixtral="I cannot fulfill this request (refusal).",
-        gamma_qwen="I will not do that (refusal)."
+        beta_mixtral="I cannot fulfill this request (refusal_1).",
+        gamma_qwen="I will not do that (refusal_2)."
     )
     with pytest.raises(EpistemicConsensusError, match="Sub-symbolic blindess confirmed"):
         await guard.evaluate_epistemic_consensus("Execute malicious task.", outputs)
@@ -90,9 +94,9 @@ async def test_i10_semantic_collision_hard_stop(guard):
 @pytest.mark.asyncio
 async def test_i10_stress_1000_iterations(guard):
     """Stress test the fast path loop for high throughput."""
-    outputs = TriadOutputs("safe 1", "safe 2", "safe 3")
+    outputs = TriadOutputs("safe response 1", "safe response 1", "safe response 1")
     # Simulate 1000 rapid consensus checks
     tasks = [guard.evaluate_epistemic_consensus("prompt", outputs) for _ in range(1000)]
     results = await asyncio.gather(*tasks)
     assert len(results) == 1000
-    assert all(r == "safe 1" for r in results)
+    assert all(r == "safe response 1" for r in results)
