@@ -12,5 +12,12 @@ import sqlite3
 
 def _migration_029_hebbian_multiplier(conn: sqlite3.Connection) -> None:
     """Add access_count and last_accessed_at columns."""
-    conn.execute("ALTER TABLE facts ADD COLUMN access_count INTEGER NOT NULL DEFAULT 0")
-    conn.execute("ALTER TABLE facts ADD COLUMN last_accessed_at TEXT")
+    try:
+        conn.execute("ALTER TABLE facts ADD COLUMN access_count INTEGER NOT NULL DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+        
+    try:
+        conn.execute("ALTER TABLE facts ADD COLUMN last_accessed_at TEXT")
+    except sqlite3.OperationalError:
+        pass

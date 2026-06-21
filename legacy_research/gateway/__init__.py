@@ -19,6 +19,7 @@ __all__ = [
     "GatewayResponse",
     "GatewayRouter",
     "SignalBus",
+    "I10ConsensusGateway",
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
@@ -27,6 +28,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "GatewayRequest": ("cortex.gateway.router", "GatewayRequest"),
     "GatewayResponse": ("cortex.gateway.router", "GatewayResponse"),
     "GatewayRouter": ("cortex.gateway.router", "GatewayRouter"),
+    "I10ConsensusGateway": ("cortex.gateway.i10_consensus", "I10ConsensusGateway"),
 }
 
 

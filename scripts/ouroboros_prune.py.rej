@@ -1,0 +1,124 @@
+@@ -32,11 +32,6 @@
+ WARM_THRESHOLD = 0.50  # 1 half-life  → HOT → WARM
+ COLD_THRESHOLD = 0.25  # 2 half-lives → WARM → COLD
+ 
+-# ─── Hebbian Constants ───────────────────────────────────────────────
+-HEBBIAN_BOOST_PER_ACCESS = 0.15
+-HEBBIAN_DECAY_HALF_LIFE_DAYS = 7.0
+-MAX_KINETIC_MASS = 2.0
+-
+ from cortex.observability.jsonl_logger import setup_cortex_logging
+ 
+ setup_cortex_logging()
+@@ -58,7 +58,6 @@
+     transitioned_warm: int = 0
+     transitioned_cold: int = 0
+     protected_by_topology: int = 0
+-    hebbian_boosted: int = 0
+     exergy_scores_updated: int = 0
+     errors: list[str] = field(default_factory=list)
+ 
+@@ -69,7 +69,6 @@
+             "transitioned_warm": self.transitioned_warm,
+             "transitioned_cold": self.transitioned_cold,
+             "protected_by_topology": self.protected_by_topology,
+-            "hebbian_boosted": self.hebbian_boosted,
+             "exergy_scores_updated": self.exergy_scores_updated,
+             "errors": self.errors,
+         }
+@@ -76,7 +76,7 @@
+ # ─── Core Engine ─────────────────────────────────────────────────────
+ 
+ 
+-def _build_topological_barrier(conn: sqlite3.Connection, dry_run: bool = False) -> set[int]:
++def _build_topological_barrier(conn: sqlite3.Connection) -> set[int]:
+     """Build set of fact IDs that are ancestors of any live C5 node.
+ 
+     This performs a recursive upward traversal from every C5 fact,
+@@ -83,6 +83,4 @@
+     are structurally protected from thermal death.
+-
+-    If not a dry_run, applies Hebbian Potentiation to all protected nodes.
+     """
+     cursor = conn.cursor()
+ 
+@@ -119,23 +119,6 @@
+                 next_frontier.add(parent)
+         frontier = next_frontier
+ 
+-    # Apply Hebbian Potentiation to causal ancestors
+-    if not dry_run and protected:
+-        now_ts = time.time()
+-        placeholders = ",".join("?" for _ in protected)
+-        cursor.execute(
+-            f"""
+-            UPDATE facts 
+-            SET 
+-                last_accessed_at = ?,
+-                last_boosted_at = ?,
+-                access_count = access_count + 1,
+-                kinetic_mass = MIN(kinetic_mass + ?, ?)
+-            WHERE id IN ({placeholders}) AND is_tombstoned = 0
+-            """,
+-            [now_ts, now_ts, HEBBIAN_BOOST_PER_ACCESS, MAX_KINETIC_MASS] + list(protected)
+-        )
+-
+     return protected
+ 
+ 
+@@ -171,11 +171,9 @@
+             conn.row_factory = sqlite3.Row
+             cursor = conn.cursor()
+ 
+-            # Phase 0: Build topological barrier (recursive ancestor protection & Hebbian LTP)
+-            protected_ids = _build_topological_barrier(conn, dry_run=dry_run)
++            # Phase 0: Build topological barrier (recursive ancestor protection)
++            protected_ids = _build_topological_barrier(conn)
+             if protected_ids:
+-                if not dry_run:
+-                    stats.hebbian_boosted = len(protected_ids)
+                 logger.info(
+                     "Topological Barrier: %d ancestor nodes protected by C5 lineage.",
+                     len(protected_ids),
+@@ -180,8 +180,8 @@
+ 
+-            # Phase 1: Scan all prurable candidates
++            # Phase 1: Scan all prunable candidates
+             sql_find = """
+                 SELECT id, content, created_at, decay_half_life, quadrant, storage_tier,
+-                       exergy_score, access_count,
++                       exergy_score,
+                        ((strftime('%s', 'now') - strftime('%s', created_at)) / 86400.0) as age_days
+                 FROM facts
+                 WHERE confidence != 'C5'
+@@ -206,17 +206,12 @@
+                     float(row["decay_half_life"]) if row["decay_half_life"] is not None else 30.0
+                 )
+                 current_tier = row["storage_tier"] or "HOT"
+-                    kinetic_effective = 1.0
++
++                # Compute exergy (exponential decay)
++                if half_life <= 0:
++                    exergy = 0.0
+                 else:
+-                    now_ts = time.time()
+-                    boost_age_days = (now_ts - last_boosted_at) / 86400.0
+-                    decay_factor = 0.5 ** (boost_age_days / HEBBIAN_DECAY_HALF_LIFE_DAYS)
+-                    kinetic_effective = 1.0 + (kinetic_mass - 1.0) * decay_factor
+-                    kinetic_effective = max(1.0, kinetic_effective)
+-
+-                # Total exergy with capped kinetic multiplier
+-                raw_exergy = base_exergy * kinetic_effective
+-                exergy = min(raw_exergy, MAX_KINETIC_MASS * base_exergy)
++                    exergy = 0.5 ** (age_days / half_life)
+ 
+                 # Always update exergy_score for dashboards
+                 exergy_updates.append((exergy, fact_id))
+@@ -298,7 +298,6 @@
+                 logger.info("  Transitioned → WARM:  %d", stats.transitioned_warm)
+                 logger.info("  Transitioned → COLD:  %d", stats.transitioned_cold)
+                 logger.info("  Protected (Topology): %d", stats.protected_by_topology)
+-                logger.info("  Hebbian Boosts (LTP): %d", stats.hebbian_boosted)
+                 logger.info("  Exergy Scores Updated:%d", stats.exergy_scores_updated)
+ 
+     except sqlite3.Error as e:

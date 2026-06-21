@@ -156,6 +156,7 @@ class GatewayRouter:
             GatewayIntent.STATUS: self._handle_status,
             GatewayIntent.EMIT: self._handle_emit,
             GatewayIntent.GIDATU: self._handle_gidatu,
+            GatewayIntent.ASK: self._handle_ask,
         }
 
     async def handle(self, request: GatewayRequest) -> GatewayResponse:
@@ -318,3 +319,35 @@ class GatewayRouter:
 
         handler = GidatuHandler()
         return await handler.handle(req)
+
+    async def _handle_ask(self, req: GatewayRequest) -> dict[str, Any]:
+        """Perform cross-consensus validation inference for a prompt."""
+        from cortex.gateway.i10_consensus import I10ConsensusGateway
+
+        prompt = req.payload.get("prompt", "")
+        session_id = req.payload.get("session_id", f"session-{req.request_id}")
+        system_prompt = req.payload.get("system_prompt", "You are a helpful assistant.")
+
+        if not prompt:
+            raise ValueError("payload.prompt is required for ask intent")
+
+        # Resolve local primary and embedding engine
+        alpha_provider = None
+        embed_engine = None
+        if hasattr(self._engine, "_embeddings") and self._engine._embeddings:
+            embed_engine = self._engine._embeddings._get_embedder()
+
+        gateway = I10ConsensusGateway(
+            alpha_provider=alpha_provider,
+            embed_engine=embed_engine,
+        )
+        response_content = await gateway.execute(
+            user_prompt=prompt,
+            session_id=session_id,
+            system_prompt=system_prompt,
+        )
+
+        return {
+            "response": response_content,
+            "session_id": session_id,
+        }

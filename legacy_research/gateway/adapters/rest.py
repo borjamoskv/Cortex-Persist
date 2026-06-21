@@ -59,6 +59,13 @@ class EmitBody(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class AskBody(BaseModel):
+    prompt: str = Field(..., min_length=1, max_length=50_000)
+    session_id: str | None = Field(default=None)
+    system_prompt: str = Field(default="You are a helpful assistant.")
+    project: str = Field(default="default")
+
+
 # ─── Dependency: get gateway router ──────────────────────────────────
 
 
@@ -169,4 +176,26 @@ async def gateway_emit(
     resp = await gateway.handle(req)
     if not resp.ok:
         raise HTTPException(status_code=500, detail=resp.error)
+    return resp.to_dict()
+
+
+@router.post("/ask")
+async def gateway_ask(
+    body: AskBody,
+    gateway: GatewayRouter = Depends(_get_router),
+) -> dict:
+    """Perform cross-consensus validation inference for a prompt through the Gateway."""
+    req = GatewayRequest(
+        intent=GatewayIntent.ASK,
+        project=body.project,
+        payload={
+            "prompt": body.prompt,
+            "session_id": body.session_id,
+            "system_prompt": body.system_prompt,
+        },
+        source="rest",
+    )
+    resp = await gateway.handle(req)
+    if not resp.ok:
+        raise HTTPException(status_code=422, detail=resp.error)
     return resp.to_dict()
