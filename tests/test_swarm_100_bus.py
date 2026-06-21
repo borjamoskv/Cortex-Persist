@@ -64,7 +64,8 @@ async def test_async_signal_bus_emits() -> None:
 @pytest.mark.asyncio
 async def test_swarm_deployment_100() -> None:
     """Test 100-agent deployment and parallel execution latency (O(1))."""
-    squadron = MockSquadron()
+    from unittest.mock import MagicMock
+    squadron = MockSquadron(guard=MagicMock())
 
     start_time = time.monotonic()
     result = await squadron.deploy("phantom_pattern")
