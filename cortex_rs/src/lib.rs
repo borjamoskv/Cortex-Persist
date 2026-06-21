@@ -1,16 +1,17 @@
-
+pub mod collision_bound;
 pub mod edg;
 pub mod event_schema;
 pub mod hash_chain;
-pub mod replay;
 pub mod probabilistic_crdt;
+pub mod replay;
 pub mod scene_model;
 pub mod smt_compiler;
+pub mod vector_vault;
 
-use pyo3::prelude::*;
 use edg::{EpistemicGraph, EpistemicNode, EpistemicStatus};
-use scene_model::{SceneState, EdgeRule, ContinuityRuleType};
-use smt_compiler::{GateStatus, Verdict, validate_scene_transition};
+use pyo3::prelude::*;
+use scene_model::{ContinuityRuleType, EdgeRule, SceneState};
+use smt_compiler::{validate_scene_transition, GateStatus, Verdict};
 
 /// CORTEX-Persist Cognitive Core Rust Extension (Enterprise EDG)
 #[pymodule]
@@ -29,9 +30,11 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::event_schema::{LedgerEvent, EventType, EvidenceLevel, IntegrityStatus, TaintStatus, Provenance};
-    use super::hash_chain::HashChain;
     use super::edg::{EpistemicGraph, EpistemicStatus};
+    use super::event_schema::{
+        EventType, EvidenceLevel, IntegrityStatus, LedgerEvent, Provenance, TaintStatus,
+    };
+    use super::hash_chain::HashChain;
     use super::replay::replay_state;
     use serde_json::json;
 
@@ -109,9 +112,15 @@ mod tests {
         replay_state(&graph, &chain.events).unwrap();
 
         // Check node 1
-        assert_eq!(graph.get_node_status("mem_node_1").unwrap(), EpistemicStatus::Accepted);
+        assert_eq!(
+            graph.get_node_status("mem_node_1").unwrap(),
+            EpistemicStatus::Accepted
+        );
         // Check node 2
-        assert_eq!(graph.get_node_status("mem_node_2").unwrap(), EpistemicStatus::Accepted);
+        assert_eq!(
+            graph.get_node_status("mem_node_2").unwrap(),
+            EpistemicStatus::Accepted
+        );
 
         // Modify belief
         let event3 = LedgerEvent {
@@ -143,6 +152,9 @@ mod tests {
         chain.append_event(event3).unwrap();
         replay_state(&graph, &chain.events).unwrap();
 
-        assert_eq!(graph.get_node_status("mem_node_1").unwrap(), EpistemicStatus::Challenged);
+        assert_eq!(
+            graph.get_node_status("mem_node_1").unwrap(),
+            EpistemicStatus::Challenged
+        );
     }
 }
