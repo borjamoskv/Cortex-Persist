@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 # Config
-DRY_RUN = True
+DRY_RUN = False
 
 # Paths
 BASE_DIR = Path("/Users/borjafernandezangulo/10_PROJECTS/cortex-persist")
@@ -132,11 +132,11 @@ for src_dir in SOURCE_DIRS:
                 inventory["capabilities"][cap].append(file)
             
             # Move file
-            if not DRY_RUN:
+            if not DRY_RUN and score >= 8:
                 target_path.parent.mkdir(parents=True, exist_ok=True)
                 if filepath.exists() and not target_path.exists():
                     shutil.move(str(filepath), str(target_path))
-            else:
+            elif DRY_RUN:
                 print(f"[DRY] {filepath.relative_to(BASE_DIR)} -> {target_path.relative_to(BASE_DIR)}")
 
 with open(INVENTORY_FILE, 'w', encoding='utf-8') as f:
