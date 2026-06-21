@@ -4,9 +4,13 @@ pub mod event_schema;
 pub mod hash_chain;
 pub mod replay;
 pub mod probabilistic_crdt;
+pub mod scene_model;
+pub mod smt_compiler;
 
 use pyo3::prelude::*;
 use edg::{EpistemicGraph, EpistemicNode, EpistemicStatus};
+use scene_model::{SceneState, EdgeRule, ContinuityRuleType};
+use smt_compiler::{GateStatus, Verdict, validate_scene_transition};
 
 /// CORTEX-Persist Cognitive Core Rust Extension (Enterprise EDG)
 #[pymodule]
@@ -14,6 +18,12 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<EpistemicStatus>()?;
     m.add_class::<EpistemicNode>()?;
     m.add_class::<EpistemicGraph>()?;
+    m.add_class::<SceneState>()?;
+    m.add_class::<EdgeRule>()?;
+    m.add_class::<ContinuityRuleType>()?;
+    m.add_class::<GateStatus>()?;
+    m.add_class::<Verdict>()?;
+    m.add_function(wrap_pyfunction!(validate_scene_transition, m)?)?;
     Ok(())
 }
 

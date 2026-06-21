@@ -322,3 +322,4 @@ cortex/swarm/staged_legion_2m.py
 # Cortex Demo Artifacts
 demo_causal/backend/artifacts/*
 demo_causal/backend/*.db
+frontend/.wrangler/
