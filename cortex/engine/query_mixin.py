@@ -70,7 +70,7 @@ class QueryMixin(EngineMixinBase):
                 "WHERE f.tenant_id = ? AND "
                 "f.is_quarantined = 0 "
                 "AND f.is_tombstoned = 0 "
-                "AND f.id NOT IN (SELECT CAST(json_extract(metadata, '$.inverted_fact_id') AS INTEGER) FROM facts WHERE fact_type = 'inversion' AND is_tombstoned = 0)"
+                "AND f.id NOT IN (SELECT parent_id FROM facts WHERE fact_type = 'inversion' AND is_tombstoned = 0 AND parent_id IS NOT NULL)"
             )
             params: list = [tenant_id]
 
@@ -158,7 +158,7 @@ class QueryMixin(EngineMixinBase):
                 "WHERE f.tenant_id = ? AND f.project = ? "
                 "AND f.is_quarantined = 0 "
                 "AND f.is_tombstoned = 0 "
-                "AND f.id NOT IN (SELECT CAST(json_extract(metadata, '$.inverted_fact_id') AS INTEGER) FROM facts WHERE fact_type = 'inversion' AND is_tombstoned = 0)"
+                "AND f.id NOT IN (SELECT parent_id FROM facts WHERE fact_type = 'inversion' AND is_tombstoned = 0 AND parent_id IS NOT NULL)"
             )
             params: list = [tenant_id, project]
 
@@ -331,7 +331,7 @@ class QueryMixin(EngineMixinBase):
                 row = await cursor.fetchone()
                 total = row[0] if row else 0
             async with conn.execute(
-                "SELECT COUNT(*) FROM facts WHERE is_tombstoned = 0 AND tenant_id = ? AND id NOT IN (SELECT CAST(json_extract(metadata, '$.inverted_fact_id') AS INTEGER) FROM facts WHERE fact_type = 'inversion' AND is_tombstoned = 0)", (tenant_id,)
+                "SELECT COUNT(*) FROM facts WHERE is_tombstoned = 0 AND tenant_id = ? AND id NOT IN (SELECT parent_id FROM facts WHERE fact_type = 'inversion' AND is_tombstoned = 0 AND parent_id IS NOT NULL)", (tenant_id,)
             ) as cursor:
                 row = await cursor.fetchone()
                 active = row[0] if row else 0

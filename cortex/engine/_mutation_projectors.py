@@ -125,11 +125,12 @@ async def proj_deprecate(
         project = row[0] if row else "unknown"
 
     # [C5-REAL] Epistemic Inversion: Additive delta instead of destructive update
-    metadata = json.dumps({"inverted_fact_id": fact_id, "deprecation_reason": reason})
+    # We use parent_id to store the inverted_fact_id for O(1) indexed resolution
+    metadata = json.dumps({"deprecation_reason": reason})
     await conn.execute(
-        "INSERT INTO facts (tenant_id, project, content, fact_type, metadata, created_at, updated_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (resolved_tenant_id, project, f"Inversion of fact {fact_id}: {reason}", "inversion", metadata, ts, ts)
+        "INSERT INTO facts (tenant_id, project, content, fact_type, parent_id, metadata, created_at, updated_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (resolved_tenant_id, project, f"Inversion of fact {fact_id}: {reason}", "inversion", fact_id, metadata, ts, ts)
     )
 
 
