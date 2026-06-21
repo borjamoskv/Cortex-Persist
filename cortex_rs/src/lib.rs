@@ -21,25 +21,25 @@ use telemetry::validate_metric_json;
 /// Valida y registra un claim desde Python.
 /// Retorna el status final como string.
 #[pyfunction]
-pub fn ingest_reality_claim(
+pub fn ingest_verifiable_claim(
     ledger_path: &str,
     claim_json: &str,
     now_epoch_ms: u64,
 ) -> PyResult<String> {
-    let claim: reality::claim::RealityClaim = serde_json::from_str(claim_json)
-        .map_err(|e| PyValueError::new_err(format!("Invalid claim JSON: {e}")))?;
+    let claim_input: reality::claim::VerifiableClaimInput = serde_json::from_str(claim_json)
+        .map_err(|e| PyValueError::new_err(format!("Invalid claim JSON schema: {e}")))?;
 
-    let registry = reality::registry::RealityRegistry::new(ledger_path);
+    let ledger = reality::registry::ClaimsLedger::new(ledger_path);
 
-    let status = registry
-        .ingest(claim, now_epoch_ms)
+    let status = ledger
+        .ingest(claim_input, now_epoch_ms)
         .map_err(|e| PyValueError::new_err(format!("Ingestion failed: {e}")))?;
 
     let status_str = match status {
-        reality::claim::ClaimStatus::Verified => "verified",
+        reality::claim::ClaimStatus::Accepted => "accepted",
         reality::claim::ClaimStatus::Rejected => "rejected",
-        reality::claim::ClaimStatus::Pending  => "pending",
-        reality::claim::ClaimStatus::Unknown  => "unknown",
+        reality::claim::ClaimStatus::Unverified => "unverified",
+        reality::claim::ClaimStatus::Auditable => "auditable",
     };
 
     Ok(status_str.to_string())
@@ -58,7 +58,7 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Verdict>()?;
     m.add_function(wrap_pyfunction!(validate_scene_transition, m)?)?;
     m.add_function(wrap_pyfunction!(validate_metric_json, m)?)?;
-    m.add_function(wrap_pyfunction!(ingest_reality_claim, m)?)?;
+    m.add_function(wrap_pyfunction!(ingest_verifiable_claim, m)?)?;
     Ok(())
 }
 
