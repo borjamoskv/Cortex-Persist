@@ -62,16 +62,16 @@ If any required control fails, the write aborts.
 
 ---
 
-## Architectural Overview (Enterprise EDG Firewall)
+## Architectural Overview (LEGION-10k Design Target)
 
-The persistence and trust layer is organized into sovereign domains matching the 4 Core Modules of the **CI/CD Firewall**:
+The persistence and trust layer is organized into sovereign domains under the root `cortex/` package:
 
 | Domain | Responsibility |
 |---|---|
-| `cortex/auth/` | **SovereignIdentity:** Tenant-aware isolation and Role-Based Access Control (RBAC). |
-| `cortex_rs/src/edg.rs` | **Epistemic Dependency Graph (Rust):** Lock-free DAG tracking Epistemic State Transitions. Computes blast radius and enforces Epistemic Consistency via Invalidation Propagation. |
-| `cortex/gateway/` | **CodeGovernanceGateway:** The enforcement boundary. Blocks or approves code mutations based on Entropy Score and EDG traversal. |
-| `cortex/audit/` | **EnterpriseAuditLedger:** Immutable hash-chain recording every PR evaluation and state transition. |
+| `cortex/engine/` | Core CRUD, Kinetic Engines (EntropyAnnihilator, AutoCrystallizer), fact store, causal scheduler |
+| `cortex/audit/` | Master Ledger — immutable hash-chain for all actions (`ledger.py`) |
+| `cortex/memory/` | Large public API surface for fact persistence and retrieval |
+| `cortex/guards/` | Admission, contradiction, dependency, and sovereign seal verification |
 
 **Execution & Delivery (`cortex/delivery/` & `cortex/swarm/`):**
 - `outbox.py` — Lock-free task dispatch integration.

@@ -23,17 +23,8 @@ pytestmark = [
 def tracker(tmp_path: Path):
     """Create a ComplianceTracker with a temp database."""
     from cortex.compliance import ComplianceTracker
-    from cortex.compliance.policy_engine import PolicyEngine
-    from cortex.compliance.comply_signer import ComplySigner
 
     t = ComplianceTracker(db_path=str(tmp_path / "compliance_test.db"), project="test-agent")
-    t._signer = ComplySigner(keys_dir=tmp_path / "keys")
-    t._policy_engine = PolicyEngine(policy_path=tmp_path / "policies.json")
-    
-    # Assign writer role to all test agents
-    for agent in ["agent:loan-processor", "agent:test", "agent:verifier", "agent:auditor", "agent:counter", "agent:lister"]:
-        t._policy_engine.assign_role(agent, "writer")
-        
     t._ensure_init()
     yield t
     t.close()
@@ -214,17 +205,11 @@ class TestExportAudit:
 class TestContextManager:
     def test_context_manager_works(self, tmp_path: Path):
         from cortex.compliance import ComplianceTracker
-        from cortex.compliance.policy_engine import PolicyEngine
-        from cortex.compliance.comply_signer import ComplySigner
 
         with ComplianceTracker(
             db_path=str(tmp_path / "ctx_test.db"),
             project="ctx-test",
         ) as t:
-            t._signer = ComplySigner(keys_dir=tmp_path / "keys")
-            t._policy_engine = PolicyEngine(policy_path=tmp_path / "policies.json")
-            t._policy_engine.assign_role("agent:ctx", "writer")
-            
             fact_id = t.log_decision(
                 content="Decision inside context manager.",
                 agent_id="agent:ctx",

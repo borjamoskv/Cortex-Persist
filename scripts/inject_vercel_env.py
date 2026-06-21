@@ -5,6 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 ENV_PATH = ROOT / ".env"
 
+
 def main():
     if not ENV_PATH.exists():
         print(f"Error: {ENV_PATH} not found.")
@@ -22,7 +23,9 @@ def main():
             key = key.strip()
             val = val.strip()
             # Strip quotes if present
-            if (val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")):
+            if (val.startswith('"') and val.endswith('"')) or (
+                val.startswith("'") and val.endswith("'")
+            ):
                 val = val[1:-1]
             env_vars[key] = val
 
@@ -32,7 +35,13 @@ def main():
             # Run vercel env add using subprocess and stdin
             cmd = ["vercel", "env", "add", key, env, "--yes", "--force"]
             try:
-                proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                proc = subprocess.Popen(
+                    cmd,
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
                 stdout, stderr = proc.communicate(input=val)
                 if proc.returncode != 0:
                     print(f"  [!] Failed to add {key} to {env}: {stderr.strip()}")
@@ -40,6 +49,7 @@ def main():
                     print(f"  ✓ Added {key} to {env}")
             except Exception as e:
                 print(f"  [!] Exception adding {key}: {e}")
+
 
 if __name__ == "__main__":
     main()

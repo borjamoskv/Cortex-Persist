@@ -190,13 +190,6 @@ class ComponentsMixin:
 
             return ArchaeologyGuardAdapter()
 
-        def _eft():
-            if os.environ.get("CORTEX_TESTING") == "1" and os.environ.get("CORTEX_FORCE_EFT") != "1":
-                return None
-            from cortex.engine.guard_adapters import EFTVerificationGuardAdapter
-
-            return EFTVerificationGuardAdapter()
-
         self._try_add(pipeline, "HealthGuardAdapter", _health, is_hook=False)
         self._try_add(pipeline, "ContradictionGuardAdapter", _contradiction, is_hook=False)
         self._try_add(pipeline, "VerifierGuardAdapter", _verifier, is_hook=False)
@@ -204,7 +197,6 @@ class ComponentsMixin:
         self._try_add(pipeline, "VirgoGuardAdapter", _virgo, is_hook=False)
         self._try_add(pipeline, "OmegaGuardAdapter", _omega, is_hook=False)
         self._try_add(pipeline, "ArchaeologyGuardAdapter", _arch, is_hook=False)
-        self._try_add(pipeline, "EFTVerificationGuardAdapter", _eft, is_hook=False)
 
         def _ledger():
             from cortex.engine.guard_adapters import LedgerCheckpointHook
@@ -235,8 +227,6 @@ class ComponentsMixin:
     def _try_add(self, pipeline, name: str, factory, is_hook: bool) -> None:
         try:
             component = factory()
-            if component is None:
-                return
             if is_hook:
                 pipeline.add_post_hook(component)
             else:

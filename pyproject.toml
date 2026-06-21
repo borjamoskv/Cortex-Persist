@@ -170,7 +170,7 @@ exclude_commit_patterns = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "--timeout=30"
+addopts = "--timeout=30 -p cortex.shannon.ledger.pytest_plugin"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 markers = [

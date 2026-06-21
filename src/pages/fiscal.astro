@@ -1,0 +1,137 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+	title="CORTEX Persist | Fiscal AI Audit"
+	description="Diligencia debida para Agentes de IA Fiscales. Inyecta auditoría inmutable en 3 líneas de código."
+	canonical="https://cortexpersist.com/fiscal"
+>
+	<main class="landing-shell" id="top">
+		<!-- HERO SECTION -->
+		<section class="section-frame surface hero">
+			<div class="section-heading">
+				<p class="section-kicker" style="color: var(--accent-red, #ff3333);">Riesgo Operativo en IA</p>
+				<h1 style="font-size: clamp(2.4rem, 5vw, 4rem); max-width: 900px;">
+					Tu Agente Fiscal se va a equivocar. Lo que no puedes permitirte es no saber por qué.
+				</h1>
+				<p style="font-size: 1.2rem; max-width: 750px;">
+					CORTEX-Persist ancla criptográficamente cada deducción y cálculo de tu IA a su documento original. Exporta el razonamiento del agente en un comando de terminal para que un humano firme los impuestos con confianza total.
+				</p>
+			</div>
+
+			<div class="hero-actions" style="margin-top: 2rem;">
+				<a class="button-primary" href="/pilot-scope" style="font-size: 1.1rem; padding: 1rem 2rem;">Solicitar Piloto Async</a>
+				<a class="button-secondary" href="#demo" style="font-size: 1.1rem; padding: 1rem 2rem;">Ver Auditoría C5-REAL</a>
+			</div>
+		</section>
+
+		<!-- PAIN POINT: THE BLACK BOX -->
+		<section class="section-frame surface-sunken" style="margin-top: 4rem;">
+			<div class="grid-2-col" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 4rem; align-items: center;">
+				<div>
+					<h2 style="font-size: 2rem; margin-bottom: 1rem;">La IA asume. Tú firmas.</h2>
+					<p style="opacity: 0.9;">
+						Cuando usas LLMs para extraer datos de extractos bancarios o clasificar facturas, ganas velocidad pero pierdes la <strong>cadena de custodia</strong>.
+					</p>
+					<p style="opacity: 0.9; margin-top: 1rem;">
+						Si Hacienda revisa una deducción de 12.000€ y la IA alucinó un código de IVA, el problema no es del modelo. Es tuyo. Reconstruir qué prompt, qué PDF y qué versión del agente tomó esa decisión meses atrás es imposible con logs estándar.
+					</p>
+				</div>
+				<div class="surface" style="padding: 2rem; border-left: 4px solid var(--accent-red, #ff3333);">
+					<strong style="display: block; margin-bottom: 0.5rem; font-family: monospace;">ALERTA DE DILIGENCIA</strong>
+					<span>"El socio del despacho firma bajo su responsabilidad penal. No puedes defender un requerimiento fiscal con un log de LangChain."</span>
+				</div>
+			</div>
+		</section>
+
+		<!-- THE MECHANISM -->
+		<section class="section-frame surface" style="margin-top: 4rem;">
+			<div class="section-heading" style="margin-bottom: 3rem;">
+				<h2>El Mecanismo: 3 Pasos para Diligencia Debida</h2>
+			</div>
+			
+			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+				<div class="surface-sunken" style="padding: 2rem;">
+					<span style="font-size: 2rem; opacity: 0.5; font-family: monospace;">01</span>
+					<h3 style="margin: 1rem 0;">Captura Silenciosa</h3>
+					<p>El agente extrae el dato. CORTEX lo sella junto al PDF original y la normativa RAG aplicada sin latencia añadida gracias a nuestro decorador <code>@seal_decision</code>.</p>
+				</div>
+				<div class="surface-sunken" style="padding: 2rem;">
+					<span style="font-size: 2rem; opacity: 0.5; font-family: monospace;">02</span>
+					<h3 style="margin: 1rem 0;">Inmutabilidad Matemática</h3>
+					<p>El registro se hashea (SHA-256) en un ledger local. Ni tus propios desarrolladores pueden alterar la decisión a posteriori para tapar un error. Tus datos nunca tocan nuestros servidores.</p>
+				</div>
+				<div class="surface-sunken" style="padding: 2rem;">
+					<span style="font-size: 2rem; opacity: 0.5; font-family: monospace;">03</span>
+					<h3 style="margin: 1rem 0;">Auditoría en 1 Click</h3>
+					<p>¿Revisión humana? Genera un paquete forense antes de enviar el modelo 303 usando el CLI <code>cortex incident-report</code>.</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- THE OUTPUT: DEMO -->
+		<section id="demo" class="section-frame surface-sunken" style="margin-top: 4rem;">
+			<div class="section-heading">
+				<p class="section-kicker">C5-REAL EXECUTION</p>
+				<h2>El output que salvará tu licencia.</h2>
+				<p>Esto es lo que le entregas al inspector. El problema de la "caja negra" desaparece.</p>
+			</div>
+			
+			<div class="terminal-window" style="background: #0A0A0A; padding: 2rem; border: 1px solid #333; font-family: monospace; color: #00FF00; margin-top: 2rem; border-radius: 4px; overflow-x: auto;">
+<pre style="margin: 0; line-height: 1.5;">$ cortex incident-report --fact-id fact_992a1b
+[CORTEX] Reconstructing causal chain...
+
+DECISION: Deduct 1250.00 EUR (reverse_charge)
+AGENT: tax-copilot-v4
+TIMESTAMP: 2026-06-01T09:22:11Z
+
+PROVENANCE:
+├── [INPUT] Document: aws_invoice_nov.pdf (Hash: 8f4e2b)
+└── [RULE] eu_vat_directive_2025 (Hash: ae991c)
+
+VERDICT: Deterministic action. Record is pristine.
+Exporting evidence bundle... [OK]</pre>
+			</div>
+		</section>
+
+		<!-- THE PILOT OFFER -->
+		<section class="section-frame surface" style="margin-top: 4rem; border: 2px solid var(--accent, #2B3BE5);">
+			<div class="section-heading">
+				<h2 style="color: var(--accent, #2B3BE5);">Piloto de Auditoría Fiscal (15.000 EUR)</h2>
+				<p>Evita migraciones interminables. Cierra la brecha legal de tu IA en 4 semanas.</p>
+			</div>
+			
+			<ul style="list-style: none; padding: 0; margin-top: 2rem; font-size: 1.1rem; line-height: 2;">
+				<li>✓ <strong>1 Workflow Crítico</strong> (Ej. Clasificación de facturas extranjeras).</li>
+				<li>✓ <strong>Zero-Friction DX</strong>: Te damos el código modificado con 3 líneas (Decorador Parasítico).</li>
+				<li>✓ <strong>Local-First</strong>: Cumplimiento GDPR estricto. CORTEX corre en tus servidores.</li>
+				<li>✓ <strong>Entrega Final</strong>: Paquete <em>Audit-Pack</em> listo para firmas legales de socios.</li>
+			</ul>
+			
+			<div style="margin-top: 3rem;">
+				<a class="button-primary" href="/pilot-scope" style="font-size: 1.2rem; padding: 1rem 3rem;">Scopear Piloto Async (24h)</a>
+				<p style="margin-top: 1rem; opacity: 0.7; font-size: 0.9rem;">Envíanos un Gist con la función de tu agente. Te devolvemos el código auditado mañana. Sin llamadas.</p>
+			</div>
+		</section>
+
+		<footer class="site-footer" style="margin-top: 6rem;">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+			<div class="footer-links">
+				<a href="/">← Back to Platform</a>
+				<a href="/pilot-scope">Scope Pilot</a>
+			</div>
+		</footer>
+	</main>
+</SiteLayout>
+
+<style>
+	/* Minimal resets for the new specific sections, piggybacking on existing SiteLayout */
+	.terminal-window pre {
+		color: #00FF00;
+		text-shadow: 0 0 5px rgba(0,255,0,0.3);
+	}
+	li::before {
+		color: var(--accent, #2B3BE5);
+	}
+</style>

@@ -163,7 +163,7 @@ async def test_seal_4_timeout():
         mock_run.side_import = AsyncMock(
             side_effect=Exception("Timeout")
         )  # or simulate via wait_for
-        
+
         async def mock_wait_for(coro, timeout):
             coro.close()
             raise pytest.importorskip("asyncio").TimeoutError()

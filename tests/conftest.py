@@ -12,7 +12,6 @@ os.environ["CORTEX_NO_OMEGA"] = "1"
 os.environ["CORTEX_MASTER_KEY"] = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
 os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
-os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
 
 import pytest
 
@@ -67,7 +66,7 @@ def inject_test_master_key(monkeypatch):
     monkeypatch.setenv("DASHSCOPE_API_KEY", "test")
     # Base64 for 32 bytes of '0'
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
-    monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
+
 
 @pytest.fixture(autouse=True)
 def isolate_swarm_ledger(tmp_path, monkeypatch):

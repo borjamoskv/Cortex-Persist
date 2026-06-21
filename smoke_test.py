@@ -21,19 +21,24 @@ async def main():
         )
     """)
 
-    conn.execute("""
+    conn.execute(
+        """
         INSERT OR REPLACE INTO tasks (id, payload, status, priority, created_at)
         VALUES (?, ?, 'pending', 7, ?)
-    """, (
-        "cascade-smoke-001",
-        json.dumps({
-            "type": "architecture",
-            "prompt": "Refactor cascade_router.py: add async retry logic with exponential backoff per engine",
-            "context_tokens": 4200,
-            "target_engine": None  # forzar decisión del router
-        }),
-        time.time()
-    ))
+    """,
+        (
+            "cascade-smoke-001",
+            json.dumps(
+                {
+                    "type": "architecture",
+                    "prompt": "Refactor cascade_router.py: add async retry logic with exponential backoff per engine",
+                    "context_tokens": 4200,
+                    "target_engine": None,  # forzar decisión del router
+                }
+            ),
+            time.time(),
+        ),
+    )
     conn.commit()
     print("Task injected successfully.")
 
@@ -43,28 +48,29 @@ async def main():
     if row:
         task_id = row[0]
         payload = json.loads(row[1])
-        
+
         # Update to processing
         conn.execute("UPDATE tasks SET status='processing' WHERE id=?", (task_id,))
         conn.commit()
         conn.close()
-        
+
         print(f"Processing task {task_id}...")
-        
+
         import sys
+
         sys.path.insert(0, "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist")
-        os.environ["PATH"] = f"/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/tests/mock-bin:{os.environ.get('PATH', '')}"
+        os.environ["PATH"] = (
+            f"/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/tests/mock-bin:{os.environ.get('PATH', '')}"
+        )
         from cortex.engine.cascade_router import CascadeRouter
-        
+
         router = CascadeRouter()
         result = await router.route_task(
-            prompt=payload.get("prompt"),
-            task_type=payload.get("type"),
-            task_id=task_id
+            prompt=payload.get("prompt"), task_type=payload.get("type"), task_id=task_id
         )
-        
+
         print("Result snippet:", result[:300])
-        
+
         # Check task status in db after run by opening a new connection
         conn = sqlite3.connect(db_path)
         cursor = conn.execute("SELECT status FROM tasks WHERE id=?", (task_id,))
@@ -73,6 +79,7 @@ async def main():
         conn.close()
     else:
         print("No pending tasks found.")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

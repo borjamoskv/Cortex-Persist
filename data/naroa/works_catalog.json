@@ -1,0 +1,37 @@
+{
+  "artist": "Naroa Gutiérrez Gil",
+  "schema_version": "1.0",
+  "description": "Structured registry for cataloging original artworks. No inferred or fabricated artworks included.",
+  "indexing_model": {
+    "structure": "event-sourced art registry",
+    "primary_keys": ["work_id", "timestamp"],
+    "relations": ["series", "medium", "thematic_tags", "exhibition_context"]
+  },
+  "works": [],
+  "templates": {
+    "work": {
+      "work_id": "string",
+      "title": "string",
+      "year": "int",
+      "medium": "string",
+      "dimensions": "string",
+      "tags": ["string"],
+      "series": "string|null",
+      "images": ["uri|string"],
+      "exhibition_history": [
+        {
+          "name": "string",
+          "location": "string",
+          "year": "int"
+        }
+      ],
+      "notes": "string"
+    }
+  },
+  "rules": {
+    "no_hallucination": true,
+    "require_source_for_entry": true,
+    "event_sourced_updates_only": true,
+    "append_only": true
+  }
+}

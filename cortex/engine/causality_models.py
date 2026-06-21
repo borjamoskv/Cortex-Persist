@@ -31,15 +31,6 @@ class Confidence(str, Enum):
     C5 = "C5"
 
 
-class BeliefState(str, Enum):
-    """Epistemic states for Scientific BeliefObjects."""
-
-    PROPOSED = "proposed"
-    VERIFIED = "verified"
-    REJECTED = "rejected"
-    ORPHANED = "orphaned"
-
-
 EDGE_DERIVED_FROM = "derived_from"
 EDGE_TRIGGERED_BY = "triggered_by"
 EDGE_UPDATED_FROM = "updated_from"
@@ -83,16 +74,3 @@ class LedgerEvent:
     created_at: str
     last_revalidated_at: str | None = None
     tainted: bool = False
-
-
-@dataclass
-class BeliefObject:
-    """Atomic unit of probabilistically weighted scientific cognition."""
-
-    id: str
-    proposition_key: str
-    payload: dict[str, Any]
-    confidence_score: float
-    state: BeliefState
-    cortex_taint: str
-    parent_id: str | None = None

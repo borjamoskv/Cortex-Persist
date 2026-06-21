@@ -49,7 +49,7 @@ async def run_consolidation():
 
     # Trigger underlying physical consolidation
     print("\nExecuting Physical Repository Consolidation (Sync + Singularity Purge)...")
-    
+
     # We use subprocess to capture return code or just os.system
     ret = os.system("bash scripts/consolidar_cortex.sh")
     if ret != 0:

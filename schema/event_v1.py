@@ -7,6 +7,7 @@ from typing import Any
 @dataclass(slots=True)
 class EventV1:
     """Event V1 strict schema."""
+
     event_type: str
     source: str
     skill_id: str

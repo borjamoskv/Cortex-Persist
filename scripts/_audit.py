@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+
 def log_to_ledger(action: str, resource: str, status: str):
     """
     Synchronous wrapper to log an action to the CORTEX SQLite Audit Ledger.
@@ -21,7 +22,7 @@ def log_to_ledger(action: str, resource: str, status: str):
         return
 
     db_path = os.environ.get("CORTEX_DB_PATH", str(ROOT / "cortex_ledger.db"))
-    
+
     async def _log():
         async with aiosqlite.connect(db_path) as db:
             ledger = EnterpriseAuditLedger(db)
@@ -32,9 +33,9 @@ def log_to_ledger(action: str, resource: str, status: str):
                 actor_id=os.environ.get("USER", "system"),
                 action=action,
                 resource=resource,
-                status=status
+                status=status,
             )
-            
+
     try:
         # Check if there is an existing event loop
         try:

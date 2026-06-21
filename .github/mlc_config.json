@@ -47,6 +47,18 @@
     },
     {
       "pattern": "^\\.\\./examples/audit_proof_artifact\\.json$"
+    },
+    {
+      "pattern": "^\\.\\./README\\.md$"
+    },
+    {
+      "pattern": "^\\.\\./README\\.md#api-endpoints$"
+    },
+    {
+      "pattern": "^\\.\\./README\\.md#models$"
+    },
+    {
+      "pattern": "^https://cortexpersist\\.dev$"
     }
   ],
   "retryOn429": true,

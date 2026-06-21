@@ -2,6 +2,7 @@ import pytest
 import asyncio
 import cortex.engine.omega_daemon as omega
 
+
 @pytest.mark.asyncio
 async def test_omega_daemon_start_stop():
     """OmegaDaemon inicia y se detiene sin crash usando asyncio."""
@@ -12,6 +13,7 @@ async def test_omega_daemon_start_stop():
     await task
     assert daemon.loop_count >= 1
 
+
 def test_exergy_guard_check():
     """ExergyGuard.check() devuelve dict con RAM + critical."""
     guard = omega.ExergyGuard(ram_threshold_mb=200.0)
@@ -19,6 +21,7 @@ def test_exergy_guard_check():
     assert "ram_free_mb" in result
     assert "critical" in result
     assert isinstance(result["ram_free_mb"], (int, float))
+
 
 def test_entropy_sensor_sense():
     """EntropySensor.sense() devuelve dict con CPU + swap."""

@@ -240,7 +240,7 @@ def test_postgres_api_endpoints(mock_postgres_env: None) -> None:
             store_payload = {
                 "project": "test-proj",
                 "content": "Sovereign memory is running on PostgreSQL",
-                "fact_type": "fact",
+                "fact_type": "knowledge",
                 "tags": ["postgres", "test"],
                 "source": "api-agent",
             }
@@ -264,7 +264,7 @@ def test_postgres_api_endpoints(mock_postgres_env: None) -> None:
                     "id": 999,
                     "content": "Mocked fact content",
                     "project": "test-proj",
-                    "fact_type": "fact",
+                    "fact_type": "knowledge",
                     "confidence": "C5",
                     "valid_from": "2026-06-06T00:00:00Z",
                     "valid_until": None,

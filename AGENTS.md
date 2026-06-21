@@ -41,11 +41,11 @@ New session on this repo?            → Execute Multi-Session Handoff (§6.4) f
 
 ## 1. 🎯 Scope & Epistemic Posture
 
-**CORTEX Persist** is the **CI/CD Firewall for LLM-Generated Code**. It is formally defined as a distributed system for managing the formal lifecycle of verifiable claims via an **Epistemic Dependency Graph (EDG)**. It does not blindly store "facts"; it tracks Epistemic State Transitions, enforcing deterministic validation boundaries, maintaining cryptographic auditability, and treating generative output as conjecture until externally verified.
+**CORTEX Persist** is a local-first trust substrate for autonomous, tool-using, and multi-agent AI systems. It persists facts, enforces deterministic validation boundaries, maintains cryptographic auditability, and treats generative output as conjecture until externally verified.
 
-- **Epistemic Invalidation Propagation:** Generative output is a probabilistic proposal. If an AI mutates a foundational node, CORTEX traverses the EDG to compute the blast radius. If Epistemic Consistency is violated (an accepted node depends on an invalidated chain), the PR is blocked.
-- **The Python/Rust Boundary (🛑):** CORTEX orchestration is built in Python to maximize *Shipping Velocity*. Mitigation is the **Byzantine Boundary**: Python handles routing, while the causal engine (EDG) and concurrent graphs are managed natively in Rust via PyO3 to bypass the GIL and achieve zero-latency.
-- **Audit Trails vs. Authorization (📜):** CORTEX is a **Forensic Audit Sidecar** for CI/CD pipelines. The Master Ledger commits every policy decision and Epistemic Transition to an immutable hash chain.
+- **Epistemic Containment:** Generative output is a probabilistic proposal — useful, invalid, partial, or dangerous. System state may only be mutated after crossing deterministic validation boundaries: guards, typed interfaces, schemas, tests, cryptographic logging, and external verification when required.
+- **The Python Paradox (🛑):** CORTEX is built in Python to maximize *Shipping Velocity* and *Developer Adoption*. Mitigation is the **Byzantine Boundary**: Python as orchestration glue, SQLite-Vec and ONNX as immutable cores. We prioritize **Tamper-Evidence** over language-level safety. Trust model: `f < n/3` faulty nodes tolerated; cryptographic primitives are Ed25519 (signatures), SHA-256 (ledger hash-chain), and SHA3-256 (taint engine, guard seals).
+- **Audit Trails vs. Authorization (📜):** CORTEX is a **Forensic Audit Sidecar** for MCP — not "Tamper-Proof" (an architectural illusion), but **Tamper-Evident**. The Master Ledger commits every action to an immutable hash chain.
 
 ---
 
@@ -95,8 +95,6 @@ All agents operating in this repository MUST self-identify by role before acting
 7. **Migration Safety:** Schema changes MUST preserve auditability and rollback awareness.
 8. **Architectural Boundaries:** CLI modules are thin wrappers. Business logic belongs in `engine/`, `services/`, or core modules.
 9. **Failure Locality:** Invalid state must be rejectable and safely abortable at any point.
-10. **Autopoiesis Watchdog:** The engine MUST NEVER modify its own active binary or source code directly in execution. Mutations MUST target isolated git branches (e.g., `auto/moskv1-mitosis-*`) and undergo external CI compilation.
-11. **BABYLON-60 Epistemology:** The control kernel MUST operate in Base-60 (Babylon-60) for internal calculations (timestamps, coordinates, proportions) to eliminate cumulative float rounding errors and decimal approximation entropy. Use struct/integer types scaled to Base-60. No `float64`.
 
 ### ❌ Anti-Patterns & Failure Signatures
 
@@ -104,7 +102,6 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 
 | Signal | Severity | Enforced | Remediation |
 | :--- | :---: | :---: | :--- |
-| `float` / `float64` in internal calculations | CRITICAL | ✗ | Replace → BABYLON-60 integer structures; eradicate `float` |
 | `float` in financial or scoring variable | HIGH | ✗ | Replace → `Decimal`; audit all callers |
 | `time.sleep()` inside `async def` | CRITICAL | ✓ ruff TID251 | Replace → `asyncio.sleep()` |
 | Bare `print()` in `engine/`, `memory/`, `guards/` | MEDIUM | ✓ ruff TID251 | Replace → `logging.getLogger(__name__)` |
@@ -115,7 +112,6 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 | Schema change with no migration entry | CRITICAL | ✗ | Add migration in `cortex/migrations/`; review via `cortex/migrate.py` |
 | Plaintext secret in any metadata dict or JSON | **P0** | ✗ | Rotate immediately; encrypt at rest; audit exposure window |
 | `NO` documenting a module that doesn't exist | HIGH | ✗ | Remove reference or create the module |
-| Engine modifying its own source or binary directly | **P0** | ✗ | Implement Bootstrap Watchdog; route via git sentinel branch (`auto/moskv1-mitosis-*`) |
 
 ---
 

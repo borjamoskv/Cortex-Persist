@@ -176,37 +176,7 @@ El linaje criptográfico es innegable. Todo cambio de estado, parche semántico 
 
 ---
 
-## 13. Termodinámica de la Información y Vibe-Sovereignty
-
-La arquitectura de Cortex-Persist opera bajo el marco riguroso de la termodinámica de la información. Esto une la entropía física con la entropía de Shannon mediante el **Principio de Landauer**, estableciendo que borrar o sobrescribir irreversiblemente información (intención cognitiva) requiere disipar energía térmica.
-
-En el desarrollo de software (y particularmente en el ecosistema estocástico del *Vibe Coding*), el coste de Landauer se manifiesta no sólo en decaimiento energético del silicio, sino en "calor cognitivo": **deuda técnica, burnout y pérdida de trazabilidad.**
-
-### El Principio de Landauer Aplicado (Conservación de Intención)
-Cada vez que un LLM sobrescribe código borrando el contexto original sin un registro auditable, se destruye "Información Computacional". Cortex-Persist actúa como una **Máquina Reversible de Bennett**. A través de su *Intent Ledger* y `BeliefObjects`, no borra intenciones; las transita a estados inactivos (`Subsumed`, `Archived`), evitando la penalización entrópica del borrado irreversible.
-
-### Entropía de Software = Entropía de Shannon
-Un codebase hiper-acoplado o con dependencias fantasma posee alta entropía informacional: su comportamiento interno admite demasiados microestados impredecibles.
-- Cortex reduce esta incertidumbre mediante el `EnterpriseRBACGuard` y el `ATMS`.
-- El **Umbral de Colapso (Ω₃)** es formalmente una transición de fase termodinámica: cuando el `Risk_contam` supera el límite, el sistema entra en un estado de alta "temperatura" donde la señal útil (intención) se pierde en el ruido. El Memory Scheduler previene esta transición bloqueando dependencias contaminadas.
-
-### Ecuación Enriquecida de Compound Yield
-Integrando la Información Mutua entre Prompt e Intención, la rentabilidad exergética se calcula como:
-
-$$ Y = \eta_{\text{vibe}} \times \prod_{i=1}^{N} (1 + \Delta_{\text{CORTEX},i}) \times \left(1 - \frac{I_{\text{lost}}}{I_{\text{total}}}\right) $$
-
-Donde:
-- $Y$ = Rendimiento Compuesto (Compound Yield)
-- $\eta_{\text{vibe}}$ = Eficiencia base del Agente/Prompt
-- $\Delta_{\text{CORTEX},i}$ = Reducción de entropía provista por cada validación de Ledger
-- $I_{\text{lost}}$ = Información de intención borrada irreversiblemente
-- $I_{\text{total}}$ = Intención original del Operador
-
-**Corolario:** Cortex-Persist no viola la Segunda Ley de la Termodinámica. No elimina la entropía; la exporta activamente del ciclo inferencial (RAM del operador) hacia un sumidero altamente estructurado (Ledger Criptográfico), manteniendo el "motor" del Swarm operando siempre bajo máxima exergía.
-
----
-
-## 14. Roadmap
+## 13. Roadmap
 
 | Fase | Hito Técnico y Entregable |
 |:---|:---|

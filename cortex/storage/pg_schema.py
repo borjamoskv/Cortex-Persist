@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS facts (
     valid_until     TIMESTAMPTZ,
     source          TEXT,
     meta            JSONB DEFAULT '{}',
-    consensus_score DOUBLE PRECISION DEFAULT 0.5,
+    consensus_score DOUBLE PRECISION DEFAULT 1.0,
     hash            TEXT,
     signature       TEXT,
     signer_pubkey   TEXT,

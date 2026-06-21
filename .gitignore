@@ -115,8 +115,6 @@ Thumbs.db
 .lsp/
 .qodo/
 .vercel/
-.wrangler/
-frontend/.wrangler/
 
 # ── Agent internals ──────────────────────────────
 .agent/
@@ -318,7 +316,3 @@ cortex/swarm/staged_legion_2m.py
 
 # Quarantined entropy — dead code pending permanent deletion
 .quarantine/
-
-# Cortex Demo Artifacts
-demo_causal/backend/artifacts/*
-demo_causal/backend/*.db

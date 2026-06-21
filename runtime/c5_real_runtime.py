@@ -9,6 +9,7 @@ from typing import Any, Optional
 # Event Model
 # -----------------------------
 
+
 @dataclass(frozen=True)
 class Event:
     id: str
@@ -28,6 +29,7 @@ class Event:
 # -----------------------------
 # Event Store (append-only)
 # -----------------------------
+
 
 class EventStore:
     def __init__(self):
@@ -49,6 +51,7 @@ class EventStore:
 # -----------------------------
 # Merkle Root
 # -----------------------------
+
 
 class Merkle:
     @staticmethod
@@ -75,6 +78,7 @@ class Merkle:
 # -----------------------------
 # Replay Engine
 # -----------------------------
+
 
 class ReplayEngine:
     def __init__(self, store: EventStore):
@@ -110,6 +114,7 @@ class ReplayEngine:
 # Authority Graph (minimal)
 # -----------------------------
 
+
 class AuthorityGraph:
     def __init__(self):
         self.edges: dict[str, list[str]] = {}
@@ -128,6 +133,7 @@ class AuthorityGraph:
 # -----------------------------
 # C5-REAL Kernel
 # -----------------------------
+
 
 class C5RealKernel:
     def __init__(self):

@@ -108,6 +108,7 @@ class SyncMixin:
                             loop.run_until_complete(loop.shutdown_default_executor())
                         except NotImplementedError:
                             import logging
+
                             pass
                     loop.close()
                 except (RuntimeError, ValueError) as e:
