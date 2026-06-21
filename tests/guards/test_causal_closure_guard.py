@@ -5,11 +5,21 @@ Validates that the pipeline enforces strict thermodynamic causality
 via structural hash verification, rejecting pure prose or empty claims.
 """
 
+from dataclasses import dataclass
 import datetime
 import pytest
 
-from cortex.guards.causal_closure_guard import CausalClosureGuard, SwarmProposal
+from cortex.guards.causal_closure_guard import CausalClosureGuard
 from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
+
+
+@dataclass
+class SwarmProposal:
+    """Legacy dummy proposal for testing causal rejection."""
+    agent_id: str
+    mission_statement: str
+    content: str
+    token_cost: int = 0
 
 
 @pytest.fixture
@@ -29,14 +39,28 @@ def valid_evidence() -> EvidenceBundle:
     )
 
 
-def test_valid_closure_payload_passes(closure_guard: CausalClosureGuard, valid_evidence: EvidenceBundle) -> None:
-    """A structurally sound payload with valid hashes must pass."""
+def test_guard_accepts_canonical_payload_even_if_cheap(closure_guard: CausalClosureGuard, valid_evidence: EvidenceBundle) -> None:
+    """A structurally sound payload with valid hashes must pass, token cost is irrelevant."""
     payload = ClosurePayload.seal(
         claims=[{"cve_id": "CVE-123"}],
         evidence=valid_evidence,
         verdict=True
     )
+    # The guard accepts the sealed payload perfectly without needing heuristics or token costs
     assert closure_guard.verify_closure(payload) is True
+
+
+def test_guard_rejects_narrative_even_if_expensive(closure_guard: CausalClosureGuard) -> None:
+    """A legacy operation that outputs only prose must be aborted, even if token cost is extremely high."""
+    proposal = SwarmProposal(
+        agent_id="test", 
+        mission_statement="test", 
+        content="We carefully analyzed the system and conclude it is valid.", 
+        token_cost=50000
+    )
+    with pytest.raises(RuntimeError):
+        # The guard requires a canonical ClosurePayload, not a loose SwarmProposal
+        closure_guard.verify_closure(proposal)  # type: ignore
 
 
 def test_tampered_payload_hash_fails(closure_guard: CausalClosureGuard, valid_evidence: EvidenceBundle) -> None:
@@ -75,30 +99,3 @@ def test_empty_evidence_and_claims_fails(closure_guard: CausalClosureGuard) -> N
     
     with pytest.raises(RuntimeError, match="Payload contains no observable evidence"):
         closure_guard.verify_closure(payload)
-
-
-def test_legacy_closure_empty_content_returns_false(closure_guard: CausalClosureGuard) -> None:
-    """Empty legacy content should be safely rejected."""
-    proposal = SwarmProposal(agent_id="test", mission_statement="test", content="   ")
-    assert not closure_guard.verify_legacy_closure(proposal)
-
-
-def test_legacy_closure_with_ledger_passes(closure_guard: CausalClosureGuard) -> None:
-    """A legacy operation that outputs a LedgerPayload achieves causal closure."""
-    content = """Emitting to the audit trail:
-LedgerPayload: { "tx": 123, "CORTEX-TAINT": "v1" }
-"""
-    proposal = SwarmProposal(
-        agent_id="test", mission_statement="test", content=content, token_cost=5000
-    )
-    assert closure_guard.verify_legacy_closure(proposal) is True
-
-
-def test_legacy_closure_without_structure_throws(closure_guard: CausalClosureGuard) -> None:
-    """A legacy operation that outputs only prose must be aborted."""
-    content = "I have thought deeply. No code is needed."
-    proposal = SwarmProposal(
-        agent_id="test", mission_statement="test", content=content, token_cost=5000
-    )
-    with pytest.raises(RuntimeError, match="Legacy Swarm output must contain permanent invariants"):
-        closure_guard.verify_legacy_closure(proposal)

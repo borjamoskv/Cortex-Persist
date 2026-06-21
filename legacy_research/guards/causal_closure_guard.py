@@ -11,19 +11,10 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from dataclasses import dataclass
 
 from cortex.types.evidence import ClosurePayload
 
 logger = logging.getLogger("cortex.guards.causal_closure")
-
-# Retained strictly for legacy pipeline migrations. Must be deprecated.
-@dataclass
-class SwarmProposal:
-    agent_id: str
-    mission_statement: str
-    content: str
-    token_cost: int = 0
 
 
 class CausalClosureGuard:
@@ -45,6 +36,12 @@ class CausalClosureGuard:
         Returns:
             bool: True if safe to persist.
         """
+        if not isinstance(payload, ClosurePayload):
+            logger.error("🛑 [P0] Causal Closure Failure! Expected canonical ClosurePayload.")
+            raise RuntimeError(
+                "[P0] AX-VIII Violation: Structural payload hash mismatch. Expected canonical payload, got unsealed artifact."
+            )
+
         expected_dict = {
             "claims": payload.claims,
             "evidence_hash": payload.evidence.evidence_hash,
@@ -74,17 +71,3 @@ class CausalClosureGuard:
         logger.info("Causal Closure verified. Epistemic chain intact.")
         return True
 
-    def verify_legacy_closure(self, proposal: SwarmProposal) -> bool:
-        """Bridge for legacy swarm pipelines. Fails instantly if content is pure prose."""
-        if not proposal.content.strip():
-            logger.warning("[%s] Empty legacy proposal.", proposal.agent_id)
-            return False
-            
-        has_ledger = "CORTEX-TAINT" in proposal.content or "LedgerPayload" in proposal.content
-        if not has_ledger:
-            raise RuntimeError(
-                f"[P0] AX-VIII Violation: Agent {proposal.agent_id} failed to achieve Causal Closure. "
-                f"Legacy Swarm output must contain permanent invariants."
-            )
-             
-        return True

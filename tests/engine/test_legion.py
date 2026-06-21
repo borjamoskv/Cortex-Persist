@@ -88,7 +88,7 @@ async def test_swarm_agent_run():
 @pytest.mark.asyncio
 async def test_squadron_deploy():
     """Validates Squadron orchestration of multiple agents."""
-    squad = MockSquadron()
+    squad = MockSquadron(guard=MagicMock())
     report = await squad.deploy("target-pattern")
 
     assert report["squadron"] == "TEST"
@@ -121,7 +121,7 @@ async def test_red_team_swarm_siege():
     mock_vector = MagicMock()
     mock_vector.attack = AsyncMock(return_value=["vulnerability found"])
 
-    swarm = RedTeamSwarm(vectors=[mock_vector], replica_count=2)
+    swarm = RedTeamSwarm(vectors=[mock_vector, mock_vector])
     findings = await swarm.siege("some code", {})
 
     assert len(findings) == 2
@@ -254,7 +254,7 @@ async def test_squadron_crystallize_cross_system_invariance():
         def _create_agent(self, agent_id: str) -> SwarmAgent:
             return CustomMockAgent(agent_id, self.bus, self.engine)
 
-    squad = CustomMockSquadron(engine=engine)
+    squad = CustomMockSquadron(guard=MagicMock(), engine=engine)
 
     # 5. Deploy and verify it passes
     report = await squad.deploy("target-1")

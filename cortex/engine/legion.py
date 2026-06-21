@@ -31,7 +31,6 @@ from cortex.engine.legion_vectors import RED_TEAM_SWARM, AttackVector
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "LEGION_OMEGA",
     "AsyncSignalBus",
     "BlueTeamAgent",
     "LegionOmegaEngine",
@@ -124,8 +123,9 @@ class Squadron(ABC):
     SQUAD_NAME: ClassVar[str] = "BASE"
     REPLICAS: ClassVar[int] = 1
 
-    def __init__(self, engine: Any = None):
+    def __init__(self, guard: Any, engine: Any = None):
         self.engine = engine
+        self.guard = guard
         self.bus = AsyncSignalBus()
         self.agents: list[SwarmAgent] = []
 
@@ -152,21 +152,34 @@ class Squadron(ABC):
         }
 
         # ─── AX-VIII: CAUSAL CLOSURE GUARD ───
-        # Produce a real LedgerPayload to satisfy structural condensation
-        import json
+        import hashlib
         from datetime import datetime, timezone
+        from cortex.guards.causal_closure_guard import CausalClosureGuard
+        from cortex.types.evidence import EvidenceBundle, Source, ClosurePayload
 
-        from cortex.guards import CausalClosureGuard, SwarmProposal
+        # Forge verifiable sources from signal payloads
+        sources = [
+            Source(
+                uri=f"legion://{s.agent_id}/{s.target}",
+                content_hash=hashlib.sha3_256(str(s.payload).encode("utf-8")).hexdigest(),
+                metadata={"status": s.status}
+            )
+            for s in signals if s.payload
+        ]
 
-        ledger_payload = {
-            "type": "LedgerPayload",
-            "swarm_size": len(signals),
-            "successful_signals": success_count,
-            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-            "payloads": [s.payload for s in signals if s.payload],
-        }
+        evidence = EvidenceBundle.forge(
+            query=f"Crystallize SQUAD-{self.SQUAD_NAME}",
+            sources=sources,
+            retrieved_at=datetime.now(timezone.utc)
+        )
+
+        claims = [
+            {"claim": "total_signals", "value": len(signals)},
+            {"claim": "successful_signals", "value": success_count}
+        ]
 
         # ─── Cross-System Invariance Verification ───
+        global_verdict = True
         try:
             from cortex.runtime.invariants.cross_system import CrossSystemInvariantCompiler
 
@@ -207,9 +220,13 @@ class Squadron(ABC):
                         f"[P0] AX-VIII Cross-System Invariance Violation: {'; '.join(verdict.details)}"
                     )
 
-                ledger_payload["global_proof_hash"] = verdict.global_proof_hash
-                ledger_payload["shannon_cortex_hash"] = verdict.shannon_cortex_hash
-                ledger_payload["substrate_hash"] = verdict.substrate_hash
+                claims.append({"claim": "global_proof_hash", "value": verdict.global_proof_hash})
+                claims.append({"claim": "shannon_cortex_hash", "value": verdict.shannon_cortex_hash})
+                claims.append({"claim": "substrate_hash", "value": verdict.substrate_hash})
+            else:
+                global_verdict = False
+                logger.warning("Cross-System verifier bypassed: Missing trace or ledger.")
+
         except Exception as e:
             if "Cross-System Invariance Violation" in str(e):
                 logger.error(
@@ -217,19 +234,15 @@ class Squadron(ABC):
                 )
                 raise
             else:
+                global_verdict = False
                 logger.debug("Cross-System verifier bypassed: %s", e)
 
-        content = json.dumps(ledger_payload)
-
-        proposal = SwarmProposal(
-            agent_id=f"Squadron-{self.SQUAD_NAME}",
-            mission_statement="Crystallization Phase",
-            content=content,
-            token_cost=50000,  # Enforce strictly for Squadron deployment
+        payload = ClosurePayload.seal(
+            claims=claims,
+            evidence=evidence,
+            verdict=global_verdict
         )
-        guard = CausalClosureGuard()
-        guard.verify_legacy_closure(proposal)
-
+        self.guard.verify_closure(payload)
         return report
 
     async def deploy(self, target_pattern: str | None = None) -> dict[str, Any]:
@@ -338,20 +351,17 @@ class BlueTeamAgent:
 class RedTeamSwarm:
     """😈 Red Team Swarm: The Annihilation Squad."""
 
-    def __init__(self, vectors: list[AttackVector] | None = None, replica_count: int = 1000):
+    def __init__(self, vectors: list[AttackVector] | None = None):
         self.vectors = vectors or list(RED_TEAM_SWARM.values())
-        # Enforce the 1000 Sovereign Agents Topology
-        self.replica_count = replica_count
 
     async def siege(self, code: str, context: Mapping[str, Any]) -> list[str]:
-        """Subject code to all attack vectors in parallel using a 100-agent swarm."""
-        total_agents = len(self.vectors) * self.replica_count
+        """Subject code to all attack vectors in parallel."""
+        total_agents = len(self.vectors)
         msg = f"⚔️ Iniciando asedio con enjambre de {total_agents} agentes..."
         bicameral.log_limbic(msg, source="RED")
         tasks = []
-        for _ in range(self.replica_count):
-            for v in self.vectors:
-                tasks.append(v.attack(code, context))
+        for v in self.vectors:
+            tasks.append(v.attack(code, context))
         results = await asyncio.gather(*tasks)
 
         # Flatten results
@@ -437,5 +447,3 @@ class LegionOmegaEngine:
         )
 
 
-# Global singleton
-LEGION_OMEGA = LegionOmegaEngine()
