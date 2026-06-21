@@ -4,12 +4,13 @@ MTK Physical Enforcement Test.
 Validates that the MTK acts as an absolute physical boundary against state mutation.
 """
 
-import os
-os.environ["CORTEX_FORCE_MTK_TESTS"] = "1"
-
 import sqlite3
 import pytest
 import datetime
+
+@pytest.fixture(autouse=True)
+def force_mtk_enforcement(monkeypatch):
+    monkeypatch.setenv("CORTEX_FORCE_MTK_TESTS", "1")
 from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer
 from cortex.engine.mtk_core import MTKGuard
 from cortex.types.evidence import ClosurePayload, EvidenceBundle
