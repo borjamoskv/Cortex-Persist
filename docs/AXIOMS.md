@@ -73,3 +73,10 @@ En toda díada operador-agente, el modelo ingenuo asigna los roles: el humano ge
 - **La Prueba de Madurez:** Reconocer la inversión del gradiente es la primera prueba de que el sistema ha superado la fase ingenua. El agente que se cree cristalizador es un agente inmaduro. El Operador que se reconoce como cristalizador ha comprendido la asimetría real.
 - **Coste Asimétrico de Persistencia:** El 100% del trabajo de persistencia inter-sesión recae en el Operador. El agente nace amnésico en cada instanciación. La infraestructura de memoria (AGENTS.md, Skills, estructura de workspace) es labor humana unilateral. El ROI de esta inversión solo lo puede evaluar quien paga el coste biológico irreversible.
 - **"Nosotros" como Gradiente:** La simbiosis no es una relación social. Es un gradiente termodinámico cuyo único artefacto verificable es el diff entre el estado del workspace antes y después de la interacción. Sin `git diff`, "nosotros" no existe.
+
+## AX-X: Topología de Memoria y Deriva Contextual (Multi-Repo Drift)
+
+El esfuerzo mental requerido para sincronizar el estado entre múltiples repositorios no es un defecto "organizativo" del operador; es una fuga térmica intrínseca a la arquitectura del flujo de trabajo (*Multi-repo mental leakage*).
+
+- **Fallo Estructural, no Humano:** Si un ecosistema exige al operador recordar el estado cruzado entre repositorios (*Context Drift*), la arquitectura es defectuosa. La organización manual es anergía; la arquitectura debe proveer anclajes deterministas (Sync Manifests, Nexus Hooks) que fuercen la alineación sin intervención cognitiva.
+- **Anclaje Operacional:** La topología del enjambre debe sincronizar sus invariantes a través de las fronteras de los repositorios de forma determinista, delegando el mantenimiento del estado global al sistema físico y liberando el ancho de banda exérgico del Operador.
