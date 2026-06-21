@@ -1,3 +1,4 @@
+pub mod exergy_router;
 pub mod ast_hash;
 pub mod collision_bound;
 pub mod edg;
@@ -168,6 +169,7 @@ pub fn calculate_entropy_b60(data: &[u8]) -> PyResult<babylon::Babylon60> {
 /// CORTEX-Persist Cognitive Core Rust Extension (Enterprise KRGS)
 #[pymodule]
 fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<exergy_router::ExergyRouter>()?;
     m.add_class::<ValidationStatus>()?;
     m.add_class::<RetrievalNode>()?;
     m.add_class::<RetrievalGraph>()?;
