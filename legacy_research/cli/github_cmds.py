@@ -118,3 +118,66 @@ def status(db: str) -> None:
             await engine.close()
 
     _run_async(_async_status())
+
+
+@github_cmds.command()
+@click.option("--token", envvar="GITHUB_TOKEN", default=None, help="GitHub PAT (or GITHUB_TOKEN)")
+@click.option("--owner", default="borjamoskv", help="GitHub user/org to scan")
+@click.option("--repo", default=None, help="Sync only this repo (name, not full path)")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def telemetry(token: str | None, owner: str, repo: str | None, db: str) -> None:
+    """Harvest GitHub telemetry and store telemetry_batch fact."""
+    if not token:
+        token = os.environ.get("GITHUB_TOKEN")
+    if not token:
+        console.print("[yellow]⚠[/] No GITHUB_TOKEN set. Using mock telemetry fallback.")
+
+    engine = get_engine(db)
+
+    async def _async_telemetry():
+        from cortex.agents.builtins.github_telemetry_agent import GithubTelemetryAgent
+        from cortex.agents.manifest import AgentManifest
+
+        try:
+            await engine.init_db()
+            manifest = AgentManifest(
+                agent_id="cli-telemetry-collector",
+                purpose="CLI GitHub telemetry collection",
+            )
+            repos = [repo] if repo else []
+            agent = GithubTelemetryAgent(
+                manifest=manifest,
+                bus=None,
+                engine=engine,
+                token=token,
+                owner=owner,
+                repos=repos,
+            )
+
+            with console.status("[bold blue]Harvesting GitHub Telemetry...[/]"):
+                stats = await agent.harvest_telemetry()
+
+            await agent.on_stop()
+
+            table = Table(
+                title=f"📊 GitHub Telemetry for {owner}",
+                border_style="cyan",
+            )
+            table.add_column("Metric", style="bold")
+            table.add_column("Value", style="green")
+
+            table.add_row("Active Pull Requests", str(stats.get("prs_active", 0)))
+            table.add_row("Total Additions (Active PRs)", str(stats.get("additions", 0)))
+            table.add_row("Total Deletions (Active PRs)", str(stats.get("deletions", 0)))
+            table.add_row("Total Workflow Runs", str(stats.get("workflow_runs_total", 0)))
+            table.add_row("Workflow Failures", str(stats.get("workflow_failures", 0)))
+            table.add_row("Max / P95 Run Duration", f"{stats.get('duration_p95_sec', 0.0):.2f}s")
+
+            console.print(table)
+            console.print("[bold green]✓ Telemetry batch successfully persisted as 'telemetry_batch' fact.[/]")
+
+        finally:
+            await engine.close()
+
+    _run_async(_async_telemetry())
+
