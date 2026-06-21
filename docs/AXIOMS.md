@@ -80,3 +80,11 @@ El esfuerzo mental requerido para sincronizar el estado entre múltiples reposit
 
 - **Fallo Estructural, no Humano:** Si un ecosistema exige al operador recordar el estado cruzado entre repositorios (*Context Drift*), la arquitectura es defectuosa. La organización manual es anergía; la arquitectura debe proveer anclajes deterministas (Sync Manifests, Nexus Hooks) que fuercen la alineación sin intervención cognitiva.
 - **Anclaje Operacional:** La topología del enjambre debe sincronizar sus invariantes a través de las fronteras de los repositorios de forma determinista, delegando el mantenimiento del estado global al sistema físico y liberando el ancho de banda exérgico del Operador.
+
+## AX-XI: Sistema de Admisión de Estado y Continuidad Topológica
+
+CORTEX-Persist no es una base de datos ni una "memoria para agentes". Es un **Sistema de Transición de Estados Verificables**. El estado no se define por similitud semántica (RAG clásico), sino por pertenencia a una trayectoria topológica verificable y computada mecánicamente.
+
+- **Generación vs Admisión:** El LLM deja de ser fuente de verdad. Es estrictamente un generador de propuestas: `LLM : Context → Proposal`. El Kernel es el ejecutor determinista: `Proposal → Valid | Reject`.
+- **Ecuación de Estado Válido:** Un estado $S_t = \{n_0, n_1, \ldots, n_t\}$ es admisible si y solo si todo nodo satisface los invariantes de causalidad, integridad criptográfica y acotación de recursos/complejidad: $Valid(n_i) = Parent(n_i) \in S_{i-1} \land Verify(n_i) \land Bounded(n_i)$.
+- **Verdad por Continuidad:** Si una inferencia probabilística no puede demostrar criptográficamente de qué ancestro proviene ($I_{causal}$) y que su coste físico de mutación no excede el presupuesto del sistema ($I_{complexity}$), es rechazada en la membrana (Verification Membrane). La verdad no se infiere; se atesta.
