@@ -14,6 +14,7 @@ pub mod bft;
 pub mod causal;
 pub mod retrieval;
 pub mod babylon;
+pub mod mee;
 
 use serde::{Deserialize, Serialize};
 
