@@ -7,7 +7,7 @@ async def test_ouroboros_loop_initialization():
     engine = MythosOuroborosEngine()
     assert engine.is_running is False
     assert engine.state.identity_anchor == b"C5-REAL-MYTHOS-1"
-    assert engine.meta_controller.health_score == 100.0
+    assert engine.meta_controller.health_score == 10000
 
 @pytest.mark.asyncio
 async def test_ouroboros_loop_critic_rejection():
@@ -27,4 +27,4 @@ async def test_ouroboros_loop_critic_rejection():
     assert yield_val < 0
     engine.meta_controller.register_pain(yield_val)
     
-    assert engine.meta_controller.pain_accumulator == 5000
+    assert engine.meta_controller.active_version == "v0.9.9-safe"

@@ -16,19 +16,19 @@ class MetaController:
 
     def __init__(self):
         self.pain_accumulator = 0
-        self.health_score = 100.0 # Strict health score (Primitive 20 requires >98.5)
+        self.health_score = 10000 # Strict health score (Primitive 20 requires >9850)
         self.active_version = "v1.0.0"
 
-    def decide_mode(self, current_exergy: float) -> str:
+    def decide_mode(self, current_exergy: int) -> str:
         """
         Determines the execution path.
         If pain is too high or exergy is low, shifts to Dream Mode (offline simulation).
         """
-        if self.pain_accumulator > 50 or self.health_score < 98.5:
+        if self.pain_accumulator > 50 or self.health_score < 9850:
             return "dream"
         return "real"
 
-    def register_pain(self, negative_exergy: float):
+    def register_pain(self, negative_exergy: int):
         """
         Accumulates pain signal from failed or negative-yield actions.
         """
