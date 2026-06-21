@@ -1,0 +1,2122 @@
+{
+  "root": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist",
+  "band": [
+    7.5,
+    8.5
+  ],
+  "findings": [
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/inject_vercel_env.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/inject_vercel_env.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/deploy_cortex_cloud.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/deploy_cortex_cloud.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/radar_daemon.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/radar_daemon.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/swarm_duration_optimizer.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/swarm_duration_optimizer.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/zero_debt.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/zero_debt.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/zero_debt.sh",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 819,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/omni_ultramap_sim.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/omni_ultramap_sim.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/diagnose.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/diagnose.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/diagnose.sh",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 885,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/pronoic_transducer.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/pronoic_transducer.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/prove_ax8_obsolescence.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/prove_ax8_obsolescence.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/scarcity_governor.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/scarcity_governor.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/repo_health_changed.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/repo_health_changed.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/cortex-boot.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/cortex-boot.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/build_semantic_trees.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/build_semantic_trees.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/_audit.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/_audit.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/master_exergy_singularity.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 10.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/master_exergy_singularity.sh",
+      "reason": "high-score artifact is unusually small",
+      "score": 10.0,
+      "details": {
+        "size_bytes": 987,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/ouroboros_prune.py.rej",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/ouroboros_prune.py.rej",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/auto_radar.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/auto_radar.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/auto_radar.sh",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 615,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/security/sovereign_pre_commit.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/security/sovereign_pre_commit.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/ouroboros_prune.py.orig",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/ouroboros_prune.py.orig",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/setup_anti_context_rot.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/setup_anti_context_rot.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/legion_strike.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/legion_strike.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/unknown/entropy_gate.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/unknown/entropy_gate.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/README.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/README.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/swarm_julio_audit.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/swarm_julio_audit.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/update_memory_c5.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/update_memory_c5.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/cortex_persist.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/cortex_persist.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/cortex_persist.sh",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 852,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/generate_telemetry.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/generate_telemetry.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/swarm_10k_consolidate.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/swarm_10k_consolidate.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/sovereign_pre_commit.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/sovereign_pre_commit.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/sovereign_pre_commit.sh",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 644,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/consolidar_cortex.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/consolidar_cortex.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/swarm_100k_stress.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/swarm_100k_stress.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/generate_sdks.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/generate_sdks.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/unknown/_changed_files.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/unknown/_changed_files.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/empirical_transfer_rate.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/empirical_transfer_rate.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/radar_cron.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/radar_cron.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/swarm_pacing_verifier.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/swarm_pacing_verifier.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/ouroboros_prune.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/ouroboros_prune.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/research/update_signatures.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/research/update_signatures.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/ouroboros_absorb_runner.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/ouroboros_absorb_runner.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/star-engine/launch-posts.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/star-engine/launch-posts.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/star-engine/awesome-lists.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/star-engine/awesome-lists.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/star-engine/github-settings.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/star-engine/github-settings.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/star-engine/pr-template.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/star-engine/pr-template.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/lab/local_agent_pipeline.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/lab/local_agent_pipeline.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/start_node.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/start_node.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/start_node.sh",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 1003,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/stripe_config.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/stripe_config.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/agent_implacable_omega.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/agent_implacable_omega.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/lab/stress_rag.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/lab/stress_rag.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/unknown/lab/README.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/unknown/lab/README.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/unknown/lab/README.md",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 37,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/exergy_x10_purge.sh",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/exergy_x10_purge.sh",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/quantum_event_sourcing.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/quantum_event_sourcing.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/agent_with_tools.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/lab/agent_with_tools.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/stitch/aether_stitch.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/stitch/aether_stitch.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/mac_control/cdp_engine.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 10.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/forensic_hunters/lido_warden.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/forensic_hunters/lido_warden.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/forensic_hunters/sky_stalker.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/forensic_hunters/sky_stalker.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/unknown/data/bandcamp_results.json",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/unknown/data/bandcamp_results.json",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/data/claude_manifest.yaml",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/data/claude_manifest.yaml",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/sortu/sortu_engine.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 10.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/unknown/sortu/sortu_overlap.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/unknown/sortu/sortu_overlap.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/sortu/verify_sortu.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/sortu/verify_sortu.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/sortu/sortu_models.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/sortu/sortu_models.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/sortu/sortu_ledger.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/sortu/sortu_ledger.py",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.086,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/research/browser-subagent.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/research/browser-subagent.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/musa_creativa.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/musa_creativa.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/idea.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/idea.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/omega_protocol.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/omega_protocol.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/flujo_glorioso_v2.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/flujo_glorioso_v2.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/playground.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/playground.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/legion.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/legion.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/memory.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/memory.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/sentinel_seguridad.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/sentinel_seguridad.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/deployment/build.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/deployment/build.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/deployment/build.md",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 662,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/arquitecto_codigo.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/arquitecto_codigo.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/comandante_despliegue.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/comandante_despliegue.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/ouroboros.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/ouroboros.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/research/confluence-awwwards.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/research/confluence-awwwards.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/research/confluence-awwwards.md",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 926,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/CORTEX-PERSIST-WHITEPAPER.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/CORTEX-PERSIST-WHITEPAPER.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/confluence-nightshift.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/confluence-nightshift.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/confluence-nightshift.md",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 983,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/RFC-CORTEX-NATIVE-AI.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/RFC-CORTEX-NATIVE-AI.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/confluence-inmortal.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/confluence-inmortal.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/automation/confluence-inmortal.md",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 959,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/confluence-mmx.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/confluence-mmx.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/confluence-mmx.md",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 924,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/CORTEX-NATIVE-AI-MANIFESTO.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/CORTEX-NATIVE-AI-MANIFESTO.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/confluence-sindicate.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/confluence-sindicate.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/confluence-sindicate.md",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 928,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/CORTEX-NATIVE-ARCHITECTURE.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/CORTEX-NATIVE-ARCHITECTURE.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/observability/C5-LEXICON-100.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/observability/C5-LEXICON-100.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/sovereign-audit-pipeline.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/sovereign-audit-pipeline.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 8.062,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/confluence-black-swan.md",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/confluence-black-swan.md",
+      "reason": "high-score artifact modified too recently",
+      "score": 8.0,
+      "details": {
+        "age_hours": 0.087,
+        "threshold_hours": 24.0
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/confluence-black-swan.md",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 936,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/deploy.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/observability/registry.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/deployment/__init__.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/deployment/__init__.py",
+      "reason": "high-score artifact is unusually small",
+      "score": 8.0,
+      "details": {
+        "size_bytes": 0,
+        "min_size_bytes": 1024
+      }
+    },
+    {
+      "severity": "WARN",
+      "path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/creation/repo_health.py",
+      "reason": "boundary-band artifact requires manual review",
+      "score": 8.0,
+      "details": {
+        "band": [
+          7.5,
+          8.5
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "errors": 0,
+    "warns": 193,
+    "total": 193
+  }
+}
