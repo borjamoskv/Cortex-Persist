@@ -365,8 +365,13 @@ def classify_thermal(exergy: float) -> str:
 
 # ── Hebbian Reinforcement ─────────────────────────────────────────────────────
 
-def hebbian_reinforce(node: FactNode, now: Optional[float] = None, depth: int = 0) -> FactNode:
+def hebbian_reinforce(node: FactNode, now: Optional[float] = None, depth: int = 0) -> tuple[FactNode, float]:
     """
+    Depth-attenuated Hebbian reinforcement.
+    Energy decays exponentially with topological distance:
+    E(d) = E0 * (0.85 ** d)
+    This enforces locality and prevents semantic inflation.
+
     LTP: invoked ONLY from consolidate_epistemic_graph.
     Never from semantic router — prevents latent space poisoning.
     """
@@ -377,14 +382,20 @@ def hebbian_reinforce(node: FactNode, now: Optional[float] = None, depth: int = 
     node.access_count += 1
     
     policy = get_policy(node.origin_type)
+    delta_injected = 0.0
     if policy.hebbiano_eligible:
         node.last_boosted_at = t
         attenuation_factor = 0.85 ** depth
+        boost = HEBBIAN_BOOST_PER_ACCESS * attenuation_factor
+        
+        old_mass = node.kinetic_mass
         node.kinetic_mass = min(
-            node.kinetic_mass + (HEBBIAN_BOOST_PER_ACCESS * attenuation_factor),
+            node.kinetic_mass + boost,
             MAX_KINETIC_MULTIPLIER
         )
-    return node
+        delta_injected = node.kinetic_mass - old_mass
+        
+    return node, delta_injected
 
 
 # ── Causal BFS Consolidation ──────────────────────────────────────────────────
@@ -413,6 +424,9 @@ def consolidate_epistemic_graph(
     queue: list[tuple[str, int]] = [(target_node.node_id, 0)]
     visited: set[str] = set()
 
+    total_energy_injected = 0.0
+    max_depth_reached = 0
+
     while queue:
         current_id, depth = queue.pop(0)
 
@@ -425,6 +439,8 @@ def consolidate_epistemic_graph(
             raise ValueError(msg)
 
         visited.add(current_id)
+        if depth > max_depth_reached:
+            max_depth_reached = depth
 
         node = graph_db.get_node(current_id)
         if node.is_tombstoned:
@@ -433,13 +449,25 @@ def consolidate_epistemic_graph(
             logger.error(msg)
             raise ValueError(msg)
 
-        node = hebbian_reinforce(node, t, depth)
+        node, delta = hebbian_reinforce(node, t, depth)
+        total_energy_injected += delta
         graph_db.update_node(node)
         audit[current_id] = compute_exergy(node, t)
 
         for ancestor_id in graph_db.get_ancestors(current_id):
             if ancestor_id not in visited:
                 queue.append((ancestor_id, depth + 1))
+
+    logger.info(
+        "Consolidation Telemetry",
+        extra={
+            "seed": target_node.node_id,
+            "nodes_affected": len(audit),
+            "max_depth_reached": max_depth_reached,
+            "total_energy_injected": round(total_energy_injected, 4),
+            "mean_energy_per_node": round(total_energy_injected / len(audit) if audit else 0.0, 4)
+        }
+    )
 
     return audit
 
