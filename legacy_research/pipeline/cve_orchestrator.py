@@ -151,6 +151,34 @@ class CVEOrchestrator:
             cited=final_synthesis["cited"]
         )
         
+        # ─── AX-VIII: CAUSAL CLOSURE GUARD (Stochastic Obsolescence) ───
+        # Ensure this multi-model burn condenses into a permanent deterministic artifact (C5-REAL).
+        from cortex.guards.causal_closure_guard import CausalClosureGuard, SwarmProposal
+        
+        structural_payload = json.dumps({
+            "type": "LedgerPayload",
+            "timestamp": "2026-06-21T00:00:00Z", # Deterministic placeholder, in production use isoformat
+            "payloads": [
+                {
+                    "cve_id": analysis.get("cve_id", "UNKNOWN"),
+                    "affected_crates": analysis.get("affected_crates", []),
+                    "severity": analysis.get("severity", "unknown"),
+                    "CORTEX-TAINT": final_synthesis["_cortex_taint_hash"]
+                }
+            ]
+        })
+        
+        proposal = SwarmProposal(
+            agent_id="cve_orchestrator",
+            mission_statement="Multi-model CVE ingestion and structural verification",
+            content=structural_payload,
+            token_cost=999999 # Pseudo-cost forcing strict check
+        )
+        
+        guard = CausalClosureGuard(min_token_threshold=0)
+        guard.verify_closure(proposal)
+        logger.info("[CVEOrchestrator] AX-VIII Causal Closure Verified. Vulnerability permanently crystallized.")
+        
         self.metrics.validate_thresholds()
         
         return final_synthesis
