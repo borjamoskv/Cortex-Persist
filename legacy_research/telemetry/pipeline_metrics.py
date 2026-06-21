@@ -20,7 +20,7 @@ class PipelineThresholds:
 
 class PipelineMetrics:
     def __init__(self):
-        self.start_time_ns = time.time_ns()
+        self.start_time_ns = time.monotonic_ns()
         self.total_claims = 0
         self.confirmed_claims = 0
         self.total_cost_usd = Decimal("0.0")
@@ -45,7 +45,7 @@ class PipelineMetrics:
             self.uncited_claims += 1
 
     def compute_metrics(self) -> dict:
-        latency_ns = time.time_ns() - self.start_time_ns
+        latency_ns = time.monotonic_ns() - self.start_time_ns
         total = Decimal(self.total_claims) if self.total_claims > 0 else Decimal("1")
         steps = Decimal(self.total_steps) if self.total_steps > 0 else Decimal("1")
         

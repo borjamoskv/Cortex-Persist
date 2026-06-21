@@ -136,14 +136,29 @@ class CVEOrchestrator:
         
         if not verification["validated"]:
             self.metrics.record_claim(confirmed=False, cited=False)
-            logger.error(f"[CVEOrchestrator] SAGA Abort. Epistemic Collapse. Max loops ({self.max_loops}) exhausted without validation.")
-            raise EpistemicCollapseError(f"CVE Orchestration failed to reach deterministic consensus after {self.max_loops} attempts. Aborting SAGA.")
+            logger.warning(f"[CVEOrchestrator] SAGA Record. Epistemic Collapse. Max loops ({self.max_loops}) exhausted without validation.")
+            final_synthesis = {
+                "cve_id": analysis.get("cve_id", "UNKNOWN"),
+                "status": "COLLAPSED",
+                "reason": f"Max verification loops ({self.max_loops}) exhausted without consensus.",
+                "cited": False
+            }
+        else:
+            final_synthesis = await self.step_5_synthesize(analysis)
+            final_synthesis["status"] = "VALIDATED"
             
-        final_synthesis = await self.step_5_synthesize(analysis)
+        # ─── C5-REAL CANONICALIZATION (Decimal safe) ───
+        class C5CanonicalEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, Decimal):
+                    return str(obj)
+                return super().default(obj)
+                
+        encoded_synthesis = json.dumps(final_synthesis, cls=C5CanonicalEncoder, sort_keys=True, separators=(",", ":"))
         
         # Apply strict cryptographic trace bounding
         from cortex.engine.causal.taint_engine import _fast_sha3, canonicalize_content
-        final_synthesis["_cortex_taint_hash"] = _fast_sha3(canonicalize_content(json.dumps(final_synthesis)))
+        final_synthesis["_cortex_taint_hash"] = _fast_sha3(canonicalize_content(encoded_synthesis))
         
         # Record final claim for metrics
         self.metrics.record_claim(
@@ -163,10 +178,11 @@ class CVEOrchestrator:
                     "cve_id": analysis.get("cve_id", "UNKNOWN"),
                     "affected_crates": analysis.get("affected_crates", []),
                     "severity": analysis.get("severity", "unknown"),
+                    "status": final_synthesis["status"],
                     "CORTEX-TAINT": final_synthesis["_cortex_taint_hash"]
                 }
             ]
-        })
+        }, cls=C5CanonicalEncoder)
         
         proposal = SwarmProposal(
             agent_id="cve_orchestrator",
@@ -177,7 +193,7 @@ class CVEOrchestrator:
         
         guard = CausalClosureGuard(min_token_threshold=0)
         guard.verify_closure(proposal)
-        logger.info("[CVEOrchestrator] AX-VIII Causal Closure Verified. Vulnerability permanently crystallized.")
+        logger.info(f"[CVEOrchestrator] AX-VIII Causal Closure Verified. State: {final_synthesis['status']}")
         
         self.metrics.validate_thresholds()
         
