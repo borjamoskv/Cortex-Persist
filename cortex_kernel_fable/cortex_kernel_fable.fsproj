@@ -9,6 +9,7 @@
     <Compile Include="src/EpistemicNodes.fs" />
     <Compile Include="src/Babylon.fs" />
     <Compile Include="src/MaxwellDemon.fs" />
+    <Compile Include="src/StateMachine.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

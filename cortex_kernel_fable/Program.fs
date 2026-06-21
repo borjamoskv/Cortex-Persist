@@ -2,6 +2,7 @@ module Program
 
 open Cortex.Kernel
 open Cortex.Kernel.Babylon
+open Cortex.Kernel.StateMachine
 
 [<EntryPoint>]
 let main argv =
@@ -31,5 +32,15 @@ let main argv =
     // Test merkle
     let merkleRoot = hashDistanceRollup 123456u [| 50us<distance>; 10us<distance>; 0us<distance> |]
     printfn "\nMerkle Rollup Root (uint32): %u" merkleRoot
+
+    // StateMachine Demo
+    printfn "\n[StateMachine Test]"
+    let initial = { Phase = Observation; Cycle = 0u; ExergyAccum = 0u; TraceHash = 0u }
+    let inputs = [| 5u; 15u; 60u; 1u; 1u; 10u; 20u; 100u; 1u; 1u |]
+    let finalState = StateMachine.runCycle initial inputs
+    printfn "Final Phase: %A" finalState.Phase
+    printfn "Cycles completed: %u" finalState.Cycle
+    printfn "Exergy accumulated: %u" finalState.ExergyAccum
+    printfn "Trace Hash: %u" finalState.TraceHash
 
     0 // return an integer exit code
