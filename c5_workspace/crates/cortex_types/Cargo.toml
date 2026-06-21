@@ -1,0 +1,9 @@
+[package]
+name = "cortex_types"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+sha2 = "0.10"
