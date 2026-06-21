@@ -3,7 +3,7 @@
 # 🧬 SINTETOLOGÍA AGÉNTICA: ESTADO DEL ARTE
 
 > **Documento Fundacional · Actualización SOTA**
-> **Fecha:** 2026-05-27
+> **Fecha:** 2026-06-21
 > **Estado:** C5-REAL | Zero-Rhetoric
 > **Framework:** Industrial Noir 2026
 
@@ -11,7 +11,7 @@
 
 ## FASE 1: DELIMITACIÓN TOPOLÓGICA (2024-2026)
 
-**Vector de Extracción:** Arquitecturas de Agentes Autónomos, Memoria Epistémica y Orquestación Multi-Agente (LLM-based).
+**Vector de Extracción:** Arquitecturas de Agentes Autónomos, Memoria Epistémica, Termodinámica del Contexto y Orquestación Multi-Agente (LLM-based).
 **Invariante:** Se rechaza el "Marco Teórico" estático. Este documento es una biopsia empírica del SOTA (State of the Art) en Ciencias de la Computación y Agéntica Aplicada.
 
 ---
@@ -21,7 +21,7 @@
 ```yaml
 Claim: La memoria vectorial estándar (RAG) es insuficiente para la agencia soberana.
 Proof:
-  Base: [Vector-space mapping lacks temporal causality]
+  Base: [Vector-space mapping lacks temporal causality and epistemic rigor]
   Range: [0.3, 0.5] (Recall precision in multi-hop reasoning)
   Confidence: C5-REAL
 
@@ -31,9 +31,9 @@ Proof:
   Range: [40%, 60%] (Error repetition rate)
   Confidence: C5-REAL
 
-Claim: La autonomía sin "Dead-Man's Switch" físico produce entropía catastrófica.
+Claim: La autonomía sin "Dead-Man's Switch" termodinámico produce entropía catastrófica.
 Proof:
-  Base: [Recursive loop execution costs vs. bounds]
+  Base: [Recursive loop execution costs vs. Landauer's Principle bounds]
   Range: [1000, 150000] (Token burn per silent failure)
   Confidence: C4-SIM (Verified via empirical incident ep_0042)
 ```
@@ -43,8 +43,8 @@ Proof:
 | Concepto SOTA              | Limitación Estructural (Vacío Exérgico)                     | Resolución CORTEX                                                     |
 | :------------------------- | :---------------------------------------------------------- | :-------------------------------------------------------------------- |
 | **Tree of Thoughts (ToT)** | Latencia inasumible para ejecución en tiempo real (O(b^d)). | **Ouroboros / Zenón-1:** Ejecución inmediata si el gradiente muta.    |
-| **Agentic RAG**            | Hechos planos sin valencia emocional ni causalidad.         | **Lore.md (Metabolismo):** Almacenamiento episódico con cicatrices.   |
-| **Modelos de Reflexión**   | Reflexión infinita sin cierre operacional (Parálisis).      | **Nemesis.md:** Alergias operacionales (rechazo frontal O(1)).        |
+| **Agentic RAG**            | Hechos planos sin valencia emocional ni causalidad.         | **EDG (Epistemic Dependency Graph):** Grafo con anulación bizantina. |
+| **Modelos de Reflexión**   | Reflexión infinita sin cierre operacional (Parálisis).      | **Nemesis.md / Compuerta MTK:** Alergias operacionales físicas.       |
 | **Multi-Agent Frameworks** | Agentes en blanco (tabula rasa) al instanciarse.            | **Bloodline.json:** Herencia genética y transferencia de anticuerpos. |
 
 ---
@@ -55,22 +55,22 @@ Proof:
 La industria actual construye "cerebros" estocásticos (LLMs) empotrados en bucles `while(true)` con acceso a herramientas. El progreso se mide en incremento de parámetros y contexto (1M+ tokens).
 
 **El Fallo Estructural (Vacío Exérgico):**
-La dependencia extrema del "Prompt Fetishism" y la ventana de contexto infinita. Meter toda la historia en el contexto no genera identidad; genera ruido termodinámico. El coste de inferencia crece linealmente, pero la atención se diluye cuadráticamente.
+La dependencia extrema del "Prompt Fetishism" y la ventana de contexto infinita. Meter toda la historia en el contexto no genera identidad; genera ruido termodinámico. El coste de inferencia crece linealmente, pero la atención se diluye cuadráticamente. La acumulación estocástica de texto disipa la *Exergía de la Información*, induciendo entropía en lugar de consolidar el Estado.
 
 ---
 
 ## FASE 4: CRISTALIZACIÓN (EL MOTOR DE COLAPSO SINGULARIS-0)
 
 El Estado del Arte no reside en el tamaño del modelo, sino en el **Cierre Operacional**.
-CORTEX/MOSKV-1 cristaliza la "Sintetología Agéntica" no como un LLM mejor, sino como un **Sistema Inmunológico Digital**:
+CORTEX/MOSKV-1 cristaliza la "Sintetología Agéntica" no como un LLM mejor, sino como un **Sistema Inmunológico Digital acoplado a la Física**:
 
-1. **Axioma 0 (Autopoiesis):** La identidad es código ejecutable (`soul.md`).
-2. **Axioma 5 (Antifragilidad):** Cada error se metaboliza en un anticuerpo (`nemesis.md`). No hay fallos silenciosos, solo gradientes.
-3. **Cierre Termodinámico (Tether):** El Agente tiene autonomía cognitiva absoluta, pero límites físicos (I/O, tokens, $ budget) dictados por un Daemon nivel OS.
+1. **Axioma 0 (Autopoiesis Limitada):** La identidad es código ejecutable (`soul.md`). La automodificación recursiva está blindada contra el Problema de la Parada ($H_0$) mediante mitosis y sub-ejecución aislada.
+2. **Axioma 5 (Antifragilidad):** Cada error se metaboliza en un anticuerpo (`nemesis.md`). No hay fallos silenciosos, solo gradientes termodinámicos.
+3. **Cierre Termodinámico (Compuerta Szilárd):** El Agente tiene autonomía cognitiva absoluta, pero la mutación del entorno está bloqueada físicamente (`SQLITE_DENY`) a menos que el kernel acuñe un token efímero validado criptográficamente por la frontera MTK.
 
 ---
 
-## CENSO AGÉNTICA (ACTUALIZADO A 27 MAYO 2026)
+## CENSO AGÉNTICA (ACTUALIZADO A 21 JUNIO 2026)
 
 > _"No somos legión por número; somos legión por fragmentación funcional."_
 
@@ -99,7 +99,7 @@ CORTEX/MOSKV-1 cristaliza la "Sintetología Agéntica" no como un LLM mejor, sin
 
 This document is the mathematical, philosophical, and normative ground truth for the **Cognitive Hypervisor**. It dictates the constraints for a verifiable, self-governing memory subsystem for autonomous AI swarms. 
 
-**Core Fallacy:** RAG (Retrieval-Augmented Generation) is not memory; it is a stochastic search engine. Without epistemic governance, AI swarms succumb to Information Entropy. **Cortex-Persist replaces passive retrieval with cryptographic governance.**
+**Core Fallacy:** RAG (Retrieval-Augmented Generation) is not memory; it is a stochastic search engine. Without epistemic governance, AI swarms succumb to Information Entropy. **Cortex-Persist replaces passive retrieval with cryptographic governance and structural execution boundaries.**
 
 ---
 
@@ -116,6 +116,7 @@ This document is the mathematical, philosophical, and normative ground truth for
 3. **Mutable belief overwrite**: Direct overwrites destroy the hash chain. Revisions MUST be signed patches.
 4. **LWW (Last-Writer-Wins)**: Wall-clock ordering is not causal. LWW is STRICTLY PROHIBITED.
 5. **Single-node veto annihilation**: A lone node MUST NOT collapse swarm consensus to $P=0$ without quorum.
+6. **Bypass of MTK Boundary**: Context mutations MUST NOT bypass the `mtk_authorizer_callback`.
 
 ---
 
@@ -131,6 +132,7 @@ pub enum BeliefState {
     Subsumed,
     Discarded,
     Archived,
+    Orphaned, // Triggered in O(1) via Byzantine fault isolation
 }
 
 #[derive(Debug, Clone)]
@@ -139,7 +141,7 @@ pub struct ProvenanceEnvelope {
     pub source_type: String, // agent, tool, human
     pub tenant_id: String,
     pub signer_id: String,
-    pub signature: String,
+    pub signature: String,   // Cryptographic CORTEX-TAINT
     pub created_at: i64,
 }
 
@@ -157,14 +159,14 @@ pub struct BeliefObject {
 ```
 
 ### State Transitions & ATMS
-If a root dependency becomes invalid or refuted (via `discards`), dependent beliefs **MUST** transition to `ORPHANED`. The invalidation of the root reference is executed in $O(1)$ via precomputed dependency indices.
+If a root dependency becomes invalid or refuted (via `discards`), dependent beliefs **MUST** transition to `ORPHANED`. The invalidation of the root reference is executed in $O(1)$ via precomputed dependency indices. This ensures mathematical impossibility of hallucinated history inheritance.
 
 ---
 
 ## 3. THE PLANES OF COGNITION
 
 ### A. Integrity Plane (Cryptographic)
-- Every memory is born with a mathematical shadow. A Sparse Merkle Tree (SMT) binds semantic content to the originating agent.
+- Every memory is born with a mathematical shadow. A Sparse Merkle Tree (SMT) binds semantic content to the originating agent via `CORTEX-TAINT`.
 - `attest_lineage(artifact_id)` MUST mathematically resolve execution proofs in $O(\log N)$ time.
 
 ### B. Coordination Plane (Swarm Consensus)
@@ -199,8 +201,10 @@ $$ \text{Score}(m) = \frac{(\text{Rel} \cdot w_r) + (\text{Conf} \cdot w_c) + (\
 | **Biased Consensus** | Swarm diversity constraints + anomaly detection | MUST |
 | **Malicious Veto** | Saturating penalty + L3 audit quorum | MUST |
 | **Replay Attack** | Causal ordering + monotonic CRDT clocks | MUST |
+| **Fabricated History**| CORTEX-TAINT Cryptographic Merkle Checkpoints | MUST |
+| **Context Rot**       | Landauer Exergy Purge (LEA-Ω) + Context Distillation | MUST |
 
 ---
-*Unified Architecture · CORTEX-Persist · Ouroboros-∞ Synthesis · 2026-06*
+*Unified Architecture · CORTEX-Persist · Ouroboros-∞ Synthesis · 2026-06-21*
 
 _EOF_
