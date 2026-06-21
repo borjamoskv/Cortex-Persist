@@ -2,6 +2,7 @@
 import logging
 
 from cortex.engine.smte.llm_mutator import llm_driven_mutator
+from cortex.observability.jsonl_logger import setup_cortex_logging
 from cortex.engine.smte.parser import AgentASTParser
 from cortex.engine.smte.weismann_barrier import enforce_weismann_barrier
 from cortex.guards.exergy_guard import calculate_exergy

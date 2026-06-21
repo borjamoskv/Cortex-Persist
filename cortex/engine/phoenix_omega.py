@@ -14,6 +14,8 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any
 
+from cortex.observability.jsonl_logger import setup_cortex_logging
+
 setup_cortex_logging()
 logger = logging.getLogger("PHOENIX-OMEGA")
 

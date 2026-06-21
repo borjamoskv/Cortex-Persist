@@ -34,7 +34,7 @@ class SovereignDecalcifier:
         logger.warning("🧠 [DECALCIFIER] Initiating REM Sleep Cycle (Deep memory sweep)...")
         start_time = time.monotonic()
 
-        metrics = {"purged_orphans": 0, "compressed_engrams": 0, "serotonin_boost": 0.0}
+        metrics = {"purged_orphans": 0, "compressed_engrams": 0}
 
         # 1. Sweep stale transactions / ledger entries that are purely logging
         # We only delete old 'telemetry' or extremely low-impact actions.
@@ -72,7 +72,6 @@ class SovereignDecalcifier:
             # 3. Reward the system for a successful sleep cycle
             ENDOCRINE.pulse(HormoneType.SEROTONIN, 0.1, reason="REM Cycle Completed")
             ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.05, reason="Memory Compression")
-            metrics["serotonin_boost"] = 0.1
 
         except Exception as e:
             logger.error("❌ [DECALCIFIER] REM Cycle interrupted by nightmare (Error): %s", e)
@@ -82,10 +81,9 @@ class SovereignDecalcifier:
 
         duration = time.monotonic() - start_time
         logger.warning(
-            "🧠 [DECALCIFIER] Cycle complete in %.2fs. Purged: %d. 🧬 SEROTONIN +%.2f",
+            "🧠 [DECALCIFIER] Cycle complete in %.2fs. Purged: %d.",
             duration,
             metrics["purged_orphans"],
-            metrics["serotonin_boost"],
         )
 
         return {"status": "success", "duration": duration, "metrics": metrics}

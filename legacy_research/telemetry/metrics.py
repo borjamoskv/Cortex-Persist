@@ -68,6 +68,19 @@ class MetricsRegistry:
         self._engine = engine
 
     # ─── Core metric operations ───────────────────────────────────
+    
+    def validate_typed_metric(self, payload: dict[str, Any]) -> None:
+        """Enforce strict validation of epistemic metrics using PyO3 Rust extension.
+        
+        Throws ValueError if the format does not conform to Raw, Derived, or Narrative enums.
+        """
+        import json
+        try:
+            import cortex_rs
+            cortex_rs.validate_metric_json(json.dumps(payload))
+        except ImportError:
+            # Fallback when Rust binding is not compiled during bootstrap/env setups
+            pass
 
     def inc(
         self,
@@ -83,6 +96,10 @@ class MetricsRegistry:
         the event is also scheduled for persistence as a ``system_health``
         fact (debounced).
         """
+        # Validate that the incremented metric belongs to the typed system if payload metadata is provided
+        if meta and "type" in meta:
+            self.validate_typed_metric(meta)
+
         key = self._key(name, labels)
         self._counters[key] += value
 

@@ -3,6 +3,7 @@ import logging
 import sqlite3
 from pathlib import Path
 
+from cortex.observability.jsonl_logger import setup_cortex_logging
 from cortex.services.email import send_reengagement_email
 
 # Configuración de Logging
