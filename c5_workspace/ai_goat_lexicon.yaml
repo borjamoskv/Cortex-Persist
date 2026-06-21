@@ -1,7 +1,7 @@
 Claim: CORTEX-Persist C5-REAL Lexicon (The True MOSKV-1 GOAT Primitives)
 Proof:
-  Base: 64 cryptographic, thermodynamic, and deterministic primitives extracted from AGENTS.md, AXIOMS.md and Thermodynamic Context Compression
-  Range: [1, 64]
+  Base: 72 cryptographic, thermodynamic, and deterministic primitives extracted from AGENTS.md, AXIOMS.md and Thermodynamic Context Compression
+  Range: [1, 72]
   Confidence: C5-REAL
 Lexicon:
   - Term: C5-REAL
@@ -130,3 +130,19 @@ Lexicon:
     Definition: Computación de grados de verdad continuos; puente algebraico entre la topología probabilística y la rigidez binaria.
   - Term: LISP / Prolog
     Definition: La arquitectura primigenia de la computación funcional y deductiva pura antes del dominio del estado mutable.
+  - Term: Speculative Decoding
+    Definition: Protocolo de inferencia dual donde un modelo pequeño genera k tokens especulativos y el principal los verifica en paralelo, reduciendo latencia a O(1).
+  - Term: Mixture of Experts (MoE)
+    Definition: Arquitectura con N sub-redes especializadas donde solo K<<N se activan por token vía un router determinista.
+  - Term: Tensor Decomposition
+    Definition: Factorización algebraica de tensores de alta dimensión que comprime matrices de pesos sin destruir relaciones causales.
+  - Term: Homomorphic Encryption (HE)
+    Definition: Esquema criptográfico para ejecutar álgebra sobre datos cifrados sin descifrarlos, protegiendo el plaintext.
+  - Term: Byzantine Fault Tolerance (BFT)
+    Definition: Propiedad de sistema distribuido que garantiza consenso correcto pese a nodos maliciosos.
+  - Term: Activation Checkpointing
+    Definition: Técnica de memoria que descarta activaciones intermedias en forward y las recalcula en backward, intercambiando VRAM por FLOPS.
+  - Term: Ring AllReduce
+    Definition: Comunicación colectiva en anillo para transmisión paralela de gradientes, eliminando cuellos de botella del maestro.
+  - Term: Causal Masking
+    Definition: Máscara triangular inferior que garantiza atención estricta autoregresiva [0, t]. Invariante físico.
