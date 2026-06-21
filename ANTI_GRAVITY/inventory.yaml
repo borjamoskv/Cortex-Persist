@@ -47,6 +47,7 @@ capabilities:
   - lido_warden.py
   - sky_stalker.py
   - k2_slayer.py
+  - immunefi_radar.py
   - claude_manifest.yaml
   - sortu_engine.py
   - sortu_models.py
@@ -808,3 +809,10 @@ artifacts:
   yield_score: 8
   original_path: scripts/forensic_hunters/k2_slayer.py
   new_path: ANTI_GRAVITY/01_ACTIVE/memory/forensic_hunters/k2_slayer.py
+- id: artifact_102
+  name: immunefi_radar.py
+  status: active
+  domain: memory
+  yield_score: 8
+  original_path: scripts/forensic_hunters/immunefi_radar.py
+  new_path: ANTI_GRAVITY/01_ACTIVE/memory/forensic_hunters/immunefi_radar.py
