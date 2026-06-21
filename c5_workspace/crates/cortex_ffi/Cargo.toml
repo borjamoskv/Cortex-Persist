@@ -1,0 +1,17 @@
+[package]
+name = "cortex_ffi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["extension-module"]
+extension-module = ["pyo3/extension-module"]
+
+[dependencies]
+pyo3 = { version = "0.21.2", features = ["abi3-py310"] }
+cortex_rs = { path = "../cortex_rs" }
+cortex_chaos = { path = "../cortex_chaos" }
