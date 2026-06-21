@@ -102,9 +102,23 @@ class ClosurePayload:
         *,
         schema_version: str = "v1",
         proof_kind: str = "sealed-claim-set",
-        info_exergy: float = 1.0,
+        info_exergy: float | None = None,
     ) -> "ClosurePayload":
         normalized_claims = tuple(_normalize_value(c) for c in claims)
+        
+        # [C5-REAL] Dynamic Thermodynamic Calculation (E-INFO-01)
+        if info_exergy is None:
+            try:
+                from cortex.shannon.entropy import compute_fact_entropy
+                evidence_text = _canonical_json(evidence.canonical())
+                h = compute_fact_entropy(evidence_text)
+                if h <= 0:
+                    h = 1.0  # Fallback to prevent ZeroDivisionError
+                c_v = len(normalized_claims)
+                info_exergy = round(c_v / h, 6)
+            except ImportError:
+                info_exergy = 1.0
+
         payload = {
             "schema_version": schema_version,
             "proof_kind": proof_kind,
