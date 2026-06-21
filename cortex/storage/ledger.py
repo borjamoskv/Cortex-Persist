@@ -210,7 +210,8 @@ class EnterpriseAuditLedger:
         g_phi_weights_hash: str,
         hyperparameters: dict,
         previous_fitness: float,
-        trace_id: str = None
+        trace_id: str = None,
+        **kwargs
     ) -> str:
         """
         Hard Fork epistémico: Registra mutaciones en la red de proyección dinámica g_phi.
@@ -226,6 +227,7 @@ class EnterpriseAuditLedger:
             "hyperparameters": hyperparameters,
             "previous_fitness": previous_fitness
         }
+        payload.update(kwargs)
 
         payload_str = json.dumps(payload, sort_keys=True, separators=(',', ':'))
         
