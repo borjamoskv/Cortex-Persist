@@ -23,10 +23,13 @@ Axioms: Ω2 (Entropic Asymmetry), AX-047 (Anti-Limerence)
 import argparse
 import json
 import logging
+import math
 import sqlite3
 import sys
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Optional, Protocol, runtime_checkable
 
 # ─── Thermodynamic Constants ─────────────────────────────────────────
 MIN_EXERGY_THRESHOLD = 0.125  # 3 half-lives → tombstone
@@ -154,7 +157,7 @@ def execute_thermal_purge(
             # Phase 1: Scan all prunable candidates
             sql_find = """
                 SELECT id, content, created_at, decay_half_life, quadrant, storage_tier,
-                       exergy_score,
+                       exergy_score, access_count,
                        ((strftime('%s', 'now') - strftime('%s', created_at)) / 86400.0) as age_days
                 FROM facts
                 WHERE confidence != 'C5'
@@ -176,12 +179,15 @@ def execute_thermal_purge(
                     float(row["decay_half_life"]) if row["decay_half_life"] is not None else 30.0
                 )
                 current_tier = row["storage_tier"] or "HOT"
+                access_count = int(row["access_count"]) if "access_count" in row.keys() and row["access_count"] is not None else 0
 
-                # Compute exergy (exponential decay)
+                # Compute exergy (exponential decay + Hebbian Multiplier)
                 if half_life <= 0:
                     exergy = 0.0
                 else:
-                    exergy = 0.5 ** (age_days / half_life)
+                    decay_factor = 0.5 ** (age_days / half_life)
+                    hebbian_multiplier = 1.0 + (math.log10(access_count + 1) * 1.0)
+                    exergy = min(decay_factor * hebbian_multiplier, 1.0)
 
                 # Always update exergy_score for dashboards
                 exergy_updates.append((exergy, fact_id))
@@ -273,7 +279,139 @@ def execute_thermal_purge(
     return stats
 
 
-# ─── CLI ─────────────────────────────────────────────────────────────
+# ── Graph DB Protocol (duck-typed, no hard dependency) ───────────────────────
+
+@runtime_checkable
+class GraphDB(Protocol):
+    def get_node(self, node_id: str) -> "FactNode": ...
+    def update_node(self, node: "FactNode") -> None: ...
+    def get_ancestors(self, node_id: str) -> list[str]: ...
+
+
+# ── FactNode ─────────────────────────────────────────────────────────────────
+
+BASE_DECAY_HALF_LIFE_DAYS: float = 30.0
+HEBBIAN_BOOST_PER_ACCESS: float = 0.15
+HEBBIAN_DECAY_HALF_LIFE_DAYS: float = 7.0
+MAX_KINETIC_MULTIPLIER: float = 2.0
+
+@dataclass
+class FactNode:
+    node_id: str
+    created_at: float
+    last_accessed_at: float
+    decay_half_life: float = BASE_DECAY_HALF_LIFE_DAYS
+    kinetic_mass: float = 1.0
+    last_boosted_at: Optional[float] = None
+    access_count: int = 0
+    classification: str = "C3"
+    is_tombstoned: bool = False
+    causal_ancestors: list[str] = field(default_factory=list)
+
+
+# ── Exergy Engine ─────────────────────────────────────────────────────────────
+
+def _base_exergy(node: FactNode, now: float) -> float:
+    age_days = (now - node.created_at) / 86400.0
+    return math.pow(0.5, age_days / node.decay_half_life)
+
+
+def _kinetic_effective(node: FactNode, now: float) -> float:
+    if node.last_boosted_at is None:
+        return 1.0
+    boost_age_days = (now - node.last_boosted_at) / 86400.0
+    decay = math.pow(0.5, boost_age_days / HEBBIAN_DECAY_HALF_LIFE_DAYS)
+    return max(1.0, 1.0 + (node.kinetic_mass - 1.0) * decay)
+
+
+def compute_exergy(node: FactNode, now: Optional[float] = None) -> float:
+    t = now or time.time()
+    base = _base_exergy(node, t)
+    kinetic = _kinetic_effective(node, t)
+    # Cap is relative to base: dying nodes cannot be zombie-resurrected
+    return min(base * kinetic, MAX_KINETIC_MULTIPLIER * base)
+
+
+def classify_thermal(exergy: float) -> str:
+    if exergy > 0.50:   return "HOT"
+    if exergy > 0.25:   return "WARM"
+    if exergy > MIN_EXERGY_THRESHOLD: return "COLD"
+    return "VOID"
+
+
+# ── Hebbian Reinforcement ─────────────────────────────────────────────────────
+
+def hebbian_reinforce(node: FactNode, now: Optional[float] = None) -> FactNode:
+    """
+    LTP: invoked ONLY from consolidate_epistemic_graph.
+    Never from semantic router — prevents latent space poisoning.
+    """
+    t = now or time.time()
+    node.last_accessed_at = t
+    node.last_boosted_at = t
+    node.access_count += 1
+    node.kinetic_mass = min(
+        node.kinetic_mass + HEBBIAN_BOOST_PER_ACCESS,
+        MAX_KINETIC_MULTIPLIER
+    )
+    return node
+
+
+# ── Causal BFS Consolidation ──────────────────────────────────────────────────
+
+def consolidate_epistemic_graph(
+    target_node: FactNode,
+    graph_db: GraphDB,
+    now: Optional[float] = None,
+    max_depth: int = 32,        # Circuit breaker: strict CORTEX depth limit
+) -> dict[str, float]:
+    """
+    Traverses the EDG upward from a validated mutation target.
+    Applies Hebbian LTP to every causal ancestor.
+
+    Returns: {node_id: new_exergy} for audit trail.
+
+    Invoke AFTER:
+        1. BFT consensus threshold cleared (2/3)
+        2. Deterministic oracle (Z3/AST) veto cleared
+        3. SAGA-commit phase initiated
+
+    Never invoke speculatively or from retrieval paths.
+    """
+    t = now or time.time()
+    audit: dict[str, float] = {}
+    queue: list[tuple[str, int]] = [(target_node.node_id, 0)]
+    visited: set[str] = set()
+
+    while queue:
+        current_id, depth = queue.pop(0)
+
+        if current_id in visited:
+            continue
+        if depth > max_depth:
+            # Log and raise: Causal depth breached. Indicates runaway topological cycle.
+            msg = f"Causal Depth Exceeded ({max_depth}) at node {current_id}. Topology runaway."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        visited.add(current_id)
+
+        node = graph_db.get_node(current_id)
+        if node.is_tombstoned:
+            # P0 Invariant: A live mutation cannot inherit from a tombstoned ancestor.
+            msg = f"Causal Breach: Encountered TOMBSTONED ancestor '{current_id}'. Epistemic Consistency violated."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        node = hebbian_reinforce(node, t)
+        graph_db.update_node(node)
+        audit[current_id] = compute_exergy(node, t)
+
+        for ancestor_id in graph_db.get_ancestors(current_id):
+            if ancestor_id not in visited:
+                queue.append((ancestor_id, depth + 1))
+
+    return audit
 
 
 def main() -> None:
