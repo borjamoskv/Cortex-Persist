@@ -127,6 +127,10 @@ CREATE TABLE IF NOT EXISTS facts (
     yield_score   REAL NOT NULL DEFAULT 1.0,
     -- Temporal Knowledge Graph
     decay_half_life REAL DEFAULT 30.0,
+    kinetic_mass REAL DEFAULT 1.0,
+    last_accessed_at REAL,
+    last_boosted_at REAL,
+    access_count INTEGER DEFAULT 0,
     -- Legacy/Compatibility
     tags          TEXT DEFAULT '[]'
 );

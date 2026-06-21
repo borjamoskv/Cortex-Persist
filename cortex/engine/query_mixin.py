@@ -35,7 +35,27 @@ class QueryMixin(EngineMixinBase):
     - ``stats()``: O(1) indexed aggregate metrics.
     """
 
+    async def record_access(self, fact_ids: list[int], tenant_id: str = "default") -> None:
+        """Increment access_count and update last_accessed_at for Hebbian pruning."""
+        if not fact_ids:
+            return
+        tenant_id = self._resolve_tenant(tenant_id)
+        async with self.session() as conn:
+            try:
+                placeholders = ",".join("?" for _ in fact_ids)
+                sql = f"""
+                    UPDATE facts 
+                    SET access_count = access_count + 1, 
+                        last_accessed_at = datetime('now')
+                    WHERE tenant_id = ? AND id IN ({placeholders})
+                """
+                await conn.execute(sql, [tenant_id, *fact_ids])
+                await conn.commit()
+            except Exception as e:
+                logger.warning("Hebbian record_access failed (ignoring to prevent read-path blockage): %s", e)
+
     async def get_all_active_facts(
+
         self,
         tenant_id: str = "default",
         project: str | None = None,
@@ -105,7 +125,16 @@ class QueryMixin(EngineMixinBase):
             q = f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ? AND f.tenant_id = ?"
             async with conn.execute(q, (fact_id, tenant_id)) as cursor:
                 row = await cursor.fetchone()
-                return self._row_to_fact(row, tenant_id=tenant_id) if row else None
+                
+            if row:
+                fact = self._row_to_fact(row, tenant_id=tenant_id)
+                # Async fire-and-forget logic could be used here, but we await it inline
+                # To prevent write contention, this could be batched in future.
+                import asyncio
+                asyncio.create_task(self.record_access([fact_id], tenant_id=tenant_id))
+                return fact
+            return None
+
 
     async def recall(
         self,
@@ -157,7 +186,15 @@ class QueryMixin(EngineMixinBase):
 
             async with conn.execute(q, params) as cursor:
                 rows = await cursor.fetchall()
-            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+                
+            facts = [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+            if facts:
+                fact_ids = [f["id"] for f in facts if "id" in f]
+                import asyncio
+                asyncio.create_task(self.record_access(fact_ids, tenant_id=tenant_id))
+                
+            return facts
+
 
     async def history(
         self,

@@ -33,6 +33,7 @@ from cortex.migrations.mig_solid_state import _migration_021_solid_state
 from cortex.migrations.mig_temporal_kg import _migration_027_temporal_kg
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
 from cortex.migrations.mig_tombstone import _migration_020_tombstone
+from cortex.migrations.mig_hebbian import _migration_029_hebbian_multiplier
 
 __all__ = ["MIGRATIONS"]
 
@@ -65,4 +66,5 @@ MIGRATIONS = [
     (26, "Ledger replay admission reservations", _migration_026_ledger_replay_admission),
     (27, "Temporal Knowledge Graph columns", _migration_027_temporal_kg),
     (28, "Dual Identity Paradigm (fact_hash)", _migration_028_dual_identity),
+    (29, "Hebbian Multiplier columns", _migration_029_hebbian_multiplier),
 ]
