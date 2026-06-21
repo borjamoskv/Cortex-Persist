@@ -25,12 +25,13 @@ La tesis central es simple: la persistencia pasiva de embeddings no equivale a m
 
 Para resolver este problema, Cortex-Persist sustituye el modelo de “base vectorial + prompt” por una infraestructura de gobernanza cognitiva activa. La unidad básica ya no es el chunk, sino el Belief Object: una estructura con contenido semántico, estado epistémico, procedencia verificable, relaciones lógicas y política temporal de decaimiento.
 
-Sobre esta ontología, el sistema introduce cuatro capacidades centrales:
+Sobre esta ontología, el sistema introduce cinco capacidades centrales que lo elevan de una "Base de Datos de Hechos" a una "Red Epistemológica Soberana":
 
-1. revisión bayesiana de creencias,
-2. mantenimiento de verdad condicionado por dependencias,
-3. resolución de colisiones semánticas en enjambres distribuidos,
-4. trazabilidad criptográfica del linaje de inferencia.
+1. **Sandbox Mental (Simulación):** Ninguna política cognitiva muta el estado sin ser simulada primero.
+2. **Gobernanza Epistémica:** Clasificación tipada del conocimiento (Observado, Consensuado, Inferido, Simulado).
+3. **Mantenimiento de Verdad Estructural:** Propagación de fallos y ramas contrafactuales.
+4. **Pensamiento Adversarial Estructurado:** Auditoría cruzada mediante contratos tipados de desafío (`ChallengeMessage`).
+5. **Metacontrol Adaptativo:** Mutaciones de topología de agentes y JIT Skills auditadas por ledger.
 
 El resultado no es una memoria más grande, sino una memoria más gobernable.
 
@@ -52,11 +53,11 @@ Cortex-Persist aborda este límite sustituyendo la persistencia pasiva por una c
 
 Para anclar el modelo, Cortex-Persist emplea la siguiente semántica:
 
-- **Belief Object (BO)**: Unidad estructurada de estado cognitivo operacional. Un BO representa una proposición junto con su procedencia, confianza, incertidumbre, relaciones lógicas, política temporal y estado epistémico. No es texto recuperado por similitud; es memoria gobernable. (Ver Apéndice A).
-- **Entropía Cognitiva**: La acumulación de ruido semántico, recuerdos obsoletos y creencias contradictorias que degrada la precisión inferencial de un agente con el tiempo.
-- **Admisibilidad Epistémica**: Condición bajo la cual una afirmación (incluso si está criptográficamente íntegra) es válida para ser inyectada en el prompt, basada en su soporte de evidencia y ausencia de colisión irresoluble.
-- **Contaminación Estructural**: Propagación de fallos lógicos a través del grafo de dependencias, donde el colapso de una premisa raíz invalida silenciosamente cientos de inferencias derivadas.
-- **Colisión Semántica**: Concurrencia de Belief Objects con proposiciones lógicamente excluyentes sobre el mismo dominio de estado.
+- **Belief Object (BO)**: Unidad estructurada de estado cognitivo operacional. No es texto recuperado por similitud; es memoria gobernable. Un BO incluye no solo *qué ocurrió*, sino *cómo se sabe* (factuality), *con qué confianza* y *bajo qué contexto contrafactual*. (Ver Apéndice A).
+- **Entropía Cognitiva**: La acumulación de ruido semántico, recuerdos obsoletos y creencias contradictorias que degrada la precisión inferencial de un agente.
+- **Gobernanza Epistémica**: Reglas duras para distinguir realidades observadas, posibilidades simuladas, opiniones probabilísticas y consensos de enjambre, previniendo la mezcla de ontologías incompatibles.
+- **Contaminación Estructural**: Propagación de fallos lógicos a través del grafo de dependencias, donde el colapso de una premisa raíz invalida silenciosamente dependencias, o donde ramas contrafactuales contaminan la línea de tiempo principal.
+- **Colisión Semántica**: Concurrencia de proposiciones excluyentes sobre el mismo dominio, resueltas vía Desafío Epistémico (`ChallengeMessage`) en lugar de vetos absolutos.
 - **Scheduler Risk / Risk_contam**: Riesgo cuantificado por el programador de memoria de inyectar contexto estructuralmente contaminado en la ventana de inferencia del LLM.
 
 ---
@@ -79,9 +80,10 @@ Cortex-Persist no garantiza:
 
 El sistema opera como un hipervisor cognitivo descentralizado estructurado en tres planos formales:
 
-1. **Plano de Creencias:** Gestiona los *Belief Objects*, la máquina de estados y el mantenimiento de la verdad basado en suposiciones (ATMS).
-2. **Plano de Integridad:** Garantiza la inmutabilidad y procedencia mediante Sparse Merkle Trees (SMT) y firmas criptográficas.
-3. **Plano de Coordinación:** Orquesta la propagación de estado a través del enjambre mediante CRDTs semánticos, resolviendo colisiones con algoritmos de consenso bayesiano (LogOP).
+1. **Plano de Simulación:** El Sandbox Mental. Ninguna política o estado transiciona a real sin simularse previamente contra recursos virtualizados (`cortex.simulation`).
+2. **Plano de Creencias & Gobernanza:** Gestiona los *Belief Objects*, su factualidad, contextos contrafactuales y el mantenimiento de la verdad basado en suposiciones (ATMS).
+3. **Plano de Integridad & Metacontrol:** Garantiza la inmutabilidad de la memoria y audita mutaciones en la topología del enjambre mediante Sparse Merkle Trees (SMT) y firmas criptográficas.
+4. **Plano de Coordinación:** Orquesta la propagación de estado y resuelve conflictos mediante el contrato `ChallengeMessage` y consenso bayesiano (LogOP).
 
 Los agentes producen hechos. El *Memory Scheduler* dicta la inyección de contexto. El protocolo de consenso propaga los estados. La memoria compartida (iceoryx2) provee IPC lock-free hacia los pipelines inferenciales.
 
@@ -122,8 +124,8 @@ A diferencia de los CRDTs estándar basados en el reloj del sistema (LWW - Last 
 
 Si dos agentes divergen fuertemente:
 - Se invoca la capa de consenso (LogOP - Logarithmic Opinion Pool).
-- Los vetos aplican una penalización epistémica saturante.
-- La retirada de soporte operativo o deactivación de un consenso requiere superar un umbral predefinido (*consensus collapse threshold*) o el requisito de auditoría definido por política. 
+- Los desafíos se canalizan a través de un contrato formal (`ChallengeMessage`) que exige evidencia estructurada, eliminando el Veto Unilateral Absoluto (SPOF).
+- La retirada de soporte operativo o desactivación de un consenso requiere superar un umbral predefinido (*consensus collapse threshold*) o el requisito de auditoría definido por política.  
 
 CRDTs proporcionan convergencia estructural de réplicas y causalidad operativa suficiente para propagación distribuida. No determinan por sí mismos superioridad evidencial ni corrección semántica. La resolución epistémica ocurre por encima de la capa de réplica.
 
@@ -287,11 +289,21 @@ pub enum PropositionPayload {
     Reference { uri: String, kind: String },
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Factuality {
+    Asserted,
+    Observed,
+    Inferred,
+    Simulated,
+}
+
 #[derive(Debug, Clone)]
 pub struct BeliefObject {
     pub id: uuid::Uuid,
     pub proposition_key: String,
     pub payload: PropositionPayload,
+    pub factuality: Factuality,
+    pub counterfactual_context: Option<String>,
     pub confidence_score: f32,
     pub uncertainty: f32,
     pub decay_rate: f32,
