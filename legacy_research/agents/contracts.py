@@ -36,6 +36,13 @@ class VerificationResultPayload(BaseModel):
     reasons: list[str] = Field(default_factory=list)
 
 
+class HandoffRequestPayload(BaseModel):
+    reason: str
+    causal_gap: str
+    required_capability: str
+    confidence: float
+
+
 class TaskCompletedPayload(BaseModel):
     task_id: str
     output: dict[str, Any] = Field(default_factory=dict)
@@ -44,4 +51,6 @@ class TaskCompletedPayload(BaseModel):
 class TaskFailedPayload(BaseModel):
     task_id: str
     error: str
+    error_state: Literal["transient", "validation", "permanent"] = "permanent"
     retryable: bool = False
+
