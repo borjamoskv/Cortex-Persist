@@ -9,6 +9,10 @@
 *   **Destrucción de Información (Erasure):** La operación irreversible de borrar un bit, disipando al menos $k_B T \ln 2$ de calor según el Límite de Landauer. -> *Operaciones destructivas de base de datos (`DELETE`, `UPDATE` in-place, `VACUUM`), las cuales disipan recursos computacionales de IOPS, ciclos de CPU y rompen el linaje de auditoría.*
 *   **Estructura de Datos Funcional/Persistente (Persistent Data Structures):** Estructuras que preservan siempre la versión anterior de sí mismas cuando son modificadas. -> *Grafos acíclicos dirigidos (DAGs) de transiciones de estado donde las actualizaciones se anexan como deltas y los nodos antiguos siguen siendo accesibles de forma inmutable.*
 
+## 1.5 Física Real vs Metáfora Arquitectónica
+*   **Física Real:** La computación reversible formal (y las puertas de Toffoli/Fredkin) son constructos físicos/matemáticos que minimizan o anulan la disipación térmica (Ley de Landauer).
+*   **Metáfora Arquitectónica:** Afirmaciones como "Git como substrato de entropía cero" o "inversión epistémica" son analogías potentes de diseño de sistemas (homólogas a Event Sourcing, CRDTs, o Append-only Ledgers). Preservar el historial equivale a evitar la destrucción de información lógica y mantener la trazabilidad causal, pero no transgrede la termodinámica del hardware subyacente.
+
 ## 2. Mapeo Topológico (Arquitectura de CORTEX-Persist)
 *   **El Ledger de Git como Substrato de Entropía Cero:** El principio rector `AX-041` ("Tu repositorio de Git es tu base de datos inmutable") es una implementación directa de computación reversible. Git no borra el historial de commits al modificar archivos; guarda un DAG de instantáneas referenciadas por hashes criptográficos. Revertir el estado es una operación libre de destrucción de información (reversibilidad física y lógica).
 *   **Deltas Causales en SQLite:** En lugar de realizar actualizaciones destructivas (`UPDATE facts SET content = ?`), CORTEX-Persist almacena el historial como un log secuencial donde cada hecho apunta a su predecesor en el Grafo de Dependencia Epistémica (EDG). El estado actual es el resultado de la acumulación reversible de deltas sobre el origen de datos.
@@ -19,7 +23,7 @@
 
 ## 4. Forja de Hipótesis (Predicción Falsable)
 **Hipótesis [H-REVERSIBLE-01]: Inversión Epistémica vs Depreciación Destructiva**
-*   **Claim:** Reemplazar las operaciones destructivas de eliminación de hechos por un sistema de anexado aditivo reversible (donde las depreciaciones se insertan como deltas de inversión y el estado se resuelve mediante consultas biyectivas históricas) reducirá los fallos de coherencia causal en un 100% y los bloqueos de escritura por concurrencia a cero, con una sobrecarga de almacenamiento inferior al 12% en 1000 transacciones.
+*   **Claim:** Reemplazar las operaciones destructivas de eliminación de hechos por un sistema de anexado aditivo reversible (Event Sourcing / Ledger Append-only) erradicará una clase específica de incoherencias derivadas de mutaciones destructivas, limitando la degradación causal. Esta mutación arquitectónica no pretende resolver errores lógicos, eventos fuera de orden o condiciones de carrera de aplicación, pero blinda la resiliencia del historial de auditoría con una sobrecarga de almacenamiento inferior al 12%.
 *   **Proof Conditions:**
     *   *Base:* Ejecución de 50 ciclos concurrentes de inserción, actualización y borrado de hechos bajo un modelo mutable vs. modelo aditivo/reversible con resolución biyectiva.
     *   *Medición:* Número de incoherencias en el linaje del EDG tras las depreciaciones, frecuencia de bloqueos de base de datos (`database is locked`), overhead en bytes de la base de datos.
