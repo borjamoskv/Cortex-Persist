@@ -26,6 +26,7 @@ import logging
 import math
 import sqlite3
 import sys
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Protocol, runtime_checkable
@@ -154,9 +155,16 @@ def execute_thermal_purge(
                 )
 
             # Phase 1: Scan all prunable candidates
-            sql_find = """
-                SELECT id, content, created_at, decay_half_life, quadrant, storage_tier,
-                       exergy_score, access_count,
+            cursor.execute("PRAGMA table_info(facts)")
+            columns = {r["name"] for r in cursor.fetchall()}
+            meta_col = "metadata" if "metadata" in columns else ("meta" if "meta" in columns else None)
+
+            select_cols = "id, content, created_at, decay_half_life, quadrant, storage_tier, exergy_score, access_count"
+            if meta_col:
+                select_cols += f", {meta_col}"
+
+            sql_find = f"""
+                SELECT {select_cols},
                        ((strftime('%s', 'now') - strftime('%s', created_at)) / 86400.0) as age_days
                 FROM facts
                 WHERE confidence != 'C5'
@@ -180,6 +188,21 @@ def execute_thermal_purge(
                 current_tier = row["storage_tier"] or "HOT"
                 access_count = int(row["access_count"]) if "access_count" in row.keys() and row["access_count"] is not None else 0
 
+                origin_type = "agent_scratchpad"
+                locked_floor = 0.0
+                if meta_col and row[meta_col]:
+                    try:
+                        # Try to parse if plaintext JSON
+                        meta = json.loads(row[meta_col])
+                        origin_type = meta.get("origin_type", origin_type)
+                        locked_floor = meta.get("locked_at_floor", 0.0)
+                    except Exception:
+                        pass
+                
+                from cortex.engine.immunity.origin_policy import get_policy
+                policy = get_policy(origin_type)
+                floor = max(policy.criticality_floor, locked_floor)
+
                 # Compute exergy (exponential decay + Hebbian Multiplier)
                 if half_life <= 0:
                     exergy = 0.0
@@ -187,6 +210,7 @@ def execute_thermal_purge(
                     decay_factor = 0.5 ** (age_days / half_life)
                     hebbian_multiplier = 1.0 + (math.log10(access_count + 1) * 1.0)
                     exergy = min(decay_factor * hebbian_multiplier, 1.0)
+                    exergy = max(exergy, floor)
 
                 # Always update exergy_score for dashboards
                 exergy_updates.append((exergy, fact_id))
@@ -306,6 +330,7 @@ class FactNode:
     classification: str = "C3"
     is_tombstoned: bool = False
     causal_ancestors: list[str] = field(default_factory=list)
+    origin_type: str = "agent_scratchpad"
 
 
 # ── Exergy Engine ─────────────────────────────────────────────────────────────
@@ -345,14 +370,19 @@ def hebbian_reinforce(node: FactNode, now: Optional[float] = None) -> FactNode:
     LTP: invoked ONLY from consolidate_epistemic_graph.
     Never from semantic router — prevents latent space poisoning.
     """
+    from cortex.engine.immunity.origin_policy import get_policy
+
     t = now or time.time()
     node.last_accessed_at = t
-    node.last_boosted_at = t
     node.access_count += 1
-    node.kinetic_mass = min(
-        node.kinetic_mass + HEBBIAN_BOOST_PER_ACCESS,
-        MAX_KINETIC_MULTIPLIER
-    )
+    
+    policy = get_policy(node.origin_type)
+    if policy.hebbiano_eligible:
+        node.last_boosted_at = t
+        node.kinetic_mass = min(
+            node.kinetic_mass + HEBBIAN_BOOST_PER_ACCESS,
+            MAX_KINETIC_MULTIPLIER
+        )
     return node
 
 

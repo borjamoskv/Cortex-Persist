@@ -17,7 +17,7 @@ pub struct CortexLogEnvelope {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "snake_case")]
+#[serde(tag = "kind")]
 pub enum EpistemicMetric {
     Raw(RawMetric),
     Derived(DerivedMetric),
@@ -25,34 +25,29 @@ pub enum EpistemicMetric {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "metric", rename_all = "snake_case")]
-pub enum RawMetric {
-    ExecutionDuration { path: String, duration_ms: u64 },
-    GitDiffBytes { lines_added: u32, lines_removed: u32 },
-    TokenConsumption { prompt_tokens: u32, completion_tokens: u32 },
-    TestPassRate { total: u32, failed: u32 },
+pub struct RawMetric {
+    pub name: String,
+    pub value: f64,
+    pub unit: String,
+    pub source: String,          // e.g., "prometheus", "kernel_perf_counter"
+    pub timestamp_epoch_ms: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "formula", rename_all = "snake_case")]
-pub enum DerivedMetric {
-    ExergyRatio {
-        raw_work_tokens: u32,
-        total_tokens: u32,
-        value: f64,
-    },
-    CausalDensity {
-        edges: u32,
-        nodes: u32,
-        value: f64,
-    },
+pub struct DerivedMetric {
+    pub name: String,
+    pub value: f64,
+    pub unit: String,
+    pub derivation: String,      // formula or reference to computation
+    pub source_metrics: Vec<String>,  // names of input RawMetrics
+    pub timestamp_epoch_ms: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NarrativeClaim {
-    pub label: String,
-    pub description: String,
-    pub evidence_roots: Vec<String>,
+    pub claim: String,
+    pub context: Option<String>,
+    pub confidence: Option<String>,  // e.g., "low", "medium" — not a float
 }
 
 /// A lock-free, append-only, JSONL telemetry writer.
@@ -102,8 +97,17 @@ impl TelemetryEngine {
 }
 
 #[pyfunction]
-pub fn validate_metric_json(json_str: &str) -> PyResult<bool> {
-    let _val: EpistemicMetric = serde_json::from_str(json_str)
-        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid epistemic metric schema: {}", e)))?;
-    Ok(true)
+pub fn validate_metric_json(json_str: &str) -> PyResult<String> {
+    let parsed: EpistemicMetric = serde_json::from_str(json_str)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!(
+            "Telemetry validation failed: {e}"
+        )))?;
+
+    let kind = match parsed {
+        EpistemicMetric::Raw(_) => "Raw",
+        EpistemicMetric::Derived(_) => "Derived",
+        EpistemicMetric::Narrative(_) => "Narrative",
+    };
+
+    Ok(kind.to_string())
 }

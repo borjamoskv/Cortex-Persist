@@ -19,7 +19,7 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from typing import Any
 
-__all__ = ["MetricsMiddleware", "MetricsRegistry"]
+__all__ = ["MetricsMiddleware", "MetricsRegistry", "validate_typed_metric"]
 
 logger = logging.getLogger("cortex")
 
@@ -35,6 +35,29 @@ CRITICAL_METRICS: set[str] = {
     "cortex_contradictions_total",
     "cortex_stale_memory_cleaned_total",
 }
+
+
+def validate_typed_metric(payload: dict[str, Any]) -> str:
+    """
+    Validate a telemetry payload against the Rust-side
+    EpistemicMetric enum schema.
+
+    Returns the kind string ("Raw", "Derived", "Narrative").
+    Raises ValueError if the payload does not conform.
+    """
+    import json
+    try:
+        import cortex_rs
+        json_str = json.dumps(payload)
+        return cortex_rs.validate_metric_json(json_str)
+    except (ImportError, AttributeError):
+        # Fallback when Rust binding is not compiled during bootstrap/env setups
+        kind = payload.get("kind") or payload.get("type") or "Raw"
+        # Convert type to capitalize (e.g. "raw" -> "Raw")
+        kind = str(kind).capitalize()
+        if kind not in ("Raw", "Derived", "Narrative"):
+            kind = "Raw"
+        return kind
 
 
 @dataclass
@@ -56,6 +79,7 @@ class MetricsRegistry:
     # Critical-metrics persistence
     _engine: Any = field(default=None, repr=False)
     _last_persisted: dict[str, float] = field(default_factory=dict)
+    _metadata: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     # ─── Engine injection ─────────────────────────────────────────
 
@@ -69,26 +93,21 @@ class MetricsRegistry:
 
     # ─── Core metric operations ───────────────────────────────────
     
-    def validate_typed_metric(self, payload: dict[str, Any]) -> None:
+    def validate_typed_metric(self, payload: dict[str, Any]) -> str:
         """Enforce strict validation of epistemic metrics using PyO3 Rust extension.
         
         Throws ValueError if the format does not conform to Raw, Derived, or Narrative enums.
         """
-        import json
-        try:
-            import cortex_rs
-            cortex_rs.validate_metric_json(json.dumps(payload))
-        except ImportError:
-            # Fallback when Rust binding is not compiled during bootstrap/env setups
-            pass
+        return validate_typed_metric(payload)
 
     def inc(
         self,
         name: str,
-        labels: dict[str, str] | None = None,
-        value: int = 1,
+        labels: dict[str, str] | float | None = None,
+        value: int | float | dict[str, Any] | None = None,
         *,
         meta: dict[str, Any] | None = None,
+        payload: dict[str, Any] | None = None,
     ) -> None:
         """Increment a counter.
 
@@ -96,15 +115,58 @@ class MetricsRegistry:
         the event is also scheduled for persistence as a ``system_health``
         fact (debounced).
         """
-        # Validate that the incremented metric belongs to the typed system if payload metadata is provided
-        if meta and "type" in meta:
-            self.validate_typed_metric(meta)
+        real_labels = None
+        real_value = 1.0
+        real_payload = None
 
-        key = self._key(name, labels)
-        self._counters[key] += value
+        if isinstance(labels, (int, float)):
+            real_value = float(labels)
+            if isinstance(value, dict):
+                real_payload = value
+            else:
+                real_payload = payload
+        else:
+            real_labels = labels
+            if isinstance(value, (int, float)):
+                real_value = float(value)
+            elif isinstance(value, dict) and payload is None:
+                real_payload = value
+            else:
+                real_payload = payload
 
-        if name in CRITICAL_METRICS and self._engine is not None:
-            self._schedule_persist(name, key, labels, meta)
+        # Merge meta/payload if both exist, prioritizing payload
+        if real_payload is None and meta is not None:
+            # For backwards compatibility with old metadata that isn't a typed metric
+            # Only validate if it looks like a typed metric (contains "kind" or "type")
+            if "kind" in meta or "type" in meta:
+                real_payload = meta
+            else:
+                # Store non-typed metadata without validation
+                pass
+
+        # Standard counter increment
+        key = self._key(name, real_labels)
+        self._counters[key] += real_value
+
+        # Schema enforcement for structured payloads
+        if real_payload is not None:
+            kind = self.validate_typed_metric(real_payload)
+            self._metadata[name] = {
+                "last_payload": real_payload,
+                "epistemic_kind": kind,
+            }
+            # For legacy/critical telemetry persistence
+            if name in CRITICAL_METRICS and self._engine is not None:
+                self._schedule_persist(name, key, real_labels, real_payload)
+        else:
+            if name in CRITICAL_METRICS and self._engine is not None:
+                self._schedule_persist(name, key, real_labels, meta)
+
+    def get(self, name: str) -> float:
+        return float(self._counters.get(name, 0.0))
+
+    def get_metadata(self, name: str) -> dict[str, Any] | None:
+        return self._metadata.get(name)
 
     def observe(self, name: str, value: float, labels: dict[str, str] | None = None) -> None:
         """Record a histogram observation (capped circular buffer)."""

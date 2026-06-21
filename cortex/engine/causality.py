@@ -14,6 +14,7 @@ import aiosqlite
 
 from cortex.crypto import get_default_encrypter
 from cortex.database.core import connect
+from cortex.engine.causal.decision_parser import CausalInvariant, DecisionParser
 from cortex.engine.causality_models import (
     CONFIDENCE_LEVELS,
     EDGE_DERIVED_FROM,
@@ -27,7 +28,6 @@ from cortex.engine.causality_models import (
     TaintStatus,
     _downgrade_confidence,
 )
-from cortex.engine.causal.decision_parser import DecisionParser, CausalInvariant
 from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 
 try:
@@ -274,6 +274,53 @@ class AsyncCausalGraph:
             f"INSERT INTO causal_edges ({columns_sql}) VALUES ({placeholders_sql})",
             values,
         )
+
+        # 4. C5-REAL: Synchronous Topological Lock
+        if parent_id is not None:
+            await self._apply_topological_lock(fact_id, parent_id, tenant_id)
+
+    async def _apply_topological_lock(self, child_id: int, parent_id: int, tenant_id: str) -> None:
+        """Applies synchronous topological protection if a child node is more stable than its parent."""
+        try:
+            from cortex.engine.immunity.origin_policy import get_policy
+            meta_col = await self._metadata_column()
+            if not meta_col:
+                return
+
+            enc = get_default_encrypter()
+            nodes_data = await self._fetch_nodes_data([child_id, parent_id], tenant_id, meta_col, has_tenant=True)
+
+            if child_id not in nodes_data or parent_id not in nodes_data:
+                return
+
+            child_data = nodes_data[child_id]
+            parent_data = nodes_data[parent_id]
+
+            child_meta = child_data["metadata"]
+            parent_meta = parent_data["metadata"]
+
+            child_origin = child_meta.get("origin_type", "agent_scratchpad")
+            child_policy = get_policy(child_origin)
+
+            parent_origin = parent_meta.get("origin_type", "agent_scratchpad")
+            parent_policy = get_policy(parent_origin)
+
+            if child_policy.criticality_floor > parent_policy.criticality_floor:
+                parent_meta["topological_lock_by"] = child_id
+                parent_meta["locked_at_floor"] = child_policy.criticality_floor
+
+                if parent_data["is_encrypted"]:
+                    new_meta_str = enc.encrypt_json(parent_meta, tenant_id=tenant_id)
+                else:
+                    new_meta_str = json.dumps(parent_meta)
+
+                # Use SQLite MAX correctly (or use CASE statement if MAX is not available for standard update)
+                # Note: SQLite `MAX()` scalar function is available.
+                sql = f"UPDATE facts SET {meta_col} = ?, exergy_score = MAX(exergy_score, ?) WHERE id = ? AND tenant_id = ?"
+                await self.conn.execute(sql, (new_meta_str, child_policy.criticality_floor, parent_id, tenant_id))
+
+        except Exception as e:
+            logger.error("Failed to apply topological lock: %s", e)
 
     async def temporal_causal_chain(
         self,
