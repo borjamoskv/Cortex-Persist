@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package agent;
+
+service PolicyService {
+  rpc GetActions (State) returns (ActionDistribution);
+  rpc EvalValue (State) returns (ValueResponse);
+}
+
+message State {
+  repeated float obs_vector = 1;
+  repeated string blacklist = 2;
+  int64 step = 3;
+}
+
+message ActionDistribution {
+  repeated ActionCandidate candidates = 1;
+}
+
+message ActionCandidate {
+  string op = 1;
+  float score = 2;
+  float expected_value = 3;
+}
+
+message ValueResponse {
+  float value = 1;
+}
