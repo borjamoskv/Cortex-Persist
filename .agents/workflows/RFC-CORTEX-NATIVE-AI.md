@@ -61,7 +61,7 @@ provides lock-free IPC to downstream inference pipelines (vLLM/SGLang).
 
 ```typescript
 type BeliefState = "ACTIVE" | "CONTESTED" | "SUBSUMED" | "DISCARDED" | "ORPHANED";
-type Factuality = "ASSERTED" | "OBSERVED" | "INFERRED" | "SIMULATED";
+type Factuality = "OBSERVED" | "INFERRED" | "TASK" | "SIMULATED";
 
 interface ProvenanceEnvelope {
   source_hash: string;
@@ -93,6 +93,12 @@ interface BeliefObject {
 
 > [!NOTE]
 > The `BeliefObject` schema is **MUST**-level normative. Field additions require RFC amendment.
+> The `Factuality` taxonomy strictly implements the AXIOM 6 Epistemic DAG:
+> - `OBSERVED`: Ground truth telemetry (`Node_Observation_Raw`).
+> - `INFERRED`: Derived hypothesis (`Node_Invariant_Extraction`).
+> - `TASK`: Executable capability (`Node_Crystallization`).
+> - `SIMULATED`: Counterfactual context branch.
+> *(Legacy state `ASSERTED` is structurally deprecated; unclassified claims are rejected).*
 
 ## 7. Integrity Plane
 
@@ -305,7 +311,7 @@ Orchestrators MUST NOT mutate the swarm topology (e.g., creating/destroying agen
 
 > **Classification: MUST (Normative)**
 
-The architecture MUST enforce explicit rules determining what constitutes valid knowledge. Since `BeliefObject` includes a `Factuality` property (`ASSERTED`, `OBSERVED`, `INFERRED`, `SIMULATED`), the system MUST NOT mix incompatible ontologies during resolution.
+The architecture MUST enforce explicit rules determining what constitutes valid knowledge. Since `BeliefObject` includes a `Factuality` property (`OBSERVED`, `INFERRED`, `TASK`, `SIMULATED`), the system MUST NOT mix incompatible ontologies during resolution.
 
 ### Governance Rules
 
@@ -320,12 +326,22 @@ The architecture MUST enforce explicit rules determining what constitutes valid 
 
 The AUTODIDACT protocol defines how the system extracts, crystallizes, and persists volatile interfaces (e.g., DOM structures, APIs) into the Epistemic Dependency Graph (EDG).
 
+### 19.0 Epistemic DAG Compliance (AXIOM 6)
+
+All AUTODIDACT nodes MUST satisfy the AXIOM 6 topological reachability constraints:
+- `Node_Observation_Raw`: `reachable_observation = self`
+- `Node_Invariant_Extraction`: `reachable_observation >= 1`
+- `Node_Crystallization`: `reachable_observation >= 1` AND `reachable_inference >= 1`
+- `Node_Consensus_Anchor`: `reachable_observation >= 1`
+
+Cycles are mathematically FORBIDDEN by the EDG architecture. The RFC integrates AXIOM 6 as the native constraint system, eliminating external taxonomy dependencies.
+
 ### 19.1 Structural Ontology
 
 The autonomous learning of capabilities MUST be topologically represented within the EDG:
 - **Node_Observation_Raw (Input):** The raw, high-entropy fragment of the environment (e.g., DOM Snapshot). Factuality: `OBSERVED`.
 - **Node_Invariant_Extraction (Hypothesis):** The deterministic rule extracted from the noise (e.g., XPath or JSON schema). Factuality: `INFERRED`.
-- **Node_Crystallization (Task/Capability):** The executable, immutable script generated from the invariant. Factuality: `ASSERTED`.
+- **Node_Crystallization (Task/Capability):** The executable, immutable script generated from the invariant. Factuality: `TASK`.
 - **Node_Consensus_Anchor (Seal):** The cryptographic seal representing Swarm consensus (Quorum BFT).
 
 ### 19.2 Epistemic Routing & Zero-Anergy
