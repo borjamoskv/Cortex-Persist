@@ -8,11 +8,12 @@ Protocolo: C5-REAL | Aprendizaje Basado en Aserciones
 Objetivo: Transformar teoría abstracta en competencia técnica medible.
 """
 
-import sys
-import sqlite3
 import argparse
+import sqlite3
+import sys
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import Optional
+
 
 class CurriculumEngine:
     def __init__(self, db_path: str = "cortex.db"):
@@ -22,7 +23,7 @@ class CurriculumEngine:
             sys.exit(1)
         self.conn = sqlite3.connect(str(self.db_path))
 
-    def get_topological_path(self) -> List[Dict]:
+    def get_topological_path(self) -> list[dict]:
         """Extrae la ruta de estudio basada en dependencias causales (DAG)."""
         cursor = self.conn.execute("""
             SELECT id, name, block_name, criticality, dependencies, validation_status
@@ -41,7 +42,7 @@ class CurriculumEngine:
             })
         return nodes
 
-    def get_node(self, node_id: str) -> Optional[Dict]:
+    def get_node(self, node_id: str) -> Optional[dict]:
         cursor = self.conn.execute("""
             SELECT id, name, block_name, verification_method, validation_status
             FROM goat_math_nodes
@@ -71,11 +72,11 @@ class CurriculumEngine:
             print(f"❌ ERROR: Archivo de sumisión {script_path} no encontrado.")
             return False
 
-        print(f"═══════════════════════════════════════════════════════════════")
+        print("═══════════════════════════════════════════════════════════════")
         print(f"🐐 EVALUACIÓN C5-REAL: {node_id} - {node['name']}")
         print(f"Bloque: {node['block']}")
         print(f"Criterio de Verificación: {node['method']}")
-        print(f"═══════════════════════════════════════════════════════════════")
+        print("═══════════════════════════════════════════════════════════════")
 
         code = script_path.read_text()
         
@@ -83,7 +84,7 @@ class CurriculumEngine:
             # Aislamiento Termodinámico Básico
             env = {}
             exec(code, env)
-            print(f"\n✅ PASS: Aserción determinista superada.")
+            print("\n✅ PASS: Aserción determinista superada.")
             
             # Actualizar Ledger local
             self.conn.execute(
@@ -91,7 +92,7 @@ class CurriculumEngine:
                 (node_id,)
             )
             self.conn.commit()
-            print(f"🔗 ESTADO ACTUALIZADO A 'VALIDATED' EN DAG EPISTÉMICO.")
+            print("🔗 ESTADO ACTUALIZADO A 'VALIDATED' EN DAG EPISTÉMICO.")
             return True
         except AssertionError as e:
             print(f"\n❌ FAIL: Falla de aserción estructural. {str(e)}")

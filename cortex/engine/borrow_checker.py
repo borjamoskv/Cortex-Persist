@@ -1,6 +1,6 @@
 import asyncio
 import time
-from typing import Dict, Set
+
 
 class StateDriftError(Exception):
     """Excepción lanzada cuando se violan las reglas de Borrowing (ej: doble &mut)."""
@@ -16,9 +16,9 @@ class LogicalBorrowChecker:
     """
     def __init__(self):
         # Mapeo de namespace -> contador de préstamos inmutables activos
-        self._shared_borrows: Dict[str, int] = {}
+        self._shared_borrows: dict[str, int] = {}
         # Conjunto de namespaces con un préstamo mutable activo
-        self._mut_borrows: Set[str] = set()
+        self._mut_borrows: set[str] = set()
         self._lock = asyncio.Lock()
 
     async def acquire_mut(self, namespace: str, timeout_sec: float = 5.0) -> bool:

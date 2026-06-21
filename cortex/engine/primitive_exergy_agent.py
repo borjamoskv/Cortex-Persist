@@ -1,16 +1,17 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import jax
 import jax.numpy as jnp
 
 from cortex.engine.goat_calculus import (
-    compute_limit,
     compute_derivative,
-    rate_of_change,
+    compute_limit,
     definite_integral,
+    rate_of_change,
 )
 from cortex.engine.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
 

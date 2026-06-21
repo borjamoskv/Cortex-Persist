@@ -1,0 +1,16 @@
+[package]
+name = "cortex_merkle_rewrite"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "cortex_merkle_rewrite"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+regex = "1.10"
+sha2 = "0.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+pyo3 = { version = "0.20", features = ["extension-module"] }
+hex = "0.4"

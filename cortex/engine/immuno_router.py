@@ -1,6 +1,7 @@
-import re
 import hashlib
-from typing import Dict, Callable, Optional
+import re
+from collections.abc import Callable
+
 
 class MicroAgent:
     def __init__(self, name: str, antigen_regex: str, handler: Callable[[str], str]):

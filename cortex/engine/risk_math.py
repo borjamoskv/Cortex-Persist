@@ -2,64 +2,54 @@
 """
 Matemáticas del Plano Creencia (CORTEX-Persist).
 Define funciones puras para calcular el decaimiento de creencias y 
-la divergencia semántica (Riesgo de Contaminación).
+la divergencia causal bajo el protocolo BABYLON-60.
+Operaciones estrictamente limitadas al dominio de los enteros.
 """
 
-import math
-from collections.abc import Sequence
 
 
-def calculate_decay_weight(w0: float, time_delta_seconds: float, lambda_factor: float) -> float:
+def calculate_decay_weight(w0: int, time_delta_seconds: int, half_life_seconds: int) -> int:
     """
-    Calcula el peso de una creencia utilizando Decaimiento Exponencial (Ebbinghaus).
-    W(t) = W_0 * e^(-lambda * t)
+    Calcula el peso de una creencia utilizando decaimiento discreto basado en vida media (Half-life).
+    Evita representaciones exponenciales y floats.
     
     Args:
-        w0: Peso inicial (ej. 1.0).
-        time_delta_seconds: Tiempo transcurrido desde la última aserción o uso.
-        lambda_factor: Tasa de decaimiento (calibrada por dominio, ej. 0.0001).
+        w0: Peso inicial discreto (ej. 1000000).
+        time_delta_seconds: Tiempo transcurrido (uint32).
+        half_life_seconds: Ciclos de vida media en segundos (uint32).
     """
-    return w0 * math.exp(-lambda_factor * time_delta_seconds)
-
-
-def cosine_distance(vec_a: Sequence[float], vec_b: Sequence[float]) -> float:
-    """Calcula la Distancia Coseno optimizada (O(n)) sin dependencias externas."""
-    if len(vec_a) != len(vec_b):
-        raise ValueError("Los vectores deben tener la misma dimensionalidad.")
+    if half_life_seconds <= 0:
+        return 0
         
-    # Optimización mediante generadores sin copias innecesarias
-    dot_product = sum(a * b for a, b in zip(vec_a, vec_b))
-    norm_a = sum(a * a for a in vec_a) ** 0.5
-    norm_b = sum(b * b for b in vec_b) ** 0.5
+    # Bitwise shift right for every half life passed (integer division representation of 1/2^n)
+    half_lives_passed = time_delta_seconds // half_life_seconds
     
-    EPSILON = 1e-10
-    if norm_a < EPSILON or norm_b < EPSILON:
-        return 1.0 # Max distance si hay subnormales o ceros
+    if half_lives_passed >= 31: # Shift limit for standard 32bit boundary prevention
+        return 0
         
-    return 1.0 - (dot_product / (norm_a * norm_b))
+    return w0 >> half_lives_passed
 
 
 def calculate_risk_contam(
-    vector_proposal: Sequence[float], 
-    vector_core_axioms: Sequence[float], 
-    threshold: float
-) -> float:
+    hash_proposal: int, 
+    hash_core_axioms: int, 
+    threshold_distance: int
+) -> int:
     """
-    Calcula el Riesgo de Contaminación (Risk_contam) mediante Divergencia Semántica.
-    Si la distancia supera el umbral, el riesgo se dispara asintóticamente al infinito
-    (o un valor lo suficientemente alto para anular la ecuación del Score).
+    Calcula el Riesgo de Contaminación mediante Distancia de Hamming sobre Hashes BABYLON-60.
     
     Args:
-        vector_proposal: Embedding de la creencia propuesta.
-        vector_core_axioms: Embedding o centroide de los axiomas core verificados.
-        threshold: Umbral máximo permitido (ej. 0.3 de distancia).
+        hash_proposal: Identificador hash determinista.
+        hash_core_axioms: Identificador hash de validación core.
+        threshold_distance: Límite máximo de discrepancia (Hamming distance max).
     """
-    distance = cosine_distance(vector_proposal, vector_core_axioms)
+    # Computamos la distancia de Hamming utilizando la Capa 0 (Sustrato Binario) de BABYLON-60
+    distance = (hash_proposal ^ hash_core_axioms).bit_count()
     
-    if distance <= threshold:
-        # Riesgo lineal bajo
+    if distance <= threshold_distance:
+        # Riesgo lineal
         return distance
     else:
-        # Penalización exponencial acotada (Clipping en exponente=20.0 para evitar Overflow/NaN)
-        exponent = min(10.0 * (distance - threshold), 20.0)
-        return distance * math.exp(exponent)
+        # Penalización aritmética entera fuerte: distance * (distance - threshold)^2
+        penalty = (distance - threshold_distance) ** 2
+        return distance * penalty

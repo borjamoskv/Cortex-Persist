@@ -1,5 +1,6 @@
 import hashlib
-from typing import List, Tuple, Sequence
+from collections.abc import Sequence
+
 
 class Babylon60Vector:
     """
@@ -7,7 +8,7 @@ class Babylon60Vector:
     Spatial vectors maintain a Euclidean illusion. This will be entirely removed
     in favor of EpistemicTrajectory DAG mapping.
     """
-    def __init__(self, data: List[int]):
+    def __init__(self, data: list[int]):
         for val in data:
             if not isinstance(val, int):
                 raise ValueError(f"BABYLON-60 violation: Non-integer scalar detected in vector. Type: {type(val)}")
@@ -67,7 +68,7 @@ def causal_distance(ancestry_overlap: int, ledger_overlap: int, witness_overlap:
     # Clamp to uint16 (0 - 65535)
     return min(distance, 65535)
 
-def hash_distance_rollup(root_hash: str, distance_batch: Sequence[Tuple[str, str, int]]) -> str:
+def hash_distance_rollup(root_hash: str, distance_batch: Sequence[tuple[str, str, int]]) -> str:
     """
     Merkle Cognition Tree: Rollup Batch Hashing.
     Prevents Merkle Storms by batching multiple causal distance calculations

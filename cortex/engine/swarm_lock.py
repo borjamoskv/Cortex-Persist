@@ -1,7 +1,7 @@
-import os
 import fcntl
-import time
 import logging
+import os
+import time
 from contextlib import contextmanager
 
 logger = logging.getLogger("cortex.engine.swarm_lock")
@@ -35,10 +35,10 @@ def swarm_git_lock(timeout: float = 60.0):
         raise TimeoutError("Swarm Git Lock Timeout: El índice está saturado de concurrencia.")
         
     try:
-        logger.info(f"[C5-REAL] Swarm Lock adquirido. Dominio físico asegurado.")
+        logger.info("[C5-REAL] Swarm Lock adquirido. Dominio físico asegurado.")
         yield
     finally:
         fcntl.flock(lock_fd, fcntl.LOCK_UN)
         os.close(lock_fd)
-        logger.info(f"[C5-REAL] Swarm Lock liberado.")
+        logger.info("[C5-REAL] Swarm Lock liberado.")
 

@@ -1,10 +1,12 @@
 # Anchored: cortex/engine/thermodynamic_execution.py
 # Epistemic Level: C5-REAL (Asymptotic Silence Protocol)
 
+import hashlib
 import os
 import sys
-import hashlib
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
+
 
 class ThermodynamicGhost(Exception):
     """

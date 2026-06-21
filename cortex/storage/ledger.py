@@ -313,28 +313,27 @@ class EnterpriseAuditLedger:
 
         return event_hash
 
-    async def log_inference_distance(
+    async def log_distance_rollup_batch(
         self,
         tenant_id: str,
         actor_id: str,
-        query_hash: str,
-        target_hash: str,
-        distance_int: int,
+        distance_batch_root: str,
+        batch_size: int,
         trace_id: str = None
     ) -> str:
         """
-        [C5-REAL] Merkle Cognition Tree transition.
-        Records an absolute deterministic integer distance between two states.
+        [C5-REAL] Merkle Cognition Tree transition via Rollup.
+        Records a batch of absolute deterministic distances between cognitive nodes.
+        Replaces 'log_inference_distance' to prevent Merkle Storms.
         """
         ident = generate_event_identity(trace_id=trace_id)
         
         payload = {
             "tenant_id": tenant_id,
             "actor_id": actor_id,
-            "mutation_type": "MCT_DISTANCE_CALCULATION",
-            "query_hash": query_hash,
-            "target_hash": target_hash,
-            "distance_int": distance_int
+            "mutation_type": "MCT_DISTANCE_ROLLUP",
+            "distance_batch_root": distance_batch_root,
+            "batch_size": batch_size
         }
 
         payload_str = json.dumps(payload, sort_keys=True, separators=(',', ':'))
@@ -353,7 +352,7 @@ class EnterpriseAuditLedger:
             "event_id": ident.event_id,
             "trace_id": ident.trace_id,
             "span_id": ident.span_id,
-            "type": "MCT_DISTANCE_CALCULATION",
+            "type": "MCT_DISTANCE_ROLLUP",
             "payload": payload,
             "parent_hash": self._last_hash,
             "event_hash": event_hash,

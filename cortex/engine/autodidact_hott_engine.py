@@ -1,14 +1,14 @@
 # [C5-REAL] HoTT-AGI Inference Engine
 import hashlib
 import logging
-import uuid
 import os
+import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
 
 from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.engine.ultramap import UltramapSubstrate
 from cortex.engine.mtk_core import MTKGuard
+from cortex.engine.ultramap import UltramapSubstrate
 from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
 
 logger = logging.getLogger("cortex.autodidact.hott")

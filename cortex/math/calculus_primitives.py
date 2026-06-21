@@ -18,10 +18,13 @@ Formalization of 11 Calculus Primitives:
 11. Cálculo (Calculus - Orchestration)
 """
 
-import torch
-import sympy as sp
+from collections.abc import Callable
+from typing import Any
+
 import numpy as np
-from typing import Callable, Tuple, Any
+import sympy as sp
+import torch
+
 
 class CalculusPrimitives:
     """

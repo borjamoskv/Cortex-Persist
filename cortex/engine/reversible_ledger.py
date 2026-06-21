@@ -1,7 +1,8 @@
-import time
 import hashlib
-from typing import Dict, List, Optional
+import time
 from dataclasses import dataclass
+from typing import Optional
+
 
 @dataclass
 class EpistemicDelta:
@@ -19,7 +20,7 @@ class ReversibleLedger:
     Las depreciaciones se procesan como 'Inversiones Epistémicas'.
     """
     def __init__(self):
-        self._deltas: List[EpistemicDelta] = []
+        self._deltas: list[EpistemicDelta] = []
         
     def _hash_content(self, content: str) -> str:
         return hashlib.sha256(content.encode('utf-8')).hexdigest()
@@ -46,7 +47,7 @@ class ReversibleLedger:
         self._deltas.append(delta)
         return inversion_id
 
-    def resolve_current_state(self) -> Dict[str, str]:
+    def resolve_current_state(self) -> dict[str, str]:
         """
         Colapsa el DAG de Deltas en un estado de verdad (Proyección Biyectiva).
         Si existe un ASSERT y un INVERT del mismo linaje causal, se aniquilan lógicamente
@@ -67,6 +68,6 @@ class ReversibleLedger:
                 
         return state
 
-    def get_full_lineage(self) -> List[EpistemicDelta]:
+    def get_full_lineage(self) -> list[EpistemicDelta]:
         """Devuelve la cinta termodinámica completa sin pérdida de información."""
         return self._deltas

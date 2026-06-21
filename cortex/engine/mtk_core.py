@@ -6,8 +6,8 @@ with a single, hard-enforced physical checkpoint.
 """
 
 import hashlib
-import time
 import logging
+import time
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 

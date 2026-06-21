@@ -1,6 +1,6 @@
 import logging
-import traceback
-from typing import Callable, Any
+from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.pronoic_transducer")
 

@@ -1,6 +1,6 @@
 import math
 import re
-from typing import List, Tuple
+
 
 class MaxwellsDemon:
     """
@@ -28,7 +28,7 @@ class MaxwellsDemon:
         prob_dict = {c: text.count(c) / len(text) for c in set(text)}
         return -sum(p * math.log2(p) for p in prob_dict.values())
 
-    def filter_context(self, input_text: str) -> Tuple[str, float]:
+    def filter_context(self, input_text: str) -> tuple[str, float]:
         """
         Ingesta un flujo de texto estocástico y lo colapsa en un estado de alta exergía.
         Devuelve el texto filtrado y el porcentaje de masa térmica (tokens) purgada.

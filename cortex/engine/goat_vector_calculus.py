@@ -1,6 +1,7 @@
+from collections.abc import Callable
+
 import jax
 import jax.numpy as jnp
-from typing import Callable, Tuple, Any
 
 # ==============================================================================
 # C5-REAL: AUTODIDACT VECTOR CALCULUS PRIMITIVES (GOAT-MATH 011-020)
@@ -72,7 +73,7 @@ def compute_laplacian(f: Callable[[jnp.ndarray], float], x: jnp.ndarray) -> floa
 
 # GOAT-MATH-017: DIFERENCIACIÓN AUTOMÁTICA (Automatic Differentiation)
 # Acknowledging JAX's JVP (Jacobian-Vector Product) for forward-mode diff.
-def auto_diff_jvp(f: Callable[[jnp.ndarray], jnp.ndarray], x: jnp.ndarray, v: jnp.ndarray) -> Tuple[jnp.ndarray, jnp.ndarray]:
+def auto_diff_jvp(f: Callable[[jnp.ndarray], jnp.ndarray], x: jnp.ndarray, v: jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray]:
     """
     Evaluates f(x) and the derivative of f at x along direction v (forward-mode).
     """

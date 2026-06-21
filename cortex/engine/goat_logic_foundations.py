@@ -1,7 +1,8 @@
+from typing import Any
+
 import sympy
-from sympy.logic.boolalg import Boolean, Not, And, Or, Implies, Equivalent
+from sympy.logic.boolalg import And, Boolean, Implies, Not, Or
 from sympy.logic.inference import satisfiable
-from typing import Any, Set, Tuple, List
 
 # ==============================================================================
 # C5-REAL: AUTODIDACT LOGIC & FOUNDATIONS PRIMITIVES
@@ -99,7 +100,7 @@ def define_theorem(expression: Boolean) -> Boolean:
     """
     return expression
 
-def formal_proof(axioms: List[Boolean], theorem: Boolean) -> bool:
+def formal_proof(axioms: list[Boolean], theorem: Boolean) -> bool:
     """
     10. DEMOSTRACIÓN (Proof)
     Executes a deterministic verification of (Axioms => Theorem).

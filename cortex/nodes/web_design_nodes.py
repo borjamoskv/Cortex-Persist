@@ -13,10 +13,10 @@ import hashlib
 import json
 import sqlite3
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import List, Dict
-from datetime import datetime, timezone
+
 
 class Criticality(Enum):
     CRITICAL = "CRÍTICO"
@@ -56,7 +56,7 @@ class WebDesignNode:
     block: str
     block_name: str
     criticality: str
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
     verification_method: str = ""
     validation_status: str = "PENDING"
     hash: str = ""
@@ -74,10 +74,10 @@ class WebDesignNode:
 def _id(n: int) -> str:
     return f"WEB-DESIGN-{n:04d}"
 
-def _deps(*indices: int) -> List[str]:
+def _deps(*indices: int) -> list[str]:
     return [_id(i) for i in indices]
 
-def generate_1000_nodes() -> List[WebDesignNode]:
+def generate_1000_nodes() -> list[WebDesignNode]:
     """Generador combinatorio determinista de 1000 nodos (10 bloques de 100)."""
     nodes = []
     
@@ -159,7 +159,7 @@ class CortexPersist:
         """)
         self.conn.commit()
 
-    def inject_nodes(self, nodes: List[WebDesignNode]) -> Dict:
+    def inject_nodes(self, nodes: list[WebDesignNode]) -> dict:
         injected, updated = 0, 0
         for node in nodes:
             existing = self.conn.execute(

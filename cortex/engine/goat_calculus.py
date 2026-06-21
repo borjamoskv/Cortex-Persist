@@ -1,6 +1,7 @@
+from collections.abc import Callable
+
 import jax
 import jax.numpy as jnp
-from typing import Callable, Tuple
 
 # ==============================================================================
 # C5-REAL: AUTODIDACT CALCULUS PRIMITIVES
@@ -13,7 +14,7 @@ from typing import Callable, Tuple
 # 1. LÍMITE (Limit)
 # Mathematically: lim(x->a) f(x) = L
 # Computationally: Evaluate f(x) at x = a ± epsilon.
-def compute_limit(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, epsilon: float = 1e-5) -> Tuple[jnp.ndarray, jnp.ndarray]:
+def compute_limit(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, epsilon: float = 1e-5) -> tuple[jnp.ndarray, jnp.ndarray]:
     """
     Computes the numerical limit of f(x) as x approaches a.
     Returns (left_limit, right_limit).
@@ -69,7 +70,7 @@ def definite_integral(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, b: floa
 # 7. INTEGRAL INDEFINIDA (Indefinite Integral / Antiderivative)
 # Computationally represented as the cumulative sum area over a domain.
 @jax.jit(static_argnums=(0, 3))
-def indefinite_integral(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, b: float, num_points: int = 1000) -> Tuple[jnp.ndarray, jnp.ndarray]:
+def indefinite_integral(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, b: float, num_points: int = 1000) -> tuple[jnp.ndarray, jnp.ndarray]:
     """
     Returns the domain (x) and the cumulative integral (F(x)) for an indefinite integral approximation.
     """

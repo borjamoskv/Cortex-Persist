@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
-import logging
 import hashlib
 import json
+import logging
 from typing import Any
 
 logger = logging.getLogger("cortex.engine.mcts_sanhedrin")
@@ -30,7 +30,7 @@ class VectorialDownsampling:
         
         # Immutable cryptographic footprint
         intent_json = json.dumps(intent_vector, sort_keys=True)
-        payload = f"{self.tenant_id}|{intent_json}".encode("utf-8")
+        payload = f"{self.tenant_id}|{intent_json}".encode()
         node_hash = hashlib.sha256(payload).hexdigest()[:16]
         
         # Consensus Collapse (Vectorial voting)
@@ -64,7 +64,7 @@ class ContextFusionEngine:
             temperature = 0.7 # Higher temp to explore semantic space
             
         # Cryptographic fusion hash (immutable footprint)
-        fusion_payload = f"{input_data}|{context}|{intent}|{base_entropy}|{temperature}".encode("utf-8")
+        fusion_payload = f"{input_data}|{context}|{intent}|{base_entropy}|{temperature}".encode()
         fusion_hash = hashlib.sha256(fusion_payload).hexdigest()[:16]
             
         return {

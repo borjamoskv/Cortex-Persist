@@ -11,7 +11,7 @@ de primitivas matemáticas en PyTorch/SciPy.
 import sqlite3
 import sys
 from pathlib import Path
-import json
+
 
 def verify_dag_integrity(db_path: str = "../../cortex.db"):
     print("=" * 70)

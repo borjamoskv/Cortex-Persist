@@ -1,6 +1,7 @@
 import asyncio
 import logging
-from typing import Callable, Awaitable, Dict, List, Any
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.rhizome_mesh")
 
@@ -12,7 +13,7 @@ class RhizomeMesh:
     """
     def __init__(self):
         # Mapeo de Evento (Plateau) -> Lista de Callbacks (Líneas de fuga)
-        self._subscribers: Dict[str, List[Callable[[Any], Awaitable[None]]]] = {}
+        self._subscribers: dict[str, list[Callable[[Any], Awaitable[None]]]] = {}
 
     def subscribe(self, event_type: str, handler: Callable[[Any], Awaitable[None]]):
         """Un nodo se adhiere pasivamente al rizoma esperando un evento específico."""

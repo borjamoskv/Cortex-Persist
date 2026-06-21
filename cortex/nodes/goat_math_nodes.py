@@ -12,12 +12,10 @@ Restricción: Zero stochastic floats | BFT-compliant
 import hashlib
 import json
 import sqlite3
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Dict
-from datetime import datetime, timezone
-
 
 # ═══════════════════════════════════════════════════════════════
 # ENUMS Y TIPOS
@@ -109,7 +107,7 @@ class GOATMathNode:
     block: str                           # "B1"
     block_name: str                      # "Álgebra Lineal Avanzada"
     criticality: str                     # "CRÍTICO"
-    dependencies: List[str] = field(default_factory=list)  # ["GOAT-MATH-004"]
+    dependencies: list[str] = field(default_factory=list)  # ["GOAT-MATH-004"]
     verification_method: str = ""        # "torch.linalg.svd()"
     validation_status: str = "PENDING"
     hash: str = ""
@@ -134,11 +132,11 @@ def _id(n: int) -> str:
     return f"GOAT-MATH-{n:03d}"
 
 
-def _deps(*indices: int) -> List[str]:
+def _deps(*indices: int) -> list[str]:
     return [_id(i) for i in indices]
 
 
-def build_all_nodes() -> List[GOATMathNode]:
+def build_all_nodes() -> list[GOATMathNode]:
     """Construye las 100 primitivas GOAT como nodos epistémicos."""
 
     raw = [
@@ -288,7 +286,7 @@ class DAGValidator:
     """Valida que el grafo de dependencias sea un DAG acíclico."""
 
     @staticmethod
-    def validate(nodes: List[GOATMathNode]) -> Dict:
+    def validate(nodes: list[GOATMathNode]) -> dict:
         """Topological sort con detección de ciclos."""
         node_map = {n.id: n for n in nodes}
         in_degree = {n.id: 0 for n in nodes}
@@ -380,7 +378,7 @@ class CortexPersist:
         """)
         self.conn.commit()
 
-    def inject_nodes(self, nodes: List[GOATMathNode]) -> Dict:
+    def inject_nodes(self, nodes: list[GOATMathNode]) -> dict:
         """Inyecta nodos con upsert atómico."""
         injected = 0
         updated = 0
@@ -424,7 +422,7 @@ class CortexPersist:
         self.conn.commit()
         return {"injected": injected, "updated": updated, "total": len(nodes)}
 
-    def record_dag_validation(self, result: Dict):
+    def record_dag_validation(self, result: dict):
         """Registra validación del DAG."""
         manifest_hash = hashlib.sha256(
             json.dumps(result, sort_keys=True).encode()
@@ -448,7 +446,7 @@ class CortexPersist:
         self.conn.commit()
         return manifest_hash
 
-    def get_status_report(self) -> Dict:
+    def get_status_report(self) -> dict:
         """Genera reporte de estado del sistema."""
         cursor = self.conn.execute("""
             SELECT
@@ -605,7 +603,7 @@ def main():
     if dag_result['orphan_dependencies']:
         print(f"      ⚠️  Deps huérfanas: {dag_result['orphan_dependencies']}")
     else:
-        print(f"      ✅ Sin dependencias huérfanas")
+        print("      ✅ Sin dependencias huérfanas")
 
     if not dag_result['is_valid_dag']:
         print("      ❌ CICLO DETECTADO - Abortando inyección")
@@ -651,7 +649,7 @@ def main():
 
     print("\n" + "=" * 70)
     print("✅ INYECCIÓN COMPLETADA")
-    print(f"   Sentinel commit listo:")
+    print("   Sentinel commit listo:")
     print(f'   git add . && git commit -m '
           f'"feat(epistemic): inject 100 GOAT math primitives '
           f'into C5-REAL DAG [{manifest_hash}]"')

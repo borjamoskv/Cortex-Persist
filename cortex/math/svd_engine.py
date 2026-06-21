@@ -5,10 +5,10 @@ Convierte la Primitiva Matemática NODO 1 en un Actor Invocable para el Swarm,
 con validación criptográfica y termodinámica (ClosurePayload) compatible con MTK.
 """
 
-import numpy as np
 import logging
 from datetime import datetime, timezone
-from typing import Tuple, Dict, Any
+
+import numpy as np
 
 from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
 
@@ -29,7 +29,7 @@ class SVDEngine:
             raise ValueError("Violación de Invariante SVD: Falla de reconstrucción estructural.")
 
     @classmethod
-    def compress_tensor(cls, tensor: np.ndarray, k_components: int, query_context: str = "SVD Tensor Compression") -> Tuple[np.ndarray, ClosurePayload]:
+    def compress_tensor(cls, tensor: np.ndarray, k_components: int, query_context: str = "SVD Tensor Compression") -> tuple[np.ndarray, ClosurePayload]:
         """
         Comprime un tensor usando SVD y sella el resultado en un ClosurePayload
         para ser validado por el MTK.
@@ -85,7 +85,7 @@ class SVDEngine:
         return compressed_tensor, payload
 
     @classmethod
-    def pca_projection(cls, data: np.ndarray, n_components: int, query_context: str = "SVD PCA Projection") -> Tuple[np.ndarray, ClosurePayload]:
+    def pca_projection(cls, data: np.ndarray, n_components: int, query_context: str = "SVD PCA Projection") -> tuple[np.ndarray, ClosurePayload]:
         """
         Reduce la dimensionalidad de features utilizando SVD-PCA, emitiendo ClosurePayload.
         """

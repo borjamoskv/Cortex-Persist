@@ -8,11 +8,11 @@ Objetivo: Validar Regla R10 (Concurrencia Confiable de DB).
 Prueba inyección y mutación concurrente masiva usando WAL mode.
 """
 
-import time
-import sqlite3
 import concurrent.futures
-from pathlib import Path
 import random
+import sqlite3
+import time
+from pathlib import Path
 
 DB_PATH = Path("cortex.db")
 
@@ -48,7 +48,7 @@ def worker_task(worker_id: int, iterations: int):
             )
             conn.commit()
             successes += 1
-        except sqlite3.OperationalError as e:
+        except sqlite3.OperationalError:
             failures += 1
             # Backoff forzado en caso de busy
             time.sleep(0.01)
