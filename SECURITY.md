@@ -12,7 +12,7 @@
 
 **Do NOT open a public issue for security vulnerabilities.**
 
-Email: **<security@cortexpersist.com>**
+Email: **<security@cortexpersist.dev>**
 
 You will receive an acknowledgment within 48 hours and a detailed response within 5 business days.
 
