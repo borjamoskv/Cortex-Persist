@@ -25,6 +25,13 @@ for extra_path in (
     _REPO_ROOT,
     _REPO_ROOT / "cortex-core",
     _REPO_ROOT / "scripts" / "sortu",
+    _REPO_ROOT / "legacy_research" / "extensions",
+    _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "memory",
+    _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "memory" / "lab",
+    _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "memory" / "sortu",
+    _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "creation",
+    _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "creation" / "sortu",
+    _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "unknown" / "sortu",
 ):
     if extra_path.exists() and str(extra_path) not in sys.path:
         sys.path.insert(0, str(extra_path))
