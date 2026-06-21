@@ -10,6 +10,7 @@ from cortex.agents.builtins.security_agent import SecurityAgent
 from cortex.agents.builtins.supervisor_agent import SupervisorAgent
 from cortex.agents.builtins.verification_agent import VerificationAgent
 from cortex.agents.builtins.epistemic_validator import EpistemicValidatorAgent
+from cortex.agents.builtins.github_telemetry_agent import GithubTelemetryAgent
 
 __all__ = [
     "MoskvVidentiaAgent",
@@ -22,4 +23,6 @@ __all__ = [
     "SupervisorAgent",
     "VerificationAgent",
     "EpistemicValidatorAgent",
+    "GithubTelemetryAgent",
 ]
+
