@@ -4,17 +4,21 @@
 
 La ontología epistémica de CORTEX impone un Grafo Acíclico Dirigido (DAG) estricto para la cristalización de conocimiento y la mutación de estado.
 
-## Estructura Causal Obligatoria
+## Estructura Causal Formal
 
-```text
-[Observation] ──(causa)──> [Inference] ──(motiva)──> [Task]
-```
+- **`Observation`**: Nodo raíz verificable derivado de evidencia física, determinista y reproducible (ej. un estado del AST, un código de error de SQLite, un hash criptográfico).
+- **`Inference`**: Nodo derivado que debe poseer al menos un ancestro `Observation` alcanzable en el DAG.
+- **`Task`**: Nodo de acción que debe poseer al menos un ancestro `Inference` alcanzable en el DAG.
 
-## Invariantes Estructurales
+## Transiciones de Estado y Prohibiciones (Forbidden)
 
-1. **`Observation` (Primacy)**: Todo linaje epistémico DEBE originarse en una observación física y determinista (ej. un estado del AST, un código de error de SQLite, un hash criptográfico, la ausencia demostrable de una función).
-2. **`Inference` (Causal Grounding)**: Una `Inference` DEBE referenciar explícitamente la `Observation` de la que se deriva. Las cadenas `Inference -> Inference` sin un nuevo anclaje en una `Observation` física están prohibidas para evitar la deriva estocástica (Context Rot).
-3. **`Task` (Actionable Causality)**: Una `Task` (mutación propuesta sobre el sistema) DEBE depender de una `Inference` que explique *por qué* dicha intervención resuelve la tensión observada. La conexión directa `Observation -> Task` está prohibida, ya que omite la explicación causal.
+El **Epistemic Validator** bloqueará topologías que no cumplan los siguientes invariantes:
 
-## Mecanismo de Falsación
-Cualquier intento de inyectar una `Task` en el sistema sin su correspondiente cadena de ascendencia (`Parent_ID` apuntando a una `Inference`, que a su vez apunta a una `Observation`) será interceptado y rechazado por el **Epistemic Validator**.
+1. `Task` sin ancestro `Inference` en el grafo causal.
+2. `Inference` sin ancestro `Observation` en el grafo causal.
+3. Ciclos epistemológicos.
+4. Autojustificación recursiva (`Inference -> Inference -> Inference` ad infinitum sin anclaje en la realidad física).
+
+## Corolario (Falsación Local y Propagación)
+
+Si una `Observation` fundacional (ej. `O1`) es invalidada o muta su estado, todos los nodos descendientes (tanto `Inference` como `Task`) en su sub-grafo se marcan automáticamente como estructuralmente sospechosos o inválidos. Este mecanismo de invalidación local previene la corrupción silente del conocimiento de dominio.
