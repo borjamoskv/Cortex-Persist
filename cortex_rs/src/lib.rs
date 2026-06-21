@@ -187,6 +187,7 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(try_seal_fact, m)?)?;
     m.add_function(wrap_pyfunction!(calculate_entropy_b60, m)?)?;
     m.add_function(wrap_pyfunction!(reality::reader::load_verified_reality, m)?)?;
+    m.add_function(wrap_pyfunction!(mee::ffi::execute_mee_transfer, m)?)?;
     Ok(())
 }
 
