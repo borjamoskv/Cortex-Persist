@@ -92,3 +92,42 @@ AUDIT_LOG_PATH: Path = CORTEX_DIR / "audit.log"
 
 DRIFT_DIR: Path = CORTEX_DIR / "drift"
 """Topological drift signature storage."""
+
+
+# ─── macOS Spotlight Indexing Mitigation (Self-healing) ───────────────
+def _mitigate_spotlight_recurrence() -> None:
+    """If running on macOS, ensure .metadata_never_index exists in critical heavy local directories
+    to prevent mds/mds_stores from saturating CPU/RAM.
+    """
+    import sys
+    if sys.platform != "darwin":
+        return
+
+    try:
+        repo_root = Path(__file__).resolve().parents[2]
+        # Verify it's actually the cortex-persist repo by checking for pyproject.toml or AGENTS.md
+        if not (repo_root / "pyproject.toml").exists() and not (repo_root / "AGENTS.md").exists():
+            return
+
+        heavy_dirs = [
+            repo_root,                          # Workspace root
+            repo_root / ".cortex",              # 9.6 GB models
+            repo_root / "cortex_rs" / "target", # 6.5 GB Rust targets
+            repo_root / ".venv",                # 2.3 GB virtualenv
+            repo_root / "c5_workspace",         # 1.1 GB Rust sub-workspace
+        ]
+
+        for d in heavy_dirs:
+            if d.exists() and d.is_dir():
+                ignore_file = d / ".metadata_never_index"
+                if not ignore_file.exists():
+                    try:
+                        with open(ignore_file, "w", encoding="utf-8") as f:
+                            f.write("# Spotlight Ignore\n")
+                    except Exception:
+                        pass
+    except Exception:
+        pass
+
+_mitigate_spotlight_recurrence()
+
