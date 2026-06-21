@@ -30,6 +30,7 @@ extension-module = ["pyo3/extension-module"]
 
 [dev-dependencies]
 criterion = "0.8.2"
+proptest = "1.11.0"
 
 [[bench]]
 name = "vault_benchmark"
