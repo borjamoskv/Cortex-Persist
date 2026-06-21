@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS facts (
     tx_id           BIGINT REFERENCES transactions(id),
     is_tombstoned   BOOLEAN NOT NULL DEFAULT FALSE,
     tombstoned_at   TIMESTAMPTZ,
+    epistemic_status TEXT NOT NULL DEFAULT 'staging',
     embedding       vector(384)
 );
 """
@@ -104,6 +105,22 @@ CREATE INDEX IF NOT EXISTS idx_tx_tenant ON transactions(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_tx_project ON transactions(project);
 CREATE INDEX IF NOT EXISTS idx_tx_action ON transactions(action);
 """
+
+# ─── Write-Ahead Log (WAL) for 50ms Batching ─────────────────────────
+PG_CREATE_WAL = """
+CREATE TABLE IF NOT EXISTS batch_wal (
+    id          BIGSERIAL PRIMARY KEY,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
+    payload     JSONB NOT NULL,
+    status      TEXT NOT NULL DEFAULT 'pending',
+    timestamp   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+"""
+
+PG_CREATE_WAL_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_wal_status ON batch_wal(status);
+"""
+
 
 # ─── Heartbeats ──────────────────────────────────────────────────────
 PG_CREATE_HEARTBEATS = """
@@ -422,6 +439,8 @@ CREATE INDEX IF NOT EXISTS idx_ee_timestamp ON entity_events(timestamp);
 PG_ALL_SCHEMA = [
     PG_CREATE_TRANSACTIONS,
     PG_CREATE_TRANSACTIONS_INDEX,
+    PG_CREATE_WAL,
+    PG_CREATE_WAL_INDEX,
     PG_CREATE_FACTS,
     PG_CREATE_FACTS_INDEXES,
     PG_CREATE_SESSIONS,
