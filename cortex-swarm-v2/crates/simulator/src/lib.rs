@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use uuid::Uuid;
 
-/// CORTEX-SWARM v3: ADAPTIVE TOPOLOGY MACHINE
+/// CORTEX-SWARM v3.1: ADAPTIVE TOPOLOGY MACHINE + REALITY COUPLING
 /// Ilya Prigogine Physics Engine for Artificial Minds
 
 #[derive(Clone, Debug, PartialEq)]
@@ -31,6 +31,7 @@ pub enum BranchOutcome {
     Transform(String, String), // old, new
     Forget(String),
     Collapse,
+    EmpiricalTest(String, bool), // Test a branch against reality (R)
 }
 
 #[derive(Clone, Debug)]
@@ -43,8 +44,11 @@ pub struct EpistemicMembrane {
     // Topology of Branches and their mass
     pub active_branches: HashMap<String, u64>,
     
-    // Variable K: Crystallized Knowledge. The conserved quantity across phase transitions.
+    // Variable K: Crystallized Knowledge.
     pub crystallized_knowledge: f64,
+
+    // Variable R: Reality Coupling (0.0 to 1.0)
+    pub reality_coupling: f64,
     
     // Tracking
     pub prior_entropy: f64,
@@ -64,6 +68,9 @@ pub enum MetabolicError {
     
     /// Z3 validation fails on core invariants
     InvariantsViolated,
+
+    /// Delirium: System has K but lost reality coupling (R -> 0). K * 0 = 0.
+    SolipsisticDelirium, 
 }
 
 impl EpistemicMembrane {
@@ -82,6 +89,7 @@ impl EpistemicMembrane {
             },
             active_branches: branches,
             crystallized_knowledge: 1.0,
+            reality_coupling: 1.0, // Initially coupled
             prior_entropy: 0.0,
         }
     }
@@ -123,8 +131,18 @@ impl EpistemicMembrane {
                     self.active_branches.remove(&name);
                 },
                 BranchOutcome::Collapse => {
-                    // Forced internal tension
                     self.internal_entropy += 100.0;
+                },
+                BranchOutcome::EmpiricalTest(name, success) => {
+                    if self.active_branches.contains_key(&name) {
+                        if success {
+                            self.reality_coupling = (self.reality_coupling + 0.1).min(1.0);
+                        } else {
+                            // Reality selection: empiricism crushes the hallucination
+                            self.active_branches.remove(&name);
+                            self.reality_coupling -= 0.2; 
+                        }
+                    }
                 }
             }
         }
@@ -132,28 +150,31 @@ impl EpistemicMembrane {
         let post_state_entropy = self.shannon_entropy();
         let delta_state_entropy = (post_state_entropy - pre_state_entropy).abs();
 
-        // Dissipative work lowers internal entropy based on structural changes
         self.internal_entropy -= delta_state_entropy * 10.0;
         if self.internal_entropy < 0.0 { self.internal_entropy = 0.0; }
 
         self.survival_state.identity_baseline -= flux * 0.005;
-        // Crystallized knowledge buffers identity loss
-        self.survival_state.identity_baseline += self.crystallized_knowledge * 0.001;
         
+        // P = K * R 
+        // Identity is buffered by Empirical Power, not just abstract Knowledge
+        let empirical_power = self.crystallized_knowledge * self.reality_coupling;
+        self.survival_state.identity_baseline += empirical_power * 0.001;
+        
+        if self.reality_coupling <= 0.0 {
+            return Err(MetabolicError::SolipsisticDelirium);
+        }
+
         if self.survival_state.identity_baseline <= 0.2 {
             return Err(MetabolicError::IdentityDissolution);
         }
 
-        // Structural Collapse logic (Supercritical phase transition)
         let critical_limit = 50.0;
         if self.internal_entropy > critical_limit {
-            // Retain only core branches and branches with high mass
             self.active_branches.retain(|k, v| k == "genesis" || k.starts_with("core_") || *v > 50);
             
-            // Phase transition crystallizes remaining internal entropy into K
             let crystallized = self.internal_entropy * 0.1;
             self.crystallized_knowledge += crystallized;
-            self.internal_entropy = critical_limit * 0.5; // Cool down
+            self.internal_entropy = critical_limit * 0.5;
             
             return Ok(MetabolicState::Supercritical(crystallized));
         }
@@ -176,8 +197,6 @@ mod tests {
         membrane.active_branches.clear();
         membrane.active_branches.insert("a".into(), 50);
         membrane.active_branches.insert("b".into(), 50);
-        
-        // ln(2) = 0.693
         let h = membrane.shannon_entropy();
         assert!((h - 0.693).abs() < 0.01);
     }
@@ -189,24 +208,20 @@ mod tests {
             BranchOutcome::Create("alpha".into(), 10),
             BranchOutcome::Create("beta".into(), 10),
         ]).unwrap();
-        
         let h1 = membrane.shannon_entropy();
         
-        // Merge beta into alpha -> reduces diversity, increases crystallized knowledge
         membrane.metabolize(1.0, vec![
             BranchOutcome::Merge("beta".into(), "alpha".into()),
         ]).unwrap();
         
         let h2 = membrane.shannon_entropy();
-        assert!(h2 < h1); // Entropy decreased (compression)
-        assert!(membrane.crystallized_knowledge > 1.0); // K increased
+        assert!(h2 < h1);
+        assert!(membrane.crystallized_knowledge > 1.0);
     }
 
     #[test]
     fn supercritical_phase_transition() {
         let mut membrane = EpistemicMembrane::new(1.0);
-        
-        // Inject massive entropy to trigger collapse
         let state = membrane.metabolize(100.0, vec![
             BranchOutcome::Create("noise1".into(), 5),
             BranchOutcome::Create("noise2".into(), 5),
@@ -214,7 +229,6 @@ mod tests {
         
         if let MetabolicState::Supercritical(k_gained) = state {
             assert!(k_gained > 0.0);
-            // Noise should be cleared, genesis kept
             assert!(membrane.active_branches.contains_key("genesis"));
             assert!(!membrane.active_branches.contains_key("noise1"));
         } else {
@@ -223,16 +237,21 @@ mod tests {
     }
     
     #[test]
-    fn adaptive_resistance_is_not_death() {
+    fn solipsistic_delirium_annihilation() {
         let mut membrane = EpistemicMembrane::new(1.0);
         
-        // System rejects perturbations (empty outcomes)
-        for _ in 0..10 {
-            let res = membrane.metabolize(0.5, vec![]);
-            assert!(res.is_ok());
+        // System generates K but fails empirical tests
+        membrane.crystallized_knowledge = 100.0; // Massive abstract knowledge
+        
+        membrane.metabolize(1.0, vec![BranchOutcome::Create("theory".into(), 10)]).unwrap();
+        
+        let mut result = Ok(MetabolicState::Subcritical);
+        // Repeated empirical failures crush reality coupling
+        for _ in 0..6 {
+            result = membrane.metabolize(1.0, vec![BranchOutcome::EmpiricalTest("theory".into(), false)]);
+            if result.is_err() { break; }
         }
         
-        // It's still alive, identity buffered by K
-        assert!(membrane.survival_state.identity_baseline > 0.2);
+        assert!(matches!(result, Err(MetabolicError::SolipsisticDelirium)));
     }
 }
