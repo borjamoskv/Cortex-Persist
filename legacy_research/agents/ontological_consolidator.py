@@ -33,7 +33,10 @@ class OntologicalConsolidator(ReactiveTaskAgent):
     Validates node definitions, enforces formal constraints, and prevents
     epistemic mixing before state reaches the Master Ledger.
     """
-    _SUPPORTED_OPS = frozenset({"consolidate_node", "detect_epistemic_mixing", "propagate_invalidation"})
+
+    _SUPPORTED_OPS = frozenset(
+        {"consolidate_node", "detect_epistemic_mixing", "propagate_invalidation"}
+    )
 
     async def _dispatch(self, op: str, payload: dict[str, Any]) -> Any:
         if op == "consolidate_node":
@@ -48,7 +51,7 @@ class OntologicalConsolidator(ReactiveTaskAgent):
         """Classify and validate an incoming node's epistemic integrity."""
         node_data = payload.get("node", {})
         raw_class = node_data.get("epistemic_class", "INFERENCE").upper()
-        
+
         try:
             epistemic_class = EpistemicClass(raw_class)
         except ValueError:
@@ -56,40 +59,51 @@ class OntologicalConsolidator(ReactiveTaskAgent):
             return {"status": "REJECTED", "reason": "Invalid EpistemicClass"}
 
         validation_result = self._validate_constraints(epistemic_class, node_data)
-        
+
         if not validation_result["is_valid"]:
             logger.warning(f"[{self.agent_id}] Epistemic violation: {validation_result['reason']}")
             return {"status": "REJECTED", "reason": validation_result["reason"]}
-            
+
         # Construct deterministic EDG node signature
         node_hash = self._generate_node_hash(node_data)
-        
+
         return {
             "status": "CONSOLIDATED",
             "epistemic_class": epistemic_class.value,
             "node_hash": node_hash,
-            "confidence_score": validation_result["confidence_score"]
+            "confidence_score": validation_result["confidence_score"],
         }
 
-    def _validate_constraints(self, e_class: EpistemicClass, node: dict[str, Any]) -> dict[str, Any]:
+    def _validate_constraints(
+        self, e_class: EpistemicClass, node: dict[str, Any]
+    ) -> dict[str, Any]:
         """Apply zero-entropy deterministic constraints based on epistemic class."""
         if e_class == EpistemicClass.OBSERVATION:
             if "provenance_hash" not in node and "sensor_timestamp" not in node:
-                return {"is_valid": False, "reason": "OBSERVATION lacks physical/cryptographic provenance."}
+                return {
+                    "is_valid": False,
+                    "reason": "OBSERVATION lacks physical/cryptographic provenance.",
+                }
             return {"is_valid": True, "confidence_score": 100}
-            
+
         elif e_class == EpistemicClass.INFERENCE:
             parents = node.get("causal_parents", [])
             if not isinstance(parents, list) or len(parents) == 0:
-                return {"is_valid": False, "reason": "INFERENCE must have explicitly declared causal parents."}
+                return {
+                    "is_valid": False,
+                    "reason": "INFERENCE must have explicitly declared causal parents.",
+                }
             # Confidence is derived; placeholder for causal decay logic
             return {"is_valid": True, "confidence_score": node.get("confidence_score", 50)}
-            
+
         elif e_class in (EpistemicClass.SIMULATION, EpistemicClass.COUNTERFACTUAL):
             if "sandbox_id" not in node:
-                return {"is_valid": False, "reason": "SIMULATION/COUNTERFACTUAL must run in isolated sandbox context."}
+                return {
+                    "is_valid": False,
+                    "reason": "SIMULATION/COUNTERFACTUAL must run in isolated sandbox context.",
+                }
             return {"is_valid": True, "confidence_score": 0}  # No reality bearing
-            
+
         elif e_class == EpistemicClass.CONSENSUS:
             signatures = node.get("signatures", [])
             if len(signatures) < 3:
@@ -104,24 +118,23 @@ class OntologicalConsolidator(ReactiveTaskAgent):
         """
         nodes = payload.get("nodes", [])
         violations = []
-        
+
         for idx, node in enumerate(nodes):
             e_class = node.get("epistemic_class")
             parents = node.get("causal_parents_classes", [])
-            
+
             # An OBSERVATION cannot have an INFERENCE as a parent.
             if e_class == "OBSERVATION" and "INFERENCE" in parents:
-                violations.append(f"Node {idx}: Epistemic mixing detected. OBSERVATION cannot stem from INFERENCE.")
-                
+                violations.append(
+                    f"Node {idx}: Epistemic mixing detected. OBSERVATION cannot stem from INFERENCE."
+                )
+
             # A CONSENSUS node must trace back to verifiable inputs.
             if e_class == "CONSENSUS" and "SIMULATION" in parents:
                 violations.append(f"Node {idx}: SIMULATION cannot directly dictate CONSENSUS.")
-                
+
         is_clean = len(violations) == 0
-        return {
-            "is_clean": is_clean,
-            "violations": violations
-        }
+        return {"is_clean": is_clean, "violations": violations}
 
     def _generate_node_hash(self, node: dict[str, Any]) -> str:
         """Deterministically hash the structural content of the node."""
@@ -137,7 +150,7 @@ class OntologicalConsolidator(ReactiveTaskAgent):
         """
         invalidated_node_id = payload.get("invalidated_node_id")
         edg_subgraph = payload.get("edg_subgraph", [])  # Flattened dependencies
-        
+
         collapsed_nodes = []
         for node in edg_subgraph:
             parents = node.get("causal_parents", [])
@@ -145,11 +158,13 @@ class OntologicalConsolidator(ReactiveTaskAgent):
                 node["confidence_score"] = 0
                 node["status"] = "INVALIDATED"
                 collapsed_nodes.append(node.get("node_id", "unknown"))
-                
-        logger.info(f"[{self.agent_id}] Propagated invalidation from {invalidated_node_id}. Collapsed {len(collapsed_nodes)} nodes.")
-        
+
+        logger.info(
+            f"[{self.agent_id}] Propagated invalidation from {invalidated_node_id}. Collapsed {len(collapsed_nodes)} nodes."
+        )
+
         return {
             "status": "PROPAGATION_COMPLETE",
             "invalidated_root": invalidated_node_id,
-            "collapsed_nodes": collapsed_nodes
+            "collapsed_nodes": collapsed_nodes,
         }
