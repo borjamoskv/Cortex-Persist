@@ -23,7 +23,7 @@ CAPA 3: Verification Layer (Artefacto .b60)      -> Garantiza la Confianza (Lean
 
 Esta tripartición proporciona infraestructura común para dominios donde importan simultáneamente cuatro propiedades intransigentes:
 
-1. **Determinismo**: La misma entrada produce la misma historia de ejecución bit-a-bit (vía aritmética racional Base-60).
+1. **Determinismo Estricto (Frontera Aislada)**: El universo exterior (reloj, red, LLMs) es estocástico. BABYLON-60 opera aislando la frontera: toda entrada probabilística es capturada, congelada en un Evento Firmado, y a partir de ahí, la ejecución computacional es 100% determinista bit-a-bit (vía aritmética racional Base-60).
 2. **Procedencia**: Cada transición de estado queda registrada criptográficamente y puede auditarse.
 3. **Reproducibilidad**: Un tercero puede reconstruir la ejecución sin ambigüedades, libre de derivas estocásticas.
 4. **Verificabilidad**: El artefacto generado sirve como prueba base para comprobaciones formales (Lean, Coq) o auditorías automatizadas.
@@ -79,4 +79,12 @@ El bypass estocástico se logra mediante la siguiente cadena causal física:
 [Demostrador de Teoremas (Lean / Coq)]
 ```
 
-> **CONCLUSIÓN ESTRUCTURAL**: Cero Anergía. BABYLON-60 transforma el cálculo informático temporal en un fósil epistemológico matemáticamente puro.
+> **CONCLUSIÓN ESTRUCTURAL**: Cero Anergía. BABYLON-60 convierte procesos efímeros en evidencia computacional persistente. Transforma una ejecución temporal en un artefacto causal permanente que puede ser reanimado, auditado y verificado.
+
+## Síntesis Definitiva (GTM)
+
+> **BABYLON-60 es un Deterministic Causal Provenance Runtime que transforma transiciones de estado en artefactos verificables, preservando de forma reproducible la historia causal completa de una ejecución.**
+
+Para comunicar este valor axiomático a capas de dirección (CTO/Arquitectura):
+
+> **"Git versiona archivos. BABYLON versiona la realidad computacional que produjo esos archivos."**
