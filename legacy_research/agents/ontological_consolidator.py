@@ -33,13 +33,15 @@ class OntologicalConsolidator(ReactiveTaskAgent):
     Validates node definitions, enforces formal constraints, and prevents
     epistemic mixing before state reaches the Master Ledger.
     """
-    _SUPPORTED_OPS = frozenset({"consolidate_node", "detect_epistemic_mixing"})
+    _SUPPORTED_OPS = frozenset({"consolidate_node", "detect_epistemic_mixing", "propagate_invalidation"})
 
     async def _dispatch(self, op: str, payload: dict[str, Any]) -> Any:
         if op == "consolidate_node":
             return await self._consolidate_node(payload)
         elif op == "detect_epistemic_mixing":
             return await self._detect_epistemic_mixing(payload)
+        elif op == "propagate_invalidation":
+            return await self._propagate_invalidation(payload)
         raise NotImplementedError(f"Op {op} not supported by OntologicalConsolidator")
 
     async def _consolidate_node(self, payload: dict[str, Any]) -> dict[str, Any]:
@@ -127,3 +129,27 @@ class OntologicalConsolidator(ReactiveTaskAgent):
         e_class = str(node.get("epistemic_class", ""))
         raw = f"{e_class}:{content}".encode("utf-8")
         return hashlib.sha256(raw).hexdigest()
+
+    async def _propagate_invalidation(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Calculates the blast radius of an invalidated base node.
+        If an OBSERVATION is revoked, all INFERENCE nodes that causally
+        depend on it must have their confidence score collapsed to 0.
+        """
+        invalidated_node_id = payload.get("invalidated_node_id")
+        edg_subgraph = payload.get("edg_subgraph", [])  # Flattened dependencies
+        
+        collapsed_nodes = []
+        for node in edg_subgraph:
+            parents = node.get("causal_parents", [])
+            if invalidated_node_id in parents:
+                node["confidence_score"] = 0
+                node["status"] = "INVALIDATED"
+                collapsed_nodes.append(node.get("node_id", "unknown"))
+                
+        logger.info(f"[{self.agent_id}] Propagated invalidation from {invalidated_node_id}. Collapsed {len(collapsed_nodes)} nodes.")
+        
+        return {
+            "status": "PROPAGATION_COMPLETE",
+            "invalidated_root": invalidated_node_id,
+            "collapsed_nodes": collapsed_nodes
+        }

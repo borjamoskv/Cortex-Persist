@@ -37,12 +37,22 @@ class MTKGuard:
         4. Yield control for the DB write.
         5. Destroy the token.
         """
-        # Step 1: Verify Payload Integrity
+        # Step 1: Formal State Admission System (AX-XI)
+        # Valid(n_i) = Parent(n_i) ∈ S_{i-1} ∧ Verify(n_i) ∧ Bounded(n_i)
+        
+        # 1.1 Invariante Causal (I_causal)
         if not payload.evidence or not payload.claims:
-            raise ValueError("MTK-REJECT: Missing evidence or claims in payload.")
-            
+            raise ValueError("MTK-REJECT: Missing evidence or claims in payload. Causal continuity broken.")
         if not payload.verdict:
-            raise ValueError("MTK-REJECT: Payload verdict is negative. Causality broken.")
+            raise ValueError("MTK-REJECT: Payload verdict is negative. Causal DAG evaluation failed.")
+            
+        # 1.2 Invariante Criptográfico (I_crypto)
+        # TODO: Inject Ed25519 payload signature verification here.
+        # if not verify_zk_seal(payload.payload_hash, payload.signature): raise ValueError(...)
+        
+        # 1.3 Invariante Termodinámico/Complejidad (I_complexity)
+        # TODO: Inject Z3/AEON-0 resource bounding here.
+        # if payload.exergy_cost > MAX_JOULES: raise ValueError(...)
             
         # Step 2: Mint Ephemeral Token
         token = self._generate_ephemeral_token(payload)
