@@ -30,9 +30,12 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
     }
     
     if action in MUTATION_ACTIONS:
-        # Ignore writes to internal sqlite sequences/schemas during initial connect
-        if arg1 and (arg1.startswith("sqlite_") or arg1 == "sqlite_sequence"):
-            return sqlite3.SQLITE_OK
+        # Ignore writes to internal sqlite sequences/schemas and virtual table shadow tables
+        if arg1:
+            if arg1.startswith("sqlite_") or arg1 in ("schema_version", "cortex_meta", "agent_messages"):
+                return sqlite3.SQLITE_OK
+            if arg1.endswith(("_info", "_chunks", "_data", "_idx", "_docsize", "_config", "_content")):
+                return sqlite3.SQLITE_OK
 
         token = mtk_active_token.get()
         if not token or not token.startswith("mtk_auth_"):

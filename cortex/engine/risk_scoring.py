@@ -9,7 +9,15 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
+import cortex_rs
 from cortex.engine.entropy import EntropyAnnihilator
+
+
+def calculate_entropy_b60(data: bytes) -> "cortex_rs.Babylon60":
+    """
+    Thin Python wrapper over the Rust FFI for BABYLON-60 entropy calculation.
+    """
+    return cortex_rs.calculate_entropy_b60(data)
 
 
 class SystemRegime(str, Enum):

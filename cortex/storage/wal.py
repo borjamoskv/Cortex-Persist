@@ -4,6 +4,7 @@ import time
 import threading
 from pathlib import Path
 from typing import Optional
+from cortex.database.core import connect
 
 WAL_PATH = "cortex/data/batch_wal.db"
 BATCH_WINDOW_MS = 50
@@ -24,7 +25,7 @@ class WriteAheadLog:
 
     def _init_db(self):
         with self._lock:
-            conn = sqlite3.connect(self.db_path)
+            conn = connect(self.db_path)
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS batch_wal (
                     event_id TEXT PRIMARY KEY,
@@ -54,7 +55,7 @@ class WriteAheadLog:
         event_hash = hashlib.sha3_256(hash_input.encode()).hexdigest()
         
         with self._lock:
-            conn = sqlite3.connect(self.db_path)
+            conn = connect(self.db_path)
             conn.execute(
                 "INSERT OR IGNORE INTO batch_wal (event_id, payload, received_at_epoch_ms, status, event_hash, previous_hash) "
                 "VALUES (?, ?, ?, 'pending', ?, ?)",
@@ -68,7 +69,7 @@ class WriteAheadLog:
     def seal_batch(self, event_ids: list[str]) -> None:
         """Mark as sealed after Merkle root is computed."""
         with self._lock:
-            conn = sqlite3.connect(self.db_path)
+            conn = connect(self.db_path)
             placeholders = ','.join('?' * len(event_ids))
             conn.execute(
                 f"UPDATE batch_wal SET status = 'sealed' "
@@ -84,7 +85,7 @@ class WriteAheadLog:
         Returns all pending events that were never sealed.
         """
         with self._lock:
-            conn = sqlite3.connect(self.db_path)
+            conn = connect(self.db_path)
             cursor = conn.execute(
                 "SELECT payload FROM batch_wal WHERE status = 'pending'"
             )
@@ -95,7 +96,7 @@ class WriteAheadLog:
     def mark_rejected(self, event_ids: list[str]) -> None:
         """Events that failed ZK validation or consensus."""
         with self._lock:
-            conn = sqlite3.connect(self.db_path)
+            conn = connect(self.db_path)
             placeholders = ','.join('?' * len(event_ids))
             conn.execute(
                 f"UPDATE batch_wal SET status = 'rejected' "

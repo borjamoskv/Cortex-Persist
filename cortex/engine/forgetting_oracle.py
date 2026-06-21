@@ -6,7 +6,7 @@ import asyncio
 import json
 import logging
 import math
-import sqlite3
+from cortex.database.core import connect
 import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
@@ -148,7 +148,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
                 return
             from cortex.extensions.signals.bus import SignalBus
 
-            conn = sqlite3.connect(db_path)
+            conn = connect(db_path)
             try:
                 bus = SignalBus(conn)
                 report_dict = report.to_dict()
@@ -171,7 +171,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
                     )
             finally:
                 conn.close()
-        except (sqlite3.Error, ImportError, OSError) as e:
+        except (Exception) as e:
             logger.debug("[ORACLE] Signal emission failed: %s", e)
 
     # ─── Persistence & Reporting ───────────────────────────────────────────────
@@ -188,7 +188,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
                     tenant_id="system",
                 )
                 await conn.commit()
-        except (sqlite3.Error, json.JSONDecodeError, TypeError) as e:
+        except (Exception) as e:
             logger.error("[ORACLE] Failed to persist report: %s", e)
 
     def _empty_report(self) -> OracleReport:

@@ -6,8 +6,8 @@ import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
-
 import aiosqlite
+from cortex.database.core import connect_async_ctx
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -41,8 +41,7 @@ async def lifespan(app: FastAPI):
     rollback = CausalRollbackEngine(CORTEX_DB_PATH, ledger, None)
     scheduler = CausalScheduler(graph, rollback, ledger)
     bifurcation = ExergyBifurcationEngine(ledger, scheduler)
-
-    async with aiosqlite.connect(CORTEX_DB_PATH) as conn:
+    async with connect_async_ctx(CORTEX_DB_PATH) as conn:
         await conn.execute("PRAGMA journal_mode=WAL;")
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS execution_trace_ledger (
@@ -119,8 +118,7 @@ async def get_all_influencers():
     """Retorna el estado del radar del Influencer Guard."""
     if not GUARD_DB_PATH.exists():
         raise HTTPException(status_code=404, detail="Guard DB not found. No telemetry yet.")
-
-    async with aiosqlite.connect(GUARD_DB_PATH) as conn:
+    async with connect_async_ctx(GUARD_DB_PATH) as conn:
         async with conn.execute(
             "SELECT influencer_name, strikes, status, last_update FROM influencer_strikes ORDER BY strikes DESC"
         ) as cursor:
@@ -136,8 +134,7 @@ async def get_influencer_audit(name: str):
     """Extrae el log criptográfico de alucinaciones (las pruebas del delito)."""
     if not GUARD_DB_PATH.exists():
         raise HTTPException(status_code=404, detail="Guard DB not found.")
-
-    async with aiosqlite.connect(GUARD_DB_PATH) as conn:
+    async with connect_async_ctx(GUARD_DB_PATH) as conn:
         async with conn.execute(
             "SELECT prompt, response, hallucinated, reason, timestamp FROM audit_log WHERE influencer_name = ? ORDER BY timestamp DESC",
             (name,),
@@ -158,8 +155,7 @@ async def get_toxic_community_events(limit: int = 50):
     db_path = Path(SCRAPER_DB_PATH)
     if not db_path.exists():
         return []
-
-    async with aiosqlite.connect(db_path) as conn:
+    async with connect_async_ctx(db_path) as conn:
         async with conn.execute(
             "SELECT video_id, target_id, taxonomia_ataque, cita_textual_exacta FROM eventos_acoso LIMIT ?",
             (limit,),

@@ -23,7 +23,8 @@ class MTKGuard:
         
     def _generate_ephemeral_token(self, payload: ClosurePayload) -> str:
         """Generate a short-lived cryptographic capability token for this transaction."""
-        raw = f"{payload.canonical()}:{time.time_ns()}:{self.private_key}"
+        babylon_time = time.time_ns()
+        raw = f"{payload.canonical()}:{babylon_time}:{self.private_key}"
         return f"mtk_auth_{hashlib.sha3_256(raw.encode()).hexdigest()}"
 
     @asynccontextmanager

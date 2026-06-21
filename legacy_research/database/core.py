@@ -101,6 +101,7 @@ _LOCK_MARKERS: Final[tuple[str, ...]] = ("database is locked", "busy")
 # ─── Core Pragmas ─────────────────────────────────────────────────────
 
 
+
 def _apply_pragmas_sync(
     conn: sqlite3.Connection,
     *,
@@ -130,6 +131,10 @@ def _apply_pragmas_sync(
         conn.execute("PRAGMA wal_autocheckpoint=0")
     else:
         conn.execute(f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT}")
+
+    # [MTK] C5-REAL Physical Boundary
+    from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer
+    install_mtk_authorizer(conn)
 
 
 # ─── Sync Factory ─────────────────────────────────────────────────────
@@ -296,6 +301,13 @@ async def apply_pragmas_async(conn: aiosqlite.Connection) -> None:
     await conn.execute("PRAGMA temp_store=MEMORY;")
     await conn.execute("PRAGMA threads=4;")  # Optimize sqlite-vec sorting/indexing
     await conn.execute(f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT};")
+    
+    # [MTK] C5-REAL Physical Boundary
+    def _install_authorizer_sync(raw_conn: sqlite3.Connection):
+        from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer
+        install_mtk_authorizer(raw_conn)
+        
+    await conn._execute(_install_authorizer_sync, conn._conn)
     await conn.commit()
 
 

@@ -1,7 +1,7 @@
 import argparse
 import logging
-import sqlite3
 from pathlib import Path
+from cortex.database.core import connect
 
 from cortex.observability.jsonl_logger import setup_cortex_logging
 from cortex.services.email import send_reengagement_email
@@ -20,8 +20,9 @@ def evaluate_retention(dry_run=True):
     """
     logger.info("Iniciando Causal Scheduler (Evaluación de Retención)...")
 
-    conn = sqlite3.connect(CORTEX_DB_PATH)
-    conn.row_factory = sqlite3.Row
+    conn = connect(CORTEX_DB_PATH)
+    # the factory might not set row_factory by default if not passed, but we can just set it
+    conn.row_factory = __import__("sqlite3").Row
     cursor = conn.cursor()
 
     # Extraer Élite en riesgo (days_active > 15 y que sean import/music_media)

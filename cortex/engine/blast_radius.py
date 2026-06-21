@@ -150,7 +150,7 @@ class ChronosROI:
         actual_tokens = 0
         if db_path and os.path.exists(db_path):
             try:
-                with sqlite3.connect(db_path) as conn:
+                with db_connect(db_path) as conn:
                     cursor = conn.cursor()
                     cursor.execute("PRAGMA table_info(llm_telemetry)")
                     columns = {row[1] for row in cursor.fetchall()}

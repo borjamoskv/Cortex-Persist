@@ -13,6 +13,7 @@ pub mod reality;
 pub mod bft;
 pub mod causal;
 pub mod retrieval;
+pub mod babylon;
 
 use serde::{Deserialize, Serialize};
 
@@ -143,6 +144,26 @@ pub fn try_seal_fact(fact_json: &str, wal_event_hash: &str, valid: bool) -> PyRe
         .map_err(|e| PyValueError::new_err(e.to_string()))
 }
 
+#[pyfunction]
+pub fn calculate_entropy_b60(data: &[u8]) -> PyResult<babylon::Babylon60> {
+    let mut counts = [0usize; 256];
+    for &b in data {
+        counts[b as usize] += 1;
+    }
+    let len = data.len() as f64;
+    let mut entropy = 0.0;
+    if len > 0.0 {
+        for &count in &counts {
+            if count > 0 {
+                let p = count as f64 / len;
+                entropy -= p * p.log2();
+            }
+        }
+    }
+    Ok(babylon::Babylon60::from_float(entropy))
+}
+
+
 /// CORTEX-Persist Cognitive Core Rust Extension (Enterprise KRGS)
 #[pymodule]
 fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -154,6 +175,7 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<ContinuityRuleType>()?;
     m.add_class::<GateStatus>()?;
     m.add_class::<Verdict>()?;
+    m.add_class::<babylon::Babylon60>()?;
     m.add_function(wrap_pyfunction!(validate_scene_transition, m)?)?;
     m.add_function(wrap_pyfunction!(validate_metric_json, m)?)?;
     m.add_function(wrap_pyfunction!(ingest_reality_claim, m)?)?;
@@ -162,6 +184,7 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_staging_fact, m)?)?;
     m.add_function(wrap_pyfunction!(can_read_fact, m)?)?;
     m.add_function(wrap_pyfunction!(try_seal_fact, m)?)?;
+    m.add_function(wrap_pyfunction!(calculate_entropy_b60, m)?)?;
     m.add_function(wrap_pyfunction!(reality::reader::load_verified_reality, m)?)?;
     Ok(())
 }
