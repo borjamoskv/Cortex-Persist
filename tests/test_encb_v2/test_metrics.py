@@ -36,7 +36,7 @@ class TestPFBR:
 
 
 class TestTER:
-    """Test Time to Epistemic Recovery."""
+    """Test Time to Retrieval Recovery."""
 
     def test_immediate_recovery(self):
         snapshots = [[_state(True)] * 10]
@@ -60,7 +60,7 @@ class TestTER:
 
 
 class TestEDI:
-    """Test Epistemic Debt Integral."""
+    """Test Retrieval Debt Integral."""
 
     def test_zero_debt(self):
         snapshots = [[_state(True)] * 10 for _ in range(5)]

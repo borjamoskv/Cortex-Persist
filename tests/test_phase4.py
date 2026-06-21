@@ -21,7 +21,7 @@ def temp_repo(tmp_path):
     subprocess.run(["git", "config", "user.name", "Tester"], cwd=repo, check=True)
     (repo / "README.md").write_text("initial")
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
-    subprocess.run(["git", "commit", "-m", "initial commit"], cwd=repo, check=True)
+    subprocess.run(["git", "commit", "-m", "initial commit", "--no-verify"], cwd=repo, check=True)
     return repo
 
 
@@ -88,7 +88,7 @@ async def test_autonomous_merge_success(temp_repo):
     subprocess.run(["git", "checkout", "-b", branch], cwd=repo_path, check=True)
     (repo_path / "fix.txt").write_text("fix")
     subprocess.run(["git", "add", "."], cwd=repo_path, check=True)
-    subprocess.run(["git", "commit", "-m", "fix commit"], cwd=repo_path, check=True)
+    subprocess.run(["git", "commit", "-m", "fix commit", "--no-verify"], cwd=repo_path, check=True)
 
     # Go back to master
     subprocess.run(["git", "checkout", "master"], cwd=repo_path, check=True)
@@ -116,13 +116,13 @@ async def test_autonomous_merge_failure_conflict(temp_repo):
     subprocess.run(["git", "checkout", "-b", branch], cwd=repo_path, check=True)
     (repo_path / "file.txt").write_text("line A")
     subprocess.run(["git", "add", "."], cwd=repo_path, check=True)
-    subprocess.run(["git", "commit", "-m", "commit A"], cwd=repo_path, check=True)
+    subprocess.run(["git", "commit", "-m", "commit A", "--no-verify"], cwd=repo_path, check=True)
 
     # 2. Go to master and create a conflicting commit
     subprocess.run(["git", "checkout", "master"], cwd=repo_path, check=True)
     (repo_path / "file.txt").write_text("line B")
     subprocess.run(["git", "add", "."], cwd=repo_path, check=True)
-    subprocess.run(["git", "commit", "-m", "commit B"], cwd=repo_path, check=True)
+    subprocess.run(["git", "commit", "-m", "commit B", "--no-verify"], cwd=repo_path, check=True)
 
     pipeline = AutoFixPipeline(repo_path=str(repo_path))
     # This should fail because it's not a fast-forward merge

@@ -73,6 +73,17 @@ async def lifespan(app: FastAPI):
     auth_manager = AuthManager()  # Use dynamic backend selection based on config
     await auth_manager.initialize()
 
+    # Increment demo restart count for demo v0
+    try:
+        from cortex.database.core import connect_async
+        async with connect_async(db_path) as conn:
+            await conn.execute("CREATE TABLE IF NOT EXISTS demo_system_state (key TEXT PRIMARY KEY, value TEXT)")
+            await conn.execute("INSERT INTO demo_system_state (key, value) VALUES ('restarts', '1') ON CONFLICT(key) DO UPDATE SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT)")
+            await conn.commit()
+        logger.info("Lifespan: Demo restart count incremented.")
+    except Exception as e:
+        logger.warning("Could not increment demo restarts: %s", e)
+
     from cortex.ledger.billing_gateway import get_billing_gateway
     await get_billing_gateway().initialize()
 

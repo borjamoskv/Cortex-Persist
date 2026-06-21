@@ -1,0 +1,8 @@
+[package]
+name = "cortex-eval"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+moka = { version = "0.12.5", features = ["sync"] }
+petgraph = "0.8.3"

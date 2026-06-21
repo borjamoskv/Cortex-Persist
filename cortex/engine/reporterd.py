@@ -119,7 +119,7 @@ class ManifoldDaemon:
 
 
 async def main():
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
+    setup_cortex_logging()
     db_path = os.path.expanduser("~/.cortex/cortex.db")
     daemon = ManifoldDaemon(db_path)
     await daemon.start()

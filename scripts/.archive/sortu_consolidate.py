@@ -6,7 +6,7 @@ from pathlib import Path
 
 import yaml
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+setup_cortex_logging()
 
 
 def consolidate_registry():

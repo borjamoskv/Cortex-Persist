@@ -51,13 +51,9 @@ BACKOFF_BASE: Final[float] = 1.0
 BACKOFF_CAP: Final[float] = 30.0
 
 if _RICH:
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(message)s",
-        handlers=[RichHandler(rich_tracebacks=True, show_path=False)],
-    )
+    setup_cortex_logging()
 else:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    setup_cortex_logging()
 
 log = logging.getLogger("cortex.claude_orchestrator")
 console = Console() if _RICH else None

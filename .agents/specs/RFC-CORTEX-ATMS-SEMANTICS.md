@@ -154,6 +154,14 @@ The ATMS dependency graph inherits causal ordering from UUIDv7 timestamps.
 Cross-replica merges respect this ordering: a justification cannot reference
 a node with a later timestamp (causal violation → reject at ingestion).
 
+### 4.3 Counterfactual Merge Reconciliation
+
+When `merge_counterfactual(branch_id)` is invoked, the ATMS must reconcile the `SIMULATED` branch with the `ACTIVE` main timeline:
+
+1. **Precondition Drift Check**: For every assumption $a \in E_{\text{branch}}$ made at fork time $t_0$, verify that $a$ is still `ACTIVE` at merge time $t_1$.
+2. **Conflict Resolution**: If $a$ has transitioned to `DISCARDED` or `CONTESTED` in the `ACTIVE` timeline, the merge is rejected as a **Structural Merge Conflict**. The branch must be rebased onto the new `ACTIVE` state.
+3. **Label Integration**: If all preconditions hold, the derived beliefs in the branch are promoted from `SIMULATED` to `INFERRED`, and their labels are unified with the `ACTIVE` environment.
+
 ---
 
 ## 5. Formal Properties Summary

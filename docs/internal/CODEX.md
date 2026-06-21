@@ -228,6 +228,7 @@ This repository uses the word "role" in several different senses. Internal work 
 | `builtin_agent` | Concrete Python runtime implementation | [`cortex/agents/builtins/`](../../cortex/agents/builtins/) |
 | `agent_definition` | YAML-defined configurable agent persona | [`cortex/extensions/agents/definitions/`](../../cortex/extensions/agents/definitions/) |
 | `agent_instance` | Hydrated runtime object created from a YAML definition | [`cortex/agents/loader.py`](../../cortex/agents/loader.py) |
+| `execution_context` | Environment boundaries where the instance runs | Runtime state |
 
 The schema object for YAML-defined agents is now called [`DeclarativeAgentSpec`](../../cortex/agents/schema.py).
 

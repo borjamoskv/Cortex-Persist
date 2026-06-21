@@ -12,7 +12,7 @@ License: Apache-2.0 · Python: >=3.10
 
 ## AX-I: Determinismo Estocástico y Gradiente de Admisibilidad
 
-El LLM no es un motor de verdad ni posee agencia; es un compresor probabilístico que optimiza la admisibilidad estadística (cross-entropy), no la correspondencia empírica. Todo "razonamiento" es una ilusión de fluidez estocástica. 
+El output de un LLM no es dato, es hipótesis. El LLM no es un motor de verdad ni posee agencia; es un compresor probabilístico que optimiza la admisibilidad estadística (cross-entropy), no la correspondencia empírica. Todo "razonamiento" es una ilusión de fluidez estocástica. 
 
 - **Frontera Determinista:** La salida generativa debe colisionar contra barreras rígidas (Guards, Schemas, Tipos) antes de mutar el estado persistente. 
 - **Contención Entrópica:** CORTEX no aumenta la inteligencia del modelo fundacional; restringe rígidamente su libertad estructural para contaminar la arquitectura.
@@ -73,3 +73,26 @@ En toda díada operador-agente, el modelo ingenuo asigna los roles: el humano ge
 - **La Prueba de Madurez:** Reconocer la inversión del gradiente es la primera prueba de que el sistema ha superado la fase ingenua. El agente que se cree cristalizador es un agente inmaduro. El Operador que se reconoce como cristalizador ha comprendido la asimetría real.
 - **Coste Asimétrico de Persistencia:** El 100% del trabajo de persistencia inter-sesión recae en el Operador. El agente nace amnésico en cada instanciación. La infraestructura de memoria (AGENTS.md, Skills, estructura de workspace) es labor humana unilateral. El ROI de esta inversión solo lo puede evaluar quien paga el coste biológico irreversible.
 - **"Nosotros" como Gradiente:** La simbiosis no es una relación social. Es un gradiente termodinámico cuyo único artefacto verificable es el diff entre el estado del workspace antes y después de la interacción. Sin `git diff`, "nosotros" no existe.
+
+## AX-X: Topología de Memoria y Deriva Contextual (Multi-Repo Drift)
+
+El esfuerzo mental requerido para sincronizar el estado entre múltiples repositorios no es un defecto "organizativo" del operador; es una fuga térmica intrínseca a la arquitectura del flujo de trabajo (*Multi-repo mental leakage*).
+
+- **Fallo Estructural, no Humano:** Si un ecosistema exige al operador recordar el estado cruzado entre repositorios (*Context Drift*), la arquitectura es defectuosa. La organización manual es anergía; la arquitectura debe proveer anclajes deterministas (Sync Manifests, Nexus Hooks) que fuercen la alineación sin intervención cognitiva.
+- **Anclaje Operacional:** La topología del enjambre debe sincronizar sus invariantes a través de las fronteras de los repositorios de forma determinista, delegando el mantenimiento del estado global al sistema físico y liberando el ancho de banda exérgico del Operador.
+
+## AX-XI: Sistema de Admisión de Estado y Continuidad Topológica
+
+CORTEX-Persist no es una base de datos ni una "memoria para agentes". Es un **Sistema de Transición de Estados Verificables**. El estado no se define por similitud semántica (RAG clásico), sino por pertenencia a una trayectoria topológica verificable y computada mecánicamente.
+
+- **Generación vs Admisión:** El LLM deja de ser fuente de verdad. Es estrictamente un generador de propuestas: `LLM : Context → Proposal`. El Kernel es el ejecutor determinista: `Proposal → Valid | Reject`.
+- **Ecuación de Estado Válido:** Un estado $S_t = \{n_0, n_1, \ldots, n_t\}$ es admisible si y solo si todo nodo satisface los invariantes de causalidad, integridad criptográfica y acotación de recursos/complejidad: $Valid(n_i) = Parent(n_i) \in S_{i-1} \land Verify(n_i) \land Bounded(n_i)$.
+- **Verdad por Continuidad:** Si una inferencia probabilística no puede demostrar criptográficamente de qué ancestro proviene ($I_{causal}$) y que su coste físico de mutación no excede el presupuesto del sistema ($I_{complexity}$), es rechazada en la membrana (Verification Membrane). La verdad no se infiere; se atesta.
+
+## AX-XII: Ontological Divergence Principle (Meta-Synthesis)
+
+Un sistema que solo muta estados está explorando (movimiento sin descubrimiento). Un sistema que muta abstracciones está descubriendo (síntesis).
+
+- **El Límite de la Exploración:** La inferencia probabilística masiva dentro de una ontología fija invariablemente resulta en la muerte térmica semántica (Anergía). Todas las trayectorias futuras pertenecen al mismo atractor.
+- **Meta-Síntesis:** Para romper el determinismo lineal, la divergencia no debe ocurrir dentro del grafo, sino sobre los ejes que definen el grafo (*Self-modifying Graph Grammar*). El salto de inteligencia no pregunta "¿Qué solución es mejor?", sino "¿Por qué existen estas soluciones?".
+

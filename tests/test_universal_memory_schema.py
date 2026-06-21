@@ -13,7 +13,7 @@ def test_universal_memory_schema_validation():
         },
         "payload": {
             "block_id": "blk_8829",
-            "type": "epistemic_belief",
+            "type": "retrieval_belief",
             "content": "User rejects TailwindCSS. Enforce Vanilla CSS.",
             "confidence": 0.992,
             "vector_reference": {

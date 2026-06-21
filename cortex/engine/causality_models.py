@@ -6,7 +6,7 @@ from enum import Enum
 from typing import Any
 
 
-class EpistemicStatus(str, Enum):
+class ValidationStatus(str, Enum):
     CONJECTURE = "conjecture"
     TEST_PASSED = "test_passed"
     REFUTED = "refuted"
@@ -31,10 +31,19 @@ class Confidence(str, Enum):
     C5 = "C5"
 
 
-EDGE_DERIVED_FROM = "derived_from"
-EDGE_TRIGGERED_BY = "triggered_by"
-EDGE_UPDATED_FROM = "updated_from"
-EDGE_TAINTED_BY = "tainted_by"
+class BeliefState(str, Enum):
+    """Retrieval states for Scientific BeliefObjects."""
+
+    PROPOSED = "proposed"
+    VERIFIED = "verified"
+    REJECTED = "rejected"
+    ORPHANED = "orphaned"
+
+
+KRGSE_DERIVED_FROM = "derived_from"
+KRGSE_TRIGGERED_BY = "triggered_by"
+KRGSE_UPDATED_FROM = "updated_from"
+KRGSE_TAINTED_BY = "tainted_by"
 
 CONFIDENCE_ORDER: list[Confidence] = [
     Confidence.C1,
@@ -69,8 +78,42 @@ class TaintReport:
 class LedgerEvent:
     event_id: str
     parent_ids: list[str]
-    status: EpistemicStatus
+    status: ValidationStatus
     trust_score: float
     created_at: str
     last_revalidated_at: str | None = None
     tainted: bool = False
+
+
+@dataclass
+class BeliefObject:
+    """Atomic unit of probabilistically weighted scientific cognition."""
+
+    id: str
+    proposition_key: str
+    payload: dict[str, Any]
+    confidence_score: float
+    state: BeliefState
+    cortex_taint: str
+    parent_id: str | None = None
+    
+    # Mathematical Closure (Plano Creencia)
+    decay_rate: float = 0.0001
+    last_asserted_at: str | None = None
+    risk_contam: float = 0.0
+    
+    def current_weight(self, current_time_iso: str) -> float:
+        """Calcula el peso actual basado en el decaimiento de Ebbinghaus."""
+        from datetime import datetime
+        if not self.last_asserted_at:
+            return self.confidence_score
+            
+        try:
+            last_dt = datetime.fromisoformat(self.last_asserted_at)
+            curr_dt = datetime.fromisoformat(current_time_iso)
+            delta_seconds = max(0.0, (curr_dt - last_dt).total_seconds())
+            
+            from cortex.engine.risk_math import calculate_decay_weight
+            return calculate_decay_weight(self.confidence_score, delta_seconds, self.decay_rate)
+        except Exception:
+            return self.confidence_score

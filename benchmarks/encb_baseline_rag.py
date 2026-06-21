@@ -2,7 +2,7 @@
 """
 ENCB - Baseline RAG (Passive Memory Control Group)
 ====================================================
-Minimal append-only memory system with NO epistemic governance.
+Minimal append-only memory system with NO retrieval governance.
 No consensus, no belief revision, no Byzantine detection.
 Serves as the control group for the ENCB experiment.
 
@@ -35,7 +35,7 @@ class RagFact:
 
 
 class BaselineRAG:
-    """Append-only memory. No governance. No epistemic filtering.
+    """Append-only memory. No governance. No retrieval filtering.
 
     This is what most "AI memory" systems do today:
     - Store everything

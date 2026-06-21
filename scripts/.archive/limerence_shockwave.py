@@ -14,7 +14,7 @@ import os
 import sys
 
 # Set up logging
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+setup_cortex_logging()
 logger = logging.getLogger("shockwave")
 
 try:

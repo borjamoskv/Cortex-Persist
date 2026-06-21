@@ -4,7 +4,7 @@
 This repo uses the word "agent" for several different things. This page separates
 the concepts so policy, implementation, and configuration do not get mixed.
 
-## The Four Layers
+## The Five Layers
 
 | Concept | What it is | Source of truth | Typical example |
 | :--- | :--- | :--- | :--- |
@@ -12,6 +12,7 @@ the concepts so policy, implementation, and configuration do not get mixed.
 | `builtin_agent` | Python class already implemented in the runtime | [`cortex/agents/builtins/`](../../cortex/agents/builtins/) | `SupervisorAgent` |
 | `agent_definition` | Declarative YAML spec for name, model, prompt, tools, memory, and guardrails | [`cortex/extensions/agents/definitions/`](../../cortex/extensions/agents/definitions/) | `antigravity.yaml` |
 | `agent_instance` | Hydrated runtime object created from a YAML spec | [`cortex/agents/loader.py`](../../cortex/agents/loader.py) | `AgentInstance` |
+| `execution_context` | Environment where the instance runs (sandbox, namespace, tenant) | Runtime state | `execution_mode` |
 
 ## 1. Governance Roles
 
@@ -29,6 +30,13 @@ Examples:
 - `Persist-Guardian`
 
 Use this layer when the question is "what may this agent do?"
+
+> **Governance Role vs Intent:**
+> 
+> - `governance_role` answers **"may"** (e.g., `Persist-Auditor` means "is authorized to execute audit actions").
+> - `intent` answers **"wants"** (e.g., `intent: audit` means "attempts to perform audits").
+> 
+> Separating intent from authority eliminates design errors: an agent may want to audit, but without the `Persist-Auditor` governance role, the system will block the action.
 
 ## 2. Builtin Agents
 
@@ -86,6 +94,23 @@ Important:
 
 Use this layer when the question is "what object is running in memory?"
 
+## 5. Execution Context
+
+The execution context is the environment where the logical instance runs. It bridges the gap between the `agent_instance` and the physical runtime.
+
+- It defines scope, boundaries, and isolation.
+- It is injected dynamically, not defined in the agent's core identity YAML.
+
+Examples:
+
+- `tenant_id`
+- `sandbox_id`
+- `memory_namespace`
+- `ledger_scope`
+- `execution_mode`
+
+Use this layer when the question is "in what sandbox or scope is this instance operating?"
+
 ## Practical Rule
 
 If a discussion mixes these layers, confusion follows quickly.
@@ -94,6 +119,7 @@ If a discussion mixes these layers, confusion follows quickly.
 - For code ownership and implementation, use `builtin_agent`.
 - For configurable personas and prompts, use `agent_definition`.
 - For the hydrated executable object, use `agent_instance`.
+- For the environment boundaries and scope, use `execution_context`.
 
 ## Registry Boundary
 

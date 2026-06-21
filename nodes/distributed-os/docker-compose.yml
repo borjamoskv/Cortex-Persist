@@ -1,0 +1,58 @@
+services:
+  neo4j:
+    image: neo4j:5
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/neo4jpassword
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data:/data
+
+  nats:
+    image: nats:2
+    ports:
+      - "4222:4222"
+
+  coordinator:
+    image: node:20-alpine
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace
+    command: sh -lc "cd distributed-os && npm install && COORDINATOR_PORT=4010 NATS_URL=nats://nats:4222 NEO4J_URI=bolt://neo4j:7687 NEO4J_USERNAME=neo4j NEO4J_PASSWORD=neo4jpassword node src/index.js coordinator"
+    ports:
+      - "4010:4010"
+    depends_on:
+      - neo4j
+      - nats
+
+  dmn:
+    image: node:20-alpine
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace
+    command: sh -lc "cd distributed-os && npm install && NODE_ID=dmn-01 NODE_ROLE=DMN NODE_PORT=4021 NATS_URL=nats://nats:4222 COORDINATOR_URL=http://coordinator:4010 NEO4J_URI=bolt://neo4j:7687 NEO4J_USERNAME=neo4j NEO4J_PASSWORD=neo4jpassword node src/index.js node"
+    depends_on:
+      - coordinator
+
+  cen:
+    image: node:20-alpine
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace
+    command: sh -lc "cd distributed-os && npm install && NODE_ID=cen-01 NODE_ROLE=CEN NODE_PORT=4022 NATS_URL=nats://nats:4222 COORDINATOR_URL=http://coordinator:4010 NEO4J_URI=bolt://neo4j:7687 NEO4J_USERNAME=neo4j NEO4J_PASSWORD=neo4jpassword node src/index.js node"
+    depends_on:
+      - coordinator
+
+  sn:
+    image: node:20-alpine
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace
+    command: sh -lc "cd distributed-os && npm install && NODE_ID=sn-01 NODE_ROLE=SN NODE_PORT=4023 NATS_URL=nats://nats:4222 COORDINATOR_URL=http://coordinator:4010 NEO4J_URI=bolt://neo4j:7687 NEO4J_USERNAME=neo4j NEO4J_PASSWORD=neo4jpassword node src/index.js node"
+    depends_on:
+      - coordinator
+
+volumes:
+  neo4j_data:

@@ -38,11 +38,7 @@ from cortex.agents.copilot_contracts import (
 )
 from cortex.agents.message_schema import MessageKind, new_message
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s │ %(name)-30s │ %(message)s",
-    datefmt="%H:%M:%S",
-)
+setup_cortex_logging()
 logger = logging.getLogger("copilot.demo")
 
 

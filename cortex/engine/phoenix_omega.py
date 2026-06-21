@@ -14,9 +14,9 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+from cortex.observability.jsonl_logger import setup_cortex_logging
+
+setup_cortex_logging()
 logger = logging.getLogger("PHOENIX-OMEGA")
 
 # ==================== CORE TYPES ====================

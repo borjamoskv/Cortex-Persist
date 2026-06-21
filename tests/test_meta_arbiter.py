@@ -4,7 +4,7 @@ Tests for the CORTEX Meta-Arbiter — Cross-Layer Cognitive Arbitration Engine.
 
 Covers all 5 resolution paths:
   1. CONSENSUS — all layers agree
-  2. LEDGER_OVERRIDE — L3 veto active
+  2. LKRGSER_OVERRIDE — L3 veto active
   3. WEIGHTED_FUSION — moderate divergence resolved by weights
   4. ABSTAIN — all layers below confidence floor
   5. CONFLICT — irreconcilable divergence (>0.70)
@@ -44,7 +44,7 @@ def _make_signals(
     return [
         LayerSignal(layer=LayerID.L1_EMBEDDING, score=l1, raw_value={"cosine": l1}),
         LayerSignal(layer=LayerID.L2_TOPOLOGY, score=l2, raw_value={"potential": l2}),
-        LayerSignal(layer=LayerID.L3_LEDGER, score=l3, raw_value={"verified": l3 >= 0.5}),
+        LayerSignal(layer=LayerID.L3_LKRGSER, score=l3, raw_value={"verified": l3 >= 0.5}),
         LayerSignal(layer=LayerID.L4_RL, score=l4, raw_value={"q_value": l4}),
     ]
 
@@ -80,14 +80,14 @@ class TestConsensus:
 
 
 class TestLedgerOverride:
-    """L3 score < 0.5 with ledger_veto=True → LEDGER_OVERRIDE."""
+    """L3 score < 0.5 with ledger_veto=True → LKRGSER_OVERRIDE."""
 
     def test_ledger_veto_basic(self, arbiter: MetaArbiter) -> None:
         signals = _make_signals(l1=0.95, l2=0.90, l3=0.10, l4=0.88)
         verdict = arbiter.arbitrate(signals, query_context="ledger_veto_test")
 
-        assert verdict.resolution == Resolution.LEDGER_OVERRIDE
-        assert verdict.winning_layer == LayerID.L3_LEDGER
+        assert verdict.resolution == Resolution.LKRGSER_OVERRIDE
+        assert verdict.winning_layer == LayerID.L3_LKRGSER
         assert verdict.fused_score == 0.10
         assert "Ledger" in verdict.reasoning
         assert "sovereign" in verdict.reasoning.lower()
@@ -96,7 +96,7 @@ class TestLedgerOverride:
         signals = _make_signals(l1=1.0, l2=1.0, l3=0.0, l4=1.0)
         verdict = arbiter.arbitrate(signals)
 
-        assert verdict.resolution == Resolution.LEDGER_OVERRIDE
+        assert verdict.resolution == Resolution.LKRGSER_OVERRIDE
         assert verdict.fused_score == 0.0
 
     def test_ledger_veto_disabled(self) -> None:
@@ -104,15 +104,15 @@ class TestLedgerOverride:
         signals = _make_signals(l1=0.90, l2=0.85, l3=0.10, l4=0.88)
         verdict = arbiter.arbitrate(signals)
 
-        # Without veto, should NOT be LEDGER_OVERRIDE
-        assert verdict.resolution != Resolution.LEDGER_OVERRIDE
+        # Without veto, should NOT be LKRGSER_OVERRIDE
+        assert verdict.resolution != Resolution.LKRGSER_OVERRIDE
 
     def test_ledger_at_boundary(self, arbiter: MetaArbiter) -> None:
         """L3 score exactly 0.5 should NOT trigger veto."""
         signals = _make_signals(l1=0.80, l2=0.75, l3=0.50, l4=0.78)
         verdict = arbiter.arbitrate(signals)
 
-        assert verdict.resolution != Resolution.LEDGER_OVERRIDE
+        assert verdict.resolution != Resolution.LKRGSER_OVERRIDE
 
 
 class TestWeightedFusion:
@@ -200,7 +200,7 @@ class TestLayerSignal:
             LayerSignal(LayerID.L2_TOPOLOGY, -0.1, raw_value=None)
 
     def test_boundary_scores(self) -> None:
-        s0 = LayerSignal(LayerID.L3_LEDGER, 0.0, raw_value=False)
+        s0 = LayerSignal(LayerID.L3_LKRGSER, 0.0, raw_value=False)
         s1 = LayerSignal(LayerID.L4_RL, 1.0, raw_value=True)
         assert s0.score == 0.0
         assert s1.score == 1.0
@@ -255,16 +255,16 @@ class TestEdgeCases:
         assert verdict.fused_score > 0.0
 
     def test_only_ledger(self, arbiter: MetaArbiter) -> None:
-        signals = [LayerSignal(LayerID.L3_LEDGER, 0.30, raw_value=False)]
+        signals = [LayerSignal(LayerID.L3_LKRGSER, 0.30, raw_value=False)]
         verdict = arbiter.arbitrate(signals)
-        assert verdict.resolution == Resolution.LEDGER_OVERRIDE
+        assert verdict.resolution == Resolution.LKRGSER_OVERRIDE
 
     def test_custom_weights(self) -> None:
         arb = MetaArbiter(
             weights={
                 "L1_EMBEDDING": 0.10,
                 "L2_TOPOLOGY": 0.10,
-                "L3_LEDGER": 0.0,
+                "L3_LKRGSER": 0.0,
                 "L4_RL": 0.80,
             }
         )

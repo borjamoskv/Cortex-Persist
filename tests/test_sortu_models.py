@@ -44,7 +44,7 @@ class TestTransitions:
             SortuState.FORGED,
             SortuState.VERIFIED,
             SortuState.LINKED,
-            SortuState.LEDGERED,
+            SortuState.LKRGSERED,
         ]:
             assert validate_transition(state, SortuState.ABORTED) is True
 

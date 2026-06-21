@@ -131,7 +131,7 @@ def generate_svg_content(data: dict) -> str:
   <g transform="translate(45 190)">
     <g transform="translate(0 0)">
       <rect width="105" height="60" rx="8" fill="#0A0A0A" stroke="#2B3BE5" stroke-opacity="0.6" stroke-width="1.5"/>
-      <text x="12" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" letter-spacing="1">LEDGER</text>
+      <text x="12" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" letter-spacing="1">LKRGSER</text>
       <text x="12" y="44" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700" letter-spacing="1">{data["ledger"]["status"]}</text>
       <circle cx="90" cy="18" r="3.5" fill="#00F0FF" class="glow-active" filter="url(#glow)"/>
     </g>

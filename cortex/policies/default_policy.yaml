@@ -1,0 +1,13 @@
+risk_thresholds:
+  block: 0.8
+  warn: 0.5
+
+rules:
+  - name: auth_modification
+    weight: 0.3
+
+  - name: no_tests_added
+    weight: 0.2
+
+  - name: massive_diff
+    weight: 0.4

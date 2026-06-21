@@ -14,7 +14,7 @@ import sqlite3
 
 from cortex.guards.omega_auditor import OmegaAuditor
 
-logging.basicConfig(level=logging.INFO)
+setup_cortex_logging()
 logger = logging.getLogger("GenesisAuditor")
 
 DB_PATH = os.path.expanduser("~/.cortex/vectors.db")

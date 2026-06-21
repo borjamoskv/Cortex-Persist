@@ -52,7 +52,7 @@ class WeightedProposal:
 
 class TrustRegistry:
     """
-    Epistemic arbiter for all CORTEX operations.
+    Retrieval arbiter for all CORTEX operations.
     Computes mathematical trust, penalizes taint, and handles probabilistic degradation.
     """
 

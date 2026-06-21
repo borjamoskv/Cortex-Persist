@@ -9,7 +9,7 @@ The last 7 operational sessions generated high entropy (narrative) directed towa
 2. **Systemic Exergy**: Deployed background daemons for continuous execution.
 3. **C5-REAL Reality Anchoring**: GitHub remote commits mandated across all steps.
 4. **Agent Refinements**: Julio Cortázar agent integrated, Substack audits executed.
-5. **Cortex.com**: Holistic web portal exergy maximized.
+5. **cortexpersist.com**: Holistic web portal exergy maximized.
 
 ## 2. Exergy Crystallization
 To eliminate the need for future iterations of "maximizing exergy", this node consolidates all past directives into the following sovereign realities:

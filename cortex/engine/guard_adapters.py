@@ -16,7 +16,7 @@ import aiosqlite
 
 __all__ = [
     "ContradictionGuardAdapter",
-    "EpistemicBreakerHook",
+    "RetrievalBreakerHook",
     "ExergyGuardAdapter",
     "HealthGuardAdapter",
     "LedgerCheckpointHook",
@@ -26,6 +26,7 @@ __all__ = [
     "VirgoGuardAdapter",
     "ZKGuardAdapter",
     "ArchaeologyGuardAdapter",
+    "EFTVerificationGuardAdapter",
 ]
 
 logger = logging.getLogger("cortex.engine")
@@ -265,6 +266,129 @@ class ArchaeologyGuardAdapter:
             )
 
 
+class EFTValidatorGuard:
+    """Validator: checks structure and required metadata fields."""
+
+    async def verify(self, content: str, project: str, fact_type: str, meta: dict[str, Any]) -> None:
+        justification = meta.get("justification", "")
+        just_str = str(justification).strip()
+        if not just_str:
+            raise ValueError(
+                "[EFT-Validator] Rejecting naked claim. KnowledgeObject requires explicit 'justification'."
+            )
+
+        # Retrieval Half-Life Enforcement for ACCEPTED states
+        verification_status = meta.get("verification_status", "UNVERIFIED")
+        if verification_status == "ACCEPTED":
+            half_life = meta.get("retrieval_half_life") or meta.get("confidence_half_life")
+            if not half_life:
+                raise ValueError(
+                    "[EFT-Validator] ACCEPTED state requires 'retrieval_half_life' or 'confidence_half_life'."
+                )
+
+
+class EFTEpistemologistGuard:
+    """Epistemologist: checks for anti-circularity and structural evidence."""
+
+    async def verify(self, content: str, project: str, fact_type: str, meta: dict[str, Any]) -> None:
+        justification = meta.get("justification", "")
+        just_str = ""
+        evidence_links = []
+        if isinstance(justification, dict):
+            just_str = justification.get("description", "")
+            evidence_links = justification.get("evidence_links", [])
+        elif hasattr(justification, "description"):
+            just_str = getattr(justification, "description", "")
+            evidence_links = getattr(justification, "evidence_links", [])
+        else:
+            just_str = str(justification)
+
+        just_str_lower = just_str.lower()
+        evidence_markers = ["sha3_256:", "ed25519:", "z3_proof:", "metric:", "test_hash:"]
+        has_evidence = any(marker in just_str_lower for marker in evidence_markers) or len(evidence_links) > 0
+        if not has_evidence:
+            raise ValueError(
+                "[EFT-Epistemologist] Retrieval Circularity: Justification lacks structural evidence or links."
+            )
+
+
+class EFTCryptographerGuard:
+    """Cryptographer: checks provenance, CORTEX-TAINT and cryptographic signatures."""
+
+    async def verify(self, content: str, project: str, fact_type: str, meta: dict[str, Any]) -> None:
+        provenance = meta.get("provenance")
+        if fact_type == "code":
+            if not provenance:
+                raise ValueError(
+                    "[EFT-Cryptographer] Critical KnowledgeObject (code) lacks 'provenance'."
+                )
+            if not (provenance.startswith("ast_sha3_256:") or provenance.startswith("raw_sha3_256:")):
+                raise ValueError(
+                    "[EFT-Cryptographer] Code provenance must be a deterministic AST signature (ast_sha3_256: or raw_sha3_256:)."
+                )
+        
+        if provenance and fact_type != "code":
+            if not (provenance.startswith("taint:") or provenance.startswith("sig:") or len(provenance) > 10):
+                raise ValueError(
+                    "[EFT-Cryptographer] Provenance format is invalid."
+                )
+
+
+class EFTVerificationGuardAdapter:
+    """EFT Protocol -> StoreGuard protocol.
+
+    Orchestrates a Quorum (2/3 consensus) of three sub-guards:
+    - EFTValidatorGuard: Syntax and metadata validation.
+    - EFTEpistemologistGuard: Evidence circularity and link checks.
+    - EFTCryptographerGuard: Provenance and taint checks.
+    """
+
+    def __init__(self) -> None:
+        self.validator = EFTValidatorGuard()
+        self.epistemologist = EFTEpistemologistGuard()
+        self.cryptographer = EFTCryptographerGuard()
+
+    async def check(
+        self,
+        content: str,
+        project: str,
+        fact_type: str,
+        meta: dict[str, Any],
+        conn: aiosqlite.Connection,
+        *,
+        tenant_id: str = "default",
+    ) -> None:
+        import os
+        if os.environ.get("CORTEX_SKIP_EXERGY_VALIDATION") == "1":
+            return
+        if fact_type not in ("knowledge", "code"):
+            return
+        guards = [
+            ("Validator", self.validator),
+            ("Epistemologist", self.epistemologist),
+            ("Cryptographer", self.cryptographer),
+        ]
+
+        failures = []
+        for name, guard in guards:
+            try:
+                await guard.verify(content, project, fact_type, meta)
+            except Exception as e:
+                failures.append((name, str(e)))
+
+        if len(failures) >= 2:
+            reasons = "; ".join(f"[{name}] {err}" for name, err in failures)
+            raise ValueError(
+                f"[EFT-Quorum] Retrieval Quorum failed (less than 2/3 passes). Failures: {reasons}"
+            )
+
+        if len(failures) == 1:
+            name, err = failures[0]
+            logger.warning(
+                f"[EFT-Quorum] Quorum met (2/3) but {name} rejected: {err}"
+            )
+
+
 # ─── Post-Store Hooks ─────────────────────────────────────────────
 
 
@@ -361,8 +485,8 @@ class SignalEmitHook:
             logger.debug("compact:needed check failed: %s", e)
 
 
-class EpistemicBreakerHook:
-    """Epistemic Circuit Breaker → PostStoreHook protocol."""
+class RetrievalBreakerHook:
+    """Retrieval Circuit Breaker → PostStoreHook protocol."""
 
     async def on_stored(
         self,
@@ -375,9 +499,9 @@ class EpistemicBreakerHook:
         source: str | None = None,
         db_path: str | None = None,
     ) -> None:
-        from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
+        from cortex.extensions.daemon.retrieval_breaker import RetrievalBreakerDaemon
 
-        await EpistemicBreakerDaemon.evaluate(  # type: ignore[reportAttributeAccessIssue]
+        await RetrievalBreakerDaemon.evaluate(  # type: ignore[reportAttributeAccessIssue]
             conn,
             tenant_id,
             project,

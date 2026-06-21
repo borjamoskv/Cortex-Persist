@@ -14,14 +14,15 @@ import aiosqlite
 
 from cortex.crypto import get_default_encrypter
 from cortex.database.core import connect
+from cortex.engine.causal.decision_parser import CausalInvariant, DecisionParser
 from cortex.engine.causality_models import (
     CONFIDENCE_LEVELS,
-    EDGE_DERIVED_FROM,
-    EDGE_TAINTED_BY,
-    EDGE_TRIGGERED_BY,
-    EDGE_UPDATED_FROM,
+    KRGSE_DERIVED_FROM,
+    KRGSE_TAINTED_BY,
+    KRGSE_TRIGGERED_BY,
+    KRGSE_UPDATED_FROM,
     Confidence,
-    EpistemicStatus,
+    ValidationStatus,
     LedgerEvent,
     TaintReport,
     TaintStatus,
@@ -37,17 +38,17 @@ except ImportError:
 logger = logging.getLogger("cortex.engine.causality")
 
 __all__ = [
-    "EDGE_DERIVED_FROM",
-    "EDGE_TAINTED_BY",
-    "EDGE_TRIGGERED_BY",
-    "EDGE_UPDATED_FROM",
+    "KRGSE_DERIVED_FROM",
+    "KRGSE_TAINTED_BY",
+    "KRGSE_TRIGGERED_BY",
+    "KRGSE_UPDATED_FROM",
     "AsyncCausalGraph",
     "AsyncCausalOracle",
     "CausalGraph",
     "CausalOracle",
     "Confidence",
     "CONFIDENCE_LEVELS",
-    "EpistemicStatus",
+    "ValidationStatus",
     "LedgerEvent",
     "TaintReport",
     "TaintStatus",
@@ -93,7 +94,7 @@ def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay: float
             continue
 
         if depth == 0:
-            event.status = EpistemicStatus.REFUTED
+            event.status = ValidationStatus.REFUTED
             event.trust_score = 0.0
         else:
             event.trust_score = max(0.0, event.trust_score * (1.0 - decay / max(depth, 1)))
@@ -140,6 +141,17 @@ class AsyncCausalGraph:
         await self.conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_causal_parent ON causal_edges(parent_id)"
         )
+        await self.conn.execute('''
+            CREATE TABLE IF NOT EXISTS taint_jobs (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                fact_id     INTEGER NOT NULL,
+                tenant_id   TEXT NOT NULL,
+                status      TEXT DEFAULT 'pending',
+                attempts    INTEGER DEFAULT 0,
+                created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at  TEXT
+            )
+        ''')
         if "tenant_id" in cols:
             await self.conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_causal_tenant ON causal_edges(tenant_id)"
@@ -150,6 +162,32 @@ class AsyncCausalGraph:
             )
         if commit:
             await self.conn.commit()
+
+    async def parse_and_record_decision(
+        self,
+        delta_payload: str,
+        fact_id: int,
+        context: dict[str, Any],
+        parent_id: int | None = None,
+        tenant_id: str = "default",
+    ) -> CausalInvariant:
+        """
+        [C5-REAL] Parses a structural decision delta and anchors it to the Retrieval Graph.
+        Delegates stochastic-to-deterministic translation to the DecisionParser.
+        """
+        parser = DecisionParser()
+        invariant = parser.parse_decision(delta_payload, context)
+
+        await self.record_edge(
+            fact_id=fact_id,
+            parent_id=parent_id,
+            edge_type=invariant.edge_type,
+            confidence=invariant.confidence_b60 / 60.0,
+            agent_id=invariant.metadata.get("agent_id"),
+            tenant_id=tenant_id,
+            fact_hash=invariant.delta_hash,
+        )
+        return invariant
 
     async def _causal_edge_columns(self) -> set[str]:
         cursor = await self.conn.execute("PRAGMA table_info(causal_edges)")
@@ -236,6 +274,53 @@ class AsyncCausalGraph:
             f"INSERT INTO causal_edges ({columns_sql}) VALUES ({placeholders_sql})",
             values,
         )
+
+        # 4. C5-REAL: Synchronous Topological Lock
+        if parent_id is not None:
+            await self._apply_topological_lock(fact_id, parent_id, tenant_id)
+
+    async def _apply_topological_lock(self, child_id: int, parent_id: int, tenant_id: str) -> None:
+        """Applies synchronous topological protection if a child node is more stable than its parent."""
+        try:
+            from cortex.engine.immunity.origin_policy import get_policy
+            meta_col = await self._metadata_column()
+            if not meta_col:
+                return
+
+            enc = get_default_encrypter()
+            nodes_data = await self._fetch_nodes_data([child_id, parent_id], tenant_id, meta_col, has_tenant=True)
+
+            if child_id not in nodes_data or parent_id not in nodes_data:
+                return
+
+            child_data = nodes_data[child_id]
+            parent_data = nodes_data[parent_id]
+
+            child_meta = child_data["metadata"]
+            parent_meta = parent_data["metadata"]
+
+            child_origin = child_meta.get("origin_type", "agent_scratchpad")
+            child_policy = get_policy(child_origin)
+
+            parent_origin = parent_meta.get("origin_type", "agent_scratchpad")
+            parent_policy = get_policy(parent_origin)
+
+            if child_policy.criticality_floor > parent_policy.criticality_floor:
+                parent_meta["topological_lock_by"] = child_id
+                parent_meta["locked_at_floor"] = child_policy.criticality_floor
+
+                if parent_data["is_encrypted"]:
+                    new_meta_str = enc.encrypt_json(parent_meta, tenant_id=tenant_id)
+                else:
+                    new_meta_str = json.dumps(parent_meta)
+
+                # Use SQLite MAX correctly (or use CASE statement if MAX is not available for standard update)
+                # Note: SQLite `MAX()` scalar function is available.
+                sql = f"UPDATE facts SET {meta_col} = ?, exergy_score = MAX(exergy_score, ?) WHERE id = ? AND tenant_id = ?"
+                await self.conn.execute(sql, (new_meta_str, child_policy.criticality_floor, parent_id, tenant_id))
+
+        except Exception as e:
+            logger.error("Failed to apply topological lock: %s", e)
 
     async def temporal_causal_chain(
         self,
@@ -367,6 +452,73 @@ class AsyncCausalGraph:
             confidence_changes=changes,
         )
 
+    async def propagate_taint_background(
+        self,
+        fact_id: int,
+        tenant_id: str = "default",
+        floor_to_c1: bool = True,
+    ) -> None:
+        """
+        [R10] Encola la propagación de taint/orphaning en la tabla transaccional.
+        Evita bloqueos en el hilo principal y elimina fallos silenciosos (sin create_task ciego).
+        """
+        import time
+        from datetime import datetime, timezone
+        now_iso = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        
+        await self.ensure_table(commit=False)
+        await self.conn.execute(
+            """INSERT INTO taint_jobs (fact_id, tenant_id, status, created_at)
+               VALUES (?, ?, 'pending', ?)""",
+            (fact_id, tenant_id, now_iso)
+        )
+        await self.conn.commit()
+        logger.info(f"Taint propagation job queued for fact {fact_id}")
+
+    async def process_taint_jobs_daemon(self, max_jobs: int = 50) -> int:
+        """
+        Worker que corre en background (ej. invocable cada N segundos).
+        Extrae trabajos pendientes o fallidos y los procesa con reintentos.
+        """
+        import time
+        from datetime import datetime, timezone
+        
+        cursor = await self.conn.execute(
+            """SELECT id, fact_id, tenant_id, attempts FROM taint_jobs 
+               WHERE status = 'pending' OR (status = 'failed' AND attempts < 3)
+               ORDER BY created_at ASC LIMIT ?""",
+            (max_jobs,)
+        )
+        jobs = await cursor.fetchall()
+        
+        processed = 0
+        for job_id, fact_id, tenant_id, attempts in jobs:
+            now_iso = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+            await self.conn.execute(
+                "UPDATE taint_jobs SET status = 'running', updated_at = ? WHERE id = ?",
+                (now_iso, job_id)
+            )
+            await self.conn.commit()
+            
+            try:
+                await self.propagate_taint(fact_id, tenant_id, floor_to_c1=True)
+                now_iso = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+                await self.conn.execute(
+                    "UPDATE taint_jobs SET status = 'done', updated_at = ? WHERE id = ?",
+                    (now_iso, job_id)
+                )
+            except Exception as e:
+                logger.error(f"Taint job {job_id} failed for fact {fact_id}: {e}")
+                now_iso = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+                await self.conn.execute(
+                    "UPDATE taint_jobs SET status = 'failed', attempts = ?, updated_at = ? WHERE id = ?",
+                    (attempts + 1, now_iso, job_id)
+                )
+            await self.conn.commit()
+            processed += 1
+            
+        return processed
+
     async def _get_descendant_ids(self, fact_id: int, tenant_id: str) -> set[int]:
         """Fetch all descendants using a recursive CTE."""
         sql = """
@@ -381,7 +533,7 @@ class AsyncCausalGraph:
         SELECT id FROM descendants
         """
         ids = {fact_id}
-        async with self.conn.execute(sql, (fact_id, tenant_id, EDGE_TAINTED_BY)) as cursor:
+        async with self.conn.execute(sql, (fact_id, tenant_id, KRGSE_TAINTED_BY)) as cursor:
             async for row in cursor:
                 ids.add(int(row[0]))
         return ids
@@ -397,7 +549,7 @@ class AsyncCausalGraph:
             SELECT fact_id, parent_id FROM causal_edges
             WHERE fact_id IN ({local_placeholders}) AND edge_type != ? AND tenant_id = ?
             """
-            async with self.conn.execute(sql, (*chunk, EDGE_TAINTED_BY, tenant_id)) as cursor:
+            async with self.conn.execute(sql, (*chunk, KRGSE_TAINTED_BY, tenant_id)) as cursor:
                 async for child_id, parent_id in cursor:
                     if parent_id is not None:
                         edges.setdefault(int(child_id), []).append(int(parent_id))
@@ -619,7 +771,7 @@ class AsyncCausalGraph:
             if chg["fact_id"] == source_id:
                 continue
 
-            row = [chg["fact_id"], source_id, None, EDGE_TAINTED_BY, None]
+            row = [chg["fact_id"], source_id, None, KRGSE_TAINTED_BY, None]
             if has_tenant:
                 row.append(tenant_id)
             params.append(tuple(row))

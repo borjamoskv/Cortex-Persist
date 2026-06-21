@@ -5,7 +5,7 @@ from cortex.engine.right_brain import HeuristicEngine
 from cortex.extensions.evolution.agents import AgentDomain
 from cortex.extensions.evolution.free_energy import FreeEnergyState
 
-logging.basicConfig(level=logging.INFO)
+setup_cortex_logging()
 logger = logging.getLogger(__name__)
 
 

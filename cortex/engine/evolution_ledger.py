@@ -331,7 +331,7 @@ class EvolutionLedger:
             self._record_count += 1
 
             logger.debug(
-                "EVO-LEDGER seq=%d agent=%d hash=%s…%s (write: %.2fms)",
+                "EVO-LKRGSER seq=%d agent=%d hash=%s…%s (write: %.2fms)",
                 self._sequence,
                 agent_idx,
                 new_hash[:8],

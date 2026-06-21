@@ -16,7 +16,7 @@ async def test_logop_consensus_math():
 
     assert math.isclose(_sigmoid(0.0), 0.5, abs_tol=1e-5)
 
-    # Epistemic veto test
+    # Retrieval veto test
     # 3 highly unreliable agents vote TRUE
     # 1 highly reliable agent votes FALSE
 

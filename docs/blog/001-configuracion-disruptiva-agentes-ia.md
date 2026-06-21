@@ -412,7 +412,7 @@ El futuro de la configuración de agentes IA no es un prompt más largo ni una b
 
 **CORTEX** está construyendo la infraestructura de confianza que hace posible todo esto.
 
-→ [cortexpersist.org](https://cortexpersist.org) | [GitHub](https://github.com/borjamoskv/Cortex-Persist) | [Docs](https://github.com/borjamoskv/Cortex-Persist/tree/main/docs)
+→ [cortexpersist.com](https://cortexpersist.com) | [GitHub](https://github.com/borjamoskv/Cortex-Persist) | [Docs](https://github.com/borjamoskv/Cortex-Persist/tree/main/docs)
 
 ---
 

@@ -87,7 +87,7 @@ def parse_vtt_and_analyze(vtt_file: str, video_id: str):
             f"[0x01_CORE] Disonancia extraída: Video {video_id}. Victim({len(victim_timestamps)}) -> CTA({len(cta_timestamps)})"
         )
     else:
-        print(f"[0x02_EDGE] Sin vector de victimización clara en {video_id}.")
+        print(f"[0x02_KRGSE] Sin vector de victimización clara en {video_id}.")
 
     conn.close()
     if os.path.exists(vtt_file):

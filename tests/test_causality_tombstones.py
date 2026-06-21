@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-from cortex.engine.causality import CausalGraph, EpistemicStatus, LedgerEvent, propagate_refutation
+from cortex.engine.causality import CausalGraph, ValidationStatus, LedgerEvent, propagate_refutation
 
 
 def test_refuted_propagates_taint():
@@ -8,21 +8,21 @@ def test_refuted_propagates_taint():
     e1 = LedgerEvent(
         event_id="e1",
         parent_ids=[],
-        status=EpistemicStatus.TEST_PASSED,
+        status=ValidationStatus.TEST_PASSED,
         trust_score=1.0,
         created_at="2026-01-01",
     )
     e2 = LedgerEvent(
         event_id="e2",
         parent_ids=["e1"],
-        status=EpistemicStatus.CONJECTURE,
+        status=ValidationStatus.CONJECTURE,
         trust_score=0.8,
         created_at="2026-01-02",
     )
     e3 = LedgerEvent(
         event_id="e3",
         parent_ids=["e2"],
-        status=EpistemicStatus.TEST_PASSED,
+        status=ValidationStatus.TEST_PASSED,
         trust_score=0.9,
         created_at="2026-01-03",
     )
@@ -33,7 +33,7 @@ def test_refuted_propagates_taint():
 
     propagate_refutation(graph, "e1", decay=0.35)
 
-    assert graph["e1"].status == EpistemicStatus.REFUTED
+    assert graph["e1"].status == ValidationStatus.REFUTED
     assert graph["e1"].trust_score == 0.0
 
     # e2 is depth 1 -> trust = 0.8 * (1 - 0.35) = 0.52, tainted = True

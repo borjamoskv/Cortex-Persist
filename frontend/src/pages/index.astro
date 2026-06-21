@@ -1,0 +1,328 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import AwwwardsHero from '../components/landing/AwwwardsHero.tsx';
+import PreloadScreen from '../components/landing/PreloadScreen.tsx';
+import TelemetryWidget from '../components/TelemetryWidget.tsx';
+
+const navLinks = [
+	{ href: '#quickstart', label: 'Quickstart' },
+	{ href: '#features', label: 'Features' },
+	{ href: '#why-cortex', label: 'Why CORTEX?' },
+	{ href: '#sdks', label: 'SDKs' },
+	{ href: '/pricing', label: 'Pricing' },
+	{ href: '/ultramap', label: 'Ultramap' },
+	{ href: '/vsa', label: 'VSA' },
+	{ href: '/blog', label: 'Blog' },
+];
+
+const heroProofs = [
+	{
+		value: 'Agent Accountability',
+		label: 'Prove exactly what your agent knew when it made a decision.',
+	},
+	{
+		value: 'Tamper-Evident',
+		label: 'Hash-chains guarantee the decision record is completely intact.',
+	},
+	{
+		value: 'Deterministic Replay',
+		label: 'Reconstruct agent state exactly as it was during the failure.',
+	},
+];
+
+const signalCards = [
+	{
+		index: '01',
+		label: 'Ingest',
+		title: 'Drop in and track',
+		body: 'Send events from any agent or system. We handle the ledger, indexing, and storage.',
+	},
+	{
+		index: '02',
+		label: 'Prove',
+		title: 'Tamper-evident record',
+		body: 'Every decision is cryptographically sealed. Detect silent mutation instantly.',
+	},
+	{
+		index: '03',
+		label: 'Replay',
+		title: 'Reconstruct state',
+		body: 'Query the API to rebuild system state and prove exactly what happened when an agent failed.',
+	},
+];
+
+const pricingCards = [
+	{
+		name: 'Core (Local)',
+		price: '$0 (Apache-2.0)',
+		body: 'Plan local gratuito. Desarrollo y pruebas individuales sin conexión.',
+		items: ['Uso local (100k spans/mes)', 'Retención local', '1 seat', 'Cero fuga de datos'],
+		cta: 'Descarga OSS',
+		href: 'https://github.com/borjamoskv/Cortex-Persist',
+	},
+	{
+		name: 'Starter SaaS',
+		price: '$15/mo base',
+		body: 'Trazas a prueba de manipulación para desarrolladores pragmáticos.',
+		items: ['100k spans/mes + uso', '14 días retención', 'Hasta 3 seats', 'Sincronización Langfuse'],
+		cta: 'Start Free Plan',
+		href: '/api-key',
+	},
+	{
+		name: 'Pro (SaaS)',
+		price: 'From $49/mo',
+		tag: 'Recommended',
+		body: 'Para equipos en crecimiento y validación de sistemas de producción.',
+		items: ['1M spans/mes + uso', '30 días retención', 'Hasta 10 seats', 'Replay orchestration'],
+		cta: 'Deploy Pro',
+		href: '/api-key',
+		featured: true,
+	},
+	{
+		name: 'Enterprise',
+		price: '$25k - 120k/yr',
+		body: 'Gobernanza de IA en VPC para industrias reguladas.',
+		items: ['Spans personalizables', 'Retención custom', 'SOC 2 Type II ready', 'EU AI Act Art. 12 compliance'],
+		cta: 'Architecture Review',
+		href: '/pilot-scope',
+	},
+];
+
+const githubUrl = 'https://github.com/borjamoskv/Cortex-Persist';
+const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
+
+// C5-REAL Edge Personalization
+const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
+---
+
+<SiteLayout
+	title="CORTEX Persist | Know exactly what your AI agents did."
+	description="Track every decision, prove integrity, and replay failures without relying on logs, screenshots, or human memory."
+	canonical="https://cortexpersist.com/"
+>
+	<main class="landing-shell">
+		<PreloadScreen client:load />
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home">
+				<span class="brand-mark">CP</span>
+				<span class="brand-copy">
+					<strong>CORTEX Persist</strong>
+					<span>Verifiable event ledger</span>
+				</span>
+			</a>
+
+			<nav class="site-nav" aria-label="Primary">
+				{
+					navLinks.map((link) => (
+						<a class="nav-link" href={link.href}>
+							{link.label}
+						</a>
+					))
+				}
+			</nav>
+
+			<div class="masthead-actions">
+				<span class="microcopy" style="color: var(--accent-soft); font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; margin-right: 1rem; text-transform: uppercase; letter-spacing: 0.05em; display: none; @media (min-width: 768px) { display: inline-block; }">
+					EDGE: {country}
+				</span>
+				<a class="button-tertiary" href={githubUrl} target="_blank" rel="noreferrer">
+					Docs
+				</a>
+				<a class="button-primary" href="/api-key">
+					Get API Key
+				</a>
+			</div>
+		</header>
+
+		<AwwwardsHero client:load />
+
+		<section class="signal-grid" id="features">
+			{
+				signalCards.map((card) => (
+					<article class="signal-card surface">
+						<div class="card-meta">
+							<span class="card-index">{card.index}</span>
+							<span class="surface-label">{card.label}</span>
+						</div>
+						<h2>{card.title}</h2>
+						<p class="surface-copy">{card.body}</p>
+					</article>
+				))
+			}
+		</section>
+
+		<section class="section-frame surface" id="why-cortex">
+			<div class="section-heading">
+				<p class="section-kicker">The Gap</p>
+				<h2>Why not just use logs?</h2>
+				<p>
+					Traditional observability tells you something happened. CORTEX proves exactly what the agent knew when it made the decision, and guarantees nobody changed the story afterwards.
+				</p>
+			</div>
+
+			<div class="fit-layout">
+				<!-- Traditional Logs -->
+				<article class="fit-card surface-sunken">
+					<p class="surface-label">Traditional Logs (e.g. Datadog, Elastic)</p>
+					<ul class="surface-list">
+						<li style="color: var(--text-muted); text-decoration: line-through;">Mutable text strings that can be altered or deleted.</li>
+						<li style="color: var(--text-muted); text-decoration: line-through;">Fragmented context across different services.</li>
+						<li style="color: var(--text-muted); text-decoration: line-through;">Nearly impossible to replay the exact state.</li>
+						<li style="color: var(--text-muted); text-decoration: line-through;">Weak or non-existent provenance.</li>
+					</ul>
+				</article>
+
+				<!-- CORTEX -->
+				<article class="fit-card surface-sunken" style="border: 1px solid var(--accent);">
+					<p class="surface-label" style="color: var(--accent);">CORTEX Event Ledger</p>
+					<ul class="surface-list">
+						<li><strong>Cryptológicamente sellados</strong> con SHA-256 hash chains.</li>
+						<li><strong>Reconstrucción determinística</strong> (Replay) del estado del agente.</li>
+						<li><strong>MetaArbiter</strong> para resolver divergencias métricas de trayectorias.</li>
+						<li><strong>Compliance Nativo</strong>: SOC 2 Type II ready & EU AI Act Art. 12.</li>
+					</ul>
+				</article>
+			</div>
+		</section>
+
+		<section class="section-frame surface" id="sdks">
+			<div class="section-heading">
+				<p class="section-kicker">Developer SDKs</p>
+				<h2>Integrate CORTEX in 30 seconds.</h2>
+				<p>
+					Production-ready npm packages to inject verifiable event logging directly into your current stack.
+				</p>
+			</div>
+
+			<div class="fit-layout">
+				<!-- Core SDK -->
+				<article class="fit-card surface-sunken" style="min-height: auto;">
+					<p class="surface-label">Core SDK</p>
+					<h3>cortex-persist</h3>
+					<p>The core API client for Node.js and Edge environments.</p>
+					<pre class="console-block"><code>npm install cortex-persist</code></pre>
+					<p class="microcopy" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; margin-top: 1rem; color: var(--accent-soft); line-height: 1.5;">
+						import &#123; CortexClient &#125; from 'cortex-persist';
+						<br/><br/>
+						const cortex = new CortexClient(&#123; apiKey: process.env.CORTEX_API_KEY &#125;);
+						<br/>
+						await cortex.logEvent(&#123; type: 'agent.decision', actor: 'agent-1' &#125;);
+					</p>
+				</article>
+
+				<!-- LangChain Plugin -->
+				<article class="fit-card surface-sunken" style="min-height: auto;">
+					<p class="surface-label">Plugin</p>
+					<h3>cortex-persist-langchain</h3>
+					<p>Conecta la persistencia CORTEX directamente en el middleware de LangChain.</p>
+					<pre class="console-block"><code>npm install cortex-persist-langchain</code></pre>
+					<p class="microcopy" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; margin-top: 1rem; color: var(--accent-soft); line-height: 1.5;">
+						import &#123; CortexCallbackHandler &#125; from 'cortex-persist-langchain';
+						<br/><br/>
+						const handler = new CortexCallbackHandler(&#123; apiKey: process.env.CORTEX_API_KEY &#125;);
+					</p>
+				</article>
+
+				<!-- Langfuse Integration -->
+				<article class="fit-card surface-sunken" style="min-height: auto;">
+					<p class="surface-label">Integración</p>
+					<h3>Sincronización Langfuse</h3>
+					<p>Transforma trazas mutables de Langfuse en ledgers criptográficos inmutables sin cambiar tu UI.</p>
+					<pre class="console-block"><code>export CORTEX_LANGFUSE_SYNC=true</code></pre>
+					<p class="microcopy" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; margin-top: 1rem; color: var(--accent-soft); line-height: 1.5;">
+						[Agent] -> [Langfuse SDK] -> [CORTEX OTel Interceptor] -> Ledger Inmutable
+					</p>
+				</article>
+			</div>
+		</section>
+
+		<section class="section-frame surface" id="pricing">
+			<div class="section-heading">
+				<p class="section-kicker">Pricing</p>
+				<h2>Clear, transparent pricing.</h2>
+				<p>Start free. Scale as your system grows.</p>
+			</div>
+
+			<div class="pricing-grid-home">
+				{
+					pricingCards.map((card) => (
+						<article class:list={['pricing-card', 'surface-sunken', card.featured && 'pricing-card-featured']}>
+							<div class="pricing-head">
+								<div class="pricing-head-copy">
+									<h3>{card.name}</h3>
+									<p class="plan-price">{card.price}</p>
+								</div>
+								{card.tag && <span class="plan-tag">{card.tag}</span>}
+							</div>
+							<p>{card.body}</p>
+							<ul class="surface-list">
+								{card.items.map((item) => <li>{item}</li>)}
+							</ul>
+							<a
+								class:list={[card.featured ? 'button-primary' : 'button-secondary', 'pricing-cta']}
+								href={card.href}
+								target={card.href.startsWith('http') ? '_blank' : undefined}
+								rel={card.href.startsWith('http') ? 'noreferrer' : undefined}
+							>
+								{card.cta}
+							</a>
+						</article>
+					))
+				}
+			</div>
+
+			<div style="margin-top: 3rem; text-align: center;">
+				<a class="button-tertiary" href="/pricing" style="font-size: 1rem; border-bottom: 1px solid var(--accent); padding-bottom: 2px;">
+					Ver comparación detallada, argumentos de ventas y FAQs →
+				</a>
+			</div>
+		</section>
+
+		<style>
+			.pricing-grid-home {
+				display: grid;
+				gap: 1rem;
+				grid-template-columns: 1fr;
+			}
+			@media (min-width: 768px) {
+				.pricing-grid-home {
+					grid-template-columns: repeat(2, 1fr);
+				}
+			}
+			@media (min-width: 1200px) {
+				.pricing-grid-home {
+					grid-template-columns: repeat(4, 1fr);
+				}
+			}
+		</style>
+
+		<section class="cta-banner surface">
+			<div>
+				<p class="section-kicker">Get Started</p>
+				<h2>Start logging events today.</h2>
+				<p>
+					Drop in the API key and get instant provenance for your most critical agent workflows.
+				</p>
+			</div>
+
+			<div class="cta-actions">
+				<div class="footer-actions" style="margin-top: 0;">
+					<a class="button-primary" href="/api-key">Get API Key</a>
+					<a class="button-secondary" href={docsUrl}>Read the Docs</a>
+				</div>
+			</div>
+		</section>
+
+		<footer class="site-footer">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers. <span style="opacity:0.5; margin-left:8px;">| Powered by Cloudflare Edge</span></p>
+			<div class="footer-links">
+				<a href={githubUrl} target="_blank" rel="noreferrer">GitHub</a>
+				<a href={docsUrl} target="_blank" rel="noreferrer">Docs</a>
+				<a href="/certificaciones">Certificaciones</a>
+				<a href="https://agents.archi" target="_blank" rel="noreferrer">Audit Registry</a>
+			</div>
+		</footer>
+
+		<TelemetryWidget client:load />
+	</main>
+</SiteLayout>

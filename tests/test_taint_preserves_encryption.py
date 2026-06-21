@@ -11,7 +11,7 @@ import aiosqlite
 import pytest
 
 from cortex.crypto.aes import CortexEncrypter
-from cortex.engine.causality import EDGE_DERIVED_FROM, AsyncCausalGraph, TaintStatus
+from cortex.engine.causality import KRGSE_DERIVED_FROM, AsyncCausalGraph, TaintStatus
 
 # Use a fixed 32-byte master key for deterministic testing
 TEST_MASTER_KEY = b"0" * 32
@@ -81,7 +81,7 @@ async def test_taint_preserves_encrypted_metadata(db, encrypter, monkeypatch):
     )
     await db.execute(
         "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) VALUES (?, ?, ?, ?)",
-        (2, 1, EDGE_DERIVED_FROM, tenant),
+        (2, 1, KRGSE_DERIVED_FROM, tenant),
     )
     await db.commit()
 

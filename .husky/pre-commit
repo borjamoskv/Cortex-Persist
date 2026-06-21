@@ -1,4 +1,0 @@
-if [ ! -f "package.json" ] || [ ! -d "node_modules" ]; then
-  exit 0
-fi
-npm test

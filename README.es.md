@@ -209,4 +209,4 @@ if __name__ == "__main__":
 *   [**Referencia de API**](docs/api.md) — Primitivas de SDK y endpoints REST.
 
 ---
-> **LICENCIA:** Apache-2.0 | **OPERADOR:** borjamoskv | [cortexpersist.com](https://cortexpersist.com)
+> **LICENCIA:** Apache-2.0 | **OPERADOR:** borjamoskv | [cortexpersist.dev](https://cortexpersist.dev)

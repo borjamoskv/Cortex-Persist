@@ -10,7 +10,7 @@ logger = logging.getLogger("cortex.engine.auth_gateway")
 
 class QuorumGateway:
     """
-    Byzantine-Aware Epistemic Transition Gateway.
+    Byzantine-Aware Retrieval Transition Gateway.
     Implements f < n/3 BFT consensus using multi-signature threshold validation.
     """
 

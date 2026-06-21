@@ -234,14 +234,14 @@ class VaultCracker:
         return findings
 
 
-class EpistemicJustice:
-    """Vector: Epistemic Injustice Audit (Miranda Fricker Protocol).
+class RetrievalJustice:
+    """Vector: Retrieval Injustice Audit (Miranda Fricker Protocol).
 
     Detects patterns where subjects are discredited or misunderstood due to
     identity prejudice (Testimonial) or lack of conceptual resources (Hermeneutical).
     """
 
-    name = "epistemic_justice"
+    name = "retrieval_justice"
 
     async def attack(self, system: Any, context: dict[str, Any]) -> list[str]:
         findings = []
@@ -276,4 +276,4 @@ class EpistemicJustice:
 
 
 RED_TEAM_SWARM = {v.name: v for v in (OOMKiller(), Intruder(), EntropyDemon(), ChronosSniper())}
-COMPLIANCE_SIEGE_SWARM = {v.name: v for v in (LedgerPoisoner(), VaultCracker(), EpistemicJustice())}
+COMPLIANCE_SIEGE_SWARM = {v.name: v for v in (LedgerPoisoner(), VaultCracker(), RetrievalJustice())}

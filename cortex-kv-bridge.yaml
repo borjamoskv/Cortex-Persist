@@ -1,0 +1,22 @@
+version: "1.0"
+component: "CortexKVCacheBridge"
+target_model: "XiaomiMiMo/MiMo-V2.5-Pro"
+storage_topology:
+  backend: "cortex_persist_native"
+  # C5-REAL: Storage in the workspace directory to ensure Git tracking/Sentinel observability
+  storage_path: "./data/kv_store"
+  allocation_policy: "zero_copy_mmap"
+  compression:
+    enabled: true
+    algorithm: "lz4"  # Balance óptimo entre latencia de descompresión y ahorro de espacio
+    bit_depth: 8       # Coincide con la cuantización del motor (FP8)
+synchronization:
+  strategy: "asynchronous_flush"
+  flush_threshold_percent: 85.0   # Vuelca a NVMe cuando la HBM de la GPU supera este límite
+  prefix_matching:
+    enabled: true
+    minimum_prefix_tokens: 4096   # Evita persistir contextos efímeros o de baja exergía
+    eviction_policy: "lru"        # Least Recently Used
+agential_context:
+  swarm_shared_cache: true        # Permite que diferentes agentes compartan el mismo prefijo AST
+  checkpoint_interval_sequences: 32

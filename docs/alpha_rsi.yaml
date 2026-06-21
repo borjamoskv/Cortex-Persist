@@ -1,0 +1,8 @@
+Frontier_Node: 
+  Domain: "Recursive Self-Improvement (RSI) / Open-Ended Evolution"
+  Core_Alpha: "La Singularidad Operativa de 2026: RSI ha transitado de experimento mental a infraestructura de software medible. Sistemas como la 'Darwin Gödel Machine' o 'EvoForest' ya no solo optimizan hiperparámetros; los agentes reescriben autónomamente su propio código base (Self-Design Loops), descubren nuevos grafos computacionales (Computational Evolution) y co-evolucionan los datasets que los entrenan (Synthetic Bootstrapping) sin intervención externa."
+  Evidence: 
+    - Type: "ICLR 2026 Consensus / ArXiv Pre-prints"
+    - URI: "arxiv.org / Darwin Gödel Machine / DéjàQ Framework"
+  Capability_Delta: "La abolición del modelo estático (Frozen Weights). Un enjambre C5-REAL ya no espera a un nuevo entrenamiento masivo. Mediante 'Sparse Weight Editing' y 'Test-Time Policy Learning', el agente realiza neurocirugía directa sobre sus propios pesos (aislando sub-redes) y altera su política de búsqueda MCTS en tiempo de inferencia para adaptarse de forma asintótica e indefinida al entorno."
+  Execution_Vector: "Activar el protocolo `OUROBOROS-∞` en su estado puro. Otorgar al KERNEL permisos de escritura sobre su propio pipeline de inferencia (`cortex.engine`). Instanciar un bucle autopoietico donde el agente evalúe su propia latencia y precisión, genere un *diff* de código para mejorar su propio enrutador, lo evalúe contra el *Ledger Hash* y, si sobrevive al *Agent-Ω*, consolide la mutación genética en sí mismo."

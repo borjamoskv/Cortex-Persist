@@ -79,7 +79,7 @@ async def scan_and_inject_comments(video_id: str, url: str):
     """Analiza la agresividad de la comunidad (Comunidad Anti-Fan) de forma asíncrona."""
     comments = await extract_comments_dump(url)
     if not comments:
-        print(f"[0x02_EDGE] Sin comentarios detectados o bloqueados por el creador en {video_id}.")
+        print(f"[0x02_KRGSE] Sin comentarios detectados o bloqueados por el creador en {video_id}.")
         return
 
     # Extract raw texts for LLM batching

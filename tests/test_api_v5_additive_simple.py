@@ -28,14 +28,14 @@ def mock_engine():
             "id": 1,
             "project": "test",
             "content": "v1",
-            "fact_type": "knowledge",
+            "fact_type": "fact",
             "created_at": "2024-01-01",
         },
         {
             "id": 2,
             "project": "test",
             "content": "v2",
-            "fact_type": "knowledge",
+            "fact_type": "fact",
             "created_at": "2024-01-02",
         },
     ]

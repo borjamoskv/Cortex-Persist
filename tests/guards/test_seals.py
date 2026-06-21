@@ -173,7 +173,7 @@ async def test_seal_4_timeout():
             assert passed is False
 
 
-# --- SEAL 5: LEDGER ---
+# --- SEAL 5: LKRGSER ---
 
 
 @pytest.mark.asyncio

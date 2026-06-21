@@ -5,14 +5,14 @@ import json
 from cortex.engine.causality import (
     CausalGraph,
     LedgerEvent,
-    EpistemicStatus,
+    ValidationStatus,
     propagate_refutation,
     AsyncCausalGraph,
     TaintStatus,
     Confidence,
     _downgrade_confidence,
-    EDGE_DERIVED_FROM,
-    EDGE_TAINTED_BY,
+    KRGSE_DERIVED_FROM,
+    KRGSE_TAINTED_BY,
 )
 
 
@@ -28,8 +28,8 @@ def test_confidence_downgrade():
 def test_causal_graph_sync():
     """Validates synchronous CausalGraph operations."""
     graph = CausalGraph()
-    e1 = LedgerEvent("e1", [], EpistemicStatus.TEST_PASSED, 1.0, "2023-01-01")
-    e2 = LedgerEvent("e2", ["e1"], EpistemicStatus.CONJECTURE, 0.8, "2023-01-02")
+    e1 = LedgerEvent("e1", [], ValidationStatus.TEST_PASSED, 1.0, "2023-01-01")
+    e2 = LedgerEvent("e2", ["e1"], ValidationStatus.CONJECTURE, 0.8, "2023-01-02")
 
     graph.add_event(e1)
     graph.add_event(e2)
@@ -42,9 +42,9 @@ def test_causal_graph_sync():
 def test_propagate_refutation():
     """Validates refutation propagation and trust score decay."""
     graph = CausalGraph()
-    e1 = LedgerEvent("e1", [], EpistemicStatus.TEST_PASSED, 1.0, "t1")
-    e2 = LedgerEvent("e2", ["e1"], EpistemicStatus.CONJECTURE, 1.0, "t2")
-    e3 = LedgerEvent("e3", ["e2"], EpistemicStatus.CONJECTURE, 1.0, "t3")
+    e1 = LedgerEvent("e1", [], ValidationStatus.TEST_PASSED, 1.0, "t1")
+    e2 = LedgerEvent("e2", ["e1"], ValidationStatus.CONJECTURE, 1.0, "t2")
+    e3 = LedgerEvent("e3", ["e2"], ValidationStatus.CONJECTURE, 1.0, "t3")
 
     graph.add_event(e1)
     graph.add_event(e2)
@@ -52,7 +52,7 @@ def test_propagate_refutation():
 
     propagate_refutation(graph, "e1", decay=0.5)
 
-    assert graph["e1"].status == EpistemicStatus.REFUTED
+    assert graph["e1"].status == ValidationStatus.REFUTED
     assert graph["e1"].trust_score == 0.0
 
     assert graph["e2"].tainted is True
@@ -143,7 +143,7 @@ async def test_propagate_taint_async(tmp_path):
 
             # Verify audit edges
             async with conn.execute(
-                "SELECT COUNT(*) FROM causal_edges WHERE edge_type = ?", (EDGE_TAINTED_BY,)
+                "SELECT COUNT(*) FROM causal_edges WHERE edge_type = ?", (KRGSE_TAINTED_BY,)
             ) as cursor:
                 row = await cursor.fetchone()
                 assert row[0] == 2  # Taint edges from 1 to 2 and 1 to 3

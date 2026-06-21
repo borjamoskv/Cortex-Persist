@@ -1,0 +1,24 @@
+{
+  "name": "CORTEX Code Governance Gateway",
+  "url": "https://cortexpersist.com",
+  "hook_attributes": {
+    "url": "https://api.cortexpersist.com/api/v1/webhook/github",
+    "active": true
+  },
+  "redirect_url": "https://cortexpersist.com/setup",
+  "public": false,
+  "default_permissions": {
+    "pull_requests": "write",
+    "contents": "read",
+    "issues": "read",
+    "statuses": "write",
+    "checks": "write",
+    "metadata": "read"
+  },
+  "default_events": [
+    "pull_request",
+    "check_suite",
+    "check_run"
+  ],
+  "description": "The CI/CD Firewall for LLM-Generated Code. Prevents AI changes from silently breaking production by enforcing policy and assigning risk scores to PRs."
+}

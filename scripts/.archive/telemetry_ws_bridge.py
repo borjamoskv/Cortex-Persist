@@ -25,7 +25,7 @@ except ImportError:
     subprocess.run(["pip", "install", "websockets"], check=True)
     import websockets
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - CORTEX-WS - %(message)s")
+setup_cortex_logging()
 
 
 def _audit_payload_inline(payload: dict, event_id: str) -> list[dict]:

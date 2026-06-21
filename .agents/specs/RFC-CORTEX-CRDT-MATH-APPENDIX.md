@@ -120,6 +120,17 @@ When a veto survives L3 audit, a Zero-Knowledge proof SHOULD be generated attest
 
 Without revealing the specific evidence content. **Formal ZK circuit specification: PENDING.**
 
+### 3.5 Epistemic Challenge Saturation Penalty (Logit Model)
+
+When a `ChallengeMessage` $C$ is introduced against a Belief Object with probability $P$, the penalty is calculated in log-odds (logit) space to ensure asymptotic saturation and prevent arbitrary $P=0$ collapse without L3 authorization.
+
+1. Convert $P$ to logit: $\text{logit}(P) = \ln\left(\frac{P}{1-P}\right)$
+2. Compute the challenge impact $\lambda(C) = w_c \cdot \text{confidence}(C) \cdot |E_C|$, where $E_C$ is the set of valid evidence BOs.
+3. Apply penalty: $\text{logit}(P') = \text{logit}(P) - \lambda(C)$
+4. Convert back to probability: $P' = \frac{1}{1 + e^{-\text{logit}(P')}}$
+
+This guarantees that multiple challenges exponentially decay $P'$ towards $\epsilon_{\min}$ without prematurely annihilating the belief.
+
 ---
 
 ## 4. Tombstones & Garbage Collection

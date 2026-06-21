@@ -42,7 +42,11 @@ CREATE TABLE IF NOT EXISTS facts (
     quadrant TEXT DEFAULT 'ACTIVE',
     storage_tier TEXT DEFAULT 'HOT',
     exergy_score REAL DEFAULT 1.0,
-    updated_at TEXT
+    updated_at TEXT,
+    kinetic_mass REAL DEFAULT 1.0,
+    last_accessed_at REAL,
+    last_boosted_at REAL,
+    access_count INTEGER DEFAULT 0
 );
 """
 

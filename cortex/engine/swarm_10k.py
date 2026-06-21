@@ -104,6 +104,32 @@ class CenturionSuperv:
         self.bus.update_metrics(self.metrics.exergy, self.last_latency_ms, self.metrics.uncertainty)
         return self.metrics.exergy
 
+    async def intercept_and_latent_compute(self, task: dict, semantic_space: Any) -> Any:
+        """
+        Intercepta la carga de la tarea antes de invocar al oráculo léxico.
+        Deriva el procesamiento a Latent Thought Flow (NF-CoT).
+        Se previene la generación de trazas `[THINK]` al operar directamente
+        en el grafo base-60 hasta alcanzar el consenso BFT.
+        """
+        from cortex.compat.optional import np
+
+        # Dummy inicial (en producción, vendría de la capa L1_EMBEDDING del encoder)
+        base_vector = np.zeros(4096, dtype=np.float32)
+
+        # Invocamos el razonamiento continuo O(1) en memoria (RiM)
+        latent_result = await semantic_space.latent_thought_flow(
+            base_hidden_state=base_vector,
+            session_fact_id=f"session_{self.id}",
+            pulse_excitation=30.0
+        )
+
+        logger.debug(
+            "Latent Thought Flow applied on node %s for task dispatch. "
+            "Bypassed linguistic bottleneck.",
+            self.id
+        )
+        return latent_result
+
 
 class LegionSupervisor:
     """L1 Domain Node: Manages multiple Centurions within an isolated context."""

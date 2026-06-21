@@ -4,7 +4,7 @@ import logging
 
 from cortex.engine import CortexEngine
 
-logging.basicConfig(level=logging.INFO)
+setup_cortex_logging()
 logger = logging.getLogger(__name__)
 
 

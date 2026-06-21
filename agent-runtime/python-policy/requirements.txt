@@ -1,0 +1,7 @@
+torch==2.3.0
+grpcio==1.64.0
+grpcio-tools==1.64.0
+fastapi==0.111.0
+uvicorn==0.29.0
+pydantic==2.7.1
+numpy==1.26.4

@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """
-Tests for the Epistemic Noise Chaos Benchmark (ENCB).
+Tests for the Semantic Noise Chaos Benchmark (ENCB).
 
 Validates:
 1. Chaos generator produces correct event types and counts.
@@ -17,7 +17,7 @@ from benchmarks.encb_baseline_rag import BaselineRAG
 from benchmarks.encb_chaos_generator import (
     ChaosModality,
     EpisodicSpamGenerator,
-    EpistemicChaosOrchestrator,
+    RetrievalChaosOrchestrator,
     TemporalContradictionGenerator,
     TransitiveBreakageGenerator,
 )
@@ -135,9 +135,9 @@ class TestEpisodicSpam:
 # ── Orchestrator Tests ─────────────────────────────────────────────────────
 
 
-class TestEpistemicChaosOrchestrator:
+class TestRetrievalChaosOrchestrator:
     def test_setup_all_creates_three_ground_truths(self):
-        orch = EpistemicChaosOrchestrator(
+        orch = RetrievalChaosOrchestrator(
             num_propositions=3,
             num_agents=2,
             num_chains=2,
@@ -153,7 +153,7 @@ class TestEpistemicChaosOrchestrator:
         assert ChaosModality.EPISODIC_SPAM in gts
 
     def test_generate_all_produces_events(self):
-        orch = EpistemicChaosOrchestrator(
+        orch = RetrievalChaosOrchestrator(
             num_propositions=2,
             num_agents=2,
             num_chains=2,

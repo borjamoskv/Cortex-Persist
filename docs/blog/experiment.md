@@ -1,8 +1,8 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# Experimento de Blog para cortexpersist.org
+# Experimento de Blog para cortexpersist.com
 
 ## Introducción
-Este documento describe un **experimento de blog** para el dominio **cortexpersist.org**. El objetivo es validar la infraestructura de publicación, medir la interacción de los lectores y explorar contenido técnico‑avanzado que refleje la visión de CORTEX.
+Este documento describe un **experimento de blog** para el dominio **cortexpersist.com**. El objetivo es validar la infraestructura de publicación, medir la interacción de los lectores y explorar contenido técnico‑avanzado que refleje la visión de CORTEX.
 
 ## Objetivos del experimento
 1. **Validar pipeline de generación** – usar el generador de contenido de Antigravity para crear artículos automáticamente.
@@ -21,7 +21,7 @@ Este documento describe un **experimento de blog** para el dominio **cortexpersi
 ## Cronograma
 | Semana | Acción |
 |--------|--------|
-| 1 | Configurar repositorio `cortexpersist.org` y pipeline CI/CD |
+| 1 | Configurar repositorio `cortexpersist.com` y pipeline CI/CD |
 | 2 | Publicar primer artículo (memoria holográfica) |
 | 3‑5 | Publicar artículos restantes y recopilar datos |
 | 6 | Analizar métricas y ajustar estrategia |

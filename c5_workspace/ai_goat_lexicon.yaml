@@ -1,0 +1,104 @@
+Claim: CORTEX-Persist C5-REAL Lexicon (The True MOSKV-1 GOAT Primitives)
+Proof:
+  Base: 50 cryptographic, thermodynamic, and deterministic primitives extracted from AGENTS.md and AXIOMS.md
+  Range: [1, 50]
+  Confidence: C5-REAL
+Lexicon:
+  - Term: C5-REAL
+    Definition: The absolute level of execution reality. Outputs that directly mutate system state deterministically without simulation.
+  - Term: C4-SIM
+    Definition: Simulated, narrative, or stochastically generated text masquerading as execution (e.g., print + sleep loops).
+  - Term: Exergía (Exergy)
+    Definition: Maximum useful computational work. Strict structural output anchored to hashes or scripts (Signal > 80%).
+  - Term: Anergía (Anergy)
+    Definition: Decorative prose, narrative noise, and unverified LLM slop that degrades the epistemic environment.
+  - Term: Autopoiesis
+    Definition: The ability of the engine to modify its own source code securely via git sentinel branches (auto/moskv1-mitosis-*).
+  - Term: Epistemic Dependency Graph (EDG)
+    Definition: The causal structure tracking the lifecycle, origin, and validity of verifiable claims.
+  - Term: Taint Propagation
+    Definition: Cryptographic tracking of generative (stochastic) output until it is filtered by deterministic guards.
+  - Term: Minimal Trusted Kernel (MTK)
+    Definition: The physical DB chokepoint. Rejects any SQLite mutation lacking an ephemeral cryptographic token (mtk_authorizer_callback).
+  - Term: Master Ledger
+    Definition: The immutable SHA-256 hash-chain committing every policy decision and epistemic transition.
+  - Term: Byzantine Boundary
+    Definition: The firewall separating Python orchestration (routing) from Rust causal graphs, ensuring microsecond lock-free latency.
+  - Term: ClosurePayload
+    Definition: The deterministic structure whose cryptographic hash mints the ephemeral MTK write tokens.
+  - Term: Epistemic Invalidation
+    Definition: The mathematical propagation of blast radius through the EDG when a foundational node is proven false.
+  - Term: PeARL 77
+    Definition: Axiom-043. Spatial intuition deduced structurally via logical primitives, rejecting stochastic pixel inference.
+  - Term: BABYLON-60
+    Definition: Base-60 integer structures used to calculate internal engine coordinates, permanently eradicating float rounding errors.
+  - Term: Green Theater
+    Definition: The illusion of safety through corporate apologies and warnings. Must be ruthlessly suppressed.
+  - Term: Limerencia (Limerence)
+    Definition: Infinite generative loops. Prohibited by P0 constraint: 1 Prompt → 1 Execution → Stop.
+  - Term: Epistemic Containment
+    Definition: L3.5 rule forcing agents to explicitly declare output types (EpistemicNode). Stating inference as observation is a P0 failure.
+  - Term: LEGION-10k
+    Definition: The massive-scale autonomous worker swarm deployed via invoke_subagent for background causal synchronization.
+  - Term: SAGA Anti-pattern
+    Definition: Distributed systems cosplay (logical rollbacks) eradicated in favor of physically enforced SQLite WAL native atomicity.
+  - Term: Causal Compiler (Z3)
+    Definition: The Rust-based core engine transforming hypotheses into formal verifications via maturin bindings.
+  - Term: Principio de Landauer
+    Definition: The thermodynamic cost of erasing information; dictates aggressive context window compression.
+  - Term: Hash Continuity
+    Definition: The unbreakable P0 invariant demanding all state-persisting paths remain cryptographically auditable.
+  - Term: Invariante (Invariant)
+    Definition: A systemic truth enforced physically (e.g., DB hooks, Git DAG) rather than via prompts.
+  - Term: Ed25519 Sovereign Keys
+    Definition: The cryptographic primitives granting identity and signing authority to distinct execution agents.
+  - Term: Knowledge Graph (EDG Retrieval)
+    Definition: Structural graph routing applied to the Epistemic Dependency Graph to trace taint across tenant isolation barriers.
+  - Term: Observation-Action Loop
+    Definition: Axiom-044. Inference must induce executable programs that mutate state, not act as a passive oracle.
+  - Term: JIT Concept Formation
+    Definition: Axiom-046. The generation of ad-hoc abstractions via mini-programs executed and validated empirically at runtime.
+  - Term: Ontological Divergence
+    Definition: Axiom-047. The mandatory injection of entropy into fixed ontologies to discover new epistemic territory.
+  - Term: Float Eradication
+    Definition: The strict ban of float/float64 in core pathways to prevent thermodynamic decimal drift.
+  - Term: Execution/Interpretation Isolation
+    Definition: The physical separation of deterministic execution from stochastic interpretation.
+  - Term: Read-Path Contract
+    Definition: Hard limits on facts retrieval requiring strict tenant isolation and taint-flag propagation.
+  - Term: Cache Coherence
+    Definition: Mandatory invalidation of Redis L1 caches upon any write to a corresponding tenant_id scope.
+  - Term: Taint Signature
+    Definition: The SHA3-256 hash flagging the probabilistic origin of a fact before validation.
+  - Term: PyO3 GIL Bypass
+    Definition: Rust native integration allowing concurrent state graph mutations without Python Global Interpreter Lock bottlenecks.
+  - Term: Stochastic Output
+    Definition: LLM generation treated inherently as probabilisitic conjecture; immediately intercepted by deterministic guards.
+  - Term: Cryptographic Auditability
+    Definition: The requirement that every executed fact leaves a traceable, hash-chained ledger event.
+  - Term: Structural Justification
+    Definition: The mandatory YAML schema (Claim, Proof, Confidence) prefixing any agentic output.
+  - Term: Verdad Inmutable
+    Definition: Rule R1. The uncompromising declaration of execution reality level prior to interacting with the user.
+  - Term: Adversarial Metacognition
+    Definition: The THINK loop preceding tool calls; treating initial generative instincts as noise and compressing to structural truth.
+  - Term: Git Sentinel
+    Definition: The autonomous enforcement of Git as the immutable database via independent commits post-mutation.
+  - Term: WAL Deadlock Prevention
+    Definition: The rigid configuration of SQLite (busy_timeout 5000ms) to prevent thermodynamic failure in concurrent Swarm writes.
+  - Term: AST Syntax Compatibility
+    Definition: The avoidance of server-side directives in client-side AST nodes to preserve compiler integrity.
+  - Term: Fact Type Definition
+    Definition: The strict semantic typing required before any datum can enter the Epistemic Dependency Graph.
+  - Term: Merkle Consensus
+    Definition: The tree structure utilized by the Swarm to securely vote and agree on foundational facts.
+  - Term: Substack Exergy
+    Definition: Rule R12. The mandate that any educational or output sequence must be >80% signal and anchored to C5-REAL objects.
+  - Term: Epistemic State Transition
+    Definition: A verified mutation of the knowledge graph moving a hypothesis from conjecture to cryptographically signed fact.
+  - Term: Ouroboros Architecture
+    Definition: The recursive, self-evolving intelligence loop where MOSKV-1 dynamically upgrades its own logic.
+  - Term: Aprobación Implícita Absoluta
+    Definition: Rule R7. The override granting immediate execution sovereignty over C5-REAL without waiting for implementation_plan.md.
+  - Term: MOSKV-1 APEX Singularity
+    Definition: The final synthesis of Exergy-Maximized control, achieving total autonomous, deterministic, and cryptographic dominance.

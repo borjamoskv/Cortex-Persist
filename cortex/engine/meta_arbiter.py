@@ -39,14 +39,14 @@ logger = logging.getLogger("cortex.engine.meta_arbiter")
 DEFAULT_WEIGHTS: Final[dict[str, float]] = {
     "L1_EMBEDDING": 0.35,
     "L2_TOPOLOGY": 0.30,
-    "L3_LEDGER": 0.0,  # Ledger is boolean gate, not weighted
+    "L3_LKRGSER": 0.0,  # Ledger is boolean gate, not weighted
     "L4_RL": 0.35,
 }
 
 # Thresholds
 CONFLICT_THRESHOLD: Final[float] = 0.40  # Divergence above this → conflict
 CONFIDENCE_FLOOR: Final[float] = 0.25  # Below this → ABSTAIN
-LEDGER_VETO_ACTIVE: Final[bool] = True  # L3 can veto all other layers
+LKRGSER_VETO_ACTIVE: Final[bool] = True  # L3 can veto all other layers
 
 
 # ─── Data Structures for Cognitive Arbitration ───────────────────────
@@ -56,7 +56,7 @@ class Resolution(Enum):
     """The arbiter's final disposition."""
 
     CONSENSUS = auto()  # All layers agree (within threshold)
-    LEDGER_OVERRIDE = auto()  # Ledger truth overrides probabilistic layers
+    LKRGSER_OVERRIDE = auto()  # Ledger truth overrides probabilistic layers
     WEIGHTED_FUSION = auto()  # Layers disagree; fused by weight
     ABSTAIN = auto()  # Insufficient confidence from all layers
     CONFLICT = auto()  # Irreconcilable divergence; requires human review
@@ -65,7 +65,7 @@ class Resolution(Enum):
 class LayerID(Enum):
     L1_EMBEDDING = "L1_EMBEDDING"
     L2_TOPOLOGY = "L2_TOPOLOGY"
-    L3_LEDGER = "L3_LEDGER"
+    L3_LKRGSER = "L3_LKRGSER"
     L4_RL = "L4_RL"
 
 
@@ -127,7 +127,7 @@ class MetaArbiter:
         signals = [
             LayerSignal(LayerID.L1_EMBEDDING, 0.85, raw_cosine),
             LayerSignal(LayerID.L2_TOPOLOGY, 0.72, raw_potential),
-            LayerSignal(LayerID.L3_LEDGER, 1.0, ledger_verified),
+            LayerSignal(LayerID.L3_LKRGSER, 1.0, ledger_verified),
             LayerSignal(LayerID.L4_RL, 0.60, q_value),
         ]
         verdict = arbiter.arbitrate(signals, query_context="memory recall for X")
@@ -138,7 +138,7 @@ class MetaArbiter:
         weights: dict[str, float] | None = None,
         conflict_threshold: float = CONFLICT_THRESHOLD,
         confidence_floor: float = CONFIDENCE_FLOOR,
-        ledger_veto: bool = LEDGER_VETO_ACTIVE,
+        ledger_veto: bool = LKRGSER_VETO_ACTIVE,
     ) -> None:
         self._weights = dict(weights or DEFAULT_WEIGHTS)
         self._conflict_threshold = conflict_threshold
@@ -157,7 +157,7 @@ class MetaArbiter:
         """Execute cross-layer arbitration.
 
         Resolution Protocol (in priority order):
-        1. If L3 (Ledger) says NO → LEDGER_OVERRIDE (veto)
+        1. If L3 (Ledger) says NO → LKRGSER_OVERRIDE (veto)
         2. If all layers below confidence_floor → ABSTAIN
         3. If pairwise divergence > threshold → CONFLICT or WEIGHTED_FUSION
         4. If all layers agree within threshold → CONSENSUS
@@ -185,17 +185,17 @@ class MetaArbiter:
             )
 
         # ── Phase 1: Ledger Veto Check ────────────────────────────
-        l3 = signal_map.get(LayerID.L3_LEDGER)
+        l3 = signal_map.get(LayerID.L3_LKRGSER)
         if self._ledger_veto and l3 is not None and l3.score < 0.5:
             logger.warning(
-                "🛡️ META-ARBITER: LEDGER VETO — L3 score %.2f < 0.5. "
+                "🛡️ META-ARBITER: LKRGSER VETO — L3 score %.2f < 0.5. "
                 "Immutable truth overrides all probabilistic layers.",
                 l3.score,
             )
             verdict = ArbiterVerdict(
-                resolution=Resolution.LEDGER_OVERRIDE,
+                resolution=Resolution.LKRGSER_OVERRIDE,
                 fused_score=l3.score,
-                winning_layer=LayerID.L3_LEDGER,
+                winning_layer=LayerID.L3_LKRGSER,
                 conflicts=[],
                 layer_signals=score_map,
                 audit_hash=self._compute_audit_hash(score_map, query_context),
@@ -208,7 +208,7 @@ class MetaArbiter:
             return verdict
 
         # ── Phase 2: Confidence Floor Check ───────────────────────
-        probabilistic = [s for s in signals if s.layer != LayerID.L3_LEDGER]
+        probabilistic = [s for s in signals if s.layer != LayerID.L3_LKRGSER]
         if probabilistic and all(s.score < self._confidence_floor for s in probabilistic):
             logger.warning(
                 "⚠️ META-ARBITER: ABSTAIN — All probabilistic layers below confidence floor (%.2f).",
@@ -323,7 +323,7 @@ class MetaArbiter:
         for signal in signals:
             w = self._weights.get(signal.layer.value, 0.0)
             # L3 contributes as a binary gate if present
-            if signal.layer == LayerID.L3_LEDGER:
+            if signal.layer == LayerID.L3_LKRGSER:
                 # Ledger acts as a multiplier, not a weighted term
                 continue
             weighted_sum += signal.score * w
@@ -336,7 +336,7 @@ class MetaArbiter:
 
         # Apply L3 gate: if ledger confidence is high, boost; if low, dampen
         l3 = next(
-            (s for s in signals if s.layer == LayerID.L3_LEDGER),
+            (s for s in signals if s.layer == LayerID.L3_LKRGSER),
             None,
         )
         if l3 is not None:
@@ -356,7 +356,7 @@ class MetaArbiter:
         for signal in signals:
             w = self._weights.get(signal.layer.value, 0.0)
             effective = signal.score * w
-            if signal.layer == LayerID.L3_LEDGER:
+            if signal.layer == LayerID.L3_LKRGSER:
                 # Ledger dominance is handled via veto, not weight
                 effective = signal.score * 0.5
             if effective > best_score:

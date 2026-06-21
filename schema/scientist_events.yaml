@@ -1,0 +1,128 @@
+asyncapi: 3.0.0
+info:
+  title: CORTEX AI Scientist Event Bus
+  version: 1.0.0
+  description: |
+    Event schema for the multi-agent AI Scientist execution bus.
+    Uses Zenoh/Kafka semantics for sovereign cognitive transitions.
+
+channels:
+  experiment.brief.received:
+    address: experiment/brief/received
+    messages:
+      publish:
+        $ref: '#/components/messages/BriefReceived'
+
+  belief.transition.proposed:
+    address: belief/transition/proposed
+    messages:
+      publish:
+        $ref: '#/components/messages/BeliefTransitionEvent'
+
+  experiment.execution.completed:
+    address: experiment/execution/completed
+    messages:
+      publish:
+        $ref: '#/components/messages/ExecutionResultEvent'
+
+  artifact.review.completed:
+    address: artifact/review/completed
+    messages:
+      publish:
+        $ref: '#/components/messages/ArtifactReviewEvent'
+
+components:
+  messages:
+    BriefReceived:
+      name: BriefReceived
+      payload:
+        type: object
+        required: [brief_id, domain, objective, constraints]
+        properties:
+          brief_id:
+            type: string
+            format: uuid
+          domain:
+            type: string
+          objective:
+            type: string
+          constraints:
+            type: array
+            items:
+              type: string
+          tenant_id:
+            type: string
+
+    BeliefTransitionEvent:
+      name: BeliefTransitionEvent
+      payload:
+        type: object
+        required: [belief_id, parent_belief_id, state, payload, cortex_taint]
+        properties:
+          belief_id:
+            type: string
+            format: uuid
+          parent_belief_id:
+            type: string
+            format: uuid
+          state:
+            type: string
+            enum: [PROPOSED, VERIFIED, REJECTED, ORPHANED]
+          payload:
+            type: object
+            properties:
+              hypothesis:
+                type: string
+              mechanism:
+                type: string
+          cortex_taint:
+            type: string
+            description: cryptographic SHA3-256 signature
+          confidence:
+            type: number
+            format: float
+
+    ExecutionResultEvent:
+      name: ExecutionResultEvent
+      payload:
+        type: object
+        required: [node_id, status, metrics_uri]
+        properties:
+          node_id:
+            type: string
+            format: uuid
+          status:
+            type: string
+            enum: [SUCCESS, COMPLETED_WITH_WARNINGS, FAILED, TIMEOUT]
+          metrics_uri:
+            type: string
+            format: uri
+          artifacts:
+            type: array
+            items:
+              type: string
+              format: uri
+          resource_cost:
+            type: number
+            format: float
+
+    ArtifactReviewEvent:
+      name: ArtifactReviewEvent
+      payload:
+        type: object
+        required: [node_id, artifact_uri, reviewer_model, is_sane]
+        properties:
+          node_id:
+            type: string
+            format: uuid
+          artifact_uri:
+            type: string
+            format: uri
+          reviewer_model:
+            type: string
+          is_sane:
+            type: boolean
+          hallucination_detected:
+            type: boolean
+          critique:
+            type: string

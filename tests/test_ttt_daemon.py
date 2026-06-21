@@ -201,6 +201,7 @@ class TestAutonomousTrainingDaemon:
 
 class TestLLMProviderLoRARouting:
     @patch("cortex.extensions.llm.provider.load_presets")
+    @patch.dict("os.environ", {"CORTEX_LLM_MODEL": ""})
     @pytest.mark.asyncio
     async def test_vllm_routes_to_adapter_when_verified(self, mock_load_presets, mock_home) -> None:
         mock_presets = {

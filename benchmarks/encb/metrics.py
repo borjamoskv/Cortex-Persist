@@ -1,11 +1,11 @@
 # [C5-REAL] Exergy-Maximized
 """ENCB v2 - Formal Metrics.
 
-Four metrics that measure epistemic debt, not just accuracy:
+Four metrics that measure retrieval debt, not just accuracy:
 
     PFBR - Persistent False Belief Rate
-    TER  - Time to Epistemic Recovery
-    EDI  - Epistemic Debt Integral
+    TER  - Time to Retrieval Recovery
+    EDI  - Retrieval Debt Integral
     CNCL - Corrupt Node Containment Latency
 """
 
@@ -32,7 +32,7 @@ def pfbr(states: list[PropState]) -> float:
     return errors / len(states)
 
 
-# ── TER - Time to Epistemic Recovery ─────────────────────────────────────
+# ── TER - Time to Retrieval Recovery ─────────────────────────────────────
 
 
 def ter(
@@ -71,7 +71,7 @@ def ter(
     return None
 
 
-# ── EDI - Epistemic Debt Integral ────────────────────────────────────────
+# ── EDI - Retrieval Debt Integral ────────────────────────────────────────
 
 
 def edi(
@@ -80,7 +80,7 @@ def edi(
     w_fn: float = 1.0,
     w_conflict: float = 0.25,
 ) -> float:
-    """Cumulative area under the epistemic error curve.
+    """Cumulative area under the retrieval error curve.
 
     EDI = Σ_t (w_f · FP_t + w_n · FN_t + w_c · C_t)
 

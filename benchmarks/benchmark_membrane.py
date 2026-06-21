@@ -9,18 +9,18 @@ import torchhd  # pyright: ignore[reportMissingImports]
 # Adjust path to import cortex module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cortex.memory.epistemic_membrane import EpistemicMembrane
+from cortex.memory.semantic_boundary import SemanticBoundary
 
 # Configure logging to write to stdout
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+setup_cortex_logging()
 
 
 def run_stress_test():
-    logging.info("=== Epistemic Membrane Stress Test (C5-REAL) ===")
+    logging.info("=== Retrieval Membrane Stress Test (C5-REAL) ===")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     dim = 16384
-    membrane = EpistemicMembrane(dim=dim, max_history=1000)
+    membrane = SemanticBoundary(dim=dim, max_history=1000)
 
     logging.info(f"Device: {device}")
     logging.info(f"Membrane initialized. D={dim}, max_history={1000}")
@@ -76,8 +76,8 @@ def run_stress_test():
     check_adv = membrane.check_proposal(adv_hv)
     logging.info(f"Adversarial Proposal Check: {check_adv}")
 
-    # 3. Inducing Epistemic Crisis & Autopoietic Mutation
-    logging.info("\n--- 3. Epistemic Crisis Phase ---")
+    # 3. Inducing Validation Failure & Autopoietic Mutation
+    logging.info("\n--- 3. Validation Failure Phase ---")
     # We simulate a paradigm shift by creating vectors that drift significantly from genesis
     # but remain internally coherent in recent history.
     crisis_hvs = []

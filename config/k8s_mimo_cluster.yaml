@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: vllm-runtime
+  namespace: llm
+spec:
+  serviceName: vllm-runtime
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-runtime
+  template:
+    metadata:
+      labels:
+        app: vllm-runtime
+    spec:
+      nodeSelector:
+        accelerator: b200
+
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:latest
+
+          resources:
+            limits:
+              nvidia.com/gpu: 8
+            requests:
+              nvidia.com/gpu: 8
+
+          args:
+            - "--model=/models/model"
+            - "--tensor-parallel-size=8"
+            - "--gpu-memory-utilization=0.95"
+            - "--max-model-len=131072"
+            - "--trust-remote-code"
+
+          env:
+            - name: NCCL_DEBUG
+              value: WARN
+
+          volumeMounts:
+            - name: model-store
+              mountPath: /models
+
+  volumeClaimTemplates:
+    - metadata:
+        name: model-store
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 500Gi
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: b200-runtime
+  namespace: llm
+spec:
+  selector:
+    matchLabels:
+      app: b200-runtime
+  template:
+    metadata:
+      labels:
+        app: b200-runtime
+    spec:
+      nodeSelector:
+        accelerator: b200
+
+      tolerations:
+        - operator: Exists
+
+      containers:
+        - name: runtime
+          image: nvcr.io/nvidia/k8s-device-plugin:latest
+          securityContext:
+            privileged: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-runtime
+  namespace: llm
+spec:
+  selector:
+    app: vllm-runtime
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP

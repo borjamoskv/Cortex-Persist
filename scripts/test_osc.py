@@ -25,5 +25,5 @@ if __name__ == "__main__":
     # Ensure logs show up
     import logging
 
-    logging.basicConfig(level=logging.INFO)
+    setup_cortex_logging()
     asyncio.run(test_osc())

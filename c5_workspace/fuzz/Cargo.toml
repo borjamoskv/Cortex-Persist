@@ -1,0 +1,20 @@
+[package]
+name = "c5_fuzz"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+libfuzzer-sys = "0.4"
+arbitrary = { version = "1", features = ["derive"] }
+cortex_ffi = { path = "../crates/cortex_ffi" }
+cortex_ledger = { path = "../crates/cortex_ledger" }
+cortex_types = { path = "../crates/cortex_types" }
+
+[[bin]]
+name = "ffi_submit"
+path = "fuzz_targets/ffi_submit.rs"
+
+[[bin]]
+name = "ledger_append"
+path = "fuzz_targets/ledger_append.rs"

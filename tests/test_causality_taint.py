@@ -9,7 +9,7 @@ import pytest
 
 from cortex.engine.causality import (
     CONFIDENCE_LEVELS,
-    EDGE_DERIVED_FROM,
+    KRGSE_DERIVED_FROM,
     TaintReport,
     _downgrade_confidence,
 )
@@ -83,7 +83,7 @@ def _insert_fact(conn: sqlite3.Connection, fact_id: int, confidence: str = "C5")
 
 
 def _insert_edge(
-    conn: sqlite3.Connection, fact_id: int, parent_id: int, edge_type: str = EDGE_DERIVED_FROM
+    conn: sqlite3.Connection, fact_id: int, parent_id: int, edge_type: str = KRGSE_DERIVED_FROM
 ) -> None:
     conn.execute(
         "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) VALUES (?, ?, ?, ?)",
@@ -129,7 +129,7 @@ async def test_propagate_taint_single_child() -> None:
     )
     await conn.execute(
         "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) VALUES (?, ?, ?, ?)",
-        (2, 1, EDGE_DERIVED_FROM, "default"),
+        (2, 1, KRGSE_DERIVED_FROM, "default"),
     )
     await conn.commit()
 
@@ -193,7 +193,7 @@ async def test_propagate_taint_chain() -> None:
         await conn.execute(
             "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) "
             "VALUES (?, ?, ?, ?)",
-            (child, parent, EDGE_DERIVED_FROM, "default"),
+            (child, parent, KRGSE_DERIVED_FROM, "default"),
         )
     await conn.commit()
 
@@ -282,7 +282,7 @@ async def test_propagate_taint_cyclic_graph() -> None:
         await conn.execute(
             "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) "
             "VALUES (?, ?, ?, ?)",
-            (child, parent, EDGE_DERIVED_FROM, "default"),
+            (child, parent, KRGSE_DERIVED_FROM, "default"),
         )
     await conn.commit()
 

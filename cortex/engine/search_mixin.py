@@ -106,7 +106,7 @@ class SearchMixin(EngineMixinBase):
                         self, conn, results, query, graph_depth, tenant_id=tenant_id
                     )
 
-                # 3. [CORTEX v10] Read-Path Epistemic Membrane (Taint Propagation)
+                # 3. [CORTEX v10] Read-Path Retrieval Membrane (Taint Propagation)
                 for r in results:
                     meta = getattr(r, "meta", {}) or {}
                     confidence = getattr(r, "confidence", meta.get("confidence", "UNKNOWN"))
@@ -142,7 +142,7 @@ class SearchMixin(EngineMixinBase):
                     **kwargs,
                 )
 
-                # 3. [CORTEX v10] Read-Path Epistemic Membrane (Taint Propagation) - Fallback
+                # 3. [CORTEX v10] Read-Path Retrieval Membrane (Taint Propagation) - Fallback
                 for r in fallback_results:
                     meta = getattr(r, "meta", {}) or {}
                     conf = getattr(r, "confidence", meta.get("confidence", "UNKNOWN"))

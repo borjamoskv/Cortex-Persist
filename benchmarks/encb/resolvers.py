@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """ENCB v2 - Pluggable Resolvers Protocol.
 
-Defines the interface for resolving epistemic chaos, allowing engine-agnostic
+Defines the interface for resolving retrieval chaos, allowing engine-agnostic
 evaluation between CORTEX, Baseline RAG, and an Upper Bound Oracle.
 """
 
@@ -13,7 +13,7 @@ from benchmarks.encb_chaos_generator import ChaosEvent
 @runtime_checkable
 class Resolver(Protocol):
     """
-    Interface for Epistemic Chaos Resolution.
+    Interface for Retrieval Chaos Resolution.
     Any memory system tested in the ENCB must implement this protocol.
     """
 

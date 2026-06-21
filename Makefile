@@ -38,7 +38,7 @@ format: ## Auto-format code
 	ruff format cortex/ tests/
 
 build: ## Build distribution package
-	python -m build
+	uv build
 
 serve: ## Start CORTEX API server (development)
 	uvicorn cortex.api.core:app --reload --host 0.0.0.0 --port 8000

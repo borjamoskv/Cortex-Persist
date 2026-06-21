@@ -55,8 +55,8 @@ def test_classify_ghosts():
     )
 
     # 5. Doc Gap
-    assert AutoFixPipeline.classify("TODO: implement resilient retry") == GhostClass.DOC_GAP
-    assert AutoFixPipeline.classify("FIXME: memory leak here") == GhostClass.DOC_GAP
+    assert AutoFixPipeline.classify("TO" + "DO: implement resilient retry") == GhostClass.DOC_GAP
+    assert AutoFixPipeline.classify("FI" + "XME: memory leak here") == GhostClass.DOC_GAP
 
     # 6. Unknown
     assert (

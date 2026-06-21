@@ -96,9 +96,7 @@ class TransactionMixin(EngineMixinBase):
 
     async def verify_ledger(self) -> dict[str, Any]:
         """Verify the integrity of the sovereign ledger (Operation Void)."""
-        if not getattr(self, "_ledger", None):
+        async with getattr(self, "session")() as conn:
             from cortex.ledger import ImmutableLedger
-
-            # Pass the pool directly instead of a raw connection
-            self._ledger = ImmutableLedger(cast(Any, self).pool)
-        return await self._ledger.audit_integrity_async()
+            ledger = ImmutableLedger(conn)
+            return await ledger.audit_integrity_async()

@@ -6,7 +6,7 @@ import time
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+setup_cortex_logging()
 logger = logging.getLogger("void_max.bounty_hunter")
 
 

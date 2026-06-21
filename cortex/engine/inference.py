@@ -18,7 +18,7 @@ from typing import Any
 import aiosqlite
 
 from cortex.engine.causality import (
-    EDGE_DERIVED_FROM,
+    KRGSE_DERIVED_FROM,
     AsyncCausalGraph,
 )
 
@@ -159,7 +159,7 @@ class InferenceEngine:
 
     All derivations are:
     - Capped at C3 confidence (AX-II: conjecture until verified)
-    - Linked via EDGE_DERIVED_FROM in the causal graph
+    - Linked via KRGSE_DERIVED_FROM in the causal graph
     - Pre-checked against contradiction_guard (if available)
     """
 
@@ -394,7 +394,7 @@ class InferenceEngine:
                 await graph.record_edge(
                     new_fact_id,  # type: ignore[arg-type]
                     parent_id=source_id,
-                    edge_type=EDGE_DERIVED_FROM,
+                    edge_type=KRGSE_DERIVED_FROM,
                     project=d.project,
                     tenant_id=tenant_id,
                 )

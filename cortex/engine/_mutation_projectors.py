@@ -42,6 +42,7 @@ async def project(
     projector = _PROJECTORS.get(event_type)
     if projector:
         if event_type in {
+            "deprecate",
             "tombstone",
             "archaeology_merge",
             "quarantine",
@@ -112,17 +113,24 @@ async def proj_deprecate(
     conn: aiosqlite.Connection,
     fact_id: int,
     payload: dict,
+    tenant_id: str | None = None,
 ) -> None:
     ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
     reason = payload.get("reason", "deprecated")
+    resolved_tenant_id = tenant_id or await engine._get_fact_tenant_id(conn, fact_id)
+
+    # Fetch original project to clone context
+    async with conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,)) as cursor:
+        row = await cursor.fetchone()
+        project = row[0] if row else "unknown"
+
+    # [C5-REAL] Epistemic Inversion: Additive delta instead of destructive update
+    # We use parent_id to store the inverted_fact_id for O(1) indexed resolution
+    metadata = json.dumps({"deprecation_reason": reason})
     await conn.execute(
-        "UPDATE facts SET valid_until = ?, updated_at = ?, "
-        "metadata = CASE "
-        "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
-        "  ELSE json_set(COALESCE(metadata, '{}'), '$.deprecation_reason', ?) "
-        "END "
-        "WHERE id = ?",
-        (ts, ts, reason, fact_id),
+        "INSERT INTO facts (tenant_id, project, content, fact_type, parent_id, metadata, created_at, updated_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (resolved_tenant_id, project, f"Inversion of fact {fact_id}: {reason}", "inversion", fact_id, metadata, ts, ts)
     )
 
 

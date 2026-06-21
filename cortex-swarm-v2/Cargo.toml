@@ -1,0 +1,6 @@
+[workspace]
+members = ["crates/cortex-eval","crates/mmap-logger",
+    "crates/scheduler-z3",
+    "crates/simulator",
+]
+resolver = "2"

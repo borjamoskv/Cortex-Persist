@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
-"""ENCB v2 - Epistemic Noise Chaos Benchmark.
+"""ENCB v2 - Semantic Noise Chaos Benchmark.
 
 Self-contained benchmark framework for empirically falsifying the
 Cortex-Persist cognitive hypervisor hypothesis under structured
-epistemic noise. No CortexEngine dependency at runtime.
+semantic noise. No CortexEngine dependency at runtime.
 
 Modules:
     belief_object  - Typed BeliefObject (Boolean/Categorical/Scalar/Set)

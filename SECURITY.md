@@ -12,7 +12,7 @@
 
 **Do NOT open a public issue for security vulnerabilities.**
 
-Email: **<security@cortexpersist.com>**
+Please report vulnerabilities by opening a **Private Vulnerability Report** in this GitHub repository or by contacting the maintainer directly.
 
 You will receive an acknowledgment within 48 hours and a detailed response within 5 business days.
 
@@ -22,11 +22,39 @@ CORTEX is built security-first:
 
 - **SHA-256 sovereign ledger continuity** — tamper-evident fact storage
 - **Merkle tree checkpoints** — batch integrity verification
-- **Privacy Shield** — 11-pattern secret detection at ingress
-- **AST Sandbox** — safe LLM code execution without `eval()`
-- **RBAC** — 4-role access control (admin, editor, viewer, auditor)
+- **Privacy Shield** — 11-pattern secret detection and holistic cross-field correlation analysis at ingress
+- **AST Sandbox** — safe LLM code execution via deny-by-default structural validation
+- **RBAC** — 4-role access control enforcing the principle of least privilege
 - **Security Headers Middleware** — CSP, HSTS, X-Frame-Options
 - **Input Sanitization** — validated ingress surfaces apply sanitization and schema checks
+
+### Privacy Shield & Composition Leakage
+
+Two individually innocuous data points that, when combined by an adversary, reconstruct a secret (e.g., deploy address + contract salt = proxy key). This is the differential privacy analog of correlation attacks. 
+
+CORTEX's Privacy Shield evaluates facts holistically — not per-field — scoring each new fact against the combinatorial surface of related stored data with the following verifiable bounds:
+- **Max Correlation Depth**: Bounded to N=2 hops in the semantic graph.
+- **Computational Complexity**: O(k) per insertion by leveraging locality embeddings.
+- **False Positives**: Addressed via configurable confidence thresholds.
+- **Graph Growth**: Linear scaling through vector proximity clustering prior to combinatorial checking.
+
+### AST Sandbox Architecture
+
+The execution of LLM-generated logic is protected by a strict, deny-by-default whitelist on all JIT compilers. 
+- **Allowed Nodes**: `ast.Num`, `ast.Str`, `ast.List`, `ast.Dict`, `ast.Name`, `ast.Assign`, `ast.Call` (with strict target validation).
+- **Blocked Functions**: Execution of `getattr`, `globals`, `locals`, `compile`, `__subclasses__`, `eval`, and `exec` is structurally denied.
+- **Reflection Escapes**: Access to any attribute starting with `__` is blocked to prevent traversing the interpreter's frame or object hierarchies.
+
+### Role-Based Access Control (RBAC)
+
+CORTEX implements a strict separation of duties enforcing the principle of least privilege:
+
+| Role | Capability Surface | Constraints |
+| :--- | :--- | :--- |
+| **Viewer** | Read-only access | Scoped to specific `tenant_id` boundaries. |
+| **Editor** | Read/Write/Update | Cannot delete cryptographic ledger entries. |
+| **Auditor** | Read-only + Ledger Verification | Full visibility into hash chains and ZK-Seals; cannot mutate state. |
+| **Admin** | System configuration | Cannot alter the ledger history or bypass sovereign seals. |
 
 ## Supply Chain Security
 
@@ -51,8 +79,8 @@ To verify a release:
 pip install sigstore
 sigstore verify identity \
   --cert-oidc-issuer https://token.actions.githubusercontent.com \
-  --cert-identity https://github.com/borjamoskv/Cortex-Persist/.github/workflows/release.yml@refs/tags/v1.0.0 \
-  cortex_persist-0.3.0b2.tar.gz
+  --cert-identity "https://github.com/borjamoskv/Cortex-Persist/.github/workflows/release.yml@refs/tags/v<VERSION>" \
+  cortex_persist-<VERSION>.tar.gz
 ```
 
 ### Container Image Scanning
@@ -71,7 +99,10 @@ CI runs **[pip-audit](https://github.com/pypa/pip-audit)** on every push to dete
 
 CORTEX assumes:
 
-- The local SQLite database is as secure as the host filesystem
+- The local SQLite database is as secure as the host filesystem. For enterprise deployments, this implies:
+  - **Encryption at rest** (e.g., AES-256-GCM via `cortex/crypto/`).
+  - **Signed backups** to preserve ledger continuity.
+  - **Key management** via an OS keyring or sovereign vault.
 - Network APIs require authentication (API keys or JWT)
 - Multi-tenant deployments enforce strict tenant isolation via `tenant_id` scoping
 - **Untrusted plugins** execute in containerized sandboxes with no host network access
@@ -95,7 +126,7 @@ CORTEX assumes:
 | CORS misconfiguration | Wildcard `*` rejected in cloud/production deployment mode |
 | Unsafe file patching | AST validation gate before writing patches to `.py` files |
 
-> **⚠️ Composition Leakage:** Two individually innocuous data points that, when combined by an adversary, reconstruct a secret (e.g., deploy address + contract salt = proxy key). This is the differential privacy analog of correlation attacks. CORTEX's Privacy Shield evaluates facts holistically — not per-field — scoring each new fact against the combinatorial surface of related stored data.
+> **⚠️ Composition Leakage:** Refer to the "Privacy Shield & Composition Leakage" section above for details on depth, complexity, and scaling limits for correlation attacks.
 
 ---
 

@@ -88,7 +88,7 @@ def plot_pfbr_convergence(
 def plot_edi_bars(
     results: dict[str, list[MetricsReport]],
     output_path: str = "edi_comparison.png",
-    title: str = "Epistemic Debt Integral - ENCB v2",
+    title: str = "Retrieval Debt Integral - ENCB v2",
 ) -> None:
     """Bar chart comparing EDI across strategies."""
     plt = _ensure_matplotlib()

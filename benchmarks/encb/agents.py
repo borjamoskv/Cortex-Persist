@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """ENCB v2 - Agent Profiles and Adversary Models.
 
-Five adversary archetypes for realistic epistemic noise:
+Five adversary archetypes for realistic semantic noise:
 
 1. Random Liar       - lies with probability p
 2. Assertive Hallucinator - lies rarely but with inflated confidence
@@ -31,7 +31,7 @@ class AdversaryType(str, Enum):
 
 @dataclass
 class NodeProfile:
-    """An agent in the epistemic swarm.
+    """An agent in the retrieval swarm.
 
     Attributes:
         node_id: Unique identifier.

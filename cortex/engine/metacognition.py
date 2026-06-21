@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """
 Metacognition & The Doubt Circuit (DOUBT-Ω)
-Evaluates Semantic Divergence and Epistemic Uncertainty to prevent Coherence Traps.
+Evaluates Semantic Divergence and Retrieval Uncertainty to prevent Coherence Traps.
 Axiom Ω₃: Byzantine Default - Nothing is trusted by default, including consensus.
 """
 
@@ -15,7 +15,7 @@ from cortex.utils.void_vec import cosine_similarity
 
 
 class DoubtAlert(BaseModel):
-    """Alert emitted when a Coherence Trap or high Epistemic Uncertainty is detected."""
+    """Alert emitted when a Coherence Trap or high Retrieval Uncertainty is detected."""
 
     type: str  # "COHERENCE_TRAP" | "EPISTEMIC_DIVERGENCE" | "REPUTATION_SKEW"
     node_id: str
@@ -57,7 +57,7 @@ class DoubtCircuit:
                 )
             )
 
-        # 2. Detect Epistemic Uncertainty (High Shannon Entropy in consolidation)
+        # 2. Detect Retrieval Uncertainty (High Shannon Entropy in consolidation)
         # Based on how much "surprise" or contradiction the node encountered.
         entropy = getattr(node, "shannon_entropy", 0.0)
         if entropy > self.uncertainty_threshold:

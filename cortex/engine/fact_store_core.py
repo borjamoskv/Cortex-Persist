@@ -186,13 +186,13 @@ async def _build_fact_payload(
 ) -> list[tuple[str, Any]]:
     """Construct the SQL payload with layout-aware column detection."""
     from cortex.engine.metadata_engine import MetadataEngine
-    from cortex.engine.models import Fact
+    from cortex.engine.models import KnowledgeObject
 
-    temp_fact = Fact(
+    temp_fact = KnowledgeObject(
         id=0,
         tenant_id=tenant_id,
         project=project,
-        content="",
+        claim="",
         fact_type=fact_type,
         tags=[],
         parent_id=parent_decision_id,
@@ -256,9 +256,9 @@ async def _record_causality(
 ) -> None:
     """Record causal linkage for the fact."""
     from cortex.engine.causality import (
-        EDGE_DERIVED_FROM,
-        EDGE_TRIGGERED_BY,
-        EDGE_UPDATED_FROM,
+        KRGSE_DERIVED_FROM,
+        KRGSE_TRIGGERED_BY,
+        KRGSE_UPDATED_FROM,
         AsyncCausalGraph,
     )
 
@@ -268,7 +268,7 @@ async def _record_causality(
     graph = AsyncCausalGraph(conn)
 
     if p_sig or p_fact:
-        e_type = EDGE_UPDATED_FROM if p_fact else EDGE_TRIGGERED_BY
+        e_type = KRGSE_UPDATED_FROM if p_fact else KRGSE_TRIGGERED_BY
         await graph.record_edge(
             fact_id=fact_id,
             parent_id=p_fact,
@@ -281,7 +281,7 @@ async def _record_causality(
         await graph.record_edge(
             fact_id=fact_id,
             parent_id=parent_decision_id,
-            edge_type=EDGE_DERIVED_FROM,
+            edge_type=KRGSE_DERIVED_FROM,
             project=project,
             tenant_id=tenant_id,
         )

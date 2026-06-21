@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
 """
-ENCB - Epistemic Noise Chaos Benchmark Runner
+ENCB - Semantic Noise Chaos Benchmark Runner
 ===============================================
 Empirical falsification of the Cortex-Persist hypothesis via structured
-epistemic noise injection.
+semantic noise injection.
 
 Hypothesis (NOBEL-Ω):
   "A cluster of agents synchronizing Belief Objects via CRDTs and LogOP
@@ -52,7 +52,7 @@ from benchmarks.encb.resolvers import AppendOnlyResolver, OracleResolver, Resolv
 from benchmarks.encb_chaos_generator import (
     ChaosEvent,
     ChaosModality,
-    EpistemicChaosOrchestrator,
+    RetrievalChaosOrchestrator,
 )
 
 console = Console()
@@ -150,7 +150,7 @@ async def run_encb(
 
     console.print(
         Panel(
-            "[bold cyan]🧪 ENCB - Epistemic Noise Chaos Benchmark[/]\n"
+            "[bold cyan]🧪 ENCB - Semantic Noise Chaos Benchmark[/]\n"
             "[dim]Nobel-Ω Vector Ξ₄: Empirical Falsification[/]",
             box=box.DOUBLE,
         )
@@ -158,7 +158,7 @@ async def run_encb(
 
     # ── Setup chaos orchestrator ───────────────────────────────────────
     console.print("\n[yellow]⏳ Setting up chaos orchestrator...[/]")
-    orchestrator = EpistemicChaosOrchestrator(
+    orchestrator = RetrievalChaosOrchestrator(
         lambda_flip=lambda_flip,
         num_propositions=10,
         num_agents=num_agents,
@@ -362,7 +362,7 @@ async def run_encb(
     verdict_text = (
         (
             "[bold green]✅ HYPOTHESIS CONFIRMED[/]\n"
-            "Cortex-Persist demonstrates superior epistemic resilience.\n"
+            "Cortex-Persist demonstrates superior retrieval resilience.\n"
             "The Cognitive Hypervisor recovers ground truth under structured chaos."
         )
         if hypothesis_confirmed
@@ -391,7 +391,7 @@ async def run_encb(
 async def main() -> None:
     import argparse
 
-    parser = argparse.ArgumentParser(description="ENCB - Epistemic Noise Chaos Benchmark")
+    parser = argparse.ArgumentParser(description="ENCB - Semantic Noise Chaos Benchmark")
     parser.add_argument(
         "--iterations", "-n", type=int, default=20, help="Number of temporal contradiction rounds"
     )

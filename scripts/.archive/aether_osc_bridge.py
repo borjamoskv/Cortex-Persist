@@ -20,7 +20,7 @@ OSC_IP = "127.0.0.1"
 OSC_PORT = 8001  # Port TouchDesigner / Ableton listens to
 
 logger = logging.getLogger("AetherOSC")
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+setup_cortex_logging()
 
 
 def create_osc_message(address: str, arg: str) -> bytes:

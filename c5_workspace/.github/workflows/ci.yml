@@ -1,0 +1,28 @@
+name: C5 Rust CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cargo fmt
+        run: cargo fmt --manifest-path c5_workspace/Cargo.toml --all --check
+
+      - name: Cargo test
+        run: cargo test --manifest-path c5_workspace/Cargo.toml --all --locked
+
+      - name: Cargo clippy
+        run: cargo clippy --manifest-path c5_workspace/Cargo.toml --all -- -D warnings
+
+      - name: WASM build
+        run: cargo build --manifest-path c5_workspace/Cargo.toml -p cortex_wasm --target wasm32-unknown-unknown --locked

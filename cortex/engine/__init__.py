@@ -122,7 +122,7 @@ class CortexEngine(
         return self._system_state
 
     def set_system_state(self, state: str) -> None:
-        """Lock or unlock the sovereign engine (e.g., from EpistemicCircuitBreaker)"""
+        """Lock or unlock the sovereign engine (e.g., from RetrievalCircuitBreaker)"""
         self._system_state = state
         logger.warning("🛡️ [SOVEREIGN-STATE] CORTEX Engine state changed to: %s", state)
 

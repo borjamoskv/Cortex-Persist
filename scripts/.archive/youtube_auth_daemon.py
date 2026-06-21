@@ -9,7 +9,7 @@ from typing import Any
 from authenticity_engine import AuthenticityDynamicsEngine, InterpretationLayer, RawFeatures
 
 # CORTEX-ULTRATHINK-LOOP // DAEMON CONFIG
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - [CORTEX-DAEMON] - %(message)s")
+setup_cortex_logging()
 
 
 class YouTubeTelemetryScraper:

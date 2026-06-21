@@ -208,4 +208,4 @@ if __name__ == "__main__":
 *   [**API 参考**](docs/api.md) — SDK 原语和 REST 端点。
 
 ---
-> **许可证:** Apache-2.0 | **操作员:** borjamoskv | [cortexpersist.com](https://cortexpersist.com)
+> **许可证:** Apache-2.0 | **操作员:** borjamoskv | [cortexpersist.dev](https://cortexpersist.dev)

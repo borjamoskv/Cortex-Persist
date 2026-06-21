@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS facts (
     valid_until     TIMESTAMPTZ,
     source          TEXT,
     meta            JSONB DEFAULT '{}',
-    consensus_score DOUBLE PRECISION DEFAULT 1.0,
+    consensus_score DOUBLE PRECISION DEFAULT 0.5,
     hash            TEXT,
     signature       TEXT,
     signer_pubkey   TEXT,
@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS facts (
     tx_id           BIGINT REFERENCES transactions(id),
     is_tombstoned   BOOLEAN NOT NULL DEFAULT FALSE,
     tombstoned_at   TIMESTAMPTZ,
+    validation_state TEXT NOT NULL DEFAULT 'staging',
     embedding       vector(384)
 );
 """
@@ -68,7 +69,7 @@ CREATE INDEX IF NOT EXISTS idx_facts_quarantine ON facts(is_quarantined);
 CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned);
 CREATE INDEX IF NOT EXISTS idx_facts_content_trgm ON facts USING gin(content gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_facts_embedding
-    ON facts USING ivfflat(embedding vector_cosine_ops)
+    ON facts USING ivfflat(embedding vector_l2_ops)
     WITH (lists = 100);
 """
 
@@ -104,6 +105,22 @@ CREATE INDEX IF NOT EXISTS idx_tx_tenant ON transactions(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_tx_project ON transactions(project);
 CREATE INDEX IF NOT EXISTS idx_tx_action ON transactions(action);
 """
+
+# ─── Write-Ahead Log (WAL) for 50ms Batching ─────────────────────────
+PG_CREATE_WAL = """
+CREATE TABLE IF NOT EXISTS batch_wal (
+    id          BIGSERIAL PRIMARY KEY,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
+    payload     JSONB NOT NULL,
+    status      TEXT NOT NULL DEFAULT 'pending',
+    timestamp   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+"""
+
+PG_CREATE_WAL_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_wal_status ON batch_wal(status);
+"""
+
 
 # ─── Heartbeats ──────────────────────────────────────────────────────
 PG_CREATE_HEARTBEATS = """
@@ -212,7 +229,7 @@ CREATE TABLE IF NOT EXISTS consensus_votes_v2 (
 """
 
 # ─── Trust Edges ──────────────────────────────────────────────────────
-PG_CREATE_TRUST_EDGES = """
+PG_CREATE_TRUST_KRGSES = """
 CREATE TABLE IF NOT EXISTS trust_edges (
     id              BIGSERIAL PRIMARY KEY,
     source_agent    TEXT NOT NULL REFERENCES agents(id),
@@ -422,6 +439,8 @@ CREATE INDEX IF NOT EXISTS idx_ee_timestamp ON entity_events(timestamp);
 PG_ALL_SCHEMA = [
     PG_CREATE_TRANSACTIONS,
     PG_CREATE_TRANSACTIONS_INDEX,
+    PG_CREATE_WAL,
+    PG_CREATE_WAL_INDEX,
     PG_CREATE_FACTS,
     PG_CREATE_FACTS_INDEXES,
     PG_CREATE_SESSIONS,
@@ -433,7 +452,7 @@ PG_ALL_SCHEMA = [
     PG_CREATE_VOTES,
     PG_CREATE_AGENTS,
     PG_CREATE_VOTES_V2,
-    PG_CREATE_TRUST_EDGES,
+    PG_CREATE_TRUST_KRGSES,
     PG_CREATE_OUTCOMES,
     PG_CREATE_RWC_INDEXES,
     PG_CREATE_GHOSTS,

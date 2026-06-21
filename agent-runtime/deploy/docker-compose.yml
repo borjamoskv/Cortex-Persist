@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  policy-engine:
+    build: 
+      context: ../python-policy
+      dockerfile: Dockerfile
+    ports:
+      - "50051:50051"
+    volumes:
+      - ../proto:/app/proto
+    networks:
+      - cortex-net
+
+  rust-kernel:
+    build:
+      context: ../rust-core
+      dockerfile: Dockerfile
+    depends_on:
+      - policy-engine
+    volumes:
+      - ./ledger.aof:/app/ledger.aof
+    networks:
+      - cortex-net
+
+networks:
+  cortex-net:
+    driver: bridge

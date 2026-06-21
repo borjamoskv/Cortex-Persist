@@ -2,7 +2,7 @@
 """ENCB v2 - Log-Odds Pooling (LogOP) Resolution.
 
 Layer 2: Belief arbitration. Takes CRDT-merged replicas and resolves
-them into a single epistemic judgement using weighted log-odds pooling.
+them into a single retrieval judgement using weighted log-odds pooling.
 
 Key insight: confidence is NOT a raw scalar from the LLM. It's decomposed:
     c_eff = f(c_self, r_node, e_external, a_consistency, t_freshness)

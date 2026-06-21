@@ -25,7 +25,7 @@
       "pattern": "^https://github\\.com/borjamoskv/Cortex-Persist/settings$"
     },
     {
-      "pattern": "^https://cortexpersist\\.org$"
+      "pattern": "^https://cortexpersist\\.com$"
     },
     {
       "pattern": "^https://stackoverflow\\.com/help/mcve$"

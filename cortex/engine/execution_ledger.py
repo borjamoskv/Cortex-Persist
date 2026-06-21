@@ -3,12 +3,12 @@ import json
 import time
 from pathlib import Path
 
-DEFAULT_LEDGER_PATH = Path("~/.cortex/execution_ledger.jsonl").expanduser()
+DEFAULT_LKRGSER_PATH = Path("~/.cortex/execution_ledger.jsonl").expanduser()
 
 
 class ExecutionLedger:
     def __init__(self, path: Path | str | None = None):
-        self.path = Path(path or DEFAULT_LEDGER_PATH)
+        self.path = Path(path or DEFAULT_LKRGSER_PATH)
         self.path.parent.mkdir(parents=True, exist_ok=True)
 
     def record(

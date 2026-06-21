@@ -1,0 +1,17 @@
+[package]
+name = "cortex_core_rs"
+version = "0.1.0"
+edition = "2021"
+authors = ["Borja Moskv"]
+
+[lib]
+name = "cortex_core_rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.20", features = ["extension-module"] }
+sha3 = "0.10"
+hex = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rustpython-parser = "0.3.1"

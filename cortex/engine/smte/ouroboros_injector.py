@@ -81,5 +81,5 @@ def inject_synthetic_friction(broker="localhost:9092", num_events=500):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    setup_cortex_logging()
     inject_synthetic_friction()

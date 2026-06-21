@@ -65,7 +65,7 @@ def get_commit_diff_metadata(commit_hash: str) -> tuple[str, list[str]]:
 def main():
     parser = argparse.ArgumentParser(description="LORCA-Ω Retroactive Ledger Generator")
     parser.add_argument("--limit", type=int, default=30, help="Number of commits to translate")
-    parser.add_argument("--output", default="docs/LORCA_LEDGER.md", help="Output path")
+    parser.add_argument("--output", default="docs/LORCA_LKRGSER.md", help="Output path")
     args = parser.parse_args()
 
     print("C5-REAL :: Initializing LORCA-Ω retroactive narrative log generator.")
@@ -81,7 +81,7 @@ def main():
     poet = CommitPoet()
 
     markdown_lines = [
-        "# 📜 CORTEX LORCA-Ω NARRATIVE LEDGER",
+        "# 📜 CORTEX LORCA-Ω NARRATIVE LKRGSER",
         "",
         "> **Sovereign Chronicle of the Substrate** | **Reality Level:** `C5-REAL`",
         f"> **Generated at:** `{datetime.now(timezone.utc).isoformat()}` | **Source:** `git history` (last {len(commits)} commits)",

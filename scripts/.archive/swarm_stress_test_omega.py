@@ -6,7 +6,7 @@ import sys
 import time
 
 # Configuración de logging denso
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - [CHAOS-OMEGA] - %(message)s")
+setup_cortex_logging()
 
 # === PARÁMETROS DEL ENJAMBRE ===
 TARGET_COUNT = 10000

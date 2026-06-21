@@ -50,7 +50,7 @@ class CortexEmailDaemon:
         self.log_lock = asyncio.Lock()
         self.telemetry_path = "cortex_email_telemetry.json"
 
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s - C5-REAL - %(message)s")
+        setup_cortex_logging()
 
     async def log_telemetry(self, event: dict):
         """Escritura de logs asíncrona y segura (Thread-Safe / Async-Safe)."""

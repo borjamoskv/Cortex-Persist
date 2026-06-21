@@ -13,9 +13,9 @@ except ImportError:
         "scipy/numpy no localizados. El modo de evaluación estadística fallará si se invoca."
     )
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - [R-01 C5-REAL] - %(message)s")
+setup_cortex_logging()
 
-# --- CONTRATO DE FALSACIÓN PREDEFINIDO (ANTI P-HACKING) ---
+# --- CONTRATO DE FALSACIÓN PREDEFINIDO (ANTI p-hacking) ---
 # Aprobado por operador BorjaMoskv - C5-REAL
 R01_SUCCESS_CRITERIA = {
     "min_sample_size": 500,  # Aumentado para evidencia fuerte

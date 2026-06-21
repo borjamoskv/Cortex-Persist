@@ -61,7 +61,7 @@ SEVERITY_THRESHOLDS: Final[list[tuple[float, Severity]]] = [
 # Resolution → blast_radius mapping
 RESOLUTION_BLAST_RADIUS: Final[dict[Resolution, int]] = {
     Resolution.CONSENSUS: 0,
-    Resolution.LEDGER_OVERRIDE: 3,  # Ledger veto = catastrophic scope
+    Resolution.LKRGSER_OVERRIDE: 3,  # Ledger veto = catastrophic scope
     Resolution.WEIGHTED_FUSION: 2,  # Fusion implies cross-layer impact
     Resolution.ABSTAIN: 1,  # Unknown scope
     Resolution.CONFLICT: 3,  # Irreconcilable = maximum blast
@@ -227,8 +227,8 @@ class ArbiterBridge:
 
         # Information state from layer presence
         has_l1 = LayerID.L1_EMBEDDING.value in verdict.layer_signals
-        has_l3 = LayerID.L3_LEDGER.value in verdict.layer_signals
-        l3_score = verdict.layer_signals.get(LayerID.L3_LEDGER.value, 1.0)
+        has_l3 = LayerID.L3_LKRGSER.value in verdict.layer_signals
+        l3_score = verdict.layer_signals.get(LayerID.L3_LKRGSER.value, 1.0)
 
         info_state = InformationState(
             exists_internally=has_l1,  # Embedding found = info exists

@@ -151,7 +151,7 @@ class TestQuarantineCandidates:
             SortuState.FORGED,
             SortuState.VERIFIED,
             SortuState.LINKED,
-            SortuState.LEDGERED,
+            SortuState.LKRGSERED,
             SortuState.ACTIVE,
         ]:
             ledger.transition(record.skill_id, state)
@@ -168,7 +168,7 @@ class TestQuarantineCandidates:
             SortuState.FORGED,
             SortuState.VERIFIED,
             SortuState.LINKED,
-            SortuState.LEDGERED,
+            SortuState.LKRGSERED,
             SortuState.ACTIVE,
         ]:
             ledger.transition(record.skill_id, state)
@@ -187,7 +187,7 @@ class TestFullLifecycle:
             SortuState.FORGED,
             SortuState.VERIFIED,
             SortuState.LINKED,
-            SortuState.LEDGERED,
+            SortuState.LKRGSERED,
             SortuState.ACTIVE,
             SortuState.QUARANTINED,
             SortuState.TOMBSTONED,

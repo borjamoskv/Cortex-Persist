@@ -16,7 +16,7 @@ from dataclasses import dataclass
 
 import httpx
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s | CORTEX-OMEGA | %(message)s")
+setup_cortex_logging()
 logger = logging.getLogger("apollo_engine")
 
 

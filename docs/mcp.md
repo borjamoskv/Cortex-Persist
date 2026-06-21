@@ -434,4 +434,4 @@ graph LR
 ---
 
 > **Related docs:** [API Reference](api.md) · [Security Trust Model](SECURITY_TRUST_MODEL.md) · [Architecture](architecture.md) · [LEGION 10k Evaluation](legion_10k_evaluation.md)  
-> **Operator:** borjamoskv · [cortexpersist.org](https://cortexpersist.org) · Apache-2.0
+> **Operator:** borjamoskv · [cortexpersist.com](https://cortexpersist.com) · Apache-2.0

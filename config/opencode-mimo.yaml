@@ -1,0 +1,35 @@
+version: "2.5"
+model:
+  name: "XiaomiMiMo/MiMo-V2.5-Pro"
+  architecture: "MoE-SWA"
+  total_parameters: 1.02T
+  active_parameters: 42B
+  context_window: 1000000
+engine:
+  backend: "vllm-cortex"
+  tensor_parallel_size: 32
+  pipeline_parallel_size: 4
+  dtype: "fp8"
+  kv_cache_dtype: "fp8"
+  gpu_memory_utilization: 0.95
+optimization:
+  persistent_kernels:
+    enabled: true
+    backend: "DFlash"
+    allocation: "static"
+    l2_cache_persistence: 0.75
+  attention:
+    sliding_window_size: 32768
+    global_attention_blocks: [0, 20, 40, 60, 79]
+  agential_memory:
+    provider: "CortexPersist"
+    session_persistence: true
+    sync_interval_ms: 100
+opencode:
+  workspace:
+    auto_refactor: true
+    max_tokens_per_file: 250000
+    streaming: true
+  telemetry:
+    enabled: false
+    endpoint: null

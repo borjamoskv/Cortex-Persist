@@ -9,9 +9,9 @@ import asyncio
 import hashlib
 import logging
 import os
-import sqlite3
 import subprocess
 from pathlib import Path
+from cortex.database.core import connect
 
 logger = logging.getLogger("cortex_cascade.router")
 
@@ -149,7 +149,7 @@ class CascadeRouter:
                     try:
                         db_path = Path(os.environ.get("CORTEX_DB_PATH", "~/.cortex/cortex.db")).expanduser()
                         if db_path.exists():
-                            conn = sqlite3.connect(db_path)
+                            conn = connect(db_path)
                             digest = hashlib.sha256(output_content.encode("utf-8")).hexdigest()[:16]
                             # Escribir en la tabla de episodios/BM25
                             conn.execute(
@@ -165,7 +165,7 @@ class CascadeRouter:
                             try:
                                 status = "completed" if process.returncode == 0 else "failed"
                                 conn.execute("UPDATE tasks SET status=? WHERE id=?", (status, task_id))
-                            except sqlite3.OperationalError:
+                            except Exception:
                                 pass  # Ignorar si la tabla tasks no tiene esa estructura
                             conn.commit()
                             conn.close()
@@ -193,7 +193,7 @@ class CascadeRouter:
 if __name__ == "__main__":
     import asyncio
     # Test stub
-    logging.basicConfig(level=logging.INFO)
+    setup_cortex_logging()
     router = CascadeRouter()
     
     async def run_tests():

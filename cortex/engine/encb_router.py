@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """
-ENCB Router Spec v1 - Epistemic Routing DSL
+ENCB Router Spec v1 - Retrieval Routing DSL
 SYS_ID: ENCB_ROUTER_OMEGA
 STATE: C5-REAL
 """
@@ -21,7 +21,7 @@ class ModelRole(Enum):
     ROUTER = "router"
 
 
-class EpistemicState(Enum):
+class RetrievalState(Enum):
     STATED = "stated"
     VERIFIED = "verified"
     DISPUTED = "disputed"
@@ -40,7 +40,7 @@ class RiskLevel(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
-    EPISTEMIC_CRITICAL = "epistemic_critical"
+    EPISTEMIC_CRITICAL = "retrieval_critical"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -101,7 +101,7 @@ class PipelineStage:
 class RouteCondition:
     domain: TaskDomain | None = None
     risk: RiskLevel | None = None
-    epistemic_state: EpistemicState | None = None
+    retrieval_state: RetrievalState | None = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -126,7 +126,7 @@ ROUTES = [
     # STATISTICAL INFERENCE PATH
     RouteRule(
         when=RouteCondition(
-            domain=TaskDomain.STATISTICAL_INFERENCE, epistemic_state=EpistemicState.DISPUTED
+            domain=TaskDomain.STATISTICAL_INFERENCE, retrieval_state=RetrievalState.DISPUTED
         ),
         assign=RouteAssignment(
             planner=MODELS["gemini_3_1_pro"],
@@ -187,8 +187,8 @@ def match(rule_when: RouteCondition, context: RouteCondition) -> bool:
         (rule_when.domain is None or rule_when.domain == context.domain)
         and (rule_when.risk is None or rule_when.risk == context.risk)
         and (
-            rule_when.epistemic_state is None
-            or rule_when.epistemic_state == context.epistemic_state
+            rule_when.retrieval_state is None
+            or rule_when.retrieval_state == context.retrieval_state
         )
     )
 

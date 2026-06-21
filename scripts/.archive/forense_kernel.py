@@ -69,7 +69,7 @@ def append_event(case_id: str, event_type: str, details: dict[str, Any]):
 def run_adversarial_swarm(case_id: str, case_data: dict[str, Any]):
     """
     Background Task: Executes the Adversarial Swarm IR Graph
-    INPUT -> PARSER -> IR GRAPH -> ATTACK SURFACE MAP -> SWARM -> CONSENSUS -> LEDGER
+    INPUT -> PARSER -> IR GRAPH -> ATTACK SURFACE MAP -> SWARM -> CONSENSUS -> LKRGSER
     """
     append_event(case_id, "PHASE_START", {"phase": "INGEST", "status": "Parsing input sources"})
     time.sleep(1)
@@ -178,7 +178,7 @@ def run_adversarial_swarm(case_id: str, case_data: dict[str, Any]):
     ledger_db[case_id] = ledger_entry
 
     append_event(
-        case_id, "LEDGER_COMMIT", {"merkle_root": ledger_entry["commit"], "signature": signature}
+        case_id, "LKRGSER_COMMIT", {"merkle_root": ledger_entry["commit"], "signature": signature}
     )
     cases_db[case_id]["status"] = "COMPLETED"
 

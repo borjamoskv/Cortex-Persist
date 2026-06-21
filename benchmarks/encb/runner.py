@@ -296,7 +296,7 @@ def print_summary(results: dict[str, list[MetricsReport]]) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ENCB v2 - Epistemic Noise Chaos Benchmark")
+    parser = argparse.ArgumentParser(description="ENCB v2 - Semantic Noise Chaos Benchmark")
     parser.add_argument("--n-agents", type=int, default=200)
     parser.add_argument("--n-props", type=int, default=1000)
     parser.add_argument("--n-domains", type=int, default=8)

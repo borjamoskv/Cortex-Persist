@@ -30,7 +30,7 @@ def crystallize_awareness():
 
     import logging
 
-    logging.basicConfig(level=logging.INFO)
+    setup_cortex_logging()
     logging.info(f"OMNISCIENCE MATRIX CRISTALIZADA EN: {output_path}")
     logging.info(f"Workflows Indexados: {len(matrix['workflows'])}")
     logging.info(f"Skills Indexados: {len(matrix['skills'])}")

@@ -1,0 +1,99 @@
+scenes:
+  - id: "01"
+    geography_id: "ancient_rainforest"
+    palette_state: "golden_scatter_light"
+    emotional_state: "pristine"
+    lineage_state: "none"
+  
+  - id: "02"
+    geography_id: "ancient_rainforest"
+    palette_state: "soft_canopy_light"
+    emotional_state: "aligned"
+    lineage_state: "indigenous_ancestors"
+
+  - id: "03"
+    geography_id: "sea_boundary"
+    palette_state: "heavy_overcast"
+    emotional_state: "storm_threat"
+    lineage_state: "colonial_arrival"
+
+  - id: "04"
+    geography_id: "colonial_room"
+    palette_state: "candle_low_key"
+    emotional_state: "extraction"
+    lineage_state: "colonial_arrival"
+
+  - id: "05"
+    geography_id: "rocky_ridge"
+    palette_state: "smoke_density"
+    emotional_state: "resistance"
+    lineage_state: "indigenous_ancestors"
+
+  - id: "06"
+    geography_id: "dark_empty_room"
+    palette_state: "blue_desaturation"
+    emotional_state: "collapse"
+    lineage_state: "indigenous_ancestors"
+
+  - id: "07"
+    geography_id: "family_home"
+    palette_state: "warm_nostalgic"
+    emotional_state: "lineage_morph"
+    lineage_state: "indigenous_ancestors"
+
+  - id: "08"
+    geography_id: "family_home"
+    palette_state: "golden_natural"
+    emotional_state: "memory_awakening"
+    lineage_state: "indigenous_ancestors"
+
+  - id: "09"
+    geography_id: "community_assembly"
+    palette_state: "bright_daylight"
+    emotional_state: "collective_organization"
+    lineage_state: "indigenous_ancestors"
+
+  - id: "10"
+    geography_id: "urban_street"
+    palette_state: "harsh_urban_sunlight"
+    emotional_state: "contemporary_claim"
+    lineage_state: "indigenous_ancestors"
+
+  - id: "11"
+    geography_id: "valley_mountain_pass"
+    palette_state: "sunset_volumetric"
+    emotional_state: "hopeful_reconstruction"
+    lineage_state: "indigenous_ancestors"
+
+  - id: "12"
+    geography_id: "golden_horizon"
+    palette_state: "golden_sun_saturation"
+    emotional_state: "future_resolution"
+    lineage_state: "indigenous_ancestors"
+
+edges:
+  # Escena 1 a 2: Mantiene la misma geografia (HardGeographyLock)
+  - from_id: "01"
+    to_id: "02"
+    rule_type: "HardGeographyLock"
+
+  # Escena 2 a 3: Ruptura geografica
+  - from_id: "02"
+    to_id: "03"
+    rule_type: "EmotionalCausality"
+
+  # Escena 7 a 8: Mantenimiento del linaje (LineageIntegrity)
+  - from_id: "07"
+    to_id: "08"
+    rule_type: "LineageIntegrity"
+
+  # Escena 7 a 8: Mantiene la misma geografia (HardGeographyLock)
+  - from_id: "07"
+    to_id: "08"
+    rule_type: "HardGeographyLock"
+
+  # Intentional Failure Test: HardGeographyLock between 10 and 11
+  # This edge should be caught by Z3 as UNSAT
+  - from_id: "10"
+    to_id: "11"
+    rule_type: "HardGeographyLock"

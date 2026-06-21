@@ -315,14 +315,10 @@ def test_checkpoint_manager():
 
 def test_substrate_integration():
     """Test that UltramapSubstrate emits ledger events on update_control_vector."""
-    # Import substrate
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "cortex-core"))
-    from ultramap import UltramapSubstrate
+    from cortex.engine.ultramap import UltramapSubstrate
+    import cortex.engine.ultramap as um_module
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        # Override DB_PATH for isolation
-        import ultramap as um_module
-
         original_db_path = um_module.DB_PATH
         um_module.DB_PATH = os.path.join(tmpdir, "test.db")
 
@@ -339,7 +335,7 @@ def test_substrate_integration():
             substrate._buffer = memoryview(substrate._mmap)
 
             # Initialize evolution ledger manually for tmpdir
-            if um_module.HAS_EVOLUTION_LEDGER:
+            if um_module.HAS_EVOLUTION_LKRGSER:
                 ledger_path = os.path.join(tmpdir, "evolution_ledger.jsonl")
                 substrate._evolution_ledger = um_module.EvolutionLedger(ledger_path)
 
@@ -373,7 +369,7 @@ def test_substrate_integration():
 
 def main():
     print("=" * 60)
-    print("EVOLUTION LEDGER — C5-REAL Integration Test Suite")
+    print("EVOLUTION LKRGSER — C5-REAL Integration Test Suite")
     print("=" * 60)
     start = time.monotonic()
 

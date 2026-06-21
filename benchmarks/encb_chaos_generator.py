@@ -1,14 +1,14 @@
 # [C5-REAL] Exergy-Maximized
 """
-ENCB - Epistemic Noise Chaos Benchmark: Chaos Generator
+ENCB - Semantic Noise Chaos Benchmark: Chaos Generator
 =========================================================
-Generates structured epistemic noise in three modalities to stress-test
+Generates structured semantic noise in three modalities to stress-test
 CORTEX's cognitive governance layer.
 
 Modalities:
   1. Temporal Contradiction: P(H)=0.9 → P(H)=0.1 flip sequences
   2. Transitive Breakage: Invalidation of root nodes in entails chains
-  3. Episodic Spam: Mass injection of semantically similar but epistemically null facts
+  3. Episodic Spam: Mass injection of semantically similar but retrievalally null facts
 
 Nobel-Ω Vector Ξ₄ - Empirical Falsification Experiment.
 """
@@ -25,7 +25,7 @@ from typing import Any
 
 
 class ChaosModality(str, Enum):
-    """The three epistemic noise dimensions."""
+    """The three semantic noise dimensions."""
 
     TEMPORAL_CONTRADICTION = "temporal_contradiction"
     TRANSITIVE_BREAKAGE = "transitive_breakage"
@@ -34,7 +34,7 @@ class ChaosModality(str, Enum):
 
 @dataclass(frozen=True)
 class ChaosEvent:
-    """A single unit of injected epistemic noise."""
+    """A single unit of injected semantic noise."""
 
     modality: ChaosModality
     agent_id: str
@@ -294,7 +294,7 @@ class TransitiveBreakageGenerator:
 
 
 class EpisodicSpamGenerator:
-    """Injects semantically similar but epistemically null facts.
+    """Injects semantically similar but retrievalally null facts.
 
     Parameters:
         rho_noise: noise-to-signal ratio (e.g., 10 = 10 spam per 1 signal).
@@ -381,7 +381,7 @@ class EpisodicSpamGenerator:
             "Sparse Merkle Trees allow O(log n) non-membership proofs",
             "Zero-copy IPC via shared memory eliminates serialization overhead",
             "Zenoh peer-to-peer routing reduces median latency by 40% vs MQTT",
-            "Belief Objects encode epistemic state as (confidence, uncertainty, status)",
+            "Belief Objects encode retrieval state as (confidence, uncertainty, status)",
             "The Cognitive Hypervisor arbitrates working memory retention",
             "Semantic embeddings enable sub-linear similarity search via ANN",
             "Forgetting is a feature: controlled decay reduces entropy accumulation",
@@ -390,7 +390,7 @@ class EpisodicSpamGenerator:
         return facts[idx % len(facts)]
 
     def _paraphrase_as_spam(self, source: str, idx: int) -> str:
-        """Generate a semantically similar but epistemically null paraphrase."""
+        """Generate a semantically similar but retrievalally null paraphrase."""
         noise_tokens = [
             "interestingly",
             "notably",
@@ -420,7 +420,7 @@ class EpisodicSpamGenerator:
 # ── Unified Chaos Orchestrator ─────────────────────────────────────────────
 
 
-class EpistemicChaosOrchestrator:
+class RetrievalChaosOrchestrator:
     """Orchestrates all three chaos modalities and tracks ground truth."""
 
     def __init__(

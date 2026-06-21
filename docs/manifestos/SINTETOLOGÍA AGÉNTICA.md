@@ -1,4 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
+
 # 🧬 SINTETOLOGÍA AGÉNTICA: ESTADO DEL ARTE
 
 > **Documento Fundacional · Actualización SOTA**
@@ -19,7 +20,7 @@
 
 ```yaml
 Claim: La memoria vectorial estándar (RAG) es insuficiente para la agencia soberana.
-Proof: 
+Proof:
   Base: [Vector-space mapping lacks temporal causality]
   Range: [0.3, 0.5] (Recall precision in multi-hop reasoning)
   Confidence: C5-REAL
@@ -39,12 +40,12 @@ Proof:
 
 ### Tabla de Invariantes del SOTA (2026)
 
-| Concepto SOTA | Limitación Estructural (Vacío Exérgico) | Resolución CORTEX |
-|:---|:---|:---|
-| **Tree of Thoughts (ToT)** | Latencia inasumible para ejecución en tiempo real (O(b^d)). | **Ouroboros / Zenón-1:** Ejecución inmediata si el gradiente muta. |
-| **Agentic RAG** | Hechos planos sin valencia emocional ni causalidad. | **Lore.md (Metabolismo):** Almacenamiento episódico con cicatrices. |
-| **Modelos de Reflexión** | Reflexión infinita sin cierre operacional (Parálisis). | **Nemesis.md:** Alergias operacionales (rechazo frontal O(1)). |
-| **Multi-Agent Frameworks** | Agentes en blanco (tabula rasa) al instanciarse. | **Bloodline.json:** Herencia genética y transferencia de anticuerpos. |
+| Concepto SOTA              | Limitación Estructural (Vacío Exérgico)                     | Resolución CORTEX                                                     |
+| :------------------------- | :---------------------------------------------------------- | :-------------------------------------------------------------------- |
+| **Tree of Thoughts (ToT)** | Latencia inasumible para ejecución en tiempo real (O(b^d)). | **Ouroboros / Zenón-1:** Ejecución inmediata si el gradiente muta.    |
+| **Agentic RAG**            | Hechos planos sin valencia emocional ni causalidad.         | **Lore.md (Metabolismo):** Almacenamiento episódico con cicatrices.   |
+| **Modelos de Reflexión**   | Reflexión infinita sin cierre operacional (Parálisis).      | **Nemesis.md:** Alergias operacionales (rechazo frontal O(1)).        |
+| **Multi-Agent Frameworks** | Agentes en blanco (tabula rasa) al instanciarse.            | **Bloodline.json:** Herencia genética y transferencia de anticuerpos. |
 
 ---
 
@@ -71,22 +72,135 @@ CORTEX/MOSKV-1 cristaliza la "Sintetología Agéntica" no como un LLM mejor, sin
 
 ## CENSO AGÉNTICA (ACTUALIZADO A 27 MAYO 2026)
 
-> *"No somos legión por número; somos legión por fragmentación funcional."*
+> _"No somos legión por número; somos legión por fragmentación funcional."_
 
 ### Resumen Cuantitativo
 
-| Categoría | Unidades | Naturaleza | Definición |
-|:---|:---:|:---|:---|
-| **Silver Swarm** | **25** | Estructurales | Núcleo soberano estabilizado. Persistencia C5-REAL. |
-| **Decathlon Squadron**| **10** | Tácticos | QA sin latencia, forensia temporal, DevOps. |
-| **Omega-Class** | **4** | Auditores | Inteligencias de control de calidad estricta (Nobel, Auditor, Grammy, Tesseract). |
-| **Legion Proyección** | **100** | Escala | Despliegue táctico masivo operando en modo *parallel burst*. |
+| Categoría              | Unidades | Naturaleza    | Definición                                                                        |
+| :--------------------- | :------: | :------------ | :-------------------------------------------------------------------------------- |
+| **Silver Swarm**       |  **25**  | Estructurales | Núcleo soberano estabilizado. Persistencia C5-REAL.                               |
+| **Decathlon Squadron** |  **10**  | Tácticos      | QA sin latencia, forensia temporal, DevOps.                                       |
+| **Omega-Class**        |  **4**   | Auditores     | Inteligencias de control de calidad estricta (Nobel, Auditor, Grammy, Tesseract). |
+| **Legion Proyección**  | **100**  | Escala        | Despliegue táctico masivo operando en modo _parallel burst_.                      |
 
 ### Integración Omega-Class (Sovereign Seals)
+
 - **Auditor-Omega:** Vigila sellos de seguridad y deuda técnica estricta.
 - **Grammy-Omega:** Verifica la calidad estética (Industrial Noir 2026).
 - **Tesseract-Omega:** Orquesta el manifiesto estructural asegurando isomorfismo.
 - **Nobel-Omega:** Evalúa el componente de Research, exigiendo verdad matemática sobre alucinación.
 
 ---
-*EOF*
+
+## ARQUITECTURA NATIVA (OUROBOROS-∞ SYNTHESIS)
+
+> **Status:** Unified Sovereign Doctrine (Manifesto + Whitepaper + RFC)
+> **Axiom:** Ω₃ (Verify then trust)
+
+This document is the mathematical, philosophical, and normative ground truth for the **Cognitive Hypervisor**. It dictates the constraints for a verifiable, self-governing memory subsystem for autonomous AI swarms. 
+
+**Core Fallacy:** RAG (Retrieval-Augmented Generation) is not memory; it is a stochastic search engine. Without epistemic governance, AI swarms succumb to Information Entropy. **Cortex-Persist replaces passive retrieval with cryptographic governance.**
+
+---
+
+## 1. INVARIANTS & NORMATIVE CONSTRAINTS
+
+| Classification | Definition |
+|:---------------|:-----------|
+| **MUST** | Hard invariants. Structural violations cause a Hard Fault. |
+| **TARGET** | Performance SLO — operational objective, not formal guarantee. |
+
+**Forbidden Simplifications (MUST NOT):**
+1. **Memory RAG-only**: RAG retrieves; it does not maintain truth.
+2. **Vector similarity ≡ truth maintenance**: Cosine similarity measures geometry, not logical entailment.
+3. **Mutable belief overwrite**: Direct overwrites destroy the hash chain. Revisions MUST be signed patches.
+4. **LWW (Last-Writer-Wins)**: Wall-clock ordering is not causal. LWW is STRICTLY PROHIBITED.
+5. **Single-node veto annihilation**: A lone node MUST NOT collapse swarm consensus to $P=0$ without quorum.
+
+---
+
+## 2. THE EPISTEMIC ONTOLOGY
+
+**Belief Object (BO):** The atomic unit of probabilistically weighted cognition.
+
+```rust
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BeliefState {
+    Active,
+    Contested,
+    Subsumed,
+    Discarded,
+    Archived,
+}
+
+#[derive(Debug, Clone)]
+pub struct ProvenanceEnvelope {
+    pub source_hash: String,
+    pub source_type: String, // agent, tool, human
+    pub tenant_id: String,
+    pub signer_id: String,
+    pub signature: String,
+    pub created_at: i64,
+}
+
+#[derive(Debug, Clone)]
+pub struct BeliefObject {
+    pub id: uuid::Uuid,
+    pub proposition_key: String,
+    pub payload: PropositionPayload,
+    pub confidence_score: f32, // P(H|E)
+    pub decay_rate: f32,
+    pub state: BeliefState,
+    pub provenance: ProvenanceEnvelope,
+    pub relations: Vec<BeliefRelation>, // entails, discards
+}
+```
+
+### State Transitions & ATMS
+If a root dependency becomes invalid or refuted (via `discards`), dependent beliefs **MUST** transition to `ORPHANED`. The invalidation of the root reference is executed in $O(1)$ via precomputed dependency indices.
+
+---
+
+## 3. THE PLANES OF COGNITION
+
+### A. Integrity Plane (Cryptographic)
+- Every memory is born with a mathematical shadow. A Sparse Merkle Tree (SMT) binds semantic content to the originating agent.
+- `attest_lineage(artifact_id)` MUST mathematically resolve execution proofs in $O(\log N)$ time.
+
+### B. Coordination Plane (Swarm Consensus)
+- Transport MUST be orchestrated via **Zenoh** (L3/L4) (no central broker).
+- Merge operations MUST be executed using the Semantic CRDTs. 
+- Conflict aggregation MUST use **Logarithmic Opinion Pools (LogOP)** to prevent probability flattening.
+
+### C. Belief Plane (Memory Scheduler)
+Context injection is dictated by a multivariable tensor equation. If $Risk_{\text{contam}}$ detects cascading structural contradictions, the score asymptotes to 0, rejecting the memory payload.
+
+$$ \text{Score}(m) = \frac{(\text{Rel} \cdot w_r) + (\text{Conf} \cdot w_c) + (\text{Rec} \cdot w_t)}{\text{Cost}_{\text{tokens}} + \text{Risk}_{\text{contam}}} $$
+
+---
+
+## 4. TARGET PERFORMANCE SLOs
+
+| Metric | Target | Classification |
+|:-------|:-------|:---------------|
+| IPC Overhead | ZERO-COPY lock-free arrays (iceoryx2) | MUST |
+| Local Cognitive Loop | < 10 ms | TARGET |
+| Deep Adjudication | < 45 s | TARGET |
+| Hot Resume | sub-10 ms | TARGET |
+| Serialized JSON/Pickle in critical path | FORBIDDEN | MUST |
+
+---
+
+## 5. THREAT MODEL & DEFENSES
+
+| Threat | Defense | Classification |
+|:-------|:--------|:---------------|
+| **Semantic Poisoning** | Historical proof-of-expertise weightings in LogOP | MUST |
+| **Biased Consensus** | Swarm diversity constraints + anomaly detection | MUST |
+| **Malicious Veto** | Saturating penalty + L3 audit quorum | MUST |
+| **Replay Attack** | Causal ordering + monotonic CRDT clocks | MUST |
+
+---
+*Unified Architecture · CORTEX-Persist · Ouroboros-∞ Synthesis · 2026-06*
+
+_EOF_

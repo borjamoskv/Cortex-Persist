@@ -1,0 +1,12 @@
+[package]
+name = "cortex_wasm"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+cortex_chaos = { path = "../cortex_chaos" }
+cortex_types = { path = "../cortex_types" }

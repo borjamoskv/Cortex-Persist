@@ -9,7 +9,7 @@ from cortex.memory.manager import CortexMemoryManager
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 from cortex.memory.working import WorkingMemoryL1
 
-logging.basicConfig(level=logging.INFO)
+setup_cortex_logging()
 
 
 class DummyEmbedder:

@@ -1,17 +1,17 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# EU AI Act Compliance
+# EU AI Act & SOC 2 Compliance
 
-**Document Version:** 2.0
-**Date:** 2026-06-06
+**Document Version:** 2.1
+**Date:** 2026-06-19
 **System:** CORTEX Trust Engine v1.0.0 (Apache-2.0)
 
 ---
 
 ## Scope
 
-This document maps CORTEX Trust Engine capabilities to the requirements of the **EU AI Act (Regulation 2024/1689)**, specifically **Article 12** (Record-Keeping) and related provisions for high-risk AI systems.
+This document maps CORTEX Trust Engine capabilities to the requirements of the **EU AI Act (Regulation 2024/1689)**, specifically **Article 12** (Record-Keeping) and related provisions for high-risk AI systems, as well as the **AICPA SOC 2 Type II** Trust Services Criteria.
 
-**Enforcement Date:** August 2, 2026
+**EU AI Act Enforcement Date:** August 2, 2026
 
 **Potential Fines:** €30 million or 6% of global annual revenue.
 
@@ -66,6 +66,33 @@ This document maps CORTEX Trust Engine capabilities to the requirements of the *
 | Verification results shall be recorded | `integrity_checks` table stores every verification result | `integrity_checks` table |
 
 **Verification:** `cortex compliance-report`
+
+---
+
+## SOC 2 Type II — Trust Services Criteria Mapping
+
+CORTEX Persist provides native architectural support for SOC 2 Type II compliance, specifically addressing the Security, Availability, and Confidentiality criteria.
+
+### 1. Security (Logical Access & Protection)
+
+| Criterion (CC) | CORTEX Implementation | Evidence |
+|:---|:---|:---|
+| **CC6.1:** Logical access security | Multi-tenant isolation via cryptographic scoping. Z3 SMT Guards prevent unauthorized state mutations. | `cortex/guards/zk_guard.py` |
+| **CC6.8:** Prevention of unauthorized execution | All mutations require `CORTEX-TAINT` signature. Unsigned executions are aborted at SAGA-1. | `cortex/engine/causal/taint_engine.py` |
+| **CC7.2:** Security event logging | Immutable SHA-256 hash-chaining of all `store()` operations. Cryptographically tamper-evident. | `ImmutableLedger` |
+
+### 2. Availability (System Resilience)
+
+| Criterion (CC) | CORTEX Implementation | Evidence |
+|:---|:---|:---|
+| **CC9.1:** Business continuity and recovery | `ROLLBACK_STATE` SAGA compensation ensures atomic recovery from failure. Postgres WAL / SQLite WAL ensures zero-data-loss durability. | Saga Protocol (`cortex/engine/`) |
+
+### 3. Confidentiality (Data Protection)
+
+| Criterion (CC) | CORTEX Implementation | Evidence |
+|:---|:---|:---|
+| **CC6.6:** Logical boundary protection | 11-pattern ingress guard intercepts PII, PHI, and credentials before persistence. | `cortex/security/ingress.py` |
+| **CC6.7:** Data encryption | Ephemeral key destruction in SAGA-4. Sensitive payloads encrypted at rest (AES-GCM). | `cortex/crypto/aes.py` |
 
 ---
 

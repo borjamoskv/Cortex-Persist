@@ -36,7 +36,7 @@ except ImportError as e:
 TARGETS_FILE = "targets_audit.txt"
 STATE_DB = "batch_omega_state.db"
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - [C5-REAL] - %(message)s")
+setup_cortex_logging()
 
 
 class BatchProcessorOmega:

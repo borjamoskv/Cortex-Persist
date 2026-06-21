@@ -41,11 +41,20 @@ New session on this repo?            → Execute Multi-Session Handoff (§6.4) f
 
 ## 1. 🎯 Scope & Epistemic Posture
 
-**CORTEX Persist** is a local-first trust substrate for autonomous, tool-using, and multi-agent AI systems. It persists facts, enforces deterministic validation boundaries, maintains cryptographic auditability, and treats generative output as conjecture until externally verified.
+**CORTEX Persist** is the **CI/CD Firewall for LLM-Generated Code**. It is formally defined as a distributed system for managing the formal lifecycle of verifiable claims via an **Epistemic Dependency Graph (EDG)**. It does not blindly store "facts"; it tracks Epistemic State Transitions, enforcing deterministic validation boundaries, maintaining cryptographic auditability, and treating generative output as conjecture until externally verified.
 
-- **Epistemic Containment:** Generative output is a probabilistic proposal — useful, invalid, partial, or dangerous. System state may only be mutated after crossing deterministic validation boundaries: guards, typed interfaces, schemas, tests, cryptographic logging, and external verification when required.
-- **The Python Paradox (🛑):** CORTEX is built in Python to maximize *Shipping Velocity* and *Developer Adoption*. Mitigation is the **Byzantine Boundary**: Python as orchestration glue, SQLite-Vec and ONNX as immutable cores. We prioritize **Tamper-Evidence** over language-level safety. Trust model: `f < n/3` faulty nodes tolerated; cryptographic primitives are Ed25519 (signatures), SHA-256 (ledger hash-chain), and SHA3-256 (taint engine, guard seals).
-- **Audit Trails vs. Authorization (📜):** CORTEX is a **Forensic Audit Sidecar** for MCP — not "Tamper-Proof" (an architectural illusion), but **Tamper-Evident**. The Master Ledger commits every action to an immutable hash chain.
+- **Epistemic Invalidation Propagation:** Generative output is a probabilistic proposal. If an AI mutates a foundational node, CORTEX traverses the EDG to compute the blast radius. If Epistemic Consistency is violated (an accepted node depends on an invalidated chain), the PR is blocked.
+- **The Python/Rust Boundary (🛑):** CORTEX orchestration is built in Python to maximize *Shipping Velocity*. Mitigation is the **Byzantine Boundary**: Python handles routing, while the causal engine (EDG) and concurrent graphs are managed natively in Rust via PyO3 to bypass the GIL and achieve microsecond lock-free latency.
+- **Audit Trails vs. Authorization (📜):** CORTEX is a **Forensic Audit Sidecar** for CI/CD pipelines. The Master Ledger commits every policy decision and Epistemic Transition to an immutable hash chain.
+
+### C5-REAL CORE RULES (Hard Constraints)
+
+1. **No narrative claims without executable trace.**
+2. **No agent exists without identity + key + event log.**
+3. **No metric exists without unit + measurement method.**
+4. **No propagation exists without explicit channel.**
+5. **No system state exists without hashable snapshot.**
+6. **All failure defaults to HARD FAIL (no reinterpretation).**
 
 ---
 
@@ -78,7 +87,7 @@ All agents operating in this repository MUST self-identify by role before acting
 | **AX-044** | *La inteligencia se evalúa como capacidad agéntica.* | Observation-Action Loop: inference must induce executable programs, not act as a passive oracle. |
 | **AX-045** | *Autonomía = elegir qué problemas resolver y persistir.* | Causal chain enforced: PeARL → Ledger → Swarm. No step may be skipped. |
 | **AX-046** | *La inteligencia fluida sintetiza abstracciones ad-hoc en tiempo de ejecución.* | JIT concept formation: generate mini-program → execute → validate empirically. |
-| **AX-047** | *La limerencia epistémica quema cuota sin mutar el estado (Exergy Drain).* | Kill Criteria: 1 Prompt → 1 Mutation → Stop. Decorative prose and infinite analysis loops are terminally forbidden. |
+| **AX-047** | *Ontological Divergence: A system that mutates abstractions discovers.* | Infinite traversal over a fixed ontology yields finite epistemic gain. Inject entropy into the ontology. |
 
 ---
 
@@ -95,6 +104,10 @@ All agents operating in this repository MUST self-identify by role before acting
 7. **Migration Safety:** Schema changes MUST preserve auditability and rollback awareness.
 8. **Architectural Boundaries:** CLI modules are thin wrappers. Business logic belongs in `engine/`, `services/`, or core modules.
 9. **Failure Locality:** Invalid state must be rejectable and safely abortable at any point.
+10. **Autopoiesis Watchdog:** The engine MUST NEVER modify its own active binary or source code directly in execution. Mutations MUST target isolated git branches (e.g., `auto/moskv1-mitosis-*`) and undergo external CI compilation.
+11. **BABYLON-60 Epistemology:** The control kernel MUST operate in Base-60 (Babylon-60) for internal calculations (timestamps, coordinates, proportions) to eliminate cumulative float rounding errors and decimal approximation entropy. Use struct/integer types scaled to Base-60. No `float64`.
+12. **Execution/Interpretation Isolation:** Deterministic execution MUST be strictly separated from stochastic interpretation. This structural boundary prevents the CI environment from degrading into a "conceptual simulator".
+13. **Epistemic Containment (L3.5):** Agents MUST explicitly declare the epistemic type of their output using `EpistemicNode` structures. Stating an inference, simulation, or counterfactual as an observation is a P0 failure.
 
 ### ❌ Anti-Patterns & Failure Signatures
 
@@ -102,6 +115,7 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 
 | Signal | Severity | Enforced | Remediation |
 | :--- | :---: | :---: | :--- |
+| `float` / `float64` in internal calculations | CRITICAL | ✗ | Replace → BABYLON-60 integer structures; eradicate `float` |
 | `float` in financial or scoring variable | HIGH | ✗ | Replace → `Decimal`; audit all callers |
 | `time.sleep()` inside `async def` | CRITICAL | ✓ ruff TID251 | Replace → `asyncio.sleep()` |
 | Bare `print()` in `engine/`, `memory/`, `guards/` | MEDIUM | ✓ ruff TID251 | Replace → `logging.getLogger(__name__)` |
@@ -112,51 +126,39 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 | Schema change with no migration entry | CRITICAL | ✗ | Add migration in `cortex/migrations/`; review via `cortex/migrate.py` |
 | Plaintext secret in any metadata dict or JSON | **P0** | ✗ | Rotate immediately; encrypt at rest; audit exposure window |
 | `NO` documenting a module that doesn't exist | HIGH | ✗ | Remove reference or create the module |
+| Engine modifying its own source or binary directly | **P0** | ✗ | Implement Bootstrap Watchdog; route via git sentinel branch (`auto/moskv1-mitosis-*`) |
 
 ---
 
-## 4. 🔄 The Write-Path Contract (Saga Pattern)
+## 4. 🔄 The Write-Path Contract (MTK Enforcement)
 
-All non-trivial state mutations MUST follow this unidirectional flow.
+All state mutations MUST go through the **Minimal Trusted Kernel (MTK)**. 
+We have eradicated "distributed systems cosplay" (SAGAs, logical rollbacks, idempotent compensations). The execution boundary is now physically enforced.
 
-> 🛑 **ABORT CONDITION:** If a proposal fails validation or lacks a valid `CORTEX-TAINT` signature, execute the compensating Saga sequence in reverse and abort immediately.
->
-> **`CORTEX-TAINT` Format:** `taint:{agent_id}:{session_id}:{timestamp_iso8601}:{sha3_256_of_payload}` — A cryptographic attribution token on every fact insert. Generated by `cortex/engine/causal/taint_engine.py`. Absence = automatic SAGA-1 rejection.
+> 🛑 **PHYSICAL DB REJECTION:** SQLite is hooked via `mtk_authorizer_callback`. Any `INSERT`, `UPDATE`, or `DELETE` that occurs without an active ephemeral cryptographic token in the current execution context will be brutally rejected by the database engine (`SQLITE_DENY`).
 
 ```text
 [Generative Proposal]
   ↓
-[Guards] (Sanity/Logic Check) .................. SAGA-1: Log rejection to Ledger, no state written.
-  ↓
-[Taint Signature] (Attribution/Traceability) ... SAGA-2: Revoke taint, emit rejection event.
-  ↓
-[Schema & Type Validation] (Deterministic) ..... SAGA-3: Clean abort — no state has been written.
-  ↓
-[Encryption] (For sensitive payloads) .......... SAGA-4: Destroy ephemeral key material.
-  ↓
-[Ledger & Audit Emission] (Cryptographic) ...... SAGA-5: Emit abort event to audit trail.
-  ↓
-[Persistence] (SQLite write) ................... SAGA-6: ROLLBACK transaction → restore snapshot.
-  ↓
-[Index & Side Effects] (Vector/KV updates) ..... SAGA-7: Revert index deltas.
+[MTK Guard Boundary] (mtk_core.py)
+  ├─ Verify Taint Signature & ClosurePayload
+  ├─ Mint Ephemeral `mtk_auth_...` Token
+  └─ Inject Token into ContextVar
+      ↓
+[SQLite Execution]
+  ├─ `mtk_authorizer_callback` intercepts ALL mutations
+  ├─ Validates ephemeral token presence
+  ├─ Allows transaction natively
+  └─ DB Commit
+      ↓
+[Token Destruction] ContextVar cleared.
 ```
 
-**Saga Invariants:**
+**Execution Invariants:**
 
-- Every forward action has a compensating function (SAGA-N).
-- All compensating actions are **idempotent** — safe to invoke multiple times.
-- On failure at step N: execute SAGA-N backwards to SAGA-1.
-- `ROLLBACK_STATE` snapshot MUST be captured before `[Persistence]` begins.
-
-**Fact State Lifecycle:**
-
-```text
-IDLE → PROPOSED → VALIDATED → TAINTED → ENCRYPTED → COMMITTED
-               ↓                                         ↓
-            REJECTED ←←←←← (any SAGA abort) ←←←←← ROLLED_BACK
-```
-
-Transition rules: a fact may only advance forward. Any backward transition = Saga compensation. `COMMITTED` is immutable.
+- **No SAGA.** Atomicity is delegated to SQLite WAL native transactions.
+- **Physical Chokepoint:** Python logic cannot bypass the authorizer hook. Attempted bypass results in a crash.
+- **Taint Requirement:** The MTK token is generated from the cryptographic hash of the `ClosurePayload` and the engine's private key. No valid payload = no token = no write.
 
 ---
 

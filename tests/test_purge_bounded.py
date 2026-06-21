@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from cortex.engine import CortexEngine
-from cortex.engine.causality import EDGE_DERIVED_FROM, AsyncCausalGraph
+from cortex.engine.causality import KRGSE_DERIVED_FROM, AsyncCausalGraph
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ class TestPurgeBounded:
             async with engine.session() as conn:
                 await conn.execute(
                     "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
-                    (child_id, rule_id, EDGE_DERIVED_FROM),
+                    (child_id, rule_id, KRGSE_DERIVED_FROM),
                 )
                 await conn.commit()
 
@@ -110,7 +110,7 @@ class TestPurgeBounded:
             async with engine.session() as conn:
                 await conn.execute(
                     "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
-                    (child_id, fact_id, EDGE_DERIVED_FROM),
+                    (child_id, fact_id, KRGSE_DERIVED_FROM),
                 )
                 await conn.commit()
 

@@ -123,7 +123,7 @@ class TestNoveltyDimension:
 
     def test_unique_content_boosts_novelty(self, engine: TasteEngine) -> None:
         unique = (
-            "Thermodynamic crystallization of epistemic gradients "
+            "Thermodynamic crystallization of retrieval gradients "
             "through sovereign ledger verification enables "
             "compound yield amplification across causal DAG chains."
         )

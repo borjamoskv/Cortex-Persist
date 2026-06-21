@@ -1,0 +1,22 @@
+name: C5 Adversarial Harness
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  adversarial:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Run adversarial kernel tests
+        run: cargo test --manifest-path c5_workspace/Cargo.toml -p cortex_rs --test adversarial -- --nocapture
+
+      - name: Run replay determinism tests
+        run: cargo test --manifest-path c5_workspace/Cargo.toml -p cortex_replay --locked

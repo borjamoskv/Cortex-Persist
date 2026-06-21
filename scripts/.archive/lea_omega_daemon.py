@@ -22,7 +22,7 @@ from scripts.death_protocol import DeathProtocolVisitor, evaluate_file
 
 from cortex.engine.smte.llm_mutator import call_qwen_mutator
 
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+setup_cortex_logging()
 logger = logging.getLogger("lea-omega")
 
 

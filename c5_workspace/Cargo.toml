@@ -1,0 +1,26 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/cortex_types",
+    "crates/cortex_chaos",
+    "crates/cortex_ledger",
+    "crates/cortex_zk",
+    "crates/cortex_hardware_stub",
+    "crates/cortex_rs",
+    "crates/cortex_replay",
+    "crates/cortex_ffi",
+    "crates/cortex_wasm",
+    "crates/cortex_gateway",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["borjamoskv"]
+license = "MIT"
+
+[workspace.dependencies]
+pyo3 = { version = "0.21", features = ["extension-module"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"

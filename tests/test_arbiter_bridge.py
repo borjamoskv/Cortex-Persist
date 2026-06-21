@@ -47,7 +47,7 @@ def _make_signals(
     return [
         LayerSignal(LayerID.L1_EMBEDDING, l1, raw_value=f"cos={l1}"),
         LayerSignal(LayerID.L2_TOPOLOGY, l2, raw_value=f"pot={l2}"),
-        LayerSignal(LayerID.L3_LEDGER, l3, raw_value=f"ledger={l3}"),
+        LayerSignal(LayerID.L3_LKRGSER, l3, raw_value=f"ledger={l3}"),
         LayerSignal(LayerID.L4_RL, l4, raw_value=f"q={l4}"),
     ]
 
@@ -112,7 +112,7 @@ class TestLedgerVetoRouting:
         signals = _make_signals(l1=0.90, l2=0.85, l3=0.10, l4=0.80)
         result = bridge.route(signals, query_context="contradicted by ledger")
 
-        assert result.verdict.resolution == Resolution.LEDGER_OVERRIDE
+        assert result.verdict.resolution == Resolution.LKRGSER_OVERRIDE
         # Ledger override → blast_radius=3 → GATE_ULTRA
         assert result.decision.mode == CognitiveMode.ULTRA_THINK
         assert result.decision.gate_id == "GATE_ULTRA"

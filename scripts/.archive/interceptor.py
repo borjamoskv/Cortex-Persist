@@ -15,7 +15,7 @@ def text_to_hv(text: str, dim: int = 1024) -> cortex_rs.HyperVector:
 class CortexShield:
     def __init__(self, system_prompt: str, dim: int = 1024):
         self.dim = dim
-        self.membrane = cortex_rs.EpistemicMembrane(dim)
+        self.membrane = cortex_rs.SemanticBoundary(dim)
 
         # Clear the old ledger for a clean test
         if os.path.exists("cortex_ledger.jsonl"):
@@ -48,7 +48,7 @@ class CortexShield:
                 noise = cortex_rs.HyperVector.random(self.dim)
                 proposal_hv = self.base_hv.bundle(noise)
 
-            # Intercept with Epistemic Membrane
+            # Intercept with Retrieval Membrane
             episode = self.membrane.encode_episode([("consistency", proposal_hv)])
             res = self.membrane.check_proposal(episode)
 
