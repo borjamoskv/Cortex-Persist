@@ -199,29 +199,35 @@ def _analyze_single_file(
     return loc, large_file, psi, sec, comp
 
 
-def _hash_ast_subtree(node: ast.AST) -> int:
+def _hash_ast_subtree(node: ast.AST, memo: dict[int, int]) -> int:
     """Recursively hash an AST subtree using node type and field names.
 
     Ignores identifiers and literals to detect structural clones, not variable renames.
     Returns a stable integer hash of the structural shape.
     """
-    # Use type name + sorted field names as signature
-    parts: list[str] = [type(node).__name__]
+    node_id = id(node)
+    if node_id in memo:
+        return memo[node_id]
+
+    # Use type name hash as signature base
+    parts: list[int] = [hash(type(node).__name__)]
     for field_name, value in ast.iter_fields(node):
         if field_name in ("lineno", "col_offset", "end_lineno", "end_col_offset"):
             continue
         if isinstance(value, list):
-            parts.extend(
-                str(_hash_ast_subtree(child)) if isinstance(child, ast.AST) else str(field_name)
-                for child in value
-            )
+            for child in value:
+                if isinstance(child, ast.AST):
+                    parts.append(_hash_ast_subtree(child, memo))
+                else:
+                    parts.append(hash((field_name, type(child).__name__)))
         elif isinstance(value, ast.AST):
-            parts.append(str(_hash_ast_subtree(value)))
+            parts.append(_hash_ast_subtree(value, memo))
         else:
-            # For constants and names, use the type only (ignore actual value)
-            # to detect structural ghosts even when variable names differ
-            parts.append(type(value).__name__)
-    return hash(tuple(parts))
+            parts.append(hash((field_name, type(value).__name__)))
+    
+    h = hash(tuple(parts))
+    memo[node_id] = h
+    return h
 
 
 def _count_subtree_nodes(node: ast.AST) -> int:
@@ -245,6 +251,7 @@ def _detect_code_ghosts(source_files: list[Path], root: Path) -> list[str]:
     """
     # hash → list[(rel_path, node_name, lineno)]
     hash_registry: dict[int, list[tuple[str, str, int]]] = {}
+    memo: dict[int, int] = {}
 
     for sf in source_files:
         if sf.suffix != ".py":
@@ -286,7 +293,7 @@ def _detect_code_ghosts(source_files: list[Path], root: Path) -> list[str]:
                 continue
             if _count_subtree_nodes(node) < GHOST_MIN_SUBTREE_SIZE:
                 continue
-            h = _hash_ast_subtree(node)
+            h = _hash_ast_subtree(node, memo)
             line = getattr(node, "lineno", 0)
             hash_registry.setdefault(h, []).append((rel_path, name, line))
 
