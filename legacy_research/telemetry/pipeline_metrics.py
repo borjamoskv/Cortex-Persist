@@ -59,6 +59,7 @@ class PipelineMetrics:
             "cost_per_claim": cost_per_claim,
             "loop_rate": loop_rate,
             "latency_p95_ns": latency_ns,
+            "latency_p95": float(latency_ns) / 1_000_000_000.0,
             "hallucination_rate": hallucination_rate
         }
 

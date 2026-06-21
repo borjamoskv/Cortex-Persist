@@ -52,6 +52,9 @@ class CausalClosureGuard:
                         if isinstance(p, dict):
                             # Extract all string values from the dictionary payload
                             inner_contents.extend(str(v) for v in p.values() if isinstance(v, str))
+                            # Include keys and serialized dictionary representation
+                            inner_contents.extend(str(k) for k in p.keys())
+                            inner_contents.append(json.dumps(p))
                         elif isinstance(p, str):
                             inner_contents.append(p)
         except Exception:
