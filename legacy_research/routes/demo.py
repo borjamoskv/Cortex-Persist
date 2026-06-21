@@ -45,97 +45,108 @@ class AuditReportResponse(BaseModel):
 
 # Helper to initialize demo tables
 async def ensure_demo_tables(conn: aiosqlite.Connection):
-    await conn.execute("""
-        CREATE TABLE IF NOT EXISTS events(
-            id INTEGER PRIMARY KEY,
-            timestamp TEXT,
-            type TEXT,
-            actor TEXT,
-            payload TEXT,
-            parent_event INTEGER,
-            prev_hash TEXT,
-            event_hash TEXT
-        )
-    """)
-    await conn.execute("""
-        CREATE TABLE IF NOT EXISTS demo_system_state(
-            key TEXT PRIMARY KEY,
-            value TEXT
-        )
-    """)
-    await conn.commit()
+    from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+    token_id = mtk_active_token.set("mtk_auth_demo")
+    try:
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS events(
+                id INTEGER PRIMARY KEY,
+                timestamp TEXT,
+                type TEXT,
+                actor TEXT,
+                payload TEXT,
+                parent_event INTEGER,
+                prev_hash TEXT,
+                event_hash TEXT
+            )
+        """)
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS demo_system_state(
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )
+        """)
+        await conn.commit()
+    finally:
+        mtk_active_token.reset(token_id)
+
 
 
 @router.post("/init")
 async def init_demo_events() -> dict[str, Any]:
     """Generates 10,000 demo events sequentially, building a cryptographic hash chain."""
-    async with connect_async_ctx(config.DB_PATH) as conn:
-        await ensure_demo_tables(conn)
-        await conn.execute("DELETE FROM events")
+    from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+    token_id = mtk_active_token.set("mtk_auth_demo")
+    try:
+        async with connect_async_ctx(config.DB_PATH) as conn:
+            await ensure_demo_tables(conn)
+            await conn.execute("DELETE FROM events")
 
-        events = []
-        prev_hash = "0" * 64
+            events = []
+            prev_hash = "0" * 64
 
-        # Generate 10,000 events
-        for i in range(1, 10001):
-            timestamp = f"2026-06-20T10:{38 + (i // 600):02d}:{(i % 60):02d}Z"
-            
-            # Anchor root cause user request at event 42
-            if i == 42:
-                event_type = "user_request"
-                actor = "user"
-                payload = json.dumps({"message": "user_message_001"})
-                parent_event = None
-            elif i == 9652:
-                # Trigger a chain originating from event 42
-                event_type = "tool_execution"
-                actor = "agent"
-                payload = json.dumps({"tool": "web_search", "query": "query_9652"})
-                parent_event = 42
-            elif 9653 <= i <= 9834:
-                # Consecutive causal propagation: parent is i - 1
-                event_type = "tool_execution"
-                actor = "agent"
-                payload = json.dumps({"tool": "web_search", "query": f"query_{i}"})
-                parent_event = i - 1
-            else:
-                event_type = "tool_execution"
-                actor = "agent"
-                payload = json.dumps({"tool": "web_search", "query": f"query_{i}"})
-                parent_event = None
+            # Generate 10,000 events
+            for i in range(1, 10001):
+                timestamp = f"2026-06-20T10:{38 + (i // 600):02d}:{(i % 60):02d}Z"
+                
+                # Anchor root cause user request at event 42
+                if i == 42:
+                    event_type = "user_request"
+                    actor = "user"
+                    payload = json.dumps({"message": "user_message_001"})
+                    parent_event = None
+                elif i == 9652:
+                    # Trigger a chain originating from event 42
+                    event_type = "tool_execution"
+                    actor = "agent"
+                    payload = json.dumps({"tool": "web_search", "query": "query_9652"})
+                    parent_event = 42
+                elif 9653 <= i <= 9834:
+                    # Consecutive causal propagation: parent is i - 1
+                    event_type = "tool_execution"
+                    actor = "agent"
+                    payload = json.dumps({"tool": "web_search", "query": f"query_{i}"})
+                    parent_event = i - 1
+                else:
+                    event_type = "tool_execution"
+                    actor = "agent"
+                    payload = json.dumps({"tool": "web_search", "query": f"query_{i}"})
+                    parent_event = None
 
-            parent_str = str(parent_event) if parent_event is not None else ""
-            raw_str = (
-                timestamp +
-                event_type +
-                actor +
-                payload +
-                parent_str +
-                prev_hash
+                parent_str = str(parent_event) if parent_event is not None else ""
+                raw_str = (
+                    timestamp +
+                    event_type +
+                    actor +
+                    payload +
+                    parent_str +
+                    prev_hash
+                )
+                event_hash = hashlib.sha256(raw_str.encode("utf-8")).hexdigest()
+
+                events.append((
+                    i,
+                    timestamp,
+                    event_type,
+                    actor,
+                    payload,
+                    parent_event,
+                    prev_hash,
+                    event_hash
+                ))
+                prev_hash = event_hash
+
+            # Perform high-performance batch insert
+            await conn.executemany(
+                """
+                INSERT INTO events (id, timestamp, type, actor, payload, parent_event, prev_hash, event_hash)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                events
             )
-            event_hash = hashlib.sha256(raw_str.encode("utf-8")).hexdigest()
-
-            events.append((
-                i,
-                timestamp,
-                event_type,
-                actor,
-                payload,
-                parent_event,
-                prev_hash,
-                event_hash
-            ))
-            prev_hash = event_hash
-
-        # Perform high-performance batch insert
-        await conn.executemany(
-            """
-            INSERT INTO events (id, timestamp, type, actor, payload, parent_event, prev_hash, event_hash)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            events
-        )
-        await conn.commit()
+            await conn.commit()
+    finally:
+        mtk_active_token.reset(token_id)
 
     return {"status": "SUCCESS", "events_generated": 10000}
 
@@ -335,16 +346,21 @@ async def run_cryptographic_audit() -> AuditReportResponse:
 @router.post("/tamper/{event_id}")
 async def tamper_event(event_id: int) -> dict[str, Any]:
     """Simulates an adversarial attack by altering an event's payload in SQLite."""
-    async with connect_async_ctx(config.DB_PATH) as conn:
-        await ensure_demo_tables(conn)
+    from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+    token_id = mtk_active_token.set("mtk_auth_demo")
+    try:
+        async with connect_async_ctx(config.DB_PATH) as conn:
+            await ensure_demo_tables(conn)
 
-        # Alter the payload of the event
-        tampered_payload = json.dumps({"tool": "web_search", "query": "tampered_payload_injection_v0"})
-        await conn.execute(
-            "UPDATE events SET payload = ? WHERE id = ?",
-            (tampered_payload, event_id)
-        )
-        await conn.commit()
+            # Alter the payload of the event
+            tampered_payload = json.dumps({"tool": "web_search", "query": "tampered_payload_injection_v0"})
+            await conn.execute(
+                "UPDATE events SET payload = ? WHERE id = ?",
+                (tampered_payload, event_id)
+            )
+            await conn.commit()
+    finally:
+        mtk_active_token.reset(token_id)
 
     return {"status": "TAMPERED", "event_id": event_id, "message": "Event payload mutated directly in database."}
 
@@ -352,40 +368,45 @@ async def tamper_event(event_id: int) -> dict[str, Any]:
 @router.post("/repair")
 async def repair_ledger() -> dict[str, Any]:
     """Repairs tampered events by recomputing the cryptographic hash chain sequentially."""
-    async with connect_async_ctx(config.DB_PATH) as conn:
-        await ensure_demo_tables(conn)
+    from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+    token_id = mtk_active_token.set("mtk_auth_demo")
+    try:
+        async with connect_async_ctx(config.DB_PATH) as conn:
+            await ensure_demo_tables(conn)
 
-        async with conn.execute(
-            "SELECT id, timestamp, type, actor, payload, parent_event FROM events ORDER BY id ASC"
-        ) as cursor:
-            rows = await cursor.fetchall()
+            async with conn.execute(
+                "SELECT id, timestamp, type, actor, payload, parent_event FROM events ORDER BY id ASC"
+            ) as cursor:
+                rows = await cursor.fetchall()
 
-        recomputed_events = []
-        prev_hash = "0" * 64
+            recomputed_events = []
+            prev_hash = "0" * 64
 
-        for row in rows:
-            eid, timestamp, event_type, actor, payload = row[0], row[1], row[2], row[3], row[4]
-            parent_event = row[5]
+            for row in rows:
+                eid, timestamp, event_type, actor, payload = row[0], row[1], row[2], row[3], row[4]
+                parent_event = row[5]
 
-            parent_str = str(parent_event) if parent_event is not None else ""
-            raw_str = (
-                timestamp +
-                event_type +
-                actor +
-                payload +
-                parent_str +
-                prev_hash
+                parent_str = str(parent_event) if parent_event is not None else ""
+                raw_str = (
+                    timestamp +
+                    event_type +
+                    actor +
+                    payload +
+                    parent_str +
+                    prev_hash
+                )
+                event_hash = hashlib.sha256(raw_str.encode("utf-8")).hexdigest()
+
+                recomputed_events.append((prev_hash, event_hash, eid))
+                prev_hash = event_hash
+
+            # Update all hashes sequentially
+            await conn.executemany(
+                "UPDATE events SET prev_hash = ?, event_hash = ? WHERE id = ?",
+                recomputed_events
             )
-            event_hash = hashlib.sha256(raw_str.encode("utf-8")).hexdigest()
-
-            recomputed_events.append((prev_hash, event_hash, eid))
-            prev_hash = event_hash
-
-        # Update all hashes sequentially
-        await conn.executemany(
-            "UPDATE events SET prev_hash = ?, event_hash = ? WHERE id = ?",
-            recomputed_events
-        )
-        await conn.commit()
+            await conn.commit()
+    finally:
+        mtk_active_token.reset(token_id)
 
     return {"status": "REPAIRED", "message": "Hash chain re-anchored successfully."}

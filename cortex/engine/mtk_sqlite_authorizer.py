@@ -30,6 +30,8 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
         sqlite3.SQLITE_FUNCTION,
         sqlite3.SQLITE_TRANSACTION,
         sqlite3.SQLITE_SAVEPOINT,
+        getattr(sqlite3, "SQLITE_RECURSIVE", 33),
+        33,  # SQLITE_RECURSIVE
     }
     
     if action not in SAFE_ACTIONS:

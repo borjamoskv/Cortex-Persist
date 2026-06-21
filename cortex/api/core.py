@@ -76,10 +76,15 @@ async def lifespan(app: FastAPI):
     # Increment demo restart count for demo v0
     try:
         from cortex.database.core import connect_async
-        async with connect_async(db_path) as conn:
-            await conn.execute("CREATE TABLE IF NOT EXISTS demo_system_state (key TEXT PRIMARY KEY, value TEXT)")
-            await conn.execute("INSERT INTO demo_system_state (key, value) VALUES ('restarts', '1') ON CONFLICT(key) DO UPDATE SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT)")
-            await conn.commit()
+        from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+        token_id = mtk_active_token.set("mtk_auth_demo")
+        try:
+            async with connect_async(db_path) as conn:
+                await conn.execute("CREATE TABLE IF NOT EXISTS demo_system_state (key TEXT PRIMARY KEY, value TEXT)")
+                await conn.execute("INSERT INTO demo_system_state (key, value) VALUES ('restarts', '1') ON CONFLICT(key) DO UPDATE SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT)")
+                await conn.commit()
+        finally:
+            mtk_active_token.reset(token_id)
         logger.info("Lifespan: Demo restart count incremented.")
     except Exception as e:
         logger.warning("Could not increment demo restarts: %s", e)
