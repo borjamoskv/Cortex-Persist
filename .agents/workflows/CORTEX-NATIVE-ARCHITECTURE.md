@@ -96,21 +96,32 @@ If a root dependency becomes invalid or refuted (via `discards`), dependent beli
 
 ---
 
-## 3. THE PLANES OF COGNITION
+## 3. THE 5-LAYER SOVEREIGN ARCHITECTURE
 
-### A. Integrity Plane (Cryptographic) `[SPECIFICATION]`
-- Every memory is born with a mathematical shadow. A Sparse Merkle Tree (SMT) binds semantic content to the originating agent.
-- `attest_lineage(artifact_id)` targets resolving execution proofs in $O(\log N)$ time (dependent on structural backend scaling).
+The architecture converges into a rigorously stratified layer model to prevent epistemological mixing and ensure verifiable state execution.
 
-### B. Coordination Plane (Swarm Consensus) `[RESEARCH]`
-- Transport MUST be orchestrated via **Zenoh** (L3/L4) (no central broker).
-- Merge operations MUST be executed using Semantic CRDTs. 
-- Conflict aggregation MUST use **Logarithmic Opinion Pools (LogOP)** to prevent probability flattening.
+### L5 — Governance Layer (Authority)
+Defines roles (Persist-Guardian, Persist-Auditor). Governs who can do what. It does not execute or store logic; it only defines authority and RBAC boundaries.
 
-### C. Belief Plane (Memory Scheduler) `[EXPERIMENTAL]`
-Context injection is dictated by a multivariable tensor equation. If $Risk_{\text{contam}}$ detects cascading structural contradictions, the score asymptotes to 0, rejecting the memory payload.
+### L4 — Cognitive Layer (Reasoning)
+The stochastic reasoning engines (Omega Prime, AETHER-1, Legion). They propose, simulate, argue, and dissent, but they CANNOT modify state directly.
 
-$$ \text{Score}(m) = \frac{(\text{Rel} \cdot w_r) + (\text{Conf} \cdot w_c) + (\text{Rec} \cdot w_t)}{\text{Cost}_{\text{tokens}} + \text{Risk}_{\text{contam}}} $$
+### L3.5 — Epistemic Layer (Knowledge Taxonomy)
+The critical membrane that prevents epistemological mixing. Ensures that a simulated fact, a derived inference, and a directly observed fact do not share the same semantic weight.
+- `ObservationNode` (C5/C4)
+- `InferenceNode` (C3, requires causal lineage)
+- `SimulationNode` (C2, requires branch ID)
+- `CounterfactualNode` (C1, requires divergence point)
+- `ConsensusNode` (C5/C4, requires WBFT quorum)
+
+### L3 — Contract Layer (Validation)
+The deterministic execution boundary (Pydantic, `AgentMessage`). LLM output must be coerced into typed JSON and pass strict validation before transitioning deeper.
+
+### L2 — Causal Layer (Bus + DAG)
+Defines "what caused what" (message_id, causation_id, WBFT). It stores the causal graph but not the raw truth itself.
+
+### L1 — Sovereign State Layer (Ledger + Memory)
+The immutable cryptographic hash chain (Ledger) and memory store that definitively answers "what occurred" and "what is known."
 
 ---
 

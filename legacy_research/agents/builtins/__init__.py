@@ -9,6 +9,7 @@ from cortex.agents.builtins.omega_prime import OmegaPrimeAgent
 from cortex.agents.builtins.security_agent import SecurityAgent
 from cortex.agents.builtins.supervisor_agent import SupervisorAgent
 from cortex.agents.builtins.verification_agent import VerificationAgent
+from cortex.agents.builtins.epistemic_validator import EpistemicValidatorAgent
 
 __all__ = [
     "MoskvVidentiaAgent",
@@ -20,4 +21,5 @@ __all__ = [
     "SecurityAgent",
     "SupervisorAgent",
     "VerificationAgent",
+    "EpistemicValidatorAgent",
 ]

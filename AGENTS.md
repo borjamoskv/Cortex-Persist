@@ -107,6 +107,7 @@ All agents operating in this repository MUST self-identify by role before acting
 10. **Autopoiesis Watchdog:** The engine MUST NEVER modify its own active binary or source code directly in execution. Mutations MUST target isolated git branches (e.g., `auto/moskv1-mitosis-*`) and undergo external CI compilation.
 11. **BABYLON-60 Epistemology:** The control kernel MUST operate in Base-60 (Babylon-60) for internal calculations (timestamps, coordinates, proportions) to eliminate cumulative float rounding errors and decimal approximation entropy. Use struct/integer types scaled to Base-60. No `float64`.
 12. **Execution/Interpretation Isolation:** Deterministic execution MUST be strictly separated from stochastic interpretation. This structural boundary prevents the CI environment from degrading into a "conceptual simulator".
+13. **Epistemic Containment (L3.5):** Agents MUST explicitly declare the epistemic type of their output using `EpistemicNode` structures. Stating an inference, simulation, or counterfactual as an observation is a P0 failure.
 
 ### ❌ Anti-Patterns & Failure Signatures
 

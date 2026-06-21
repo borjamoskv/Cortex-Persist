@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class FactType(str, Enum):
+    # DEPRECATED: Use EpistemicType (Observation, Inference, Belief, etc.) instead
     FACT = "fact"
     DECISION = "decision"
     TASK = "task"
@@ -20,9 +21,9 @@ class FactType(str, Enum):
     ERROR = "error"
     GHOST = "ghost"
     BRIDGE = "bridge"
+    # DEPRECATED: Handled by L3.5 ObservationNode
     OBSERVATION = "observation"
     EVENT = "event"
-
 
 __all__ = [
     "AcceptanceResult",
@@ -102,7 +103,8 @@ class QueryResultData(BaseModel):
     degraded: bool = False
     degraded_reason: str | None = None
     trace: dict | None = None
-    facts: list[dict] | None = None
+    facts: list[dict] | None = Field(None, description="[DEPRECATED] Use epistemic_nodes instead")
+    epistemic_nodes: list[EpistemicNode] | None = Field(None, description="The L3.5 Epistemic Nodes retrieved")
 
 
 class RejectionResult(TypedDict):
@@ -160,8 +162,9 @@ class StoreRequest(BaseModel):
     project: str = Field(..., max_length=100, description="Project/namespace for the fact")
     content: str = Field(..., max_length=50000, description="The fact content")
     fact_type: FactType = Field(
-        FactType.FACT, description="Type of fact as defined in ADR-0001"
+        FactType.FACT, description="[DEPRECATED] Type of fact as defined in ADR-0001. Use epistemic_node instead."
     )
+    epistemic_node: EpistemicNode | None = Field(None, description="The L3.5 Epistemic Node wrapper")
     tags: list[str] = Field(default_factory=list, description="Optional tags")
     source: str = Field("", max_length=200, description="Origin of the fact (e.g. agent:vex)")
     confidence: str | None = Field(None, description="Optional confidence level (C1-C5)")
