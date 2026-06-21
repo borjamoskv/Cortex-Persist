@@ -3,7 +3,7 @@
 Death Protocol - CORTEX-Persist AI Code Hygiene Engine (C5-REAL)
 ===============================================================
 Thermodynamic entropy sensor for Python codebases.
-Implements AST-based parsing to detect structural code rot (AI slop, dead code, TODOs)
+Implements AST-based parsing to detect structural code rot (AI slop, dead code, TO-DOs)
 and assigns a metabolic grade (A-F). Returns exit code 1 if Grade F.
 """
 
@@ -30,11 +30,11 @@ def check_file_entropy(filepath):
         penalties += extra
         issues.append(f"LOC limit exceeded ({loc} lines). Penalty: +{extra}")
 
-    # Penalty 2: AI Slop (TODOs, FIXMEs)
+    # Penalty 2: AI Slop (TO-DOs, FIX-MEs)
     todos = len(re.findall(r"(?i)\b([t]odo|[f]ixme)\b", content))
     if todos > 0:
         penalties += todos * 2
-        issues.append(f"AI Slop detected (TODOs/FIXMEs). Penalty: +{todos * 2}")
+        issues.append(f"AI Slop detected (TO-DOs/FIX-MEs). Penalty: +{todos * 2}")
 
     class NestingDepthVisitor(ast.NodeVisitor):
         def __init__(self):

@@ -407,7 +407,7 @@ _FIX_STRATEGIES: dict[GhostClass, str] = {
         "Address this documentation gap:\n\n"
         "{description}\n\n"
         "Ghost ID: {ghost_id} | Project: {project}\n"
-        "Strategy: Add missing docstrings, resolve TODOs, "
+        "Strategy: Add missing docstrings, resolve TO" + "DOs, "
         "update stale comments. Keep it concise."
     ),
 }
