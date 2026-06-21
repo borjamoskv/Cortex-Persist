@@ -265,3 +265,75 @@ def test_mtk_authorizer_replacement_fails(mtk_db):
     
     with pytest.raises(sqlite3.DatabaseError, match="MTK-LOCK"):
         mtk_db.set_authorizer(lambda *args: sqlite3.SQLITE_OK)
+
+@pytest.mark.asyncio
+async def test_mtk_blocks_pragma_modifications(mtk_db, dummy_payload):
+    """
+    Empirical Falsification 1: PRAGMA modification vs read.
+    Validates that `PRAGMA synchronous=OFF` is blocked even with an MTK token,
+    but reading `PRAGMA synchronous` is allowed.
+    """
+    guard = MTKGuard(private_key="test_key_123")
+    
+    # Outside boundary: Read is allowed
+    mtk_db.execute("PRAGMA synchronous").fetchone()
+    
+    # Outside boundary: Write is blocked
+    with pytest.raises(sqlite3.DatabaseError, match="not authorized"):
+        mtk_db.execute("PRAGMA synchronous=OFF")
+        
+    # Inside boundary: Read is allowed, Write is STILL blocked (Default Deny for structural PRAGMAs)
+    async with guard.transaction_boundary(dummy_payload):
+        mtk_db.execute("PRAGMA synchronous").fetchone()
+        with pytest.raises(sqlite3.DatabaseError, match="not authorized"):
+            mtk_db.execute("PRAGMA synchronous=OFF")
+
+@pytest.mark.asyncio
+async def test_mtk_blocks_structural_ddl_with_or_without_token(mtk_db, dummy_payload):
+    """
+    Empirical Falsification 2: Structural DDL (e.g., ATTACH, CREATE TRIGGER, CREATE VIEW)
+    must be blocked completely regardless of MTK capability presence.
+    """
+    guard = MTKGuard(private_key="test_key_123")
+    
+    ddl_statements = [
+        "ATTACH DATABASE 'rogue.db' AS rogue",
+        "CREATE VIEW evil_view AS SELECT * FROM records",
+        "CREATE TRIGGER evil_trigger AFTER INSERT ON records BEGIN SELECT 1; END"
+    ]
+    
+    # Outside boundary: Blocked
+    for stmt in ddl_statements:
+        with pytest.raises(sqlite3.DatabaseError, match="not authorized"):
+            mtk_db.execute(stmt)
+            
+    # Inside boundary: STILL Blocked (Hard-blocked by DANGEROUS_ACTIONS)
+    async with guard.transaction_boundary(dummy_payload):
+        for stmt in ddl_statements:
+            with pytest.raises(sqlite3.DatabaseError, match="not authorized"):
+                mtk_db.execute(stmt)
+
+@pytest.mark.asyncio
+async def test_mtk_blocks_shadow_table_evasion(mtk_db, dummy_payload):
+    """
+    Empirical Falsification 3: Shadow table name spoofing.
+    Validates that creating or writing to a table ending in `_data` without a token
+    is correctly rejected by the MTK engine.
+    """
+    guard = MTKGuard(private_key="test_key_123")
+    
+    # Attempting to create a spoofed shadow table outside boundary MUST fail
+    with pytest.raises(sqlite3.DatabaseError, match="not authorized"):
+        mtk_db.execute("CREATE TABLE evil_data (id INTEGER)")
+        
+    # Inside boundary, authorize creating a table that looks like a shadow table
+    async with guard.transaction_boundary(dummy_payload):
+        mtk_db.execute("CREATE TABLE cortex_vectors_data (id INTEGER)")
+        
+    # Outside boundary: Attempting to write to it MUST fail (the `endswith` bypass is removed)
+    with pytest.raises(sqlite3.DatabaseError, match="not authorized"):
+        mtk_db.execute("INSERT INTO cortex_vectors_data (id) VALUES (1)")
+        
+    # Inside boundary: Authorized
+    async with guard.transaction_boundary(dummy_payload):
+        mtk_db.execute("INSERT INTO cortex_vectors_data (id) VALUES (1)")
