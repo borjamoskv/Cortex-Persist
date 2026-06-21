@@ -130,6 +130,7 @@ dependencies = [
  "hex",
  "ndarray 0.15.6",
  "rand",
+ "rand_distr",
  "rusqlite",
  "serde",
  "serde_json",

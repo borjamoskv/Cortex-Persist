@@ -1,8 +1,10 @@
 use rusqlite::{Connection, Result};
 use std::path::Path;
+use crate::orthogonal_obfuscator::OrthogonalObfuscator;
 
 pub struct SqliteVecEngine {
     conn: Connection,
+    obfuscator: OrthogonalObfuscator,
 }
 
 impl SqliteVecEngine {
@@ -30,13 +32,16 @@ impl SqliteVecEngine {
             [],
         )?;
 
-        Ok(Self { conn })
+        let obfuscator = OrthogonalObfuscator::new(512);
+
+        Ok(Self { conn, obfuscator })
     }
 
     /// Stores a new embedding into the sqlite-vec space
     pub fn insert_embedding(&self, vector: &[f32]) -> Result<i64> {
+        let obf_vec = self.obfuscator.obfuscate(vector);
         // We encode the vector into bytes as expected by sqlite-vec
-        let vector_bytes: Vec<u8> = vector.iter().flat_map(|&f| f.to_ne_bytes()).collect();
+        let vector_bytes: Vec<u8> = obf_vec.iter().flat_map(|&f| f.to_ne_bytes()).collect();
 
         self.conn.execute(
             "INSERT INTO divergence_embeddings(embedding) VALUES (?1)",
@@ -48,7 +53,8 @@ impl SqliteVecEngine {
 
     /// Performs Cosine Similarity lookup (ANN/KNN via sqlite-vec)
     pub fn find_nearest_cosine_divergence(&self, query_vector: &[f32], k: usize) -> Result<Vec<(i64, f64)>> {
-        let vector_bytes: Vec<u8> = query_vector.iter().flat_map(|&f| f.to_ne_bytes()).collect();
+        let obf_vec = self.obfuscator.obfuscate(query_vector);
+        let vector_bytes: Vec<u8> = obf_vec.iter().flat_map(|&f| f.to_ne_bytes()).collect();
 
         let mut stmt = self.conn.prepare(
             "SELECT rowid, vec_distance_cosine(embedding, ?1) as distance 

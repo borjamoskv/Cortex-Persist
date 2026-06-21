@@ -166,3 +166,4 @@ mod tests {
 }
 pub mod onnx_engine;
 pub mod sqlite_vec_engine;
+pub mod orthogonal_obfuscator;
