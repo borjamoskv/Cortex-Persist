@@ -1,6 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import logging
+import hashlib
+import json
 from typing import Any
 
 logger = logging.getLogger("cortex.engine.mcts_sanhedrin")
@@ -26,12 +28,18 @@ class VectorialDownsampling:
         # Simulated parallel execution in the vector space
         await asyncio.sleep(0)
         
+        # Immutable cryptographic footprint
+        intent_json = json.dumps(intent_vector, sort_keys=True)
+        payload = f"{self.tenant_id}|{intent_json}".encode("utf-8")
+        node_hash = hashlib.sha256(payload).hexdigest()[:16]
+        
         # Consensus Collapse (Vectorial voting)
         collapsed_vector = {
-            "node_hash": "mcts_collapsed_8f9a2",
+            "node_hash": node_hash,
             "entropy_variance": 0.12,
             "selected_path": "exploitation_dominant"
         }
+        logger.info(f"[{self.tenant_id}] MCTS Decision Certified. Immutable footprint: {node_hash}")
         return collapsed_vector
 
 
@@ -55,10 +63,14 @@ class ContextFusionEngine:
         else:
             temperature = 0.7 # Higher temp to explore semantic space
             
+        # Cryptographic fusion hash (immutable footprint)
+        fusion_payload = f"{input_data}|{context}|{intent}|{base_entropy}|{temperature}".encode("utf-8")
+        fusion_hash = hashlib.sha256(fusion_payload).hexdigest()[:16]
+            
         return {
             "normalized_entropy": base_entropy,
             "dynamic_temperature": temperature,
-            "fused_vector_hash": "fusion_b60_992"
+            "fused_vector_hash": fusion_hash
         }
 
 
