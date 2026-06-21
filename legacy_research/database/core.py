@@ -39,6 +39,30 @@ from contextlib import asynccontextmanager
 from typing import Any, Final
 
 import aiosqlite
+import contextvars
+
+# -- Monkey-patch aiosqlite to propagate ContextVars to worker threads --
+# This is mathematically required so that MTK capabilities (which use ContextVars)
+# survive the hop from the main asyncio event loop thread to aiosqlite's background
+# worker threads. Without this, the SQLite authorizer hook would always evaluate to None.
+_original_aiosqlite_execute = aiosqlite.core.Connection._execute
+_original_aiosqlite_cursor_execute = aiosqlite.core.Cursor._execute
+
+def _patched_aiosqlite_execute(self, fn, *args, **kwargs):
+    ctx = contextvars.copy_context()
+    def wrapper():
+        return ctx.run(fn, *args, **kwargs)
+    return _original_aiosqlite_execute(self, wrapper)
+
+def _patched_aiosqlite_cursor_execute(self, fn, *args, **kwargs):
+    ctx = contextvars.copy_context()
+    def wrapper():
+        return ctx.run(fn, *args, **kwargs)
+    return _original_aiosqlite_cursor_execute(self, wrapper)
+
+aiosqlite.core.Connection._execute = _patched_aiosqlite_execute
+aiosqlite.core.Cursor._execute = _patched_aiosqlite_cursor_execute
+# ---------------------------------------------------------------------
 
 try:
     import sqlite_vec
@@ -139,6 +163,13 @@ def _apply_pragmas_sync(
 
 # ─── Sync Factory ─────────────────────────────────────────────────────
 
+class SovereignConnection(sqlite3.Connection):
+    """Hardened connection class that prevents removing the MTK authorizer."""
+    def set_authorizer(self, authorizer_callback: Any) -> None:
+        from cortex.engine.mtk_sqlite_authorizer import mtk_authorizer_callback
+        if authorizer_callback is not mtk_authorizer_callback:
+            raise sqlite3.DatabaseError("MTK-LOCK: Cannot override sovereign authorizer callback.")
+        super().set_authorizer(authorizer_callback)
 
 def connect(
     db_path: str,
@@ -172,6 +203,7 @@ def connect(
             timeout=timeout,
             check_same_thread=check_same_thread,
             uri=uri,
+            factory=SovereignConnection,
             isolation_level=isolation_level,  # type: ignore[type-error]
         )
     except sqlite3.OperationalError as e:
@@ -210,6 +242,7 @@ def connect_writer(
             db_path,
             timeout=timeout,
             check_same_thread=check_same_thread,
+            factory=SovereignConnection,
             uri=uri,
         )
     except sqlite3.OperationalError as e:
@@ -241,7 +274,7 @@ async def connect_async(
     """
     is_uri = uri or db_path.startswith("file:")
     try:
-        conn = await aiosqlite.connect(db_path, timeout=5.0, uri=is_uri)
+        conn = await aiosqlite.connect(db_path, timeout=5.0, uri=is_uri, factory=SovereignConnection)
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):
             raise DBLockError(f"Async database lock timeout: {e}") from e
