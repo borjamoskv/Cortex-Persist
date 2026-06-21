@@ -4,6 +4,7 @@ import sys
 from typing import Any
 
 import requests
+from cortex.observability.jsonl_logger import setup_cortex_logging
 
 # Configure structured logging for CI/CD
 setup_cortex_logging()

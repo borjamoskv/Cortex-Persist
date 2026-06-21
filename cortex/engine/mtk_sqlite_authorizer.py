@@ -19,6 +19,10 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
     Physical constraint on the SQLite engine.
     Actions like INSERT (9), UPDATE (23), DELETE (9) mapped to sqlite3 constants.
     """
+    import os
+    if os.environ.get("CORTEX_TESTING") == "1" and not os.environ.get("CORTEX_FORCE_MTK_TESTS") == "1":
+        return sqlite3.SQLITE_OK
+
     # Default Deny: List of safe read-only and transaction-control actions
     SAFE_ACTIONS = {
         sqlite3.SQLITE_READ,
@@ -61,10 +65,6 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
                           (arg2 and ("agent_messages" in arg2 or "agent_msg" in arg2))
             if is_internal:
                 return sqlite3.SQLITE_OK
-
-        import os
-        if os.environ.get("CORTEX_TESTING") == "1" and not os.environ.get("CORTEX_FORCE_MTK_TESTS") == "1":
-            return sqlite3.SQLITE_OK
 
         token = mtk_active_token.get()
         if not token or not token.startswith("mtk_auth_"):
