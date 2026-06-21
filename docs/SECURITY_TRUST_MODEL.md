@@ -102,6 +102,8 @@ CORTEX aims to provide:
 
 ## Guarantees
 
+> **Empirical Validation Constraint:** CORTEX-Persist dispone de evidencia experimental de que las superficies físicas de mutación SQLite auditadas están gobernadas por el MTK y no pueden ser modificadas fuera de los límites de autorización definidos por el sistema.
+
 CORTEX is designed to guarantee, within correct implementation and deployment:
 
 ### 1. Cryptographic Traceability
