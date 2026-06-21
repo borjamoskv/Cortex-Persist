@@ -96,8 +96,8 @@ class GuardrailConfig(BaseModel):
     )
 
 
-class AgentRole(BaseModel):
-    """Top-level schema for a CORTEX agent role definition.
+class DeclarativeAgentSpec(BaseModel):
+    """Top-level schema for a CORTEX agent definition.
 
     This is the Pydantic model that maps 1:1 to a role.yaml file.
     """
@@ -115,13 +115,13 @@ class AgentRole(BaseModel):
         default="You are a helpful assistant.",
         description="System prompt injected at the start of every session.",
     )
-    tenant_id: str = Field(
-        default="default",
-        description="Tenant isolation identifier.",
+    provider: str | None = Field(
+        default=None,
+        description="Optional specific LLM provider.",
     )
-    project_id: str = Field(
-        default="default",
-        description="Project scope for memory operations.",
+    intent: str | None = Field(
+        default=None,
+        description="The agent's primary intent (wants). Does not imply governance role authorization.",
     )
     memory: MemoryConfig = Field(
         default_factory=MemoryConfig,
@@ -141,8 +141,8 @@ class AgentRole(BaseModel):
     )
 
     @classmethod
-    def from_yaml_file(cls, path: str) -> AgentRole:
-        """Load an AgentRole from a YAML file."""
+    def from_yaml_file(cls, path: str) -> DeclarativeAgentSpec:
+        """Load a DeclarativeAgentSpec from a YAML file."""
         from pathlib import Path
 
         import yaml
@@ -165,8 +165,8 @@ class AgentRole(BaseModel):
         )
 
     @classmethod
-    def scaffold(cls) -> AgentRole:
-        """Generate a scaffold AgentRole with sensible defaults."""
+    def scaffold(cls) -> DeclarativeAgentSpec:
+        """Generate a scaffold DeclarativeAgentSpec with sensible defaults."""
         return cls(
             name="my-agent",
             model="gemini-2.5-pro",
@@ -175,3 +175,6 @@ class AgentRole(BaseModel):
             guardrails=GuardrailConfig(),
             tools=["filesystem", "http"],
         )
+
+# Legacy alias for backward compatibility.
+AgentRole = DeclarativeAgentSpec
