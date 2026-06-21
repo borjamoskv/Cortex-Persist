@@ -11,3 +11,7 @@ cortex_ledger = { path = "../cortex_ledger" }
 cortex_zk = { path = "../cortex_zk" }
 cortex_hardware_stub = { path = "../cortex_hardware_stub" }
 serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+cortex_replay = { path = "../cortex_replay" }
+cortex_ffi = { path = "../cortex_ffi" }
