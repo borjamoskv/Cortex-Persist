@@ -1,0 +1,27 @@
+attention:
+  type: hybrid_swa_global
+
+  sliding_window:
+    size: 4096
+
+  global_blocks:
+    - 0
+    - 20
+    - 40
+    - 60
+    - 79
+
+  routing:
+    block_0:
+      mode: global
+    block_20:
+      mode: global
+    block_40:
+      mode: global
+    block_60:
+      mode: global
+    block_79:
+      mode: global
+
+  default:
+    mode: sliding_window
