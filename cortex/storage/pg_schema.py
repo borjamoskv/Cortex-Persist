@@ -68,7 +68,7 @@ CREATE INDEX IF NOT EXISTS idx_facts_quarantine ON facts(is_quarantined);
 CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned);
 CREATE INDEX IF NOT EXISTS idx_facts_content_trgm ON facts USING gin(content gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_facts_embedding
-    ON facts USING ivfflat(embedding vector_cosine_ops)
+    ON facts USING ivfflat(embedding vector_l2_ops)
     WITH (lists = 100);
 """
 
