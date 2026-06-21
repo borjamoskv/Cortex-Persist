@@ -9,12 +9,41 @@ pub mod scene_model;
 pub mod smt_compiler;
 pub mod telemetry;
 pub mod vector_vault;
+pub mod reality;
 
 use edg::{EpistemicGraph, EpistemicNode, EpistemicStatus};
 use pyo3::prelude::*;
+use pyo3::exceptions::PyValueError;
 use scene_model::{ContinuityRuleType, EdgeRule, SceneState};
 use smt_compiler::{validate_scene_transition, GateStatus, Verdict};
 use telemetry::validate_metric_json;
+
+/// Valida y registra un claim desde Python.
+/// Retorna el status final como string.
+#[pyfunction]
+pub fn ingest_reality_claim(
+    ledger_path: &str,
+    claim_json: &str,
+    now_epoch_ms: u64,
+) -> PyResult<String> {
+    let claim: reality::claim::RealityClaim = serde_json::from_str(claim_json)
+        .map_err(|e| PyValueError::new_err(format!("Invalid claim JSON: {e}")))?;
+
+    let registry = reality::registry::RealityRegistry::new(ledger_path);
+
+    let status = registry
+        .ingest(claim, now_epoch_ms)
+        .map_err(|e| PyValueError::new_err(format!("Ingestion failed: {e}")))?;
+
+    let status_str = match status {
+        reality::claim::ClaimStatus::Verified => "verified",
+        reality::claim::ClaimStatus::Rejected => "rejected",
+        reality::claim::ClaimStatus::Pending  => "pending",
+        reality::claim::ClaimStatus::Unknown  => "unknown",
+    };
+
+    Ok(status_str.to_string())
+}
 
 /// CORTEX-Persist Cognitive Core Rust Extension (Enterprise EDG)
 #[pymodule]
@@ -29,6 +58,7 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Verdict>()?;
     m.add_function(wrap_pyfunction!(validate_scene_transition, m)?)?;
     m.add_function(wrap_pyfunction!(validate_metric_json, m)?)?;
+    m.add_function(wrap_pyfunction!(ingest_reality_claim, m)?)?;
     Ok(())
 }
 
