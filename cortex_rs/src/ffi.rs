@@ -1,4 +1,7 @@
 use serde_json::Value;
+use std::sync::{Arc, RwLock, OnceLock};
+
+static LEDGER_STATE: OnceLock<Arc<RwLock<Vec<Value>>>> = OnceLock::new();
 
 pub fn submit_ir(ir: &str) -> Result<String, String> {
     // Phase I: FFI Membrane Assault
@@ -11,9 +14,14 @@ pub fn submit_ir(ir: &str) -> Result<String, String> {
     }
 
     let parsed: Result<Value, _> = serde_json::from_str(ir);
-    if parsed.is_err() {
-        return Err("REJECTED_MALFORMED_JSON".to_string());
+    match parsed {
+        Ok(v) => {
+            let state = LEDGER_STATE.get_or_init(|| Arc::new(RwLock::new(Vec::new())));
+            if let Ok(mut lock) = state.write() {
+                lock.push(v);
+            }
+            Ok("hash-placeholder".to_string())
+        }
+        Err(_) => Err("REJECTED_MALFORMED_JSON".to_string()),
     }
-
-    Ok("hash-placeholder".to_string())
 }

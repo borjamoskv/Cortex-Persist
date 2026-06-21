@@ -20,7 +20,8 @@ async def test_cve_orchestrator_metrics():
     assert "markdown" in result
     
     # Assert telemetry
-    metrics_summary = orchestrator.metrics.compute_metrics()
+    metrics_summary = result["_metrics_summary"]
+    metrics_obj = result["_metrics_obj"]
     
     assert metrics_summary["precision"] >= 0.90
     assert metrics_summary["cost_per_claim"] < 0.08
@@ -28,7 +29,7 @@ async def test_cve_orchestrator_metrics():
     assert metrics_summary["hallucination_rate"] < 0.05
     # The mock forces confidence to 0.95, which trips the <0.96 threshold for discrepancies.
     # It loops once, so loops should be 1 and steps should be higher.
-    assert orchestrator.metrics.total_loops > 0
+    assert metrics_obj.total_loops > 0
     assert metrics_summary["loop_rate"] > 0.0 # Depends on the number of steps, mock triggers at least one loop.
     
     # If the test runs, the framework enforces the pipeline correctly.

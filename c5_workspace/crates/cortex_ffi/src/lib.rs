@@ -4,11 +4,13 @@ use cortex_rs::{submit_ir, get_ledger_root};
 
 /// Submit an Intermediate Representation (IR) to the determinist kernel
 #[pyfunction]
-fn submit_ir_py(ir: String) -> PyResult<String> {
-    match submit_ir(&ir) {
-        Ok(hash) => Ok(hash),
-        Err(e) => Err(PyValueError::new_err(e)),
-    }
+fn submit_ir_py(py: Python<'_>, ir: String) -> PyResult<String> {
+    py.allow_threads(|| {
+        match submit_ir(&ir) {
+            Ok(hash) => Ok(hash),
+            Err(e) => Err(PyValueError::new_err(e)),
+        }
+    })
 }
 
 /// Retrieve the current ledger root hash

@@ -10,6 +10,7 @@ Executes a 5-step concrete metric-driven flow:
 """
 
 import asyncio
+import contextvars
 import json
 import logging
 import os
@@ -21,6 +22,8 @@ from uuid import UUID
 from cortex.telemetry.pipeline_metrics import PipelineMetrics
 
 logger = logging.getLogger("cortex.pipeline.cve_orchestrator")
+
+metrics_ctx = contextvars.ContextVar("pipeline_metrics")
 
 class RetrievalCollapseError(RuntimeError):
     """Raised when the orchestrator fails to reach structural consensus within the causal loop bound."""
@@ -37,7 +40,6 @@ class MockSearchClient:
 
 class CVEOrchestrator:
     def __init__(self):
-        self.metrics = PipelineMetrics()
         self.search_client = self._init_search_client()
         self.max_loops = 3
 
@@ -52,8 +54,9 @@ class CVEOrchestrator:
 
     async def step_1_decompose(self, cargo_lock_content: str) -> dict:
         """[1] Claude 3.5 Sonnet -> Decompose into verifiable sub-questions"""
-        self.metrics.record_step()
-        self.metrics.record_cost(Decimal("0.01")) # Mock cost for Sonnet
+        metrics = metrics_ctx.get()
+        metrics.record_step()
+        metrics.record_cost(Decimal("0.01")) # Mock cost for Sonnet
         
         # Mock LLM response
         return {
@@ -64,8 +67,9 @@ class CVEOrchestrator:
 
     async def step_2_retrieve(self, questions: list[str]) -> list[dict]:
         """[2] Perplexity API -> Parallel Retrieval"""
-        self.metrics.record_step()
-        self.metrics.record_cost(Decimal("0.02")) # Mock cost for Perplexity
+        metrics = metrics_ctx.get()
+        metrics.record_step()
+        metrics.record_cost(Decimal("0.02")) # Mock cost for Perplexity
         
         tasks = [self.search_client.search(q) for q in questions]
         results = await asyncio.gather(*tasks)
@@ -73,8 +77,9 @@ class CVEOrchestrator:
 
     async def step_3_analyze(self, search_results: list[dict], augmented_context: list = None) -> dict:
         """[3] GPT-4o -> Cross-reference and structural mapping"""
-        self.metrics.record_step()
-        self.metrics.record_cost(Decimal("0.01")) # Lowering cost to pass SLA
+        metrics = metrics_ctx.get()
+        metrics.record_step()
+        metrics.record_cost(Decimal("0.01")) # Lowering cost to pass SLA
         
         # Simulate increasing confidence if augmented context is provided (loops)
         confidence = Decimal("0.95")
@@ -91,8 +96,9 @@ class CVEOrchestrator:
 
     async def step_4_verify(self, analysis: dict) -> dict:
         """[4] GPT-4o mini -> Deterministic check against original versions"""
-        self.metrics.record_step()
-        self.metrics.record_cost(Decimal("0.001")) # Mock cost
+        metrics = metrics_ctx.get()
+        metrics.record_step()
+        metrics.record_cost(Decimal("0.001")) # Mock cost
         
         # Simulating a discrepancy loop logic
         # In a real run, this would verify Cargo.lock version vs affected_crates
@@ -107,8 +113,9 @@ class CVEOrchestrator:
 
     async def step_5_synthesize(self, analysis: dict) -> dict:
         """[5] Claude 3.5 Sonnet -> Final Report with citation-grounding"""
-        self.metrics.record_step()
-        self.metrics.record_cost(Decimal("0.01")) # Mock cost
+        metrics = metrics_ctx.get()
+        metrics.record_step()
+        metrics.record_cost(Decimal("0.01")) # Mock cost
         
         return {
             "markdown": f"# Vulnerability Report\n- {analysis['cve_id']}: {analysis['severity']} (cited)",
@@ -118,6 +125,14 @@ class CVEOrchestrator:
 
     async def audit_cargo_lock(self, content: str) -> dict:
         """Execute full orchestration flow."""
+        metrics = PipelineMetrics()
+        token = metrics_ctx.set(metrics)
+        try:
+            return await self._audit_cargo_lock_internal(content, metrics)
+        finally:
+            metrics_ctx.reset(token)
+
+    async def _audit_cargo_lock_internal(self, content: str, metrics: PipelineMetrics) -> dict:
         decomposition = await self.step_1_decompose(content)
         search_results = await self.step_2_retrieve(decomposition["questions"])
         
@@ -125,7 +140,7 @@ class CVEOrchestrator:
         augmented_context = []
         
         while loop_count < self.max_loops:
-            self.metrics.record_loop()
+            metrics.record_loop()
             analysis = await self.step_3_analyze(search_results, augmented_context)
             verification = await self.step_4_verify(analysis)
             
@@ -138,7 +153,7 @@ class CVEOrchestrator:
             logger.warning(f"[CVEOrchestrator] Step 4 failed. Discrepancies: {verification['discrepancies']}. Looping back to Step 3. (Loop {loop_count}/{self.max_loops})")
         
         if not verification["validated"]:
-            self.metrics.record_claim(confirmed=False, cited=False)
+            metrics.record_claim(confirmed=False, cited=False)
             logger.warning(f"[CVEOrchestrator] SAGA Record. Retrieval Collapse. Max loops ({self.max_loops}) exhausted without validation.")
             final_synthesis = {
                 "cve_id": analysis.get("cve_id", "UNKNOWN"),
@@ -174,7 +189,7 @@ class CVEOrchestrator:
         final_synthesis["_cortex_taint_hash"] = _fast_sha3(canonicalize_content(encoded_synthesis))
         
         # Record final claim for metrics
-        self.metrics.record_claim(
+        metrics.record_claim(
             confirmed=verification["validated"],
             cited=final_synthesis["cited"]
         )
@@ -208,6 +223,8 @@ class CVEOrchestrator:
         guard.verify_closure(proposal)
         logger.info(f"[CVEOrchestrator] AX-VIII Causal Closure Verified. State: {final_synthesis['status']}")
         
-        self.metrics.validate_thresholds()
+        metrics.validate_thresholds()
         
+        final_synthesis["_metrics_summary"] = metrics.compute_metrics()
+        final_synthesis["_metrics_obj"] = metrics
         return final_synthesis
