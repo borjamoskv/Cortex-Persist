@@ -7,12 +7,19 @@ with a single, hard-enforced physical checkpoint.
 
 import hashlib
 import time
+import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+
+try:
+    import cortex_core_rs
+except ImportError:
+    cortex_core_rs = None
 
 from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
 from cortex.types.evidence import ClosurePayload
 
+logger = logging.getLogger(__name__)
 
 class MTKGuard:
     """
@@ -21,6 +28,18 @@ class MTKGuard:
     """
     def __init__(self, private_key: str):
         self.private_key = private_key
+        if cortex_core_rs:
+            self.ast_projector = cortex_core_rs.ASTProjector()
+            self.rust_authorizer = cortex_core_rs.MTKAuthorizer()
+        else:
+            self.ast_projector = None
+            self.rust_authorizer = None
+            
+    def validate_c5_ast(self, source_code: str) -> str:
+        """Invokes the Rust AST Projector to validate C5-REAL constraints."""
+        if self.ast_projector:
+            return self.ast_projector.ingest_c5_real(source_code)
+        return ""
         
     def _generate_ephemeral_token(self, payload: ClosurePayload) -> str:
         """Generate a short-lived cryptographic capability token for this transaction."""
@@ -62,6 +81,8 @@ class MTKGuard:
         
         # Step 3: Open Physical DB Boundary
         token_id = mtk_active_token.set(token)
+        if self.rust_authorizer:
+            self.rust_authorizer.set_ephemeral_token(token)
         
         try:
             # Yield to the execution layer
@@ -69,4 +90,6 @@ class MTKGuard:
             yield token
         finally:
             # Step 5: Destroy the physical capability
+            if self.rust_authorizer:
+                self.rust_authorizer.clear_token()
             mtk_active_token.reset(token_id)
