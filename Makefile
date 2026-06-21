@@ -62,6 +62,9 @@ bench: ## Run benchmarks
 bench-fast: ## Run quick benchmarks (import time + source size)
 	.venv/bin/python benchmarks/bench_repo.py --quick
 
+gc: ## Garbage Collection: Maximizes Exergy by pruning detached HEADs and orphan blobs
+	git gc --aggressive --prune=now
+
 docker: ## Build Docker image
 	docker build -t cortex:latest .
 

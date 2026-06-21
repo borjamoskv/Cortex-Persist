@@ -54,7 +54,7 @@ def rate_of_change(f: Callable[[float], float], x: float) -> float:
 # 6. INTEGRAL DEFINIDA (Definite Integral)
 # Area under the curve between bounds [a, b].
 # Implemented here via deterministic Riemann sum (Vectorized).
-@jax.jit(static_argnames=['f'])
+@jax.jit(static_argnums=(0, 3))
 def definite_integral(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, b: float, num_points: int = 1000) -> jnp.ndarray:
     """
     Computes the definite integral of f(x) from a to b using the trapezoidal rule.
@@ -68,7 +68,7 @@ def definite_integral(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, b: floa
 
 # 7. INTEGRAL INDEFINIDA (Indefinite Integral / Antiderivative)
 # Computationally represented as the cumulative sum area over a domain.
-@jax.jit(static_argnames=['f'])
+@jax.jit(static_argnums=(0, 3))
 def indefinite_integral(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, b: float, num_points: int = 1000) -> Tuple[jnp.ndarray, jnp.ndarray]:
     """
     Returns the domain (x) and the cumulative integral (F(x)) for an indefinite integral approximation.
@@ -81,7 +81,7 @@ def indefinite_integral(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, b: fl
 
 # 8. SUCESIÓN (Sequence)
 # A discrete mapping of N to R.
-@jax.jit(static_argnames=['f', 'n_terms'])
+@jax.jit(static_argnums=(0, 1))
 def generate_sequence(f: Callable[[jnp.ndarray], jnp.ndarray], n_terms: int) -> jnp.ndarray:
     """
     Generates a succession of values for n = 1, 2, ..., n_terms.
@@ -91,7 +91,7 @@ def generate_sequence(f: Callable[[jnp.ndarray], jnp.ndarray], n_terms: int) -> 
 
 # 9. SERIE (Series)
 # The cumulative sum of a sequence.
-@jax.jit(static_argnames=['f', 'n_terms'])
+@jax.jit(static_argnums=(0, 1))
 def compute_series(f: Callable[[jnp.ndarray], jnp.ndarray], n_terms: int) -> jnp.ndarray:
     """
     Computes the infinite series (up to n_terms) by summing the sequence.

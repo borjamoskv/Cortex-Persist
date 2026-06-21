@@ -28,6 +28,13 @@ repos:
         language: system
         stages: [commit-msg]
 
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        stages: [pre-commit]
+        exclude: .*\.lock$|.*\.db$
+
   - repo: local
     hooks:
       - id: doc-entropy-linter

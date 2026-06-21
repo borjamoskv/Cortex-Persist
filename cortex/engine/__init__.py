@@ -27,6 +27,7 @@ from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.sync_mixin import SyncMixin
 from cortex.engine.transaction_mixin import TransactionMixin
+from cortex.engine.primitive_exergy_agent import PrimitiveExergyMaximizerAgent
 
 if TYPE_CHECKING:
     from cortex.consensus.manager import ConsensusManager

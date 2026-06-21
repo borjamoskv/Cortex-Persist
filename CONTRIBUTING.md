@@ -49,7 +49,9 @@ If your change touches CLI behavior, test the CLI path explicitly.
 
 ## Pull Requests
 
-Keep pull requests small, test-backed, and scoped to one change surface when possible.
+**Exergy Rule:** Keep pull requests small (<200 lines if possible), test-backed, and scoped to ONE change surface (Tip 36).
+**Squash your WIPs:** Run an interactive rebase (`git rebase -i`) to squash Work-In-Progress commits into a single atomic commit before requesting review (Tip 20).
+**Short-Lived Branches:** Feature branches must live 1-3 days maximum. Long-living branches accumulate entropy and are forbidden (Tip 22).
 
 Before opening a PR:
 
@@ -110,6 +112,8 @@ pre-commit install
 ```
 
 ## Basic Contribution Rules
+
+> **LA REGLA DE ORO DE LA EXERGÍA EN GIT:** Minimiza la ENTROPÍA del repositorio. Un repo con alta exergía es donde TODO EL ESFUERZO invertido se traduce en VALOR ENTREGADO. Evita ruido, narrativa y teatralidad (Tip 100).
 
 - Preserve tenant-aware behavior in public data paths.
 - Keep CLI modules thin; do not move business logic into command wrappers.
