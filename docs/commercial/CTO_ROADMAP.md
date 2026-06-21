@@ -12,7 +12,7 @@
 
 Traditional LLM applications operate as stochastic black-boxes, introducing severe operational risk, non-deterministic failures, and compliance vulnerabilities. 
 
-The **CORTEX SOTA AI Scientist Stack** represents a paradigm shift. It is a distributed multi-layer architecture where LLMs serve strictly as reasoning and policy components, while the core research, experimentation, and validation loops are governed by a deterministic, sandboxed execution environment backed by a cryptographic system of record: the **Epistemic Dependency Graph (EDG)** and the **Master Decision Ledger**.
+The **CORTEX SOTA AI Scientist Stack** represents a paradigm shift. It is a distributed multi-layer architecture where LLMs serve strictly as reasoning and policy components, while the core research, experimentation, and validation loops are governed by a deterministic, sandboxed execution environment backed by a cryptographic system of record: the **Keyed Retrieval Graph System (KRGS)** and the **Master Decision Ledger**.
 
 This document outlines the architecture, security gates, and a 4-week deployment roadmap for integrating this stack into enterprise infrastructure.
 
@@ -54,7 +54,7 @@ The system decouples cognitive planning from physical execution, enforcing deter
 - **VLM Critic (`legacy_research/extensions/vlm_critic.py`):** Performs deep visual and logical analysis of sandbox outputs (e.g., training curves, data tables). It acts as an adversarial reviewer, detecting anomalies (e.g., overfitting, silent failures) that textual models fail to spot.
 
 ### 2.5 Causal Integrity (The Ledger)
-- **Epistemic Dependency Graph (`cortex/engine/causality_models.py`):** Tracks the lifecycle of hypotheses as `BeliefObject`s.
+- **Keyed Retrieval Graph System (`cortex/engine/causality_models.py`):** Tracks the lifecycle of hypotheses as `BeliefObject`s in the causal truth layer (`G`).
 - **Master Decision Ledger (`cortex/audit/ledger.py`):** Immutably registers every state transition with a cryptographic `CORTEX-TAINT` signature to prevent untraceable state drift.
 
 ---
