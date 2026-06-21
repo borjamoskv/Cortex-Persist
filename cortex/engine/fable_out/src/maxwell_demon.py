@@ -5,7 +5,7 @@ from fable_library.core import (uint16, int32, uint32)
 from fable_library.list import (empty, FSharpList, exists, cons, to_array, map, reverse)
 from fable_library.reflection import (TypeInfo, class_type)
 from fable_library.util import (UNIT, range)
-from src.babylon import Babylon_causalDistance
+from .babylon import Babylon_causalDistance
 
 def _expr2() -> TypeInfo:
     return class_type("Cortex.Kernel.MaxwellDemon", None, MaxwellDemon)
