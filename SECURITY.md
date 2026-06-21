@@ -12,7 +12,7 @@
 
 **Do NOT open a public issue for security vulnerabilities.**
 
-Email: **<security@cortexpersist.dev>**
+Please report vulnerabilities by opening a **Private Vulnerability Report** in this GitHub repository or by contacting the maintainer directly.
 
 You will receive an acknowledgment within 48 hours and a detailed response within 5 business days.
 
