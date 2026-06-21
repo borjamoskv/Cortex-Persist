@@ -27,6 +27,7 @@ from cortex.engine.causality_models import (
     TaintStatus,
     _downgrade_confidence,
 )
+from cortex.engine.causal.decision_parser import DecisionParser, CausalInvariant
 from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 
 try:
@@ -161,6 +162,32 @@ class AsyncCausalGraph:
             )
         if commit:
             await self.conn.commit()
+
+    async def parse_and_record_decision(
+        self,
+        delta_payload: str,
+        fact_id: int,
+        context: dict[str, Any],
+        parent_id: int | None = None,
+        tenant_id: str = "default",
+    ) -> CausalInvariant:
+        """
+        [C5-REAL] Parses a structural decision delta and anchors it to the Epistemic Graph.
+        Delegates stochastic-to-deterministic translation to the DecisionParser.
+        """
+        parser = DecisionParser()
+        invariant = parser.parse_decision(delta_payload, context)
+
+        await self.record_edge(
+            fact_id=fact_id,
+            parent_id=parent_id,
+            edge_type=invariant.edge_type,
+            confidence=invariant.confidence_b60 / 60.0,
+            agent_id=invariant.metadata.get("agent_id"),
+            tenant_id=tenant_id,
+            fact_hash=invariant.delta_hash,
+        )
+        return invariant
 
     async def _causal_edge_columns(self) -> set[str]:
         cursor = await self.conn.execute("PRAGMA table_info(causal_edges)")
