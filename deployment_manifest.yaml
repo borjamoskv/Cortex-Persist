@@ -11,4 +11,4 @@ checks:
   audit:
     source: cortex audit
   runtime:
-    source: demo_causal_output.json
+    source: runtime_evidence.json

@@ -20,11 +20,28 @@ async def main():
     start_time = time.time()
     
     # Store 10000 events
-    for i in range(10000):
+    for i in range(100):
+        import hashlib
+        from datetime import datetime, timezone
+        
+        content_str = f"Telemetry event #{i} at time {time.time()}"
+        project_str = "causal-demo"
+        logos_sig = hashlib.sha256(f"{content_str}{project_str}".encode()).hexdigest()
+        
+        # Format: taint:{agent_id}:{session_id}:{timestamp_iso8601}:{sha3_256_of_payload}
+        payload_hash = hashlib.sha3_256(content_str.encode()).hexdigest()
+        now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        cortex_taint = f"taint:moskv-1:demo-ses:{now_iso}:{payload_hash}"
+
         await engine.store(
-            project="causal-demo",
-            content=f"Telemetry event #{i} at time {time.time()}",
-            fact_type="telemetry"
+            project=project_str,
+            content=content_str,
+            fact_type="telemetry",
+            source="agent:moskv-1",
+            meta={
+                "logos_signature": logos_sig,
+                "cortex_taint": cortex_taint
+            }
         )
     
     # Final verify
@@ -50,13 +67,14 @@ async def main():
         "final_hash": final_hash,
         "audit_result": "PASS" if ledger_ok else "FAIL",
         "execution_time_ms": execution_time_ms,
-        "verification_method": "C5-REAL EDG V6"
+        "verification_method": "C5-REAL EDG V6",
+        "manifest_reference": "deployment_manifest.yaml"
     }
     
-    with open("demo_causal_output.json", "w") as f:
+    with open("runtime_evidence.json", "w") as f:
         json.dump(output, f, indent=2)
         
-    print(f"[+] Output written to demo_causal_output.json in {execution_time_ms}ms")
+    print(f"[+] Output written to runtime_evidence.json in {execution_time_ms}ms")
     
     await engine.close()
 
