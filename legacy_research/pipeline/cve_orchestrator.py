@@ -140,7 +140,13 @@ class CVEOrchestrator:
         """[5] Forge the final structural payload and execute Guard."""
         from cortex.guards.causal_closure_guard import CausalClosureGuard
         
-        payload = ClosurePayload.seal(claims=claims, evidence=evidence, verdict=verdict)
+        payload = ClosurePayload.seal(
+            claims=claims,
+            evidence=evidence,
+            verdict=verdict,
+            schema_version="v1",
+            proof_kind="sealed-claim-set",
+        )
         guard = CausalClosureGuard()
         guard.verify_closure(payload)
         return payload
@@ -165,16 +171,22 @@ class CVEOrchestrator:
             logger.warning(f"[CVEOrchestrator] Step 4 failed. Discrepancies: {verification['discrepancies']}. Looping back. (Loop {loop_count}/{self.max_loops})")
         
         # Whether validated or collapsed, we seal the reality
+        if not verification["validated"]:
+            return {
+                "status": "UNVERIFIED",
+                "reason": "cross-verifier unavailable or failed"
+            }
+        
         payload = await self.step_5_seal_and_guard(
-            claims=claims if verification["validated"] else [],
+            claims=claims,
             evidence=evidence,
-            verdict=verification["validated"]
+            verdict=True
         )
         
         # ─── C5-REAL CANONICALIZATION ───
         return {
-            "status": "VALIDATED" if payload.verdict else "COLLAPSED",
-            "claims": payload.claims,
+            "status": "VALIDATED",
+            "claims": list(payload.claims),
             "evidence_hash": payload.evidence.evidence_hash,
             "payload_hash": payload.payload_hash
         }

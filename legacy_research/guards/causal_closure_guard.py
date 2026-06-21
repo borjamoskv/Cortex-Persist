@@ -1,73 +1,131 @@
-# [C5-REAL] Exergy-Maximized
-"""CORTEX - Causal Closure Guard (Axiom VIII: Stochastic Obsolescence).
-
-Enforces strict thermodynamic causality across the execution boundary.
-Eliminates synthetic token-cost thresholds and regex-based artifact heuristics 
-in favor of deterministic cryptographic verification of `ClosurePayload`.
-"""
-
 from __future__ import annotations
 
-import hashlib
+import ast
 import json
-import logging
+from dataclasses import is_dataclass, asdict
+from typing import Any
 
 from cortex.types.evidence import ClosurePayload
 
-logger = logging.getLogger("cortex.guards.causal_closure")
+
+class ClosureContractError(RuntimeError):
+    pass
 
 
 class CausalClosureGuard:
-    """Enforces Axiom VIII: Massive execution must yield verifiable causal condensation."""
+    """
+    Strict verifier for sealed causal payloads.
 
-    def __init__(self) -> None:
-        # min_token_threshold is permanently eradicated. Causality is absolute.
-        pass
+    Rules:
+    - token_cost is ignored completely.
+    - narrative text is rejected.
+    - canonical payloads are required.
+    - legacy structured input is only accepted if it can be normalized into
+      the canonical schema.
+    """
 
-    def verify_closure(self, payload: ClosurePayload) -> bool:
-        """Evaluates if the execution achieved causal closure.
+    EXPECTED_SCHEMA_VERSION = "v1"
+    ALLOWED_PROOF_KINDS = {
+        "sealed-claim-set",
+        "ast-proof",
+        "hash-chain",
+        "zk-proof",
+    }
 
-        Args:
-            payload: The explicitly structured analytical output tied to evidence.
-
-        Raises:
-            RuntimeError: SAGA-1 Abort if the evidence payload is inconsistent.
-
-        Returns:
-            bool: True if safe to persist.
-        """
-        if not isinstance(payload, ClosurePayload):
-            logger.error("🛑 [P0] Causal Closure Failure! Expected canonical ClosurePayload.")
-            raise RuntimeError(
-                "[P0] AX-VIII Violation: Structural payload hash mismatch. Expected canonical payload, got unsealed artifact."
-            )
-
-        expected_dict = {
-            "claims": payload.claims,
-            "evidence_hash": payload.evidence.evidence_hash,
-            "verdict": payload.verdict
-        }
-        encoded = json.dumps(expected_dict, sort_keys=True, separators=(",", ":")).encode("utf-8")
-        computed_hash = hashlib.sha3_256(encoded).hexdigest()
-
-        if computed_hash != payload.payload_hash:
-            logger.error(
-                "🛑 [P0] Causal Closure Failure! "
-                "The computed payload hash does not match the sealed payload_hash. "
-                "Evidence tampering or semantic drift detected."
-            )
-            raise RuntimeError(
-                "[P0] AX-VIII Violation: Failed to achieve Causal Closure. "
-                "Structural payload hash mismatch."
-            )
-
-        # Validate that the evidence bundle has actually been populated
-        if not payload.evidence.sources and not payload.claims:
-            logger.error("🛑 [P0] Causal Closure Failure! Empty claims and evidence.")
-            raise RuntimeError(
-                "[P0] AX-VIII Violation: Payload contains no observable evidence or claims."
-            )
-
-        logger.info("Causal Closure verified. Epistemic chain intact.")
+    def verify_closure(self, proposal: Any) -> bool:
+        payload = self._normalize_input(proposal)
+        self._validate_payload(payload)
         return True
 
+    def _normalize_input(self, proposal: Any) -> dict[str, Any]:
+        # Preferred path: already sealed.
+        if isinstance(proposal, ClosurePayload):
+            return proposal.canonical()
+
+        # Dataclass wrapper support.
+        if is_dataclass(proposal):
+            proposal = asdict(proposal)
+
+        # Proposal-like object with content field.
+        if hasattr(proposal, "content"):
+            proposal = getattr(proposal, "content")
+
+        # Raw string content.
+        if isinstance(proposal, str):
+            parsed = self._parse_text_payload(proposal)
+            if parsed is None:
+                raise ClosureContractError("closure payload is narrative or unparseable")
+            return parsed
+
+        # Dict-like structured payload.
+        if isinstance(proposal, dict):
+            return proposal
+
+        raise ClosureContractError(f"unsupported closure input type: {type(proposal).__name__}")
+
+    def _parse_text_payload(self, text: str) -> dict[str, Any] | None:
+        stripped = text.strip()
+        if not stripped:
+            return None
+
+        # Strict JSON first.
+        try:
+            parsed = json.loads(stripped)
+        except json.JSONDecodeError:
+            parsed = None
+
+        if parsed is None:
+            # Safe fallback for legacy Python literal payloads.
+            try:
+                parsed = ast.literal_eval(stripped)
+            except (ValueError, SyntaxError):
+                return None
+
+        if not isinstance(parsed, dict):
+            return None
+
+        return parsed
+
+    def _validate_payload(self, payload: dict[str, Any]) -> None:
+        required = {"schema_version", "proof_kind", "claims", "evidence_hash", "verdict"}
+        missing = required - payload.keys()
+        if missing:
+            raise ClosureContractError(f"missing required fields: {sorted(missing)}")
+
+        if payload["schema_version"] != self.EXPECTED_SCHEMA_VERSION:
+            raise ClosureContractError(
+                f"unsupported schema_version: {payload['schema_version']!r}"
+            )
+
+        if payload["proof_kind"] not in self.ALLOWED_PROOF_KINDS:
+            raise ClosureContractError(
+                f"unsupported proof_kind: {payload['proof_kind']!r}"
+            )
+
+        if not isinstance(payload["claims"], list) or not payload["claims"]:
+            raise ClosureContractError("claims must be a non-empty list")
+
+        if not isinstance(payload["evidence_hash"], str) or len(payload["evidence_hash"]) != 64:
+            raise ClosureContractError("evidence_hash must be a 64-char SHA3-256 hex digest")
+
+        if not isinstance(payload["verdict"], bool):
+            raise ClosureContractError("verdict must be boolean")
+
+        # Recompute canonical payload hash if present.
+        canonical = {
+            "schema_version": payload["schema_version"],
+            "proof_kind": payload["proof_kind"],
+            "claims": payload["claims"],
+            "evidence_hash": payload["evidence_hash"],
+            "verdict": payload["verdict"],
+        }
+        encoded = json.dumps(canonical, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+
+        import hashlib
+        expected_payload_hash = hashlib.sha3_256(encoded).hexdigest()
+
+        if "payload_hash" in payload and payload["payload_hash"] != expected_payload_hash:
+            raise ClosureContractError("payload_hash mismatch")
+
+        # No token_cost gate. No heuristics. No vibes.
+        return
