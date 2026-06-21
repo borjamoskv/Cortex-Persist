@@ -293,7 +293,7 @@ def execute_thermal_purge(
                         projected_code = None
                         if project_ast:
                             try:
-                                projected_code = project_ast(p_content, targets=[])
+                                projected_code = project_ast(p_content, [])
                             except Exception as e:
                                 logger.info("AST validation failed for fact %d (falling back to text): %s", rc["id"], e)
                         

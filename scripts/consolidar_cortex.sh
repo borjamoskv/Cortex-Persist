@@ -30,7 +30,7 @@ fi
 echo "   [4/4] Forzando Colapso Causal en el Grafo Git (Git Sentinel)..."
 git add .
 if ! git diff-index --quiet HEAD --; then
-    commit_msg="chore(C5-REAL): Auto-Consolidación Física Determinista [$(date -u +'%Y-%m-%dT%H:%M:%SZ')]"
+    commit_msg="chore(core): inyectar orquestación determinista BFT en flujo de consolidación"
     git commit -m "$commit_msg" >/dev/null
     HASH=$(git rev-parse HEAD)
     echo "✅ Colapso Semántico completado. Hash Sentinel: $HASH"
