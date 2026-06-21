@@ -9,14 +9,18 @@ Executes a 5-step concrete metric-driven flow:
 [5] Claude 3.5 Sonnet -> Synthesis
 """
 
-import os
+import asyncio
 import json
 import logging
-import asyncio
-from typing import Any
+import os
+from decimal import Decimal
+
 from cortex.telemetry.pipeline_metrics import PipelineMetrics
 
 logger = logging.getLogger("cortex.pipeline.cve_orchestrator")
+
+class EpistemicCollapseError(RuntimeError):
+    """Raised when the orchestrator fails to reach structural consensus within the causal loop bound."""
 
 class MockSearchClient:
     """Fallback search client when Perplexity API is missing."""
@@ -46,7 +50,7 @@ class CVEOrchestrator:
     async def step_1_decompose(self, cargo_lock_content: str) -> dict:
         """[1] Claude 3.5 Sonnet -> Decompose into verifiable sub-questions"""
         self.metrics.record_step()
-        self.metrics.record_cost(0.01) # Mock cost for Sonnet
+        self.metrics.record_cost(Decimal("0.01")) # Mock cost for Sonnet
         
         # Mock LLM response
         return {
@@ -58,7 +62,7 @@ class CVEOrchestrator:
     async def step_2_retrieve(self, questions: list[str]) -> list[dict]:
         """[2] Perplexity API -> Parallel Retrieval"""
         self.metrics.record_step()
-        self.metrics.record_cost(0.02) # Mock cost for Perplexity
+        self.metrics.record_cost(Decimal("0.02")) # Mock cost for Perplexity
         
         tasks = [self.search_client.search(q) for q in questions]
         results = await asyncio.gather(*tasks)
@@ -67,12 +71,12 @@ class CVEOrchestrator:
     async def step_3_analyze(self, search_results: list[dict], augmented_context: list = None) -> dict:
         """[3] GPT-4o -> Cross-reference and structural mapping"""
         self.metrics.record_step()
-        self.metrics.record_cost(0.01) # Lowering cost to pass SLA
+        self.metrics.record_cost(Decimal("0.01")) # Lowering cost to pass SLA
         
         # Simulate increasing confidence if augmented context is provided (loops)
-        confidence = 0.95
+        confidence = Decimal("0.95")
         if augmented_context:
-            confidence = 0.98
+            confidence = Decimal("0.98")
             
         # Output is strictly structured
         return {
@@ -85,12 +89,12 @@ class CVEOrchestrator:
     async def step_4_verify(self, analysis: dict) -> dict:
         """[4] GPT-4o mini -> Deterministic check against original versions"""
         self.metrics.record_step()
-        self.metrics.record_cost(0.001) # Mock cost
+        self.metrics.record_cost(Decimal("0.001")) # Mock cost
         
         # Simulating a discrepancy loop logic
         # In a real run, this would verify Cargo.lock version vs affected_crates
         discrepancies = []
-        if analysis["confidence"] < 0.96:
+        if analysis["confidence"] < Decimal("0.96"):
             discrepancies.append("Version mismatch detected in analysis.")
             
         return {
@@ -101,7 +105,7 @@ class CVEOrchestrator:
     async def step_5_synthesize(self, analysis: dict) -> dict:
         """[5] Claude 3.5 Sonnet -> Final Report with citation-grounding"""
         self.metrics.record_step()
-        self.metrics.record_cost(0.01) # Mock cost
+        self.metrics.record_cost(Decimal("0.01")) # Mock cost
         
         return {
             "markdown": f"# Vulnerability Report\n- {analysis['cve_id']}: {analysis['severity']} (cited)",
@@ -128,9 +132,18 @@ class CVEOrchestrator:
             # Loop Back
             loop_count += 1
             augmented_context.extend(verification["discrepancies"])
-            logger.info(f"Step 4 failed. Looping back to Step 3. (Loop {loop_count})")
+            logger.warning(f"[CVEOrchestrator] Step 4 failed. Discrepancies: {verification['discrepancies']}. Looping back to Step 3. (Loop {loop_count}/{self.max_loops})")
         
+        if not verification["validated"]:
+            self.metrics.record_claim(confirmed=False, cited=False)
+            logger.error(f"[CVEOrchestrator] SAGA Abort. Epistemic Collapse. Max loops ({self.max_loops}) exhausted without validation.")
+            raise EpistemicCollapseError(f"CVE Orchestration failed to reach deterministic consensus after {self.max_loops} attempts. Aborting SAGA.")
+            
         final_synthesis = await self.step_5_synthesize(analysis)
+        
+        # Apply strict cryptographic trace bounding
+        from cortex.engine.causal.taint_engine import _fast_sha3, canonicalize_content
+        final_synthesis["_cortex_taint_hash"] = _fast_sha3(canonicalize_content(json.dumps(final_synthesis)))
         
         # Record final claim for metrics
         self.metrics.record_claim(

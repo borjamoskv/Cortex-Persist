@@ -5,29 +5,30 @@ Enforces concrete operational thresholds for multi-model orchestrations.
 Replaces abstract "cognitive exergy" with strict, measurable SLA checks.
 """
 
-import time
 import logging
+import time
+from decimal import Decimal
 
 logger = logging.getLogger("cortex.telemetry.pipeline_metrics")
 
 class PipelineThresholds:
-    PRECISION_MIN = 0.90
-    COST_PER_CLAIM_MAX = 0.08
-    LOOP_RATE_MAX = 0.15
-    LATENCY_P95_MAX = 45.0
-    HALLUCINATION_RATE_MAX = 0.05
+    PRECISION_MIN = Decimal("0.90")
+    COST_PER_CLAIM_MAX = Decimal("0.08")
+    LOOP_RATE_MAX = Decimal("0.15")
+    LATENCY_P95_MAX_NS = 45_000_000_000 # 45 seconds in nanoseconds
+    HALLUCINATION_RATE_MAX = Decimal("0.05")
 
 class PipelineMetrics:
     def __init__(self):
-        self.start_time = time.time()
+        self.start_time_ns = time.time_ns()
         self.total_claims = 0
         self.confirmed_claims = 0
-        self.total_cost_usd = 0.0
+        self.total_cost_usd = Decimal("0.0")
         self.total_loops = 0
         self.total_steps = 0
         self.uncited_claims = 0
 
-    def record_cost(self, usd_amount: float):
+    def record_cost(self, usd_amount: Decimal):
         self.total_cost_usd += usd_amount
 
     def record_loop(self):
@@ -44,17 +45,20 @@ class PipelineMetrics:
             self.uncited_claims += 1
 
     def compute_metrics(self) -> dict:
-        latency = time.time() - self.start_time
-        precision = (self.confirmed_claims / self.total_claims) if self.total_claims > 0 else 1.0
-        cost_per_claim = (self.total_cost_usd / self.total_claims) if self.total_claims > 0 else 0.0
-        loop_rate = (self.total_loops / self.total_steps) if self.total_steps > 0 else 0.0
-        hallucination_rate = (self.uncited_claims / self.total_claims) if self.total_claims > 0 else 0.0
+        latency_ns = time.time_ns() - self.start_time_ns
+        total = Decimal(self.total_claims) if self.total_claims > 0 else Decimal("1")
+        steps = Decimal(self.total_steps) if self.total_steps > 0 else Decimal("1")
+        
+        precision = Decimal(self.confirmed_claims) / total if self.total_claims > 0 else Decimal("1.0")
+        cost_per_claim = self.total_cost_usd / total if self.total_claims > 0 else Decimal("0.0")
+        loop_rate = Decimal(self.total_loops) / steps if self.total_steps > 0 else Decimal("0.0")
+        hallucination_rate = Decimal(self.uncited_claims) / total if self.total_claims > 0 else Decimal("0.0")
 
         return {
             "precision": precision,
             "cost_per_claim": cost_per_claim,
             "loop_rate": loop_rate,
-            "latency_p95": latency,
+            "latency_p95_ns": latency_ns,
             "hallucination_rate": hallucination_rate
         }
 
@@ -68,7 +72,7 @@ class PipelineMetrics:
             logger.warning(f"Cost SLA violated: {m['cost_per_claim']} > {PipelineThresholds.COST_PER_CLAIM_MAX}")
         if m["loop_rate"] > PipelineThresholds.LOOP_RATE_MAX:
             logger.warning("Loop Rate SLA violated. Review JSON Schema of Stage 3 and Few-Shot of Stage 2.")
-        if m["latency_p95"] > PipelineThresholds.LATENCY_P95_MAX:
-            logger.warning(f"Latency SLA violated: {m['latency_p95']} > {PipelineThresholds.LATENCY_P95_MAX}")
+        if m["latency_p95_ns"] > PipelineThresholds.LATENCY_P95_MAX_NS:
+            logger.warning(f"Latency SLA violated: {m['latency_p95_ns']}ns > {PipelineThresholds.LATENCY_P95_MAX_NS}ns")
         if m["hallucination_rate"] > PipelineThresholds.HALLUCINATION_RATE_MAX:
             logger.warning("Hallucination SLA violated. Forcing stronger citation-grounding in Stage 5.")
