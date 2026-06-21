@@ -1,0 +1,18 @@
+[workspace]
+members = [
+    "crates/cortex_types",
+    "crates/cortex_chaos",
+    "crates/cortex_ledger",
+    "crates/cortex_zk",
+    "crates/cortex_tee_stub",
+    "crates/cortex_rs",
+    "crates/cortex_replay",
+    "crates/cortex_ffi",
+    "crates/cortex_wasm",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+license = "MIT"
