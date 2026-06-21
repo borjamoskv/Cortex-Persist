@@ -23,6 +23,8 @@ crossbeam-channel = "0.5"
 chrono = { version = "0.4", features = ["serde"] }
 syn = { version = "2.0", features = ["full", "extra-traits", "visit"] }
 quote = "1.0"
+sha3 = "0.12.0"
+hex = "0.4.3"
 
 [features]
 default = ["extension-module"]
