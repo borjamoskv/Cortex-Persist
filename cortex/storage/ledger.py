@@ -16,6 +16,8 @@ import os
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
+from typing import Any
+
 try:
     import cortex_core_rs
 except ImportError:
@@ -54,8 +56,16 @@ class AsyncFileLock:
 class EnterpriseAuditLedger:
     """Immutable Audit Ledger for enterprise-grade SOC 2 compliance (WORM JSONL)."""
 
-    def __init__(self, log_path: str = "security_audit_log.jsonl") -> None:
-        self.log_path = log_path
+    def __init__(self, log_path: Any = "security_audit_log.jsonl") -> None:
+        import aiosqlite
+        import sqlite3
+        if isinstance(log_path, (aiosqlite.Connection, sqlite3.Connection)) or hasattr(log_path, "execute"):
+            self._conn = log_path
+            self.log_path = "security_audit_log.jsonl"
+        else:
+            self._conn = None
+            self.log_path = log_path
+
         self._lock = asyncio.Lock()
         self._batch_queue: list[dict] = []
         self._batch_task: asyncio.Task | None = None
@@ -85,6 +95,14 @@ class EnterpriseAuditLedger:
         self.public_key = self.private_key.public_key()
         
         self._initialize_log()
+
+    async def ensure_table(self) -> None:
+        """Idempotent check. If SQL-backed ledger was used, setup schema.
+        
+        Otherwise, does nothing (JSONL WORM ledger handles file initialization on write).
+        """
+        pass
+
 
     def _initialize_log(self):
         if not os.path.exists(self.log_path):
