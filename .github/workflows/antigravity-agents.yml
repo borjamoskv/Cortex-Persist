@@ -44,14 +44,14 @@ jobs:
       - name: PSI scan — zero markers allowed
         id: psi
         run: |
-          count=$(grep -rEn "TODO|FIXME|HACK|WTF" \
+          count=$(grep -rEn "TODO|FIXME|HACK|WTF" --exclude-dir=".venv" \
             --include="*.py" --include="*.ts" --include="*.rs" \
             . 2>/dev/null | grep -v ".github" | wc -l || echo 0)
           echo "psi_count=$count" >> "$GITHUB_OUTPUT"
           echo "PSI markers found: $count"
           if [ "$count" -gt 0 ]; then
             echo "❌ CORTAZAR BLOCKED: PSI=$count (target: 0)"
-            grep -rEn "TODO|FIXME|HACK|WTF" \
+            grep -rEn "TODO|FIXME|HACK|WTF" --exclude-dir=".venv" \
               --include="*.py" --include="*.ts" --include="*.rs" . \
               | grep -v ".github" || true
             exit 1
