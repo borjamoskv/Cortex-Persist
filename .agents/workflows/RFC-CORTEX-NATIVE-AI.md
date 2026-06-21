@@ -314,7 +314,45 @@ The architecture MUST enforce explicit rules determining what constitutes valid 
 3. **Agent Opinion:** Probabilistic assertions (`INFERRED`). Must always include variance and uncertainty metrics.
 4. **Simulated Possibility:** Branches created via `fork_memory`. MUST NOT leak into the `ACTIVE` main context without an explicit merge commit integrating the counterfactual context.
 
-## 19. Formal Appendices (EXPERIMENTAL)
+## 19. Epistemic Integration of AUTODIDACT Nodes
+
+> **Classification: MUST (Normative)**
+
+The AUTODIDACT protocol defines how the system extracts, crystallizes, and persists volatile interfaces (e.g., DOM structures, APIs) into the Epistemic Dependency Graph (EDG).
+
+### 19.1 Structural Ontology
+
+The autonomous learning of capabilities MUST be topologically represented within the EDG:
+- **Node_Observation_Raw (Input):** The raw, high-entropy fragment of the environment (e.g., DOM Snapshot). Factuality: `OBSERVED`.
+- **Node_Invariant_Extraction (Hypothesis):** The deterministic rule extracted from the noise (e.g., XPath or JSON schema). Factuality: `INFERRED`.
+- **Node_Crystallization (Task/Capability):** The executable, immutable script generated from the invariant. Factuality: `ASSERTED`.
+- **Node_Consensus_Anchor (Seal):** The cryptographic seal representing Swarm consensus (Quorum BFT).
+
+### 19.2 Epistemic Routing & Zero-Anergy
+
+- **CANONICAL_ROUTING:** If a `Node_Crystallization` attains `Epistemic_Stability > 0.95`, consumption by agents is **MUST** (mandatory). Re-exploration is an Exergy Drain violation.
+- **FALLBACK_EXPLORATION:** If `Epistemic_Stability < 0.95` or the node is `TAINTED`, shadow routing is permitted. Agents consume the node but retain budgetary authorization to invoke `Autodidact-Interfaces-OMEGA` for emergency exploration if execution fails.
+
+### 19.3 Taint Traceability (CORTEX-TAINT)
+
+Extracted invariants MUST traverse a discrete purification pipeline:
+1. `TAINTED`: Origin is heuristic (LLM-inferred). High risk.
+2. `PARTIALLY_VERIFIED`: Isolated successful execution ($N=1$).
+3. `VERIFIED`: Successful execution validated by Quorum across distinct topologies ($N=3$).
+4. `CANONICAL`: Cryptographically sealed based on sustained production stability.
+
+### 19.4 Epistemic Stability Metric
+
+The evaluation of a node's robustness MUST incorporate temporal decay, calculated in Base-60 structs:
+$$ \text{Stability} = \frac{\text{Successful\_Executions}}{\text{Total\_Executions} + \text{Penalty\_Factor}(T)} $$
+A node maintaining a 100% success rate over 18 months possesses mathematically higher `Epistemic_Stability` than a node with a 100% success rate over 24 hours.
+
+### 19.5 Mitosis & Governance
+
+- **Mitosis (Autonomous):** Upon detecting semantic drift (e.g., `Node_Crystallization` fails), `Autodidact-OMEGA` autonomously isolates a worker to generate a new Observation and Invariant.
+- **Promotion (Consensus-Gated):** The worker emits a Cryptographic Pull Request. The system MUST NOT automatically substitute the active node without Quorum (BFT) validation or explicit Operator approval if the causal Blast Radius affects critical paths.
+
+## 20. Formal Appendices (EXPERIMENTAL)
 
 The following documents contain formal mathematical specifications pending complete proof.
 They are referenced throughout this RFC and will be promoted to normative status upon
@@ -326,7 +364,7 @@ verification.
 | [RFC-CORTEX-ATMS-SEMANTICS](file:///.agents/specs/RFC-CORTEX-ATMS-SEMANTICS.md) | Dependency indexing, assumption environments, propagation mathematics, backtracking | EXPERIMENTAL |
 | [Epistemic Failure Modes](file:///.agents/tests/epistemic-failure-modes.md) | Adversarial test scenarios, invariant validation, acceptance criteria | Test Spec |
 
-## 20. Open Questions
+## 21. Open Questions
 
 - Optimal heuristic embedding strategy for identifying $G_c$ abstractions without invoking excessive off-cycle LLM generation tasks?
 - Upper latency bounds for asynchronous Zero-Knowledge Proof (ZKP) calculation when spanning an SMT root enclosing millions of active belief leaves?
