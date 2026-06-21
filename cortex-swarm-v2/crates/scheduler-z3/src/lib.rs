@@ -16,9 +16,21 @@ pub struct ConflictNode {
     pub confidence: f64,
 }
 
-pub struct RealityCompressor;
+pub enum Z3Mode {
+    Validator,
+    Sampler,
+    IncompleteProofEmitter,
+}
+
+pub struct RealityCompressor {
+    pub mode: Z3Mode,
+}
 
 impl RealityCompressor {
+    pub fn new(mode: Z3Mode) -> Self {
+        Self { mode }
+    }
+
     pub fn compress_branches(&self, nodes: &mut Vec<ConflictNode>) {
         if nodes.is_empty() { return; }
 
