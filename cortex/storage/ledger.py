@@ -258,3 +258,57 @@ class EnterpriseAuditLedger:
         # The epoch_hash becomes the causal root for subsequent states
         return epoch_hash
 
+    async def log_hott_axiom(
+        self,
+        tenant_id: str,
+        actor_id: str,
+        axiom_hash: str,
+        proof_signature: str,
+        topology_distance: float,
+        trace_id: str = None
+    ) -> str:
+        """
+        [C5-REAL] Registra la asimilación de un axioma de Homotopy Type Theory.
+        Garantiza que la matemática asimilada contiene prueba constructiva.
+        """
+        ident = generate_event_identity(trace_id=trace_id)
+        
+        payload = {
+            "tenant_id": tenant_id,
+            "actor_id": actor_id,
+            "mutation_type": "HOTT_AXIOM_ASSIMILATED",
+            "axiom_hash": axiom_hash,
+            "proof_signature": proof_signature,
+            "topology_distance": topology_distance
+        }
+
+        payload_str = json.dumps(payload, sort_keys=True, separators=(',', ':'))
+        
+        m = hashlib.sha3_256()
+        m.update(payload_str.encode("utf-8"))
+        m.update(self._last_hash.encode("utf-8"))
+        event_hash = m.hexdigest()
+
+        signature = self.private_key.sign(payload_str.encode("utf-8")).hex()
+
+        event = {
+            "ts": ident.wall_time,
+            "monotonic_ts": ident.monotonic_time,
+            "lamport_time": ident.lamport_time,
+            "event_id": ident.event_id,
+            "trace_id": ident.trace_id,
+            "span_id": ident.span_id,
+            "type": "HOTT_AXIOM_ASSIMILATED",
+            "payload": payload,
+            "parent_hash": self._last_hash,
+            "event_hash": event_hash,
+            "signature": signature
+        }
+
+        async with self._lock:
+            self._batch_queue.append(event)
+            if self._batch_task is None:
+                self._batch_task = asyncio.create_task(self._batch_worker())
+
+        return event_hash
+

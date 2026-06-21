@@ -43,16 +43,17 @@ class UltramapSubstrate:
     ULTRAMAP-Ω: Sovereign Spatial Matrix for the K-0 Swarm.
     C5-REAL Lock-Free Topological Substrate.
 
-    Memory Layout per Node (128 bytes):
-      [0:24]  : X, Y, Z coordinates (3x double)
-      [24:88] : Target Hash (64 bytes string)
-      [88:96] : Entropy Gradient (double)
-      [96:128]: Control Vector (4x double: queue_depth, error_rate, causal_entropy, cpu_load)
+    Memory Layout per Node (256 bytes):
+      [0:24]   : X, Y, Z coordinates (3x double)
+      [24:88]  : Target Hash (64 bytes string)
+      [88:96]  : Entropy Gradient (double)
+      [96:128] : Control Vector (4x double: queue_depth, error_rate, causal_entropy, cpu_load)
+      [128:256]: HoTT Axiom Signature & Proof Topology Hash (128 bytes string)
     """
 
     def __init__(self, capacity=10000):
         self.capacity = capacity
-        self.node_size = 128
+        self.node_size = 256
         self.tensor_size = self.capacity * self.node_size
         self.bin_path = os.path.join(os.path.dirname(DB_PATH), "ultramap.bin")
 
@@ -181,6 +182,18 @@ class UltramapSubstrate:
 
         return True
 
+    def write_hott_axiom_signature(self, agent_idx: int, signature: str) -> bool:
+        """Injects a Homotopy Type Theory Constructive Proof Signature into the topology."""
+        if not (0 <= agent_idx < self.capacity):
+            return False
+            
+        offset = agent_idx * self.node_size
+        sig_bytes = signature.encode("utf-8")[:128].ljust(128, b"\x00")
+        if self._buffer is not None:
+            self._buffer[offset + 128 : offset + 256] = sig_bytes  # pyright: ignore[reportOptionalSubscript]
+            return True
+        return False
+
     def calculate_exergy_distance(self, agent_idx: int, target_hash: str) -> float:
         """
         O(1) calculation of thermodynamic distance to target.
@@ -221,6 +234,8 @@ class UltramapSubstrate:
         queue_depth, error_rate, causal_entropy, cpu_load = struct.unpack_from(
             "dddd", self._buffer, offset + 96
         )  # pyright: ignore[reportArgumentType]
+        
+        hott_sig = bytes(self._buffer[offset + 128 : offset + 256]).rstrip(b"\x00").decode("utf-8", "ignore")  # pyright: ignore[reportOptionalSubscript]
 
         return {
             "x": x,
@@ -232,6 +247,7 @@ class UltramapSubstrate:
             "error_rate": error_rate,
             "causal_entropy": causal_entropy,
             "cpu_load": cpu_load,
+            "hott_signature": hott_sig,
         }
 
     def update_control_vector(
