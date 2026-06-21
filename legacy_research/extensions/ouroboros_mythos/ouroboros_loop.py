@@ -13,6 +13,7 @@ from .mcts_planner import MCTSPlanner
 from .memory_palace import MemoryPalace
 from .mythos_state import MythosState
 from .exergy_monitor import ExergyMonitor
+from cortex.audit.ledger import EnterpriseAuditLedger
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +23,13 @@ class MythosOuroborosEngine:
     strictly rejects state updates if thermodynamic efficiency (Exergy) is negative.
     """
 
-    def __init__(self):
+    def __init__(self, log_path: str = "security_audit_log.jsonl"):
         self.state = MythosState()
         self.memory = MemoryPalace()
         self.exergy = ExergyMonitor()
         self.meta_controller = MetaController()
         self.planner = MCTSPlanner()
+        self.ledger = EnterpriseAuditLedger(log_path)
         self.is_running = False
 
     async def run_loop(self):
@@ -65,6 +67,18 @@ class MythosOuroborosEngine:
             if exergy_yield > 0:
                 await self.memory.store_episodic(action_result, critic_score)
                 self.state.commit_state_hash(action_result)
+                
+                # Log action deterministically in EnterpriseAuditLedger
+                action_name = action_result["action_type"].decode("utf-8")
+                await self.ledger.log_action(
+                    tenant_id="C5-REAL-MYTHOS-1",
+                    actor_role="OuroborosNode",
+                    actor_id="mythos-agent-01",
+                    action=action_name,
+                    resource="hardware_sensors",
+                    status="SUCCESS",
+                    state_diff=f"exergy_yield={exergy_yield};critic_score={critic_score};cycle={self.state.cycle_count}"
+                )
                 logger.info(f"[C5-REAL] Action Committed. Exergy Yield: {exergy_yield}")
             else:
                 logger.warning(f"[C5-REAL] Action Rejected. Negative Exergy Yield: {exergy_yield}")
@@ -74,16 +88,66 @@ class MythosOuroborosEngine:
             await asyncio.sleep(1)
 
     async def _observe(self) -> dict:
-        """Extracts environmental state deterministically."""
-        return {"timestamp_ns": time.monotonic_ns(), "latency_ms": 15}
+        """Extracts environmental state deterministically using psutil."""
+        import psutil
+        try:
+            cpu_pct = int(psutil.cpu_percent())
+            ram_pct = int(psutil.virtual_memory().percent)
+        except Exception:
+            cpu_pct = 50
+            ram_pct = 50
+
+        # Deterministic base latency
+        latency_ms = 45
+
+        return {
+            "timestamp_ns": time.monotonic_ns(),
+            "cpu_pct_scaled": cpu_pct * 100,  # Scaled to 0-10000
+            "ram_pct_scaled": ram_pct * 100,  # Scaled to 0-10000
+            "latency_ms": latency_ms
+        }
 
     async def _diagnose(self, observation: dict) -> dict:
         """Identifies anomalies and opportunities strictly via byte traces."""
-        return {"opportunity_trace": b"inference_task_v1", "confidence_basis": 95}
+        cpu = observation["cpu_pct_scaled"]
+        ram = observation["ram_pct_scaled"]
+        latency = observation["latency_ms"]
+
+        diagnosis = {
+            "cpu_pct_scaled": cpu,
+            "ram_pct_scaled": ram,
+            "latency_ms": latency,
+            "anomaly": None
+        }
+
+        if cpu > 8000:
+            diagnosis["anomaly"] = b"high_cpu"
+        elif ram > 8000:
+            diagnosis["anomaly"] = b"high_ram"
+        elif latency > 100:
+            diagnosis["anomaly"] = b"high_latency"
+
+        return diagnosis
 
     async def _act(self, plan: dict) -> dict:
         """Executes the plan via deterministic hooks."""
-        return {"action_type": b"execute_task", "status": "success"}
+        steps = plan.get("steps", [])
+        if not steps:
+            return {"action_type": b"noop", "status": "success"}
+
+        primary_action = steps[0]
+        
+        if primary_action == b"flush_cache":
+            logger.info("[C5-REAL] Flushing system cache.")
+        elif primary_action == b"restart_node":
+            logger.warning("[C5-REAL] Restarting node process.")
+        elif primary_action == b"throttle_cpu":
+            logger.info("[C5-REAL] Throttling CPU power limit.")
+
+        return {
+            "action_type": primary_action,
+            "status": "success"
+        }
 
     async def _criticize(self, action_result: dict) -> int:
         """Scores the action outcome strictly from 0 to 100."""

@@ -18,6 +18,17 @@ class ExergyMonitor:
     def __init__(self):
         self.total_microjoules = 0
         self.base_multiplier = 3600
+        self._last_cpu_time = self._get_process_cpu_time_ms()
+
+    def _get_process_cpu_time_ms(self) -> int:
+        import psutil
+        import os
+        try:
+            p = psutil.Process(os.getpid())
+            cpu_times = p.cpu_times()
+            return int((cpu_times.user + cpu_times.system) * 1000)
+        except Exception:
+            return 0
 
     def compute_yield(self, reward: int, quality_score: int = 100) -> int:
         """
@@ -33,8 +44,15 @@ class ExergyMonitor:
         return exergy
 
     def current_score(self) -> int:
-        """Returns the rolling exergy score scaled to an integer."""
-        return 10000 
+        """Returns the rolling exergy score scaled to an integer (0-10000)."""
+        import psutil
+        try:
+            cpu_pct = int(psutil.cpu_percent())
+            ram_pct = int(psutil.virtual_memory().percent)
+            score = 10000 - ((cpu_pct + ram_pct) * 50)
+            return max(0, score)
+        except Exception:
+            return 9000
 
     def enforce_thermal_limits(self):
         """
@@ -46,12 +64,32 @@ class ExergyMonitor:
             self._force_sleep_phase()
 
     def _read_hardware_consumption_uj(self) -> int:
-        """Reads microjoules directly, mimicking deterministic integer output."""
-        return 2500 
+        """Reads microjoules consumed, based on process CPU time delta."""
+        current_cpu_time = self._get_process_cpu_time_ms()
+        delta_ms = current_cpu_time - self._last_cpu_time
+        self._last_cpu_time = current_cpu_time
+        
+        if delta_ms <= 0:
+            delta_ms = 1  # 1ms fallback
+            
+        # Estimate 15W power consumption in milliWatts -> 15000 mW
+        # Energy in uJ = delta_ms * 15000
+        return delta_ms * 15000
 
     def _read_temperature_mc(self) -> int:
-        """Reads milli-Celsius as integer."""
-        return 45000 
+        """Reads CPU temperature in milli-Celsius."""
+        import subprocess
+        import psutil
+        try:
+            output = subprocess.check_output(["sysctl", "-n", "machdep.xcpm.cpu_thermal_level"], stderr=subprocess.DEVNULL)
+            level = int(output.strip())
+            return 30000 + (level * 500)
+        except Exception:
+            try:
+                cpu_pct = int(psutil.cpu_percent())
+            except Exception:
+                cpu_pct = 10
+            return 40000 + (cpu_pct * 200)
         
     def _force_sleep_phase(self):
         """Physical sleep alignment (Mock)."""

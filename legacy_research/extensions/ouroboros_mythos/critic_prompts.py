@@ -29,15 +29,31 @@ REASON: <Structural justification>
 
     def evaluate_action(self, action_result: dict[str, Any]) -> int:
         """
-        Calculates the critic score deterministically without full LLM invocation 
-        unless required for complex heuristics.
+        Calculates the critic score deterministically from 0 to 100 based on
+        current physical resource usage post-action.
         """
-        # Mock evaluation logic for MVP
         status = action_result.get("status", "failed")
-        
-        if status == "success":
-            logger.info("[C5-REAL] Critic evaluation: Action Success. Baseline score: 95")
-            return 95
-        else:
+        if status != "success":
             logger.warning("[C5-REAL] Critic evaluation: Action Failed. Baseline score: 10")
             return 10
+
+        import psutil
+        try:
+            cpu_pct = int(psutil.cpu_percent())
+            ram_pct = int(psutil.virtual_memory().percent)
+        except Exception:
+            cpu_pct = 50
+            ram_pct = 50
+            
+        latency_ms = 45 # baseline mockup
+
+        # Calculate penalties
+        cpu_penalty = max(0, cpu_pct - 70)
+        ram_penalty = max(0, ram_pct - 80)
+        latency_penalty = max(0, latency_ms - 50) // 5
+
+        score = 100 - (cpu_penalty * 2 + ram_penalty * 2 + latency_penalty)
+        final_score = max(0, min(100, score))
+        
+        logger.info(f"[C5-REAL] Critic evaluation: Action Success. Health-based score: {final_score}")
+        return final_score
