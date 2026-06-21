@@ -18,7 +18,7 @@ pub struct CortexKernel {
     energy: u64,
     collapsed: bool,
     state_hash: [u8; 32],
-    ledger_root: [u8; 32],
+    ledger: Ledger,
 }
 
 impl Default for CortexKernel {
@@ -34,7 +34,7 @@ impl CortexKernel {
             energy: 0,
             collapsed: false,
             state_hash: [0u8; 32],
-            ledger_root: [0u8; 32],
+            ledger: Ledger::new(),
         }
     }
 
@@ -69,33 +69,18 @@ impl CortexKernel {
         }
 
         let block = Block {
-            parent_root: self.ledger_root,
+            parent_root: self.ledger.root(),
             state_hash: self.state_hash,
             proof_hash,
             origin: self.node_id.clone(),
             energy: self.energy,
         };
 
-        let mut ledger = Ledger::new();
-        ledger = {
-            // rebuild the ledger root deterministically from the current state hash.
-            // the in-memory ledger is local to the kernel instance.
-            let mut l = Ledger::new();
-            if self.ledger_root != [0u8; 32] {
-                l = Ledger::default();
-                l = Ledger::new();
-            }
-            l
-        };
-
-        let mut local_ledger = Ledger::new();
-        local_ledger.append(block).map_err(|err| match err {
-            LedgerError::OrphanedBlock => self.collapse(CollapseReason::LedgerForkAccepted),
-            LedgerError::EmptyOrigin => self.collapse(CollapseReason::MemoryViolation),
-        })?;
-        self.ledger_root = local_ledger.root();
-
-        Ok(())
+        match self.ledger.append(block) {
+            Ok(_) => Ok(()),
+            Err(LedgerError::OrphanedBlock) => Err(self.collapse(CollapseReason::LedgerForkAccepted)),
+            Err(LedgerError::EmptyOrigin) => Err(self.collapse(CollapseReason::MemoryViolation)),
+        }
     }
 
     pub fn submit_ir(&mut self, ir: &str) -> KernelResult {
@@ -153,7 +138,7 @@ impl KernelTrait for CortexKernel {
     }
 
     fn ledger_root(&self) -> [u8; 32] {
-        self.ledger_root
+        self.ledger.root()
     }
 
     fn kernel_hash(&self) -> [u8; 32] {
