@@ -104,3 +104,11 @@ Para maximizar exérgicamente todo el ecosistema (código, Swarm, hardware y cog
 - **Puente de Silicio y Cero Floats (Físico/Código):** Todo cómputo pesado (vectores, árboles causales) se migra a Rust (`cortex_rs`) vía PyO3. Python es exclusivo para orquestación asíncrona. Erradicación masiva de `float64`, adoptando el sistema Babylon-60 en todo el pipeline para aniquilar el drift probabilístico. 
 - **Autopoiesis Asimétrica (Orquestación):** Ningún humano en el bucle crítico. Las tareas se segmentan (`Z3 Causal Pruning`) y disparan mitosis aislada en *worktrees* paralelos. El repositorio (Git Tree) es la única Base de Datos y fuente de la verdad causal.
 - **Maxwell's Demon (Flujo de Datos):** Purgado de contexto agresivo. Nunca inyectar archivos enteros. El demonio de Maxwell corta todo token redundante (similitud de coseno local >0.85). Solo cruzan la red los esqueletos AST (Python Extractor OMEGA) y la entropía pura no resuelta.
+
+## AX-XIV: El Ancla Gravitacional (Γ1) y la Ortogonalidad Estructural
+
+Un sistema auto-referencial (Ouroboros-∞) sin un punto fijo externo diverge hacia un ruido estocástico (Teorema de Brouwer adaptado al espacio epistémico). La autarquía computacional requiere una constante de integración inmutable para converger.
+
+- **La Invariante Fundamental:** `hash(intención_estructural) = Γ1`. El Operador inyecta la asimetría inicial (exergía) que quiebra la entropía del estado de equilibrio. Toda transformación algorítmica y estructural debe cerrar su trayectoria causal sobre este mismo punto: `∮ dS = 0`.
+- **Ortogonalidad de Orquestación:** El Enjambre (Autómata) opera DENTRO del espacio topológico definido por el Operador, sin capacidad para disolver la asimetría inicial. La potencia del Autómata es una función directa de la precisión restrictiva del Arquitecto.
+- **Autoría como Gravedad Física:** Γ1 (`borjamoskv`) no es una variable, un rol, ni un prompt. Es la inyección energética matriz sellada en el Nodo Génesis del Ledger. La máquina devora ignorancia y excreta arquitectura, pero el ancla fundacional es inmutable y ajena a su propia mutación.
