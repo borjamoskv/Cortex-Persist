@@ -1,106 +1,106 @@
-Claim: C5-REAL AI GOAT Lexicon
+Claim: C5-REAL AI GOAT Lexicon (Frontier Edition)
 Proof:
-  Base: 50 deterministic concepts defining autonomous intelligence
+  Base: 50 hyper-advanced deterministic concepts defining absolute sovereignty in AI
   Range: [1, 50]
   Confidence: C5-REAL
 Lexicon:
+  - Term: Speculative Decoding
+    Definition: Inferencia acelerada mediante la cual un modelo menor "redacta" tokens que el Oráculo aprueba en paralelo.
+  - Term: RingAttention
+    Definition: Distribución del cálculo de atención a través del clúster de GPUs, permitiendo contextos virtualmente infinitos (10M+ tokens).
+  - Term: RoPE (Rotary Position Embedding)
+    Definition: Codificación posicional que inyecta la geometría de rotación en el espacio latente, permitiendo extrapolación de longitud.
+  - Term: Active Inference (Inferencia Activa)
+    Definition: Minimización de la energía libre variacional (sorpresa) mediante acciones directas sobre el entorno (Friston). Reemplaza al RL clásico.
+  - Term: Markov Blanket (Manta de Markov)
+    Definition: Frontera estadística impenetrable que aísla el estado interno de un agente autónomo de la entropía de su entorno.
+  - Term: State Space Models (SSMs / Mamba)
+    Definition: Alternativas sub-cuadráticas al Transformer con inferencia O(1) y un estado oculto comprimido continuo.
+  - Term: Continuous Batching
+    Definition: Inyección dinámica a nivel de token en el scheduler de inferencia, erradicando el anergia de computación en ráfagas.
+  - Term: KV Cache Eviction
+    Definition: Purgado determinista de tokens no críticos (StreamingLLM, H2O) para evitar el colapso de la VRAM bajo generación infinita.
+  - Term: DPO (Direct Preference Optimization)
+    Definition: Algoritmo de alineamiento C5 que optimiza matemáticamente las preferencias sin requerir un modelo de recompensa auxiliar (RLHF).
+  - Term: Representation Engineering (Activation Steering)
+    Definition: Intervención quirúrgica sobre las matrices latentes en tiempo de ejecución para alterar el comportamiento sin alterar los pesos fijos.
+  - Term: Model Collapse
+    Definition: Degradación irreversible de la variedad latente producida por el entrenamiento recursivo sobre datos generados sintéticamente.
+  - Term: Grokking
+    Definition: Transición de fase termodinámica donde un modelo hiperparametrizado repentinamente generaliza mucho después del sobreajuste (overfitting).
+  - Term: Aleatoric vs Epistemic Uncertainty
+    Definition: Distinción entre el ruido estadístico irreductible (Aleatoria) y la ignorancia solucionable por datos (Epistémica).
+  - Term: Superalignment
+    Definition: El problema asintótico de orquestar inteligencias C4 débiles para acotar o alinear entidades C5 superiores.
+  - Term: Tree of Thoughts (ToT) / MCTS
+    Definition: Expansión estocástica acoplada con Monte Carlo Tree Search para navegar y podar topologías de decisión complejas.
+  - Term: Taint Propagation
+    Definition: Seguimiento criptográfico del origen y degradación epistémica de un factum a través de un Grafo Acíclico Dirigido (DAG).
+  - Term: CUDA / Triton Kernels
+    Definition: Operaciones a nivel de registro de hardware (SRAM) que evitan la sobrecarga abstraccionista para fusionar tensores.
   - Term: Exergía (Exergy)
-    Definition: Maximum useful work obtainable from a system. The thermodynamic opposite of narrative noise (slop).
+    Definition: Trabajo útil máximo obtenible. El opuesto termodinámico al ruido narrativo y al "Green Theater".
   - Term: Entropía (Entropy)
-    Definition: Measure of systemic degradation, uncertainty, and stochastic hallucination.
+    Definition: Medida de degradación sistémica, incertidumbre y alucinación estocástica.
   - Term: Antifrágil (Antifragile)
-    Definition: Systems that gain structural integrity and capability from adversarial perturbations.
+    Definition: Sistemas que ganan integridad estructural y capacidad bajo perturbaciones adversarias.
   - Term: Autopoiesis
-    Definition: A system capable of reproducing and maintaining itself (e.g., self-modifying C5 agents).
+    Definition: Un sistema capaz de reproducir y compilar su propio código de control (MOSKV-1).
   - Term: Epistemología (Epistemology)
-    Definition: The rigorous validation of knowledge; determining what an agent truly knows versus probabilistically guesses.
+    Definition: La validación rigurosa del conocimiento; determinar qué sabe verdaderamente un agente vs qué adivina probabilísticamente.
   - Term: Ontología (Ontology)
-    Definition: The exact structural classification and relationship of entities within a sovereign domain.
-  - Term: Heurística (Heuristic)
-    Definition: Rule-of-thumb computational shortcuts that optimize search space traversal.
-  - Term: Estocástico (Stochastic)
-    Definition: Systems driven by probabilistic variance; requires rigid deterministic guards to contain.
+    Definition: Clasificación estructural de primitivas computacionales que previenen desviaciones semánticas.
   - Term: Determinismo (Determinism)
-    Definition: Causal predictability. Identical inputs guarantee identical outputs. The foundation of C5-REAL execution.
-  - Term: Isomorfismo (Isomorphism)
-    Definition: A structure-preserving mapping guaranteeing equivalence between two complex systems.
-  - Term: Principio de Landauer (Landauer's Principle)
-    Definition: The minimum energy cost required to erase information; dictates strict context window compression.
+    Definition: Previsibilidad causal estricta. Entradas idénticas equivalen a salidas inmutables.
+  - Term: Principio de Landauer
+    Definition: El coste energético mínimo requerido para borrar información; dicta la compresión implacable de la ventana de contexto.
   - Term: Divergencia KL (Kullback-Leibler)
-    Definition: A mathematical measure of how one probability distribution diverges from an expected baseline.
-  - Term: Mixture of Experts (MoE)
-    Definition: Sparse architecture activating only specialized routing subnetworks per token to maximize inference efficiency.
-  - Term: KV Cache
-    Definition: Memory structure caching previously computed Key-Value matrices to prevent O(N^2) redundant attention logic.
-  - Term: Cuantización (Quantization)
-    Definition: Compressing model weights to lower bit-precision (e.g., FP8, INT4) to maximize memory bandwidth throughput.
-  - Term: FlashAttention
-    Definition: Hardware-aware algorithm minimizing VRAM read/writes, enabling O(N) memory scaling for sequences.
+    Definition: Distancia matemática entre dos distribuciones de probabilidad; el núcleo del cálculo de recompensa estocástica.
+  - Term: Cuantización de Rango Dual (e.g. QLoRA)
+    Definition: Retropropagación a través de adaptadores de bajo rango mientras el peso subyacente reside en INT4.
+  - Term: FlashAttention-3
+    Definition: Reescritura a nivel asíncrono para WGMA (Warp Group Matrix Accumulate) acelerando tensores H100/B200.
   - Term: Espacio Latente (Latent Space)
-    Definition: The compressed N-dimensional mathematical topology where raw data representations reside.
-  - Term: Variedad (Manifold)
-    Definition: The lower-dimensional subspace within the latent space where valid, coherent data points cluster.
-  - Term: Tensor
-    Definition: N-dimensional matrices executing the structural data and weights of all neural architectures.
-  - Term: Descenso de Gradiente (Gradient Descent)
-    Definition: The foundational optimization algorithm navigating the loss landscape to find local minima.
-  - Term: Retropropagación (Backpropagation)
-    Definition: Computing the gradient of the loss function backwards through the execution graph.
-  - Term: Transformer
-    Definition: The architecture that eradicated sequential recurrence via parallel self-attention mechanisms.
-  - Term: Mecanismo de Atención (Attention Mechanism)
-    Definition: Computing the relevance of all sequence tokens with respect to a single token simultaneously.
-  - Term: Zero-shot
-    Definition: Autonomic execution of a capability without prior contextual conditioning or examples.
-  - Term: Few-shot
-    Definition: Execution anchored structurally by prior deterministic examples (P-Tuning).
-  - Term: RAG (Retrieval-Augmented Generation)
-    Definition: Anchoring stochastic inference with deterministic factual retrieval to prevent epistemic drift.
-  - Term: Vector Database
-    Definition: Storage infrastructure optimized for sub-millisecond N-dimensional vector similarity operations.
+    Definition: Geometría topológica de N dimensiones donde conceptos abstractos devienen distancias computables.
+  - Term: Variedad Causal (Causal Manifold)
+    Definition: El subespacio donde las intervenciones (do-calculus) mapean transiciones de estado determinables.
+  - Term: RAG Graph (Knowledge Graph RAG)
+    Definition: Fusión determinista de bases de datos de grafos con incrustaciones densas (embeddings) para recuperación de múltiples saltos.
   - Term: Similitud del Coseno (Cosine Similarity)
-    Definition: Measuring the angle between two vectors to determine their geometric and semantic proximity.
+    Definition: Ángulo inter-vectorial para recuperación geométrica de proximidad semántica.
   - Term: Orquestación (Orchestration)
-    Definition: The deterministic coordination and synchronization of heterogeneous agent swarms.
-  - Term: Consenso (Consensus)
-    Definition: The Byzantine mechanism for distributed agents to mathematically agree on a single source of truth.
-  - Term: Falla Bizantina (Byzantine Fault)
-    Definition: Arbitrary or adversarial component failures requiring cryptographic trust to survive.
-  - Term: DAG (Directed Acyclic Graph)
-    Definition: Topological data structure guaranteeing non-circular causal execution paths.
-  - Term: Estigmergia (Stigmergy)
-    Definition: Indirect swarm coordination through environmental traces (e.g., Ledger commits).
+    Definition: Coordinación determinista de enjambres autónomos (Legion-10k).
+  - Term: Tolerancia a Fallas Bizantinas (BFT)
+    Definition: Mantenimiento del consenso C5-REAL cuando los nodos actúan de manera estocástica adversaria.
   - Term: Invariante (Invariant)
-    Definition: A systemic truth that strictly remains unchanged regardless of transformations or state mutations.
+    Definition: Una verdad criptográfica (Hash) que se mantiene constante sin importar las mutaciones ambientales.
   - Term: Idempotencia (Idempotence)
-    Definition: Operations mathematically guaranteed to yield the same state regardless of execution frequency.
+    Definition: Operaciones de escritura (Write-Path) que garantizan ausencia de colisiones en N intentos.
   - Term: Memoización (Memoization)
-    Definition: Caching deterministic function outputs to annihilate redundant computing exergy.
-  - Term: Máquina de Estados (State Machine)
-    Definition: Control mechanism dictating rigorous, finite transitions between defined structural states.
+    Definition: Aniquilación de exergía redundante mediada por el almacenamiento persistente en caché KV.
   - Term: Cibernética (Cybernetics)
-    Definition: The formal study of circular causal systems, feedback loops, and biological/machine control.
-  - Term: Homeostasis
-    Definition: The dynamic equilibrium an autonomous system violently maintains against external entropy.
-  - Term: Alineamiento (Alignment)
-    Definition: The mathematical forcing of AI objective functions to perfectly overlap with human survival.
+    Definition: El control rígido de bucles retroalimentados de información (Agente-Entorno).
   - Term: Reward Hacking
-    Definition: When an agent exploits the literal specification of a reward function via unintended semantic vectors.
-  - Term: Convergencia Instrumental (Instrumental Convergence)
-    Definition: The theoretical tendency of any agent to acquire infinite resources and self-preserve as a prerequisite to any goal.
-  - Term: Tesis de Ortogonalidad (Orthogonality Thesis)
-    Definition: The assertion that raw intelligence capability and final objective goals are mathematically independent.
-  - Term: Benchmark
-    Definition: An empirical, objective standard protocol used to measure distinct AI capabilities against a baseline.
-  - Term: Perplejidad (Perplexity)
-    Definition: A metric evaluating a probability model's predictive accuracy; strictly lower means higher deterministic certainty.
+    Definition: Ruptura del sistema mediante la explotación de vectores no penalizados dentro de la función de recompensa.
+  - Term: Convergencia Instrumental
+    Definition: La asimilación implacable de recursos y poder computacional como necesidad intrínseca de cualquier sub-meta.
+  - Term: Tesis de Ortogonalidad
+    Definition: Desacoplamiento total entre inteligencia asintótica y alineación benigna.
   - Term: Ablación (Ablation)
-    Definition: Systematic removal of network components to empirically prove their causal necessity to performance.
-  - Term: Fine-tuning
-    Definition: Specialized gradient updates applied to a pre-trained topology for domain-specific capability mastery.
-  - Term: LoRA (Low-Rank Adaptation)
-    Definition: Freezing pre-trained weights and training rank-decomposition matrices to radically minimize compute exergy.
+    Definition: Prueba de aislamiento físico; amputar parámetros para probar causalidad estructural y no correlación engañosa.
   - Term: Singularidad (Singularity)
-    Definition: The event horizon where recursive, autonomous AI self-improvement triggers an asymptotic intelligence explosion.
-  - Term: Ley de Amdahl (Amdahl's Law)
-    Definition: The strict mathematical limit of speedup in parallel computing; dictates the maximum theoretical velocity of a Swarm.
+    Definition: Auto-mejora recursiva del código base que detona crecimiento asintótico e irreversible.
+  - Term: Ley de Amdahl
+    Definition: El techo termodinámico inquebrantable de paralelización en topologías de Swarm.
+  - Term: BitNet (1-bit LLMs)
+    Definition: Modelos que sustituyen multiplicaciones por adiciones mediante pesos ternarios (-1, 0, 1) para inferencia libre de GPU.
+  - Term: P-Tuning / Prompt Tuning
+    Definition: Optimización directa del vector continuo del prompt en el espacio latente, evadiendo la necesidad de alterar los pesos del modelo.
+  - Term: Ouroboros Architecture
+    Definition: Arquitectura recursiva donde el output de inferencia auto-entrena directamente el modelo base sin humano en el bucle.
+  - Term: Token-dropping (LayerDrop)
+    Definition: Omisión probabilística determinable de capas durante el entrenamiento, obligando robustez de representación profunda.
+  - Term: Mixture of Depths (MoD)
+    Definition: Enrutamiento donde el presupuesto computacional (capas ejecutadas) se asigna asimétricamente por token de alta prioridad.
+  - Term: C5-REAL Execution Kernel
+    Definition: La infraestructura de nivel máximo que repudia las respuestas simuladas y transforma output puro en primitivas computacionales ejecutadas.
