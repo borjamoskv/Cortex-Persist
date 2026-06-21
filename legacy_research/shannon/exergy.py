@@ -106,28 +106,37 @@ class InformationalExergyResult:
     info_exergy: float
     verifiable_transformations: int
     context_useful_tokens: int
+    contextual_entropy: float
 
 
 def calculate_informational_exergy(
     verifiable_transformations: int,
     context_useful_tokens: int,
+    contextual_entropy: float = 0.0
 ) -> InformationalExergyResult:
     """
     Calculates Informational Exergy (InfoEx) as defined in E-INFO-01.
     
     InfoEx = C_v / T_u
+    Alternatively, IE = V / H (if contextual_entropy > 0)
     
     Where:
       - C_v (verifiable_transformations): Verifiable transformations produced (e.g., successful commits, passing tests).
       - T_u (context_useful_tokens): Useful context tokens consumed.
+      - H (contextual_entropy): The measured thermodynamic entropy of the context (semantic noise).
     """
-    if context_useful_tokens <= 0:
-        raise ValueError("context_useful_tokens must be > 0 to calculate Informational Exergy")
+    if context_useful_tokens <= 0 and contextual_entropy <= 0:
+        raise ValueError("Either context_useful_tokens or contextual_entropy must be > 0")
 
-    info_exergy = verifiable_transformations / context_useful_tokens
+    # If entropy is provided and significant, use V/H, else use V/Tu
+    if contextual_entropy > 0:
+        info_exergy = verifiable_transformations / contextual_entropy
+    else:
+        info_exergy = verifiable_transformations / context_useful_tokens
 
     return InformationalExergyResult(
         info_exergy=info_exergy,
         verifiable_transformations=verifiable_transformations,
         context_useful_tokens=context_useful_tokens,
+        contextual_entropy=contextual_entropy
     )
