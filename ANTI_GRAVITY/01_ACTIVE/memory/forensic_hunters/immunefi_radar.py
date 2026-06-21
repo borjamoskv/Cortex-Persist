@@ -5,8 +5,8 @@
 
 import asyncio
 import logging
-import sys
 import os
+import sys
 
 from cortex.engine.forensic_commander import ForensicCommander
 
@@ -83,24 +83,24 @@ async def run_radar(db_path: str = "cortex.db"):
         ]
 
         print(f"{CLR_AMBER}[+] DEPLOYED TARGET ROSTER (SORTED BY MAX EXERGY YIELD):{CLR_RESET}")
-        print(f"------------------------------------------------------------------------")
+        print("------------------------------------------------------------------------")
         for t in targets:
             print(f" {CLR_GOLD}• PROTOCOL:{CLR_RESET} {t['protocol']} | {CLR_GOLD}MAX BOUNTY:{CLR_RESET} {t['max_bounty']}")
             print(f"   {CLR_WHITE}Class:{CLR_RESET} {t['vuln_class']} | {CLR_WHITE}Legion:{CLR_RESET} {t['legion']}")
             print(f"   {CLR_WHITE}Strategy:{CLR_RESET} {t['strategy']}")
             print(f"   {CLR_VOID}Confidence Score: {t['confidence']:.2f}{CLR_RESET}")
-            print(f"------------------------------------------------------------------------")
+            print("------------------------------------------------------------------------")
 
         # Swarm Metrics
         report = await commander.get_density_report()
         print(f"\n{CLR_AMBER}[+] SWARM DISPATCH MATRIX:{CLR_RESET}")
         print(f"  • Deployed Shards: {report['shards_active']}")
         print(f"  • Centurions Active: {report['centurions']}")
-        print(f"  • Total Active Agents: 10,000 (Maximum Swarm Density)")
+        print("  • Total Active Agents: 10,000 (Maximum Swarm Density)")
         print(f"  • Target Cumulative Yield Pool: {CLR_GOLD}$8,500,000 USD{CLR_RESET}\n")
 
         print(f"{CLR_BLUE}========================================================================{CLR_RESET}")
-        print(f"  VERDICT: ACTIVE MONITORING ESTABLISHED. ZERO ANERGY. REALITY: C5-REAL")
+        print("  VERDICT: ACTIVE MONITORING ESTABLISHED. ZERO ANERGY. REALITY: C5-REAL")
         print(f"{CLR_BLUE}========================================================================{CLR_RESET}")
 
     finally:

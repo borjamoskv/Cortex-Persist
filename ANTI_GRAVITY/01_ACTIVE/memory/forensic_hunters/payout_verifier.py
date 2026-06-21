@@ -4,15 +4,12 @@
 # Role: Payout & Wallet Verifier (Exergy Destination Gate)
 
 import asyncio
+import json
 import logging
-import sys
 import os
 import re
-import hashlib
-import json
+import sys
 from pathlib import Path
-
-from cortex.engine.forensic_commander import ForensicCommander
 
 logger = logging.getLogger("payout_verifier")
 logging.basicConfig(
