@@ -68,14 +68,14 @@ The persistence and trust layer is organized into sovereign domains matching the
 
 | Domain | Responsibility |
 |---|---|
-| `cortex/auth/` | **SovereignIdentity:** Tenant-aware isolation and Role-Based Access Control (RBAC). |
-| `cortex_rs/src/krgs.rs` | **Keyed Retrieval Graph System (Rust):** Lock-free DAG (`G`) tracking logical transitions, orthogonal to the heuristic retrieval space (`R_K`). Enforces strict causal truth propagation. |
-| `cortex/gateway/` | **CodeGovernanceGateway:** The enforcement boundary. Blocks or approves code mutations based on Entropy Score and EDG traversal. |
-| `cortex/audit/` | **EnterpriseAuditLedger:** Immutable hash-chain recording every PR evaluation and state transition. |
+| `cortex/auth/` | **[PRODUCTION] SovereignIdentity:** Tenant-aware isolation and Role-Based Access Control (RBAC). |
+| `cortex_rs/src/krgs.rs` | **[SPECIFICATION] Keyed Retrieval Graph System (Rust):** Lock-free DAG (`G`) tracking logical transitions, orthogonal to the heuristic retrieval space (`R_K`). Enforces strict causal truth propagation. |
+| `cortex/gateway/` | **[PRODUCTION] CodeGovernanceGateway:** The enforcement boundary. Blocks or approves code mutations based on Entropy Score and EDG traversal. |
+| `cortex/audit/` | **[PRODUCTION] EnterpriseAuditLedger:** Immutable hash-chain recording every PR evaluation and state transition. |
 
 **Execution & Delivery (`cortex/delivery/` & `cortex/swarm/`):**
-- `outbox.py` — Lock-free task dispatch integration.
-- `ZeroCopyRingBuffer` — O(1) lock-free execution (Rust-FFI integration).
+- `outbox.py` — **[PRODUCTION]** Lock-free task dispatch integration.
+- `ZeroCopyRingBuffer` — **[EXPERIMENTAL]** O(1) lock-free execution (Target) (Rust-FFI integration).
 
 **Trust & Crypto (`cortex/crypto/`):**
 - AES-256-GCM encryption at rest.
@@ -96,7 +96,7 @@ CORTEX aims to provide:
 - explicit validation boundaries between stochastic proposals and durable state
 - inspectable failure rather than silent permissiveness
 - thermodynamic (exergy) bounding of all computational operations
-- lock-free O(1) execution guarantees on the hot path
+- lock-free O(1) execution guarantees on the hot path (Target)
 
 ---
 
@@ -168,7 +168,7 @@ are dropped with explicit `RuntimeError` rather than silent degradation.
 
 ### 8. Lock-Free O(1) Hot Path (Zero-GIL)
 
-The `ZeroCopyRingBuffer` relies on `cortex_rs` Rust-FFI memory mapping, completely bypassing the Python GIL. It uses `mmap`-backed C-contiguous memory with lock-free atomic reservations. There is NO `threading.Lock()` on the write or read hot path, enabling 100k+ agents/sec deterministic throughput.
+The `ZeroCopyRingBuffer` relies on `cortex_rs` Rust-FFI memory mapping, completely bypassing the Python GIL. It uses `mmap`-backed C-contiguous memory with lock-free atomic reservations. There is NO `threading.Lock()` on the write or read hot path, enabling 100k+ agents/sec deterministic throughput (Target).
 
 ---
 
@@ -268,26 +268,26 @@ CORTEX relies on layered control, not a single magic wall.
 
 14+ specialized guards operate before persistence:
 
-- **Contradiction Guard** — semantic conflict detection
-- **Dependency Guard** — causal chain validation
-- **Exergy Guard** — thermodynamic resource bounding
-- **ZK Guard** — cryptographic seal verification
-- **Capability Guard** — capability-based access control
-- **Frontier Guard** — exploration scope bounding
-- **Path Guard** — protected filesystem enforcement
-- **URL Guard** — URL sanitization and validation
-- **Scrape Guard** — web scraping safety
-- **Health Guard** — system health preconditions
-- **Sovereign Seals** — sovereign signature pipeline
-- **Heuristic Seals** — heuristic-based seal generation
-- **Virgo** — formal verification integration
-- **Thermodynamic** — exergy/entropy balance enforcement
+- **[PRODUCTION] Contradiction Guard** — semantic conflict detection
+- **[PRODUCTION] Dependency Guard** — causal chain validation
+- **[PRODUCTION] Exergy Guard** — thermodynamic resource bounding
+- **[PRODUCTION] ZK Guard** — cryptographic seal verification
+- **[PRODUCTION] Capability Guard** — capability-based access control
+- **[PRODUCTION] Frontier Guard** — exploration scope bounding
+- **[PRODUCTION] Path Guard** — protected filesystem enforcement
+- **[PRODUCTION] URL Guard** — URL sanitization and validation
+- **[PRODUCTION] Scrape Guard** — web scraping safety
+- **[PRODUCTION] Health Guard** — system health preconditions
+- **[PRODUCTION] Sovereign Seals** — sovereign signature pipeline
+- **[EXPERIMENTAL] Heuristic Seals** — heuristic-based seal generation
+- **[PRODUCTION] Virgo** — formal verification integration
+- **[PRODUCTION] Thermodynamic** — exergy/entropy balance enforcement
 
 ### Policy / Gate Layer
 
-- `TelemetryGate` — admission control for L1 external patches
-- `AEON0Compiler.mutate()` — requires valid ZK-Seal signature before AST mutation
-- `OutboxDaemon` — C5-REAL sovereign isolation rejects all unrecognized task types
+- **[PRODUCTION] TelemetryGate** — admission control for L1 external patches
+- **[EXPERIMENTAL] AEON0Compiler.mutate()** — requires valid ZK-Seal signature before AST mutation
+- **[PRODUCTION] OutboxDaemon** — C5-REAL sovereign isolation rejects all unrecognized task types
 
 ### Crypto Layer
 
@@ -314,10 +314,10 @@ Multiple audit surfaces:
 
 ### Verification Layer
 
-- Z3 thermodynamic validation for AST mutations
-- Ed25519 seal verification (`verify_zk_seal()`)
-- DarkPoolZK anchor validation for swarm mutations
-- Formal verification integration via `cortex/guards/virgo.py`
+- **[EXPERIMENTAL] Z3 thermodynamic validation** for AST mutations
+- **[PRODUCTION] Ed25519 seal verification** (`verify_zk_seal()`)
+- **[RESEARCH] DarkPoolZK** anchor validation for swarm mutations
+- **[PRODUCTION] Formal verification** integration via `cortex/guards/virgo.py`
 
 ---
 
@@ -418,7 +418,7 @@ Fact content and meta are encrypted at rest via `cortex/crypto/`.
 
 ### ZeroCopyRingBuffer
 
-The `ZeroCopyRingBuffer` is the L4 sovereign task dispatch mechanism:
+The `ZeroCopyRingBuffer` is the L4 sovereign task dispatch mechanism (Maturity: `[EXPERIMENTAL]`):
 
 - **Memory**: `mmap`-backed C-contiguous binary (`swarm_ring_vsa.bin`)
 - **Capacity**: 10,000 tasks × 256 bytes = 2.56 MB
@@ -429,14 +429,14 @@ The `ZeroCopyRingBuffer` is the L4 sovereign task dispatch mechanism:
 
 ### OutboxDaemon
 
-The OutboxDaemon enforces **C5-REAL Sovereign Isolation**:
+The OutboxDaemon enforces **C5-REAL Sovereign Isolation** (Maturity: `[PRODUCTION]`):
 - Only recognized L0 interceptors execute (`EXA_LISP`, `QUANTUM_BRANCHING`, `AST_MUTATION`, `L1_EXTERNAL_PATCH`)
 - All other task types are silently rejected — no external network dispatch
 - Event-driven drain loop with zero arbitrary waits
 
 ### UltraMap Topology
 
-The `UltramapSubstrate` provides O(1) spatial-temporal tracking:
+The `UltramapSubstrate` provides O(1) spatial-temporal tracking (Maturity: `[SPECIFICATION]`):
 - `mmap`-backed binary (`ultramap.bin`, 96 bytes/node)
 - Exergy distance calculation using SHA-256 deterministic spatial mapping
 - Direct integration with ZeroCopyRingBuffer for swarm position updates
