@@ -10,6 +10,7 @@ import os
 import json
 import time
 import asyncio
+import fcntl
 from typing import Any, List
 
 from cryptography.exceptions import InvalidSignature
@@ -18,6 +19,35 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from cortex.crypto.identity import generate_event_identity
 import cortex_core_rs
+
+
+class AsyncFileLock:
+    """Non-blocking asynchronous cross-process file lock using fcntl.
+
+    Created by: borjamoskv / SYS_ID: borjamoskv
+    """
+
+    def __init__(self, lock_path: str = "/tmp/cortex_audit_ledger.lock") -> None:
+        self.lock_path = lock_path
+        self.fp = None
+
+    async def __aenter__(self) -> "AsyncFileLock":
+        self.fp = open(self.lock_path, "w")
+        while True:
+            try:
+                fcntl.flock(self.fp.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return self
+            except BlockingIOError:
+                await asyncio.sleep(0.01)
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        if self.fp:
+            try:
+                fcntl.flock(self.fp.fileno(), fcntl.LOCK_UN)
+            finally:
+                self.fp.close()
+                self.fp = None
+
 
 class EnterpriseAuditLedger:
     """Immutable Audit Ledger for enterprise-grade SOC 2 compliance (WORM JSONL)."""
