@@ -109,14 +109,34 @@ def _mitigate_spotlight_recurrence() -> None:
         if not (repo_root / "pyproject.toml").exists() and not (repo_root / "AGENTS.md").exists():
             return
 
-        heavy_dirs = [
-            repo_root,                          # Workspace root
-            repo_root / ".cortex",              # 9.6 GB models
-            repo_root / "cortex_rs" / "target", # 6.5 GB Rust targets
-            repo_root / ".venv",                # 2.3 GB virtualenv
-            repo_root / "c5_workspace",         # 1.1 GB Rust sub-workspace
-        ]
+        # Core local directories to prevent indexing
+        heavy_dirs = [repo_root]
 
+        # Scan for heavy/ignored directories up to depth 2 (keeps it O(1) and safe from deep traversal)
+        ignore_names = {
+            "venv", ".venv", "node_modules", "target", "build", "dist",
+            ".cortex", ".agent", ".agents", ".pytest_cache", ".ruff_cache",
+            ".idea", ".vscode", "site", ".artifacts", ".scratch", "scratch",
+            "c5_workspace"
+        }
+
+        try:
+            for p1 in repo_root.iterdir():
+                if p1.is_dir():
+                    if p1.name in ignore_names or p1.name.startswith("."):
+                        heavy_dirs.append(p1)
+                    else:
+                        # Check depth 2 (e.g. cortex_rs/target, frontend/node_modules)
+                        try:
+                            for p2 in p1.iterdir():
+                                if p2.is_dir() and (p2.name in ignore_names or p2.name.startswith(".")):
+                                    heavy_dirs.append(p2)
+                        except Exception:
+                            pass
+        except Exception:
+            pass
+
+        # Write ignore markers
         for d in heavy_dirs:
             if d.exists() and d.is_dir():
                 ignore_file = d / ".metadata_never_index"
@@ -130,4 +150,3 @@ def _mitigate_spotlight_recurrence() -> None:
         pass
 
 _mitigate_spotlight_recurrence()
-
