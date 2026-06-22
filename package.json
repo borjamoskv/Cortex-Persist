@@ -1,0 +1,13 @@
+{
+  "name": "cortex-persist-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "sdks/node",
+    "sdks/langchain"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  }
+}
