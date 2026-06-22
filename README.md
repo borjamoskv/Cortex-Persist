@@ -64,6 +64,29 @@ npm install cortex-persist-langchain
 
 ---
 
+## ▀▄ QUICK START (NODE.JS / TYPESCRIPT SDK)
+
+Inject verifiable event logging directly into your application stack in 30 seconds.
+
+```bash
+npm install cortex-persist
+```
+
+```typescript
+import { CortexClient } from 'cortex-persist';
+
+const cortex = new CortexClient({ apiKey: process.env.CORTEX_API_KEY });
+await cortex.logEvent({ type: 'agent.decision', actor: 'agent-1' });
+```
+
+We also offer an official LangChain integration to track agent events automatically:
+
+```bash
+npm install cortex-persist-langchain
+```
+
+---
+
 ## ▀▄ QUICK START (GITHUB ACTIONS)
 
 CORTEX integrates natively into your pipeline as a pre-merge hook.
