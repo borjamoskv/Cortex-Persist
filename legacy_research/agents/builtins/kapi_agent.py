@@ -18,6 +18,8 @@ from cortex.agents.contracts import TaskCompletedPayload, TaskFailedPayload, Tas
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind
 from cortex.agents.tools import ToolRegistry
+from cortex.engine.sota_vector_engine import SOTAVectorEngine
+from cortex.engine.semantic_collapse import kolmogorov_approx
 
 logger = logging.getLogger(__name__)
 
@@ -66,21 +68,36 @@ class KapiAgent(BaseAgent):
         3. Structural Synthesis (CORTEX-TAINT applied)
         """
         
-        # Simulated extraction and thermodynamic compression
+        vector_engine = SOTAVectorEngine()
+        signals = await vector_engine.detect_signals(task.objective)
+        
+        epistemic_nodes = []
+        exergy_yield = 0.0
+        
+        for idx, sig in enumerate(signals):
+            raw_content = f"{sig['title']} - {sig['mechanism']} - {sig.get('claimed_benchmarks', '')}"
+            entropy = kolmogorov_approx(raw_content)
+            
+            # BABYLON-60 mapping: high entropy (low compression) means less exergy.
+            # Base 60 implies we map confidence to a 0-60 integer scale.
+            confidence = max(0, min(60, 60 - int(entropy / 20)))
+            
+            epistemic_nodes.append({
+                "id": f"KAPI-NODE-{idx}",
+                "type": "C5-REAL_FACT",
+                "content": raw_content,
+                "confidence_b60": confidence,
+                "taint_hash": f"CORTEX-TAINT-KAPI-{idx:03d}",
+                "source_url": sig.get("url", "")
+            })
+            exergy_yield += (60 - confidence)
+
         compressed_knowledge: dict[str, Any] = {
             "workflow_id": task.task_id,
-            "epistemic_nodes": [
-                {
-                    "id": "KAPI-NODE-1",
-                    "type": "C5-REAL_FACT",
-                    "content": f"Resolved objective: {task.objective}",
-                    "confidence_b60": 60,  # BABYLON-60 maximum confidence
-                    "taint_hash": "CORTEX-TAINT-KAPI-001"
-                }
-            ],
+            "epistemic_nodes": epistemic_nodes,
             "metrics": {
-                "anergy_purged_tokens": 1024,
-                "exergy_yield": 100
+                "anergy_purged_tokens": int(sum(kolmogorov_approx(n["content"]) for n in epistemic_nodes)),
+                "exergy_yield": int(exergy_yield)
             },
             "status": "C5-REAL_SYNTHESIZED"
         }
