@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 
+
 class MarketingBlock(Enum):
     SIGNAL_EXTRACTION = "B1"
     ATTENTION_WARFARE = "B2"

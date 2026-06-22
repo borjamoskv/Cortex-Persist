@@ -2,13 +2,12 @@
 # Anchored: cortex/engine/dame.py
 # Creator: Borja Moskv (borjamoskv)
 
-import os
-import sys
+import asyncio
 import json
 import logging
-import asyncio
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Optional, Dict, List, Callable
+from typing import Any, Optional
 
 logger = logging.getLogger("cortex.engine.dame")
 
@@ -27,13 +26,13 @@ class DAMEState:
     """
     def __init__(self, state_file_path: Path):
         self.state_file_path = Path(state_file_path)
-        self.state: Dict[str, Any] = {}
+        self.state: dict[str, Any] = {}
         self.load()
 
-    def load(self) -> Dict[str, Any]:
+    def load(self) -> dict[str, Any]:
         if self.state_file_path.exists():
             try:
-                with open(self.state_file_path, "r", encoding="utf-8") as f:
+                with open(self.state_file_path, encoding="utf-8") as f:
                     self.state = json.load(f)
                 logger.info(f"[DAME-001] Estado cargado con éxito desde {self.state_file_path}")
             except Exception as e:
@@ -77,7 +76,7 @@ class DAMEExecutor:
         task_id: str,
         execution_coro: Callable[[], Any],
         validation_script_path: Path,
-        args: Optional[List[str]] = None
+        args: Optional[list[str]] = None
     ) -> bool:
         """
         Ejecuta el payload de mutación y asume aserción binaria rígida mediante validador físico.
@@ -138,7 +137,7 @@ class DAMEAsyncDelegator:
     @staticmethod
     async def delegate_task(
         task_id: str,
-        cmd: List[str],
+        cmd: list[str],
         log_dir: Path = Path("/tmp/dame_async_logs")
     ) -> asyncio.Task:
         """

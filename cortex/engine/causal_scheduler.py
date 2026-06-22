@@ -193,3 +193,19 @@ class CausalScheduler:
             )
 
         return {"tick_state": tick_state, "actions": actions_taken}
+
+    async def inject_exergy(self, target_id: str, exergy_value: float, tenant_id: str = "default") -> None:
+        """
+        [C5-REAL] Injects exergy into the thermodynamic state.
+        This increases the entropy budget, allowing the system to run more operations
+        and repair itself.
+        """
+        eb = await self._get_entropy_budget(tenant_id)
+        # Increase the entropy budget by the exergy yield (scaled to Base-60 proportional units)
+        new_eb = eb + exergy_value
+        await self._update_entropy_budget(tenant_id, new_eb)
+        logger.info(
+            "[Causal Scheduler] Exergy Injected | Target: %s | Delta EB: +%.4f | New EB: %.4f",
+            target_id, exergy_value, new_eb
+        )
+

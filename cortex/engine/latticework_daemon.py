@@ -137,8 +137,8 @@ class LatticeworkDaemon:
                     exergy = self._compute_exergy_yield(anomaly["entropy"], node)
                     self._emit_mutation(anomaly["id"], node, exergy)
 
-                    # (Futuro) inyectar exergía matemática de vuelta al CausalScheduler
-                    # await self.scheduler.inject_exergy(anomaly["id"], exergy.to_float())
+                    # Inyectar exergía matemática de vuelta al CausalScheduler
+                    await self.scheduler.inject_exergy(anomaly["id"], exergy.to_float())
 
             except Exception as e:
                 logger.error("[LatticeworkDaemon] Fallo topológico: %s", e)

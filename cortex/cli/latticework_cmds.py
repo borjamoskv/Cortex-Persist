@@ -159,6 +159,7 @@ def daemon_cmd(seconds: int, interval: int, real: bool):
                             
                         if primitive:
                             exergy_yield = daemon._compute_primitive_exergy(entropy_val, primitive.base60_constant)
+                            await scheduler.inject_exergy(anomaly["id"], exergy_yield.to_float())
                             console.print(
                                 f"[bold green]✔ CAUSAL MITIGATION[/bold green] | "
                                 f"Trace: [cyan]{anomaly['id']}[/cyan] (Entropy: {entropy_val:.2f}) -> "

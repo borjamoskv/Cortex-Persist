@@ -3,6 +3,7 @@ from typing import Optional
 
 import cortex_rs
 
+
 class EpistemicDelta:
     """[DEPRECATED] Mapped directly to Rust RetrievalNode/ValidationStatus."""
     pass

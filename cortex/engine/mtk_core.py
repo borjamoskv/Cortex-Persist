@@ -12,7 +12,6 @@ from contextlib import asynccontextmanager
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 import cortex_rs
-
 from cortex.engine.mtk_sqlite_authorizer import mtk_active_token, mtk_payload_hash
 from cortex.types.evidence import ClosurePayload
 
