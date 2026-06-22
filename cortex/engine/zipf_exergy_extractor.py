@@ -38,7 +38,7 @@ class ZipfExergyExtractor:
         "de", "del", "a", "ante", "bajo", "cabe", "con", "contra",
         "desde", "en", "entre", "hacia", "hasta", "para", "por",
         "según", "sin", "so", "sobre", "tras", "que", "y", "o", "u",
-        "the", "a", "an", "and", "or", "but", "in", "on", "at", "to",
+        "the", "an", "and", "or", "but", "in", "on", "at", "to",
         "for", "of", "with", "by", "from", "up", "about", "into", "over", "after"
     }
     
@@ -79,7 +79,7 @@ class ZipfExergyExtractor:
         sorted_terms = freq_map.most_common(max_nodes)
         
         exergy_nodes = []
-        for rank, (term, count) in enumerate(sorted_terms, start=1):
+        for _rank, (term, count) in enumerate(sorted_terms, start=1):
             # Peso de Zipf empírico (Frecuencia relativa ajustada por el logaritmo del rango)
             # En un corpus ideal, count es proporcional a 1/rank
             tf = count / total_valid_tokens

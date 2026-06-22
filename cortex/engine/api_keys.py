@@ -1,6 +1,6 @@
-import time
 import logging
-from typing import Dict, Any
+import time
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.api_keys")
 
@@ -57,7 +57,7 @@ class APIKeyManager:
             return TierRateLimits.PRO
         return TierRateLimits.ENTERPRISE
 
-    def validate_and_consume(self, api_key: str) -> Dict[str, Any]:
+    def validate_and_consume(self, api_key: str) -> dict[str, Any]:
         """
         Validates API key and applies Tier-based rate limiting using Token Bucket algorithm.
         Returns tenant details if valid, raises Exception if rate limited or invalid.

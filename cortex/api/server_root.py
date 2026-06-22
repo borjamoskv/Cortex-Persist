@@ -17,6 +17,7 @@ from cortex.engine.bifurcation_engine import ExergyBifurcationEngine
 from cortex.engine.causal_scheduler import CausalScheduler
 from cortex.engine.entropy_daemon import EntropyDaemon
 from cortex.engine.exergy_daemon import ExergyDaemon
+from cortex.engine.latticework_daemon import LatticeworkDaemon
 from cortex.engine.rollback_engine import CausalRollbackEngine
 from cortex.ledger.causal_graph import CausalGraph
 from cortex.ledger.execution_trace import ExecutionTraceLedger
@@ -62,14 +63,17 @@ async def lifespan(app: FastAPI):
 
     exergy_daemon = ExergyDaemon(bifurcation, scan_interval=60.0)
     entropy_daemon = EntropyDaemon(CORTEX_DB_PATH, scan_interval=3600.0)
+    latticework_daemon = LatticeworkDaemon(ledger, scheduler, scan_interval=15.0)
 
     exergy_daemon.start()
     entropy_daemon.start()
+    latticework_daemon.start()
 
     yield
 
     await exergy_daemon.stop()
     await entropy_daemon.stop()
+    await latticework_daemon.stop()
 
 
 app = FastAPI(

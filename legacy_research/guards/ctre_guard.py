@@ -37,7 +37,7 @@ class CTREGuard:
 
     @staticmethod
     def validate_commit(
-        expected_hash: int, current_hash: int, target_x: float = 0.0, target_y: float = 0.0
+        expected_hash: int, current_hash: int, target_x: int = 0, target_y: int = 0
     ) -> tuple[bool, int]:
         """
         Ejecuta la verificación atómica (isomorfismo de estado).
@@ -66,7 +66,7 @@ class CTREGuard:
                         f"[CTRE] COMMIT SUCCESS: Isomorfismo estructural verificado en {epsilon_us}µs"
                     )
                 return success, epsilon_us
-            except Exception as e:
+            except (RuntimeError, OSError, ValueError) as e:
                 logger.error(f"[CTRE] FFI Error en validación atómica: {e}")
                 # Fallback on error
                 return CTREGuard._python_fallback(expected_hash, current_hash)

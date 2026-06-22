@@ -3,8 +3,8 @@
 from .babylon import Babylon_causalDistance, Babylon_hashDistanceRollup
 from .maxwell_demon import (
     MaxwellDemon,
+    MaxwellDemon__CosineSimilarity_23050560,
     MaxwellDemon__ctor_6C4BA866,
     MaxwellDemon__PurgeRedundant_Z115D9F2A,
     MaxwellDemon__SetState_Z721C83C5,
-    MaxwellDemon__CosineSimilarity_23050560,
 )
