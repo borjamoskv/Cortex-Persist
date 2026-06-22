@@ -131,6 +131,7 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 | Engine modifying its own source or binary directly | **P0** | ✗ | Implement Bootstrap Watchdog; route via git sentinel branch (`auto/moskv1-mitosis-*`) |
 | `re.DOTALL` + `.*?` on files > 1KB | CRITICAL | ✗ | Replace → line-by-line O(N) parser; regex solo para patrones single-line |
 | `task.cancel()` + `await task` without explicit `except asyncio.CancelledError` | HIGH | ✗ | Add `except asyncio.CancelledError: pass` BEFORE `except Exception` in all daemon/task stop methods |
+| DB write with net exergy < 0.1 under Friston penalty | CRITICAL | ✗ | Re-verify empirical precision / prune claims complexity |
 
 ---
 
