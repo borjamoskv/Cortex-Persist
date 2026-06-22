@@ -325,3 +325,7 @@ demo_causal/backend/*.db
 frontend/.wrangler/
 .wrangler/
 target_maturin/
+
+# Local daemon generated logs
+legacy_research/extensions/daemon/*.jsonl
+
