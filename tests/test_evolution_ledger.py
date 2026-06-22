@@ -282,29 +282,27 @@ def test_checkpoint_manager():
     with tempfile.TemporaryDirectory() as tmpdir:
         log_path = os.path.join(tmpdir, "test_checkpoints.jsonl")
         ledger = EvolutionLedger(log_path)
-        
+
         # 25 records, chunk size 10 -> 3 checkpoints (1-10, 11-20, 21-25)
         for i in range(25):
             ledger.record_mutation(
-                agent_idx=0,
-                vector_after=ControlVector(float(i), 0.01, 0.1, 0.5),
-                source="test"
+                agent_idx=0, vector_after=ControlVector(float(i), 0.01, 0.1, 0.5), source="test"
             )
-            
+
         manager = CheckpointManager(ledger, chunk_size=10)
         manager.generate_index()
-        
+
         checkpoints = list(manager.iter_checkpoints())
         assert len(checkpoints) == 3
-        
+
         assert checkpoints[0].sequence_start == 1
         assert checkpoints[0].sequence_end == 10
         assert checkpoints[0].record_count == 10
-        
+
         assert checkpoints[2].sequence_start == 21
         assert checkpoints[2].sequence_end == 25
         assert checkpoints[2].record_count == 5
-        
+
         report = manager.verify_ledger_with_checkpoints()
         assert report["status"] == "VALID"
         assert report["verified_chunks"] == 3

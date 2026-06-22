@@ -3,12 +3,14 @@ CORTEX-NATIVE: Edge Cloudflare Bridge
 Synchronizes the local Master Ledger with the Cloudflare D1/Hyperdrive Edge nodes.
 Execution: C5-REAL
 """
+
 import asyncio
 import logging
 
 import httpx
 
 logger = logging.getLogger(__name__)
+
 
 class CloudflareEdgeBridge:
     def __init__(self, account_id: str, api_token: str, database_id: str = ""):
@@ -32,24 +34,18 @@ class CloudflareEdgeBridge:
         Must be async to prevent event loop blocking (Invariant 3).
         """
         logger.info(f"Syncing to edge D1: Taint={taint} Hash={payload_hash}")
-        
+
         if not self.database_id:
             logger.warning("No database_id provided; simulating sync.")
             await asyncio.sleep(0.1)
             return True
 
         sql = "INSERT INTO edge_ledger (taint, payload_hash, payload, synced_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)"
-        
-        headers = {
-            "Authorization": f"Bearer {self.api_token}",
-            "Content-Type": "application/json"
-        }
-        
-        body = {
-            "sql": sql,
-            "params": [taint, payload_hash, payload]
-        }
-        
+
+        headers = {"Authorization": f"Bearer {self.api_token}", "Content-Type": "application/json"}
+
+        body = {"sql": sql, "params": [taint, payload_hash, payload]}
+
         try:
             response = await self._client.post(self.base_url, headers=headers, json=body)
             response.raise_for_status()

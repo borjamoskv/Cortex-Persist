@@ -2,20 +2,20 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, asdict
-from typing import Any, Dict, List, Optional
-
+from dataclasses import asdict, dataclass
+from typing import Any, Optional
 
 # -----------------------------
 # Event Model
 # -----------------------------
+
 
 @dataclass(frozen=True)
 class Event:
     id: str
     timestamp: int
     type: str
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     actor: str
     parent_hash: Optional[str] = None
 
@@ -30,9 +30,10 @@ class Event:
 # Event Store (append-only)
 # -----------------------------
 
+
 class EventStore:
     def __init__(self):
-        self._events: List[Event] = []
+        self._events: list[Event] = []
 
     def append(self, event: Event) -> str:
         if self._events:
@@ -43,7 +44,7 @@ class EventStore:
         self._events.append(event)
         return event.hash()
 
-    def all(self) -> List[Event]:
+    def all(self) -> list[Event]:
         return list(self._events)
 
 
@@ -51,9 +52,10 @@ class EventStore:
 # Merkle Root
 # -----------------------------
 
+
 class Merkle:
     @staticmethod
-    def root(events: List[Event]) -> str:
+    def root(events: list[Event]) -> str:
         if not events:
             return ""
 
@@ -77,19 +79,20 @@ class Merkle:
 # Replay Engine
 # -----------------------------
 
+
 class ReplayEngine:
     def __init__(self, store: EventStore):
         self.store = store
 
-    def replay(self) -> Dict[str, Any]:
-        state: Dict[str, Any] = {}
+    def replay(self) -> dict[str, Any]:
+        state: dict[str, Any] = {}
 
         for event in self.store.all():
             state = self._apply(state, event)
 
         return state
 
-    def _apply(self, state: Dict[str, Any], event: Event) -> Dict[str, Any]:
+    def _apply(self, state: dict[str, Any], event: Event) -> dict[str, Any]:
         # deterministic reducer
         if event.type == "SET":
             key = event.payload["key"]
@@ -111,9 +114,10 @@ class ReplayEngine:
 # Authority Graph (minimal)
 # -----------------------------
 
+
 class AuthorityGraph:
     def __init__(self):
-        self.edges: Dict[str, List[str]] = {}
+        self.edges: dict[str, list[str]] = {}
 
     def auth(self, parent: str, child: str):
         self.edges.setdefault(parent, []).append(child)
@@ -130,6 +134,7 @@ class AuthorityGraph:
 # C5-REAL Kernel
 # -----------------------------
 
+
 class C5RealKernel:
     def __init__(self):
         self.store = EventStore()
@@ -139,7 +144,7 @@ class C5RealKernel:
     def commit(self, event: Event) -> str:
         return self.store.append(event)
 
-    def state(self) -> Dict[str, Any]:
+    def state(self) -> dict[str, Any]:
         return self.replay_engine.replay()
 
     def merkle_root(self) -> str:

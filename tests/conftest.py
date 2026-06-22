@@ -67,6 +67,7 @@ def inject_test_master_key(monkeypatch):
     # Base64 for 32 bytes of '0'
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
 
+
 @pytest.fixture(autouse=True)
 def isolate_swarm_ledger(tmp_path, monkeypatch):
     """Ensure each test gets an isolated SwarmLedger database."""

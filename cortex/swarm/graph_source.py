@@ -8,11 +8,12 @@ from typing import Protocol, runtime_checkable
 @dataclass(frozen=True)
 class SalienceCandidate:
     """Pure data contract between graph layer and router."""
+
     agent_id: str
     region: str
-    network: str          # DMN | CEN | SN
-    salience: float       # 0.0 – 1.0, from Neo4j BrainRegion.activation
-    latency_ms: float     # from CONNECTS_TO.latency_ms
+    network: str  # DMN | CEN | SN
+    salience: float  # 0.0 – 1.0, from Neo4j BrainRegion.activation
+    latency_ms: float  # from CONNECTS_TO.latency_ms
 
     def to_dict(self) -> dict:
         return {
@@ -26,8 +27,7 @@ class SalienceCandidate:
 
 @runtime_checkable
 class GraphSource(Protocol):
-    def get_candidates(self, task: str) -> list[SalienceCandidate]:
-        ...
+    def get_candidates(self, task: str) -> list[SalienceCandidate]: ...
 
 
 class SNGraphSource:

@@ -26,17 +26,26 @@ class SwarmLedger:
 
     def append(self, event: SwarmEvent) -> str:
         r = event.to_record()
-        self.conn.execute("""
+        self.conn.execute(
+            """
             INSERT INTO swarm_events (
                 event_id, timestamp, input_hash, registry_hash,
                 task, selected_agent, routing_payload,
                 deterministic_signature, version
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            r["event_id"], r["timestamp"], r["input_hash"],
-            r["registry_hash"], r["task"], r["selected_agent"],
-            r["routing_payload"], r["deterministic_signature"], r["version"],
-        ))
+        """,
+            (
+                r["event_id"],
+                r["timestamp"],
+                r["input_hash"],
+                r["registry_hash"],
+                r["task"],
+                r["selected_agent"],
+                r["routing_payload"],
+                r["deterministic_signature"],
+                r["version"],
+            ),
+        )
         self.conn.commit()
         return r["event_id"]
 
@@ -47,8 +56,7 @@ class SwarmLedger:
     def replay(self, task: str) -> list[dict]:
         """All events for a task, chronological order."""
         cur = self.conn.execute(
-            "SELECT * FROM swarm_events WHERE task = ? ORDER BY id ASC",
-            (task,)
+            "SELECT * FROM swarm_events WHERE task = ? ORDER BY id ASC", (task,)
         )
         return [dict(row) for row in cur.fetchall()]
 
@@ -60,21 +68,17 @@ class SwarmLedger:
         if task:
             cur = self.conn.execute(
                 "SELECT * FROM swarm_events WHERE timestamp >= ? AND task = ? ORDER BY id ASC",
-                (ts, task)
+                (ts, task),
             )
         else:
             cur = self.conn.execute(
-                "SELECT * FROM swarm_events WHERE timestamp >= ? ORDER BY id ASC",
-                (ts,)
+                "SELECT * FROM swarm_events WHERE timestamp >= ? ORDER BY id ASC", (ts,)
             )
         return [dict(row) for row in cur.fetchall()]
 
     def get_event(self, event_id: str) -> dict | None:
         """Fetch a single event by its deterministic event_id."""
-        cur = self.conn.execute(
-            "SELECT * FROM swarm_events WHERE event_id = ?",
-            (event_id,)
-        )
+        cur = self.conn.execute("SELECT * FROM swarm_events WHERE event_id = ?", (event_id,))
         row = cur.fetchone()
         return dict(row) if row else None
 

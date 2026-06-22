@@ -42,6 +42,7 @@ class CausalMetering:
     def __init__(self, db_path: str | None = None, gateway: StripeBillingGateway | None = None):
         if db_path is None:
             from cortex.core.config import DB_PATH
+
             db_path = DB_PATH
 
         self._db_path = db_path
@@ -157,9 +158,7 @@ class CausalMetering:
                 (agent_id,),
             ).fetchall()
         else:
-            rows = conn.execute(
-                "SELECT * FROM billing_events ORDER BY timestamp DESC"
-            ).fetchall()
+            rows = conn.execute("SELECT * FROM billing_events ORDER BY timestamp DESC").fetchall()
 
         events = []
         for r in rows:

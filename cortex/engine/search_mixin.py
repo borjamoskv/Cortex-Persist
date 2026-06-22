@@ -204,7 +204,7 @@ class SearchMixin(EngineMixinBase):
                     # Ejemplo asumiendo esquema FTS5 genérico en cortex.db
                     await conn.execute(
                         "INSERT INTO llm_telemetry (engine_used, response_digest, tenant_id) VALUES (?, ?, ?)",
-                        (engine_used, response_digest, tenant_id)
+                        (engine_used, response_digest, tenant_id),
                     )
                     await conn.commit()
                 logger.debug("BM25 feedback injected: %s", engine_used)

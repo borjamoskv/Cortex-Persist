@@ -257,5 +257,3 @@ def purge_omega() -> None:
     console.print(f"  [green]✓[/] Destroyed {total_files} legacy files ({freed_mb:.2f} MB).")
 
     console.print("\n[bold green]✅ LEA-Ω PURGE COMPLETE (C5-REAL). Zero Mercy.[/]")
-
-

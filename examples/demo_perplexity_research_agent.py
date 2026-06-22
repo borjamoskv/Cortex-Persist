@@ -57,6 +57,7 @@ RESEARCH_QUERIES = [
 # Ledger helpers
 # ---------------------------------------------------------------------------
 
+
 def _sha256(data: str) -> str:
     return hashlib.sha256(data.encode()).hexdigest()
 
@@ -85,8 +86,16 @@ def build_ledger_entry(
 def compute_exergy_score(content: str, tokens: int) -> float:
     """Ratio of reasoning signal (citations + logical connectors) to token cost."""
     signal_words = [
-        "because", "therefore", "however", "evidence", "study",
-        "research", "demonstrates", "implies", "contrary", "specifically",
+        "because",
+        "therefore",
+        "however",
+        "evidence",
+        "study",
+        "research",
+        "demonstrates",
+        "implies",
+        "contrary",
+        "specifically",
     ]
     signal_count = sum(content.lower().count(w) for w in signal_words)
     if tokens == 0:
@@ -97,6 +106,7 @@ def compute_exergy_score(content: str, tokens: int) -> float:
 # ---------------------------------------------------------------------------
 # Perplexity API
 # ---------------------------------------------------------------------------
+
 
 async def query_perplexity(
     client: httpx.AsyncClient,
@@ -143,6 +153,7 @@ async def query_perplexity(
 # CORTEX ledger push
 # ---------------------------------------------------------------------------
 
+
 async def push_to_cortex(
     client: httpx.AsyncClient,
     entry: dict[str, Any],
@@ -162,6 +173,7 @@ async def push_to_cortex(
 # ---------------------------------------------------------------------------
 # Main research loop
 # ---------------------------------------------------------------------------
+
 
 async def run_research_session(queries: list[str]) -> None:
     if not PERPLEXITY_API_KEY:
@@ -204,7 +216,13 @@ async def run_research_session(queries: list[str]) -> None:
             ledger_chain.append(entry)
 
             # Display response
-            console.print(Panel(result["content"], title="[green]Research Synthesis[/green]", border_style="green"))
+            console.print(
+                Panel(
+                    result["content"],
+                    title="[green]Research Synthesis[/green]",
+                    border_style="green",
+                )
+            )
 
             # Citations
             if result["citations"]:
@@ -223,7 +241,11 @@ async def run_research_session(queries: list[str]) -> None:
 
             # Push to CORTEX
             cortex_ok = await push_to_cortex(client, entry)
-            status = "[green]✓ Ledger sealed[/green]" if cortex_ok else "[yellow]⚠ CORTEX offline — entry cached locally[/yellow]"
+            status = (
+                "[green]✓ Ledger sealed[/green]"
+                if cortex_ok
+                else "[yellow]⚠ CORTEX offline — entry cached locally[/yellow]"
+            )
             console.print(status)
 
     # Session summary

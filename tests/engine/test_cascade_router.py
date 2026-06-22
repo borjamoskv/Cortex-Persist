@@ -58,7 +58,9 @@ class TestCascadeRouter:
         mock_process.communicate = AsyncMock(return_value=(b"Gemini Response", b""))
         mock_create.return_value = mock_process
 
-        response = await router.route_task("Check this code", "architecture", ["app.py", "utils.py"])
+        response = await router.route_task(
+            "Check this code", "architecture", ["app.py", "utils.py"]
+        )
         assert response == "Gemini Response"
 
         # Check call arguments
@@ -79,7 +81,9 @@ class TestCascadeRouter:
         mock_process.communicate = AsyncMock(return_value=(b"Gemini Response", b""))
         mock_create.return_value = mock_process
 
-        response = await router.route_task("Check this code", "architecture", ["app.py", "utils.py"])
+        response = await router.route_task(
+            "Check this code", "architecture", ["app.py", "utils.py"]
+        )
         assert response == "Gemini Response"
 
         mock_create.assert_called_once()
@@ -135,11 +139,16 @@ class TestCascadeRouter:
         router = CascadeRouter()
 
         mock_process = MagicMock()
-        mock_process.communicate = AsyncMock(side_effect=[
-            asyncio.TimeoutError(), (b"", b""),
-            asyncio.TimeoutError(), (b"", b""),
-            asyncio.TimeoutError(), (b"", b"")
-        ])
+        mock_process.communicate = AsyncMock(
+            side_effect=[
+                asyncio.TimeoutError(),
+                (b"", b""),
+                asyncio.TimeoutError(),
+                (b"", b""),
+                asyncio.TimeoutError(),
+                (b"", b""),
+            ]
+        )
         mock_process.kill = MagicMock()
         mock_create.return_value = mock_process
 

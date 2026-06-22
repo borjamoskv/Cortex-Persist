@@ -7,8 +7,9 @@ from cortex.guards.contradiction_guard.text_utils import (
     _extract_versions,
     _is_noise,
     _decrypt_content,
-    _embedding_cosine_similarity
+    _embedding_cosine_similarity,
 )
+
 
 def test_tokenize():
     # Should ignore stop words and punctuation, returning sets of length >= 3
@@ -17,7 +18,7 @@ def test_tokenize():
     assert "quick" in tokens
     assert "brown" in tokens
     assert "fox" in tokens
-    assert "the" not in tokens # Stop word
+    assert "the" not in tokens  # Stop word
     assert "jumps" in tokens
 
     # Test accents
@@ -25,6 +26,7 @@ def test_tokenize():
     assert "niño" in tokens_es
     assert "corrió" in tokens_es
     assert "rápido" in tokens_es
+
 
 def test_jaccard():
     a = {"apple", "banana", "cherry"}
@@ -36,23 +38,28 @@ def test_jaccard():
     assert _jaccard(set(), b) == 0.0
     assert _jaccard(set(), set()) == 0.0
 
+
 def test_detect_negation():
     assert _detect_negation("This feature is forbidden in production.")
     assert _detect_negation("no usar este método")
     assert not _detect_negation("We should totally use this feature.")
+
 
 def test_detect_supersession():
     assert _detect_supersession("This module supersedes the old one.")
     assert _detect_supersession("We replaced it yesterday.")
     assert not _detect_supersession("This is a brand new feature.")
 
+
 def test_extract_versions():
     assert _extract_versions("Initial release v1.0 and update V2.1.3.") == ["1.0", "2.1.3"]
     assert _extract_versions("No versions here.") == []
 
+
 def test_is_noise():
     assert _is_noise("MAILTV-1: ARCHIVE some text here")
     assert not _is_noise("Normal decision text")
+
 
 def test_decrypt_content():
     def mock_decrypt(x):
@@ -64,6 +71,7 @@ def test_decrypt_content():
     assert _decrypt_content("v6_aesgcm:valid", mock_decrypt) == "decrypted valid"
     assert _decrypt_content("v6_aesgcm:invalid", mock_decrypt) is None
     assert _decrypt_content("v6_aesgcm:valid", None) == "v6_aesgcm:valid"
+
 
 def test_embedding_cosine_similarity():
     v1 = [1.0, 0.0, 0.0]

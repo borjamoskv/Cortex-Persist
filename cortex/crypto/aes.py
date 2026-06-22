@@ -46,6 +46,7 @@ class CortexEncrypter:
         if hkdf_salt is None:
             try:
                 import cortex.core.config as config
+
                 self.hkdf_salt = config.HKDF_SALT.encode("utf-8")
             except (ImportError, AttributeError):
                 self.hkdf_salt = b"cortex_v6_tenant_isolation_salt"
@@ -85,7 +86,9 @@ class CortexEncrypter:
             return data
         if not self.is_active:
             if self.strict_mode:
-                raise RuntimeError("Strict crypto mode active: cannot encrypt data without a loaded Master Key.")
+                raise RuntimeError(
+                    "Strict crypto mode active: cannot encrypt data without a loaded Master Key."
+                )
             return data
 
         key = self._get_tenant_key(tenant_id)
@@ -106,11 +109,12 @@ class CortexEncrypter:
         # This allows seamless migration for existing dbs
         if not encrypted_data.startswith(self.PREFIX):
             if self.strict_mode:
-                raise DecryptionPolicyError("Strict crypto mode active: data lacks encryption prefix in strict mode")
+                raise DecryptionPolicyError(
+                    "Strict crypto mode active: data lacks encryption prefix in strict mode"
+                )
             return encrypted_data
 
         if not self.is_active:
-
             raise RuntimeError("Database contains encrypted data but no Master Key is loaded.")
 
         try:

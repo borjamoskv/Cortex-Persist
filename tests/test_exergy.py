@@ -168,6 +168,8 @@ def test_destructive_without_backup_negative_score() -> None:
         had_backup=False,
         touched_persistent_state=True,
     )
-    result = calculate_exergy(inp, threshold_min_work=0.1)  # Threshold raised for proportional model
+    result = calculate_exergy(
+        inp, threshold_min_work=0.1
+    )  # Threshold raised for proportional model
     assert result.score < 0.1  # Score will be positive but very small due to massive risk penalty
     assert result.below_threshold

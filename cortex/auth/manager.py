@@ -107,9 +107,7 @@ class AuthManager:
 
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
-            self._executor,
-            cortex_rs.hash_password,
-            key + AUTH_PEPPER
+            self._executor, cortex_rs.hash_password, key + AUTH_PEPPER
         )
 
     async def close(self) -> None:
@@ -275,7 +273,7 @@ class AuthManager:
                             self._executor,
                             cortex_rs.verify_password,
                             raw_key + AUTH_PEPPER,
-                            cand["key_hash_argon2"]
+                            cand["key_hash_argon2"],
                         )
                         if is_valid:
                             row = cand

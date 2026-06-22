@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from cortex.guards.contradiction_guard.detector import _fetch_decision_rows, detect_contradictions
 
+
 @pytest.fixture
 async def in_memory_db():
     async with aiosqlite.connect(":memory:") as conn:
@@ -38,14 +39,22 @@ async def in_memory_db():
         )
 
         # Insert some test data
-        await conn.execute("INSERT INTO facts (project, content, created_at, fact_type) VALUES (?, ?, ?, ?)",
-            ("TestProj", "This is an old decision about using python.", "2023-01-01", "decision"))
-        await conn.execute("INSERT INTO facts (project, content, created_at, fact_type) VALUES (?, ?, ?, ?)",
-            ("TestProj", "We decided to not use java.", "2023-01-02", "decision"))
-        await conn.execute("INSERT INTO facts (project, content, created_at, fact_type) VALUES (?, ?, ?, ?)",
-            ("OtherProj", "Python is good.", "2023-01-03", "decision"))
-        await conn.execute("INSERT INTO facts (project, content, created_at, fact_type) VALUES (?, ?, ?, ?)",
-            ("TestProj", "Just a normal fact.", "2023-01-04", "other"))
+        await conn.execute(
+            "INSERT INTO facts (project, content, created_at, fact_type) VALUES (?, ?, ?, ?)",
+            ("TestProj", "This is an old decision about using python.", "2023-01-01", "decision"),
+        )
+        await conn.execute(
+            "INSERT INTO facts (project, content, created_at, fact_type) VALUES (?, ?, ?, ?)",
+            ("TestProj", "We decided to not use java.", "2023-01-02", "decision"),
+        )
+        await conn.execute(
+            "INSERT INTO facts (project, content, created_at, fact_type) VALUES (?, ?, ?, ?)",
+            ("OtherProj", "Python is good.", "2023-01-03", "decision"),
+        )
+        await conn.execute(
+            "INSERT INTO facts (project, content, created_at, fact_type) VALUES (?, ?, ?, ?)",
+            ("TestProj", "Just a normal fact.", "2023-01-04", "other"),
+        )
 
         await conn.commit()
         yield conn
@@ -71,16 +80,14 @@ async def test_fetch_decision_rows_no_fts(in_memory_db):
 
 
 @pytest.mark.asyncio
-@patch('cortex.guards.contradiction_guard.detector.connect_async_ctx')
+@patch("cortex.guards.contradiction_guard.detector.connect_async_ctx")
 async def test_detect_contradictions(mock_connect_ctx, in_memory_db):
     # Mock context manager to return our in_memory_db
     mock_connect_ctx.return_value.__aenter__.return_value = in_memory_db
 
     # "python" overlaps with the first decision
     report = await detect_contradictions(
-        "We are using python in our new project.",
-        "TestProj",
-        db_path=":memory:"
+        "We are using python in our new project.", "TestProj", db_path=":memory:"
     )
 
     assert report.has_conflicts
@@ -91,30 +98,25 @@ async def test_detect_contradictions(mock_connect_ctx, in_memory_db):
 
 @pytest.mark.asyncio
 async def test_detect_contradictions_noise():
-    report = await detect_contradictions(
-        "MAILTV-1: ARCHIVE using python.",
-        "TestProj"
-    )
+    report = await detect_contradictions("MAILTV-1: ARCHIVE using python.", "TestProj")
     assert not report.has_conflicts
+
 
 @pytest.mark.asyncio
 async def test_detect_contradictions_few_tokens():
     report = await detect_contradictions(
-        "is a the", # all stop words -> 0 tokens
-        "TestProj"
+        "is a the",  # all stop words -> 0 tokens
+        "TestProj",
     )
     assert not report.has_conflicts
 
+
 @pytest.mark.asyncio
-@patch('cortex.guards.contradiction_guard.detector.connect_async_ctx')
+@patch("cortex.guards.contradiction_guard.detector.connect_async_ctx")
 async def test_detect_contradictions_db_error(mock_connect_ctx):
     # Setup mock to raise OperationalError
     mock_connect_ctx.return_value.__aenter__.side_effect = aiosqlite.OperationalError()
 
-    report = await detect_contradictions(
-        "We are using python.",
-        "TestProj",
-        db_path=":memory:"
-    )
+    report = await detect_contradictions("We are using python.", "TestProj", db_path=":memory:")
     # Should handle gracefully and return empty report
     assert not report.has_conflicts

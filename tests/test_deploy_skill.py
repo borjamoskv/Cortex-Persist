@@ -8,6 +8,7 @@ Verifies:
 - trace_id from event propagates to artifact
 - unknown command returns error artifact (not exception)
 """
+
 import json
 import pytest
 

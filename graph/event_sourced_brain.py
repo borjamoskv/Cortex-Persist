@@ -15,6 +15,7 @@ class BrainEvent:
     event_type: str
     payload: dict[str, Any]
 
+
 class EventStore:
     def __init__(self):
         self.events: list[BrainEvent] = []
@@ -28,6 +29,7 @@ class EventStore:
             state.setdefault(e.target, []).append(e)
         return state
 
+
 class BrainGraph:
     def __init__(self):
         self.store = EventStore()
@@ -38,7 +40,7 @@ class BrainGraph:
             source=source,
             target=target,
             event_type=event_type,
-            payload=payload or {}
+            payload=payload or {},
         )
         self.store.append(event)
 
@@ -56,6 +58,7 @@ class BrainGraph:
 
     def dump(self):
         return json.dumps([asdict(e) for e in self.store.events], indent=2)
+
 
 if __name__ == "__main__":
     brain = BrainGraph()

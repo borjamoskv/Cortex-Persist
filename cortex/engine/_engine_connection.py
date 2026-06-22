@@ -145,16 +145,18 @@ class ConnectionMixin:
             row = await cursor.fetchone()
             if row:
                 import cortex.core.config as config
+
                 config.HKDF_SALT = row[0]
             else:
                 import cortex.core.config as config
+
                 # Store the default config salt in the DB if not present
                 await conn.execute(
                     "INSERT INTO cortex_meta (key, value) VALUES ('tenant_isolation_salt', ?)",
                     (config.HKDF_SALT,),
                 )
                 await conn.commit()
-            
+
             # Query dynamic salt if present to reload config dynamically
             try:
                 async with conn.execute(
@@ -163,6 +165,7 @@ class ConnectionMixin:
                     row = await cursor.fetchone()
                     if row:
                         import cortex.core.config as config
+
                         config.HKDF_SALT = row[0]
                         config._cfg.HKDF_SALT = row[0]
             except Exception as e:
@@ -179,7 +182,6 @@ class ConnectionMixin:
 
                 self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
             self._schema_ready = True
-
 
     async def _get_or_create_ledger(self):
         """Return the transaction ledger, initializing it on demand."""

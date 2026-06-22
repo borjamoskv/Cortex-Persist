@@ -43,6 +43,8 @@ class SwarmEvent:
             "event_id": event_id,
             "timestamp": ts,
             **base,
-            "routing_payload": json.dumps(self.routing_payload, sort_keys=True, default=default_serializer),
+            "routing_payload": json.dumps(
+                self.routing_payload, sort_keys=True, default=default_serializer
+            ),
             "deterministic_signature": sha256({**base, "routing": self.routing_payload}),
         }

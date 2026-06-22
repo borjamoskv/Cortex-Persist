@@ -333,7 +333,9 @@ class AlertHandlerMixin:
                 )
 
                 if a.workflow == "/autodidact":
-                    logger.info("🔮 Epistemic degradation detected. Auto-triggering Ouroboros Absorb actuator.")
+                    logger.info(
+                        "🔮 Epistemic degradation detected. Auto-triggering Ouroboros Absorb actuator."
+                    )
                     self._dispatch_ouroboros_absorb()
 
     def _dispatch_ouroboros_absorb(self) -> None:

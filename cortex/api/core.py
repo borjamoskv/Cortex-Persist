@@ -74,6 +74,7 @@ async def lifespan(app: FastAPI):
     await auth_manager.initialize()
 
     from cortex.ledger.billing_gateway import get_billing_gateway
+
     await get_billing_gateway().initialize()
 
     # 2. Connection Pool & Async Engine

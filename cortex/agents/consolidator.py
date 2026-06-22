@@ -15,12 +15,14 @@ from cortex.agents.base import ReactiveTaskAgent
 
 logger = logging.getLogger("cortex.agents.consolidator")
 
+
 class ConsolidatorAgent(ReactiveTaskAgent):
     """
     Consolidator Agent Architecture.
     Transforms disparate directives into a unified, executable format.
     Integrated via the system's routing mechanism.
     """
+
     _SUPPORTED_OPS = frozenset({"consolidate_directives", "validate_synthesis"})
 
     def __init__(self, *args, **kwargs):
@@ -38,7 +40,7 @@ class ConsolidatorAgent(ReactiveTaskAgent):
         """Extract directives from historical conversation summaries and standardize."""
         logger.info(f"[{self.agent_id}] Initiating directive consolidation pipeline...")
         directives = []
-        
+
         # Operationalization: Fetch from local ledger / database
         if self.db_path.exists():
             try:
@@ -63,34 +65,30 @@ class ConsolidatorAgent(ReactiveTaskAgent):
                 conn.close()
             except Exception as e:
                 logger.error(f"[{self.agent_id}] Database extraction failed: {e}")
-                
+
         # Standardization: Format into executable schema
         synthesized_manifest = {
             "version": "1.0-alpha",
             "extracted_count": len(directives),
             "directives": directives,
             "status": "crystallized",
-            "metadata": {"source": "historical_episodes", "agent": self.agent_id}
+            "metadata": {"source": "historical_episodes", "agent": self.agent_id},
         }
-        
+
         return {"synthesized_output": synthesized_manifest}
 
     async def _validate_synthesis(self, payload: dict[str, Any]) -> dict[str, Any]:
         """Verification loop to ensure functional coherence."""
         data = payload.get("synthesized_output", {})
         directives = data.get("directives", [])
-        
+
         # Basic functional coherence verification
         is_valid = isinstance(directives, list) and len(directives) >= 0
         coherence_score = 1.0 if is_valid else 0.0
-        
+
         if is_valid:
             logger.info(f"[{self.agent_id}] Synthesis validated with score {coherence_score}")
         else:
             logger.warning(f"[{self.agent_id}] Synthesis validation failed: malformed payload")
-            
-        return {
-            "is_valid": is_valid, 
-            "coherence_score": coherence_score,
-            "verified_at": "C5-REAL"
-        }
+
+        return {"is_valid": is_valid, "coherence_score": coherence_score, "verified_at": "C5-REAL"}

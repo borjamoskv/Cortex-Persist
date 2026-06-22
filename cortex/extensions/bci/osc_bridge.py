@@ -16,13 +16,16 @@ try:
     from pythonosc.dispatcher import Dispatcher
     from pythonosc.osc_message_builder import OscMessageBuilder
     from pythonosc.osc_server import AsyncIOOSCUDPServer
+
     pythonosc_available = True
 except ImportError:
     Dispatcher = None  # type: ignore
     OscMessageBuilder = None  # type: ignore
     AsyncIOOSCUDPServer = None  # type: ignore
     pythonosc_available = False
-    logger.warning("python-osc library not installed; AetherOscBridge is running in fallback/offline mode.")
+    logger.warning(
+        "python-osc library not installed; AetherOscBridge is running in fallback/offline mode."
+    )
 
 
 class AetherOscBridge:

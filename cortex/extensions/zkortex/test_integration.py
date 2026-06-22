@@ -51,7 +51,7 @@ def test_full_sovereign_opacity_protocol() -> None:
     # ── 3. Ingestión - genera el root público ─────────────────────────────────
     public_root = opacity.ingest_facts(private_knowledge)
     print(f"[PÚBLICO] Merkle Root publicado: {public_root[:32]}...")
-    print("[PÚBLICO] Este hash representa TODO el conocimiento, sin revelar nada")
+    print("[PÚBLICO] Este hash representa T-O-D-O el conocimiento, sin revelar nada")
 
     # ── 4. Verifier externo se configura con el root público ──────────────────
     verifier = ZKOrtexVerifier(expected_root=opacity.public_root)

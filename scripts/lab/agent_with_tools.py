@@ -32,9 +32,13 @@ MAX_REACT_STEPS = 6
 
 # ==================== BM25 ENGINE ====================
 
+
 class SimpleBM25:
     """Motor BM25 ultraligero y rápido para búsqueda en código sin dependencias ni VRAM."""
-    def __init__(self, documents: list[str], metadatas: list[dict], b: float = 0.75, k1: float = 1.5):
+
+    def __init__(
+        self, documents: list[str], metadatas: list[dict], b: float = 0.75, k1: float = 1.5
+    ):
         self.documents = documents
         self.metadatas = metadatas
         self.b = b
@@ -47,7 +51,7 @@ class SimpleBM25:
 
     def tokenize(self, text: str) -> list[str]:
         # Extrae palabras clave e identificadores de código (variables, funciones)
-        return re.findall(r'[a-zA-Z0-9_]+', text.lower())
+        return re.findall(r"[a-zA-Z0-9_]+", text.lower())
 
     def _initialize(self):
         df = Counter()
@@ -55,11 +59,11 @@ class SimpleBM25:
             words = set(self.tokenize(doc))
             for word in words:
                 df[word] += 1
-        
+
         N = len(self.documents)
         for word, freq in df.items():
             self.idf[word] = math.log((N - freq + 0.5) / (freq + 0.5) + 1.0)
-            
+
         for doc in self.documents:
             self.doc_freqs.append(Counter(self.tokenize(doc)))
 
@@ -78,7 +82,7 @@ class SimpleBM25:
                 den = tf + self.k1 * (1.0 - self.b + self.b * (doc_len / self.avg_doc_len))
                 score += self.idf[word] * (num / den)
             scores.append((score, i))
-        
+
         scores.sort(reverse=True, key=lambda x: x[0])
         results = []
         for score, idx in scores[:k]:
@@ -86,7 +90,9 @@ class SimpleBM25:
                 results.append((self.documents[idx], self.metadatas[idx]))
         return results
 
+
 # ==================== RAG INGESTION ====================
+
 
 def chunk_code(code: str, max_words: int = CHUNK_SIZE) -> list[str]:
     """Segmenta código por bloques de líneas."""
@@ -141,6 +147,7 @@ def retrieve(index: SimpleBM25, query: str, k: int = TOP_K) -> str:
 
 
 # ==================== TOOLS ====================
+
 
 def execute_bash(command: str) -> str:
     """Ejecuta un comando bash."""
@@ -217,7 +224,11 @@ def parse_react(text: str) -> dict:
     """Extrae Thought, Action, Action Input, Final Answer."""
     result = {}
     for key in ["Thought", "Action", "Action Input", "Final Answer"]:
-        m = re.search(rf"{key}:\s*(.*?)(?=\n(?:Thought|Action|Final Answer)|$)", text, re.DOTALL | re.IGNORECASE)
+        m = re.search(
+            rf"{key}:\s*(.*?)(?=\n(?:Thought|Action|Final Answer)|$)",
+            text,
+            re.DOTALL | re.IGNORECASE,
+        )
         if m:
             result[key.lower().replace(" ", "_")] = m.group(1).strip()
     return result
@@ -225,10 +236,28 @@ def parse_react(text: str) -> dict:
 
 def should_use_rag(query: str) -> bool:
     """RAG solo se activa para queries de búsqueda/exploración de codebase."""
-    trigger_words = ["buscar", "busca", "¿cómo", "explica", "¿qué", "código", "implementación",
-                     "cómo se", "qué hace", "funciona", "persistencia", "estado",
-                     "conexión", "api", "database", "db", "postgres", "fastapi"]
+    trigger_words = [
+        "buscar",
+        "busca",
+        "¿cómo",
+        "explica",
+        "¿qué",
+        "código",
+        "implementación",
+        "cómo se",
+        "qué hace",
+        "funciona",
+        "persistencia",
+        "estado",
+        "conexión",
+        "api",
+        "database",
+        "db",
+        "postgres",
+        "fastapi",
+    ]
     return any(word in query.lower() for word in trigger_words)
+
 
 def react_loop(query: str, index: SimpleBM25) -> str:
     """Bucle ReAct con RAG retrieval (Lazy mode)."""
@@ -238,7 +267,9 @@ def react_loop(query: str, index: SimpleBM25) -> str:
     else:
         context_block = ""
 
-    prompt = REACT_SYSTEM.format(tools=TOOL_LIST) + f"\n{context_block}\nPregunta del usuario: {query}\n"
+    prompt = (
+        REACT_SYSTEM.format(tools=TOOL_LIST) + f"\n{context_block}\nPregunta del usuario: {query}\n"
+    )
     messages = [{"role": "user", "content": prompt}]
 
     for step in range(MAX_REACT_STEPS):
@@ -264,15 +295,18 @@ def react_loop(query: str, index: SimpleBM25) -> str:
                 observation = observation[:2000] + "\n...[TRUNCATED_DUE_TO_LENGTH]..."
             messages.append({"role": "user", "content": f"Observation: {observation}"})
         else:
-            messages.append({
-                "role": "user",
-                "content": "Observation: Formato inválido. Usa 'Action: bash' y 'Action Input: <comando>'.",
-            })
+            messages.append(
+                {
+                    "role": "user",
+                    "content": "Observation: Formato inválido. Usa 'Action: bash' y 'Action Input: <comando>'.",
+                }
+            )
 
     return "(Límite de pasos alcanzado sin respuesta final)"
 
 
 # ==================== MAIN ====================
+
 
 def main():
     print(f"[C5-REAL] ReAct Agent + BM25 RAG | Model: {MODEL_CHAT}")
