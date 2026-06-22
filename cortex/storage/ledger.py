@@ -399,10 +399,10 @@ class EnterpriseAuditLedger:
         """
         [C5-REAL] Verifies SHA-3-256 hash continuity and Ed25519 signatures in WORM log.
         """
-        import os
-        import json
         import hashlib
+        import json
         import logging
+        import os
 
         logger = logging.getLogger("cortex.audit.ledger")
         
