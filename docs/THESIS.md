@@ -127,6 +127,85 @@ Compran **la capacidad de confiar en lo que ya generaron**.
 
 ---
 
+### 3.4 La capa de seguridad: AI-BOM + enforcement físico
+
+La seguridad no es una feature de CORTEX. Es una consecuencia estructural de su arquitectura.
+
+#### 3.4.1 AI Bill of Materials (AI-BOM)
+
+La industria lleva tres años exigiendo SBOMs (Software Bill of Materials) para dependencias de terceros.
+Nadie ha construido el equivalente para contribuciones generativas.
+
+CORTEX implementa el primer **AI-BOM local-first**: un registro criptográfico, inmutable y granular de:
+
+```
+línea de código
+  → modelo que la produjo
+    → versión del modelo
+      → sesión y timestamp
+        → contexto epistémico en el momento de generación
+          → dependencias de hechos que la sustentaban
+```
+
+Si ocurre un incidente, CORTEX es el único sistema que puede responder:
+*"Esta función fue generada por `gemini-2.5-pro` en la sesión `sess_0x4f2a`, bajo el contexto `[guard=virgo_v2, taint=CORTEX-AI-0x8f3a]`, y dependía de tres asunciones — una de las cuales fue invalidada 48h antes del despliegue."*
+
+Eso convierte el ledger en **evidencia forense**, no en metadata.
+
+---
+
+#### 3.4.2 El MTK como choke point físico
+
+La distinción que separa CORTEX de cualquier sistema de auditoría convencional:
+
+| Sistema de seguridad típico | CORTEX MTK |
+|---|---|
+| Policy enforcement — puede bypassearse con permisos elevados | Physical enforcement via SQLite authorizer callback |
+| "Si tienes acceso, puedes escribir" | Sin token criptográfico efímero en ContextVar → `SQLITE_DENY` del engine |
+| Soft boundary configurable | Hard boundary en la capa de DB, no en la capa de aplicación |
+
+El `mtk_authorizer_callback` intercepta cada `INSERT`, `UPDATE` y `DELETE` a nivel de motor.
+No es un guard en Python. No se puede bypassear desde userland sin parchear SQLite.
+
+---
+
+#### 3.4.3 Taint como security boundary
+
+El taint `CORTEX-AI-0x...` no es metadata de auditoría. Es la primitiva de seguridad:
+
+```python
+IF fact.taint == "CORTEX-AI"
+AND fact.target_module IN ["crypto/", "auth/", "payments/"]
+THEN require_human_review_before_persist()
+```
+
+Ningún otro sistema puede aplicar esta política porque ningún otro sistema sabe,
+a nivel de hecho individual, qué fue producido por IA y qué por un humano.
+
+---
+
+#### 3.4.4 El vector de ataque que CORTEX cierra
+
+El ataque más probable en entornos AI-augmented no es un prompt injection visible.
+Es la **contribución adversarial silenciosa**:
+
+```
+Developer usa agente AI en Cursor
+↓
+Agente sugiere función con lógica adversarial sutil
+↓
+Pasa code review (nadie sabe la procedencia exacta)
+↓
+Llega a producción
+↓
+Incidente — nadie puede rastrear el origen
+```
+
+CORTEX cierra este vector con genealogía causal completa:
+cada mutación generada por IA deja un rastro criptográfico irrepudiable.
+
+---
+
 ## 4. El verdadero mercado
 
 El pitch actual parece: *"herramienta para developers".*
