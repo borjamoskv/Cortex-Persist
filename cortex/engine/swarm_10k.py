@@ -25,10 +25,12 @@ from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 logger = logging.getLogger("cortex.engine.swarm_10k")
 
 
+from cortex.engine.babylon60 import Babylon60
+
 @dataclass
 class NodeMetrics:
-    exergy: float
-    uncertainty: float
+    exergy: Babylon60
+    uncertainty: Babylon60
     active_children: int
 
 
@@ -43,35 +45,41 @@ class CenturionSuperv:
         self.bus = SovereignSharedBus(name=bus_name, create=True)
         self.tenant_id = tenant_id
         self.agents: list[str] = []
-        self.last_latency_ms = 0.0
-        self.metrics = NodeMetrics(exergy=1.0, uncertainty=0.0, active_children=0)
+        self.last_latency_ms = Babylon60(0.0)
+        self.metrics = NodeMetrics(exergy=Babylon60(1.0), uncertainty=Babylon60(0.0), active_children=0)
 
     async def _emit_with_latency(self, **kwargs) -> int:
         start = time.perf_counter()
         res = await self.bus.emit(**kwargs)
-        self.last_latency_ms = (time.perf_counter() - start) * 1000
+        self.last_latency_ms = Babylon60((time.perf_counter() - start) * 1000)
 
         # O(1) Bit-Parallel Telemetry update (Ω₀)
         if hasattr(self.bus, "update_metrics"):
             self.bus.update_metrics(
-                self.metrics.exergy, self.last_latency_ms, self.metrics.uncertainty
+                self.metrics.exergy.to_float(), self.last_latency_ms.to_float(), self.metrics.uncertainty.to_float()
             )
 
-        if self.last_latency_ms > 32.0:
-            logger.warning("VOID BREACH: %.2fms on node %s", self.last_latency_ms, self.id)
+        if self.last_latency_ms > Babylon60(32.0):
+            logger.warning("VOID BREACH: %.2fms on node %s", self.last_latency_ms.to_float(), self.id)
 
             # Adaptive Slashing: Penalty scales with breach magnitude
-            scaling = min(20.0, self.last_latency_ms / 16.0)
-            dynamic_penalty = min(1.0, SlashingPenalty.MINOR_DEVIATION * scaling)
+            sixteen_b60 = Babylon60(16.0)
+            scaling = self.last_latency_ms / sixteen_b60
+            if scaling > Babylon60(20.0):
+                scaling = Babylon60(20.0)
+                
+            dynamic_penalty = Babylon60(SlashingPenalty.MINOR_DEVIATION) * scaling
+            if dynamic_penalty > Babylon60(1.0):
+                dynamic_penalty = Babylon60(1.0)
 
             # Emit slashing signal for the governance ledger
             await self.bus.emit(
                 event_type="governance:slashing",
                 payload={
                     "node_id": self.id,
-                    "latency_ms": self.last_latency_ms,
-                    "penalty": dynamic_penalty,
-                    "reason": f"LATENCY_BREACH ({self.last_latency_ms:.1f}ms)",
+                    "latency_ms": self.last_latency_ms.to_float(),
+                    "penalty": dynamic_penalty.to_float(),
+                    "reason": f"LATENCY_BREACH ({self.last_latency_ms.to_float():.1f}ms)",
                 },
                 source=self.id,
                 tenant_id=self.tenant_id,
@@ -95,13 +103,13 @@ class CenturionSuperv:
         )
         return True
 
-    async def get_exergy(self) -> float:
+    async def get_exergy(self) -> Babylon60:
         """Crystalline O(1) exergy calculation and header sync."""
         self.metrics.exergy = ExergyOptimizer.calculate_node_exergy(
             self.metrics, self.last_latency_ms, self.CAPACITY
         )
         # Mirror to SHM for L1/L0 visibility
-        self.bus.update_metrics(self.metrics.exergy, self.last_latency_ms, self.metrics.uncertainty)
+        self.bus.update_metrics(self.metrics.exergy.to_float(), self.last_latency_ms.to_float(), self.metrics.uncertainty.to_float())
         return self.metrics.exergy
 
     async def intercept_and_latent_compute(self, task: dict, semantic_space: Any) -> Any:
@@ -142,7 +150,7 @@ class LegionSupervisor:
         self._available_centurions: collections.deque[CenturionSuperv] = collections.deque()
         self._thermal_event = asyncio.Event()
         self._thermal_event.set()
-        self.metrics = NodeMetrics(exergy=1.0, uncertainty=0.0, active_children=0)
+        self.metrics = NodeMetrics(exergy=Babylon60(1.0), uncertainty=Babylon60(0.0), active_children=0)
         self._overclocked = False
 
     async def ensure_centurion(self) -> CenturionSuperv:
@@ -182,7 +190,8 @@ class LegionSupervisor:
 
         # Calcular si la legión base tiene capacidad exergética promedio
         exergies = [c.metrics.exergy for c in self.centurions.values()]
-        exergy = sum(exergies) / len(exergies)
+        exergy_sum = sum(exergies, Babylon60.from_raw(0))
+        exergy = exergy_sum / Babylon60(len(exergies))
 
         if ExergyOptimizer.is_thermally_stable(exergy):
             self._thermal_event.set()
