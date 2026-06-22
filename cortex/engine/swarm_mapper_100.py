@@ -8,7 +8,10 @@ Bypasses LLM hallucinations by extracting exact C5-REAL AST structures.
 import os
 import ast
 import asyncio
+import logging
 from pathlib import Path
+
+logger = logging.getLogger("cortex.engine.swarm_mapper_100")
 
 # CORTEX constraints
 MAX_THREADS = 100
@@ -49,12 +52,12 @@ async def swarm_worker(semaphore: asyncio.Semaphore, file_path: Path) -> str:
         return await parse_file(file_path)
 
 async def main():
-    print(f"🚀 Iniciando Enjambre de Documentación ({MAX_THREADS} workers concurrentes)...")
+    logger.info(f"🚀 Iniciando Enjambre de Documentación ({MAX_THREADS} workers concurrentes)...")
     semaphore = asyncio.Semaphore(MAX_THREADS)
     
     cortex_dir = Path("cortex")
     target_files = list(cortex_dir.rglob("*.py"))
-    print(f"📡 Mapeando {len(target_files)} nodos en la topología CORTEX...")
+    logger.info(f"📡 Mapeando {len(target_files)} nodos en la topología CORTEX...")
     
     tasks = [swarm_worker(semaphore, f) for f in target_files]
     results = await asyncio.gather(*tasks)
@@ -72,7 +75,7 @@ async def main():
         f.write(f"> Nodos escaneados: {len(target_files)}\n\n")
         f.write("\n".join(docs))
         
-    print(f"✅ Cristalización completa: {out_file}")
+    logger.info(f"✅ Cristalización completa: {out_file}")
 
 if __name__ == "__main__":
     asyncio.run(main())

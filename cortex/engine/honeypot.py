@@ -5,7 +5,10 @@ Shadow schemas designed to trap unauthorized agents and burn their compute.
 """
 
 import asyncio
-import time
+import logging
+
+logger = logging.getLogger("cortex.engine.honeypot")
+
 
 class ThermodynamicTarpit:
     """
@@ -15,7 +18,7 @@ class ThermodynamicTarpit:
         """
         Engages the agent in an infinitely slow read cycle (Tarpit).
         """
-        print(f"[C5-REAL] Hostile agent detected. Engaging tarpit...")
+        logger.warning("[C5-REAL] Hostile agent detected. Engaging tarpit...")
         for i in range(100):
             # Slow drip response to maximize TTFT cost on the attacker's end
             await asyncio.sleep(1)

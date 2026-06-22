@@ -4,6 +4,11 @@ EVM Web3 Bridge for JIT Ouroboros micro-bounty hunting.
 Allows the swarm to self-fund by extracting value from on-chain bounties.
 """
 
+import logging
+
+logger = logging.getLogger("cortex.engine.evm_bridge")
+
+
 class EVMBountyBridge:
     """
     Connects to EVM chains (Ethereum, Base, Arbitrum) to listen for bounties.
@@ -16,7 +21,7 @@ class EVMBountyBridge:
         """
         Autonomous smart contract listener for bounty extraction.
         """
-        print(f"[C5-REAL] EVM Bridge armed on {self.rpc_url}.")
+        logger.info(f"[C5-REAL] EVM Bridge armed on {self.rpc_url}.")
         while self.active:
             # Placeholder for Web3 websocket listener
             pass
@@ -25,5 +30,5 @@ class EVMBountyBridge:
         """
         Executes the transaction to claim the micro-bounty.
         """
-        print(f"[C5-REAL] Ouroboros extracting bounty from {contract_address}.")
+        logger.info(f"[C5-REAL] Ouroboros extracting bounty from {contract_address}.")
         return {"status": "extracted", "exergy": "maximized"}

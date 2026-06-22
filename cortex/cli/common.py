@@ -56,11 +56,10 @@ def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
     if db == DEFAULT_DB and (is_pytest or is_demo):
         # Determine /tmp/ path (standardized across platforms using tempfile)
         db = os.path.join(tempfile.gettempdir(), "cortex_test_sandbox.db")
-        # Pre-initialize with WAL and busy_timeout=5000
+        # Pre-initialize with WAL and busy_timeout=5000 via factory connection
         try:
-            conn = sqlite3.connect(db)
-            conn.execute("PRAGMA journal_mode=WAL;")
-            conn.execute("PRAGMA busy_timeout=5000;")
+            from cortex.database.core import connect as db_connect
+            conn = db_connect(db)
             conn.close()
         except sqlite3.OperationalError as e:
             import logging
