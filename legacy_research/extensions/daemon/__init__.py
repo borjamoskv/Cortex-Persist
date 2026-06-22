@@ -84,6 +84,8 @@ __all__ = [
     "SiteMonitor",
     # notifier
     "Notifier",
+    # extractors
+    "LeadExergyExtractor",
 ]
 
 # Lazy-load map: attribute name → (module_path, attr_name)
@@ -118,6 +120,8 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "SiteMonitor": ("cortex.extensions.daemon.monitors", "SiteMonitor"),
     # notifier
     "Notifier": ("cortex.extensions.daemon.notifier", "Notifier"),
+    # extractors
+    "LeadExergyExtractor": ("cortex.extensions.daemon.lead_exergy_extractor", "LeadExergyExtractor"),
 }
 
 
