@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="FixedPoint60.fs" />
     <Compile Include="Babylon60.fs" />
   </ItemGroup>
 </Project>
