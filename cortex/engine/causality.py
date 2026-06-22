@@ -251,7 +251,7 @@ class AsyncCausalGraph:
                 self.atms.add_node(fact_hash)
                 if parent_hash:
                     self.atms.add_dependency(fact_hash, parent_hash)
-            except Exception as e:
+            except (RuntimeError, ValueError) as e:
                 # SAGA Rollback: Reject contradictory or cycle edges
                 raise RuntimeError(
                     f"ATMS Graph rejected edge {parent_hash} -> {fact_hash}: {e}"
@@ -332,7 +332,7 @@ class AsyncCausalGraph:
                 sql = f"UPDATE facts SET {meta_col} = ?, exergy_score = MAX(exergy_score, ?) WHERE id = ? AND tenant_id = ?"
                 await self.conn.execute(sql, (new_meta_str, child_policy.criticality_floor, parent_id, tenant_id))
 
-        except Exception as e:
+        except (sqlite3.Error, aiosqlite.Error, ValueError, TypeError) as e:
             logger.error("Failed to apply topological lock: %s", e)
 
     async def temporal_causal_chain(
@@ -520,7 +520,7 @@ class AsyncCausalGraph:
                     "UPDATE taint_jobs SET status = 'done', updated_at = ? WHERE id = ?",
                     (now_iso, job_id)
                 )
-            except Exception as e:
+            except (sqlite3.Error, aiosqlite.Error, ValueError) as e:
                 logger.error(f"Taint job {job_id} failed for fact {fact_id}: {e}")
                 now_iso = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
                 await self.conn.execute(
