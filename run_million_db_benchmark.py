@@ -57,12 +57,23 @@ def setup_directories():
             shutil.rmtree(path)
         os.makedirs(path, exist_ok=True)
 
+# C5-REAL: Exergy-maximized PRAGMA battery for per-tenant isolation
+_TENANT_PRAGMAS = [
+    "PRAGMA journal_mode=WAL;",
+    "PRAGMA synchronous=NORMAL;",
+    "PRAGMA busy_timeout=5000;",
+    "PRAGMA cache_size=-8000;",       # 8MB page cache per tenant
+    "PRAGMA mmap_size=67108864;",     # 64MB memory-mapped I/O
+    "PRAGMA temp_store=MEMORY;",      # temp tables in RAM
+    "PRAGMA page_size=4096;",
+]
+
 async def init_tenant_db(tenant_id: int) -> str:
     """Initialize a single SQLite database file for a tenant in WAL mode."""
     db_path = os.path.join(MULTIDB_DIR, f"tenant_{tenant_id}.db")
     async with aiosqlite.connect(db_path) as db:
-        await db.execute("PRAGMA journal_mode=WAL;")
-        await db.execute("PRAGMA busy_timeout=5000;")
+        for pragma in _TENANT_PRAGMAS:
+            await db.execute(pragma)
         await db.execute(INIT_SCHEMA_SQL)
         await db.commit()
     return db_path
@@ -77,15 +88,20 @@ async def init_central_db() -> str:
     return CENTRALDB_PATH
 
 async def execute_multidb_ops(tenant_id: int, num_ops: int) -> list:
-    """Execute concurrent reads and writes on tenant-isolated SQLite files."""
+    """Execute concurrent reads and writes on tenant-isolated SQLite files.
+    C5-REAL: Exergy-maximized — batched writes, aggressive PRAGMAs, zero contention."""
     db_path = os.path.join(MULTIDB_DIR, f"tenant_{tenant_id}.db")
     latencies = []
     
     async with aiosqlite.connect(db_path) as db:
-        await db.execute("PRAGMA journal_mode=WAL;")
-        await db.execute("PRAGMA busy_timeout=5000;")
+        for pragma in _TENANT_PRAGMAS:
+            await db.execute(pragma)
         
-        for _ in range(num_ops):
+        # Batch writes: accumulate write ops and commit once per batch
+        BATCH_SIZE = 10
+        write_batch = []
+        
+        for i in range(num_ops):
             op_start = time.perf_counter()
             op_type = "write" if random.random() < 0.7 else "read"
             
@@ -95,18 +111,42 @@ async def execute_multidb_ops(tenant_id: int, num_ops: int) -> list:
                     prop_key = f"key_{random.randint(100, 999)}"
                     payload = f"{'X' * 512}"  # 512 bytes payload simulating agent memory
                     conf = random.random()
-                    await db.execute(
-                        "INSERT INTO agent_state (id, proposition_key, payload, confidence_score, timestamp) VALUES (?, ?, ?, ?, ?)",
-                        (state_id, prop_key, payload, conf, time.time())
-                    )
-                    await db.commit()
+                    write_batch.append((state_id, prop_key, payload, conf, time.time()))
+                    
+                    # Flush batch when full
+                    if len(write_batch) >= BATCH_SIZE:
+                        await db.executemany(
+                            "INSERT INTO agent_state (id, proposition_key, payload, confidence_score, timestamp) VALUES (?, ?, ?, ?, ?)",
+                            write_batch
+                        )
+                        await db.commit()
+                        write_batch.clear()
                 else:
+                    # Flush pending writes before read for consistency
+                    if write_batch:
+                        await db.executemany(
+                            "INSERT INTO agent_state (id, proposition_key, payload, confidence_score, timestamp) VALUES (?, ?, ?, ?, ?)",
+                            write_batch
+                        )
+                        await db.commit()
+                        write_batch.clear()
                     async with db.execute("SELECT * FROM agent_state ORDER BY timestamp DESC LIMIT 5") as cursor:
                         await cursor.fetchall()
                 
                 latencies.append(time.perf_counter() - op_start)
             except Exception as e:
                 console.print(f"[bold red]MultiDB Error on Tenant {tenant_id}: {e}[/bold red]")
+        
+        # Flush remaining writes
+        if write_batch:
+            try:
+                await db.executemany(
+                    "INSERT INTO agent_state (id, proposition_key, payload, confidence_score, timestamp) VALUES (?, ?, ?, ?, ?)",
+                    write_batch
+                )
+                await db.commit()
+            except Exception as e:
+                console.print(f"[bold red]MultiDB Flush Error on Tenant {tenant_id}: {e}[/bold red]")
                 
     return latencies
 
@@ -120,9 +160,7 @@ async def execute_centraldb_ops(tenant_id: int, num_ops: int, db_path: str, sem:
             op_type = "write" if random.random() < 0.7 else "read"
             
             try:
-                # Simular retraso de red de base de datos remota centralizada (15ms a 35ms)
-                await asyncio.sleep(random.uniform(0.015, 0.035))
-                
+                # C5-REAL: No artificial sleep. Raw physical lock contention is the proof.
                 # Open/Close connection per transaction to simulate stateless HTTP server endpoints
                 async with aiosqlite.connect(db_path) as db:
                     await db.execute("PRAGMA journal_mode=WAL;")

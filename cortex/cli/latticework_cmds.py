@@ -88,23 +88,28 @@ def daemon_cmd(seconds: int, interval: int, real: bool):
             except Exception:
                 pass
                 
+        from cortex.database.core import connect_async_ctx
+        from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+        
         async def init_db():
-            async with aiosqlite.connect(db_path) as conn:
-                await conn.execute("PRAGMA journal_mode=WAL;")
-                await conn.execute("PRAGMA busy_timeout=5000;")
-                await conn.execute("""
-                    CREATE TABLE IF NOT EXISTS execution_trace_ledger (
-                        id              TEXT PRIMARY KEY,
-                        tenant_id       TEXT NOT NULL DEFAULT 'default',
-                        origin          TEXT NOT NULL,
-                        cost            REAL NOT NULL,
-                        lineage         TEXT NOT NULL DEFAULT '[]',
-                        outcome         TEXT NOT NULL,
-                        rollback_possible BOOLEAN NOT NULL DEFAULT FALSE,
-                        created_at      TEXT NOT NULL DEFAULT (datetime('now'))
-                    )
-                """)
-                await conn.commit()
+            token_token = mtk_active_token.set("mtk_auth_cli_init")
+            try:
+                async with connect_async_ctx(db_path) as conn:
+                    await conn.execute("""
+                        CREATE TABLE IF NOT EXISTS execution_trace_ledger (
+                            id              TEXT PRIMARY KEY,
+                            tenant_id       TEXT NOT NULL DEFAULT 'default',
+                            origin          TEXT NOT NULL,
+                            cost            REAL NOT NULL,
+                            lineage         TEXT NOT NULL DEFAULT '[]',
+                            outcome         TEXT NOT NULL,
+                            rollback_possible BOOLEAN NOT NULL DEFAULT FALSE,
+                            created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+                        )
+                    """)
+                    await conn.commit()
+            finally:
+                mtk_active_token.reset(token_token)
                 
         _run_async(init_db())
         console.print("[cyan]ℹ Real Ledger Mode Active. Scanning isolated execution traces database...[/cyan]")
