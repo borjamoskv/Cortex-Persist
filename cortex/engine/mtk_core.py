@@ -11,10 +11,7 @@ from contextlib import asynccontextmanager
 
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-try:
-    import cortex_core_rs
-except ImportError:
-    cortex_core_rs = None
+import cortex_rs
 
 from cortex.engine.mtk_sqlite_authorizer import mtk_active_token, mtk_payload_hash
 from cortex.types.evidence import ClosurePayload
@@ -28,33 +25,19 @@ class MTKGuard:
     """
     def __init__(self, private_key: str):
         self.private_key = private_key
-        if cortex_core_rs:
-            self.ast_projector = cortex_core_rs.ASTProjector() if hasattr(cortex_core_rs, "ASTProjector") else None
-            self.rust_authorizer = cortex_core_rs.MTKAuthorizer() if hasattr(cortex_core_rs, "MTKAuthorizer") else None
-            self.cognitive_state = cortex_core_rs.CognitiveState(1000) if hasattr(cortex_core_rs, "CognitiveState") else None
-        else:
-            self.ast_projector = None
-            self.rust_authorizer = None
-            self.cognitive_state = None
+        # Enforce C5-REAL execution: crash if Rust binaries are missing
+        self.ast_projector = cortex_rs.ASTProjector()
+        self.rust_authorizer = cortex_rs.MTKAuthorizer()
+        self.cognitive_state = cortex_rs.CognitiveState(1000)
             
     def validate_c5_ast(self, source_code: str) -> str:
         """Invokes the Rust AST Projector to validate C5-REAL constraints."""
-        if self.ast_projector:
-            return self.ast_projector.ingest_c5_real(source_code)
-        return ""
+        return self.ast_projector.ingest_c5_real(source_code)
         
     def _generate_ephemeral_token(self, payload: ClosurePayload) -> str:
-        """Generate a short-lived cryptographic capability token via Rust FFI."""
-        try:
-            import cortex_rs
-            return cortex_rs.mint_ephemeral_token(payload.payload_hash, self.private_key)
-        except ImportError:
-            logger.warning("[MTK] Rust FFI not available. Falling back to Python simulation.")
-            import hashlib
-            import time
-            babylon_time = time.time_ns()
-            raw = f"{payload.payload_hash}:{babylon_time}:{self.private_key}"
-            return f"mtk_auth_{hashlib.sha3_256(raw.encode()).hexdigest()}"
+        """Generate a short-lived cryptographic capability token STRICTLY via Rust FFI."""
+        import cortex_rs
+        return cortex_rs.mint_ephemeral_token(payload.payload_hash, self.private_key)
 
     @asynccontextmanager
     async def transaction_boundary(self, payload: ClosurePayload) -> AsyncGenerator[str, None]:
@@ -107,10 +90,9 @@ class MTKGuard:
         if hasattr(payload, "info_exergy") and payload.info_exergy < 0.1:
             raise ValueError(f"MTK-REJECT: Informational Exergy too low ({payload.info_exergy} < 0.1). Entropy purge required before DB write.")
             
-        # 1.4 Invariante Cognitivo (I_cognitive): Advance the pure FSM state if Rust module loaded
-        if self.cognitive_state:
-            exergy_input = int(getattr(payload, "info_exergy", 1.0) * 100) # Simple scaling for FSM input
-            self.cognitive_state = self.cognitive_state.apply_tick(exergy_input)
+        # 1.4 Invariante Cognitivo (I_cognitive): Advance the pure FSM state via Rust
+        exergy_input = int(getattr(payload, "info_exergy", 1.0) * 100) # Simple scaling for FSM input
+        self.cognitive_state = self.cognitive_state.apply_tick(exergy_input)
             
         # Step 2: Mint Ephemeral Token
         token = self._generate_ephemeral_token(payload)
@@ -118,8 +100,7 @@ class MTKGuard:
         # Step 3: Open Physical DB Boundary
         token_id = mtk_active_token.set(token)
         payload_id = mtk_payload_hash.set(payload.payload_hash)
-        if self.rust_authorizer:
-            self.rust_authorizer.set_ephemeral_token(token)
+        self.rust_authorizer.set_ephemeral_token(token)
         
         try:
             # Yield to the execution layer
@@ -127,7 +108,6 @@ class MTKGuard:
             yield token
         finally:
             # Step 5: Destroy the physical capability
-            if self.rust_authorizer:
-                self.rust_authorizer.clear_token()
+            self.rust_authorizer.clear_token()
             mtk_active_token.reset(token_id)
             mtk_payload_hash.reset(payload_id)
