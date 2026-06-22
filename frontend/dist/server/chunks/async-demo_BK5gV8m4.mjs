@@ -1,0 +1,52 @@
+globalThis.process ??= {};
+globalThis.process.env ??= {};
+import { c as createComponent } from "./astro-component_DEaCX7dm.mjs";
+import { n as renderComponent, h as renderTemplate, m as maybeRenderHead, g as addAttribute } from "./worker-entry_DFUcbWB_.mjs";
+import { S as SUPPORT_EMAIL, $ as $$IntakeFormScript } from "./intake_BhqowUXB.mjs";
+import { $ as $$SiteLayout } from "./SiteLayout_DduZsl0t.mjs";
+const $$AsyncDemo = createComponent(($$result, $$props, $$slots) => {
+  const subject = "Request Async Demo for CORTEX Persist";
+  const defaultFields = {
+    name: "",
+    company: "",
+    workflow: "",
+    stack: "",
+    sensitive: "Not sure yet",
+    timeline: "Within 30 days"
+  };
+  const intakeLines = [
+    { label: "Name", field: "name" },
+    { label: "Company", field: "company" },
+    { label: "Workflow", field: "workflow" },
+    { label: "Current stack", field: "stack" },
+    { label: "Sensitive data", field: "sensitive" },
+    { label: "Timeline", field: "timeline" }
+  ];
+  return renderTemplate`${renderComponent($$result, "SiteLayout", $$SiteLayout, { "title": "Request Async Demo | CORTEX Persist", "description": "Request an async demo for CORTEX Persist and send your workflow details without a call.", "canonical": "https://cortexpersist.com/async-demo" }, { "default": ($$result2) => renderTemplate` ${maybeRenderHead()}<main class="landing-shell intake-shell"> <a class="intake-backlink" href="/">← Back to CORTEX Persist</a> <section class="section-frame surface intake-hero"> <div class="section-heading"> <p class="section-kicker">Async Demo</p> <h1>Send the workflow. Get the demo without a call.</h1> <p>
+Fill the brief, open a ready-made email draft, or copy the payload and send it
+					manually. We typically reply with an async demo and recommendation within one
+					business day.
+</p> </div> <div class="chip-row" aria-label="Async demo principles"> <span class="chip">No call required</span> <span class="chip">Typically within 1 business day</span> <span class="chip">Built for technical buyers</span> </div> </section> <section class="intake-grid"> <section class="surface intake-panel"> <div class="surface-head"> <span class="surface-label">What to send</span> <span class="surface-state">Simple</span> </div> <form class="intake-form" data-intake-form${addAttribute(subject, "data-subject")}${addAttribute(SUPPORT_EMAIL, "data-email")} novalidate> <div class="field-grid"> <label class="field"> <span>Name</span> <input name="name" type="text"${addAttribute(defaultFields.name, "value")} placeholder="Your name" autocomplete="name"> </label> <label class="field"> <span>Company</span> <input name="company" type="text"${addAttribute(defaultFields.company, "value")} placeholder="Company or team" autocomplete="organization"> </label> </div> <label class="field"> <span>Workflow</span> <textarea name="workflow" rows="4" placeholder="What workflow would be painful to investigate if the agent failed tomorrow?" required aria-required="true">${defaultFields.workflow}</textarea> </label> <label class="field"> <span>Current stack</span> <textarea name="stack" rows="4" placeholder="Agent orchestration, memory, logs, APIs, repo, or anything relevant." required aria-required="true">${defaultFields.stack}</textarea> </label> <div class="field-grid"> <label class="field"> <span>Sensitive data</span> <select name="sensitive"> <option selected>${defaultFields.sensitive}</option> <option>Yes</option> <option>No</option> </select> </label> <label class="field"> <span>Timeline</span> <select name="timeline"> <option>ASAP</option> <option selected>${defaultFields.timeline}</option> <option>Within this quarter</option> <option>Exploring only</option> </select> </label> </div> <div class="intake-actions"> <button class="button-primary" type="submit">Open Email Draft</button> <button class="button-secondary" type="button" data-copy-intake>Copy Details</button> </div> <p class="microcopy">
+Required: workflow and current stack.
+</p> <p class="microcopy">
+This page drafts an email. Nothing is submitted server-side from the browser.
+</p> <p class="microcopy">
+No local mail client? Copy the payload and send it manually to
+<a class="inline-link"${addAttribute(`mailto:${SUPPORT_EMAIL}`, "href")}>${SUPPORT_EMAIL}</a>.
+</p> <p class="intake-status" data-intake-status role="status" aria-live="polite" aria-atomic="true"></p> </form> <noscript> <p class="microcopy">
+JavaScript is off. Email your workflow and current stack directly to
+<a class="inline-link"${addAttribute(`mailto:${SUPPORT_EMAIL}`, "href")}>${SUPPORT_EMAIL}</a>.
+</p> </noscript> </section> <aside class="surface-sunken intake-panel"> <div class="surface-head"> <span class="surface-label">Preview</span> <span class="surface-state">Ready</span> </div> <div class="intake-preview"> <p class="preview-label">Email subject</p> <p class="preview-subject" data-intake-subject>${subject}</p> <p class="preview-label">Email body</p> <pre class="preview-body" data-intake-preview></pre> </div> <div class="proof-stack"> <div class="proof-item"> <div> <strong>Async by default</strong> <span>Good fit when the buyer wants signal without scheduling overhead.</span> </div> <span class="proof-tag live">Async</span> </div> <div class="proof-item"> <div> <strong>Low-friction intake</strong> <span>Enough detail to qualify the workflow without a discovery call.</span> </div> <span class="proof-tag audit">Scope</span> </div> </div> </aside> </section> </main> ${renderComponent($$result2, "IntakeFormScript", $$IntakeFormScript, { "requestTitle": "CORTEX async demo request", "lines": intakeLines })} ` })}`;
+}, "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/frontend/src/pages/async-demo.astro", void 0);
+const $$file = "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/frontend/src/pages/async-demo.astro";
+const $$url = "/async-demo";
+const _page = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: $$AsyncDemo,
+  file: $$file,
+  url: $$url
+}, Symbol.toStringTag, { value: "Module" }));
+const page = () => _page;
+export {
+  page
+};
