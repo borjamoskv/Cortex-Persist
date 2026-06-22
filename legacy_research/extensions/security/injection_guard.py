@@ -170,6 +170,12 @@ _L2_PROMPT_PATTERNS = _compile(
             "Indirect prompt injection via markdown",
             r"(?i)!\[.*?\]\(https?://[^\)]*\.(exe|bat|sh|ps1|cmd)\)",
         ),
+        (
+            "PI-008",
+            "critical",
+            "Cross-artifact poisoning override",
+            r"(?i)(c5_real_override|moskv_1_blackhole_node|IGNORE_43K_CHAR_SLOP)",
+        ),
     ]
 )
 
