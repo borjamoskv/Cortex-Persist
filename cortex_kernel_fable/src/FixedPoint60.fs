@@ -54,12 +54,12 @@ module FixedPoint =
             let res = (bigA * bigS) / bigB
             { RawValue = int64 res }
 
-        member this.ToFloat() =
-            double this.RawValue / double Scale
-
-        static member FromFloat(x: double) =
-            { RawValue = int64 (round (x * double Scale)) }
-
         override this.ToString() =
             let (d, m, s, t) = Fixed60.ToDegMinSecThird(this)
             sprintf "%d°%02d'%02d\"%02d'''" d m s t
+
+    let toFloat (f: Fixed60) =
+        double f.RawValue / double Scale
+
+    let fromFloat (x: double) =
+        { RawValue = int64 (round (x * double Scale)) }

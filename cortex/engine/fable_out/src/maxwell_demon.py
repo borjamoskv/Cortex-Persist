@@ -11,7 +11,7 @@ from fable_library.util import range
 from .babylon import Babylon_causalDistance
 
 
-def _expr2() -> TypeInfo:
+def _expr6() -> TypeInfo:
     return class_type("Cortex.Kernel.MaxwellDemon", None, MaxwellDemon)
 
 
@@ -20,7 +20,7 @@ class MaxwellDemon:
         self.threshold: uint16 = similarity_threshold
 
 
-MaxwellDemon_reflection = _expr2
+MaxwellDemon_reflection = _expr6
 
 
 def MaxwellDemon__ctor_6C4BA866(similarity_threshold: uint16) -> MaxwellDemon:

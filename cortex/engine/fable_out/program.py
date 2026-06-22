@@ -15,6 +15,7 @@ from .src.maxwell_demon import (
     MaxwellDemon__PurgeRedundant_Z115D9F2A,
     MaxwellDemon__SetState_Z721C83C5,
 )
+from .src.state_machine import EpistemicPhase_Observation, MachineState, run_cycle
 
 
 def main(argv: Array[str]) -> int32:
@@ -45,6 +46,28 @@ def main(argv: Array[str]) -> int32:
         uint32(123456), Array[uint16]([uint16(50), uint16.TEN, uint16.ZERO])
     )
     to_console(printf("\nMerkle Rollup Root (uint32): %u"))(merkle_root)
+    to_console(printf("\n[StateMachine Test]"))
+    final_state: MachineState = run_cycle(
+        MachineState(EpistemicPhase_Observation(), uint32.ZERO, uint32.ZERO, uint32.ZERO),
+        Array[uint32](
+            [
+                uint32.FIVE,
+                uint32(15),
+                uint32(60),
+                uint32.ONE,
+                uint32.ONE,
+                uint32.TEN,
+                uint32(20),
+                uint32(100),
+                uint32.ONE,
+                uint32.ONE,
+            ]
+        ),
+    )
+    to_console(printf("Final Phase: %A"))(final_state.phase)
+    to_console(printf("Cycles completed: %u"))(final_state.cycle)
+    to_console(printf("Exergy accumulated: %u"))(final_state.exergy_accum)
+    to_console(printf("Trace Hash: %u"))(final_state.trace_hash)
     return int32.ZERO
 
 
