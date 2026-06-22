@@ -206,6 +206,76 @@ flow = Flow()
 x = torch.randn(10, 2)
 z, log_det = flow(x)
 assert z.shape == (10, 2) and log_det.shape == (10,)
+''',
+    # ═══ B6: GEOMETRÍA DIFERENCIAL Y TOPOLOGÍA ═══
+    "GOAT-MATH-063": '''
+import torch
+# Curvatura escalar simple de una superficie parametrizada (aproximación numérica de curvatura gaussiana)
+# Consideremos una esfera x^2 + y^2 + z^2 = R^2, z = sqrt(R^2 - x^2 - y^2)
+R = 2.0
+x = torch.tensor([0.1], requires_grad=True)
+y = torch.tensor([0.1], requires_grad=True)
+z = torch.sqrt(R**2 - x**2 - y**2)
+grad_z_x = torch.autograd.grad(z, x, create_graph=True)[0]
+grad_z_y = torch.autograd.grad(z, y, create_graph=True)[0]
+# Curvatura en el polo es aprox 1/R^2
+H_xx = torch.autograd.grad(grad_z_x, x, retain_graph=True)[0]
+H_yy = torch.autograd.grad(grad_z_y, y, retain_graph=True)[0]
+H_xy = torch.autograd.grad(grad_z_x, y, retain_graph=True)[0]
+# K = (H_xx * H_yy - H_xy**2) / (1 + grad_z_x**2 + grad_z_y**2)**2
+K = (H_xx * H_yy - H_xy**2) / (1 + grad_z_x**2 + grad_z_y**2)**2
+assert torch.isclose(K, torch.tensor(1/(R**2)), atol=1e-2)
+''',
+    "GOAT-MATH-067": '''
+import torch
+# Flujo de gradiente continuo: dx/dt = -grad(f)
+x = torch.tensor([2.0], requires_grad=True)
+dt = 0.01
+for _ in range(100):
+    f = 0.5 * x**2
+    grad = torch.autograd.grad(f, x)[0]
+    with torch.no_grad():
+        x -= dt * grad
+    x.requires_grad_(True)
+assert x.item() < 2.0 # Confirma flujo hacia el atractor
+''',
+
+    # ═══ B7: TEORÍA DE APRENDIZAJE ESTADÍSTICO ═══
+    "GOAT-MATH-077": '''
+import torch
+# RKHS (Reproducing Kernel Hilbert Space) - Kernel RBF Matrix
+x = torch.randn(10, 3)
+y = torch.randn(5, 3)
+gamma = 0.1
+dist = torch.cdist(x, y, p=2)
+K = torch.exp(-gamma * dist**2)
+assert K.shape == (10, 5) and torch.all(K >= 0)
+''',
+
+    # ═══ B8: ARQUITECTURAS MODERNAS (Continuación) ═══
+    "GOAT-MATH-086": '''
+import torch
+# Teoría Espectral de Grafos: Laplaciano L = D - A
+A = torch.tensor([[0., 1., 1.], [1., 0., 0.], [1., 0., 0.]])
+D = torch.diag(A.sum(dim=1))
+L = D - A
+eigenvalues, _ = torch.linalg.eigh(L)
+# El número de componentes conexas es el número de autovalores cero
+zero_eigenvals = (eigenvalues < 1e-5).sum()
+assert zero_eigenvals.item() == 1
+''',
+    "GOAT-MATH-089": '''
+import torch
+# Score Matching (Diffusion Models)
+# score = grad_x log p(x)
+x = torch.tensor([1.0], requires_grad=True)
+mu = torch.tensor([0.0])
+sigma = torch.tensor([1.0])
+# log p(x) para normal estandar
+log_p = -0.5 * ((x - mu)/sigma)**2
+score = torch.autograd.grad(log_p, x)[0]
+# Para N(0,1), score = -x
+assert torch.isclose(score, -x)
 '''
 }
 
