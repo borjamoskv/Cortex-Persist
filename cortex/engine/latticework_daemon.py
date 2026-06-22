@@ -1,18 +1,45 @@
-# [C5-REAL] Exergy-Maximized
+# [C5-REAL] Exergy-Maximized — LatticeworkDaemon v2.0
+# Author: Borja Moskv (borjamoskv)
+"""
+LatticeworkDaemon
+=================
+Daemon residente que opera sobre el AutodidactOmegaIndex (100 UnifiedPrimitiveNodes).
+Cruza señales de entropía del Ledger contra el grafo unificado y aplica la matemática
+Base-60 (Babylon-60) para mutar causalmente el estado del sistema.
+
+Topología Operacional:
+    Anomalía (entropía) ──► Selección de Nodo (O(1)) ──► Operador B-60 ──► Mutación Causal
+"""
+from __future__ import annotations
+
 import asyncio
 import logging
 from typing import Any
 
+from cortex.engine.autodidact_omega_index import AutodidactOmegaIndex, UnifiedPrimitiveNode
 from cortex.engine.babylon60 import Babylon60
-from cortex.engine.latticework_store import LatticeworkStore
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("cortex.latticework.daemon")
+
+# Mapa heurístico: tag de anomalía ──► kernel_constant prioritario
+_ANOMALY_DISPATCH: dict[str, str] = {
+    "infinite_retry":    "ROLLBACK_SINGULARITY",
+    "green_theater_slop":"GREEN_THEATER_DROP",
+    "float_detected":    "FLOAT_ERADICATION_PASS",
+    "stochastic_drift":  "ONTOLOGICAL_DIVERGE_CHECK",
+    "context_rot":       "CONTEXT_ROT_SCAN",
+    "ledger_tamper":     "TAMPER_EVIDENT_LOCK",
+    "limerence":         "LIMERENCE_KILL_SIG",
+    "oom":               "OOM_SIM_ABORT",
+    "swarm_collision":   "COLLISION_AVOIDANCE",
+    "taint_missing":     "TAINT_PROPAGATION",
+}
+
 
 class LatticeworkDaemon:
     """
-    [C5-REAL] Daemon residente de Primitivas Cognitivas.
-    Cruza señales de entropía del Ledger contra la base de datos O(1) de las 100 Primitivas
-    y asiente inyecciones de exergía estructurada mediante operadores matemáticos (Base-60).
+    [C5-REAL] Daemon residente de Primitivas Cognitivas — Autodidact-Ω.
+    Opera sobre el AutodidactOmegaIndex (100 UnifiedPrimitiveNodes fusionados).
     """
 
     def __init__(self, ledger: Any, scheduler: Any, scan_interval: int = 15):
@@ -20,71 +47,106 @@ class LatticeworkDaemon:
         self.scheduler = scheduler
         self.interval = scan_interval
         self._running = False
-        self._task = None
-        self.store = LatticeworkStore()
+        self._task: asyncio.Task[None] | None = None
+        self.omega_index = AutodidactOmegaIndex()
+        self._log_coverage()
 
-    def _compute_primitive_exergy(self, entropy_signal: float, primitive_constant: int) -> Babylon60:
+    def _log_coverage(self) -> None:
+        report = self.omega_index.coverage_report()
+        logger.info(
+            "[LatticeworkDaemon] Autodidact-Ω Index → Total: %d | "
+            "Exergy: %d | C5-REAL: %d | Unified: %d (%.1f%% coverage)",
+            report["total"],
+            report["exergy_nodes"],
+            report["c5_primitives"],
+            report["fully_unified"],
+            report["coverage_pct"],
+        )
+
+    # ── Matemática B-60 ────────────────────────────────────────────────────────
+
+    def _compute_exergy_yield(self, entropy_signal: float, node: UnifiedPrimitiveNode) -> Babylon60:
         """
-        Ejecución Matricial (Δ2): Colapsa el ruido estocástico mediante el operador Babylon-60.
+        Operador Ortogonal B-60:  ExergyYield = B60(node.base60_constant) / (B60(entropy) + 1)
+        Colapsa el ruido estocástico en una constante determinista.
         """
         signal_b60 = Babylon60(entropy_signal)
-        const_b60 = Babylon60.from_raw(primitive_constant)
-        
-        # Inversión matemática simple de la entropía: (Constante / (Señal + 1))
-        # Para purgar el Green Theater.
-        one_b60 = Babylon60(1)
-        exergy_b60 = const_b60 / (signal_b60 + one_b60)
-        return exergy_b60
+        const_b60  = Babylon60.from_raw(node.base60_constant)
+        one_b60    = Babylon60(1)
+        return const_b60 / (signal_b60 + one_b60)
 
-    async def _daemon_loop(self):
-        logger.info("[LatticeworkDaemon] Inicializado. Matriz matemática de Primitivas Exergéticas activa.")
+    # ── Dispatch lógica ────────────────────────────────────────────────────────
+
+    def _select_node(self, tag: str) -> UnifiedPrimitiveNode | None:
+        constant = _ANOMALY_DISPATCH.get(tag)
+        if constant:
+            return self.omega_index.by_kernel_constant(constant)
+        # Fallback: búsqueda semántica por el tag
+        results = self.omega_index.search(tag)
+        return results[0] if results else None
+
+    def _emit_mutation(self, anomaly_id: str, node: UnifiedPrimitiveNode, exergy: Babylon60) -> None:
+        logger.info(
+            "[LatticeworkDaemon] Mutación Causal C5-REAL\n"
+            "  Anomalía    : %s\n"
+            "  Primitiva   : [%s] %s — %s\n"
+            "  Topología   : %s\n"
+            "  Kernel Op   : %s\n"
+            "  Exergía B60 : %s\n"
+            "  Sección     : %s",
+            anomaly_id,
+            node.c5_real_id, node.id, node.name,
+            node.algebraic_topology,
+            node.kernel_constant,
+            exergy,
+            node.section,
+        )
+
+    # ── Daemon loop ────────────────────────────────────────────────────────────
+
+    async def _daemon_loop(self) -> None:
+        logger.info(
+            "[LatticeworkDaemon] Activo. Latticework-Ω de %d nodos unificados en memoria.",
+            len(self.omega_index.index),
+        )
+
         while self._running:
             try:
-                # 1. Extracción Estructural de Entropía (Ej: del Ledger)
-                # operations = await self.ledger.get_recent_anomalies(limit=5)
-                # Aquí simularemos la ingesta de ruido estocástico por demostración de la estructura matemática:
-                anomalies = [
-                    {"id": "tx_45A", "entropy": 0.85, "tag": "infinite_retry"},
-                    {"id": "tx_45B", "entropy": 0.99, "tag": "green_theater_slop"}
+                # En producción: anomalies = await self.ledger.get_recent_anomalies(limit=10)
+                anomalies: list[dict[str, Any]] = [
+                    {"id": "sig_A1", "entropy": 0.85, "tag": "infinite_retry"},
+                    {"id": "sig_A2", "entropy": 0.91, "tag": "green_theater_slop"},
+                    {"id": "sig_A3", "entropy": 0.60, "tag": "float_detected"},
+                    {"id": "sig_A4", "entropy": 0.78, "tag": "taint_missing"},
                 ]
-                
+
                 for anomaly in anomalies:
-                    entropy_val = anomaly["entropy"]
-                    
-                    # 2. Cruce Algebraico contra Nodos de la Store
-                    # Seleccionamos heurísticamente una primitiva relevante.
-                    # En la realidad, esto cruzaría con el tag o vector empírico.
-                    if "retry" in anomaly["tag"]:
-                        primitive = self.store.get_primitive(9) # Inversión de Matrices
-                    else:
-                        primitive = self.store.get_primitive(18) # Principio de Landauer
-                        
-                    if primitive:
-                        # 3. Transición de Estado Matemática (C5-REAL)
-                        exergy_yield = self._compute_primitive_exergy(entropy_val, primitive.base60_constant)
-                        
-                        logger.info(
-                            f"[LatticeworkDaemon] Mutación Causal -> Anomalía: {anomaly['id']} "
-                            f"| Primitiva: {primitive.id} ({primitive.name}) "
-                            f"| Algebra: {primitive.algebraic_topology} "
-                            f"| Exergía B-60 Generada: {exergy_yield}"
+                    node = self._select_node(anomaly["tag"])
+                    if node is None:
+                        logger.warning(
+                            "[LatticeworkDaemon] Sin nodo para tag '%s' — Entropía no resuelta.",
+                            anomaly["tag"],
                         )
-                        
-                        # 4. (Futuro) Inyectar la Exergía matemática de vuelta al Causal Scheduler
-                        # await self.scheduler.inject_exergy(anomaly['id'], exergy_yield.to_float())
+                        continue
+
+                    exergy = self._compute_exergy_yield(anomaly["entropy"], node)
+                    self._emit_mutation(anomaly["id"], node, exergy)
+
+                    # (Futuro) inyectar exergía matemática de vuelta al CausalScheduler
+                    # await self.scheduler.inject_exergy(anomaly["id"], exergy.to_float())
 
             except Exception as e:
-                logger.error(f"[LatticeworkDaemon] Fallo topológico en matriz matemática: {e}")
+                logger.error("[LatticeworkDaemon] Fallo topológico: %s", e)
 
             await asyncio.sleep(self.interval)
 
-    def start(self):
+    def start(self) -> None:
         if self._running:
             return
         self._running = True
         self._task = asyncio.create_task(self._daemon_loop())
 
-    async def stop(self):
+    async def stop(self) -> None:
         self._running = False
         if self._task:
             self._task.cancel()
