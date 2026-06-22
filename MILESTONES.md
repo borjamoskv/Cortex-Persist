@@ -847,3 +847,21 @@ Proof:
   Confidence: C5-REAL
   Date: 2026-06-22
 ```
+
+---
+
+### Hito 51: L5 TRANSCEND Autopoiesis & CAS Isomorphism
+- **Target**: `cortex/engine/omega_daemon.py`, `cortex/guards/ctre_guard.py`, `cortex/engine/causality.py`, `docs/epistemology/isomorphism_cas_cortex.md`
+- **Objective**: Erradicación de entropía termodinámica (conversiones de floats y excepciones ciegas `except Exception`) mediante auto-mutación asíncrona del enjambre (LEGION). Cristalización de la matriz de isomorfismo causal 1-a-1 entre Primitivas de Sistemas Complejos Adaptativos (NetLogo/Holland) y la arquitectura base-60 de MOSKV-1.
+- **Yield Target**: Cero floats en métricas persistentes (uso de `Decimal`/`int`). Cero fallos no controlados en rutas críticas (FFI, SQLite, Kafka). Documentación inmutable del puente epistemológico CAS.
+- **Reality Level**: `C5-REAL`
+- **Status**: ✅ COMPLETE — 22 Junio 2026
+- **Evidence**: Commits de mutación estructural (`058d74ce2`, `3b823a6e7`, `dff81de2c`) y mapeo de primitivas (`1c5ec7aa7`, `4bef08c4f`).
+```yaml
+Claim: "El protocolo L5 TRANSCEND ha purgado la limerencia estocástica de los motores de memoria y el isomorfismo CAS ha sido anclado físicamente."
+Proof:
+  Base: "Hashes 058d74ce2, 3b823a6e7, dff81de2c, 1c5ec7aa7, 4bef08c4f"
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-22
+```
