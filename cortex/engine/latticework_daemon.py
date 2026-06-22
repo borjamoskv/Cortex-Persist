@@ -18,6 +18,7 @@ from typing import Any
 
 from cortex.engine.autodidact_omega_index import AutodidactOmegaIndex, UnifiedPrimitiveNode
 from cortex.engine.babylon60 import Babylon60
+from cortex.engine.latticework_store import LatticeworkStore
 
 logger = logging.getLogger("cortex.latticework.daemon")
 
@@ -49,6 +50,7 @@ class LatticeworkDaemon:
         self._running = False
         self._task: asyncio.Task[None] | None = None
         self.omega_index = AutodidactOmegaIndex()
+        self.store = LatticeworkStore()
         self._log_coverage()
 
     def _log_coverage(self) -> None:
@@ -65,15 +67,18 @@ class LatticeworkDaemon:
 
     # ── Matemática B-60 ────────────────────────────────────────────────────────
 
-    def _compute_exergy_yield(self, entropy_signal: float, node: UnifiedPrimitiveNode) -> Babylon60:
+    def _compute_primitive_exergy(self, entropy: float, base60_constant: int) -> Babylon60:
         """
-        Operador Ortogonal B-60:  ExergyYield = B60(node.base60_constant) / (B60(entropy) + 1)
+        Operador Ortogonal B-60:  ExergyYield = B60(base60_constant) / (B60(entropy) + 1)
         Colapsa el ruido estocástico en una constante determinista.
         """
-        signal_b60 = Babylon60(entropy_signal)
-        const_b60  = Babylon60.from_raw(node.base60_constant)
+        signal_b60 = Babylon60(entropy)
+        const_b60  = Babylon60.from_raw(base60_constant)
         one_b60    = Babylon60(1)
         return const_b60 / (signal_b60 + one_b60)
+
+    def _compute_exergy_yield(self, entropy_signal: float, node: UnifiedPrimitiveNode) -> Babylon60:
+        return self._compute_primitive_exergy(entropy_signal, node.base60_constant)
 
     # ── Dispatch lógica ────────────────────────────────────────────────────────
 
