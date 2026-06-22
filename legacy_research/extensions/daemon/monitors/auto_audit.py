@@ -8,7 +8,7 @@ import time
 from typing import Any
 
 from cortex.extensions.daemon.models import (
-    AutoAuditAlert,  # type: ignore[reportAttributeAccessIssue]
+    AutoAuditAlert,
 )
 from cortex.extensions.daemon.monitors.base import BaseMonitor
 

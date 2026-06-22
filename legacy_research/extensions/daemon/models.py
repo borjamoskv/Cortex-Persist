@@ -35,6 +35,7 @@ __all__ = [
     "STATUS_FILE",
     "ASTAlert",
     "AetherAlert",
+    "AutoAuditAlert",
     "CertAlert",
     "CloudSyncAlert",
     "CompactionAlert",
@@ -252,6 +253,16 @@ class TrendsAlert:
     category: str
     trend_type: str
     timestamp: str
+
+
+@dataclass
+class AutoAuditAlert:
+    """Alert triggered by system health diagnostics (bleeding, errors, stagnation)."""
+
+    issue_type: str
+    severity: str
+    message: str
+    metrics: dict = field(default_factory=dict)
 
 
 @dataclass
