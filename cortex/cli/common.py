@@ -45,9 +45,9 @@ GLOBAL_CLI_TIMEOUT: float = 120.0  # Chronos Sniper: No CLI command hangs indefi
 def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
     """Create an engine instance (lazy import)."""
     import os
+    import sqlite3
     import sys
     import tempfile
-    import sqlite3
 
     # Rule 14 CLI Sandbox Isolation: redirect default DB path during tests/demos
     is_pytest = "PYTEST_CURRENT_TEST" in os.environ or "pytest" in sys.modules

@@ -4,8 +4,10 @@ Storage Router for Hybrid GaaD (Git-as-a-Database) and SQLite.
 Routes requests based on payload size and swarm concurrency heuristics.
 """
 
-from typing import Optional, Any
+from typing import Optional
+
 from cortex.engine.gaad.kv_dag import GaaDKVDAG
+
 
 class StorageRouter:
     """

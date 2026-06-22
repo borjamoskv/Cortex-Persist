@@ -16,7 +16,7 @@ except ImportError:
     import logging
 
 
-__version__ = "1.0.0"
+__version__ = "12.0.0-alpha"
 __author__ = "by borjamoskv.com"
 
 # Lazy imports - CortexEngine and experimental modules load on first access

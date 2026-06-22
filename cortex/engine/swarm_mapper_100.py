@@ -5,7 +5,6 @@ Centuria-SQUAD Mapper: 100-Thread Swarm for AST Topological Mapping.
 Bypasses LLM hallucinations by extracting exact C5-REAL AST structures.
 """
 
-import os
 import ast
 import asyncio
 import logging
@@ -19,7 +18,7 @@ MAX_THREADS = 100
 async def parse_file(file_path: Path) -> str:
     """Extracts classes, methods, and docstrings using deterministic AST."""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             source = f.read()
         
         tree = ast.parse(source, filename=str(file_path))
@@ -71,7 +70,7 @@ async def main():
     out_file = docs_dir / "cortex_topology_map.md"
     with open(out_file, "w", encoding="utf-8") as f:
         f.write("# 🌌 CORTEX-PERSIST: Swarm Topological Map\n\n")
-        f.write(f"> Generado por Enjambre de 100 agentes en C5-REAL.\n")
+        f.write("> Generado por Enjambre de 100 agentes en C5-REAL.\n")
         f.write(f"> Nodos escaneados: {len(target_files)}\n\n")
         f.write("\n".join(docs))
         

@@ -55,7 +55,7 @@ class ReversibleLedger:
             
         self._graph.invalidate_node(fact_id)
         
-        inversion_id = hashlib.sha256(f"INVERT_{fact_id}_{time.time()}".encode('utf-8')).hexdigest()
+        inversion_id = hashlib.sha256(f"INVERT_{fact_id}_{time.time()}".encode()).hexdigest()
         delta = EpistemicDelta(inversion_id, "INVERT", target.content, time.time(), fact_id)
         self._deltas.append(delta)
         return inversion_id

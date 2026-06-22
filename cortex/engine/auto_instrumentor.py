@@ -1,11 +1,14 @@
 import ast
 import re
+import logging
 from pathlib import Path
-from typing import List, Tuple
+
+logger = logging.getLogger(__name__)
+
 
 class LLMNodeVisitor(ast.NodeVisitor):
     def __init__(self):
-        self.target_lines: List[int] = []
+        self.target_lines: list[int] = []
         self.llm_patterns = re.compile(r'(agent|llm|generate|inference|chat|predict)', re.IGNORECASE)
 
     def visit_FunctionDef(self, node):
@@ -45,13 +48,13 @@ def instrument_file(filepath: Path, dry_run: bool = False) -> int:
     try:
         source_code = filepath.read_text(encoding="utf-8")
     except Exception as e:
-        print(f"[!] Error reading {filepath}: {e}")
+        logger.error(f"[!] Error reading {filepath}: {e}")
         return 0
 
     try:
         tree = ast.parse(source_code)
     except SyntaxError:
-        print(f"[!] Syntax error in {filepath}. Skipping.")
+        logger.error(f"[!] Syntax error in {filepath}. Skipping.")
         return 0
 
     visitor = LLMNodeVisitor()
@@ -63,11 +66,11 @@ def instrument_file(filepath: Path, dry_run: bool = False) -> int:
     lines = source_code.splitlines()
     
     if "from cortex_persist import cortex_instrument" in source_code or "@cortex_instrument" in source_code:
-        print(f"[-] {filepath} already instrumented.")
+        logger.info(f"[-] {filepath} already instrumented.")
         return 0
 
     if dry_run:
-        print(f"[DRY RUN] Would inject CORTEX in {filepath} at lines: {visitor.target_lines}")
+        logger.info(f"[DRY RUN] Would inject CORTEX in {filepath} at lines: {visitor.target_lines}")
         return len(visitor.target_lines)
 
     for lineno in sorted(visitor.target_lines, reverse=True):
@@ -87,11 +90,11 @@ def instrument_file(filepath: Path, dry_run: bool = False) -> int:
     lines.insert(insert_idx, import_stmt)
 
     filepath.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"[+] Instrumented {filepath} ({len(visitor.target_lines)} hooks injected)")
+    logger.info(f"[+] Instrumented {filepath} ({len(visitor.target_lines)} hooks injected)")
     
     return len(visitor.target_lines)
 
-def instrument_directory(directory: Path, dry_run: bool = False) -> Tuple[int, int]:
+def instrument_directory(directory: Path, dry_run: bool = False) -> tuple[int, int]:
     files_modified = 0
     hooks_injected = 0
     

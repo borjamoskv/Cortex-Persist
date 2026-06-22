@@ -6,6 +6,7 @@ Ensures zero cross-tenant leakage.
 
 from enum import Enum
 
+
 class Role(Enum):
     ADMIN = 1
     AUDITOR = 2

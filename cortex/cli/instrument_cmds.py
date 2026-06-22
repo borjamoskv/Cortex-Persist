@@ -1,8 +1,10 @@
-import click
 from pathlib import Path
+
+import click
 
 from cortex.cli.common import cli
 from cortex.engine.auto_instrumentor import instrument_directory
+
 
 @cli.command("instrument")
 @click.option("--path", "-p", required=True, type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path), help="Directory to auto-instrument.")
@@ -14,7 +16,7 @@ def instrument_cmd(path: Path, dry_run: bool):
     Scans the given path for Python files and injects the CORTEX MTK/Trace
     decorator into functions containing LLM patterns.
     """
-    click.secho(f"=== [C5-REAL] Enterprise Auto-Instrumentor ===", fg="cyan", bold=True)
+    click.secho("=== [C5-REAL] Enterprise Auto-Instrumentor ===", fg="cyan", bold=True)
     click.secho(f"Targeting: {path}", fg="cyan")
     
     files_modified, hooks_injected = instrument_directory(path, dry_run)
@@ -25,4 +27,4 @@ def instrument_cmd(path: Path, dry_run: bool):
     else:
         click.secho(f"[+] Modified {files_modified} files.", fg="green")
         click.secho(f"[+] Injected {hooks_injected} CORTEX guards.", fg="green")
-        click.secho(f"Contención Epistémica Establecida.", fg="green", bold=True)
+        click.secho("Contención Epistémica Establecida.", fg="green", bold=True)

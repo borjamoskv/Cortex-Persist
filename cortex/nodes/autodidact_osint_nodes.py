@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 
+
 class OsintBlock(Enum):
     LEGAL_FRAMEWORK = "C1"
     METADATA_EXTRACTION = "C2"

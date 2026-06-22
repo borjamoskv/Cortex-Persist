@@ -6,9 +6,9 @@ Used for ultra-high-throughput swarm telemetry that would lock SQLite.
 """
 
 import json
-import subprocess
 import logging
-from typing import Dict, Any, Optional
+import subprocess
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class GaaDEngine:
     def __init__(self, repo_path: str = "."):
         self.repo_path = repo_path
         
-    def write_blob(self, data: Dict[str, Any]) -> Optional[str]:
+    def write_blob(self, data: dict[str, Any]) -> Optional[str]:
         """
         Writes a dictionary as a JSON blob directly into .git/objects.
         Returns the SHA-1 hash of the blob.
@@ -44,7 +44,7 @@ class GaaDEngine:
             logger.error(f"GaaD Exception: {str(e)}")
             return None
             
-    def read_blob(self, blob_hash: str) -> Optional[Dict[str, Any]]:
+    def read_blob(self, blob_hash: str) -> Optional[dict[str, Any]]:
         """
         Reads a JSON blob from .git/objects given its SHA-1 hash.
         """

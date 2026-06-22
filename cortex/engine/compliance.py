@@ -6,6 +6,7 @@ Translates cryptographic hash chains into human-readable, regulatory-compliant r
 
 import json
 
+
 class EUComplianceExporter:
     def export_report(self, tenant_id: str, ledger_records: list) -> str:
         """

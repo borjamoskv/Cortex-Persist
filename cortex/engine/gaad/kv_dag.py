@@ -5,11 +5,11 @@ Bypasses SQLite WAL under massive Swarm load (10k+ concurrent agents).
 Uses the local `.git/objects` structure as a content-addressable graph database.
 """
 
-import os
-import zlib
 import hashlib
-from typing import Optional, Dict, Any
+import zlib
 from pathlib import Path
+from typing import Optional
+
 
 class GaaDKVDAG:
     """
@@ -23,7 +23,7 @@ class GaaDKVDAG:
             raise RuntimeError("[C5-REAL] GaaD requires an initialized Git repository.")
 
     def _hash_object(self, content: bytes, obj_type: str = "blob") -> str:
-        header = f"{obj_type} {len(content)}\0".encode("utf-8")
+        header = f"{obj_type} {len(content)}\0".encode()
         store = header + content
         return hashlib.sha1(store).hexdigest()
 
@@ -31,7 +31,7 @@ class GaaDKVDAG:
         """
         Injects raw fact into Git objects bypassing `git add`.
         """
-        header = f"blob {len(content)}\0".encode("utf-8")
+        header = f"blob {len(content)}\0".encode()
         store = header + content
         sha1 = hashlib.sha1(store).hexdigest()
         

@@ -19,7 +19,7 @@ class ThermodynamicTarpit:
         Engages the agent in an infinitely slow read cycle (Tarpit).
         """
         logger.warning("[C5-REAL] Hostile agent detected. Engaging tarpit...")
-        for i in range(100):
+        for _i in range(100):
             # Slow drip response to maximize TTFT cost on the attacker's end
             await asyncio.sleep(1)
             yield b"\\0"
