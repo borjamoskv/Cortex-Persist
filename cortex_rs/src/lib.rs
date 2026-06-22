@@ -95,6 +95,8 @@ pub fn validate_exergy_mutation(mutation_json: &str, valid_nodes: Vec<String>) -
 
     let guard = ExergyGuard {
         cluster_size: 9,
+        // NOTE: max_delta_per_epoch uses f64 for FFI compatibility with Python float.
+        // Internal Babylon-60 scaling is applied at the Python boundary via Babylon60::from_float().
         max_delta_per_epoch: 100.0,
     };
     
@@ -159,6 +161,8 @@ pub fn try_seal_fact(fact_json: &str, wal_event_hash: &str, valid: bool) -> PyRe
         .map_err(|e| PyValueError::new_err(e.to_string()))
 }
 
+// BABYLON-60: f64 used only for IEEE 754 log2() intermediary.
+// Final result is converted to Babylon60 at the physical boundary.
 #[pyfunction]
 pub fn calculate_entropy_b60(data: &[u8]) -> PyResult<babylon::Babylon60> {
     let mut counts = [0usize; 256];

@@ -57,7 +57,7 @@ class ExergyGuard:
                     pages_free = int(line.split(":")[1].strip().rstrip("."))
                     break
             return pages_free * 16384 / (1024 * 1024)  # MB
-        except Exception:
+        except (subprocess.SubprocessError, OSError):
             return 0.0
 
     def get_ram_pressure(self) -> str:
@@ -70,7 +70,7 @@ class ExergyGuard:
                 if "RAM pressure" in line:
                     return line.split(":")[1].strip()
             return "unknown"
-        except Exception:
+        except (subprocess.SubprocessError, OSError):
             return "unknown"
 
     def check(self) -> dict:
@@ -83,7 +83,7 @@ class ExergyGuard:
             "ram_free_mb": ram_free,
             "ram_pressure": pressure,
             "critical": critical,
-            "exergy": float(self.current_exergy),
+            "exergy": str(self.current_exergy),
         }
 
     def reclaim(self) -> tuple[float, str]:
@@ -94,7 +94,7 @@ class ExergyGuard:
             after = self.check_ram_free_mb()
             reclaimed = after - before
             return reclaimed, "OK"
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return 0.0, f"ERR: {e}"
 
 
@@ -178,7 +178,7 @@ class EntropySensor:
                     if match:
                         return (float(match.group(1)) + float(match.group(2))) / 100.0
             return 0.0
-        except Exception:
+        except (subprocess.SubprocessError, OSError):
             return 0.0
 
     def check_swap_mb(self) -> float:
@@ -193,7 +193,7 @@ class EntropySensor:
                     if match:
                         return float(match.group(1))
             return 0.0
-        except Exception:
+        except (subprocess.SubprocessError, OSError):
             return 0.0
 
     def sense(self) -> dict:
@@ -203,7 +203,7 @@ class EntropySensor:
         return {
             "cpu_load": cpu,
             "swap_mb": swap,
-            "entropy": cpu * 0.6 + swap / 1000.0 * 0.4,  # Normalizada
+            "entropy": float(Decimal(str(cpu)) * Decimal("0.6") + Decimal(str(swap)) / Decimal("1000") * Decimal("0.4")),  # Normalizada
         }
 
 
@@ -218,7 +218,7 @@ class OmegaDaemon:
         self,
         tick_rate_seconds: int = 60,
         auto_push: bool = False,
-        exergy_threshold: float = 0.5,
+        exergy_threshold: Decimal = Decimal("0.5"),
         reclaim_on_critical: bool = True,
     ):
         self.tick_rate = tick_rate_seconds
