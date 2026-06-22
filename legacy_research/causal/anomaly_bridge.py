@@ -18,7 +18,7 @@ try:
     sys.path.append(str(Path(__file__).parent.parent.parent.parent / "cortex-core"))
     from cortex_topology_anomaly_detector import WindowedManifoldDetector
 except ImportError:
-    logger.warning("Could not import WindowedManifoldDetector. Anomaly detection will be mocked.")
+    logger.debug("Could not import WindowedManifoldDetector. Anomaly detection will be mocked.")
     WindowedManifoldDetector = None
 
 
