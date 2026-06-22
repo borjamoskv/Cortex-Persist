@@ -12,8 +12,8 @@ def export_topological_map():
     
     active_nodes = []
     
-    # Escanear capacidad parcial para mayor velocidad (los primeros 100 agentes suelen cubrir inyecciones recientes)
-    for i in range(100):
+    # Escanear capacidad completa para mapeo total
+    for i in range(10000):
         try:
             state = umap.get_agent_state(i)
             # Un nodo está activo si tiene un target definido o coordenadas no nulas
