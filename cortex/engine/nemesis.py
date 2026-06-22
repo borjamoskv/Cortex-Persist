@@ -4,6 +4,7 @@ from __future__ import annotations
 import datetime
 import logging
 import re
+from pathlib import Path
 
 import aiosqlite
 
@@ -59,6 +60,8 @@ class NemesisProtocol:
     def _load_dynamic_antibodies(cls) -> list[tuple[str, str]]:
         """Parses nemesis.md to extract dynamically generated antibodies."""
         dynamic_rules = []
+        if not Path(cls.NEMESIS_PATH).exists():
+            return dynamic_rules
         try:
             with open(cls.NEMESIS_PATH) as f:
                 content = f.read()
