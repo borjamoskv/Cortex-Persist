@@ -2,6 +2,7 @@
 """
 C5-REAL Temporal Synchronization Protocol.
 Erradicates temporal misalignment by fetching current cryptographic, temporal, and real-world signals.
+Author/SYS_ID: borjamoskv
 """
 import os
 import subprocess
