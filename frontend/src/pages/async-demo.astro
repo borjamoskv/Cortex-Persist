@@ -1,6 +1,6 @@
 ---
 import IntakeFormScript from '../components/IntakeFormScript.astro';
-import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteLayout from '../layouts/NoirLayout.astro';
 import { SUPPORT_EMAIL } from '../lib/intake';
 
 const subject = 'Request Async Demo for CORTEX Persist';
@@ -22,7 +22,7 @@ const intakeLines = [
 ];
 ---
 
-<SiteLayout
+<NoirLayout
 	title="Request Async Demo | CORTEX Persist"
 	description="Request an async demo for CORTEX Persist and send your workflow details without a call."
 	canonical="https://cortexpersist.com/async-demo"
@@ -181,4 +181,4 @@ const intakeLines = [
 	</main>
 
 	<IntakeFormScript requestTitle="CORTEX async demo request" lines={intakeLines} />
-</SiteLayout>
+</NoirLayout>

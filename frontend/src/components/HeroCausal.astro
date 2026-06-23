@@ -1,0 +1,103 @@
+---
+---
+
+<section class="hero-section">
+  <div class="container">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="text-kintsugi">BABYLON-60</span><br />
+        <span class="text-secondary">CAUSAL SIEGE ENGINE</span>
+      </h1>
+      
+      <p class="hero-subtitle">
+        Cryptographically verified state mutations. Zero Anergy. <br />
+        The deterministic infrastructure for C5-REAL autonomous execution.
+      </p>
+
+      <div class="terminal-box glass-panel">
+        <div class="terminal-header">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="terminal-title mono text-muted">zsh - moskv-1</span>
+        </div>
+        <div class="terminal-body mono">
+          <span class="prompt">$</span> uv pip install babylon60-mtk
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-content {
+    max-width: 800px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .hero-title {
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 1;
+    margin-bottom: var(--space-4);
+    text-transform: uppercase;
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-5);
+    max-width: 600px;
+  }
+
+  .terminal-box {
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .terminal-header {
+    background: rgba(0, 0, 0, 0.5);
+    padding: var(--space-2) var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-dim);
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .dot.red { background: #ff5f56; }
+  .dot.yellow { background: #ffbd2e; }
+  .dot.green { background: #27c93f; }
+
+  .terminal-title {
+    margin-left: auto;
+    font-size: 0.8rem;
+  }
+
+  .terminal-body {
+    padding: var(--space-4);
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    background: #000;
+  }
+
+  .prompt {
+    color: var(--accent-cobalt);
+    margin-right: 8px;
+  }
+</style>

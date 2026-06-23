@@ -1,0 +1,95 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Sovereign execution kernel and memetic hub." } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    
+    <!-- Google Fonts: Inter & Roboto Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <title>{title} | BABYLON-60</title>
+  </head>
+  <body>
+    <div class="site-wrapper">
+      <header class="glass-panel site-header">
+        <div class="container header-container">
+          <div class="logo mono text-glow">BABYLON-60</div>
+          <nav>
+            <a href="https://github.com/borjamoskv" target="_blank" rel="noopener" class="mono">GitHub</a>
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        <slot />
+      </main>
+
+      <footer class="site-footer">
+        <div class="container">
+          <p class="mono text-muted">© 2026 BORJA MOSKV. C5-REAL EXECUTION.</p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+
+<style>
+  .site-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    padding: var(--space-3) 0;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  main {
+    flex: 1;
+    padding-top: var(--space-6);
+  }
+
+  .site-footer {
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--border-dim);
+    margin-top: var(--space-6);
+    text-align: center;
+    font-size: 0.85rem;
+  }
+</style>

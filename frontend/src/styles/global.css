@@ -1,0 +1,99 @@
+/* BABYLON-60 | Industrial Noir 2026 */
+
+:root {
+  /* Core Colors */
+  --bg-deep: #050505;
+  --bg-surface: #0a0a0a;
+  --bg-surface-elevated: #111111;
+  --border-dim: rgba(255, 255, 255, 0.05);
+  --border-glow: rgba(43, 59, 229, 0.3);
+
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+  --text-muted: #555555;
+
+  /* Accents */
+  --accent-cobalt: #2B3BE5;
+  --accent-kintsugi: #F59E0B;
+  --accent-kintsugi-dim: rgba(245, 158, 11, 0.15);
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'Roboto Mono', 'Fira Code', monospace;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 2rem;
+  --space-5: 4rem;
+  --space-6: 8rem;
+
+  /* Transitions */
+  --t-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --t-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--t-fast);
+}
+
+a:hover {
+  color: var(--accent-cobalt);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Utilities */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.glass-panel {
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-dim);
+}
+
+/* Glitch / Glow Effects */
+.text-glow {
+  text-shadow: 0 0 20px var(--border-glow);
+}
+
+.text-kintsugi {
+  color: var(--accent-kintsugi);
+  text-shadow: 0 0 10px var(--accent-kintsugi-dim);
+}
