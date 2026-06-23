@@ -195,6 +195,7 @@ class TestFase2MotorCognitivo:
         """DESTROY: Prove forensic infrastructure is a ghost."""
         # At least one forensic module must exist
         forensic_candidates = [
+            "cortex.engine.ppi_index",
             "cortex.engine.forensic_commander",
             "cortex.forensics",
         ]
