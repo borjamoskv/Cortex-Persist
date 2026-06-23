@@ -1,6 +1,6 @@
 import pytest
 
-from cortex.engine.oracle.ast_signer import generate_ast_signature
+from babylon60.engine.oracle.ast_signer import generate_ast_signature
 
 def test_generate_ast_signature_deterministic():
     code_1 = '''

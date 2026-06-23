@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+from babylon60.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
 
 @pytest.fixture(autouse=True)
@@ -135,7 +135,7 @@ class TestCapture:
         mock_engine.store = AsyncMock(return_value=42)
 
         with patch(
-            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "babylon60.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=42,
         ):
@@ -152,7 +152,7 @@ class TestCapture:
         pipeline = ErrorGhostPipeline()
 
         with patch(
-            "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
+            "babylon60.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
             return_value=1,
         ):

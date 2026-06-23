@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 
-from cortex.utils.sql_identifiers import (
+from babylon60.utils.sql_identifiers import (
     is_safe_identifier,
     quote_identifier,
     validate_sql_identifier,
@@ -52,7 +52,7 @@ def test_quote_identifier():
 
 def test_schema_trait_get_domain_tables_rejection():
     from unittest.mock import MagicMock
-    from cortex.memory.traits.schema import SchemaTrait
+    from babylon60.memory.traits.schema import SchemaTrait
 
     class DummySchema(SchemaTrait):
         def __init__(self):
@@ -71,7 +71,7 @@ def test_schema_trait_get_domain_tables_rejection():
 
 
 def test_task_queue_update_rejection(tmp_path):
-    from cortex.extensions.aether.queue import TaskQueue
+    from babylon60.extensions.aether.queue import TaskQueue
 
     db_file = tmp_path / "aether.db"
     queue = TaskQueue(db_file)
@@ -82,7 +82,7 @@ def test_task_queue_update_rejection(tmp_path):
 
 
 def test_ledger_store_ensure_compat_columns_rejection():
-    from cortex.ledger.store import LedgerStore
+    from babylon60.ledger.store import LedgerStore
 
     store = LedgerStore(db_path=":memory:")
     with pytest.raises(ValueError):

@@ -7,7 +7,7 @@ Tests the full pipeline flow: Ingress → Context → Plan → Execute → Persi
 import pytest
 import time
 
-from cortex.pipeline import (
+from babylon60.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -17,14 +17,14 @@ from cortex.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from cortex.pipeline.orchestrator import CortexOrchestrator
-from cortex.pipeline._orchestrator_exceptions import (
+from babylon60.pipeline.orchestrator import CortexOrchestrator
+from babylon60.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )
-from cortex.router.router import AgentRouter, AgentCapability
-from cortex.context.assembler import ContextAssembler
-from cortex.delivery.manager import DeliveryManager
+from babylon60.router.router import AgentRouter, AgentCapability
+from babylon60.context.assembler import ContextAssembler
+from babylon60.delivery.manager import DeliveryManager
 
 
 # ── MCP Pipeline Tools Tests ──
@@ -34,7 +34,7 @@ class TestMCPPipelineTools:
     """Test MCP pipeline tool serialization."""
 
     def test_result_to_dict_single_agent(self):
-        from cortex.mcp.pipeline_tools import _result_to_dict
+        from babylon60.mcp.pipeline_tools import _result_to_dict
 
         result = PipelineResult(
             mission_id="m-test",
@@ -49,7 +49,7 @@ class TestMCPPipelineTools:
         assert d["status"] == "success"
 
     def test_result_to_dict_multi_agent(self):
-        from cortex.mcp.pipeline_tools import _result_to_dict
+        from babylon60.mcp.pipeline_tools import _result_to_dict
 
         result = PipelineResult(
             mission_id="m-multi",
@@ -68,7 +68,7 @@ class TestMCPPipelineTools:
         assert "[a2]" in d["content"]
 
     def test_result_to_dict_error(self):
-        from cortex.mcp.pipeline_tools import _result_to_dict
+        from babylon60.mcp.pipeline_tools import _result_to_dict
 
         result = PipelineResult(
             mission_id="m-err",

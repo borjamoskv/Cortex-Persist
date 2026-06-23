@@ -12,20 +12,20 @@ import datetime
 def force_mtk_enforcement(monkeypatch):
     monkeypatch.setenv("CORTEX_FORCE_MTK_TESTS", "1")
     monkeypatch.setenv("CORTEX_KERNEL_KEY", "test_key_123")
-from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer
-from cortex.engine.mtk_core import MTKGuard
-from cortex.types.evidence import ClosurePayload, EvidenceBundle
+from babylon60.engine.mtk_sqlite_authorizer import install_mtk_authorizer
+from babylon60.engine.mtk_core import MTKGuard
+from babylon60.types.evidence import ClosurePayload, EvidenceBundle
 
 @pytest.fixture
 def mtk_db():
-    from cortex.database.core import connect
+    from babylon60.database.core import connect
     # connect() automatically uses SovereignConnection and applies MTK
     conn = connect(":memory:")
     # Initialize schema inside a context where it's allowed or before MTK enforces strict token
     # (Actually, MTK allows CREATE TABLE if it's not blocked. Wait, we are about to block CREATE TABLE!)
     # To initialize schema without MTK token, we might need a workaround or a special setup token.
     # We can just inject a dummy token into ContextVar.
-    from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+    from babylon60.engine.mtk_sqlite_authorizer import mtk_active_token
     token = mtk_active_token.set("mtk_auth_setup")
     try:
         conn.execute("CREATE TABLE records (id INTEGER PRIMARY KEY, data TEXT)")
@@ -101,7 +101,7 @@ async def test_mtk_factory_leak(tmp_path):
     Nasty negative test: Prove that importing the standard connection factory 
     yields a connection that is ALREADY locked down by MTK.
     """
-    from cortex.database.core import connect_async, connect
+    from babylon60.database.core import connect_async, connect
     db_file = tmp_path / "factory_leak.db"
     
     # Pre-create schema so authorizer doesn't trip on internal initializations
@@ -241,7 +241,7 @@ async def test_mtk_legacy_connection_dynamic_capability(dummy_payload, tmp_path)
     """
     A connection opened *before* the MTK context still respects the boundary dynamically at execution time.
     """
-    from cortex.database.core import connect_async
+    from babylon60.database.core import connect_async
     db_file = tmp_path / "legacy.db"
     
     # Pre-create connection (legacy/global connection pattern)

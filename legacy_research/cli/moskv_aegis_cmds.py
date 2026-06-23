@@ -12,10 +12,10 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.audit.moskv_aegis import MoskvAegisEngine
-from cortex.cli.common import DEFAULT_DB, cli, console
-from cortex.database.core import connect_async_ctx
+from babylon60.audit.ledger import EnterpriseAuditLedger
+from babylon60.audit.moskv_aegis import MoskvAegisEngine
+from babylon60.cli.common import DEFAULT_DB, cli, console
+from babylon60.database.core import connect_async_ctx
 
 logger = logging.getLogger(__name__)
 

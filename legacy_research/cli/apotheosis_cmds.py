@@ -23,7 +23,7 @@ __all__ = [
     "nirvana_cmd",
 ]
 
-from cortex.cli.common import cli, console
+from babylon60.cli.common import cli, console
 
 PROGRESS_DESC_FMT = "[progress.description]{task.description}"
 
@@ -59,7 +59,7 @@ def manifest_cmd(intent: str) -> None:
 
         # Real: Connect to CortexEngine and store intent
         try:
-            from cortex.engine import CortexEngine
+            from babylon60.engine import CortexEngine
 
             engine = CortexEngine()
             progress.update(
@@ -141,7 +141,7 @@ def guard_cmd() -> None:
         # Real: Check daemon status
         daemon_status = "desconocido"
         try:
-            from cortex.extensions.daemon.core import MoskvDaemon
+            from babylon60.extensions.daemon.core import MoskvDaemon
 
             status = MoskvDaemon.load_status()
             if status:
@@ -232,8 +232,8 @@ def aix_cmd() -> None:
     """
     import asyncio
 
-    from cortex.cli.aix import calculate_aix, print_aix_report
-    from cortex.cli.common import get_engine
+    from babylon60.cli.aix import calculate_aix, print_aix_report
+    from babylon60.cli.common import get_engine
 
     async def run():
         engine = get_engine()

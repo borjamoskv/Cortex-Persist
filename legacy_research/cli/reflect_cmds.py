@@ -7,8 +7,8 @@ import sqlite3
 import click
 from rich.panel import Panel
 
-from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
-from cortex.cli.errors import err_empty_results, handle_cli_error
+from babylon60.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
+from babylon60.cli.errors import err_empty_results, handle_cli_error
 
 __all__ = ["inject", "reflect"]
 
@@ -22,7 +22,7 @@ __all__ = ["inject", "reflect"]
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def reflect(project, summary, errors, decisions, source, db) -> None:
     """Store a post-mortem reflection for the current session."""
-    from cortex.extensions.thinking.reflection import generate_reflection
+    from babylon60.extensions.thinking.reflection import generate_reflection
 
     engine = get_engine(db)
     try:
@@ -62,7 +62,7 @@ def reflect(project, summary, errors, decisions, source, db) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def inject(project, hint, top_k, fmt, db) -> None:
     """Retrieve relevant past learnings for system_prompt injection."""
-    from cortex.extensions.thinking.reflection import (
+    from babylon60.extensions.thinking.reflection import (
         format_injection_json,
         format_injection_markdown,
         inject_reflections,

@@ -1,7 +1,7 @@
 import time
 import pytest
 import concurrent.futures
-from cortex.engine.swarm_lock import swarm_git_lock
+from babylon60.engine.swarm_lock import swarm_git_lock
 
 def agent_worker(worker_id: int) -> list:
     """Simula un agente intentando mutar el DAG concurrently."""

@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 import pytest
 
-from cortex.memory.dream import AssociativeDreamEngine, DreamResult
+from babylon60.memory.dream import AssociativeDreamEngine, DreamResult
 
 
 @dataclass

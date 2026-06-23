@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.extensions.hypervisor.belief_object import (
+from babylon60.extensions.hypervisor.belief_object import (
     BeliefConfidence,
     BeliefObject,
     VerdictAction,
 )
-from cortex.extensions.llm._models import IntentProfile
-from cortex.extensions.llm.cognitive_handoff import CognitiveHandoff
+from babylon60.extensions.llm._models import IntentProfile
+from babylon60.extensions.llm.cognitive_handoff import CognitiveHandoff
 
 # ─── IntentProfile Extensions ───────────────────────────────────────────────
 

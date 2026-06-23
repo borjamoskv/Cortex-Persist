@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from cortex.engine.compound_yield import (
+from babylon60.engine.compound_yield import (
     CompoundProjector,
     CompoundYieldTracker,
 )

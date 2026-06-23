@@ -1,6 +1,6 @@
 import pytest
 import sqlite3
-from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer, mtk_active_token
+from babylon60.engine.mtk_sqlite_authorizer import install_mtk_authorizer, mtk_active_token
 
 def test_mtk_memory_taint_blocks_stochastic_module(monkeypatch):
     """Test that MTK blocks DB writes if executed from a stochastic module, even with token."""
@@ -33,7 +33,7 @@ def test_mtk_memory_taint_blocks_stochastic_module(monkeypatch):
     # Now simulate being in a stochastic module by injecting into sys.modules and setting __name__
     def stochastic_injection_attempt():
         # Fake being a stochastic module
-        globals()["__name__"] = "cortex.engine.synthesis.fake"
+        globals()["__name__"] = "babylon60.engine.synthesis.fake"
         try:
             conn.execute("INSERT INTO test_data (id, value) VALUES (2, 'stochastic')")
             conn.commit()

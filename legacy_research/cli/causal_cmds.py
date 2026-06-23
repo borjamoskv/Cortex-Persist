@@ -8,7 +8,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import (
+from babylon60.cli.common import (
     DEFAULT_DB,
     _run_async,
     _show_tip,
@@ -16,7 +16,7 @@ from cortex.cli.common import (
     console,
     get_engine,
 )
-from cortex.cli.memory_cmds import memory_cmds
+from babylon60.cli.memory_cmds import memory_cmds
 
 
 @memory_cmds.command("trace-episode")
@@ -56,7 +56,7 @@ def trace_episode(query, fact_id, project, limit, db) -> None:
             with console.status("[noir.violet]Searching causal episodes...[/]"):
                 episodes = _run_async(engine.recall_episode(query, project, limit))
             if not episodes:
-                from cortex.cli.errors import err_empty_results
+                from babylon60.cli.errors import err_empty_results
 
                 err_empty_results(
                     "episodios causales",
@@ -199,7 +199,7 @@ def history(project, as_of, db) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def dedupe(project: str, threshold: float, simulate: bool, db: str) -> None:
     """Run Memory Archaeology to deduplicate and crystallize facts."""
-    from cortex.memory.memory_archaeology import MemoryArchaeologist
+    from babylon60.memory.memory_archaeology import MemoryArchaeologist
 
     engine = get_engine(db)
     try:

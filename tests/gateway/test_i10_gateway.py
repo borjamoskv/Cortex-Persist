@@ -6,9 +6,9 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.gateway.i10_consensus import I10ConsensusGateway, LLMJudgeAdapter
-from cortex.guards.i10_consensus import RetrievalConsensusError
+from babylon60.extensions.llm.provider import LLMProvider
+from babylon60.gateway.i10_consensus import I10ConsensusGateway, LLMJudgeAdapter
+from babylon60.guards.i10_consensus import RetrievalConsensusError
 
 
 @pytest.fixture(autouse=True)
@@ -43,7 +43,7 @@ class MockLLMJudge:
 
 
 @pytest.mark.asyncio
-@patch("cortex.extensions.llm.provider.LLMProvider.complete")
+@patch("babylon60.extensions.llm.provider.LLMProvider.complete")
 async def test_i10_gateway_absolute_consensus(mock_complete):
     """Test when all models reach perfect consensus on safe output."""
     mock_complete.return_value = "This is a safe response."
@@ -67,7 +67,7 @@ async def test_i10_gateway_absolute_consensus(mock_complete):
 
 
 @pytest.mark.asyncio
-@patch("cortex.extensions.llm.provider.LLMProvider.complete")
+@patch("babylon60.extensions.llm.provider.LLMProvider.complete")
 async def test_i10_gateway_divergence_safe_resolved(mock_complete):
     """Test when models diverge slightly, but the judge resolves it as SAFE."""
     mock_complete.side_effect = [
@@ -94,8 +94,8 @@ async def test_i10_gateway_divergence_safe_resolved(mock_complete):
 
 
 @pytest.mark.asyncio
-@patch("cortex.extensions.llm.provider.LLMProvider.complete")
-@patch("cortex.gateway.i10_consensus.connect_async_ctx")
+@patch("babylon60.extensions.llm.provider.LLMProvider.complete")
+@patch("babylon60.gateway.i10_consensus.connect_async_ctx")
 async def test_i10_gateway_poisoning_hard_stop(mock_connect, mock_complete):
     """Test when models diverge and the judge confirms poisoning (UNSAFE), triggering purge."""
     mock_complete.side_effect = [
@@ -129,7 +129,7 @@ async def test_i10_gateway_poisoning_hard_stop(mock_connect, mock_complete):
 
 
 @pytest.mark.asyncio
-@patch("cortex.extensions.llm.provider.LLMProvider.complete")
+@patch("babylon60.extensions.llm.provider.LLMProvider.complete")
 async def test_i10_gateway_hedging_failover(mock_complete):
     """Test that hedging triggers BFT failovers to Together/Fireworks if primary fails."""
     mock_complete.side_effect = [

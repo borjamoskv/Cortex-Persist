@@ -11,9 +11,9 @@ from typing import Any, TypeVar, cast
 import click
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
-from cortex.cli.errors import err_empty_results, err_fact_not_found
-from cortex.extensions.sync import export_to_json
+from babylon60.cli.common import DEFAULT_DB, cli, console, get_engine
+from babylon60.cli.errors import err_empty_results, err_fact_not_found
+from babylon60.extensions.sync import export_to_json
 
 __all__ = ["delete", "edit", "list_facts"]
 
@@ -44,7 +44,7 @@ def delete(fact_id, reason, tenant_id, db) -> None:
                 err_fact_not_found(fact_id)
                 return
 
-            from cortex.engine.models import Fact
+            from babylon60.engine.models import Fact
 
             fact = cast(Fact, fact)
 
@@ -118,7 +118,7 @@ def list_facts(project, fact_type, limit, tenant_id, db) -> None:
             table.add_column("Contenido", width=60)
             table.add_column("Tags", style="dim", width=15)
 
-            from cortex.crypto import get_default_encrypter
+            from babylon60.crypto import get_default_encrypter
 
             enc = get_default_encrypter()
             from cryptography.exceptions import InvalidTag
@@ -161,7 +161,7 @@ def edit(fact_id, new_content, tenant_id, db) -> None:
                 err_fact_not_found(fact_id)
                 return
 
-            from cortex.engine.models import Fact
+            from babylon60.engine.models import Fact
 
             fact = cast(Fact, fact)
 

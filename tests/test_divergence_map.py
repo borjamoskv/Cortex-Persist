@@ -14,10 +14,10 @@ Demuestra:
 import os
 import pytest
 
-from cortex.runtime.state import RuntimeState
-from cortex.runtime.replay.engine import ReplayEngine
-from cortex.runtime.replay.ci_gate import fixed_event_trace
-from cortex.runtime.replay.divergence import (
+from babylon60.runtime.state import RuntimeState
+from babylon60.runtime.replay.engine import ReplayEngine
+from babylon60.runtime.replay.ci_gate import fixed_event_trace
+from babylon60.runtime.replay.divergence import (
     DivergenceMap,
     DivergenceReport,
     StateDistance,

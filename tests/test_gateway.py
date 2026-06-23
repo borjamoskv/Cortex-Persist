@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.gateway import GatewayIntent, GatewayRequest, GatewayRouter
+from babylon60.gateway import GatewayIntent, GatewayRequest, GatewayRouter
 
 
 @pytest.mark.asyncio
@@ -50,7 +50,7 @@ async def test_gateway_router_exception_handling():
     router = GatewayRouter(engine=mock_engine)
     req = GatewayRequest(intent=GatewayIntent.SEARCH, payload={"query": "test query"})
 
-    with patch("cortex.extensions.immune.error_boundary.ErrorBoundary") as mock_boundary_cls:
+    with patch("babylon60.extensions.immune.error_boundary.ErrorBoundary") as mock_boundary_cls:
         mock_boundary = mock_boundary_cls.return_value
         mock_boundary._persist = AsyncMock()
         resp = await router.handle(req)

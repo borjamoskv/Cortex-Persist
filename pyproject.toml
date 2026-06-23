@@ -1,5 +1,5 @@
 [project]
-name = "cortex-persist"
+name = "babylon-60"
 version = "1.0.0"
 description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
 readme = "README.md"
@@ -133,7 +133,7 @@ quality = [
     "radon>=6.0.1",
 ]
 all = [
-    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality]",
+    "babylon-60[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality]",
 ]
 
 [project.scripts]
@@ -203,8 +203,8 @@ ignore = ["E501", "E402", "B008", "W291", "W293", "S", "UP045", "TID251", "G004"
 "cortex/daemon/core.py" = ["E701", "E702", "I001"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
-"time.sleep" = { msg = "CORTEX Anti-Pattern: Usa asyncio.sleep() en este repositorio para no bloquear el event loop." }
-"builtins.print" = { msg = "CORTEX Anti-Pattern: Usa standard logging o Rich para emitir trails de auditoría." }
+"time.sleep" = { msg = "BABYLON-60 Anti-Pattern: Usa asyncio.sleep() en este repositorio para no bloquear el event loop." }
+"builtins.print" = { msg = "BABYLON-60 Anti-Pattern: Usa standard logging o Rich para emitir trails de auditoría." }
 
 [tool.pyright]
 pythonVersion = "3.10"

@@ -20,8 +20,8 @@ os.environ.setdefault("DASHSCOPE_API_KEY", "test")
 
 import pytest
 
-from cortex.extensions.llm._models import BaseProvider, IntentProfile
-from cortex.extensions.llm._presets import (
+from babylon60.extensions.llm._models import BaseProvider, IntentProfile
+from babylon60.extensions.llm._presets import (
     _PRESETS_CACHE,
     frontier_providers,
     load_presets,
@@ -172,7 +172,7 @@ class TestLLMProviderProperties:
     """LLMProvider reads tier/cost from preset."""
 
     def test_qwen_tier_and_cost(self):
-        from cortex.extensions.llm.provider import LLMProvider
+        from babylon60.extensions.llm.provider import LLMProvider
 
         p = LLMProvider(provider="qwen")
         assert p.tier == "frontier"
@@ -180,7 +180,7 @@ class TestLLMProviderProperties:
 
     def test_gemini_is_frontier(self):
         os.environ.setdefault("GEMINI_API_KEY", "test")
-        from cortex.extensions.llm.provider import LLMProvider
+        from babylon60.extensions.llm.provider import LLMProvider
 
         p = LLMProvider(provider="gemini")
         assert p.tier == "frontier"
@@ -197,7 +197,7 @@ class TestRouterOrdering:
         os.environ.setdefault("GEMINI_API_KEY", "test")
         os.environ.setdefault("GROQ_API_KEY", "test")
         os.environ.setdefault("DEEPSEEK_API_KEY", "test")
-        from cortex.extensions.llm.provider import LLMProvider
+        from babylon60.extensions.llm.provider import LLMProvider
 
         return {
             "qwen": LLMProvider(provider="qwen"),
@@ -207,7 +207,7 @@ class TestRouterOrdering:
         }
 
     def test_cost_ordering(self, _providers):
-        from cortex.extensions.llm.router import CortexLLMRouter
+        from babylon60.extensions.llm.router import CortexLLMRouter
 
         router = CortexLLMRouter(
             primary=_providers["qwen"],
@@ -229,7 +229,7 @@ class TestRouterOrdering:
 
     def test_tier_tiebreaking_within_cost(self, _providers):
         """Same cost → frontier preferred over high."""
-        from cortex.extensions.llm.router import CortexLLMRouter
+        from babylon60.extensions.llm.router import CortexLLMRouter
 
         p1 = _providers["groq"]
         p2 = _providers["deepseek"]
@@ -256,14 +256,14 @@ class TestRouterOrdering:
         assert names.index("deepseek") < names.index("groq")
 
     def test_cost_order_constants(self):
-        from cortex.extensions.llm._router_policy import COST_ORDER
+        from babylon60.extensions.llm._router_policy import COST_ORDER
 
         o = COST_ORDER
         assert isinstance(o, dict)
         assert "free" in o
 
     def test_tier_order_constants(self):
-        from cortex.extensions.llm._router_policy import TIER_ORDER
+        from babylon60.extensions.llm._router_policy import TIER_ORDER
 
         t = TIER_ORDER
         assert t["frontier"] < t["high"] < t["local"]
@@ -273,7 +273,7 @@ class TestAPIKeyFallbacks:
     """Verifies check_api_key resolves fallback env vars correctly."""
 
     def test_fallback_moonshot_to_kimi(self, monkeypatch):
-        from cortex.extensions.llm._presets import check_api_key
+        from babylon60.extensions.llm._presets import check_api_key
 
         monkeypatch.delenv("MOONSHOT_API_KEY", raising=False)
         monkeypatch.setenv("KIMI_API_KEY", "kimi-secret-token")
@@ -282,7 +282,7 @@ class TestAPIKeyFallbacks:
         assert check_api_key(preset) == "kimi-secret-token"
 
     def test_fallback_xai_to_grok(self, monkeypatch):
-        from cortex.extensions.llm._presets import check_api_key
+        from babylon60.extensions.llm._presets import check_api_key
 
         monkeypatch.delenv("XAI_API_KEY", raising=False)
         monkeypatch.setenv("GROK_API_KEY", "grok-secret-token")
@@ -291,7 +291,7 @@ class TestAPIKeyFallbacks:
         assert check_api_key(preset) == "grok-secret-token"
 
     def test_fallback_grok_to_xai(self, monkeypatch):
-        from cortex.extensions.llm._presets import check_api_key
+        from babylon60.extensions.llm._presets import check_api_key
 
         monkeypatch.delenv("GROK_API_KEY", raising=False)
         monkeypatch.setenv("XAI_API_KEY", "xai-secret-token")
@@ -300,7 +300,7 @@ class TestAPIKeyFallbacks:
         assert check_api_key(preset) == "xai-secret-token"
 
     def test_grok_preset_uses_env_key(self):
-        from cortex.extensions.llm._presets import load_presets
+        from babylon60.extensions.llm._presets import load_presets
 
         presets = load_presets()
         grok_preset = presets.get("grok", {})

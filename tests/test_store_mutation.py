@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
-from cortex.engine.store_mutation import (
+from babylon60.engine.store_mutation import (
     deprecate_impl_logic,
     invalidate_impl_logic,
     purge_logic,
@@ -21,10 +21,10 @@ async def test_deprecate_impl_logic_success():
 
     with (
         patch(
-            "cortex.engine.store_mutation._fetch_fact_state",
+            "babylon60.engine.store_mutation._fetch_fact_state",
             return_value=(1, "knowledge", None, 0, 0),
         ) as mock_fetch,
-        patch("cortex.engine.store_mutation.AsyncCausalGraph") as mock_graph,
+        patch("babylon60.engine.store_mutation.AsyncCausalGraph") as mock_graph,
     ):
         mock_graph_instance = mock_graph.return_value
         mock_graph_instance.propagate_taint = AsyncMock()
@@ -54,10 +54,10 @@ async def test_invalidate_impl_logic_success():
 
     with (
         patch(
-            "cortex.engine.store_mutation._fetch_fact_state",
+            "babylon60.engine.store_mutation._fetch_fact_state",
             return_value=(1, "knowledge", None, 0, 0),
         ) as mock_fetch,
-        patch("cortex.engine.store_mutation.AsyncCausalGraph") as mock_graph,
+        patch("babylon60.engine.store_mutation.AsyncCausalGraph") as mock_graph,
     ):
         mock_graph_instance = mock_graph.return_value
         mock_graph_instance.propagate_taint = AsyncMock()
@@ -101,7 +101,7 @@ async def test_purge_logic_success():
     mock_mixin._log_transaction = AsyncMock()
 
     with patch(
-        "cortex.engine.store_mutation._fetch_fact_state", return_value=(1, "knowledge", None, 0, 0)
+        "babylon60.engine.store_mutation._fetch_fact_state", return_value=(1, "knowledge", None, 0, 0)
     ) as mock_fetch:
         result = await purge_logic(
             mixin_instance=mock_mixin, fact_id=1, tenant_id="tenant1", force=False

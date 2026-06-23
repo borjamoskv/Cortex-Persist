@@ -2,7 +2,7 @@
 import pytest
 import aiosqlite
 import json
-from cortex.engine.causality import (
+from babylon60.engine.causality import (
     CausalGraph,
     LedgerEvent,
     ValidationStatus,

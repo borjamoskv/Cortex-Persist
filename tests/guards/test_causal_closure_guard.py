@@ -9,8 +9,8 @@ from dataclasses import dataclass
 import datetime
 import pytest
 
-from cortex.guards.causal_closure_guard import CausalClosureGuard, ClosureContractError
-from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
+from babylon60.guards.causal_closure_guard import CausalClosureGuard, ClosureContractError
+from babylon60.types.evidence import ClosurePayload, EvidenceBundle, Source
 
 
 @dataclass

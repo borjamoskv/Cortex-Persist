@@ -22,12 +22,12 @@ if str(_REPO_ROOT) not in sys.path:
 if str(_REPO_ROOT / "cortex-core") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "cortex-core"))
 
-from cortex.engine.smte.parser import AgentASTParser
-from cortex.engine.smte.analyzer import calculate_ast_complexity, estimate_dead_code_ratio
-from cortex.engine.smte.exergy import ExergyMonitor, evaluate_module_exergy
-from cortex.engine.smte.ouroboros_compiler import OuroborosCompiler
-from cortex.engine.smte.weismann_barrier import enforce_weismann_barrier
-from cortex.engine.smte.llm_mutator import llm_driven_mutator
+from babylon60.engine.smte.parser import AgentASTParser
+from babylon60.engine.smte.analyzer import calculate_ast_complexity, estimate_dead_code_ratio
+from babylon60.engine.smte.exergy import ExergyMonitor, evaluate_module_exergy
+from babylon60.engine.smte.ouroboros_compiler import OuroborosCompiler
+from babylon60.engine.smte.weismann_barrier import enforce_weismann_barrier
+from babylon60.engine.smte.llm_mutator import llm_driven_mutator
 
 
 # Sample code for testing AST parsing and analysis
@@ -164,7 +164,7 @@ class TestExergyMonitor:
         assert metrics["limerence_penalty"] == 25.0
 
     def test_circuit_breaker_tripped(self):
-        from cortex.engine.smte.exergy import CircuitBreakerTripped
+        from babylon60.engine.smte.exergy import CircuitBreakerTripped
 
         monitor = ExergyMonitor("test_breaker", circuit_breaker_threshold=20.0)
         # 5.0 / 2.0 * 10.0 = 25.0 > 20.0
@@ -235,8 +235,8 @@ class TestOuroborosCompiler:
         assert "must_amputate" in analysis
 
     @pytest.mark.asyncio
-    @patch("cortex.engine.smte.ouroboros_compiler.call_qwen_mutator")
-    @patch("cortex.engine.CortexEngine")
+    @patch("babylon60.engine.smte.ouroboros_compiler.call_qwen_mutator")
+    @patch("babylon60.engine.CortexEngine")
     async def test_compile_entity_success(self, mock_engine_cls, mock_qwen, temp_source_file):
         # Mock CortexEngine store method
         mock_engine = MagicMock()
@@ -260,7 +260,7 @@ class TestOuroborosCompiler:
         mock_engine.store.assert_awaited_once()
 
     @pytest.mark.asyncio
-    @patch("cortex.engine.CortexEngine")
+    @patch("babylon60.engine.CortexEngine")
     async def test_compile_entity_amputation(self, mock_engine_cls, temp_source_file):
         mock_engine = MagicMock()
         mock_engine.store = AsyncMock()
@@ -287,7 +287,7 @@ class TestOuroborosCompiler:
 
 
 class TestLLMDrivenMutator:
-    @patch("cortex.engine.smte.llm_mutator.call_qwen_mutator")
+    @patch("babylon60.engine.smte.llm_mutator.call_qwen_mutator")
     def test_llm_driven_mutator_success(self, mock_qwen, temp_source_file):
         parser = AgentASTParser(temp_source_file)
 

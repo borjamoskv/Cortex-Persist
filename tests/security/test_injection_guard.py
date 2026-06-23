@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.extensions.security.injection_guard import (
+from babylon60.extensions.security.injection_guard import (
     GUARD,
     InjectionGuard,
 )

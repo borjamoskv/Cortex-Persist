@@ -7,8 +7,8 @@ import sqlite3
 import click
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine, get_tracker
-from cortex.cli.errors import err_empty_results, handle_cli_error
+from babylon60.cli.common import DEFAULT_DB, cli, console, get_engine, get_tracker
+from babylon60.cli.errors import err_empty_results, handle_cli_error
 
 __all__ = ["heartbeat_cmd", "time_cmd"]
 

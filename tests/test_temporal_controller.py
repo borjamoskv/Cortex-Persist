@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from cortex.runtime.replay.controller import (
+from babylon60.runtime.replay.controller import (
     TemporalConsistencyController,
     EntropyViolation,
     AttractorViolation,

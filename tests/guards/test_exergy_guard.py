@@ -2,7 +2,7 @@
 
 import pytest
 
-from cortex.guards.exergy_guard import ExergyGuard, calculate_exergy
+from babylon60.guards.exergy_guard import ExergyGuard, calculate_exergy
 
 
 def test_calculate_exergy_empty() -> None:

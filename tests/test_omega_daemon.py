@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-import cortex.engine.omega_daemon as omega
+import babylon60.engine.omega_daemon as omega
 
 @pytest.mark.asyncio
 async def test_omega_daemon_start_stop():

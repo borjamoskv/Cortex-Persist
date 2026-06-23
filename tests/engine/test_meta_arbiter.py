@@ -15,8 +15,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from cortex.engine.meta_arbiter import MetaArbiterKernel
-from cortex.tools.trace_builder import TraceBuilder
+from babylon60.engine.meta_arbiter import MetaArbiterKernel
+from babylon60.tools.trace_builder import TraceBuilder
 
 
 # ---------------------------------------------------------------------------

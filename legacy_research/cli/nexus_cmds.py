@@ -7,8 +7,8 @@ from pathlib import Path
 import click
 from rich.console import Console
 
-from cortex.cli.common import cli
-from cortex.cli.errors import err_execution_failed, err_skill_not_found
+from babylon60.cli.common import cli
+from babylon60.cli.errors import err_execution_failed, err_skill_not_found
 
 __all__ = [
     "NEXUS_SKILL_PATH",

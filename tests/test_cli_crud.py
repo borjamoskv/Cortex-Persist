@@ -8,8 +8,8 @@ from __future__ import annotations
 import pytest
 from click.testing import CliRunner
 
-from cortex.cli import cli
-from cortex.engine import CortexEngine
+from babylon60.cli import cli
+from babylon60.engine import CortexEngine
 
 
 @pytest.fixture
@@ -83,9 +83,9 @@ class TestDeleteCommand:
 
     def test_delete_existing_fact(self, runner, db_path, monkeypatch, tmp_path):
         # Monkeypatch sync paths to avoid touching real files
-        monkeypatch.setattr("cortex.extensions.sync.MEMORY_DIR", tmp_path / "memory")
-        monkeypatch.setattr("cortex.extensions.sync.CORTEX_DIR", tmp_path)
-        monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
+        monkeypatch.setattr("babylon60.extensions.sync.MEMORY_DIR", tmp_path / "memory")
+        monkeypatch.setattr("babylon60.extensions.sync.CORTEX_DIR", tmp_path)
+        monkeypatch.setattr("babylon60.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
         result = runner.invoke(cli, ["delete", "1", "--db", db_path])
         assert result.exit_code == 0
@@ -98,9 +98,9 @@ class TestDeleteCommand:
         assert "999" in result.output and "🔍" in result.output
 
     def test_delete_with_reason(self, runner, db_path, monkeypatch, tmp_path):
-        monkeypatch.setattr("cortex.extensions.sync.MEMORY_DIR", tmp_path / "memory")
-        monkeypatch.setattr("cortex.extensions.sync.CORTEX_DIR", tmp_path)
-        monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
+        monkeypatch.setattr("babylon60.extensions.sync.MEMORY_DIR", tmp_path / "memory")
+        monkeypatch.setattr("babylon60.extensions.sync.CORTEX_DIR", tmp_path)
+        monkeypatch.setattr("babylon60.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
         result = runner.invoke(cli, ["delete", "1", "-r", "testing", "--db", db_path])
         assert result.exit_code == 0
@@ -111,9 +111,9 @@ class TestEditCommand:
     """Tests for 'cortex edit'."""
 
     def test_edit_existing_fact(self, runner, db_path, monkeypatch, tmp_path):
-        monkeypatch.setattr("cortex.extensions.sync.MEMORY_DIR", tmp_path / "memory")
-        monkeypatch.setattr("cortex.extensions.sync.CORTEX_DIR", tmp_path)
-        monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
+        monkeypatch.setattr("babylon60.extensions.sync.MEMORY_DIR", tmp_path / "memory")
+        monkeypatch.setattr("babylon60.extensions.sync.CORTEX_DIR", tmp_path)
+        monkeypatch.setattr("babylon60.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
         result = runner.invoke(
             cli, ["edit", "1", "Updated content here with more detail", "--db", db_path]
@@ -131,9 +131,9 @@ class TestEditCommand:
 
     def test_edit_preserves_metadata(self, runner, db_path, monkeypatch, tmp_path):
         """Edit should preserve project, type, tags from original."""
-        monkeypatch.setattr("cortex.extensions.sync.MEMORY_DIR", tmp_path / "memory")
-        monkeypatch.setattr("cortex.extensions.sync.CORTEX_DIR", tmp_path)
-        monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
+        monkeypatch.setattr("babylon60.extensions.sync.MEMORY_DIR", tmp_path / "memory")
+        monkeypatch.setattr("babylon60.extensions.sync.CORTEX_DIR", tmp_path)
+        monkeypatch.setattr("babylon60.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
         result = runner.invoke(
             cli, ["edit", "1", "Edited content with extended metadata", "--db", db_path]

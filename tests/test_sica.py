@@ -13,10 +13,10 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.sica.constitution import Constitution, Principle, Severity, Violation
-from cortex.sica.meta_level import FailureClass, MetaAction, MetaLevel
-from cortex.sica.object_level import ExecutionStep, ExecutionTrace, ObjectLevel, StepOutcome
-from cortex.sica.strategy import (
+from babylon60.sica.constitution import Constitution, Principle, Severity, Violation
+from babylon60.sica.meta_level import FailureClass, MetaAction, MetaLevel
+from babylon60.sica.object_level import ExecutionStep, ExecutionTrace, ObjectLevel, StepOutcome
+from babylon60.sica.strategy import (
     Heuristic,
     MutationType,
     SearchStrategy,

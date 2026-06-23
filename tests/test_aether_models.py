@@ -1,12 +1,12 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for cortex.aether.models - Pure data model validation.
+"""Tests for babylon60.aether.models - Pure data model validation.
 
 No I/O, no network, no database. Pure unit tests.
 """
 
 from __future__ import annotations
 
-from cortex.extensions.aether.models import (
+from babylon60.extensions.aether.models import (
     AetherAlert,
     AetherTestResult,
     AgentTask,

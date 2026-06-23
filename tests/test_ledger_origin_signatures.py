@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from cortex.ledger.models import ActionResult, ActionTarget, LedgerEvent
-from cortex.ledger.origin import (
+from babylon60.ledger.models import ActionResult, ActionTarget, LedgerEvent
+from babylon60.ledger.origin import (
     OriginKeyRecord,
     OriginKeyRegistry,
     OriginSignatureError,
@@ -17,10 +17,10 @@ from cortex.ledger.origin import (
     sign_event_origin,
     verify_event_origin,
 )
-from cortex.ledger.queue import EnrichmentQueue
-from cortex.ledger.store import LedgerStore
-from cortex.ledger.verifier import LedgerVerifier
-from cortex.ledger.writer import LedgerWriter
+from babylon60.ledger.queue import EnrichmentQueue
+from babylon60.ledger.store import LedgerStore
+from babylon60.ledger.verifier import LedgerVerifier
+from babylon60.ledger.writer import LedgerWriter
 
 ACTOR_ID = "agent-risk-01"
 OTHER_ACTOR_ID = "agent-risk-02"

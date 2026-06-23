@@ -3,10 +3,10 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
-from cortex.extensions.bci.maestro_bridge import BCIMaestroBridge, get_bci_maestro_handlers
-from cortex.extensions.ui_control.bootstrapper import PermsBootstrapper
-from cortex.extensions.ui_control.feedback_loop import UIFeedbackLoop
-from cortex.extensions.ui_control.models import AppTarget, InteractionResult, Point
+from babylon60.extensions.bci.maestro_bridge import BCIMaestroBridge, get_bci_maestro_handlers
+from babylon60.extensions.ui_control.bootstrapper import PermsBootstrapper
+from babylon60.extensions.ui_control.feedback_loop import UIFeedbackLoop
+from babylon60.extensions.ui_control.models import AppTarget, InteractionResult, Point
 
 
 # ─── BCI Maestro Bridge Tests ─────────────────────────────────────────
@@ -159,8 +159,8 @@ def test_perms_bootstrapper_check():
 
     with (
         patch("sys.platform", "darwin"),
-        patch("cortex.extensions.ui_control.bootstrapper.ApplicationServices", mock_app_services),
-        patch("cortex.extensions.ui_control.bootstrapper.Quartz", mock_quartz),
+        patch("babylon60.extensions.ui_control.bootstrapper.ApplicationServices", mock_app_services),
+        patch("babylon60.extensions.ui_control.bootstrapper.Quartz", mock_quartz),
     ):
         res = PermsBootstrapper.verify_and_prompt_permissions()
         assert res["accessibility"] is True

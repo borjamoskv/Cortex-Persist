@@ -1,5 +1,5 @@
 import pytest
-from cortex.engine.pr_social_engineering import PRSocialEngineeringDetector
+from babylon60.engine.pr_social_engineering import PRSocialEngineeringDetector
 
 def test_apex_044_social_engineering_detection():
     detector = PRSocialEngineeringDetector()

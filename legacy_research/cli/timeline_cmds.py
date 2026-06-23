@@ -8,8 +8,8 @@ import sqlite3
 import click
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
-from cortex.cli.errors import err_empty_results, handle_cli_error
+from babylon60.cli.common import DEFAULT_DB, cli, console, get_engine
+from babylon60.cli.errors import err_empty_results, handle_cli_error
 
 __all__ = [
     "snapshot_create",
@@ -116,7 +116,7 @@ def snapshot_create(name, db):
     """Create a new physical snapshot."""
 
     async def _snapshot_create_async():
-        from cortex.engine.snapshots import SnapshotManager
+        from babylon60.engine.snapshots import SnapshotManager
 
         engine = get_engine(db)
         try:
@@ -154,7 +154,7 @@ def snapshot_list(db):
     async def _snapshot_list_async():
         import sqlite3
 
-        from cortex.engine.snapshots import SnapshotManager
+        from babylon60.engine.snapshots import SnapshotManager
 
         try:
             sm = SnapshotManager(db_path=db)

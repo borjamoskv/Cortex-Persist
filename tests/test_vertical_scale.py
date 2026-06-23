@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cortex.database.core import (
+from babylon60.database.core import (
     CACHE_SIZE_KB,
     PAGE_SIZE,
     connect,
@@ -78,7 +78,7 @@ class TestSQLitePragmasAsync:
     @pytest.mark.asyncio
     async def test_pragmas_applied_async(self, tmp_path):
         """Async connections get the same pragmas."""
-        from cortex.database.core import connect_async
+        from babylon60.database.core import connect_async
 
         db = str(tmp_path / "async_test.db")
         conn = await connect_async(db)
@@ -106,7 +106,7 @@ class TestWriterPragmaDedup:
 
     def test_writer_no_duplicate_pragmas(self):
         """_create_connection must NOT contain cache_size or temp_store."""
-        from cortex.database.writer import SqliteWriteWorker
+        from babylon60.database.writer import SqliteWriteWorker
 
         source = inspect.getsource(SqliteWriteWorker._create_connection)
         assert "cache_size" not in source
@@ -121,7 +121,7 @@ class TestDeviceResolution:
 
     def test_cpu_fallback_no_torch(self):
         """Without torch installed, device resolves to cpu."""
-        import cortex.embeddings.local as emb
+        import babylon60.embeddings.local as emb
 
         with patch.object(emb, "_DEVICE", "auto"):
             with patch.dict("sys.modules", {"torch": None}):
@@ -130,7 +130,7 @@ class TestDeviceResolution:
 
     def test_cuda_detection(self):
         """When CUDA is available, device resolves to cuda."""
-        import cortex.embeddings.local as emb
+        import babylon60.embeddings.local as emb
 
         mock_torch = MagicMock()
         mock_torch.cuda.is_available.return_value = True
@@ -143,7 +143,7 @@ class TestDeviceResolution:
 
     def test_mps_detection(self):
         """When MPS is available (no CUDA), device resolves to mps."""
-        import cortex.embeddings.local as emb
+        import babylon60.embeddings.local as emb
 
         mock_torch = MagicMock()
         mock_torch.cuda.is_available.return_value = False
@@ -156,8 +156,8 @@ class TestDeviceResolution:
 
     def test_env_override(self):
         """CORTEX_DEVICE env var overrides auto-detection."""
-        import cortex.embeddings as emb_pkg
-        import cortex.embeddings.local as emb
+        import babylon60.embeddings as emb_pkg
+        import babylon60.embeddings.local as emb
 
         with patch.object(emb, "_DEVICE", "auto"), patch.object(emb_pkg, "_DEVICE", "auto"):
             with patch.dict("os.environ", {"CORTEX_DEVICE": "cpu"}):
@@ -166,7 +166,7 @@ class TestDeviceResolution:
 
     def test_local_embedder_accepts_device(self):
         """LocalEmbedder constructor stores explicit device."""
-        from cortex.embeddings import LocalEmbedder
+        from babylon60.embeddings import LocalEmbedder
 
         embedder = LocalEmbedder(device="cpu")
         assert embedder._device == "cpu"

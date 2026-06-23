@@ -3,8 +3,8 @@ import logging
 
 import click
 
-from cortex.cli.common import cli
-from cortex.engine.runtime_kernel import CortexRuntime
+from babylon60.cli.common import cli
+from babylon60.engine.runtime_kernel import CortexRuntime
 
 logger = logging.getLogger(__name__)
 

@@ -5,8 +5,8 @@ Benchmark Git KV-DAG vs SQLite WAL under extreme load.
 
 import time
 import asyncio
-from cortex.engine.gaad.kv_dag import GaaDKVDAG
-from cortex.engine.storage_router import StorageRouter
+from babylon60.engine.gaad.kv_dag import GaaDKVDAG
+from babylon60.engine.storage_router import StorageRouter
 
 def test_gaad_o1_resolution():
     router = StorageRouter(use_gaad=True)

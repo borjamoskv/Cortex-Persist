@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for cortex.pipeline.executor - Agent Executor (stub mode).
+"""Tests for babylon60.pipeline.executor - Agent Executor (stub mode).
 
 C5-REAL audit remediation: pipeline/ coverage gap.
 Tests the executor in stub mode (no LLM infrastructure required)
@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.pipeline import ContextPacket
-from cortex.pipeline.executor import AgentExecutor
+from babylon60.pipeline import ContextPacket
+from babylon60.pipeline.executor import AgentExecutor
 
 
 # ── Construction ─────────────────────────────────────────────────────────

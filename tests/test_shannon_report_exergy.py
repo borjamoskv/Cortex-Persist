@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.extensions.shannon.report import EntropyReport
+from babylon60.extensions.shannon.report import EntropyReport
 
 
 def _make_scanner_mock() -> MagicMock:
@@ -65,7 +65,7 @@ async def test_analyze_includes_exergy_report():
     scanner = _make_scanner_mock()
     engine_mock = MagicMock()
 
-    with patch("cortex.extensions.shannon.report.MemoryScanner", return_value=scanner):
+    with patch("babylon60.extensions.shannon.report.MemoryScanner", return_value=scanner):
         result = await report.analyze(engine_mock)
 
     assert "exergy_report" in result
@@ -90,7 +90,7 @@ async def test_analyze_includes_dead_weight_bits():
     scanner = _make_scanner_mock()
     engine_mock = MagicMock()
 
-    with patch("cortex.extensions.shannon.report.MemoryScanner", return_value=scanner):
+    with patch("babylon60.extensions.shannon.report.MemoryScanner", return_value=scanner):
         result = await report.analyze(engine_mock)
 
     assert "dead_weight_bits" in result
@@ -105,7 +105,7 @@ async def test_exergy_report_nonzero_for_real_distributions():
     scanner = _make_scanner_mock()
     engine_mock = MagicMock()
 
-    with patch("cortex.extensions.shannon.report.MemoryScanner", return_value=scanner):
+    with patch("babylon60.extensions.shannon.report.MemoryScanner", return_value=scanner):
         result = await report.analyze(engine_mock)
 
     assert result["exergy_score"] > 0.0

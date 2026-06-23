@@ -5,9 +5,9 @@ Tests for CORTEX v1.0 Entropy Core
 
 import pytest
 from pathlib import Path
-from cortex.engine.entropy_core import EntropyCore, EntropyState, SystemRegime
-from cortex.guards.entropy_guard import EntropyGuardEngine, GuardAction
-from cortex.engine.decision_engine import DecisionEngine
+from babylon60.engine.entropy_core import EntropyCore, EntropyState, SystemRegime
+from babylon60.guards.entropy_guard import EntropyGuardEngine, GuardAction
+from babylon60.engine.decision_engine import DecisionEngine
 
 @pytest.fixture
 def mock_workspace(tmp_path):

@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """
-Tests for cortex.worker.enrichment (aiosqlite-backed EnrichmentWorker)
+Tests for babylon60.worker.enrichment (aiosqlite-backed EnrichmentWorker)
 ───────────────────────────────────────────────────────────────────────
 Coverage targets:
   - start / stop lifecycle
@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import aiosqlite
 import pytest
 
-from cortex.worker.enrichment import EnrichmentWorker
+from babylon60.worker.enrichment import EnrichmentWorker
 
 # ─── Schema helpers ───────────────────────────────────────────────────
 

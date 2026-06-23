@@ -9,8 +9,8 @@ from typing import Any
 
 import click
 
-from cortex.cli.common import DEFAULT_DB, cli
-from cortex.forensics.evidence_bundle import (
+from babylon60.cli.common import DEFAULT_DB, cli
+from babylon60.forensics.evidence_bundle import (
     build_evidence_manifest,
     commit_evidence_manifest,
     dump_evidence_manifest,

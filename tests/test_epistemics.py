@@ -1,6 +1,6 @@
 import pytest
 from pydantic import ValidationError
-from cortex.types.epistemics import (
+from babylon60.types.epistemics import (
     ObservationNode,
     InferenceNode,
     ConsensusNode,

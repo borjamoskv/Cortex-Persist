@@ -1,7 +1,7 @@
 # [C5-REAL] Metrics-Enforced
 import pytest
 import asyncio
-from cortex.pipeline.cve_orchestrator import CVEOrchestrator
+from babylon60.pipeline.cve_orchestrator import CVEOrchestrator
 
 @pytest.mark.asyncio
 async def test_cve_orchestrator_metrics():

@@ -15,7 +15,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import _run_async, cli, console
+from babylon60.cli.common import _run_async, cli, console
 
 
 @cli.command("storage-init-pg")
@@ -61,7 +61,7 @@ def storage_init_pg(dsn: str | None, dry_run: bool, skip_extensions: bool) -> No
         raise click.Abort()
 
     async def _run() -> None:
-        from cortex.storage.postgres import PostgresBackend
+        from babylon60.storage.postgres import PostgresBackend
 
         with console.status("[bold #CCFF00]Connecting to PostgreSQL...[/]"):
             backend = PostgresBackend(
@@ -88,7 +88,7 @@ def storage_init_pg(dsn: str | None, dry_run: bool, skip_extensions: bool) -> No
 
         # Skip extensions if requested
         if skip_extensions:
-            from cortex.storage.pg_schema import PG_ALL_SCHEMA
+            from babylon60.storage.pg_schema import PG_ALL_SCHEMA
 
             with console.status(
                 f"[bold blue]Applying {len(PG_ALL_SCHEMA)} schema statements (no extensions)...[/]"
@@ -137,7 +137,7 @@ def storage_status() -> None:
     """Show current storage backend mode and health."""
 
     async def _run() -> None:
-        from cortex.storage import get_storage_mode
+        from babylon60.storage import get_storage_mode
 
         mode = get_storage_mode()
 
@@ -165,7 +165,7 @@ def storage_status() -> None:
         else:  # local
             from pathlib import Path
 
-            from cortex.core.config import DB_PATH  # type: ignore[reportAttributeAccessIssue]
+            from babylon60.core.config import DB_PATH  # type: ignore[reportAttributeAccessIssue]
 
             grid.add_row("DB Path", str(DB_PATH))
             grid.add_row("Exists", "[#CCFF00]✓[/]" if Path(DB_PATH).exists() else "[red]✗[/]")
@@ -199,7 +199,7 @@ def _sanitize_dsn(dsn: str) -> str:
 
 async def _check_pg_health(dsn: str, grid: Table) -> None:
     """Probe PostgreSQL connectivity and add health row to grid."""
-    from cortex.storage.postgres import PostgresBackend
+    from babylon60.storage.postgres import PostgresBackend
 
     try:
         backend = PostgresBackend(

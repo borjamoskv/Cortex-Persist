@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from cortex.engine.genome import StrategyGenome, GenomeMutator, MutationType
-from cortex.isa.builder import dispatch, noop, cond, Predicate
+from babylon60.engine.genome import StrategyGenome, GenomeMutator, MutationType
+from babylon60.isa.builder import dispatch, noop, cond, Predicate
 
 
 def test_genome_creation():

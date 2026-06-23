@@ -15,8 +15,8 @@ from __future__ import annotations
 
 import math
 
-from cortex.extensions.shannon.analyzer import shannon_entropy
-from cortex.extensions.shannon.epistemology import (
+from babylon60.extensions.shannon.analyzer import shannon_entropy
+from babylon60.extensions.shannon.epistemology import (
     assembly_index_proxy,
     compression_intelligence,
     dpi_verify,

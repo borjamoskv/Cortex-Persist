@@ -21,8 +21,8 @@ import click
 import dotenv
 from rich.console import Console
 
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexPrompt
+from babylon60.extensions.llm.provider import LLMProvider
+from babylon60.extensions.llm.router import CortexPrompt
 
 dotenv.load_dotenv()
 

@@ -46,9 +46,9 @@ def _temporarily_reset_modules(*names: str):
 
 
 def test_routes_package_import_is_lazy_without_fastapi() -> None:
-    package_name = "cortex.routes"
-    admin_module = "cortex.routes.admin"
-    graph_module = "cortex.routes.graph"
+    package_name = "babylon60.routes"
+    admin_module = "babylon60.routes.admin"
+    graph_module = "babylon60.routes.graph"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]
@@ -67,9 +67,9 @@ def test_routes_package_import_is_lazy_without_fastapi() -> None:
 
 
 def test_routes_submodules_materialize_on_demand() -> None:
-    package_name = "cortex.routes"
-    admin_module = "cortex.routes.admin"
-    graph_module = "cortex.routes.graph"
+    package_name = "babylon60.routes"
+    admin_module = "babylon60.routes.admin"
+    graph_module = "babylon60.routes.graph"
 
     with _temporarily_reset_modules(package_name, admin_module, graph_module):
         module = importlib.import_module(package_name)
@@ -80,10 +80,10 @@ def test_routes_submodules_materialize_on_demand() -> None:
 
 
 def test_ledger_origin_signatures_materialize_on_demand() -> None:
-    package_name = "cortex.ledger"
-    models_module = "cortex.ledger.models"
-    origin_module = "cortex.ledger.origin"
-    replay_module = "cortex.ledger.replay"
+    package_name = "babylon60.ledger"
+    models_module = "babylon60.ledger.models"
+    origin_module = "babylon60.ledger.origin"
+    replay_module = "babylon60.ledger.replay"
 
     with _temporarily_reset_modules(package_name, models_module, origin_module, replay_module):
         module = importlib.import_module(package_name)
@@ -102,8 +102,8 @@ def test_ledger_origin_signatures_materialize_on_demand() -> None:
 
 
 def test_browser_package_import_is_lazy_without_playwright() -> None:
-    package_name = "cortex.extensions.browser"
-    engine_module = "cortex.extensions.browser.engine"
+    package_name = "babylon60.extensions.browser"
+    engine_module = "babylon60.extensions.browser.engine"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]
@@ -121,10 +121,10 @@ def test_browser_package_import_is_lazy_without_playwright() -> None:
 
 
 def test_gate_package_import_is_lazy() -> None:
-    package_name = "cortex.extensions.gate"
-    core_module = "cortex.extensions.gate.core"
-    errors_module = "cortex.extensions.gate.errors"
-    enums_module = "cortex.extensions.gate.enums"
+    package_name = "babylon60.extensions.gate"
+    core_module = "babylon60.extensions.gate.core"
+    errors_module = "babylon60.extensions.gate.errors"
+    enums_module = "babylon60.extensions.gate.enums"
 
     with _temporarily_reset_modules(package_name, core_module, errors_module, enums_module):
         module = importlib.import_module(package_name)
@@ -137,10 +137,10 @@ def test_gate_package_import_is_lazy() -> None:
 
 
 def test_gate_public_exports_materialize_on_demand() -> None:
-    package_name = "cortex.extensions.gate"
-    core_module = "cortex.extensions.gate.core"
-    errors_module = "cortex.extensions.gate.errors"
-    enums_module = "cortex.extensions.gate.enums"
+    package_name = "babylon60.extensions.gate"
+    core_module = "babylon60.extensions.gate.core"
+    errors_module = "babylon60.extensions.gate.errors"
+    enums_module = "babylon60.extensions.gate.enums"
 
     with _temporarily_reset_modules(package_name, core_module, errors_module, enums_module):
         module = importlib.import_module(package_name)
@@ -153,9 +153,9 @@ def test_gate_public_exports_materialize_on_demand() -> None:
 
 
 def test_signals_package_import_is_lazy_without_aiosqlite() -> None:
-    package_name = "cortex.extensions.signals"
-    bus_module = "cortex.extensions.signals.bus"
-    models_module = "cortex.extensions.signals.models"
+    package_name = "babylon60.extensions.signals"
+    bus_module = "babylon60.extensions.signals.bus"
+    models_module = "babylon60.extensions.signals.models"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]
@@ -174,9 +174,9 @@ def test_signals_package_import_is_lazy_without_aiosqlite() -> None:
 
 
 def test_signals_public_exports_materialize_on_demand() -> None:
-    package_name = "cortex.extensions.signals"
-    bus_module = "cortex.extensions.signals.bus"
-    models_module = "cortex.extensions.signals.models"
+    package_name = "babylon60.extensions.signals"
+    bus_module = "babylon60.extensions.signals.bus"
+    models_module = "babylon60.extensions.signals.models"
 
     with _temporarily_reset_modules(package_name, bus_module, models_module):
         module = importlib.import_module(package_name)
@@ -189,9 +189,9 @@ def test_signals_public_exports_materialize_on_demand() -> None:
 
 
 def test_metering_package_import_is_lazy() -> None:
-    package_name = "cortex.extensions.metering"
-    quotas_module = "cortex.extensions.metering.quotas"
-    tracker_module = "cortex.extensions.metering.tracker"
+    package_name = "babylon60.extensions.metering"
+    quotas_module = "babylon60.extensions.metering.quotas"
+    tracker_module = "babylon60.extensions.metering.tracker"
 
     with _temporarily_reset_modules(package_name, quotas_module, tracker_module):
         module = importlib.import_module(package_name)
@@ -203,9 +203,9 @@ def test_metering_package_import_is_lazy() -> None:
 
 
 def test_metering_public_exports_materialize_on_demand() -> None:
-    package_name = "cortex.extensions.metering"
-    quotas_module = "cortex.extensions.metering.quotas"
-    tracker_module = "cortex.extensions.metering.tracker"
+    package_name = "babylon60.extensions.metering"
+    quotas_module = "babylon60.extensions.metering.quotas"
+    tracker_module = "babylon60.extensions.metering.tracker"
 
     with _temporarily_reset_modules(package_name, quotas_module, tracker_module):
         module = importlib.import_module(package_name)
@@ -218,11 +218,11 @@ def test_metering_public_exports_materialize_on_demand() -> None:
 
 
 def test_search_package_import_is_lazy_without_aiosqlite() -> None:
-    package_name = "cortex.search"
-    hybrid_module = "cortex.search.hybrid"
-    models_module = "cortex.search.models"
-    text_module = "cortex.search.text"
-    vector_module = "cortex.search.vector"
+    package_name = "babylon60.search"
+    hybrid_module = "babylon60.search.hybrid"
+    models_module = "babylon60.search.models"
+    text_module = "babylon60.search.text"
+    vector_module = "babylon60.search.vector"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]
@@ -249,10 +249,10 @@ def test_search_package_import_is_lazy_without_aiosqlite() -> None:
 
 
 def test_search_public_exports_materialize_on_demand() -> None:
-    package_name = "cortex.search"
-    causal_gap_module = "cortex.search.causal_gap"
-    hybrid_module = "cortex.search.hybrid"
-    models_module = "cortex.search.models"
+    package_name = "babylon60.search"
+    causal_gap_module = "babylon60.search.causal_gap"
+    hybrid_module = "babylon60.search.hybrid"
+    models_module = "babylon60.search.models"
 
     with _temporarily_reset_modules(
         package_name,
@@ -273,9 +273,9 @@ def test_search_public_exports_materialize_on_demand() -> None:
 
 
 def test_gateway_package_import_is_lazy_without_aiosqlite() -> None:
-    package_name = "cortex.gateway"
-    router_module = "cortex.gateway.router"
-    bus_module = "cortex.extensions.signals.bus"
+    package_name = "babylon60.gateway"
+    router_module = "babylon60.gateway.router"
+    bus_module = "babylon60.extensions.signals.bus"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]
@@ -294,9 +294,9 @@ def test_gateway_package_import_is_lazy_without_aiosqlite() -> None:
 
 
 def test_gateway_adapters_package_import_is_lazy_without_fastapi() -> None:
-    package_name = "cortex.gateway.adapters"
-    rest_module = "cortex.gateway.adapters.rest"
-    telegram_module = "cortex.gateway.adapters.telegram"
+    package_name = "babylon60.gateway.adapters"
+    rest_module = "babylon60.gateway.adapters.rest"
+    telegram_module = "babylon60.gateway.adapters.telegram"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]
@@ -315,9 +315,9 @@ def test_gateway_adapters_package_import_is_lazy_without_fastapi() -> None:
 
 
 def test_ledger_package_import_is_lazy_without_aiosqlite() -> None:
-    package_name = "cortex.ledger"
-    core_module = "cortex.ledger.ledger_core"
-    models_module = "cortex.ledger.models"
+    package_name = "babylon60.ledger"
+    core_module = "babylon60.ledger.ledger_core"
+    models_module = "babylon60.ledger.models"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]
@@ -336,9 +336,9 @@ def test_ledger_package_import_is_lazy_without_aiosqlite() -> None:
 
 
 def test_ledger_public_exports_materialize_on_demand() -> None:
-    package_name = "cortex.ledger"
-    core_module = "cortex.ledger.ledger_core"
-    models_module = "cortex.ledger.models"
+    package_name = "babylon60.ledger"
+    core_module = "babylon60.ledger.ledger_core"
+    models_module = "babylon60.ledger.models"
 
     with _temporarily_reset_modules(package_name, core_module, models_module):
         module = importlib.import_module(package_name)
@@ -351,11 +351,11 @@ def test_ledger_public_exports_materialize_on_demand() -> None:
 
 
 def test_graph_package_import_is_lazy_without_aiosqlite() -> None:
-    package_name = "cortex.graph"
-    backends_module = "cortex.graph.backends"
-    engine_module = "cortex.graph.engine"
-    models_module = "cortex.graph.models"
-    sqlite_backend_module = "cortex.graph.backends.sqlite"
+    package_name = "babylon60.graph"
+    backends_module = "babylon60.graph.backends"
+    engine_module = "babylon60.graph.engine"
+    models_module = "babylon60.graph.models"
+    sqlite_backend_module = "babylon60.graph.backends.sqlite"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]
@@ -382,14 +382,14 @@ def test_graph_package_import_is_lazy_without_aiosqlite() -> None:
 
 
 def test_sync_package_import_is_lazy_without_crypto_stack() -> None:
-    package_name = "cortex.extensions.sync"
-    common_module = "cortex.extensions.sync.common"
-    write_module = "cortex.extensions.sync.write"
+    package_name = "babylon60.extensions.sync"
+    common_module = "babylon60.extensions.sync.common"
+    write_module = "babylon60.extensions.sync.write"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]
-        if name == "cortex.crypto" or name.startswith("cortex.crypto."):
-            raise ImportError("blocked optional dependency: cortex.crypto")
+        if name == "babylon60.crypto" or name.startswith("babylon60.crypto."):
+            raise ImportError("blocked optional dependency: babylon60.crypto")
         return real_import(name, globals, locals, fromlist, level)
 
     with _temporarily_reset_modules(package_name, common_module, write_module):

@@ -12,7 +12,7 @@ import json
 import aiosqlite
 import pytest
 
-from cortex.engine.fact_store_core import insert_fact_record
+from babylon60.engine.fact_store_core import insert_fact_record
 
 # ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -119,7 +119,7 @@ async def test_parent_decision_id_creates_causal_edge(
     """A fact with explicit parent_decision_id creates a derived_from edge."""
     # Stub crypto to avoid keyring/encryption
     monkeypatch.setattr(
-        "cortex.engine.fact_store_core.compute_fact_hash",
+        "babylon60.engine.fact_store_core.compute_fact_hash",
         lambda x: "deadbeef",
     )
 
@@ -130,13 +130,13 @@ async def test_parent_decision_id_creates_causal_edge(
         def encrypt_json(self, d: object, **kw: object) -> str:
             return json.dumps(d)
 
-    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
+    monkeypatch.setattr("babylon60.crypto.get_default_encrypter", lambda: FakeEnc())
 
     class FakeSigner:
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "babylon60.extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 
@@ -186,7 +186,7 @@ async def test_auto_resolved_parent_creates_edge(
 ) -> None:
     """Auto-resolved parent_decision_id (for decisions) creates edge."""
     monkeypatch.setattr(
-        "cortex.engine.fact_store_core.compute_fact_hash",
+        "babylon60.engine.fact_store_core.compute_fact_hash",
         lambda x: "deadbeef",
     )
 
@@ -197,13 +197,13 @@ async def test_auto_resolved_parent_creates_edge(
         def encrypt_json(self, d: object, **kw: object) -> str:
             return json.dumps(d)
 
-    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
+    monkeypatch.setattr("babylon60.crypto.get_default_encrypter", lambda: FakeEnc())
 
     class FakeSigner:
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "babylon60.extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 
@@ -254,7 +254,7 @@ async def test_parent_decision_id_cross_tenant_rejected(
 ) -> None:
     """A parent from another tenant must be rejected before persistence."""
     monkeypatch.setattr(
-        "cortex.engine.fact_store_core.compute_fact_hash",
+        "babylon60.engine.fact_store_core.compute_fact_hash",
         lambda x: "deadbeef",
     )
 
@@ -265,13 +265,13 @@ async def test_parent_decision_id_cross_tenant_rejected(
         def encrypt_json(self, d: object, **kw: object) -> str:
             return json.dumps(d)
 
-    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
+    monkeypatch.setattr("babylon60.crypto.get_default_encrypter", lambda: FakeEnc())
 
     class FakeSigner:
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "babylon60.extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 
@@ -317,7 +317,7 @@ async def test_no_duplicate_edge_when_causal_parent_exists(
 ) -> None:
     """When meta has causal_parent, parent_decision_id doesn't double-write."""
     monkeypatch.setattr(
-        "cortex.engine.fact_store_core.compute_fact_hash",
+        "babylon60.engine.fact_store_core.compute_fact_hash",
         lambda x: "deadbeef",
     )
 
@@ -328,13 +328,13 @@ async def test_no_duplicate_edge_when_causal_parent_exists(
         def encrypt_json(self, d: object, **kw: object) -> str:
             return json.dumps(d)
 
-    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
+    monkeypatch.setattr("babylon60.crypto.get_default_encrypter", lambda: FakeEnc())
 
     class FakeSigner:
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "babylon60.extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 
@@ -385,7 +385,7 @@ async def test_causal_write_fails_closed_when_edge_recording_fails(
 ) -> None:
     """If causal edge persistence fails, the write must abort loudly."""
     monkeypatch.setattr(
-        "cortex.engine.fact_store_core.compute_fact_hash",
+        "babylon60.engine.fact_store_core.compute_fact_hash",
         lambda x: "deadbeef",
     )
 
@@ -396,13 +396,13 @@ async def test_causal_write_fails_closed_when_edge_recording_fails(
         def encrypt_json(self, d: object, **kw: object) -> str:
             return json.dumps(d)
 
-    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
+    monkeypatch.setattr("babylon60.crypto.get_default_encrypter", lambda: FakeEnc())
 
     class FakeSigner:
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "babylon60.extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 
@@ -410,7 +410,7 @@ async def test_causal_write_fails_closed_when_edge_recording_fails(
         raise RuntimeError("boom")
 
     monkeypatch.setattr(
-        "cortex.engine.causality.AsyncCausalGraph.record_edge",
+        "babylon60.engine.causality.AsyncCausalGraph.record_edge",
         boom,
     )
 

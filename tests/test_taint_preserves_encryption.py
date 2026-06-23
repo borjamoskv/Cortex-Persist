@@ -10,8 +10,8 @@ import json
 import aiosqlite
 import pytest
 
-from cortex.crypto.aes import CortexEncrypter
-from cortex.engine.causality import KRGSE_DERIVED_FROM, AsyncCausalGraph, TaintStatus
+from babylon60.crypto.aes import CortexEncrypter
+from babylon60.engine.causality import KRGSE_DERIVED_FROM, AsyncCausalGraph, TaintStatus
 
 # Use a fixed 32-byte master key for deterministic testing
 TEST_MASTER_KEY = b"0" * 32
@@ -57,8 +57,8 @@ async def test_taint_preserves_encrypted_metadata(db, encrypter, monkeypatch):
     """Verify that propagating taint on encrypted metadata preserves it correctly."""
 
     # Mock the global encrypter used by AsyncCausalGraph
-    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: encrypter)
-    monkeypatch.setattr("cortex.engine.causality.get_default_encrypter", lambda: encrypter)
+    monkeypatch.setattr("babylon60.crypto.get_default_encrypter", lambda: encrypter)
+    monkeypatch.setattr("babylon60.engine.causality.get_default_encrypter", lambda: encrypter)
 
     graph = AsyncCausalGraph(db)
     tenant = "tenant-alpha"
@@ -115,8 +115,8 @@ async def test_taint_preserves_encrypted_metadata(db, encrypter, monkeypatch):
 @pytest.mark.asyncio
 async def test_taint_isolation_between_tenants(db, encrypter, monkeypatch):
     """Verify that taint does NOT cross tenant boundaries even if IDs overlap."""
-    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: encrypter)
-    monkeypatch.setattr("cortex.engine.causality.get_default_encrypter", lambda: encrypter)
+    monkeypatch.setattr("babylon60.crypto.get_default_encrypter", lambda: encrypter)
+    monkeypatch.setattr("babylon60.engine.causality.get_default_encrypter", lambda: encrypter)
 
     graph = AsyncCausalGraph(db)
 

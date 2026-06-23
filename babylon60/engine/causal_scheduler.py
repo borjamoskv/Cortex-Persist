@@ -1,0 +1,197 @@
+# [C5-REAL] Exergy-Maximized
+"""Causal Scheduler - Función de presión temporal y estabilidad del DAG.
+
+Árbitro de ejecución. Decide cuándo el sistema evoluciona y cuándo se
+congela el estado (mediante macro-rewinds o micro-repairs) basándose
+en el 'permission_to_exist_score'.
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from babylon60.ledger.causal_graph import CausalGraph
+    from babylon60.ledger.execution_trace import ExecutionTraceLedger
+
+logger = logging.getLogger("babylon60.engine.causal_scheduler")
+
+
+class CausalScheduler:
+    """Orquestador de termodinámica viva. Dicta el execution_mode global."""
+
+    def __init__(
+        self,
+        causal_graph: CausalGraph,
+        ledger: ExecutionTraceLedger,
+        rollback_threshold: float = 100.0,
+        permission_kill_threshold: float = 0.05,
+    ):
+        self.graph = causal_graph
+        self.ledger = ledger
+
+        # Risk threshold (impact * propagation) > 100 defaults to trigger
+        self.rollback_threshold = rollback_threshold
+
+        # Any trace with permission_to_exist_score < 0.05 is an immediate macro-rewind candidate
+        self.permission_kill_threshold = permission_kill_threshold
+
+        # Coherence thresholds
+        self.cf_threshold = 0.92
+        self.base_entropy_budget = 1000.0
+
+    async def _get_entropy_budget(self, tenant_id: str) -> float:
+        """Obtiene el EB histórico. Si no existe, lo inicializa."""
+        from babylon60.database.core import connect_async_ctx
+
+        # Se almacena en la db de trazas por conveniencia de este MVP
+        init_query = "CREATE TABLE IF NOT EXISTS thermodynamics_state (tenant_id TEXT PRIMARY KEY, entropy_budget REAL)"
+        async with connect_async_ctx(self.ledger.db_path) as conn:
+            await conn.execute(init_query)
+            cursor = await conn.execute(
+                "SELECT entropy_budget FROM thermodynamics_state WHERE tenant_id = ?", (tenant_id,)
+            )
+            row = await cursor.fetchone()
+            if not row:
+                await conn.execute(
+                    "INSERT OR IGNORE INTO thermodynamics_state (tenant_id, entropy_budget) VALUES (?, ?)",
+                    (tenant_id, self.base_entropy_budget),
+                )
+                await conn.commit()
+                return self.base_entropy_budget
+            return float(row[0])
+
+    async def _update_entropy_budget(self, tenant_id: str, new_budget: float) -> None:
+        from babylon60.database.core import connect_async_ctx
+
+        async with connect_async_ctx(self.ledger.db_path) as conn:
+            await conn.execute(
+                "UPDATE thermodynamics_state SET entropy_budget = ? WHERE tenant_id = ?",
+                (new_budget, tenant_id),
+            )
+            await conn.commit()
+
+    async def evaluate_tick(
+        self, window_seconds: int = 3600, tenant_id: str = "default"
+    ) -> dict[str, Any]:
+        """Evalúa el estado del sistema y la continuidad ontológica global (GCC)."""
+        try:
+            import cortex_native
+            has_rust_compiler = True
+        except ImportError:
+            has_rust_compiler = False
+
+        drift = await self.graph.compute_global_drift(window_seconds, tenant_id)
+        cf = await self.graph.compute_coherence_field(window_seconds, tenant_id)
+        eb = await self._get_entropy_budget(tenant_id)
+
+        risk_map = await self.graph.compute_node_risk_scores(window_seconds, tenant_id)
+
+        candidates = []
+        for n in risk_map:
+            # [C5-REAL] Fase 2: Compilador Causal Rust (Bypass de validación termodinámica)
+            if has_rust_compiler:
+                verdict = cortex_native.verify_causal_assertion(f"CLAIM:{n['id']}")
+                if verdict == "invalid":
+                    n["permission_to_exist_score"] = 0.0  # Falsación absoluta
+
+            if n["risk_score"] > self.rollback_threshold or n["permission_to_exist_score"] < self.permission_kill_threshold:
+                candidates.append(n)
+
+        # GCC Core Decision Matrix
+        # 1. Entropy Exhaustion (Chaos breakdown)
+        if eb < 0.0:
+            mode = "chaotic_irreversible"
+            candidates = []  # Se prohíben operaciones defensivas, el sistema entero arde
+        # 2. Coherence collapse (Fragmentación de realidad)
+        elif cf < self.cf_threshold:
+            mode = "coherence_lock"
+            candidates = []  # Bloquear nuevos rollbacks para reconciliar primero
+        # 3. Structural runaway
+        elif drift > 50.0 and len(candidates) >= 3:
+            mode = "collapse_prevent"
+        # 4. Drift growing
+        elif drift > 20.0 or len(candidates) > 0:
+            mode = "pressure"
+        # 5. Stable
+        else:
+            mode = "stable"
+
+        # Update EB roughly based on drift vs rollback costs (drift gain adds to budget)
+        # Un drift manejable añade presupuesto, un drift alto consume entropía
+        drift_gain = (20.0 - drift) * 0.1
+        # EB mutation applies immediately to reflect thermodynamic time
+        new_eb = eb + drift_gain
+        await self._update_entropy_budget(tenant_id, new_eb)
+
+        logger.debug(
+            "[Causal Scheduler] Tick Evaluated | Mode: %s | CF: %.2f | EB: %.2f | Drift: %.2f | Candidates: %d",
+            mode,
+            cf,
+            new_eb,
+            drift,
+            len(candidates),
+        )
+
+        return {
+            "drift": drift,
+            "cf": cf,
+            "eb": new_eb,
+            "rollback_candidates": candidates,
+            "execution_mode": mode,
+        }
+
+    async def tick_and_act(
+        self, window_seconds: int = 3600, tenant_id: str = "default"
+    ) -> dict[str, Any]:
+        """Evalúa el tick y ejecuta acciones si hay permiso global."""
+        tick_state = await self.evaluate_tick(window_seconds, tenant_id)
+
+        mode = tick_state["execution_mode"]
+        actions_taken = []
+
+        if mode == "chaotic_irreversible":
+            logger.critical(
+                "[Causal Scheduler] ENTROPY BUDGET < 0. Sistema en caos irreversible. Rollbacks suspendidos."
+            )
+
+        elif mode == "coherence_lock":
+            logger.warning(
+                f"[Causal Scheduler] COHERENCE FIELD < {self.cf_threshold}. Bloqueando mutaciones hasta reconciliación causal."
+            )
+
+        elif mode == "collapse_prevent":
+            # P0: Sistema en colapso. Debido a la erradicación de SAGA,
+            # el macro-rewind ya no existe en la capa aplicativa.
+            # Se delega la atomicidad directamente al MTK / SQLite WAL.
+            logger.critical(
+                "[Causal Scheduler] COLLAPSE PREVENT ACTIVATED. SAGA Erradicado. "
+                "Corte físico forzado en el límite MTK. Dependiendo de WAL isolation."
+            )
+            # Ya no se descuenta costo de rollback pues no hay rollback lógico.
+
+
+        elif mode == "pressure":
+            # Micro-repair / Logging / Allow Ley2Loop to handle it via future bias
+            logger.info(
+                "[Causal Scheduler] Estado de Presión. Confiando en Ley2Loop para drift shaping."
+            )
+
+        return {"tick_state": tick_state, "actions": actions_taken}
+
+    async def inject_exergy(self, target_id: str, exergy_value: float, tenant_id: str = "default") -> None:
+        """
+        [C5-REAL] Injects exergy into the thermodynamic state.
+        This increases the entropy budget, allowing the system to run more operations
+        and repair itself.
+        """
+        eb = await self._get_entropy_budget(tenant_id)
+        # Increase the entropy budget by the exergy yield (scaled to Base-60 proportional units)
+        new_eb = eb + exergy_value
+        await self._update_entropy_budget(tenant_id, new_eb)
+        logger.info(
+            "[Causal Scheduler] Exergy Injected | Target: %s | Delta EB: +%.4f | New EB: %.4f",
+            target_id, exergy_value, new_eb
+        )
+

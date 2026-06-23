@@ -24,7 +24,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.notebooklm_data import (
+from babylon60.cli.notebooklm_data import (
     _PROJECT_DOMAIN,
     DIGEST_FILE,
     DOMAINS_DIR,
@@ -282,9 +282,9 @@ def ingest_cmd(drive_path: str | None) -> None:
     """Silent daemon-like ingest: Parse NotebookLM notes back into CORTEX."""
     import json
 
-    from cortex.cli.common import get_engine
-    from cortex.extensions.llm.router import IntentProfile
-    from cortex.extensions.llm.sovereign import SovereignLLM
+    from babylon60.cli.common import get_engine
+    from babylon60.extensions.llm.router import IntentProfile
+    from babylon60.extensions.llm.sovereign import SovereignLLM
 
     if drive_path:
         target = Path(drive_path)

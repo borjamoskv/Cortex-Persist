@@ -2,7 +2,7 @@
 import pytest
 import asyncio
 from pathlib import Path
-from cortex.engine import CortexEngine
+from babylon60.engine import CortexEngine
 
 
 @pytest.mark.asyncio
@@ -31,8 +31,8 @@ async def test_engine_lifecycle(tmp_path):
     from unittest.mock import patch
 
     with (
-        patch("cortex.engine._engine_connection.run_migrations_async"),
-        patch("cortex.engine.PersistenceSupervisor.start"),
+        patch("babylon60.engine._engine_connection.run_migrations_async"),
+        patch("babylon60.engine.PersistenceSupervisor.start"),
     ):
         await engine.init_db()
         assert engine.get_connection() is not None

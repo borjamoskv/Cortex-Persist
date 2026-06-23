@@ -9,11 +9,11 @@ Verifies:
 
 import asyncio
 import pytest
-from cortex.router.router import AgentRouter, AgentCapability
-from cortex.router.cascade import AsyncCascadeRouter
-from cortex.sica.object_level import ExecutionTrace, StepOutcome
-from cortex.sica.meta_level import MetaLevel, FailureClass
-from cortex.sica.strategy import SearchStrategy, StrategyGenome
+from babylon60.router.router import AgentRouter, AgentCapability
+from babylon60.router.cascade import AsyncCascadeRouter
+from babylon60.sica.object_level import ExecutionTrace, StepOutcome
+from babylon60.sica.meta_level import MetaLevel, FailureClass
+from babylon60.sica.strategy import SearchStrategy, StrategyGenome
 
 @pytest.mark.asyncio
 async def test_cascade_smoke_001():

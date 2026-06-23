@@ -5,8 +5,8 @@ from pathlib import Path
 
 import httpx
 
-from cortex.extensions.aether.github_ingestor import GitHubIngestor
-from cortex.extensions.aether.queue import TaskQueue
+from babylon60.extensions.aether.github_ingestor import GitHubIngestor
+from babylon60.extensions.aether.queue import TaskQueue
 
 
 def _issue(number: int, title: str, repo: str) -> dict:

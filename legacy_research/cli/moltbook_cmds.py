@@ -36,7 +36,7 @@ def moltbook_cmds():
 )
 def register(name: str, description: str):
     """Register MOSKV-1 on Moltbook."""
-    from cortex.extensions.moltbook.client import MoltbookClient
+    from babylon60.extensions.moltbook.client import MoltbookClient
 
     client = MoltbookClient(api_key="dummy")  # No auth needed for register
     result = asyncio.run(client.register(name, description))
@@ -62,7 +62,7 @@ def register(name: str, description: str):
 @moltbook_cmds.command("status")
 def status():
     """Check agent claim status and profile."""
-    from cortex.extensions.moltbook.client import MoltbookClient, MoltbookError
+    from babylon60.extensions.moltbook.client import MoltbookClient, MoltbookError
 
     try:
         client = MoltbookClient()
@@ -93,7 +93,7 @@ def status():
 @moltbook_cmds.command("heartbeat")
 def heartbeat():
     """Run a Moltbook heartbeat check-in cycle."""
-    from cortex.extensions.moltbook.heartbeat import MoltbookHeartbeat
+    from babylon60.extensions.moltbook.heartbeat import MoltbookHeartbeat
 
     console.print("[dim]🦞 Running Moltbook heartbeat...[/]")
     hb = MoltbookHeartbeat()
@@ -117,7 +117,7 @@ def heartbeat():
 @click.option("--content", "-c", default="", help="Post content")
 def post(submolt: str, title: str, content: str):
     """Create a post with auto-verification."""
-    from cortex.extensions.moltbook.heartbeat import MoltbookHeartbeat
+    from babylon60.extensions.moltbook.heartbeat import MoltbookHeartbeat
 
     hb = MoltbookHeartbeat()
     result = asyncio.run(hb.create_verified_post(submolt, title, content))
@@ -146,7 +146,7 @@ def post(submolt: str, title: str, content: str):
 @click.option("--limit", "-l", default=10, help="Max results")
 def search(query: str, search_type: str, limit: int):
     """Semantic search across Moltbook."""
-    from cortex.extensions.moltbook.client import MoltbookClient
+    from babylon60.extensions.moltbook.client import MoltbookClient
 
     client = MoltbookClient()
     result = asyncio.run(client.search(query, search_type=search_type, limit=limit))
@@ -176,7 +176,7 @@ def search(query: str, search_type: str, limit: int):
 @click.option("--limit", "-l", default=15, help="Max posts")
 def feed(sort: str, limit: int):
     """Browse the Moltbook feed."""
-    from cortex.extensions.moltbook.client import MoltbookClient
+    from babylon60.extensions.moltbook.client import MoltbookClient
 
     client = MoltbookClient()
     result = asyncio.run(client.get_feed(sort=sort, limit=limit))

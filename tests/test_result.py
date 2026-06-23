@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.utils.result import Err, Ok, safe, safe_async
+from babylon60.utils.result import Err, Ok, safe, safe_async
 
 # ─── Ok / Err Construction ───────────────────────────────────────────
 

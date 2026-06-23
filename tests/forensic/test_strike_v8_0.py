@@ -4,8 +4,8 @@ import time
 
 import pytest
 
-from cortex.engine.swarm_10k import ForensicLegion, SwarmCommander
-from cortex.forensics.forensic_strike import ForensicStrikeCommander, StrikeTarget
+from babylon60.engine.swarm_10k import ForensicLegion, SwarmCommander
+from babylon60.forensics.forensic_strike import ForensicStrikeCommander, StrikeTarget
 
 
 @pytest.mark.asyncio

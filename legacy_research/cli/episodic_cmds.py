@@ -19,7 +19,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, get_engine
+from babylon60.cli.common import DEFAULT_DB, cli, get_engine
 
 __all__ = [
     "boot_cmd",
@@ -88,7 +88,7 @@ async def _record_async(
     tags: str,
     db: str,
 ) -> None:
-    from cortex.extensions.episodic.main import EpisodicMemory
+    from babylon60.extensions.episodic.main import EpisodicMemory
 
     engine = get_engine(db)
     await engine.init_db()
@@ -154,7 +154,7 @@ async def _recall_async(
     as_json: bool,
     db: str,
 ) -> None:
-    from cortex.extensions.episodic.main import EpisodicMemory
+    from babylon60.extensions.episodic.main import EpisodicMemory
 
     engine = get_engine(db)
     await engine.init_db()
@@ -237,7 +237,7 @@ async def _patterns_async(
     as_json: bool,
     db: str,
 ) -> None:
-    from cortex.extensions.episodic.main import EpisodicMemory
+    from babylon60.extensions.episodic.main import EpisodicMemory
 
     engine = get_engine(db)
     await engine.init_db()
@@ -307,7 +307,7 @@ async def _boot_async(
     as_json: bool,
     db: str,
 ) -> None:
-    from cortex.extensions.episodic.boot import generate_session_boot
+    from babylon60.extensions.episodic.boot import generate_session_boot
 
     engine = get_engine(db)
     await engine.init_db()
@@ -369,7 +369,7 @@ def observe_cmd(
     db: str,
 ) -> None:
     """Start the real-time perception observer in the foreground."""
-    from cortex.cli.episodic_observe import run_observe
+    from babylon60.cli.episodic_observe import run_observe
 
     run_observe(workspace, db, console)
 

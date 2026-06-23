@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for cortex.compliance.tracker - ComplianceTracker SDK.
+"""Tests for babylon60.compliance.tracker - ComplianceTracker SDK.
 
 Validates the 3-method EU AI Act compliance API:
 log_decision(), verify_chain(), export_audit().
@@ -22,9 +22,9 @@ pytestmark = [
 @pytest.fixture
 def tracker(tmp_path: Path):
     """Create a ComplianceTracker with a temp database."""
-    from cortex.compliance import ComplianceTracker
-    from cortex.compliance.policy_engine import PolicyEngine
-    from cortex.compliance.comply_signer import ComplySigner
+    from babylon60.compliance import ComplianceTracker
+    from babylon60.compliance.policy_engine import PolicyEngine
+    from babylon60.compliance.comply_signer import ComplySigner
 
     t = ComplianceTracker(db_path=str(tmp_path / "compliance_test.db"), project="test-agent")
     t._signer = ComplySigner(keys_dir=tmp_path / "keys")
@@ -66,7 +66,7 @@ class TestLogDecision:
         conn.close()
         assert row is not None
 
-        from cortex.crypto import get_default_encrypter
+        from babylon60.crypto import get_default_encrypter
 
         enc = get_default_encrypter()
         meta = enc.decrypt_json(row[0], tenant_id="default")
@@ -88,7 +88,7 @@ class TestLogDecision:
         row = cursor.fetchone()
         conn.close()
 
-        from cortex.crypto import get_default_encrypter
+        from babylon60.crypto import get_default_encrypter
 
         enc = get_default_encrypter()
         meta = enc.decrypt_json(row[0], tenant_id="default")
@@ -213,9 +213,9 @@ class TestExportAudit:
 
 class TestContextManager:
     def test_context_manager_works(self, tmp_path: Path):
-        from cortex.compliance import ComplianceTracker
-        from cortex.compliance.policy_engine import PolicyEngine
-        from cortex.compliance.comply_signer import ComplySigner
+        from babylon60.compliance import ComplianceTracker
+        from babylon60.compliance.policy_engine import PolicyEngine
+        from babylon60.compliance.comply_signer import ComplySigner
 
         with ComplianceTracker(
             db_path=str(tmp_path / "ctx_test.db"),

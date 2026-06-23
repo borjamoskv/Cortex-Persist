@@ -2,7 +2,7 @@
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
-from cortex.engine.event_sovereignty import EventSovereigntyRuntime
+from babylon60.engine.event_sovereignty import EventSovereigntyRuntime
 
 
 @pytest.mark.asyncio
@@ -43,7 +43,7 @@ async def test_event_sovereignty_runtime_telemetry():
 
 @pytest.mark.asyncio
 async def test_auth_gateway_override():
-    from cortex.engine.auth_gateway import QuorumGateway
+    from babylon60.engine.auth_gateway import QuorumGateway
 
     mock_engine = MagicMock()
     mock_pool = MagicMock()

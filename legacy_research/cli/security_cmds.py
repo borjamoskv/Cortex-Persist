@@ -16,9 +16,9 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import cli
+from babylon60.cli.common import cli
 
-logger = logging.getLogger("cortex.cli.security")
+logger = logging.getLogger("babylon60.cli.security")
 
 console = Console()
 
@@ -31,8 +31,8 @@ def security_cli() -> None:
 @security_cli.command("status")
 def security_status() -> None:
     """Show shield health dashboard."""
-    from cortex.extensions.security.anomaly_detector import DETECTOR
-    from cortex.extensions.security.threat_feed import ThreatFeedEngine
+    from babylon60.extensions.security.anomaly_detector import DETECTOR
+    from babylon60.extensions.security.threat_feed import ThreatFeedEngine
 
     engine = ThreatFeedEngine()
     last_update = engine.get_last_update()
@@ -94,8 +94,8 @@ def security_status() -> None:
 @click.option("--file", "-f", "filepath", help="Scan content from file")
 def security_scan(content: str | None, filepath: str | None) -> None:
     """Manual full scan of content."""
-    from cortex.extensions.security.injection_guard import GUARD
-    from cortex.extensions.security.threat_feed import ThreatFeedEngine
+    from babylon60.extensions.security.injection_guard import GUARD
+    from babylon60.extensions.security.threat_feed import ThreatFeedEngine
 
     if filepath:
         from pathlib import Path
@@ -171,7 +171,7 @@ def security_scan(content: str | None, filepath: str | None) -> None:
 @security_cli.command("update")
 def security_update() -> None:
     """Force threat feed refresh from remote sources."""
-    from cortex.extensions.security.threat_feed import ThreatFeedEngine
+    from babylon60.extensions.security.threat_feed import ThreatFeedEngine
 
     engine = ThreatFeedEngine()
 
@@ -197,7 +197,7 @@ def security_update() -> None:
 @security_cli.command("audit")
 def security_audit() -> None:
     """Run integrity audit (hash chain + signatures)."""
-    from cortex.extensions.security.integrity_audit import IntegrityAuditor
+    from babylon60.extensions.security.integrity_audit import IntegrityAuditor
 
     auditor = IntegrityAuditor()
 
@@ -228,8 +228,8 @@ def security_audit() -> None:
 @security_cli.command("report")
 def security_report() -> None:
     """Generate daily security report."""
-    from cortex.extensions.security.anomaly_detector import DETECTOR
-    from cortex.extensions.security.threat_feed import ThreatFeedEngine
+    from babylon60.extensions.security.anomaly_detector import DETECTOR
+    from babylon60.extensions.security.threat_feed import ThreatFeedEngine
 
     engine = ThreatFeedEngine()
     stats = DETECTOR.get_daily_stats()
@@ -266,7 +266,7 @@ def honeypot_group() -> None:
 @click.argument("project", default="general")
 def honeypot_generate(project: str) -> None:
     """Generate a new synthetic secret (decoy)."""
-    from cortex.extensions.security.honeypot import HONEY_POT
+    from babylon60.extensions.security.honeypot import HONEY_POT
 
     decoy = HONEY_POT.generate_decoy(project)
 
@@ -286,7 +286,7 @@ def honeypot_generate(project: str) -> None:
 @honeypot_group.command("list")
 def honeypot_list() -> None:
     """List all active honeypot traps."""
-    from cortex.extensions.security.honeypot import HONEY_POT
+    from babylon60.extensions.security.honeypot import HONEY_POT
 
     if not HONEY_POT._active_honeypots:
         console.print("[yellow]No active honeypots.[/yellow]")
@@ -320,7 +320,7 @@ def honeypot_list() -> None:
 @click.argument("mood", type=click.Choice(["clean", "scanning", "anomaly", "threat", "pruning"]))
 def security_test_sync(mood: str) -> None:
     """Test visual synchronization with the Notch."""
-    from cortex.extensions.security.security_sync import SIGNAL
+    from babylon60.extensions.security.security_sync import SIGNAL
 
     console.print(f"Emitting [bold cyan]{mood}[/bold cyan] signal to Notch...")
     SIGNAL.emit_sync(mood, {"test": True})

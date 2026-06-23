@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 from unittest.mock import AsyncMock
-from cortex.verification.counterexample import learn_from_failure
+from babylon60.verification.counterexample import learn_from_failure
 
 
 @pytest.mark.asyncio

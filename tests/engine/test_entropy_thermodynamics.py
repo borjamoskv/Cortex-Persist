@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from cortex.engine.entropy import ThermodynamicContextCompressor
-from cortex.engine.babylon60 import Babylon60
+from babylon60.engine.entropy import ThermodynamicContextCompressor
+from babylon60.engine.babylon60 import Babylon60
 
 def test_shannon_entropy_calculation():
     # Test blank string yields 0 entropy

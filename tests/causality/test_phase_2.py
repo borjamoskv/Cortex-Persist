@@ -24,10 +24,10 @@ import inspect
 import aiosqlite
 import pytest
 
-from cortex.engine.fact_store_core import insert_fact_record
-from cortex.engine.mixins.base import FACT_COLUMNS
-from cortex.engine.models import Fact
-from cortex.engine.query_mixin import QueryMixin
+from babylon60.engine.fact_store_core import insert_fact_record
+from babylon60.engine.mixins.base import FACT_COLUMNS
+from babylon60.engine.models import Fact
+from babylon60.engine.query_mixin import QueryMixin
 
 
 class TestTypeReconciliation:
@@ -36,7 +36,7 @@ class TestTypeReconciliation:
     def test_memory_model_type(self):
         import typing
 
-        from cortex.memory.models import CortexFactModel
+        from babylon60.memory.models import CortexFactModel
 
         field = CortexFactModel.model_fields["parent_decision_id"]
         args = typing.get_args(field.annotation)

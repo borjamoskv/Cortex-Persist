@@ -12,16 +12,16 @@ from pathlib import Path
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from cortex.ledger.models import ActionResult, ActionTarget, LedgerEvent
-from cortex.ledger.origin import OriginKeyRecord, OriginKeyRegistry, OriginSignaturePolicy
-from cortex.ledger.queue import EnrichmentQueue
-from cortex.ledger.replay import (
+from babylon60.ledger.models import ActionResult, ActionTarget, LedgerEvent
+from babylon60.ledger.origin import OriginKeyRecord, OriginKeyRegistry, OriginSignaturePolicy
+from babylon60.ledger.queue import EnrichmentQueue
+from babylon60.ledger.replay import (
     ReplayAdmissionError,
     ReplayAdmissionPolicy,
     validate_batch_import_manifest,
 )
-from cortex.ledger.store import LedgerStore
-from cortex.ledger.writer import LedgerWriter
+from babylon60.ledger.store import LedgerStore
+from babylon60.ledger.writer import LedgerWriter
 
 ACTOR_ID = "agent-risk-01"
 TENANT_ID = "tenant-acme"
@@ -166,7 +166,7 @@ def test_replay_constraints_are_tenant_scoped_for_event_ids_and_nonces(tmp_path:
 def test_batch_import_without_manifest_is_rejected_but_offline_verify_stays_limited(
     tmp_path: Path,
 ) -> None:
-    from cortex.ledger.public_verifier import verify_export
+    from babylon60.ledger.public_verifier import verify_export
 
     export_dir = tmp_path / "export"
     shutil.copytree(STRICT, export_dir)
@@ -303,7 +303,7 @@ def _signed_event(
     action: str = "fact.store",
     issued_at: str = ISSUED_AT,
 ) -> LedgerEvent:
-    from cortex.ledger.origin import sign_event_origin
+    from babylon60.ledger.origin import sign_event_origin
 
     event = LedgerEvent.new(
         tool="agent-runtime",

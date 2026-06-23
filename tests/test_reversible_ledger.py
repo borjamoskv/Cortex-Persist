@@ -1,5 +1,5 @@
 import pytest
-from cortex.engine.reversible_ledger import ReversibleLedger
+from babylon60.engine.reversible_ledger import ReversibleLedger
 
 def test_reversible_ledger_zero_erasure_h_reversible_01():
     ledger = ReversibleLedger()

@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for cortex.database.connection_guard - CI/lint scanner for raw sqlite3 usage.
+"""Tests for babylon60.database.connection_guard - CI/lint scanner for raw sqlite3 usage.
 
 C5-REAL audit remediation: database/ coverage gap.
 """
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from cortex.database.connection_guard import (
+from babylon60.database.connection_guard import (
     ConnectionViolation,
     _scan_file_lines,
     scan_raw_connects,
@@ -93,7 +93,7 @@ class TestScanFileLines:
         py_file = tmp_path / "clean.py"
         py_file.write_text(
             textwrap.dedent("""\
-            from cortex.database.core import connect
+            from babylon60.database.core import connect
             conn = connect()
         """)
         )

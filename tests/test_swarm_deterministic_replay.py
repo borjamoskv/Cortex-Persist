@@ -19,8 +19,8 @@ import json
 
 import pytest
 
-from cortex.swarm.router import SwarmRouter
-from cortex.swarm.registry import AgentRegistry
+from babylon60.swarm.router import SwarmRouter
+from babylon60.swarm.registry import AgentRegistry
 
 
 # ---------------------------------------------------------------------------

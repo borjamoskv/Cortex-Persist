@@ -4,7 +4,7 @@ import shutil
 import time
 from pathlib import Path
 
-from cortex.engine.swarm_10k import SwarmCommander
+from babylon60.engine.swarm_10k import SwarmCommander
 
 
 async def run_10k_stress():
@@ -20,7 +20,7 @@ async def run_10k_stress():
     commander = SwarmCommander(bus_path=test_bus_dir)
     import sys
 
-    print(f"DEBUG: SwarmCommander module: {sys.modules['cortex.engine.swarm_10k'].__file__}")
+    print(f"DEBUG: SwarmCommander module: {sys.modules['babylon60.engine.swarm_10k'].__file__}")
     print(f"DEBUG: SwarmCommander class: {SwarmCommander}")
     await commander.initialize()
 

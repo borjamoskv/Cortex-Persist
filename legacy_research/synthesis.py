@@ -30,14 +30,14 @@ from typing import TYPE_CHECKING, Any
 import httpx
 
 if TYPE_CHECKING:
-    from cortex.extensions.llm.manager import LLMManager
+    from babylon60.extensions.llm.manager import LLMManager
 
-from cortex.engine.autopoiesis import AutopoiesisEngine
-from cortex.engine.crystallizer import AutoCrystallizer
-from cortex.engine.swarm_10k import SwarmCommander
-from cortex.utils.errors import CortexError
+from babylon60.engine.autopoiesis import AutopoiesisEngine
+from babylon60.engine.crystallizer import AutoCrystallizer
+from babylon60.engine.swarm_10k import SwarmCommander
+from babylon60.utils.errors import CortexError
 
-logger = logging.getLogger("cortex.engine.synthesis")
+logger = logging.getLogger("babylon60.engine.synthesis")
 
 # ---------------------------------------------------------------------------
 # Data contracts

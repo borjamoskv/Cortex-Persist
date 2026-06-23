@@ -2,7 +2,7 @@
 
 import time
 
-from cortex.engine.context_cache import ContextCacheManager, EvictionPolicy
+from babylon60.engine.context_cache import ContextCacheManager, EvictionPolicy
 
 
 class TestContextCacheManager:

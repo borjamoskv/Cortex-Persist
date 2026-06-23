@@ -39,13 +39,13 @@ from rich.prompt import Prompt
 from rich.table import Table
 from rich.text import Text
 
-from cortex.cli.common import DEFAULT_DB, cli, console
-from cortex.cli.loop_engine import ExecutionLoop
-from cortex.cli.loop_models import TaskResult, TaskStatus
+from babylon60.cli.common import DEFAULT_DB, cli, console
+from babylon60.cli.loop_engine import ExecutionLoop
+from babylon60.cli.loop_models import TaskResult, TaskStatus
 
 __all__ = ["loop"]
 
-logger = logging.getLogger("cortex.loop")
+logger = logging.getLogger("babylon60.loop")
 
 # ─── Industrial Noir Palette ──────────────────────────────────────────
 CYBER_LIME = "#CCFF00"
@@ -55,8 +55,8 @@ YINMN_BLUE = "#2E5090"
 GOLD = "#D4AF37"
 
 
-# Models → cortex.cli.loop_models
-# ExecutionLoop + PersistSupervisor → cortex.cli.loop_engine
+# Models → babylon60.cli.loop_models
+# ExecutionLoop + PersistSupervisor → babylon60.cli.loop_engine
 
 
 # ─── CLI Commands ─────────────────────────────────────────────────────

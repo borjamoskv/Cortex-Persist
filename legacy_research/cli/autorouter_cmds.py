@@ -20,8 +20,8 @@ from pathlib import Path
 import click
 from rich.console import Console
 
-from cortex.cli.errors import err_execution_failed, err_platform_unsupported, err_skill_not_found
-from cortex.core.paths import CORTEX_DIR
+from babylon60.cli.errors import err_execution_failed, err_platform_unsupported, err_skill_not_found
+from babylon60.core.paths import CORTEX_DIR
 
 __all__ = [
     "CORTEX_DIR",
@@ -257,7 +257,7 @@ def logs():
         console.print(f"[yellow]⚠️ No se encontró log en {LOG_PATH}[/]")
         sys.exit(1)
 
-    from cortex.extensions.platform.sys import tail_file_command
+    from babylon60.extensions.platform.sys import tail_file_command
 
     console.print(f"[dim]Mostrando logs de: {LOG_PATH} (Ctrl+C para salir)[/]")
     try:

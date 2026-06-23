@@ -1,7 +1,7 @@
 import sqlite3
 import pytest
 import os
-from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer, mtk_active_token, mtk_payload_hash
+from babylon60.engine.mtk_sqlite_authorizer import install_mtk_authorizer, mtk_active_token, mtk_payload_hash
 
 def test_mtk_physical_barrier(monkeypatch):
     monkeypatch.setenv("CORTEX_FORCE_MTK_TESTS", "1")

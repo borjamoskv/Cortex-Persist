@@ -10,13 +10,13 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import (
+from babylon60.cli.common import (
     DEFAULT_DB,
     cli,
     console,
 )
-from cortex.compliance.comply_signer import ComplySigner
-from cortex.compliance.tracker import ComplianceTracker
+from babylon60.compliance.comply_signer import ComplySigner
+from babylon60.compliance.tracker import ComplianceTracker
 
 
 @click.group("comply")

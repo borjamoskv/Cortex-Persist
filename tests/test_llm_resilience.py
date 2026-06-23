@@ -5,7 +5,7 @@ import pytest
 import httpx
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from cortex.extensions.llm._resilience import (
+from babylon60.extensions.llm._resilience import (
     CircuitBreaker,
     CircuitState,
     resilient_call,

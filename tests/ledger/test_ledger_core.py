@@ -4,7 +4,7 @@ import hashlib
 import sqlite3
 import aiosqlite
 from unittest.mock import MagicMock
-from cortex.ledger.ledger_core import MerkleTree, SovereignLedger
+from babylon60.ledger.ledger_core import MerkleTree, SovereignLedger
 
 
 def test_merkle_tree_root():

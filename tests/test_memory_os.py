@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.compaction.mem0_pipeline import ExergyScore, Mem0Pipeline
-from cortex.extensions.context.hiagent import HiAgentTraceManager
-from cortex.extensions.policy.memory_os import EPISODIC_TRACE_LIMIT, MemoryOS, MemoryTier
+from babylon60.compaction.mem0_pipeline import ExergyScore, Mem0Pipeline
+from babylon60.extensions.context.hiagent import HiAgentTraceManager
+from babylon60.extensions.policy.memory_os import EPISODIC_TRACE_LIMIT, MemoryOS, MemoryTier
 
 # ─── Mem0Pipeline ────────────────────────────────────────────────────
 

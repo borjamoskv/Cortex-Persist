@@ -7,13 +7,13 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from cortex.cli.common import cli
-from cortex.config import DEFAULT_DB_PATH
-from cortex.darknet.agents import AVATARS, DarknetAgent
-from cortex.darknet.ingestor import DarknetIngestor
-from cortex.darknet.social_ledger import DarknetLedger
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexLLMRouter
+from babylon60.cli.common import cli
+from babylon60.config import DEFAULT_DB_PATH
+from babylon60.darknet.agents import AVATARS, DarknetAgent
+from babylon60.darknet.ingestor import DarknetIngestor
+from babylon60.darknet.social_ledger import DarknetLedger
+from babylon60.extensions.llm.provider import LLMProvider
+from babylon60.extensions.llm.router import CortexLLMRouter
 
 console = Console()
 

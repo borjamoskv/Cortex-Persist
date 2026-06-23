@@ -9,10 +9,10 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 
-from cortex.auth.models import AuthResult
-from cortex.cli import cli
-from cortex.extensions.llm._presets import _PRESETS_CACHE, provider_inventory
-from cortex.routes import ask as ask_router
+from babylon60.auth.models import AuthResult
+from babylon60.cli import cli
+from babylon60.extensions.llm._presets import _PRESETS_CACHE, provider_inventory
+from babylon60.routes import ask as ask_router
 
 
 @pytest.fixture(autouse=True)

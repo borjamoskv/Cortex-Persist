@@ -1,7 +1,7 @@
 import time
 import uuid
 import hashlib
-from cortex.math.babylon import causal_distance, hash_distance_rollup
+from babylon60.math.babylon import causal_distance, hash_distance_rollup
 
 def generate_mock_trajectory() -> str:
     """Simulates a causal state hash."""

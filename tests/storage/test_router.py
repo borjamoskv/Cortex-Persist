@@ -10,8 +10,8 @@ import shutil
 import pytest
 from pathlib import Path
 
-from cortex.storage import StorageMode
-from cortex.storage.router import TenantRouter, get_router
+from babylon60.storage import StorageMode
+from babylon60.storage.router import TenantRouter, get_router
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def clean_shard_dir(tmp_path, monkeypatch):
     monkeypatch.setenv("CORTEX_SHARD_DIR", str(shard_dir))
     
     # Reload config to pick up env variables
-    from cortex.config import reload
+    from babylon60.config import reload
     reload()
     
     yield db_file, shard_dir
@@ -84,8 +84,8 @@ async def test_router_eviction(clean_shard_dir, monkeypatch) -> None:
     monkeypatch.setenv("CORTEX_STORAGE", "local_sharded")
     
     # Temporarily set max backends to a very small number for testing eviction
-    import cortex.storage.router
-    monkeypatch.setattr(cortex.storage.router, "_MAX_BACKENDS", 2)
+    import babylon60.storage.router
+    monkeypatch.setattr(babylon60.storage.router, "_MAX_BACKENDS", 2)
     
     router = TenantRouter()
     

@@ -2,7 +2,7 @@
 # This file is part of CORTEX. Apache-2.0.
 import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
-from cortex.guards.seals import check_seal_1_code_quality, GlobalSourceCache
+from babylon60.guards.seals import check_seal_1_code_quality, GlobalSourceCache
 from pathlib import Path
 
 
@@ -20,8 +20,8 @@ async def test_verify_seal_printer_logging(mock_cache):
     mock_cache.files = {Path("large.py"): "\n" * 800}
 
     with (
-        patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
-        patch("cortex.guards._seals_checks_1_5.printer") as mock_printer,
+        patch("babylon60.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
+        patch("babylon60.guards._seals_checks_1_5.printer") as mock_printer,
     ):
         mock_run.return_value = (0, "Ruff OK")
 
@@ -44,8 +44,8 @@ async def test_verify_seal_printer_ruff_fail(mock_cache):
     mock_cache.files = {Path("ok.py"): "code"}
 
     with (
-        patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
-        patch("cortex.guards._seals_checks_1_5.printer") as mock_printer,
+        patch("babylon60.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
+        patch("babylon60.guards._seals_checks_1_5.printer") as mock_printer,
     ):
         mock_run.return_value = (1, "Ruff Error Output")
 

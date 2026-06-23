@@ -3,7 +3,7 @@
 
 import pytest
 
-from cortex.extensions.sales_b2b.context_compressor import ContextCompressor
+from babylon60.extensions.sales_b2b.context_compressor import ContextCompressor
 
 
 def test_compressor_degradation_threshold():

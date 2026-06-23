@@ -7,7 +7,7 @@ Entry points for triggering detached, autonomous sub-agent execution.
 import click
 from rich.console import Console
 
-from cortex.cli.common import cli
+from babylon60.cli.common import cli
 
 console = Console()
 

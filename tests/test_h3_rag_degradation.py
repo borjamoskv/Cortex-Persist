@@ -23,7 +23,7 @@ class SimulatedMemoryBlock:
 
 
 class VectorGraphMemoryMock:
-    """Mock implementation representing cortex.memory.VectorGraphMemory"""
+    """Mock implementation representing babylon60.memory.VectorGraphMemory"""
 
     def __init__(self):
         self.blocks: list[SimulatedMemoryBlock] = []

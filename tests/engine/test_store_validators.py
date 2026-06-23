@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 
-from cortex.engine.store_validators import validate_content, check_dedup
+from babylon60.engine.store_validators import validate_content, check_dedup
 
 
 def test_validate_content_decision_replacement():
@@ -45,7 +45,7 @@ async def test_check_dedup_found():
     project = "proj_alpha"
     content = "Some unique fact content"
 
-    with patch("cortex.utils.canonical.compute_fact_hash", return_value="fake_hash") as mock_hash:
+    with patch("babylon60.utils.canonical.compute_fact_hash", return_value="fake_hash") as mock_hash:
         result = await check_dedup(mock_conn, tenant_id, project, content)
 
     mock_hash.assert_called_once_with(content)
@@ -94,7 +94,7 @@ async def test_check_dedup_with_exclude_id():
     project = "proj_alpha"
     content = "Updated content"
 
-    with patch("cortex.utils.canonical.compute_fact_hash", return_value="hash_99"):
+    with patch("babylon60.utils.canonical.compute_fact_hash", return_value="hash_99"):
         result = await check_dedup(mock_conn, tenant_id, project, content, exclude_id=10)
 
     assert result == 99

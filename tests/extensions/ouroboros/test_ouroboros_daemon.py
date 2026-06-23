@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from cortex.extensions.ouroboros.ouroboros_agent import app, engine
+from babylon60.extensions.ouroboros.ouroboros_agent import app, engine
 
 @pytest.fixture(autouse=True)
 def setup_test_engine(tmp_path):

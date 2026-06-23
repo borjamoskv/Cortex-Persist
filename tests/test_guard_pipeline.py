@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for cortex.engine.guard_pipeline.GuardPipeline - fully isolated, no DB.
+"""Tests for babylon60.engine.guard_pipeline.GuardPipeline - fully isolated, no DB.
 
 These tests verify the composable guard/mutator/hook pipeline independently
 of the full CortexEngine, proving that guards can be tested in isolation.
@@ -16,7 +16,7 @@ import pytest
 
 @pytest.fixture
 def pipeline():
-    from cortex.engine.guard_pipeline import GuardPipeline
+    from babylon60.engine.guard_pipeline import GuardPipeline
 
     return GuardPipeline()
 

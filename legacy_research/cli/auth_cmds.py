@@ -3,9 +3,9 @@
 import click
 from rich.console import Console
 
-from cortex.cli.common import cli, run_async
-from cortex.engine import CortexEngine
-from cortex.engine.auth_gateway import QuorumGateway
+from babylon60.cli.common import cli, run_async
+from babylon60.engine import CortexEngine
+from babylon60.engine.auth_gateway import QuorumGateway
 
 console = Console()
 
@@ -20,7 +20,7 @@ def auth() -> None:
 @run_async
 async def submit_vote(req_id: str) -> None:
     """Submits a cryptographic vote for a pending consensus request."""
-    from cortex.extensions.security.signatures import get_default_signer
+    from babylon60.extensions.security.signatures import get_default_signer
 
     engine = CortexEngine()
     auth_gw = QuorumGateway(engine)

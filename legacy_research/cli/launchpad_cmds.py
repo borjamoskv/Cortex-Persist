@@ -9,9 +9,9 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
-from cortex.cli.errors import err_empty_results, err_validation, handle_cli_error
-from cortex.extensions.launchpad.main import MissionOrchestrator
+from babylon60.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
+from babylon60.cli.errors import err_empty_results, err_validation, handle_cli_error
+from babylon60.extensions.launchpad.main import MissionOrchestrator
 
 __all__ = ["launchpad", "mission_launch", "mission_list"]
 

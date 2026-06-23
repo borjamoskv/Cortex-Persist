@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Integration tests for cortex.engine.store_mixin.StoreMixin.
+"""Integration tests for babylon60.engine.store_mixin.StoreMixin.
 
 Uses CortexEngine with a fresh temp database for realistic end-to-end coverage
 of the store → deduplicate → deprecate → update pipeline.
@@ -21,7 +21,7 @@ async def engine(tmp_path: Path):
     """Create a CortexEngine with a temp database, close after test."""
     import os
 
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     # Unblock tests from thermodynamic enforcement
     os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
@@ -31,7 +31,7 @@ async def engine(tmp_path: Path):
     await e.init_db()
 
     # Ensure causal_edges exists (AsyncCausalGraph.ensure_table is a safety check)
-    from cortex.engine.causality import AsyncCausalGraph
+    from babylon60.engine.causality import AsyncCausalGraph
 
     async with e.session() as conn:
         cg = AsyncCausalGraph(conn)
@@ -92,7 +92,7 @@ class TestStore:
         assert id1 != id2
 
     async def test_store_rejects_empty_content(self, engine):
-        from cortex.engine.storage_guard import GuardViolation
+        from babylon60.engine.storage_guard import GuardViolation
 
         with pytest.raises((ValueError, TypeError, GuardViolation)):
             await engine.store(
@@ -200,7 +200,7 @@ class TestTaintIntegration:
 
         # Let's make sure edge is created. The current store() might not map parent_decision_id to an edge.
         # Let's manually create KRGSE_DERIVED_FROM just in case.
-        from cortex.engine.causality import KRGSE_DERIVED_FROM
+        from babylon60.engine.causality import KRGSE_DERIVED_FROM
 
         async with engine.session() as conn, conn.cursor() as cur:
             await cur.execute(
@@ -220,7 +220,7 @@ class TestTaintIntegration:
             "Child confidence should be downgraded upon parent invalidation"
         )
         # Check that it's marked as tainted in causal_edges
-        from cortex.engine.causality import KRGSE_TAINTED_BY
+        from babylon60.engine.causality import KRGSE_TAINTED_BY
 
         async with engine.session() as conn, conn.cursor() as cur:
             await cur.execute(
@@ -252,7 +252,7 @@ class TestTaintIntegration:
             confidence="C5",
         )
 
-        from cortex.engine.causality import KRGSE_DERIVED_FROM, KRGSE_TAINTED_BY
+        from babylon60.engine.causality import KRGSE_DERIVED_FROM, KRGSE_TAINTED_BY
 
         async with engine.session() as conn, conn.cursor() as cur:
             await cur.execute(

@@ -15,7 +15,7 @@ from typing import Any
 
 import click
 
-from cortex.cli.common import cli
+from babylon60.cli.common import cli
 
 
 @cli.command("run")
@@ -54,7 +54,7 @@ def run_pipeline(
         cortex run "find vulnerability" --hints exactly_protocol_strikes_2026
         cortex run "summarize my KIs" --output file -f /tmp/summary.md
     """
-    from cortex.pipeline import DeliveryTarget, DeliveryType, PipelineRequest
+    from babylon60.pipeline import DeliveryTarget, DeliveryType, PipelineRequest
 
     intent_str = " ".join(intent)
 
@@ -92,7 +92,7 @@ def run_pipeline(
 
 async def _execute_pipeline(request: Any, verbose: bool) -> Any:
     """Async pipeline execution wrapper."""
-    from cortex.pipeline.bridge import CortexPipelineBridge
+    from babylon60.pipeline.bridge import CortexPipelineBridge
 
     start = time.monotonic()
     bridge = CortexPipelineBridge()
@@ -179,13 +179,13 @@ def pipeline_status() -> None:
         click.echo("  Pipeline Ledger: ❌ no entries yet")
 
     # Check Engine DB
-    from cortex.config import DEFAULT_DB_PATH
+    from babylon60.config import DEFAULT_DB_PATH
 
     engine_ok = os.path.exists(os.path.expanduser(str(DEFAULT_DB_PATH)))
     click.echo(f"  Engine DB:       {'✅' if engine_ok else '❌'} {DEFAULT_DB_PATH}")
 
     # Router capabilities
-    from cortex.router.router import AgentRouter
+    from babylon60.router.router import AgentRouter
 
     router = AgentRouter()
     click.echo(f"\n  Router Agents:   {len(router._caps)}")

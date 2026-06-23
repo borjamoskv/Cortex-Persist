@@ -8,9 +8,9 @@ import sqlite3
 import click
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
-from cortex.cli.errors import err_db_not_found, handle_cli_error
-from cortex.utils import hygiene
+from babylon60.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
+from babylon60.cli.errors import err_db_not_found, handle_cli_error
+from babylon60.utils import hygiene
 
 
 @cli.command()

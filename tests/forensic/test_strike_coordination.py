@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 
-from cortex.engine.forensic_commander import ForensicCommander
-from cortex.engine.forensic_strike_config import STRIKE_V1
+from babylon60.engine.forensic_commander import ForensicCommander
+from babylon60.engine.forensic_strike_config import STRIKE_V1
 
 
 @pytest.mark.asyncio
@@ -10,7 +10,7 @@ from cortex.engine.forensic_strike_config import STRIKE_V1
 async def test_strike_density_assignment():
     """Verify that 1,000 agents are correctly binned into mission Legions."""
     # Use Shared Memory bus (no file path) for ultra-fast coordination testing
-    commander = ForensicCommander(bus_path="cortex.db")
+    commander = ForensicCommander(bus_path="babylon60.db")
     await commander.initialize_strike()
 
     # 1. Dispatch the strike (sequential for test stability on Mac)
