@@ -1,0 +1,14 @@
+name: 'MOSKV-1 Epistemic Gatekeeper'
+description: 'CORTEX-Persist C5-REAL CI/CD Firewall. Rejects LLM slop and stochastic entropy from PRs.'
+inputs:
+  github_token:
+    description: 'GitHub token to comment and reject PRs'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Run Epistemic Check
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: python3 ${{ github.action_path }}/entrypoint.py
