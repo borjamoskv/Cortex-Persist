@@ -124,7 +124,7 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 			</nav>
 
 			<div class="masthead-actions">
-				<span class="microcopy" style="color: var(--accent-soft); font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; margin-right: 1rem; text-transform: uppercase; letter-spacing: 0.05em; display: none; @media (min-width: 768px) { display: inline-block; }">
+				<span class="microcopy">
 					EDGE: {country}
 				</span>
 				<a class="button-tertiary" href={githubUrl} target="_blank" rel="noreferrer">
@@ -281,6 +281,20 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 		</section>
 
 		<style>
+			.masthead-actions .microcopy {
+				color: var(--accent-soft);
+				font-family: 'IBM Plex Mono', monospace;
+				font-size: 0.75rem;
+				margin-right: 1rem;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				display: none;
+			}
+			@media (min-width: 768px) {
+				.masthead-actions .microcopy {
+					display: inline-block;
+				}
+			}
 			.pricing-grid-home {
 				display: grid;
 				gap: 1rem;

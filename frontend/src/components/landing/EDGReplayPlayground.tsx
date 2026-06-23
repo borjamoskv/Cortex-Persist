@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TerminalLog, LogEntry } from './TerminalLog';
+import { TerminalLog } from './TerminalLog';
+import type { LogEntry } from './TerminalLog';
 import { Play, RotateCcw, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 interface EDGNode {
