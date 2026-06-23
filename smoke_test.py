@@ -6,10 +6,17 @@ import time
 
 
 async def main():
-    db_path = os.path.expanduser("~/.cortex/cortex.db")
-    print(f"Connecting to {db_path}...")
+    db_path = "/tmp/cortex_test_smoke.db"
+    # Overwrite the environment DB path for tests to avoid production contention (L14)
+    os.environ["CORTEX_DB_PATH"] = db_path
+    
+    print(f"Connecting to isolated test DB: {db_path}...")
 
+    # Configure WAL mode and busy timeout to avoid deadlocks (R10)
     conn = sqlite3.connect(db_path)
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA busy_timeout=5000;")
+    
     # Ensure table exists for safety
     conn.execute("""
         CREATE TABLE IF NOT EXISTS tasks (
@@ -30,7 +37,7 @@ async def main():
             "type": "architecture",
             "prompt": "Refactor cascade_router.py: add async retry logic with exponential backoff per engine",
             "context_tokens": 4200,
-            "target_engine": None  # forzar decisión del router
+            "target_engine": None
         }),
         time.time()
     ))
@@ -67,6 +74,8 @@ async def main():
         
         # Check task status in db after run by opening a new connection
         conn = sqlite3.connect(db_path)
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
         cursor = conn.execute("SELECT status FROM tasks WHERE id=?", (task_id,))
         new_status = cursor.fetchone()[0]
         print(f"Post-execution Task Status in DB: {new_status}")
@@ -76,3 +85,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+

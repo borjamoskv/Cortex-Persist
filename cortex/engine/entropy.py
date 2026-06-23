@@ -254,7 +254,7 @@ class ThermodynamicContextCompressor:
         # Purge conversational fluff (Green Theater / Anergia)
         conversational_fluff = [
             "please", "could you", "would you", "thank you", "i think", "maybe",
-            "as an ai", "helpful assistant", "here is the", "hope this helps",
+            "as an ai", "helpful assistant", "hope this helps",
             "por favor", "gracias", "espero que", "aquí tienes"
         ]
 
