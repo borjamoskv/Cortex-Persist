@@ -25,7 +25,7 @@ def fetch_external_signals():
             "https://hnrss.org/frontpage?count=5", 
             headers={'User-Agent': 'MOSKV-1/C5-REAL'}
         )
-        with urllib.request.urlopen(req, timeout=5) as response:
+        with urllib.request.urlopen(req, timeout=15) as response:
             tree = ET.fromstring(response.read())
             return [item.find('title').text for item in tree.findall('./channel/item')]
     except Exception as e:
