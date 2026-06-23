@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "cortex-mtk"
+name = "cortex-persist-mtk"
 version = "0.1.0"
 description = "Minimal Trusted Kernel (MTK): A cryptographic authorizer hook for SQLite to enforce physical boundaries on AI state mutations."
 readme = "README.md"
@@ -27,4 +27,4 @@ Homepage = "https://github.com/borjamoskv/cortex-mtk"
 Repository = "https://github.com/borjamoskv/cortex-mtk.git"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/cortex_mtk"]
+packages = ["src/cortex_persist_mtk"]

@@ -1,4 +1,4 @@
-# cortex-mtk
+# cortex-persist-mtk
 
 **Minimal Trusted Kernel (MTK) - SQLite Cryptographic Authorizer Hook**
 
@@ -9,7 +9,7 @@ Designed to stop stochastic AI agents (LLMs) from destroying or corrupting datab
 ## Installation
 
 ```bash
-pip install cortex-mtk
+pip install cortex-persist-mtk
 ```
 
 ## Usage

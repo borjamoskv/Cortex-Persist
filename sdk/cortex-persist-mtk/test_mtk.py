@@ -5,7 +5,7 @@ import sys
 # Ensure the local src is in path to test before building
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 
-from cortex_mtk import install_mtk_authorizer, mtk_active_token, set_token_verifier
+from cortex_persist_mtk import install_mtk_authorizer, mtk_active_token, set_token_verifier
 
 # Disable CORTEX_TESTING bypass so the hook actually runs
 os.environ["CORTEX_TESTING"] = "0"
