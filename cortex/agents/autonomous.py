@@ -255,9 +255,9 @@ class AutonomousAgent(BaseAgent):
             "plan": plan.summary(),
             "steps": step_results,
             "elapsed_s": round(elapsed, 3),
-            "net_exergy": round(plan.net_exergy, 4),
+            "net_exergy": round(float(plan.net_exergy), 4),
             "exergy_efficiency": round(
-                plan.total_exergy_produced / max(plan.total_entropy_paid, 0.001), 4
+                float(plan.total_exergy_produced) / max(float(plan.total_entropy_paid), 0.001), 4
             ),
         }
 
@@ -265,7 +265,7 @@ class AutonomousAgent(BaseAgent):
             "⚡ [%s] AUTONOMOUS EXECUTION COMPLETE - Status: %s | Net Exergy: %.4f | Elapsed: %.2fs",
             self.agent_id,
             status,
-            plan.net_exergy,
+            float(plan.net_exergy),
             elapsed,
         )
 
@@ -389,7 +389,7 @@ class AutonomousAgent(BaseAgent):
             payload={
                 "plan_id": plan.plan_id[:8],
                 "progress": f"{plan.progress:.0%}",
-                "net_exergy": round(plan.net_exergy, 4),
+                "net_exergy": round(float(plan.net_exergy), 4),
                 "completed": sum(1 for s in plan.steps if s.status == StepStatus.COMPLETED),
                 "total": len(plan.steps),
             },

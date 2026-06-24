@@ -135,7 +135,7 @@ def run_cli(
         logger.error("Google ADK not installed. Install with: pip install google-adk")
         sys.exit(1)
 
-    from cortex.extensions.adk.agents import (
+    from cortex.adk.agents import (
         create_analyst_agent,
         create_cortex_swarm,
         create_gem_agent,
