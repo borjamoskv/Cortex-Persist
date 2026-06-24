@@ -46,7 +46,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1  # trusted publisher — keep tag
 
       - name: Sign artifacts with Sigstore
-        uses: sigstore/gh-action-sigstore-python@v3.3.0  # signing — keep tag for compat
+        uses: sigstore/gh-action-sigstore-python@v3.4.0  # signing — keep tag for compat
         with:
           inputs: dist/*
 
