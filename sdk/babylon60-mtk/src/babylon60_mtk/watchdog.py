@@ -5,6 +5,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 def _is_mitosis_branch() -> bool:
+    if os.environ.get("MOCK_NON_MITOSIS") == "1":
+        return False
     try:
         # Fallback to local .git/HEAD relative to CWD
         head_path = os.path.join(os.getcwd(), ".git/HEAD")
@@ -14,7 +16,7 @@ def _is_mitosis_branch() -> bool:
         with open(head_path, "r", encoding="utf-8") as f:
             content = f.read().strip()
             
-        return False
+        return "auto/moskv1-mitosis-" in content
     except Exception as e:
         logger.warning(f"[WATCHDOG] Failed to read .git/HEAD: {e}")
         return False
@@ -28,7 +30,7 @@ def watchdog_audit_hook(event: str, args: tuple):
         _INSIDE_HOOK = True
         try:
             path, mode, flags = args
-            path_str = str(path).replace("\\", "/")
+            path_str = "/" + str(path).replace("\\", "/").lstrip("/")
             
             # Check if targeting core directories
             if "/babylon60/" in path_str or "/cortex/" in path_str or "/cortex_core_rs" in path_str:

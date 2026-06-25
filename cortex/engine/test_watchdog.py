@@ -14,19 +14,19 @@ def run_tests():
     
     # 1. Test read operation (should always pass)
     try:
-        with open("babylon60/nodes/causal_framework_nodes.py", "r") as f:
+        with open("cortex/nodes/causal_framework_nodes.py", "r") as f:
             pass
         print("[OK] Leer archivos del core está permitido.")
     except PermissionError:
         print("[FAIL] Lectura bloqueada incorrectamente.")
         sys.exit(1)
         
-    # 2. Check current branch state
+    # 2. Check current branch state (Should be True in this environment)
     is_mitosis = _is_mitosis_branch()
-    print(f"[TEST] Estamos en rama de mitosis? {is_mitosis}")
+    print(f"[TEST] Estamos en rama de mitosis nativamente? {is_mitosis}")
     
-    # 3. Test write operation
-    test_file = "babylon60/test_watchdog_file.txt"
+    # 3. Test write operation - ALLOWED (Mitosis branch)
+    test_file = "cortex/test_watchdog_file.txt"
     if is_mitosis:
         try:
             with open(test_file, "w") as f:
@@ -36,15 +36,20 @@ def run_tests():
         except PermissionError as e:
             print(f"[FAIL] Escritura bloqueada incorrectamente estando en mitosis. Error: {e}")
             sys.exit(1)
-    else:
-        try:
-            with open(test_file, "w") as f:
-                f.write("test")
-            os.remove(test_file)
-            print("[FAIL] Escritura permitida sin estar en mitosis. Watchdog falló.")
-            sys.exit(1)
-        except PermissionError as e:
-            print(f"[OK] Escritura bloqueada correctamente: {e}")
+            
+    # 4. Test write operation - BLOCKED (Mock non-mitosis branch)
+    print("[TEST] Simulando rama externa (main)...")
+    os.environ["MOCK_NON_MITOSIS"] = "1"
+    try:
+        with open(test_file, "w") as f:
+            f.write("test")
+        os.remove(test_file)
+        print("[FAIL] Escritura permitida sin estar en mitosis. Watchdog falló.")
+        sys.exit(1)
+    except PermissionError as e:
+        print(f"[OK] Escritura bloqueada correctamente bajo entorno hostil: {e}")
+    finally:
+        os.environ.pop("MOCK_NON_MITOSIS", None)
             
     print("[SUCCESS] Bootstrap Watchdog funcionando de acuerdo a LEY 10 (Autopoiesis).")
 
