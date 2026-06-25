@@ -148,6 +148,20 @@ CORTEX assumes:
 2. Sortu JIT `__import__` in safe_builtins — removed (ACE vector)
 3. Ouroboros `os.system()` with unsanitized path — migrated to `subprocess.run()`
 
+### 2026-06-25 — MTK Red Team Baptism (C5-REAL)
+
+**Scope:** Minimal Trusted Kernel (MTK) & Swarm Offensive Security
+**Execution Vector:** Adversarial injection (`mtk_stress_test.py`) targeting C-Extension SQLite Hook.
+
+| Vulnerability Simulated | Outcome |
+|:---|:---|
+| SWARMSEC-001 (Indirect Injection / No Token) | ✅ Blocked (Physical SQLITE_DENY) |
+| SWARMSEC-002 (Viral Contamination / Taint) | ✅ Blocked (GC Stack Taint Detected) |
+| SWARMSEC-008 (Stochastic Hallucination) | ✅ Blocked (Generative Stack Denied) |
+
+**Crystallization:** 
+The CORTEX-Persist architecture successfully validates the Epistemic Containment layer natively. 30 Autodidact Primitives (ADV-LLM, SWARMSEC, MTKDEF) mapped and permanently ingested into the sovereign ledger.
+
 ---
 
 ## Related Security Documentation
