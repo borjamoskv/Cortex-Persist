@@ -25,6 +25,33 @@ def verify_ephemeral_token(token: str, payload: str, kernel_key: str) -> bool:
 def ingest_reality_claim(*args, **kwargs):
     return "verified"
 
+import json
+
+def validate_metric_json(payload_str):
+    try:
+        if isinstance(payload_str, str):
+            payload = json.loads(payload_str)
+        else:
+            payload = payload_str
+    except Exception:
+        raise ValueError("Telemetry validation failed")
+        
+    kind = payload.get("kind")
+    if kind not in ("Raw", "Derived", "Narrative"):
+        raise ValueError("Telemetry validation failed")
+        
+    if kind == "Raw":
+        if not all(k in payload for k in ("name", "value", "unit", "source", "timestamp_epoch_ms")):
+            raise ValueError("Telemetry validation failed")
+    elif kind == "Derived":
+        if not all(k in payload for k in ("name", "value", "unit", "derivation", "source_metrics", "timestamp_epoch_ms")):
+            raise ValueError("Telemetry validation failed")
+    elif kind == "Narrative":
+        if not all(k in payload for k in ("claim", "context", "confidence")):
+            raise ValueError("Telemetry validation failed")
+            
+    return kind
+
 def validate_exergy_mutation(*args, **kwargs):
     pass
 
