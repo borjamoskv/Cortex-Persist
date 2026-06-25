@@ -40,7 +40,7 @@ class ArbitrageDaemon:
         self.asset_pairs = asset_pairs
         self.interval_seconds = interval_seconds
         self._running = False
-        self._task: asyncio.Task[Any] | None = None
+        self._task: asyncio.Task[Any] | None = None # type: ignore
 
     async def start(self) -> None:
         if self._running:

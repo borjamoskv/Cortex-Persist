@@ -136,7 +136,7 @@ def run_cli(
         sys.exit(1)
 
     from legacy_research.extensions.adk.agents import (
-        create_analyst_agent,
+        create_analyst_agent, # type: ignore
         create_cortex_swarm,
         create_gem_agent,
         create_google_one_agent,

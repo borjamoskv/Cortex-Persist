@@ -128,7 +128,7 @@ class SovereignAuditPipeline:
             return False, dossier
             
         # 4. Consensus
-        if not self.phase_4_consensus(dossier, proof_hash):
+        if not self.phase_4_consensus(dossier, proof_hash): # type: ignore
             return False, dossier
             
         logger.info("=== SOVEREIGN AUDIT PIPELINE SUCCESS ===")

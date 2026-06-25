@@ -28,7 +28,7 @@ def fetch_external_signals():
         )
         with urllib.request.urlopen(req, timeout=15) as response:
             tree = ET.fromstring(response.read())
-            return [item.find('title').text for item in tree.findall('./channel/item')][:5]
+            return [item.find('title').text for item in tree.findall('./channel/item')][:5] # type: ignore
     except Exception as e:
         return [f"SIGNAL_LOSS: {str(e)}"]
 

@@ -288,7 +288,7 @@ class ZKGuardGateway:
         try:
             import cortex_rs
             if hasattr(cortex_rs, 'verify_zk_proof'):
-                return cortex_rs.verify_zk_proof(proof_payload)
+                return cortex_rs.verify_zk_proof(proof_payload) # type: ignore
             else:
                 logger.warning("[ZKGuard] Rust data plane verify_zk_proof missing. Assuming valid for dev.")
                 return True

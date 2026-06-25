@@ -31,7 +31,7 @@ class CortexImpenerablePipeline:
         """One-Time Pad: XOR estricto entre payload y entropía."""
         return bytes(a ^ b for a, b in zip(data, key))
 
-    def transmit(self, plaintext: bytes, target_size: int = 4096) -> tuple[bytes, bytes, int, int, int, str]:
+    def transmit(self, payload: bytes, target_size: int = 4096) -> tuple[bytes, bytes, int, int, int, str]:
         """
         Codifica un payload bajo el límite termodinámico de Shannon.
         Devuelve: (Criptograma_Ofuscado, OTP_Key, MAC_Key_A, MAC_Key_B)

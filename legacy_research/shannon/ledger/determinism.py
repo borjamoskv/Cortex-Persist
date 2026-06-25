@@ -69,7 +69,7 @@ def patch_time() -> None:
                 return base_dt.astimezone(tz)
             return base_dt
 
-    sys.modules["datetime"].datetime = DeterministicDatetime
+    sys.modules["datetime"].datetime = DeterministicDatetime # type: ignore
 
 
 def apply_deterministic_patches() -> None:

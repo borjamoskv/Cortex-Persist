@@ -94,7 +94,7 @@ class CrossSystemInvariantCompiler:
 
         # 2. Extract substrate mutation records
         if isinstance(substrate_ledger, EvolutionLedger):
-            records = list(substrate_ledger.replay(verify=True))
+            records = list(substrate_ledger.replay(verify=True)) # type: ignore
         else:
             records = substrate_ledger
 

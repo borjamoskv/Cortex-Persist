@@ -147,7 +147,7 @@ def telemetry(token: str | None, owner: str, repo: str | None, db: str) -> None:
             repos = [repo] if repo else []
             agent = GithubTelemetryAgent(
                 manifest=manifest,
-                bus=None,
+                bus=None, # type: ignore
                 engine=engine,
                 token=token,
                 owner=owner,

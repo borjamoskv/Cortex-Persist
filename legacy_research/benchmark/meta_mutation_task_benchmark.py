@@ -212,12 +212,12 @@ def main() -> None:
             mutator, copy.deepcopy(base_genome), args.generations, inputs
         )
         adaptive_means.append(statistics.mean(adaptive_fitness))
-        adaptive_diversities.append(diversity_entropy(base_genome.mutation_rates))
+        adaptive_diversities.append(diversity_entropy(base_genome.mutation_rates)) # type: ignore
         meta_event_counts.append(sum(meta_counts))
         rate_drift_means.append(statistics.mean(drifts))
         static_fitness = run_static(copy.deepcopy(base_genome), args.generations, inputs)
         static_means.append(statistics.mean(static_fitness))
-        static_diversities.append(diversity_entropy(base_genome.mutation_rates))
+        static_diversities.append(diversity_entropy(base_genome.mutation_rates)) # type: ignore
 
     def summarize(values: list[float]) -> tuple[float, float]:
         return statistics.mean(values), statistics.stdev(values)

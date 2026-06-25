@@ -131,6 +131,13 @@ class CascadeRouter:
                         await asyncio.sleep(delay)
                         continue
                     return f"Error: {engine} timed out."
+                except asyncio.CancelledError:
+                    if process.returncode is None:
+                        try:
+                            process.kill()
+                        except OSError:
+                            pass
+                    raise
 
                 stdout = stdout_bytes.decode('utf-8').strip()
                 stderr = stderr_bytes.decode('utf-8').strip()

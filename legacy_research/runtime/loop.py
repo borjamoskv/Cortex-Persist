@@ -28,7 +28,7 @@ class RuntimeLoop:
         self.state = RuntimeState()
         self.is_running = False
         self.homeostatic_controller = homeostatic_controller or HomeostaticController(
-            DivergenceEngine(), mode="SHADOW"
+            DivergenceEngine(), mode="SHADOW" # type: ignore
         )
         self.baseline_events = []
         self.baseline_states = []

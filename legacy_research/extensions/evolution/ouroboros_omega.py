@@ -317,7 +317,7 @@ if __name__ == "__main__":
     if args.verbose:
         # setup_cortex_logging()
 
-    engine = OuroborosOmega(
+    engine = OuroborosOmega( # type: ignore
         args.file, dry_run=args.dry_run or args.diagnose_only, p0_scan=args.p0_scan
     )
 

@@ -153,7 +153,7 @@ class BillingIntegrityGateway:
             from legacy_research.routes.stripe import _get_stripe
             stripe_obj = _get_stripe()
             customer = stripe_obj.Customer.retrieve(customer_id)
-            email = customer.get("email", "")
+            email = customer.get("email", "") # type: ignore
 
             if email and api_state.auth_manager:
                 keys = await api_state.auth_manager.list_keys(tenant_id=email)

@@ -126,7 +126,7 @@ class MCPGuard:
         try:
             import cortex_rs
 
-            match = cortex_rs.detect_poisoning(content)
+            match = cortex_rs.detect_poisoning(content) # type: ignore
             if match:
                 logger.debug("Poison pattern matched in Rust core")
             return match

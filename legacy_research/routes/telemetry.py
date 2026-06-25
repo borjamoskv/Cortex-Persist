@@ -73,7 +73,7 @@ async def ingest_telemetry(
         }
         
         # We assume enqueue_telemetry handles serialization in Rust
-        success = cortex_rs.ZeroCopyRingBuffer.enqueue_telemetry(payload)
+        success = cortex_rs.ZeroCopyRingBuffer.enqueue_telemetry(payload) # type: ignore
         if not success:
             logger.warning("ZeroCopyRingBuffer full, dropping telemetry for %s", data.agent_id)
             raise HTTPException(status_code=503, detail="Buffer Overflow")

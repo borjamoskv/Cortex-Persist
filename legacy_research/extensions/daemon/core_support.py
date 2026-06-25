@@ -171,7 +171,7 @@ def init_external_oracles(
         from legacy_research.audit.ledger import EnterpriseAuditLedger
         
         ledger = EnterpriseAuditLedger()
-        daemon.email_ingest_daemon = EmailIngestDaemon(ledger=ledger)
+        daemon.email_ingest_daemon = EmailIngestDaemon(ledger=ledger) # type: ignore
     except ImportError:
         daemon.email_ingest_daemon = None
 

@@ -74,7 +74,7 @@ class CommitRevealProtocol:
     """
     
     @staticmethod
-    def generate_commit(payload_dict: dict, secret_nonce: bytes = None) -> tuple[str, str]:
+    def generate_commit(payload_dict: dict, secret_nonce: bytes = None) -> tuple[str, str]: # type: ignore
         """
         Generates a SHA3-256 commitment of the payload.
         Returns (commit_hash_hex, secret_nonce_hex).

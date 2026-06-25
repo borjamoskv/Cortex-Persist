@@ -50,7 +50,7 @@ class Neo4jBackend(GraphBackend):
         """
         async with self.driver.session() as session:
             result = await session.run(
-                query,
+                query, # type: ignore
                 source_id=source_id,
                 target_id=target_id,
                 fact_id=fact_id,

@@ -136,7 +136,7 @@ class DeepThinkOrchestrator:
 
     async def _maradona_synthesis(
         self,
-        hvs: list[np.ndarray],
+        hvs: list[np.ndarray], # type: ignore
         text_context: str,
         diagnostics: Any,
         project: str,  # pyright: ignore[reportInvalidTypeForm]

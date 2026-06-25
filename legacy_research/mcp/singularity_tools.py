@@ -106,7 +106,7 @@ def register_singularity_tools(mcp) -> None:
 
             out = [f"Found {len(results)} relevant Tensor matches on CORTEX:"]
             for _i, fact in enumerate(results):
-                dist_str = f"{fact._recall_score:.4f}" if hasattr(fact, "_recall_score") else "N/A"
+                dist_str = f"{fact._recall_score:.4f}" if hasattr(fact, "_recall_score") else "N/A" # type: ignore
                 preview = fact.content[:600]
                 ki_name = fact.id[3:] if fact.id.startswith("ki_") else fact.id
                 out.append(

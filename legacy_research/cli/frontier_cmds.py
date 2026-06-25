@@ -110,7 +110,7 @@ def signals_cmd(phase: str | None, min_novelty: float, limit: int):
         table.add_row(
             phase_disp,
             f"{s.get('domain')}/{s.get('subdomain')}",
-            s.get("core_insight")[:75] + "..." if len(s.get("core_insight", "")) > 75 else s.get("core_insight"),
+            s.get("core_insight")[:75] + "..." if len(s.get("core_insight", "")) > 75 else s.get("core_insight"), # type: ignore
             f"{s.get('novelty_index'):.3f}",
             f"{s.get('consensus_score'):.3f}"
         )

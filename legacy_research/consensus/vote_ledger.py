@@ -227,7 +227,7 @@ class ImmutableVoteLedger:
         
         # Combinar incrementalmente con el root anterior si existe
         if prev_root and current_hashes:
-            final_root = hashlib.sha256((prev_root + new_sub_root).encode()).hexdigest()
+            final_root = hashlib.sha256((prev_root + new_sub_root).encode()).hexdigest() # type: ignore
         else:
             final_root = new_sub_root or ""
 

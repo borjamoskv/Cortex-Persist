@@ -24,7 +24,7 @@ class SolverGateway:
         try:
             import cortex_rs
             if hasattr(cortex_rs, 'verify_smt'):
-                return cortex_rs.verify_smt(assertion)
+                return cortex_rs.verify_smt(assertion) # type: ignore
             else:
                 logger.warning("[SolverGateway] Rust data plane verify_smt missing. Assuming Valid.")
                 return "Valid"

@@ -111,7 +111,15 @@ class DAMEExecutor:
                     stdout=f,
                     stderr=f
                 )
-                exit_code = await proc.wait()
+                try:
+                    exit_code = await proc.wait()
+                except asyncio.CancelledError:
+                    if proc.returncode is None:
+                        try:
+                            proc.kill()
+                        except OSError:
+                            pass
+                    raise
 
             if exit_code == 0:
                 logger.info(f"[DAME-002] Meta verificada con éxito para {task_id} (exit code 0).")
@@ -155,11 +163,21 @@ class DAMEAsyncDelegator:
                         stdout=f,
                         stderr=f
                     )
-                    exit_code = await proc.wait()
+                    try:
+                        exit_code = await proc.wait()
+                    except asyncio.CancelledError:
+                        if proc.returncode is None:
+                            try:
+                                proc.kill()
+                            except OSError:
+                                pass
+                        raise
                 if exit_code == 0:
                     logger.info(f"[DAME-003] Tarea delegada {task_id} finalizada exitosamente.")
                 else:
                     logger.warning(f"[DAME-003] Tarea delegada {task_id} finalizó con error (code {exit_code}).")
+            except asyncio.CancelledError:
+                raise
             except Exception as e:
                 logger.error(f"[DAME-003] Error ejecutando tarea delegada {task_id}: {e}")
 

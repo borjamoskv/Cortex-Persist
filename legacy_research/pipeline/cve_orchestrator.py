@@ -92,7 +92,7 @@ class CVEOrchestrator:
             retrieved_at=datetime.now(timezone.utc)
         )
 
-    async def step_3_analyze(self, evidence: EvidenceBundle, augmented_context: list = None) -> list[dict]:
+    async def step_3_analyze(self, evidence: EvidenceBundle, augmented_context: list = None) -> list[dict]: # type: ignore
         """[3] Cross-reference and structural mapping. 
         MUST be strictly causal: changing evidence changes claims."""
         try:

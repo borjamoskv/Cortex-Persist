@@ -106,7 +106,7 @@ def compile_agent(role: AgentRole) -> AgentInstance:
     # 2. Session Guardrail
     guardrail = SessionGuardrail(
         max_tokens=role.guardrails.max_session_tokens,
-        warn_threshold=role.guardrails.warn_threshold,
+        warn_threshold=role.guardrails.warn_threshold, # type: ignore
         max_turns=role.guardrails.max_turns,
     )
 

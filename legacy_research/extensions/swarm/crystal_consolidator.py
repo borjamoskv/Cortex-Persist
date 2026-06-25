@@ -332,7 +332,7 @@ async def _execute_heuristic_integration(
     # Simulate low-stress FreeEnergyState to trigger daydreaming during REM sleep
     fep_state = FreeEnergyState(domain=AgentDomain.MEMORY, surprise=0.1, free_energy=0.2)
 
-    insights = heuristic_engine.daydream(fep_state)
+    insights = heuristic_engine.daydream(fep_state) # type: ignore
 
     if insights:
         logger.info("🧠 [RIGHT-BRAIN] Generated %d architectural suggestions", len(insights))

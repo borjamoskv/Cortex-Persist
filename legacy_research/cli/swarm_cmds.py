@@ -301,7 +301,7 @@ def swarm_strike(phalanx, target):
             resolved_names = [s.SQUAD_NAME for s in squad_classes]
             console.print(f"🤖 [bold #2B3BE5]AUTONOMOUS ROUTING[/] ⮕ {resolved_names}")
             for sq_class in squad_classes:
-                tasks.append(sq_class().deploy(target))
+                tasks.append(sq_class().deploy(target)) # type: ignore
         else:
             mapping = {
                 "SILVER": [SilverPhalanx],

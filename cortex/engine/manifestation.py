@@ -51,8 +51,20 @@ async def manifest_singularity(signal_bus: SignalBus | None = None) -> None:
 
         procs = await asyncio.gather(*coros)
 
-        # OOM/Time Guard: Wait with timeout
-        await asyncio.wait([p.communicate() for p in procs], timeout=30.0)
+        try:
+            tasks = [asyncio.create_task(p.communicate()) for p in procs]
+            done, pending = await asyncio.wait(tasks, timeout=30.0)
+            for t in pending:
+                t.cancel()
+        except asyncio.CancelledError:
+            raise
+        finally:
+            for p in procs:
+                if p.returncode is None:
+                    try:
+                        p.kill()
+                    except OSError:
+                        pass
 
         # 3. Notification to Signal Bus
         if signal_bus:

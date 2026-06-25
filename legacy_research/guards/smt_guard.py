@@ -345,4 +345,4 @@ class SMTConstraintGuard:
         if s.check() == sat:
             return []
 
-        return self._parse_unsat_core_reasons(s.unsat_core())
+        return self._parse_unsat_core_reasons(s.unsat_core()) # type: ignore

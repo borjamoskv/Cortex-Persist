@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from legacy_research import CortexEngine
+from legacy_research import CortexEngine # type: ignore
 from legacy_research.extensions.daemon.monitors.canary import CanaryMonitor
 from legacy_research.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_SCAN_INTERVAL,

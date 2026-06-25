@@ -422,7 +422,7 @@ class SovereignLedger(LedgerAuditMixin):
             db_path = getattr(self.db, "_cortex_db_path", None)
             if not db_path:
                 try:
-                    db_path = self.db._connector.__closure__[0].cell_contents
+                    db_path = self.db._connector.__closure__[0].cell_contents # type: ignore
                 except (AttributeError, IndexError, TypeError):
                     db_path = None
 

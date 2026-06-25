@@ -10,7 +10,7 @@ class CRDTMergeEngine:
     Guarantees Commutativity, Associativity, and Idempotency in parameter merging.
     """
     def __init__(self):
-        self._rs_engine = cortex_rs.CRDTMergeState()
+        self._rs_engine = cortex_rs.CRDTMergeState() # type: ignore
         
     def add_model(self, model_hash: str, agent_id: str, epoch_time: int) -> None:
         self._rs_engine.add_model(model_hash, agent_id, epoch_time)

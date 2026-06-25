@@ -19,8 +19,8 @@ from legacy_research.auth.models import APIKey, AuthResult
 
 # Hashing fallback: use Rust-native if present, otherwise fall back to Python argon2-cffi
 try:
-    hash_password = cortex_rs.hash_password
-    verify_password = cortex_rs.verify_password
+    hash_password = cortex_rs.hash_password # type: ignore
+    verify_password = cortex_rs.verify_password # type: ignore
     HAS_RUST_AUTH = True
 except AttributeError:
     HAS_RUST_AUTH = False

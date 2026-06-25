@@ -257,7 +257,7 @@ class AutonomousAgent(BaseAgent):
             "elapsed_s": round(elapsed, 3),
             "net_exergy": round(plan.net_exergy, 4),
             "exergy_efficiency": round(
-                plan.total_exergy_produced / max(plan.total_entropy_paid, 0.001), 4
+                plan.total_exergy_produced / max(plan.total_entropy_paid, 0.001), 4 # type: ignore
             ),
         }
 

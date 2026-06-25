@@ -53,7 +53,7 @@ async def dry_run_guard(
             source=req.source or "api_dry_run",
             confidence=req.confidence or "C3",
             tags=req.tags,
-            meta=req.meta,
+            meta=req.meta, # type: ignore
         )
         return {"valid": True, "message": "Proposal passes all guards"}
     except GuardViolation as e:

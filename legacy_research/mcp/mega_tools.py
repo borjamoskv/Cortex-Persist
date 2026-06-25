@@ -282,7 +282,7 @@ def _register_entropy_cracker(mcp: FastMCP, ctx: _MCPContext) -> None:
             lines.append("")
 
         # Purgeable sinks
-        sinks = annihilator.purge_energy_sinks(threshold=100.0)
+        sinks = annihilator.purge_energy_sinks(threshold=100.0) # type: ignore
         if sinks:
             lines.append(
                 f"═══ VERDICT: {len(sinks)} file(s) exceed entropy threshold. "

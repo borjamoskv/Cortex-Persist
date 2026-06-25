@@ -22,7 +22,7 @@ except ImportError:
 
 # ARQ (async Redis queue) – optional, fallback to in‑process queue if Redis unavailable
 try:
-    from arq import Queue, Worker, create_pool  # pyright: ignore[reportMissingImports]
+    from arq import Queue, Worker, create_pool  # type: ignore
     from arq.connections import RedisSettings  # pyright: ignore[reportMissingImports]
 except ImportError:
     RedisSettings = None

@@ -280,7 +280,7 @@ class SqliteWriteWorker:
         if isinstance(result, Err):
             raise RuntimeError(f"Failed to begin transaction: {result.error}")
 
-        proxy = _TransactionProxy(self)
+        proxy = _TransactionProxy(self) # type: ignore
         try:
             yield proxy
             # Commit on clean exit

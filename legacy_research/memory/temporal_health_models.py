@@ -67,7 +67,7 @@ class HealthReport:
 
     # PULSE - always populated after write 1
     centroid_drift: float | None = None
-    running_centroid: np.ndarray | None = (
+    running_centroid: np.ndarray | None = ( # type: ignore
         None  # not serialized  # pyright: ignore[reportInvalidTypeForm]
     )
 

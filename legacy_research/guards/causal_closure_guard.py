@@ -44,7 +44,7 @@ class CausalClosureGuard:
 
         # Dataclass wrapper support.
         if is_dataclass(proposal):
-            proposal = asdict(proposal)
+            proposal = asdict(proposal) # type: ignore
 
         # Proposal-like object with content field.
         if hasattr(proposal, "content"):

@@ -141,14 +141,22 @@ class EntropySensor:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
-            stdout, _ = await proc.communicate()
-            if stdout:
-                try:
-                    data = json.loads(stdout)
-                    if isinstance(data, list):
-                        violations = len(data)
-                except json.JSONDecodeError:
-                    pass
+            try:
+                stdout, _ = await proc.communicate()
+                if stdout:
+                    try:
+                        data = json.loads(stdout)
+                        if isinstance(data, list):
+                            violations = len(data)
+                    except json.JSONDecodeError:
+                        pass
+            except asyncio.CancelledError:
+                if proc.returncode is None:
+                    try:
+                        proc.kill()
+                    except OSError:
+                        pass
+                raise
         except OSError:
             pass
 
