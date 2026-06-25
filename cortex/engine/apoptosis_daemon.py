@@ -71,13 +71,16 @@ class ApoptosisDaemon:
             for fact in stale_facts
         ]
         
-        evidence = EvidenceBundle(
-            primary_source=Source(
-                uri="cortex://daemon/apoptosis",
-                content_hash="system_clock_verification",
-                metadata={"time_horizon_breach": now_iso}
-            ),
-            corroborating_sources=[]
+        evidence = EvidenceBundle.forge(
+            query="stale_nodes_sweep",
+            sources=[
+                Source(
+                    uri="cortex://daemon/apoptosis",
+                    content_hash="system_clock_verification",
+                    metadata={"time_horizon_breach": now_iso}
+                )
+            ],
+            retrieved_at=datetime.now(timezone.utc)
         )
         
         # 2. Sellar el ClosurePayload
