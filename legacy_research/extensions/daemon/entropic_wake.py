@@ -7,6 +7,22 @@ The proactive heartbeat that crosses the Rubicon: from determinism to autonomous
 import asyncio
 import logging
 import sqlite3
+
+# --- C5-REAL BFT PATCH (R10) ---
+import sqlite3 as _sqlite3_bft_orig
+_orig_sqlite_connect = _sqlite3_bft_orig.connect
+def _bft_sqlite_connect(*args, **kwargs):
+    kwargs.setdefault('timeout', 5.0)
+    conn = _orig_sqlite_connect(*args, **kwargs)
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
+    return conn
+_sqlite3_bft_orig.connect = _bft_sqlite_connect
+# -------------------------------
 import subprocess
 import time
 from datetime import datetime, timezone

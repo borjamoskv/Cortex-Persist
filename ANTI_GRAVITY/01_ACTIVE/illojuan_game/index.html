@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Enjambre de Málaga - C5-REAL</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #0A0A0A; /* Industrial Noir */
+            color: #2B3BE5;
+            font-family: 'Inter', sans-serif;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+            user-select: none;
+        }
+        .metric {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .title {
+            font-size: 24px;
+            color: #FFF;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui-layer">
+        <div class="title">EL ENJAMBRE DE MÁLAGA</div>
+        <div class="metric" id="fps-counter">FPS: 00</div>
+        <div class="metric" id="entity-counter">ENTIDADES: 5000</div>
+        <div class="metric" style="color: #4CAF50; margin-top:10px;">WASD - Moverse | CLIC - Onda Choque</div>
+    </div>
+    <canvas id="c5-canvas"></canvas>
+
+    <!-- C5-REAL Primitives -->
+    <script src="engine.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
