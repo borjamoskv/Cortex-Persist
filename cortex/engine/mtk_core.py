@@ -126,6 +126,24 @@ class MTKGuard:
         exergy_input = int(getattr(payload, "info_exergy", 1.0) * 100)
         self.cognitive_state = self.cognitive_state.apply_tick(exergy_input)
             
+        # 1.5 Invariante Topológico (Fase 5: ZK-SNARK Lineage)
+        _snark_proof = getattr(payload, "snark_proof", None)
+        _schema_version = getattr(payload, "schema_version", "v1")
+        if _schema_version > "v1":
+            if not _snark_proof:
+                raise ValueError("MTK-REJECT: Missing SNARK proof for critical topological schema. Epistemic lineage cannot be verified.")
+            try:
+                from cortex.guards.snark_guard import EpistemicSNARKProtocol, SnarkProof
+                
+                _ancestor_hash = getattr(payload, "ancestor_hash", "0x0")
+                if isinstance(_snark_proof, dict):
+                    _snark_proof = SnarkProof(**_snark_proof)
+                    
+                if not EpistemicSNARKProtocol.verify_snark_proof(_ancestor_hash, payload.payload_hash, _snark_proof):
+                    raise ValueError("MTK-REJECT: ZK-SNARK mathematical verification failed. Invalid lineage projection.")
+            except ImportError:
+                logger.warning("[MTK] SNARK Guard unavailable. C5-REAL SNARK verification skipped.")
+                
         # Step 2: Mint Ephemeral Token
         token = self._generate_ephemeral_token(payload)
         

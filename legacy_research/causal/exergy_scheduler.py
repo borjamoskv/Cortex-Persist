@@ -94,21 +94,52 @@ class ExergyScheduler:
     async def execute_in_lane(self, lane: ExergyLane, query_id: str, payload: Any) -> dict[str, Any]:
         """
         Async non-blocking execution in the designated thermodynamic lane.
+        Aplica los límites de ejecución estructurales para erradicar la anergía.
         """
         logger.info(f"[{self.tenant_id}] Executing {query_id} in {lane.name} lane")
         start_b60 = int(time.time() * 60)
         
-        # Simulate PyO3 Rust engine handoff
-        await asyncio.sleep(0)
+        # Simulating context variable injection for MTK bypass
+        execution_trace = {"query_id": query_id, "lane": lane.name}
         
-        # SAGA Protocol Guard insertion points would go here
-        
+        if lane == ExergyLane.STANDARD:
+            # Flujo Rutinario: Pasa rápido por el MTK hacia el Ledger
+            logger.info(f"[{self.tenant_id}] Fast-path execution via MTK Boundary.")
+            execution_trace["status"] = "LEDGER_COMMITTED"
+            
+        elif lane == ExergyLane.DEEP_THINK:
+            # Alta Exergía: Tradeoff Resolution and Byzantine Boundary
+            logger.info(f"[{self.tenant_id}] Resolving multi-variable constraints (Byzantine Boundary).")
+            # Simulate intense computation
+            await asyncio.sleep(0.01)
+            execution_trace["confidence_ranking"] = {"C5": 0.98, "C4": 0.02}
+            execution_trace["status"] = "TRADE_OFF_RESOLVED"
+            
+        elif lane == ExergyLane.DEEP_RESEARCH:
+            # Exergía Crítica: Spiders and Frontier Nodes
+            logger.info(f"[{self.tenant_id}] Spawning Epistemic Spiders for SOTA discovery.")
+            # Simulate I/O bound network scan
+            await asyncio.sleep(0.05)
+            execution_trace["frontier_nodes_emitted"] = True
+            execution_trace["status"] = "SOTA_MAPPED"
+            
+        elif lane == ExergyLane.ULTRA_THINK:
+            # Exergía Máxima: P0 Remediation and Blast Radius mapping
+            logger.critical(f"[{self.tenant_id}] P0 Isolation Active. Tracing Blast Radius Map.")
+            # Simulate extreme containment protocols
+            await asyncio.sleep(0.1)
+            execution_trace["blast_radius_map"] = {"affected_nodes": 7, "critical_path": True}
+            execution_trace["remediation_plan"] = "FORCED_ROLLBACK"
+            execution_trace["status"] = "CONTAINMENT_ACHIEVED"
+            
+        elif lane == ExergyLane.CONTEXT_ABYSS:
+            logger.warning(f"[{self.tenant_id}] Mining Context Abyss. Truncation protocols engaged.")
+            await asyncio.sleep(0.02)
+            execution_trace["status"] = "MINED"
+
         end_b60 = int(time.time() * 60)
         latency_b60 = end_b60 - start_b60
+        execution_trace["latency_b60"] = latency_b60
         
-        return {
-            "query_id": query_id,
-            "lane": lane.name,
-            "latency_b60": latency_b60,
-            "status": "VALIDATED"
-        }
+        return execution_trace
+

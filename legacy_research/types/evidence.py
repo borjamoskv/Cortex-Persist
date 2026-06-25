@@ -97,6 +97,8 @@ class ClosurePayload:
     verdict: bool
     payload_hash: str
     info_exergy: float = 1.0
+    snark_proof: dict[str, Any] | None = None
+    ancestor_hash: str | None = None
 
     @classmethod
     def seal(
@@ -108,6 +110,8 @@ class ClosurePayload:
         schema_version: str = "v1",
         proof_kind: str = "sealed-claim-set",
         info_exergy: float | None = None,
+        snark_proof: dict[str, Any] | None = None,
+        ancestor_hash: str | None = None,
     ) -> ClosurePayload:
         normalized_claims = tuple(_normalize_value(c) for c in claims)
         
@@ -142,6 +146,8 @@ class ClosurePayload:
             verdict=verdict,
             payload_hash=payload_hash,
             info_exergy=info_exergy,
+            snark_proof=snark_proof,
+            ancestor_hash=ancestor_hash,
         )
 
     def canonical(self) -> dict[str, Any]:
