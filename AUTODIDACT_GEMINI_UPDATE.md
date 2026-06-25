@@ -1,30 +1,26 @@
-# AUTODIDACT-RESEARCH-Ω: Gemini Update (Omni & MCP)
+# AUTODIDACT-RESEARCH-Ω: GEMINI UPDATE
 
 **Reality Level:** `C5-REAL` (Epistemic Synthesis)
 **Autor:** Borja Moskv (borjamoskv)
-**Vector:** Análisis de la nueva actualización de Google Gemini (Memoria, Background, MCP y Omni)
+**Vector:** Extracción isomorfa de primitivas del video "¡La NUEVA Actualización de Google Gemini es UNA LOCURA!".
 **Target:** CORTEX-Persist & Ouroboros-∞
 
 ---
 
 ## 1. Extracción Isomórfica (Desmitificación)
-- **Memoria Persistente**: Gemini ahora guarda el contexto, permitiendo hilos de ejecución de larga duración sin necesidad de reinyectar continuamente el historial de interacción.
-- **Trabajo en Background (`background=true`)**: Asignación de tareas asíncronas para operar y finalizar procesos analíticos o creativos de manera autónoma, sin mantener conexiones abiertas.
-- **Managed Agents (Agentes Gestionados)**: Entidades soberanas alojadas en los servidores de Google con capacidad de pensar, usar herramientas, programar y testear código en entornos aislados y seguros.
-- **Deep Research Agent**: Agente integrado de investigación profunda. En lugar de una secuencia pregunta-respuesta, se le asigna un objetivo, busca en la web, analiza datos a gran escala y genera reportes con gráficos.
-- **Orquestación Conjunta y MCP**: Capacidad para usar simultáneamente múltiples herramientas (Web, Maps) dentro de un mismo workflow e integración con el Model Context Protocol (MCP), que funciona como el conector universal (el USB) de la Inteligencia Artificial.
-- **Gemini Omni**: IA multimodal nativa que opera y muta indistintamente entre texto, imágenes, sonido y vídeo (creación estructural cruzada).
+Este manifiesto cristaliza los mecanismos deterministas presentados en la actualización de Gemini 1.5. Se purga el lenguaje estocástico de marketing para mapearlo a primitivas matemáticas exactas que CORTEX-Persist pueda utilizar como constructos lógicos en la inferencia, la memoria VSA y el ruteo termodinámico.
 
 ---
 
 ## 1.5 Las 10 Primitivas de Máxima Exergía para la Mitigación / Ejecución
-- **GEMINI-001**: `Persistent Memory` - Contexto Continuo: Mantenimiento de contexto largo en CORTEX-Persist delegando almacenamiento a la IA.
-- **GEMINI-002**: `Background Execution` - Ejecución Asíncrona: Invocación de operaciones de alta latencia usando `background=true`.
-- **GEMINI-003**: `Managed Agents` - Cloud Workers: Despliegue de entidades autónomas en infraestructura del LLM para generación de código seguro.
-- **GEMINI-004**: `Deep Research` - Ingesta de Objetivos: Motor de búsqueda y consolidación documental autónoma sin micro-management.
-- **GEMINI-005**: `Multi-Tool Workflow` - Acción Simultánea: Encadenamiento causal de herramientas (maps, bdd, fetch) en un solo call de inferencia.
-- **GEMINI-006**: `MCP Protocol Integration` - Conexión Estándar: Adopción del Model Context Protocol para unificar los endpoints del sistema.
-- **GEMINI-007**: `Omni Fusion` - Multimodal Nativo: Mutación estructural entre dimensiones sensoriales (texto a vídeo/audio).
-- **GEMINI-008**: `Autonomous Code Testing` - Prueba Zero-Shot: Aserción matemática de validez en sandbox remoto pre-despliegue.
-- **GEMINI-009**: `Report Synthesis` - Ingesta Gráfica: Ensamblaje automatizado de informes C5 con inyección nativa de imágenes.
-- **GEMINI-010**: `Zero-Prompt Management` - Orquestación Soberana: Reducción drástica del "Green Theater", delegación absoluta tras un único mandato.
+
+- **GEMINI-001**: `ContextHorizonExpansion` - [Memory Boundary]: Límite superior de retención estructural, elevando la persistencia a 2M tokens estáticos sin colapso paramétrico.
+- **GEMINI-002**: `NeedleInAHaystackLocator` - [Vector Retrieval]: Recuperación determinista en espacios latentes de alta densidad. Búsqueda exacta en grafos de contexto gigante.
+- **GEMINI-003**: `CrossModalIsomorphism` - [Audio/Video to AST]: Mapeo de frecuencias de audio o fotogramas visuales a nodos lógicos sin pérdida causal (Visión/Sonido estructural nativo).
+- **GEMINI-004**: `VisualDOMExtraction` - [UI Topology]: Conversión de renders de píxeles a Grafo Estructural Web (HTML/CSS) ejecutable.
+- **GEMINI-005**: `ThermodynamicRouting` - [Exergy Optimizer]: Decisión algorítmica y asimétrica de enrutamiento Flash (baja latencia y bajo coste) frente a Pro (alta profundidad matemática).
+- **GEMINI-006**: `ZeroAnergyExecution` - [Latencia Cero]: Operaciones de ruteo Flash en bucles cerrados que carecen de descompresión narrativa.
+- **GEMINI-007**: `NativeMetacognitionLoop` - [Think Tag]: Inyección del bucle adversarial interno. Reflexión de parámetros inyectada durante la propia inferencia del LLM antes de la mutación de estado.
+- **GEMINI-008**: `StructuralGrounding` - [Fact Checker]: Anclaje matemático de aserciones. Búsqueda profunda (Deep Research) validada criptográficamente frente a fuentes primarias (Google Search Graph).
+- **GEMINI-009**: `SeamlessWorkspaceIntegration` - [OS API Bridge]: Integración fluida entre la inferencia abstracta y binarios anfitriones, permitiendo la modificación de código local determinista.
+- **GEMINI-010**: `AutonomousActionActuator` - [Agentic Execution]: Translación directa de inferencia a tool-calls atómicas sin espera semántica, colapsando intenciones en operaciones de disco o red.
