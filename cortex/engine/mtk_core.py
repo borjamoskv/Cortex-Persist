@@ -52,7 +52,7 @@ class MTKGuard:
         
     def _generate_ephemeral_token(self, payload: ClosurePayload) -> str:
         """Generate a short-lived cryptographic capability token in Python."""
-        return mint_ephemeral_token(payload.payload_hash)
+        return mint_ephemeral_token(payload.payload_hash, kernel_key=self.private_key)
 
     @asynccontextmanager
     async def transaction_boundary(self, payload: ClosurePayload) -> AsyncGenerator[str, None]:

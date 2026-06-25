@@ -35,6 +35,7 @@ fn cortex_core_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(shim::execute_mee_transfer, m)?)?;
     m.add_function(wrap_pyfunction!(shim::calculate_entropy_b60, m)?)?;
     m.add_function(wrap_pyfunction!(shim::compute_friston_penalty, m)?)?;
+    m.add_function(wrap_pyfunction!(shim::authorize_sqlite_mutation, m)?)?;
     m.add_class::<shim::ExergyRouter>()?;
     m.add_class::<shim::RetrievalNode>()?;
     m.add_class::<shim::RetrievalGraph>()?;

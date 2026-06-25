@@ -88,49 +88,18 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
         token = mtk_active_token.get()
         _payload = mtk_payload_hash.get() or ""
         
-        if not token or (not token.startswith("mtk_auth_") and not token.startswith("zk_seal_rs_")):
-            logger.critical(f"[MTK-BLOCK] Unauthorized physical mutation attempt: Action {action} on {arg1}")
-            return sqlite3.SQLITE_DENY
-            
-        if token.startswith("mtk_auth_"):
-            # Bypass FFI verification for dummy/testing/bounty tokens.
-            # Cryptographic tokens have the form: mtk_auth_<timestamp_ms>_<signature_hex> (4 parts).
-            parts = token.split("_")
-            if len(parts) >= 3:
-                # Bypass FFI verification for dummy/testing/bounty tokens.
-                # In pure Python Ouroboros engine, token generation is trusted within context.
-                pass
-
-            
-        # Cross-Language Taint Propagation: Rust ZK-Seal bypasses GC taint tracking
-        if token.startswith("zk_seal_rs_"):
-            return sqlite3.SQLITE_OK
-            
-        # Memory Taint Tracking: Bloquear inyección estocástica directa
-        import sys
-        STOCHASTIC_MODULES = (
-            "cortex.engine.inference",
-            "cortex.engine.models",
-            "cortex.extensions.llm",
-            "cortex.engine.synthesis",
-            "cortex.engine.generation"
-        )
+        # [C5-REAL] ULTRA-THINK VECTOR GAMMA
+        # Delegate token and memory taint validation to the immutable PyO3 Rust extension.
         try:
-            frame = sys._getframe(1)
-            while frame:
-                module_name = frame.f_globals.get("__name__", "")
-                if module_name and any(module_name.startswith(sm) for sm in STOCHASTIC_MODULES):
-                    logger.critical(f"[MTK-BLOCK] Stochastic memory injection detected from {module_name}. Action {action} on {arg1}")
-                    return sqlite3.SQLITE_DENY
-                # Check for explicit taint flags in locals
-                for var_name, var_value in frame.f_locals.items():
-                    if hasattr(var_value, "__taint__") or var_name == "tainted_payload":
-                        logger.critical(f"[MTK-BLOCK] Tainted memory object '{var_name}' detected in stack. Action {action}")
-                        return sqlite3.SQLITE_DENY
-                frame = frame.f_back
-        except (ValueError, AttributeError):
-            pass
-            
+            import cortex_core_rs
+            res = cortex_core_rs.authorize_sqlite_mutation(action, arg1, arg2, token)
+            if res != sqlite3.SQLITE_OK:
+                logger.critical(f"[MTK-BLOCK] Native Rust Firewall blocked physical mutation attempt. Action {action}")
+                return sqlite3.SQLITE_DENY
+        except Exception as e:
+            logger.critical(f"[MTK-BLOCK] Exception in Rust MTK FFI layer: {e}")
+            return sqlite3.SQLITE_DENY
+
     return sqlite3.SQLITE_OK
 
 def install_mtk_authorizer(conn: sqlite3.Connection):
