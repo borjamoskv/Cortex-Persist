@@ -4,6 +4,7 @@ OUROBOROS-CORE - Python implementation of the Epistemic Dependency Graph (EDG)
 Replaces the Rust `cortex_rs/src/edg.rs` to fix LOC constraints and sqlite_vec issues.
 """
 
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 
@@ -33,40 +34,32 @@ class ValidationStatus(str, Enum):
         return mapping.get(value, cls.Speculative)
 
 
+@dataclass
 class RetrievalNode:
     """Canonical Retrieval Graph Node."""
-    
-    def __init__(self, node_id: str, confidence: float):
-        self.id: str = node_id
-        self.status: ValidationStatus = ValidationStatus.Proven
-        self.confidence: float = confidence
-        self.supported_by: set[str] = set()
-        self.supports: set[str] = set()
-        self.exergy: float = 0.0
-        self.rul_claim_id: Optional[str] = None
+    id: str
+    confidence: float
+    status: ValidationStatus = ValidationStatus.Proven
+    supported_by: set[str] = field(default_factory=set)
+    supports: set[str] = field(default_factory=set)
+    exergy: float = 0.0
+    rul_claim_id: Optional[str] = None
 
-    def get_supported_by(self) -> list[str]:
-        return list(self.supported_by)
-
-    def get_supports(self) -> list[str]:
-        return list(self.supports)
-
-
+@dataclass
 class ExergyMutation:
-    def __init__(self, node_id: str, delta: float, rul_claim_id: Optional[str] = None):
-        self.node_id = node_id
-        self.delta = delta
-        self.rul_claim_id = rul_claim_id
+    node_id: str
+    delta: float
+    rul_claim_id: Optional[str] = None
 
 
 class ExergyError(Exception):
     pass
 
 
+@dataclass
 class ExergyGuard:
-    def __init__(self, cluster_size: int, max_delta_per_epoch: float):
-        self.cluster_size = cluster_size
-        self.max_delta_per_epoch = max_delta_per_epoch
+    cluster_size: int
+    max_delta_per_epoch: float
 
     def validate(self, mutation: ExergyMutation, valid_nodes: list[str]) -> None:
         if mutation.node_id not in valid_nodes:
