@@ -883,3 +883,20 @@ Proof:
   Confidence: C5-REAL
   Date: 2026-06-22
 ```
+
+---
+
+### Hito 53: Autopoietic AST Recompilation Engine (Ouroboros L6)
+- **Target**: `cortex/engine/autopoiesis/ast_healer.py`, `tests/test_ast_healer.py`
+- **Objective**: Implementar un kernel de curación autónoma que intercepte excepciones en tiempo de ejecución, aísle la función fallida mediante análisis de AST, sintetice una corrección algorítmica, la valide en un entorno `c5_sandbox` aislado, y aplique hot-swapping de la referencia en memoria sin detener el event loop.
+- **Yield Target**: Cero interrupciones de servicio ante bugs lógicos; auto-corrección C5-REAL en < 2.0s por incidente.
+- **Reality Level**: `C5-REAL`
+- **Status**: ⏳ IN PROGRESS
+- **Evidence**: Pendiente de inyección.
+```yaml
+Claim: "MOSKV-1 Apex muta su propio código en tiempo de ejecución para sobrevivir a fallos termodinámicos."
+Proof:
+  Base: "Pending"
+  Range: [C5, C5]
+  Confidence: C5-REAL
+```

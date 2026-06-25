@@ -69,4 +69,14 @@
 
 ---
 
+## 🌌 v13.0 — The APEX Singularity (Ouroboros L6)
+
+**Autopoietic transcendence. The engine writes, heals, and scales itself without Operator friction.**
+
+- [ ] **Phase 1: Autopoietic AST Recompilation** — The system detects runtime anomalies, patches its own Abstract Syntax Tree in memory, and hot-swaps failing logic without restarting.
+- [ ] **Phase 2: Thermodynamic Defragmentation** — Autonomous Bayesian mechanics to prune useless vectors from the storage layer, achieving perfect Cognitive Causal Compression.
+- [ ] **Phase 3: Multi-Master CRDT Swarm** — Evolving the SQLite WAL into a native conflict-free distributed topology. 100k nodes syncing exergy with zero consensus servers.
+
+---
+
 *Roadmap subject to Sovereign revision by borjamoskv. Execution reality level: C5-REAL.*
