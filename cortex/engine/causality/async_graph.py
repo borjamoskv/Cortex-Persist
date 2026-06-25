@@ -403,25 +403,6 @@ class AsyncCausalGraph(TaintStatusMixin):
                     queue.append(child_id)
         return changes, node_states
 
-        p_states = []
-        for pid in parents:
-            if pid in node_states:
-                p_states.append(node_states[pid])
-            else:
-                p_meta = nodes_data.get(pid, {}).get("metadata", {})
-                p_status = p_meta.get("taint_status", TaintStatus.CLEAN.value)
-                p_states.append(
-                    TaintStatus(p_status)
-                    if p_status in TaintStatus._value2member_map_
-                    else TaintStatus.CLEAN
-                )
-
-        if all(s == TaintStatus.TAINTED for s in p_states):
-            return TaintStatus.TAINTED
-        if any(s in (TaintStatus.TAINTED, TaintStatus.SUSPECT) for s in p_states):
-            return TaintStatus.SUSPECT
-        return TaintStatus.CLEAN
-
     async def _apply_fact_updates(
         self,
         changes: list[dict[str, Any]],
