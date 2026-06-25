@@ -9,7 +9,7 @@ from contextlib import contextmanager
 import click
 from rich.panel import Panel
 
-from legacy_research import __version__
+from cortex import __version__
 from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 
 

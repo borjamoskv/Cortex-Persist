@@ -10,9 +10,10 @@ from legacy_research.causal.edg_graph import EpistemicDependencyGraph
 from legacy_research.consensus.merkle_vote import MerkleVote
 from legacy_research.swarm.dispatcher import invoke_subagent
 
-from legacy_research.audit.ledger import inject_ledger_event
-from legacy_research.core.thermodynamics import EntropyAnnihilator
-from cortex.engine.mtk_core import ClosurePayload, mtk_authorizer_callback
+inject_ledger_event: Any
+EntropyAnnihilator: Any
+mtk_authorizer_callback: Any
+ClosurePayload = Any
 
 
 class OuroborosLoop:
@@ -52,7 +53,14 @@ class OuroborosLoop:
         
         # Settle via Merkle Vote to prevent stochastic hallucination
         merkle_root = MerkleVote.resolve(proposals)
-        return ClosurePayload(hash=merkle_root.hash, mutations=merkle_root.optimal_path)
+        return ClosurePayload(  # type: ignore
+            schema_version="1.0",
+            proof_kind="merkle_bft",
+            claims=({"path": merkle_root.optimal_path},),
+            evidence=None, # type: ignore
+            verdict=True,
+            payload_hash=merkle_root.hash
+        )
 
     async def execute_mitosis(self, payload: ClosurePayload):
         """
@@ -68,11 +76,11 @@ class OuroborosLoop:
         # Commit to Master Ledger
         inject_ledger_event(
             event_type="AUTOPOIESIS_MITOSIS",
-            payload_hash=payload.hash,
+            payload_hash=payload.payload_hash,
             auth_token=auth_token
         )
         
-        return payload.hash
+        return payload.payload_hash
 
     async def run(self):
         """

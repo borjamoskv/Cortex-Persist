@@ -21,7 +21,7 @@ from starlette.concurrency import run_in_threadpool
 from starlette.requests import Request
 
 import cortex.api.state as api_state
-from legacy_research import __version__
+from cortex import __version__
 from cortex.api.deps import get_engine
 from legacy_research.auth import AuthResult, get_auth_manager, require_permission
 from cortex.database.schema import SCHEMA_VERSION
