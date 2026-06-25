@@ -368,7 +368,6 @@ def siege(db: str) -> None:
     from cortex.database.pool import CortexConnectionPool
     from cortex.engine import CortexEngine as AsyncCortexEngine
     from cortex.engine.legion_vectors import COMPLIANCE_SIEGE_SWARM
-    from cortex.crypto.vault import Vault
 
     async def _run_siege():
         pool = CortexConnectionPool(db, min_connections=2, max_connections=10, read_only=False)

@@ -132,9 +132,22 @@ class EnterpriseAuditLedger:
                 batch = self._batch_queue[: self.max_batch_size]
                 self._batch_queue = self._batch_queue[self.max_batch_size :]
 
-                # Use Rust bindings to compute the Merkle root
+                # Use Rust bindings to compute the Merkle root if available
                 batch_hashes = [evt["event_hash"] for evt in batch]
-                merkle_root = cortex_core_rs.batch_merkle_root(batch_hashes)
+                merkle_root = None
+                if cortex_core_rs is not None and hasattr(cortex_core_rs, "batch_merkle_root"):
+                    try:
+                        merkle_root = cortex_core_rs.batch_merkle_root(batch_hashes)
+                    except Exception:
+                        pass
+                
+                if merkle_root is None:
+                    # Native Python fallback for batch merkle root
+                    import hashlib
+                    m = hashlib.sha3_256()
+                    for h in batch_hashes:
+                        m.update(h.encode("utf-8"))
+                    merkle_root = m.hexdigest()
                 
                 # Sign the Merkle root
                 signature = self.private_key.sign(merkle_root.encode("utf-8")).hex()

@@ -4,9 +4,9 @@ Prueba Empírica del Apoptosis Daemon (LEY 10).
 """
 
 import asyncio
+import logging
 import os
 import sys
-import logging
 
 logger = logging.getLogger(__name__)
 from datetime import datetime, timedelta, timezone
