@@ -92,11 +92,8 @@ logger = logging.getLogger("cortex.db")
 # ─── Configuration ────────────────────────────────────────────────────
 
 # How long to wait (ms) for a locked database before raising OperationalError.
-# 30s to handle bursts of >10 concurrent CLI processes competing for
-# SQLite write lock (WAL allows concurrent reads but only 1 writer).
-# Previous value was 5000ms but caused spurious SQLITE_BUSY under heavy
-# swarm concurrency. 30s is the canonical C5-REAL production value.
-BUSY_TIMEOUT_MS: Final[int] = 30000
+# Rule R10 enforces 5000ms rigid boundary to prevent silent deadlocks.
+BUSY_TIMEOUT_MS: Final[int] = 5000
 
 # Python-level timeout (seconds) for the sqlite3.connect() call itself.
 CONNECT_TIMEOUT_S: Final[int] = 5
