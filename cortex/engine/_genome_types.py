@@ -41,12 +41,12 @@ class FitnessRecord:
     def to_dict(self) -> dict[str, Any]:
         # BOUNDARY: Serialización a floats para trazabilidad visual (MongoDB/JSON)
         return {
-            "score": self.score.to_float(),
-            "latency_ms": self.latency_ms.to_float(),
+            "score": float(self.score),
+            "latency_ms": float(self.latency_ms),
             "success": self.success,
-            "error_rate": self.error_rate.to_float(),
-            "throughput": self.throughput.to_float(),
-            "timestamp": self.timestamp.to_float(),
+            "error_rate": float(self.error_rate),
+            "throughput": float(self.throughput),
+            "timestamp": float(self.timestamp),
             "metadata": self.metadata,
         }
 
@@ -100,9 +100,9 @@ class Lineage:
         return {
             "generation": self.generation,
             "parent_hash": self.parent_hash,
-            "avg_fitness": self.avg_fitness.to_float(),
-            "best_fitness": self.best_fitness.to_float(),
-            "fitness_trend": self.fitness_trend.to_float(),
+            "avg_fitness": float(self.avg_fitness),
+            "best_fitness": float(self.best_fitness),
+            "fitness_trend": float(self.fitness_trend),
             "adopted_count": self.adopted_count,
             "discarded_count": self.discarded_count,
             "children_spawned": self.children_spawned,

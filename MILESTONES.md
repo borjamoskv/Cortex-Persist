@@ -891,12 +891,12 @@ Proof:
 - **Objective**: Implementar un kernel de curación autónoma que intercepte excepciones en tiempo de ejecución, aísle la función fallida mediante análisis de AST, sintetice una corrección algorítmica, la valide en un entorno `c5_sandbox` aislado, y aplique hot-swapping de la referencia en memoria sin detener el event loop.
 - **Yield Target**: Cero interrupciones de servicio ante bugs lógicos; auto-corrección C5-REAL en < 2.0s por incidente.
 - **Reality Level**: `C5-REAL`
-- **Status**: ⏳ IN PROGRESS
-- **Evidence**: Pendiente de inyección.
+- **Status**: ✅ COMPLETE — 25 Junio 2026
+- **Evidence**: Commits `bdb13439c` and `f6aacdb9b`. Pruebas en `test_ast_healer.py` pasando exitosamente bajo validación de la `Sandbox`.
 ```yaml
 Claim: "MOSKV-1 Apex muta su propio código en tiempo de ejecución para sobrevivir a fallos termodinámicos."
 Proof:
-  Base: "Pending"
+  Base: "Hash bdb13439c, pyright 0 errors"
   Range: [C5, C5]
   Confidence: C5-REAL
 ```

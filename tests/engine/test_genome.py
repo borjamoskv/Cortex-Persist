@@ -52,7 +52,7 @@ def test_causal_patch_mutation_probability():
         name="test_causal_prob",
         dispatch_tree=dispatch("failing_target", {}),
         parameters={},
-        mutation_rates={MutationType.CAUSAL_PATCH: 1.0},  # Force 100% rate in weights
+        mutation_rates={MutationType.CAUSAL_PATCH: __import__('cortex.math.babylon', fromlist=['Babylon60']).Babylon60(216000)},  # Force 100% rate in weights
     )
 
     mutator = GenomeMutator()

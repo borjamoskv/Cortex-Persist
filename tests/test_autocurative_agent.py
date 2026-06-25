@@ -34,12 +34,12 @@ from cortex.engine.circuit_breaker import CircuitBreaker, CircuitState
 def agent() -> AutoCurativeAgent:
     """Create an AutoCurativeAgent with test-friendly config."""
     config = AutoCurativeConfig(
-        monitor_interval_s=0.1,
+        monitor_interval_ms=0.1,
         max_healing_attempts=3,
-        healing_timeout_s=5.0,
+        healing_timeout_ms=5.0,
         breaker_failure_threshold=3,
-        breaker_recovery_timeout_s=1.0,
-        cooldown_after_repair_s=0.01,  # fast cooldown for tests
+        breaker_recovery_timeout_ms=1.0,
+        cooldown_after_repair_ms=10,  # fast cooldown for tests
         max_concurrent_repairs=2,
         persist_events=False,
     )
@@ -154,7 +154,7 @@ async def test_circuit_breaker_trips():
     config = AutoCurativeConfig(
         breaker_failure_threshold=2,
         max_healing_attempts=1,
-        cooldown_after_repair_s=0.01,
+        cooldown_after_repair_ms=10,
     )
     agent = AutoCurativeAgent(config=config)
 
@@ -417,7 +417,7 @@ async def test_full_healing_loop_integration():
     """End-to-end test of the complete self-healing loop."""
     config = AutoCurativeConfig(
         max_healing_attempts=3,
-        cooldown_after_repair_s=0.01,
+        cooldown_after_repair_ms=10,
         breaker_failure_threshold=5,
     )
     agent = AutoCurativeAgent(config=config)

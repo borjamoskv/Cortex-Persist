@@ -281,7 +281,7 @@ def stack_v2(tmp_path: Path) -> HealingStack:
     config = HealingStackConfig(
         curative_config=AutoCurativeConfig(
             max_healing_attempts=3,
-            cooldown_after_repair_s=0.01,
+            cooldown_after_repair_ms=10,
             breaker_failure_threshold=5,
         ),
         optimizer_config=OptimizerConfig(
@@ -349,8 +349,8 @@ async def test_stack_v2_full_sync(stack_v2: HealingStack):
     stack_v2._sync_parameters_sync()
 
     # Timeout should be synced to agent config
-    assert stack_v2._agent.config.healing_timeout_s == 10.0
-    assert stack_v2._agent.config.cooldown_after_repair_s == 2.0
+    assert stack_v2._agent.config.healing_timeout_ms == 10.0
+    assert stack_v2._agent.config.cooldown_after_repair_ms == 2000
 
 
 @pytest.mark.asyncio

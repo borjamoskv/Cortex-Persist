@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-06-25
+
 ### Changed
 - Consolidación Ouroboros (C5-REAL): Erradicación de prints y variables no usadas.
 - Mitosis: Despliegue de Legion-1.

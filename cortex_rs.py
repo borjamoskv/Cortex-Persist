@@ -151,6 +151,9 @@ class Cortex:
     def get_value(self):
         return self.value
 
+    def to_float(self) -> float:
+        return float(self)
+
 def calculate_entropy_b60(data: bytes) -> Cortex:
     """Wrapper to return the Python-friendly Cortex object from Rust Fixed60."""
     return Cortex(_calc_entropy_rust(data))

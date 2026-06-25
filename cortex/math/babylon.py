@@ -79,6 +79,9 @@ class _PurePythonBabylon60:
     def to_float(self) -> float:
         return self.value / SCALE
 
+    def __float__(self) -> float:
+        return self.to_float()
+
     # -- arithmetic ---------------------------------------------------------- #
 
     def add(self, other: int | float | _PurePythonBabylon60) -> _PurePythonBabylon60:

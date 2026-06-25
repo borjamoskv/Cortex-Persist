@@ -38,7 +38,7 @@ def sv(tmp_path: Path) -> CortexSupervisor:
     config = SupervisorConfig(
         curative_config=AutoCurativeConfig(
             max_healing_attempts=3,
-            cooldown_after_repair_s=0.01,
+            cooldown_after_repair_ms=10,
             breaker_failure_threshold=5,
         ),
         optimizer_config=OptimizerConfig(
@@ -167,8 +167,8 @@ async def test_l6_to_l5_sync(sv: CortexSupervisor):
 
     sv._sync_l6_to_l5()
 
-    assert sv.l5.config.healing_timeout_s == 15.0
-    assert sv.l5.config.cooldown_after_repair_s == 3.0
+    assert sv.l5.config.healing_timeout_ms == 15000
+    assert sv.l5.config.cooldown_after_repair_ms == 3000
 
 
 @pytest.mark.asyncio

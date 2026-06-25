@@ -42,7 +42,7 @@ async def execute_with_healing(
             )
             ENDOCRINE.pulse(
                 HormoneType.ADRENALINE,
-                agent.config.adrenaline_on_critical.to_float(),
+                agent.config.adrenaline_on_critical,
                 reason=f"Circuit OPEN: {subsystem}",
             )
             raise RuntimeError(
@@ -77,12 +77,12 @@ async def execute_with_healing(
                 )
                 ENDOCRINE.pulse(
                     HormoneType.NEURAL_GROWTH,
-                    agent.config.neural_growth_on_heal.to_float(),
+                    agent.config.neural_growth_on_heal,
                     reason=f"Self-healed: {subsystem}",
                 )
                 ENDOCRINE.pulse(
                     HormoneType.CORTISOL,
-                    agent.config.cortisol_on_repair.to_float(),
+                    agent.config.cortisol_on_repair,
                     reason=f"Repair relief: {subsystem}",
                 )
 
@@ -97,7 +97,7 @@ async def execute_with_healing(
             agent._total_errors += 1
             ENDOCRINE.pulse(
                 HormoneType.CORTISOL,
-                agent.config.cortisol_on_error.to_float(),
+                agent.config.cortisol_on_error,
                 reason=f"Error in {subsystem}: {type(error).__name__}",
             )
 
@@ -128,7 +128,7 @@ async def execute_with_healing(
     )
     ENDOCRINE.pulse(
         HormoneType.ADRENALINE,
-        agent.config.adrenaline_on_critical.to_float(),
+        agent.config.adrenaline_on_critical,
         reason=f"Healing exhausted: {subsystem}",
     )
 
@@ -321,7 +321,7 @@ async def start_daemon(
             cortisol = ENDOCRINE.get_level(HormoneType.CORTISOL)
 
             # Thresholds
-            if cortisol > agent.config.cortisol_alarm_threshold.to_float():
+            if cortisol > agent.config.cortisol_alarm_threshold:
                 logger.warning(
                     "[AUTOCURATIVE] ⚠️ Cortisol alarm: %.3f > %.3f",
                     cortisol,
