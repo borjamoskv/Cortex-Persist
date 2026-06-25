@@ -255,7 +255,7 @@ async def query_causal_chain(event_id: int) -> CausalPathResponse:
         """
 
         async with conn.execute(query, (event_id,)) as cursor:
-            rows = await cursor.fetchall()
+            rows = list(await cursor.fetchall())
 
         if not rows:
             raise HTTPException(status_code=404, detail=f"Event {event_id} has no causal record.")
@@ -330,7 +330,7 @@ async def run_cryptographic_audit() -> AuditReportResponse:
         async with conn.execute(
             "SELECT id, timestamp, type, actor, payload, parent_event, prev_hash, event_hash FROM events ORDER BY id ASC"
         ) as cursor:
-            rows = await cursor.fetchall()
+            rows = list(await cursor.fetchall())
 
         events_count = len(rows)
         broken_hashes = 0

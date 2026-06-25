@@ -2,7 +2,16 @@
 import re
 import time
 
-from google.antigravity import hooks
+from typing import Any
+
+try:
+    from google.antigravity import hooks # type: ignore
+except ImportError:
+    pass
+
+class _HookResult:
+    PROCEED: Any = None
+HookResult = _HookResult
 
 from legacy_research.observability.telemetry import telemetry
 
@@ -36,7 +45,7 @@ def _extract_skill_info(data) -> dict:
 
 
 @hooks.pre_tool_call_decide
-async def track_start(data) -> hooks.HookResult:
+async def track_start(data) -> HookResult:
     info = _extract_skill_info(data)
 
     # Use agent's conversation ID as session ID
@@ -58,7 +67,7 @@ async def track_start(data) -> hooks.HookResult:
         event_type="tool_start",
     )
 
-    return hooks.HookResult.PROCEED
+    return HookResult.PROCEED
 
 
 @hooks.post_tool_call

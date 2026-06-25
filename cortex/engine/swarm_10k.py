@@ -243,6 +243,28 @@ class ForensicLegion(LegionSupervisor):
         self._overclocked = True  # High-agency forensic agents are always hot
 
 
+class BFTConsensusEngine:
+    """
+    Byzantine Fault Tolerance (BFT) Consensus for the Legion Swarm.
+    Requires N=3 identical proposals (represented by a cryptographically secure hash)
+    to achieve quorum on an epistemic transition.
+    """
+    def __init__(self, required_quorum: int = 3):
+        self.required_quorum = required_quorum
+        # topic_id -> { fact_hash -> { agent_id } }
+        self._proposals: collections.defaultdict[str, collections.defaultdict[str, set[str]]] = collections.defaultdict(lambda: collections.defaultdict(set))
+        
+    async def propose_fact(self, fact_hash: str, agent_id: str, topic_id: str) -> bool:
+        """
+        Records a proposal from an agent. Returns True if quorum is reached.
+        """
+        self._proposals[topic_id][fact_hash].add(agent_id)
+        
+        if len(self._proposals[topic_id][fact_hash]) >= self.required_quorum:
+            return True
+        return False
+
+
 class SwarmCommander:
     """L0 Apex Controller: Global exergy arbitration and Legion deployment."""
 

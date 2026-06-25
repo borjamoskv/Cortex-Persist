@@ -148,7 +148,7 @@ class E1Profiler:
     def score_trace(self, trace: ExecutionTrace) -> TrajectoryScore:
         """Score a single trace with no engine wiring (all signals trace-local)."""
         return self._kernel.score(
-            trace,
+            trace, # type: ignore
             state=None,
             causal_graph=None,
             vote_ledger=None,

@@ -7,9 +7,12 @@ the Sovereign Ledger. Limits hallucination ('stochastic entropy') by verifying
 mathematical proofs of consensus encoded inside the fact metadata.
 """
 
+import hashlib
+import os
+import json
 from typing import Any
 
-from legacy_research.crypto.keys import ZKSwarmIdentity
+from cortex.crypto.keys import ZKSwarmIdentity
 
 
 class VoidStateSecurityError(Exception):
@@ -62,3 +65,47 @@ class ZKSwarmGuard:
                 f"[ZK-SWARM] Cryptographic signature INVALID for payload of type '{fact_type}'. "
                 "Potential hallucination, manipulation, or thermodynamic fault detected."
             )
+
+class CommitRevealProtocol:
+    """
+    Zero-Knowledge Epistemic Contention using Commit-Reveal schemes (SHA3-256).
+    Enables swarm agents to prove precedence/causality of a fact without exposing its 
+    decrypted contents during the ingestion phase, maintaining multi-tenant isolation.
+    """
+    
+    @staticmethod
+    def generate_commit(payload_dict: dict, secret_nonce: bytes = None) -> tuple[str, str]:
+        """
+        Generates a SHA3-256 commitment of the payload.
+        Returns (commit_hash_hex, secret_nonce_hex).
+        """
+        if secret_nonce is None:
+            secret_nonce = os.urandom(32)
+            
+        payload_bytes = json.dumps(payload_dict, sort_keys=True).encode('utf-8')
+        
+        hasher = hashlib.sha3_256()
+        hasher.update(secret_nonce)
+        hasher.update(payload_bytes)
+        
+        commit_hash = hasher.hexdigest()
+        return commit_hash, secret_nonce.hex()
+        
+    @staticmethod
+    def verify_commit(commit_hash: str, secret_nonce_hex: str, payload_dict: dict) -> bool:
+        """
+        Verifies that a payload and a secret nonce match the previously generated commit hash.
+        """
+        try:
+            secret_nonce = bytes.fromhex(secret_nonce_hex)
+        except ValueError:
+            return False
+            
+        payload_bytes = json.dumps(payload_dict, sort_keys=True).encode('utf-8')
+        
+        hasher = hashlib.sha3_256()
+        hasher.update(secret_nonce)
+        hasher.update(payload_bytes)
+        
+        expected_hash = hasher.hexdigest()
+        return expected_hash == commit_hash

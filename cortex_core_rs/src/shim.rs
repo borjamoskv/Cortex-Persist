@@ -113,3 +113,9 @@ pub fn calculate_entropy_b60(data: &[u8]) -> PyResult<Fixed60> {
     }
     Ok(Fixed60 { raw_value: (ent * 216_000.0_f64).round() as i64 })
 }
+
+#[pyfunction]
+pub fn compute_friston_penalty(exergy: f64, complexity: f64, accuracy: f64) -> PyResult<f64> {
+    let net_exergy = exergy - (complexity / (accuracy + 1.0) * 0.05);
+    Ok(net_exergy)
+}

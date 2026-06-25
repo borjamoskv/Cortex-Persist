@@ -20,7 +20,7 @@ class RuntimeLoop:
         ledger: Any,
         metrics_emitter: Any,
         snapshot_manager: SnapshotManager,
-        homeostatic_controller: HomeostaticController = None,
+        homeostatic_controller: HomeostaticController | None = None,
     ):
         self.ledger = ledger
         self.metrics = metrics_emitter
@@ -44,7 +44,7 @@ class RuntimeLoop:
             "deterministic_seed": "0xDEADBEEF",
         }
 
-    def start(self, injected_state: RuntimeState = None):
+    def start(self, injected_state: RuntimeState | None = None):
         self.is_running = True
         self.state = injected_state or self.state
 

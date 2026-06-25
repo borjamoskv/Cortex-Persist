@@ -186,7 +186,7 @@ class MemoryArchaeologist:
     def _build_clusters(
         self,
         facts: list[dict[str, Any]],
-        vecs_matrix: np.ndarray,
+        vecs_matrix: Any,
         threshold: float,  # pyright: ignore[reportInvalidTypeForm]
     ) -> list[list[int]]:
         # O(N^2) dot product for cosine similarity is unavoidable here without approximate KNN.
@@ -223,7 +223,7 @@ class MemoryArchaeologist:
     async def _synthesize_and_update(
         self,
         project: str,
-        tenant_id: str,
+        tenant_id: str | None,
         clusters: list[list[int]],
         facts: list[dict[str, Any]],
         simulate: bool,
@@ -278,7 +278,7 @@ class MemoryArchaeologist:
     async def _apply_db_updates(
         self,
         project: str,
-        tenant_id: str,
+        tenant_id: str | None,
         condensed_content: str,
         cluster_facts: list[dict[str, Any]],
         primary_parent_id: str | None,

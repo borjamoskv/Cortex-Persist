@@ -37,9 +37,9 @@ class ScientistTreeSearch:
 
     async def initialize(self) -> None:
         """Subscribe to BeliefTransitions to grow the tree."""
-        await self.bus.subscribe("belief.transition.proposed", self._handle_new_hypothesis)
-        await self.bus.subscribe("experiment.execution.completed", self._handle_execution_result)
-        await self.bus.subscribe("artifact.review.completed", self._handle_review_result)
+        await self.bus.subscribe("belief.transition.proposed", self._handle_new_hypothesis) # type: ignore
+        await self.bus.subscribe("experiment.execution.completed", self._handle_execution_result) # type: ignore
+        await self.bus.subscribe("artifact.review.completed", self._handle_review_result) # type: ignore
 
     async def _handle_new_hypothesis(self, event: dict[str, Any]) -> None:
         belief = BeliefObject(

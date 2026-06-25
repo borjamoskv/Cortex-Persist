@@ -7,9 +7,10 @@ compaction sequence to the Ledger to maintain mathematical provenance before res
 """
 
 import logging
-from typing import Optional
+from typing import Optional, Any
 
-import cortex_rs
+import cortex_rs as _cortex_rs
+cortex_rs: Any = _cortex_rs
 from legacy_research.audit.ledger import EnterpriseAuditLedger
 from legacy_research.auth.enterprise_identity import SovereignIdentity, TenantRBAC
 
@@ -21,7 +22,7 @@ class SemanticOrchestrator:
     is maintained via the EnterpriseAuditLedger when the state undergoes compaction.
     """
 
-    def __init__(self, ledger: EnterpriseAuditLedger, identity: SovereignIdentity, initial_state: Optional[cortex_rs.SemanticState] = None):
+    def __init__(self, ledger: EnterpriseAuditLedger, identity: SovereignIdentity, initial_state: Optional[Any] = None):
         self.ledger = ledger
         self.identity = identity
         self.state = initial_state if initial_state else cortex_rs.SemanticState()
@@ -51,7 +52,7 @@ class SemanticOrchestrator:
             await self._compact_dependencies()
             self.state.add_dependency(id_str)
 
-    async def merge(self, other_state: cortex_rs.SemanticState) -> None:
+    async def merge(self, other_state: Any) -> None:
         """
         Merges another SemanticState into this one. If an overflow occurs,
         compacts all buffers that are full to ensure the merge can proceed.

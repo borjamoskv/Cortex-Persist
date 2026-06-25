@@ -33,6 +33,7 @@ fn cortex_core_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(shim::verify_causal_assertion, m)?)?;
     m.add_function(wrap_pyfunction!(shim::execute_mee_transfer, m)?)?;
     m.add_function(wrap_pyfunction!(shim::calculate_entropy_b60, m)?)?;
+    m.add_function(wrap_pyfunction!(shim::compute_friston_penalty, m)?)?;
     m.add_class::<shim::ExergyRouter>()?;
     
     Ok(())

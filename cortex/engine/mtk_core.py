@@ -108,10 +108,16 @@ class MTKGuard:
         net_exergy = getattr(payload, "info_exergy", 1.0)
         
         if payload.evidence and payload.claims:
-            accuracy = len(payload.evidence.sources)
-            complexity = len(payload.claims)
-            friston_free_energy = (complexity) / (accuracy + 1.0) * 0.05
-            net_exergy -= friston_free_energy
+            accuracy = float(len(payload.evidence.sources))
+            complexity = float(len(payload.claims))
+            try:
+                from cortex_core_rs import compute_friston_penalty
+                net_exergy = compute_friston_penalty(float(net_exergy), complexity, accuracy)
+            except ImportError:
+                # Fallback in case the Rust layer is not loaded, but log a warning.
+                logger.warning("[MTK] cortex_core_rs not found. Using Python Friston penalty.")
+                friston_free_energy = complexity / (accuracy + 1.0) * 0.05
+                net_exergy -= friston_free_energy
             
         if net_exergy < 0.1:
             raise ValueError(f"MTK-REJECT: Variational Free Energy too high / Net Exergy too low ({net_exergy:.3f} < 0.1).")

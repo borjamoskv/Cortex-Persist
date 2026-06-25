@@ -26,6 +26,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 
 from dataclasses import dataclass, field
+import sqlite3
 from typing import Any
 
 logger = logging.getLogger("cortex.verification")
