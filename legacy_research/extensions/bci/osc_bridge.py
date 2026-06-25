@@ -18,9 +18,10 @@ try:
     from pythonosc.osc_server import AsyncIOOSCUDPServer
     pythonosc_available = True
 except ImportError:
-    Dispatcher = None  # type: ignore
-    OscMessageBuilder = None  # type: ignore
-    AsyncIOOSCUDPServer = None  # type: ignore
+    from typing import Any
+    Dispatcher: Any = None
+    OscMessageBuilder: Any = None
+    AsyncIOOSCUDPServer: Any = None
     pythonosc_available = False
     logger.warning("python-osc library not installed; AetherOscBridge is running in fallback/offline mode.")
 
@@ -44,7 +45,7 @@ class AetherOscBridge:
         else:
             self.dispatcher = None
 
-        self.server: AsyncIOOSCUDPServer | None = None
+        self.server: Any = None
         self.transport = None
         self.tx_transport = None
 
@@ -60,9 +61,10 @@ class AetherOscBridge:
             return
 
         loop = asyncio.get_running_loop()
-        self.server = AsyncIOOSCUDPServer((self.rx_ip, self.rx_port), self.dispatcher, loop)
+        self.server = AsyncIOOSCUDPServer((self.rx_ip, self.rx_port), self.dispatcher, loop)  # type: ignore
 
         # Start receiver
+        assert self.server is not None
         self.transport, _ = await self.server.create_serve_endpoint()
         logger.info(f"Aether OSC Bridge RX Bound to udp://{self.rx_ip}:{self.rx_port}")
 

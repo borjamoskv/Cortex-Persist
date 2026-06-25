@@ -291,23 +291,23 @@ class FactManager:
         import legacy_research.graph
 
         async with self.engine.session() as conn:
-            return await cortex.graph.get_graph(conn, *args, **kwargs)
+            return await legacy_research.graph.get_graph(conn, *args, **kwargs)
 
     async def query_entity(self, *args, **kwargs) -> Any:
         """Query detailed information about an entity, delegated to QueryMixin."""
         import legacy_research.graph
 
         async with self.engine.session() as conn:
-            return await cortex.graph.query_entity(conn, *args, **kwargs)
+            return await legacy_research.graph.query_entity(conn, *args, **kwargs)
 
     async def find_path(self, *args, **kwargs) -> Any:
         import legacy_research.graph
 
         async with self.engine.session() as conn:
-            return await cortex.graph.find_path(conn, *args, **kwargs)
+            return await legacy_research.graph.find_path(conn, *args, **kwargs)
 
     async def get_context_subgraph(self, *args, **kwargs) -> Any:
         import legacy_research.graph
 
         async with self.engine.session() as conn:
-            return await cortex.graph.get_context_subgraph(conn, *args, **kwargs)
+            return await legacy_research.graph.get_context_subgraph(conn, *args, **kwargs)
