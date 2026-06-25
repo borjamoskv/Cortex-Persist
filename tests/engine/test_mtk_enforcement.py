@@ -171,10 +171,9 @@ async def test_mtk_nested_contexts_isolation(mtk_db, dummy_payload):
         object.__setattr__(dummy_payload_inner, 'payload_hash', dummy_payload_inner.payload_hash + "_new")
 
         async with guard.transaction_boundary(dummy_payload_inner) as token_inner:
+            # With the new deterministic Rust Sha3-256 seal, different payloads yield different tokens
             assert token_inner != token_outer
-            print(f"Inside inner, active_token={mtk_active_token.get()}")
         
-        print(f"After inner, active_token={mtk_active_token.get()}, expected={token_outer}")
         mtk_db.execute("INSERT INTO records (data) VALUES ('inner')")
         
         # Still in outer context, should still be able to mutate
