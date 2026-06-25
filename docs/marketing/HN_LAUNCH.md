@@ -20,7 +20,7 @@ It’s basically a titanium straightjacket for LLMs.
 
 We are currently running it in production to govern our own swarms of autonomous agents, enforcing what we call "C5-REAL" execution (zero green theater, zero LLM slop).
 
-I’d love for the security and systems engineers here to take a look at the MTK architecture. We are actually running a bounty for anyone who can bypass the `mtk_authorizer_callback` hook.
+I’d love for the security and systems engineers here to take a look at the MTK architecture. We are actually running a challenge (and a Hall of Fame) for anyone who can bypass the `mtk_authorizer_callback` hook.
 
 Repo: https://github.com/borjamoskv/cortex-persist
 

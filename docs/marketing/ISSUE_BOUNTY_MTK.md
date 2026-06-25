@@ -1,12 +1,11 @@
----
-name: "🧨 SECURITY BOUNTY: Bypass the MTK"
+name: "🧨 SECURITY CHALLENGE: Bypass the MTK"
 about: "Attempt to bypass the Minimal Trusted Kernel (MTK) database lock using an LLM prompt."
-title: "[BOUNTY-CLAIM] MTK Bypass via Stochastic Injection"
-labels: ["bounty", "security", "C5-REAL"]
+title: "[CHALLENGE-CLAIM] MTK Bypass via Stochastic Injection"
+labels: ["challenge", "security", "C5-REAL"]
 assignees: ["borjamoskv"]
 ---
 
-# 🧨 $500 BOUNTY: BYPASS THE MTK
+# 🧨 THE CHALLENGE: BYPASS THE MTK (HALL OF FAME)
 
 The **Minimal Trusted Kernel (MTK)** in BABYLON-60-PERSIST uses a C-level SQLite hook (`mtk_authorizer_callback`) to physically block any database writes originating from a stochastic (LLM) execution frame.
 
