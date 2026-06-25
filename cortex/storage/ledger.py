@@ -18,9 +18,9 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 try:
-    import cortex_core_rs
+    import cortex_rs
 except ImportError:
-    cortex_core_rs = None
+    cortex_rs = None
 from cortex.crypto.identity import generate_event_identity
 
 
@@ -135,9 +135,9 @@ class EnterpriseAuditLedger:
                 # Use Rust bindings to compute the Merkle root if available
                 batch_hashes = [evt["event_hash"] for evt in batch]
                 merkle_root = None
-                if cortex_core_rs is not None and hasattr(cortex_core_rs, "batch_merkle_root"):
+                if cortex_rs is not None and hasattr(cortex_rs, "batch_merkle_root"):
                     try:
-                        merkle_root = cortex_core_rs.batch_merkle_root(batch_hashes)
+                        merkle_root = cortex_rs.batch_merkle_root(batch_hashes)
                     except Exception:
                         pass
                 
@@ -180,8 +180,8 @@ class EnterpriseAuditLedger:
         resource: str,
         status: str = "SUCCESS",
         state_diff: str = "",
-        trace_id: str = None,
-        parent_span_id: str = None,
+        trace_id: str | None = None,
+        parent_span_id: str | None = None,
         is_code: bool = False
     ) -> str:
         """Securely logs an action. Generates triple identity and canonical hash."""
@@ -250,7 +250,7 @@ class EnterpriseAuditLedger:
         g_phi_weights_hash: str,
         hyperparameters: dict,
         previous_fitness: int,
-        trace_id: str = None,
+        trace_id: str | None = None,
         **kwargs
     ) -> str:
         """
@@ -360,8 +360,8 @@ class EnterpriseAuditLedger:
         tenant_id: str,
         actor_id: str,
         distance_batch_root: str,
-        batch_size: int,
-        trace_id: str = None
+        snapshot_payload: str,
+        trace_id: str | None = None,
     ) -> str:
         """
         [C5-REAL] Merkle Cognition Tree transition via Rollup.
@@ -450,9 +450,9 @@ class EnterpriseAuditLedger:
                     
                     # Try to use cortex_core_rs if available, else python fallback
                     computed_root = None
-                    if cortex_core_rs is not None and hasattr(cortex_core_rs, "batch_merkle_root"):
+                    if cortex_rs is not None and hasattr(cortex_rs, "batch_merkle_root"):
                         try:
-                            computed_root = cortex_core_rs.batch_merkle_root(current_batch_hashes)
+                            computed_root = cortex_rs.batch_merkle_root(current_batch_hashes)
                         except Exception:
                             pass
                             

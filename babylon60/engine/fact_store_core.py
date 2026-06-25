@@ -100,7 +100,10 @@ async def insert_fact_record(
 ) -> int:
     """Perform the actual SQL insert into the facts table."""
     ts = ts or now_iso()
-    tags_json = json.dumps(tags or [])
+    _tags = list(tags) if tags else []
+    if "CORTEX-TAINT" not in _tags:
+        _tags.append("CORTEX-TAINT")
+    tags_json = json.dumps(_tags)
 
     from babylon60.engine.causal.taint_engine import enforce_taint_check
 

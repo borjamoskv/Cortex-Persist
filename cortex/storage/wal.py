@@ -45,6 +45,7 @@ class WriteAheadLog:
             self._conn = None
 
     async def _init_db(self):
+        assert self._conn is not None
         await self._conn.execute("""
             CREATE TABLE IF NOT EXISTS batch_wal (
                 event_id TEXT PRIMARY KEY,
@@ -63,6 +64,7 @@ class WriteAheadLog:
         await self._conn.commit()
 
     async def _worker_loop(self):
+        assert self._conn is not None
         while True:
             try:
                 batch = []
@@ -110,7 +112,7 @@ class WriteAheadLog:
                         t[2].set_exception(e)
                     self._queue.task_done()
 
-    async def write_pending(self, event_id: str, payload: dict, previous_hash: str = None) -> str:
+    async def write_pending(self, event_id: str, payload: dict, previous_hash: str | None = None) -> str:
         """Atomic write before memory queue insertion. Returns the event_hash."""
         if self._conn is None:
             await self.connect()
@@ -147,6 +149,7 @@ class WriteAheadLog:
         """
         if self._conn is None:
             await self.connect()
+        assert self._conn is not None
             
         cursor = await self._conn.execute(
             "SELECT payload FROM batch_wal WHERE status = 'pending'"

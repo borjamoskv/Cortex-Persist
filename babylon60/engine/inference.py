@@ -376,7 +376,7 @@ class InferenceEngine:
 
             cursor = await conn.execute(
                 "INSERT INTO facts (content, fact_type, project, confidence, "
-                "tenant_id, source, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "tenant_id, source, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     d.content,
                     d.fact_type,
@@ -384,6 +384,7 @@ class InferenceEngine:
                     d.confidence,
                     tenant_id,
                     f"inference:{d.rule_name}",
+                    '["CORTEX-TAINT"]',
                     ts,
                 ),
             )
