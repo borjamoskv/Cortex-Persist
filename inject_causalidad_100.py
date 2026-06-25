@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath('.'))
 
-from babylon60.storage.ledger import EnterpriseAuditLedger
+from babylon60.audit.ledger import EnterpriseAuditLedger
 from babylon60.engine.autodidact_hott_engine import AutodidactHottEngine
 from babylon60.engine.ultramap import UltramapSubstrate
 
