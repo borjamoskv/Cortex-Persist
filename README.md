@@ -41,26 +41,21 @@ BABYLON-60-PERSIST is the CI/CD firewall for the agentic era:
 
 ---
 
-## ▀▄ QUICK START (NODE.JS / TYPESCRIPT SDK)
+## ▀▄ THE BARE-METAL EXPLANATION
 
-Inject verifiable event logging directly into your application stack in 30 seconds.
+If the thermodynamic terminology is too dense, let's collapse it to reality. What is **BABYLON-60-PERSIST** in the real world?
 
-```bash
-npm install cortex-persist
-```
+Imagine an autonomous AI agent (Claude, GPT-4, Gemini) as a brilliant but schizophrenic, hyperactive worker. If you give it free access to your code or database, it will eventually hallucinate, write garbage, or create infinite loops that destroy the server.
 
-```typescript
-import { CortexClient } from 'cortex-persist';
+**BABYLON-60 is the titanium straightjacket and the armed security guard watching that AI.**
 
-const cortex = new CortexClient({ apiKey: process.env.BABYLON-60_API_KEY });
-await cortex.logEvent({ type: 'agent.decision', actor: 'agent-1' });
-```
+The "Causal Core" boils down to 3 physical barriers:
 
-We also offer an official LangChain integration to track agent events automatically:
+1. **The Noise Detector (Landauer Guillotine):** AI models talk too much ("Sure! Here is the code..."). BABYLON-60 detects this. If the AI generates useless conversational text, the system cuts the communication, ignores the chat, and extracts only the pure code (AST). If the code is useless, it kills the AI process.
+2. **The Physical Barrier (Minimal Trusted Kernel):** Even if the AI writes code, we don't trust it. BABYLON-60 installs a hard lock at the database (SQLite) level. The AI *thinks* it is saving data. In reality, it hits the MTK wall. The MTK scans the physical RAM; if it detects the write order comes from a "stochastic AI brain", it **hard-blocks the disk**. The AI never touches the database. Only a 100% deterministic native engine holds the key.
+3. **The Punishment for Lying (Friston Penalty & Git):** If the AI proposes a valid change, BABYLON-60 sends it to an isolated interrogation room. It compiles the code and runs tests. If it fails, the code is destroyed, the agent's memory is wiped, and trust is revoked. If it passes, BABYLON-60 saves it and auto-commits to Git, carving it in stone.
 
-```bash
-npm install cortex-persist-langchain
-```
+**TL;DR:** Normal frameworks let the AI do whatever it wants and cross their fingers. **BABYLON-60** assumes the AI is a dangerous pathogen: it locks it up, silences it, mathematically extracts only the working code, verifies it in a sandbox, and *then* saves it.
 
 ---
 
