@@ -94,7 +94,7 @@ class PrimitiveExergyAgentAdapter(SwarmAgent):
         self.maximizer = PrimitiveExergyMaximizerAgent()
 
     async def on_signal(self, signal: SwarmSignal) -> None:
-        if signal.type == "EVALUATE_PRIMITIVE":
+        if signal.type == "EVALUATE_PRIMITIVE":  # type: ignore
             primitive_type = signal.payload.get("primitive_type")
             # f should be passed in payload or registered
             f_expr = signal.payload.get("function_expression") 
@@ -118,8 +118,8 @@ class PrimitiveExergyAgentAdapter(SwarmAgent):
                 result = await self.maximizer.evaluate_primitive(primitive_type, f_compiled, *args)
                 
                 # Emitir resultado de vuelta al enjambre
-                await self.emit("PRIMITIVE_EVALUATED", {
-                    "target": signal.source,
+                await self.emit("PRIMITIVE_EVALUATED", {  # type: ignore
+                    "target": signal.source,  # type: ignore
                     "result": result
                 })
             except Exception as e:

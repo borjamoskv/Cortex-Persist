@@ -8,8 +8,8 @@ logger = logging.getLogger(__name__)
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../sdk/babylon60-mtk/src')))
 
-from babylon60_mtk import install_bootstrap_watchdog
-from babylon60_mtk.watchdog import _is_mitosis_branch
+from babylon60_mtk import install_bootstrap_watchdog  # type: ignore
+from babylon60_mtk.watchdog import _is_mitosis_branch  # type: ignore
 
 
 def run_tests():

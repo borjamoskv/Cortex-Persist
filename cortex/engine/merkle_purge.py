@@ -3,9 +3,11 @@ import subprocess
 import time
 
 try:
-    import cortex_merkle_rewrite
+    from cortex_merkle_rewrite import RewriteEngine  # type: ignore
+    from cortex_merkle_rewrite import AuditTrail  # type: ignore
 except ImportError:
-    cortex_merkle_rewrite = None
+    RewriteEngine = None
+    AuditTrail = None
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +18,9 @@ class MerklePurgeOrchestrator:
     """
     def __init__(self, target_repo: str):
         self.target_repo = target_repo
-        if cortex_merkle_rewrite:
-            self.engine = cortex_merkle_rewrite.RewriteEngine(target_repo)
-            self.audit = cortex_merkle_rewrite.AuditTrail()
+        if RewriteEngine:
+            self.engine = RewriteEngine(target_repo)
+            self.audit = AuditTrail()
         else:
             self.engine = None
             self.audit = None

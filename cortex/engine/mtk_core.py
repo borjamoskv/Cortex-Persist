@@ -74,7 +74,7 @@ class MTKGuard:
             
         # 1.1.5 Invariante Epistémico (Anti-Metamodeling)
         try:
-            self.mythos_guard.evaluate_payload(payload.claims)
+            self.mythos_guard.evaluate_payload(payload.claims)  # type: ignore
         except PermissionError as e:
             # Silent Drop / Hard Reject
             logger.critical(str(e))
@@ -111,7 +111,7 @@ class MTKGuard:
             accuracy = float(len(payload.evidence.sources))
             complexity = float(len(payload.claims))
             try:
-                from cortex_core_rs import compute_friston_penalty
+                from cortex_core_rs import compute_friston_penalty  # type: ignore
                 net_exergy = compute_friston_penalty(float(net_exergy), complexity, accuracy)
             except ImportError:
                 # Fallback in case the Rust layer is not loaded, but log a warning.

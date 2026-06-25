@@ -59,7 +59,8 @@ class RLSGateway:
                 # Call Rust native guardrail
                 # Assuming FFI mapping: cortex_rs.retrieval_can_read(fact_json_string, agent_id)
                 import json
-                return cortex_rs.retrieval_can_read(json.dumps(fact_payload), agent_id)
+                from cortex_rs import retrieval_can_read  # type: ignore
+                return retrieval_can_read(json.dumps(fact_payload), agent_id)
             else:
                 # Stub for tests if FFI is not fully linked
                 status = fact_payload.get("validation_status", "staging").lower()

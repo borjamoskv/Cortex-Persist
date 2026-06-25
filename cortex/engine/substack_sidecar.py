@@ -19,7 +19,7 @@ def evaluate_retention(dry_run=True):
     """
     logger.info("Iniciando Causal Scheduler (Evaluación de Retención)...")
 
-    conn = connect(CORTEX_DB_PATH)
+    conn = connect(str(CORTEX_DB_PATH))
     # the factory might not set row_factory by default if not passed, but we can just set it
     conn.row_factory = __import__("sqlite3").Row
     cursor = conn.cursor()

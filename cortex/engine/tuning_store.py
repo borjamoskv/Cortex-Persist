@@ -42,7 +42,7 @@ class TuningStore:
         self._init_db()
 
     def _init_db(self) -> None:
-        with connect(self._db_path) as conn:
+        with connect(str(self._db_path)) as conn:
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS tunings (
@@ -66,7 +66,7 @@ class TuningStore:
 
     def save(self, subsystem: str, params: dict[str, Any]) -> Path:
         """Save tuned parameters for a subsystem."""
-        with connect(self._db_path) as conn:
+        with connect(str(self._db_path)) as conn:
             conn.execute(
                 """
                 INSERT INTO tunings (subsystem, params, saved_at)
@@ -82,7 +82,7 @@ class TuningStore:
 
     def load(self, subsystem: str) -> dict[str, Any] | None:
         """Load tuned parameters for a subsystem. Returns None if not found."""
-        with connect(self._db_path) as conn:
+        with connect(str(self._db_path)) as conn:
             cursor = conn.execute("SELECT params FROM tunings WHERE subsystem = ?", (subsystem,))
             row = cursor.fetchone()
             if row:
@@ -95,7 +95,7 @@ class TuningStore:
     def load_all(self) -> dict[str, dict[str, Any]]:
         """Load all persisted tunings. Returns {subsystem: params}."""
         result = {}
-        with connect(self._db_path) as conn:
+        with connect(str(self._db_path)) as conn:
             cursor = conn.execute("SELECT subsystem, params FROM tunings")
             for row in cursor.fetchall():
                 try:
@@ -108,7 +108,7 @@ class TuningStore:
 
     def delete(self, subsystem: str) -> bool:
         """Delete persisted tunings for a subsystem."""
-        with connect(self._db_path) as conn:
+        with connect(str(self._db_path)) as conn:
             cursor = conn.execute("DELETE FROM tunings WHERE subsystem = ?", (subsystem,))
             return cursor.rowcount > 0
 
@@ -118,7 +118,7 @@ class TuningStore:
         stats: dict[str, Any] | None = None,
     ) -> Path:
         """Save a complete optimizer state snapshot."""
-        with connect(self._db_path) as conn:
+        with connect(str(self._db_path)) as conn:
             # Save the global snapshot
             conn.execute(
                 """
@@ -144,7 +144,7 @@ class TuningStore:
 
     def load_snapshot(self) -> dict[str, Any] | None:
         """Load the last optimizer snapshot."""
-        with connect(self._db_path) as conn:
+        with connect(str(self._db_path)) as conn:
             cursor = conn.execute(
                 "SELECT snapshot_data, stats_data, snapshot_at FROM snapshots ORDER BY id DESC LIMIT 1"
             )
@@ -164,6 +164,6 @@ class TuningStore:
     @property
     def subsystems(self) -> list[str]:
         """List all subsystems with persisted tunings."""
-        with connect(self._db_path) as conn:
+        with connect(str(self._db_path)) as conn:
             cursor = conn.execute("SELECT subsystem FROM tunings")
             return [row[0] for row in cursor.fetchall()]

@@ -20,7 +20,13 @@ logger = logging.getLogger(__name__)
 mtk_active_token: ContextVar[str | None] = ContextVar("mtk_active_token", default=None)
 mtk_payload_hash: ContextVar[str | None] = ContextVar("mtk_payload_hash", default=None)
 
-def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbname: str | None, source: str | None) -> int:
+def mtk_authorizer_callback(
+    action: int, 
+    arg1: str | None, 
+    arg2: str | None, 
+    dbname: str | None, 
+    source: str | None
+) -> int:
     """
     Physical constraint on the SQLite engine (Gauge Constraint).
     Actions like INSERT (9), UPDATE (23), DELETE (9) mapped to sqlite3 constants.
@@ -92,7 +98,7 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
         # Delegate token and memory taint validation to the immutable PyO3 Rust extension.
         try:
             import cortex_core_rs
-            res = cortex_core_rs.authorize_sqlite_mutation(action, arg1, arg2, token)
+            res = cortex_core_rs.authorize_sqlite_mutation(action, arg1, arg2, token)  # type: ignore
             if res != sqlite3.SQLITE_OK:
                 logger.critical(f"[MTK-BLOCK] Native Rust Firewall blocked physical mutation attempt. Action {action}")
                 return sqlite3.SQLITE_DENY

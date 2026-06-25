@@ -1,3 +1,4 @@
+# pyright: reportCallIssue=false, reportArgumentType=false, reportReturnType=false, reportAssignmentType=false
 from fable_library.core import int32, uint16, uint64
 from fable_library.long import op_addition, op_bitwise_and, op_right_shift, op_subtraction
 

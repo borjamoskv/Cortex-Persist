@@ -112,14 +112,14 @@ def line_integral(F: Callable[[jnp.ndarray], jnp.ndarray],
     # Derivative of path r(t) (since r(t) outputs a vector, we use jacfwd)
     r_dot = jax.vmap(jax.jacfwd(r))(t)
     # Vector field F evaluated along path r(t)
-    F_r = jax.vmap(F)(jax.vmap(r)(t))
+    F_r = jax.vmap(F)(jax.vmap(r)(t))  # type: ignore
     
     # Dot product of F(r(t)) and r'(t)
     dot_products = jax.vmap(jnp.dot)(F_r, r_dot)
     
     # Trapezoidal integration
     integral = jnp.sum((dot_products[:-1] + dot_products[1:]) / 2.0) * dt
-    return integral
+    return integral  # type: ignore
 
 # GOAT-MATH-020: TRANSFORMADA DE FOURIER (FFT)
 # Time-domain to Frequency-domain structural transformation.
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     # [011, 013, 016, 018] Scalar Field f(x, y) = x^2 + 3y^2 + xy
     def f_scalar(v: jnp.ndarray) -> float:
         x, y = v[0], v[1]
-        return x**2 + 3.0*y**2 + x*y
+        return x**2 + 3.0*y**2 + x*y  # type: ignore
     
     v0 = jnp.array([1.0, 2.0])
     logger.info(f"[011] Gradient of f at (1,2): {compute_gradient(f_scalar)(v0)}")

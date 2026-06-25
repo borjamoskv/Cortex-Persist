@@ -1,3 +1,4 @@
+# pyright: reportCallIssue=false, reportArgumentType=false, reportReturnType=false, reportAssignmentType=false
 from __future__ import annotations
 
 import sys

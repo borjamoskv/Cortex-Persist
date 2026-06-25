@@ -225,6 +225,9 @@ class UltramapSubstrate:
         if self._rs is not None:
             return self._rs.get_agent_state(agent_idx)
 
+        if self._buffer is None:
+            return {}
+
         offset = agent_idx * self.node_size
         x, y, z = struct.unpack_from("ddd", self._buffer, offset)  # pyright: ignore[reportArgumentType]
         target_bytes = bytes(self._buffer[offset + 24 : offset + 88]).rstrip(b"\x00")  # pyright: ignore[reportOptionalSubscript]
@@ -276,6 +279,9 @@ class UltramapSubstrate:
             return success
 
         if not (0 <= agent_idx < self.capacity):
+            return False
+
+        if self._buffer is None:
             return False
 
         offset = agent_idx * self.node_size

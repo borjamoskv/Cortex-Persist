@@ -26,8 +26,9 @@ async def parse_file(file_path: Path) -> str:
         output = [f"### `{file_path.name}`\n"]
         
         # Get module docstring
-        if ast.get_docstring(tree):
-            output.append(f"> {ast.get_docstring(tree).split(chr(10))[0]}\n")
+        docstring = ast.get_docstring(tree)
+        if docstring:
+            output.append(f"> {docstring.split(chr(10))[0]}\n")
             
         for node in tree.body:
             if isinstance(node, ast.ClassDef):

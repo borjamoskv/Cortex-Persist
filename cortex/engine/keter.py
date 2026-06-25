@@ -90,7 +90,7 @@ class LegionSwarm(SovereignPhase):
     """
 
     async def execute(self, payload: KeterPayload) -> KeterPayload:
-        from cortex.engine.legion import LEGION_OMEGA
+        from cortex.engine.omega_daemon import LEGION_OMEGA  # type: ignore
 
         intent = payload.get("intent", "Refactor")
         logger.info("🐝 [KETER] Desplegando Enjambre HYDRA (Legion-Omega)...")

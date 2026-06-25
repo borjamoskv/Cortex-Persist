@@ -17,7 +17,7 @@ _PRIVATE_KEY = "CORTEX_LOCAL_KEY_12345" # In production, read from ENV or Keyrin
 class MTKError(Exception):
     pass
 
-def mint_ephemeral_token(payload: str, kernel_key: str = None) -> str:
+def mint_ephemeral_token(payload: str, kernel_key: str | None = None) -> str:
     """
     Generates an ephemeral token from the cryptographic hash of the ClosurePayload,
     delegating to the Rust C5-REAL core.
@@ -65,4 +65,4 @@ def attach_mtk_authorizer(conn: sqlite3.Connection) -> None:
     """
     Attaches the MTK authorizer to an SQLite connection.
     """
-    conn.set_authorizer(mtk_authorizer_callback)
+    conn.set_authorizer(mtk_authorizer_callback)  # type: ignore

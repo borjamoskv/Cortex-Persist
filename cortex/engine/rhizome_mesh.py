@@ -33,7 +33,7 @@ class RhizomeMesh:
             return
             
         # Expansión Clonal: Ejecutamos todos los handlers concurrentemente
-        tasks = [asyncio.create_task(handler(payload)) for handler in handlers]
+        tasks = [asyncio.create_task(handler(payload)) for handler in handlers]  # type: ignore
         
         # Dejamos que operen independientemente (Desterritorialización)
         # Gather asegura que el bus espera que terminen en la prueba, pero en prod 

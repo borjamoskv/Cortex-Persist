@@ -80,7 +80,7 @@ async def run_test():
         encoding=serialization.Encoding.Raw,
         format=serialization.PrivateFormat.Raw,
         encryption_algorithm=serialization.NoEncryption()
-    ))
+    ))  # type: ignore
     
     # 4. Iniciar Apoptosis Daemon
     daemon = ApoptosisDaemon(mtk_guard, db)

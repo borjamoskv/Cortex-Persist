@@ -1,3 +1,4 @@
+# pyright: reportCallIssue=false, reportArgumentType=false, reportReturnType=false, reportAssignmentType=false
 from __future__ import annotations
 
 from fable_library.big_int import from_int32, from_int64, to_int64

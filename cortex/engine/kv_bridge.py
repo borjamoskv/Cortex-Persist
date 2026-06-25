@@ -35,7 +35,7 @@ class CortexKVBridge:
         # token_ids must be a NumPy array. We hash the raw C-contiguous buffer directly.
         # This operates at memory speed, bypassing Python's GIL interpreter overhead.
         buffer_view = np.ascontiguousarray(token_ids).view(np.uint8)
-        return hashlib.sha256(buffer_view).hexdigest()
+        return hashlib.sha256(buffer_view).hexdigest()  # type: ignore
 
     async def persist_block(self, token_ids: np.ndarray, kv_block_tensor: np.ndarray) -> str:
         """
