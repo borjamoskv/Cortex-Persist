@@ -9,16 +9,16 @@ from __future__ import annotations
 import logging
 import uuid
 
-from cortex.extensions.market_maker.detector import TrendDetector
-from cortex.extensions.market_maker.models import (
+from legacy_research.extensions.market_maker.detector import TrendDetector
+from legacy_research.extensions.market_maker.models import (
     Experiment,
     ExperimentStatus,
     Opportunity,
     Verdict,
 )
-from cortex.extensions.market_maker.mvp_generator import MVPGenerator
-from cortex.extensions.market_maker.scorer import OpportunityScorer
-from cortex.extensions.market_maker.validator import DemandValidator
+from legacy_research.extensions.market_maker.mvp_generator import MVPGenerator
+from legacy_research.extensions.market_maker.scorer import OpportunityScorer
+from legacy_research.extensions.market_maker.validator import DemandValidator
 
 log = logging.getLogger(__name__)
 

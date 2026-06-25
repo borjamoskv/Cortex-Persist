@@ -15,8 +15,8 @@ from pathlib import Path
 
 import httpx
 
-from cortex.guards.capabilities import RiskTier
-from cortex.guards.capability_guard import CapabilityGuard
+from legacy_research.guards.capabilities import RiskTier
+from legacy_research.guards.capability_guard import CapabilityGuard
 
 __all__ = ["AgentToolkit"]
 
@@ -60,7 +60,7 @@ FORBIDDEN_BASH_PATTERNS: frozenset[str] = frozenset(
 )
 
 
-from cortex.extensions.aether.hooks import hooked_tool_execution
+from legacy_research.extensions.aether.hooks import hooked_tool_execution
 
 
 class AgentToolkit:
@@ -274,7 +274,7 @@ class AgentToolkit:
         try:
             import asyncio
 
-            from cortex.extensions.skills.autodidact.actuator import autodidact_pipeline
+            from legacy_research.extensions.skills.autodidact.actuator import autodidact_pipeline
 
             # Helper to run async in sync context
             def _run_async():

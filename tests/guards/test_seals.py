@@ -4,7 +4,7 @@ import pytest
 import json
 from pathlib import Path
 from unittest.mock import patch, AsyncMock, MagicMock
-from cortex.guards.seals import (
+from legacy_research.guards.seals import (
     check_seal_1_code_quality,
     check_seal_2_type_safety,
     check_seal_3_security,

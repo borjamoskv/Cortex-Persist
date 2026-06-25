@@ -21,8 +21,8 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.ledger.ledger_core import MerkleTree
-from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1
+from legacy_research.ledger.ledger_core import MerkleTree
+from legacy_research.utils.canonical import compute_tx_hash, compute_tx_hash_v1
 
 # Action constant used by ledger
 EVIDENCE_COMMIT_ACTION = "forensic_evidence_commit"

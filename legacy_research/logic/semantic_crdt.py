@@ -10,8 +10,8 @@ import logging
 from typing import Optional
 
 import cortex_rs
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.auth.enterprise_identity import SovereignIdentity, TenantRBAC
+from legacy_research.audit.ledger import EnterpriseAuditLedger
+from legacy_research.auth.enterprise_identity import SovereignIdentity, TenantRBAC
 
 logger = logging.getLogger("cortex.engine.logic.semantic_crdt")
 

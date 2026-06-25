@@ -8,7 +8,7 @@ import sys
 import time
 from typing import Any, Optional
 
-from cortex.guards.z3_anvil import SovereignAnvil
+from legacy_research.guards.z3_anvil import SovereignAnvil
 
 logger = logging.getLogger("cortex.evolution.ouroboros")
 
@@ -101,7 +101,7 @@ class OuroborosKernel:
                     return True
         if strategy["action"] == "increase_busy_timeout" and strategy["target"] == "cortex.database.core":
             logger.warning("  [L5] Rewriting AST for core.py to increase SQLite busy_timeout...")
-            target_path = "cortex/database/core.py"
+            target_path = "legacy_research/database/core.py"
             import os
             if os.path.exists(target_path):
                 with open(target_path, "r", encoding="utf-8") as f:

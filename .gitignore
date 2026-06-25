@@ -334,8 +334,8 @@ security_audit_log.jsonl
 stress_audit_log.jsonl
 cortex/engine/evolution_ledger*.jsonl
 cortex/nodes/mtk_stress_test.py
-cortex/data/reality_ledger.jsonl
-cortex/data/reality_ledger.jsonl
+legacy_research/data/reality_ledger.jsonl
+legacy_research/data/reality_ledger.jsonl
 cortex/nodes/autodidact_exergy.db
 cortex/nodes/moskv1_skills.db
 cortex/nodes/autodidact_exergy.db-journal

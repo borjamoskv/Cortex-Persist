@@ -7,9 +7,9 @@ import os
 import sys
 import time
 
-from cortex.config import DB_PATH
-from cortex.database.core import connect
-from cortex.extensions.signals.bus import SignalBus
+from legacy_research.config import DB_PATH
+from legacy_research.database.core import connect
+from legacy_research.extensions.signals.bus import SignalBus
 
 # Sovereign Memory & Execution Imports
 _CORTEX_CORE = os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core")
@@ -88,8 +88,8 @@ def register_singularity_tools(mcp) -> None:
             top_k: Top limit of items to return based on distance.
         """
         try:
-            from cortex.memory.encoder import AsyncEncoder
-            from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+            from legacy_research.memory.encoder import AsyncEncoder
+            from legacy_research.memory.sqlite_vec_store import SovereignVectorStoreL2
 
             encoder = AsyncEncoder()
             store = SovereignVectorStoreL2(encoder=encoder)

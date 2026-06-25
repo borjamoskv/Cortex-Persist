@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from cortex.database.writer import SqliteWriteWorker
-from cortex.utils.result import Err, Ok
+from legacy_research.database.writer import SqliteWriteWorker
+from legacy_research.utils.result import Err, Ok
 
 
 

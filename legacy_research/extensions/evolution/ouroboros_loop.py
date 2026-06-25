@@ -6,13 +6,13 @@ OUROBOROS-∞ Loop: Autonomous Evolution & Entropy Purge
 import asyncio
 from typing import Any
 
-from cortex.causal.edg_graph import EpistemicDependencyGraph
-from cortex.consensus.merkle_vote import MerkleVote
-from cortex.swarm.dispatcher import invoke_subagent
+from legacy_research.causal.edg_graph import EpistemicDependencyGraph
+from legacy_research.consensus.merkle_vote import MerkleVote
+from legacy_research.swarm.dispatcher import invoke_subagent
 
-from cortex.audit.ledger import inject_ledger_event
-from cortex.core.thermodynamics import EntropyAnnihilator
-from cortex.engine.mtk_core import ClosurePayload, mtk_authorizer_callback
+from legacy_research.audit.ledger import inject_ledger_event
+from legacy_research.core.thermodynamics import EntropyAnnihilator
+from legacy_research.engine.mtk_core import ClosurePayload, mtk_authorizer_callback
 
 
 class OuroborosLoop:

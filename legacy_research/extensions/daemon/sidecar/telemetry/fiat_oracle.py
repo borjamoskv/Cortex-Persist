@@ -14,7 +14,7 @@ import time
 from pathlib import Path
 from typing import Any, Final
 
-from cortex.utils.errors import CortexError
+from legacy_research.utils.errors import CortexError
 
 logger = logging.getLogger(__name__)
 

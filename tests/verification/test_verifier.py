@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 from unittest.mock import patch, MagicMock
-from cortex.verification.verifier import SovereignVerifier, VerificationResult
-from cortex.verification.invariants import SafetyInvariant, InvariantSeverity
+from legacy_research.verification.verifier import SovereignVerifier, VerificationResult
+from legacy_research.verification.invariants import SafetyInvariant, InvariantSeverity
 
 
 def test_verifier_initialization_no_z3():

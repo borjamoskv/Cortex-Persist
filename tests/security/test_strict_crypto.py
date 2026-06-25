@@ -6,8 +6,8 @@ import threading
 import pytest
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-from cortex.crypto.aes import CortexEncrypter, get_default_encrypter, reset_default_encrypter
-from cortex.utils.errors import DecryptionPolicyError
+from legacy_research.crypto.aes import CortexEncrypter, get_default_encrypter, reset_default_encrypter
+from legacy_research.utils.errors import DecryptionPolicyError
 
 TEST_MASTER_KEY = b"1" * 32
 ALT_MASTER_KEY = b"2" * 32

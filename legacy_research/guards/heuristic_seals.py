@@ -7,7 +7,7 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 
-from cortex.guards._seal_printer import SealPrinter
+from legacy_research.guards._seal_printer import SealPrinter
 
 from .gates.common import GlobalSourceCache
 
@@ -47,7 +47,7 @@ async def check_gate_11_cobbler(cached_files: dict[Path, str]) -> GateResult:
     _EXCLUDE = frozenset(["legion_vectors.py", "legion.py"])
 
     try:
-        from cortex.engine.legion_vectors import EntropyDemon, Intruder
+        from legacy_research.engine.legion_vectors import EntropyDemon, Intruder
     except ImportError as e:
         printer.fail(f"Cannot import legion_vectors: {e}")
         return False, "verified"
@@ -109,7 +109,7 @@ async def check_gate_12_determinism(cached_files: dict[Path, str]) -> GateResult
     critical_files = [
         ROOT_DIR / "cortex/llm/router.py",
         ROOT_DIR / "cortex/llm/provider.py",
-        ROOT_DIR / "cortex/guards/seals.py",
+        ROOT_DIR / "legacy_research/guards/seals.py",
     ]
     violations = []
     for path in critical_files:
@@ -136,7 +136,7 @@ async def check_gate_12_determinism(cached_files: dict[Path, str]) -> GateResult
 async def check_gate_13_latency() -> GateResult:
     """Seal 13: A-Record Latency Drift."""
     try:
-        from cortex.extensions.llm._telemetry import CascadeTelemetry
+        from legacy_research.extensions.llm._telemetry import CascadeTelemetry
     except ImportError:
         printer.warn("Seal 13 Skipped: LLM telemetry extension not found.")
         return True, "verified"

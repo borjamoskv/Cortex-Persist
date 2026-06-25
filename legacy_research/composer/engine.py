@@ -9,10 +9,10 @@ from __future__ import annotations
 import logging
 import re
 
-from cortex.composer.manifesto import COMPOSER_MANIFESTO
-from cortex.composer.vision_qa import AestheticAuditor
-from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
-from cortex.utils.result import Err, Ok, Result
+from legacy_research.composer.manifesto import COMPOSER_MANIFESTO
+from legacy_research.composer.vision_qa import AestheticAuditor
+from legacy_research.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
+from legacy_research.utils.result import Err, Ok, Result
 
 logger = logging.getLogger("cortex.composer.engine")
 

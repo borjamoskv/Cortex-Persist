@@ -14,8 +14,8 @@ import textwrap
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from cortex.cli.common import console  # pyright: ignore
-from cortex.extensions.mejoralo.constants import (
+from legacy_research.cli.common import console  # pyright: ignore
+from legacy_research.extensions.mejoralo.constants import (
     DEVILS_ADVOCATE_THRESHOLD,
     SWARM_BASE_TEMPERATURE,
     SWARM_DEFAULT_SQUAD_SIZE,
@@ -25,11 +25,11 @@ from cortex.extensions.mejoralo.constants import (
 )
 
 if TYPE_CHECKING:
-    from cortex.extensions.mejoralo.engine import MejoraloEngine
+    from legacy_research.extensions.mejoralo.engine import MejoraloEngine
 
-from cortex.extensions.thinking.fusion import FusionStrategy
-from cortex.extensions.thinking.orchestra import ThoughtOrchestra
-from cortex.extensions.thinking.presets import OrchestraConfig, ThinkingMode
+from legacy_research.extensions.thinking.fusion import FusionStrategy
+from legacy_research.extensions.thinking.orchestra import ThoughtOrchestra
+from legacy_research.extensions.thinking.presets import OrchestraConfig, ThinkingMode
 
 logger = logging.getLogger("cortex.extensions.mejoralo.swarm")
 

@@ -6,7 +6,7 @@ import time
 import uuid
 from typing import Any
 
-from cortex.memory.engrams import CortexSemanticEngram
+from legacy_research.memory.engrams import CortexSemanticEngram
 
 logger = logging.getLogger("cortex.memory._manager_store")
 
@@ -109,7 +109,7 @@ async def store_fact(
     if not should_process:
         logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", action)
         try:
-            from cortex.routes.notch_ws import notify_notch_pruning
+            from legacy_research.routes.notch_ws import notify_notch_pruning
 
             await notify_notch_pruning()
         except ImportError:
@@ -123,7 +123,7 @@ async def store_fact(
     _meta = metadata or {}
     
     # [C5-REAL] Strict Schema Contract (Formal Physical Barrier)
-    from cortex.types.models import MetadataSchema
+    from legacy_research.types.models import MetadataSchema
     try:
         validated_meta = MetadataSchema(**_meta).model_dump(exclude_unset=True)
         # Ensure we keep extra fields while conforming to the contract

@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.extensions.swarm.nightshift_daemon import NightShiftCrystalDaemon
+from legacy_research.extensions.swarm.nightshift_daemon import NightShiftCrystalDaemon
 
 
 @pytest.fixture

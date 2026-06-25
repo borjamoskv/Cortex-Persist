@@ -27,7 +27,7 @@ import aiosqlite
 
 import pytest
 
-from cortex.worker.enrichment import EnrichmentWorker
+from legacy_research.worker.enrichment import EnrichmentWorker
 
 
 

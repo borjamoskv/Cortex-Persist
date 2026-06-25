@@ -15,9 +15,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.thinking.orchestra import ThoughtOrchestra
+    from legacy_research.extensions.thinking.orchestra import ThoughtOrchestra
 
-from cortex.extensions.aether.tools import AgentToolkit
+from legacy_research.extensions.aether.tools import AgentToolkit
 
 __all__ = ["RedTeamAgent"]
 
@@ -69,7 +69,7 @@ class RedTeamAgent:
                 f"Write the Pytest file now. Ensure you import the target correctly (assume the test is run from {toolkit.repo_path})."
             )
 
-            from cortex.extensions.thinking.presets import ThinkingMode
+            from legacy_research.extensions.thinking.presets import ThinkingMode
 
             fused = await self._orchestra.think(
                 prompt,

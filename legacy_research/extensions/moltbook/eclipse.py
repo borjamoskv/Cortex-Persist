@@ -21,8 +21,8 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.extensions.llm.sovereign import SovereignLLM
-from cortex.extensions.moltbook.client import MoltbookClient, MoltbookError, MoltbookRateLimited
+from legacy_research.extensions.llm.sovereign import SovereignLLM
+from legacy_research.extensions.moltbook.client import MoltbookClient, MoltbookError, MoltbookRateLimited
 
 logger = logging.getLogger("cortex.extensions.moltbook.eclipse")
 
@@ -253,7 +253,7 @@ Tono: Industrial Noir. Apatía Arquitectónica. Precisión de bisturí.
 
 async def run_eclipse(target_post_id: str, dry_run: bool = False) -> None:
     """Ejecuta el Protocolo Eclipse completo."""
-    from cortex.extensions.moltbook.preflight import session_preflight
+    from legacy_research.extensions.moltbook.preflight import session_preflight
 
     print("\n" + "═" * 60)
     print("  ECLIPSE PROTOCOL - RETORNO CINÉTICO")

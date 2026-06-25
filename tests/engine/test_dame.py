@@ -7,7 +7,7 @@ import asyncio
 import pytest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from cortex.engine.dame import DAMEState, DAMEExecutor, DAMEAsyncDelegator, DAMEApoptosisError
+from legacy_research.engine.dame import DAMEState, DAMEExecutor, DAMEAsyncDelegator, DAMEApoptosisError
 
 @pytest.mark.asyncio
 async def test_dame_state_persistence():

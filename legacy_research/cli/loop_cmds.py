@@ -39,9 +39,9 @@ from rich.prompt import Prompt
 from rich.table import Table
 from rich.text import Text
 
-from cortex.cli.common import DEFAULT_DB, cli, console
-from cortex.cli.loop_engine import ExecutionLoop
-from cortex.cli.loop_models import TaskResult, TaskStatus
+from legacy_research.cli.common import DEFAULT_DB, cli, console
+from legacy_research.cli.loop_engine import ExecutionLoop
+from legacy_research.cli.loop_models import TaskResult, TaskStatus
 
 __all__ = ["loop"]
 

@@ -8,7 +8,7 @@ import subprocess
 from pathlib import Path
 from typing import TypedDict
 
-from cortex.extensions.songlines.decay import DecayEngine
+from legacy_research.extensions.songlines.decay import DecayEngine
 
 logger = logging.getLogger("cortex.extensions.songlines.sensor")
 

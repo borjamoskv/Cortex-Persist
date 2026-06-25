@@ -1,5 +1,5 @@
-from cortex.guards.epistemic_guard import EpistemicGuard
-from cortex.types.epistemics import (
+from legacy_research.guards.epistemic_guard import EpistemicGuard
+from legacy_research.types.epistemics import (
     ObservationNode,
     InferenceNode,
     ConsensusNode,

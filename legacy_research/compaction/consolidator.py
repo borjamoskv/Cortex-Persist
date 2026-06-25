@@ -29,7 +29,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
 logger = logging.getLogger("cortex.consolidator")
 
@@ -160,7 +160,7 @@ class BeliefConsolidator:
         Simple single-pass clustering: O(N²) but N is bounded
         by _MAX_EVENTS_PER_CYCLE (200). GPU-accelerated embedding.
         """
-        from cortex.engine.semantic_hash import (
+        from legacy_research.engine.semantic_hash import (
             batch_fingerprint,
             cosine_similarity,
         )
@@ -257,7 +257,7 @@ class BeliefConsolidator:
 
             # Decrypt content
             try:
-                from cortex.crypto import get_default_encrypter
+                from legacy_research.crypto import get_default_encrypter
 
                 enc = get_default_encrypter()
                 contents = []

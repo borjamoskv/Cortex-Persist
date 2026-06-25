@@ -23,13 +23,13 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex.extensions.red_team.hydra_chaos import (
+from legacy_research.extensions.red_team.hydra_chaos import (
     ChaosResult,
     ChaosScenario,
     HydraChaosEngine,
     MockRedisClient,
 )
-from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+from legacy_research.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
 # ── Fixtures ──────────────────────────────────────────────────────────
 
@@ -160,7 +160,7 @@ class TestStreamCorruptionScenario:
         mock_redis: MockRedisClient,
     ):
         """Corrupted JSON in cache MUST NOT crash the DistributedSovereignCache."""
-        from cortex.memory.distributed_cache import DistributedSovereignCache
+        from legacy_research.memory.distributed_cache import DistributedSovereignCache
 
         cache = DistributedSovereignCache(mock_redis)
 
@@ -209,7 +209,7 @@ class TestPartialWriteScenario:
         mock_redis: MockRedisClient,
     ):
         """After partial write, cache MUST be marked unavailable."""
-        from cortex.memory.distributed_cache import DistributedSovereignCache
+        from legacy_research.memory.distributed_cache import DistributedSovereignCache
 
         cache = DistributedSovereignCache(mock_redis)
         cache.chaos_gate.arm(ChaosScenario.PARTIAL_FAILURE)

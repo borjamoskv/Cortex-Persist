@@ -42,13 +42,13 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.crypto.keys import ZKSwarmIdentity
-from cortex.guards.i10_consensus import (
+from legacy_research.crypto.keys import ZKSwarmIdentity
+from legacy_research.guards.i10_consensus import (
     I10ConsensusGuard,
     RetrievalConsensusError,
     TriadOutputs,
 )
-from cortex.utils.errors import CortexError
+from legacy_research.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.security.virgo")
 
@@ -156,7 +156,7 @@ class VirgoContextGuard:
                         error_class=VirgoValidationError,
                     )
 
-            from cortex.utils.canonical import now_iso
+            from legacy_research.utils.canonical import now_iso
 
             await conn.execute(
                 """

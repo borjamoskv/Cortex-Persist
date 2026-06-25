@@ -13,7 +13,7 @@ from pathlib import Path
 
 from rich.panel import Panel
 
-from cortex.cli.common import get_engine
+from legacy_research.cli.common import get_engine
 
 __all__ = ["run_observe"]
 
@@ -24,7 +24,7 @@ def run_observe(workspace: str, db: str, console) -> None:
 
 
 async def _observe_async(workspace: str, db: str, console) -> None:
-    from cortex.extensions.perception import PerceptionPipeline
+    from legacy_research.extensions.perception import PerceptionPipeline
 
     workspace_path = Path(workspace).resolve()
     if not workspace_path.exists():

@@ -2,8 +2,8 @@
 """Tests for NOUS Dry Run Engine."""
 
 import pytest
-from cortex.extensions.nous.models import MigrationOperation
-from cortex.extensions.nous.dry_run import DryRunEngine
+from legacy_research.extensions.nous.models import MigrationOperation
+from legacy_research.extensions.nous.dry_run import DryRunEngine
 
 
 @pytest.mark.asyncio

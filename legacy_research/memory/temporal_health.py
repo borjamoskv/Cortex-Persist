@@ -29,8 +29,8 @@ import logging
 from pathlib import Path
 from typing import Any, Final
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-from cortex.memory.drift import (
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.memory.drift import (
     DriftSignature,
     PageHinkley,
     centroid_drift,
@@ -46,7 +46,7 @@ __all__ = [
 ]
 
 # Models → temporal_health_models.py (Landauer LOC barrier)
-from cortex.memory.temporal_health_models import (
+from legacy_research.memory.temporal_health_models import (
     HealthReport,
     HealthTier,
     SchedulerConfig,

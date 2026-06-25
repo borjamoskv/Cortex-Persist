@@ -12,8 +12,8 @@ import logging
 import time
 from typing import Any
 
-from cortex.extensions.daemon.models import WorkflowAlert
-from cortex.extensions.daemon.monitors.base import BaseMonitor
+from legacy_research.extensions.daemon.models import WorkflowAlert
+from legacy_research.extensions.daemon.monitors.base import BaseMonitor
 
 __all__ = ["RetrievalMonitor"]
 

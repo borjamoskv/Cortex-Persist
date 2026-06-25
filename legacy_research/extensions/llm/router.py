@@ -14,8 +14,8 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.llm._cascade import CascadeManager, classify_tier
-from cortex.extensions.llm._models import (
+from legacy_research.extensions.llm._cascade import CascadeManager, classify_tier
+from legacy_research.extensions.llm._models import (
     BaseProvider,
     CascadeEvent,
     CascadeTier,
@@ -24,11 +24,11 @@ from cortex.extensions.llm._models import (
     IntentProfile,
     ReasoningMode,
 )
-from cortex.extensions.llm._router_hedging import execute_hedged, execute_swarm
-from cortex.extensions.llm._router_policy import ordered_fallbacks
-from cortex.extensions.llm._router_shannon import compress_working_memory
-from cortex.extensions.llm._telemetry import CascadeTelemetry
-from cortex.utils.result import Err, Ok, Result
+from legacy_research.extensions.llm._router_hedging import execute_hedged, execute_swarm
+from legacy_research.extensions.llm._router_policy import ordered_fallbacks
+from legacy_research.extensions.llm._router_shannon import compress_working_memory
+from legacy_research.extensions.llm._telemetry import CascadeTelemetry
+from legacy_research.utils.result import Err, Ok, Result
 
 logger = logging.getLogger("cortex.extensions.llm.router")
 
@@ -154,7 +154,7 @@ class CortexLLMRouter:
         if not provider_hint and prompt.system_instruction:
             # Implement Cache-Aware Routing (Zero-Recompute Policy)
             try:
-                from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
+                from legacy_research.extensions.swarm.kv_prefix_registry import get_kv_registry
 
                 registry = get_kv_registry()
                 hot_providers = registry.check_cache_affinity(prompt.system_instruction)
@@ -294,7 +294,7 @@ class CortexLLMRouter:
         """Try a single provider, returning Result."""
         import httpx
 
-        from cortex.extensions.llm.quota import QuotaRejectedError
+        from legacy_research.extensions.llm.quota import QuotaRejectedError
 
         try:
             return Ok(await provider.invoke(prompt))
@@ -333,7 +333,7 @@ class CortexLLMRouter:
     def select_model_for_intent(self, intent: str) -> str | None:
         """Resolve the optimal model for the primary provider's intent."""
         try:
-            from cortex.extensions.llm._presets import resolve_model
+            from legacy_research.extensions.llm._presets import resolve_model
 
             return resolve_model(self._primary.provider_name, intent)
         except ImportError:
@@ -348,7 +348,7 @@ class CortexLLMRouter:
     ) -> list[tuple[str, str]]:
         """Return (provider_name, model) pairs for an intent, cost-optimized."""
         try:
-            from cortex.extensions.llm._presets import providers_for_intent
+            from legacy_research.extensions.llm._presets import providers_for_intent
 
             return providers_for_intent(
                 intent, min_tier=min_tier, max_cost=max_cost, sort_by="cost"
@@ -360,7 +360,7 @@ class CortexLLMRouter:
     def frontier_order(intent: str) -> list[tuple[str, str]]:
         """Return frontier-tier providers for an intent, cheapest first."""
         try:
-            from cortex.extensions.llm._presets import frontier_providers
+            from legacy_research.extensions.llm._presets import frontier_providers
 
             return frontier_providers(intent)
         except ImportError:

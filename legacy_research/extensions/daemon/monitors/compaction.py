@@ -6,7 +6,7 @@ import logging
 import time
 from typing import Any
 
-from cortex.extensions.daemon.models import CompactionAlert
+from legacy_research.extensions.daemon.models import CompactionAlert
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -41,7 +41,7 @@ class CompactionMonitor:
             return None
 
         try:
-            from cortex.compaction.compactor import compact
+            from legacy_research.compaction.compactor import compact
 
             logger.info("Autonomous Compaction (REM Sleep) running on %s", project)
 

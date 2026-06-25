@@ -41,8 +41,8 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.database.core import connect_async_ctx
-from cortex.embeddings.provider import EmbeddingProvider
+from legacy_research.database.core import connect_async_ctx
+from legacy_research.embeddings.provider import EmbeddingProvider
 
 logger = logging.getLogger("cortex")
 

@@ -20,11 +20,11 @@ import time
 from collections import deque
 from typing import Final
 
-from cortex.memory.guardrails import SessionGuardrail
-from cortex.memory.models import MemoryEvent
+from legacy_research.memory.guardrails import SessionGuardrail
+from legacy_research.memory.models import MemoryEvent
 
 try:
-    from cortex.extensions.security.tenant import get_tenant_id
+    from legacy_research.extensions.security.tenant import get_tenant_id
 except ImportError:
 
     def get_tenant_id() -> str:

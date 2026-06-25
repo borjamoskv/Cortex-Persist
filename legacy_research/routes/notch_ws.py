@@ -7,7 +7,7 @@ Bidirectional communication between CORTEX and Notch Live:
 - Notch → CORTEX: heartbeat pongs, status updates
 
 Usage from anywhere in CORTEX:
-    from cortex.routes.notch_ws import notch_hub
+    from legacy_research.routes.notch_ws import notch_hub
     await notch_hub.broadcast("thinking")
 """
 

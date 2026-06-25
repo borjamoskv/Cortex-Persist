@@ -8,7 +8,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.extensions.structural_arbitrage.models import ArbitrageSignal, CortexAmount
+from legacy_research.extensions.structural_arbitrage.models import ArbitrageSignal, CortexAmount
 
 log = logging.getLogger(__name__)
 

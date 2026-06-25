@@ -82,8 +82,8 @@ def _try_build_provider(name: str) -> Any | None:
     Returns None if the provider cannot be initialized (missing key, import error, etc.)
     """
     try:
-        from cortex.extensions.llm._presets import get_preset_info
-        from cortex.extensions.llm.provider import LLMProvider
+        from legacy_research.extensions.llm._presets import get_preset_info
+        from legacy_research.extensions.llm.provider import LLMProvider
 
         preset = get_preset_info(name)
         if preset is None:
@@ -138,7 +138,7 @@ def _check_local_provider(name: str, preset: dict[str, Any]) -> bool:
 def _build_router(providers: list[Any]) -> Any | None:
     """Construct a CortexLLMRouter from discovered providers."""
     try:
-        from cortex.extensions.llm.router import CortexLLMRouter
+        from legacy_research.extensions.llm.router import CortexLLMRouter
 
         primary = providers[0]
         fallbacks = providers[1:]

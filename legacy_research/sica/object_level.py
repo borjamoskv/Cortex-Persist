@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from cortex.sica.strategy import SearchStrategy
+from legacy_research.sica.strategy import SearchStrategy
 
 logger = logging.getLogger("cortex.sica.object_level")
 

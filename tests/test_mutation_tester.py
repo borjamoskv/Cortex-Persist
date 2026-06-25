@@ -1,5 +1,5 @@
 import pytest
-from cortex.engine.mutation_tester import MutationTester
+from legacy_research.engine.mutation_tester import MutationTester
 import tempfile
 import os
 

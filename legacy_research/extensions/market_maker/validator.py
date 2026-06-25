@@ -10,7 +10,7 @@ import logging
 import random
 from decimal import Decimal
 
-from cortex.extensions.market_maker.models import Experiment, ValidationResult
+from legacy_research.extensions.market_maker.models import Experiment, ValidationResult
 
 log = logging.getLogger(__name__)
 

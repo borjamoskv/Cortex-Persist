@@ -11,9 +11,9 @@ import logging
 import re
 from typing import Any
 
-from cortex.extensions.llm.manager import LLMManager
-from cortex.extensions.llm.router import IntentProfile
-from cortex.extensions.ui_control.maestro import MaestroUI
+from legacy_research.extensions.llm.manager import LLMManager
+from legacy_research.extensions.llm.router import IntentProfile
+from legacy_research.extensions.ui_control.maestro import MaestroUI
 
 logger = logging.getLogger("cortex.extensions.agents.mac_maestro")
 

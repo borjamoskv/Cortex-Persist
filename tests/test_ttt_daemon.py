@@ -9,10 +9,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.vllm_edge import NativeVLLMProvider
-from cortex.extensions.training.daemon import AutonomousTrainingDaemon
-from cortex.extensions.training.verifier import AdapterVerifier
+from legacy_research.extensions.llm.provider import LLMProvider
+from legacy_research.extensions.llm.vllm_edge import NativeVLLMProvider
+from legacy_research.extensions.training.daemon import AutonomousTrainingDaemon
+from legacy_research.extensions.training.verifier import AdapterVerifier
 
 
 @pytest.fixture
@@ -217,7 +217,7 @@ class TestLLMProviderLoRARouting:
 
         # 1. Without verified adapter registry
         provider = LLMProvider(provider="vllm")
-        from cortex.extensions.llm._models import IntentProfile
+        from legacy_research.extensions.llm._models import IntentProfile
 
         resolved_model = provider._resolve_model(IntentProfile.GENERAL)
         assert resolved_model == "local-model"

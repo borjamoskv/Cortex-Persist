@@ -14,7 +14,7 @@ import hashlib
 import logging
 from typing import Any
 
-from cortex.agents.base import ReactiveTaskAgent
+from legacy_research.agents.base import ReactiveTaskAgent
 
 logger = logging.getLogger("cortex.agents.ontological_consolidator")
 

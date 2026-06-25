@@ -12,7 +12,7 @@ import aiosqlite
 
 import pytest
 
-from cortex.forensics.evidence_bundle import (
+from legacy_research.forensics.evidence_bundle import (
     EVIDENCE_COMMIT_ACTION,
     build_evidence_manifest,
     canonical_json_bytes,
@@ -21,8 +21,8 @@ from cortex.forensics.evidence_bundle import (
     verify_evidence_commit,
     verify_evidence_manifest,
 )
-from cortex.ledger import SovereignLedger
-from cortex.utils.canonical import canonical_json, compute_tx_hash, now_iso
+from legacy_research.ledger import SovereignLedger
+from legacy_research.utils.canonical import canonical_json, compute_tx_hash, now_iso
 
 
 

@@ -5,8 +5,8 @@ import json
 import logging
 from typing import Any
 
-from cortex.extensions.ui_control.maestro import MaestroUI
-from cortex.extensions.ui_control.models import AppTarget, Point
+from legacy_research.extensions.ui_control.maestro import MaestroUI
+from legacy_research.extensions.ui_control.models import AppTarget, Point
 
 logger = logging.getLogger("cortex.bci.maestro_bridge")
 

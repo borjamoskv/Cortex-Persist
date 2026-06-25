@@ -1,6 +1,6 @@
 import pytest
 
-from cortex.shannon.exergy import calculate_informational_exergy
+from legacy_research.shannon.exergy import calculate_informational_exergy
 
 
 def test_calculate_informational_exergy():

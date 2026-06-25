@@ -53,8 +53,8 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.crypto.aes import CortexEncrypter
-from cortex.search.models import SearchResult
+from legacy_research.crypto.aes import CortexEncrypter
+from legacy_research.search.models import SearchResult
 
 logger = logging.getLogger("cortex.search")
 
@@ -113,7 +113,7 @@ def _row_to_result(row: Any, is_fts: bool = False) -> SearchResult:
     #   14: f.consensus_score, 15: f.confidence_rank,
     #   16: bm25(facts_fts) AS rank  [FTS only]
     """
-    from cortex.crypto import get_default_encrypter
+    from legacy_research.crypto import get_default_encrypter
 
     enc = get_default_encrypter()
 
@@ -233,7 +233,7 @@ def _parse_row_sync(row: Any, has_rank: bool) -> SearchResult:
     else:
         score = 0.5
 
-    from cortex.crypto import get_default_encrypter
+    from legacy_research.crypto import get_default_encrypter
 
     enc = get_default_encrypter()
     content = _decrypt_row_content(row[1], "default", enc)  # type: ignore[reportGeneralTypeIssues]

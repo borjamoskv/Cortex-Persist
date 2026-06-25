@@ -16,7 +16,7 @@ import os
 from dataclasses import dataclass, field
 from enum import Enum
 
-from cortex.extensions.thinking.fusion import FusionStrategy
+from legacy_research.extensions.thinking.fusion import FusionStrategy
 
 __all__ = [
     "DEFAULT_ROUTING",

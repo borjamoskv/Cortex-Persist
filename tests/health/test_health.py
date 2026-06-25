@@ -13,12 +13,12 @@ import time
 
 import pytest
 
-from cortex.extensions.health.collector import (
+from legacy_research.extensions.health.collector import (
     CollectorRegistry,
     HealthCollector,
     create_default_registry,
 )
-from cortex.extensions.health.collectors import (
+from legacy_research.extensions.health.collectors import (
     DbCollector,
     DiskSpaceCollector,
     EntropyCollector,
@@ -29,18 +29,18 @@ from cortex.extensions.health.collectors import (
     SystemLoadCollector,
     WalCollector,
 )
-from cortex.extensions.health.health_mixin import HealthMixin
-from cortex.extensions.health.health_protocol import MetricCollectorProtocol
-from cortex.extensions.health.invariants import verify_health_system
-from cortex.extensions.health.models import (
+from legacy_research.extensions.health.health_mixin import HealthMixin
+from legacy_research.extensions.health.health_protocol import MetricCollectorProtocol
+from legacy_research.extensions.health.invariants import verify_health_system
+from legacy_research.extensions.health.models import (
     Grade,
     HealthReport,
     HealthScore,
     HealthThresholds,
     MetricSnapshot,
 )
-from cortex.extensions.health.scorer import HealthScorer
-from cortex.extensions.health.trend import TrendDetector
+from legacy_research.extensions.health.scorer import HealthScorer
+from legacy_research.extensions.health.trend import TrendDetector
 
 # ═══════════════════════════════════════════════════════════════
 # D1: SEALED GRADE ENUM
@@ -526,8 +526,8 @@ class TestFixRegistry:
 class TestHealthGuard:
     @pytest.mark.asyncio
     async def test_guard_safety_pass(self, tmp_path):
-        from cortex.extensions.health import Grade, HealthScore
-        from cortex.guards.health_guard import HEALTH_AVAILABLE, HealthGuard
+        from legacy_research.extensions.health import Grade, HealthScore
+        from legacy_research.guards.health_guard import HEALTH_AVAILABLE, HealthGuard
 
         if not HEALTH_AVAILABLE:
             pytest.skip("Health extension not available")
@@ -542,8 +542,8 @@ class TestHealthGuard:
 
     @pytest.mark.asyncio
     async def test_guard_violation(self, tmp_path):
-        from cortex.extensions.health import Grade, HealthScore, HealthSLA, HealthSLAViolation
-        from cortex.guards.health_guard import HEALTH_AVAILABLE, HealthGuard
+        from legacy_research.extensions.health import Grade, HealthScore, HealthSLA, HealthSLAViolation
+        from legacy_research.guards.health_guard import HEALTH_AVAILABLE, HealthGuard
 
         if not HEALTH_AVAILABLE:
             pytest.skip("Health extension not available")

@@ -9,8 +9,8 @@ from typing import Any
 
 import click
 
-from cortex.cli.common import _run_async, cli, close_engine_sync, console, get_engine
-from cortex.cli.errors import err_empty_results, err_platform, handle_cli_error
+from legacy_research.cli.common import _run_async, cli, close_engine_sync, console, get_engine
+from legacy_research.cli.errors import err_empty_results, err_platform, handle_cli_error
 
 __all__ = [
     "entropy",
@@ -65,7 +65,7 @@ def entropy_install_hook():
 def entropy_report():
     """Genera un reporte del estado de inmunidad del proyecto."""
     console.print("[bold cyan]🔍 Analizando inmunidad del ecosistema...[/]")
-    from cortex.extensions.daemon.core import MoskvDaemon
+    from legacy_research.extensions.daemon.core import MoskvDaemon
 
     try:
         status_dict = MoskvDaemon.load_status()
@@ -238,7 +238,7 @@ def entropy_immortality(
     verbose: bool,
 ) -> None:
     """Immortality Index (ι) - cognitive crystallization metric."""
-    from cortex.extensions.shannon.immortality import ImmortalityIndex
+    from legacy_research.extensions.shannon.immortality import ImmortalityIndex
 
     engine = get_engine()
     try:
@@ -328,7 +328,7 @@ def entropy_immortality(
 )
 def entropy_shannon(project: str | None, as_json: bool, verbose: bool) -> None:
     """Shannon entropy analysis of CORTEX memory."""
-    from cortex.extensions.shannon.report import EntropyReport
+    from legacy_research.extensions.shannon.report import EntropyReport
 
     engine = get_engine()
     try:

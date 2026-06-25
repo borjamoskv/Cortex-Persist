@@ -11,17 +11,17 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.sica.colony import (
+from legacy_research.sica.colony import (
     Colony,
     GenePool,
     GenomeCrossover,
     SpecializationDetector,
     Tournament,
 )
-from cortex.sica.dream import DreamEngine, DreamInsight
-from cortex.sica.object_level import ExecutionStep, ExecutionTrace, StepOutcome
-from cortex.sica.strategy import Heuristic, SearchStrategy, StrategyGenome, default_genome
-from cortex.sica.world_model import ToolBelief, WorldModel
+from legacy_research.sica.dream import DreamEngine, DreamInsight
+from legacy_research.sica.object_level import ExecutionStep, ExecutionTrace, StepOutcome
+from legacy_research.sica.strategy import Heuristic, SearchStrategy, StrategyGenome, default_genome
+from legacy_research.sica.world_model import ToolBelief, WorldModel
 
 
 # ═══════════════════════════════════════════════════════════════════

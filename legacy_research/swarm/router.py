@@ -4,9 +4,9 @@ import copy
 import hashlib
 import json
 
-from cortex.swarm.graph_source import GraphSource
-from cortex.swarm.ledger.engine import SwarmLedger
-from cortex.swarm.ledger.models import SwarmEvent
+from legacy_research.swarm.graph_source import GraphSource
+from legacy_research.swarm.ledger.engine import SwarmLedger
+from legacy_research.swarm.ledger.models import SwarmEvent
 
 
 class SwarmRouter:

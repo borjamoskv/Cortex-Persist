@@ -1,8 +1,8 @@
 import pytest
 import asyncio
-from cortex.agents.builtins.epistemic_validator import EpistemicValidatorAgent
+from legacy_research.agents.builtins.epistemic_validator import EpistemicValidatorAgent
 
-from cortex.agents.manifest import AgentManifest
+from legacy_research.agents.manifest import AgentManifest
 from unittest.mock import MagicMock
 
 @pytest.fixture

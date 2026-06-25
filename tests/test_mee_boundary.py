@@ -1,5 +1,5 @@
 import pytest
-from cortex.engine.mee_boundary import commit_transfer
+from legacy_research.engine.mee_boundary import commit_transfer
 
 def test_mee_boundary_stochastic_collapse():
     # Universo probabilístico: texto libre del usuario

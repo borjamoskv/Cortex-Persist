@@ -14,8 +14,8 @@ from datetime import datetime, timezone
 from typing import Any
 
 import cortex_rs
-from cortex.auth.backends import BaseAuthBackend
-from cortex.auth.models import APIKey, AuthResult
+from legacy_research.auth.backends import BaseAuthBackend
+from legacy_research.auth.models import APIKey, AuthResult
 
 # Hashing fallback: use Rust-native if present, otherwise fall back to Python argon2-cffi
 try:
@@ -66,11 +66,11 @@ class AuthManager:
             backend: BaseAuthBackend instance, or str (db_path) for SQLite.
         """
         if isinstance(backend, str):
-            from cortex.auth.backends import SQLiteAuthBackend
+            from legacy_research.auth.backends import SQLiteAuthBackend
 
             backend = SQLiteAuthBackend(backend)
         elif backend is None:
-            from cortex.config import (
+            from legacy_research.config import (
                 DB_PATH,
                 PG_URL,
                 RUNBOOT_MODE,
@@ -80,24 +80,24 @@ class AuthManager:
 
             if RUNBOOT_MODE == "cloud":
                 if TURSO_DATABASE_URL:
-                    from cortex.auth.backends import TursoAuthBackend
+                    from legacy_research.auth.backends import TursoAuthBackend
 
                     logger.info("AuthManager: Using Cloud Sovereign (Turso) backend")
                     backend = TursoAuthBackend(TURSO_DATABASE_URL, TURSO_AUTH_TOKEN)
                 elif PG_URL:
-                    from cortex.auth.backends import AlloyDBAuthBackend
+                    from legacy_research.auth.backends import AlloyDBAuthBackend
 
                     logger.info("AuthManager: Using Cloud Sovereign (PostgreSQL) backend")
                     backend = AlloyDBAuthBackend(PG_URL)
                 else:
-                    from cortex.auth.backends import SQLiteAuthBackend
+                    from legacy_research.auth.backends import SQLiteAuthBackend
 
                     logger.info(
                         "AuthManager: Using Local Sovereign (SQLite) backend fallback in Cloud"
                     )
                     backend = SQLiteAuthBackend(DB_PATH)
             else:
-                from cortex.auth.backends import SQLiteAuthBackend
+                from legacy_research.auth.backends import SQLiteAuthBackend
 
                 logger.info("AuthManager: Using Local Sovereign (SQLite) backend")
                 backend = SQLiteAuthBackend(DB_PATH)
@@ -132,7 +132,7 @@ class AuthManager:
         return hashlib.sha256(key.encode()).hexdigest()
 
     async def hash_key_argon2id_async(self, key: str) -> str:
-        from cortex.config import AUTH_PEPPER
+        from legacy_research.config import AUTH_PEPPER
 
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
@@ -275,7 +275,7 @@ class AuthManager:
 
     async def authenticate_async(self, raw_key: str) -> AuthResult:
         """Fully async authentication with dual-stack Argon2id support."""
-        from cortex.config import AUTH_PEPPER
+        from legacy_research.config import AUTH_PEPPER
 
         is_valid_format = bool(raw_key and raw_key.startswith("ctx_"))
         dummy_hash = self.hash_key_legacy_sha256("ctx_invalid_dummy_key_to_waste_time")

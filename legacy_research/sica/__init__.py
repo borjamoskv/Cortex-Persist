@@ -17,23 +17,23 @@ Constitutional evaluation layer inspired by Anthropic Constitutional AI:
 
 from __future__ import annotations
 
-from cortex.sica.agent import SICAAgent
-from cortex.sica.autonomy import (
+from legacy_research.sica.agent import SICAAgent
+from legacy_research.sica.autonomy import (
     AdaptiveRetry,
     AutonomousTick,
     MetaMetaController,
     SpeculativeFork,
     TraceSynthesizer,
 )
-from cortex.sica.constitution import Constitution, Principle
-from cortex.sica.meta_level import MetaJudgment, MetaLevel
-from cortex.sica.object_level import ExecutionTrace, ObjectLevel
-from cortex.sica.persistence import (
+from legacy_research.sica.constitution import Constitution, Principle
+from legacy_research.sica.meta_level import MetaJudgment, MetaLevel
+from legacy_research.sica.object_level import ExecutionTrace, ObjectLevel
+from legacy_research.sica.persistence import (
     load_genome,
     load_or_default,
     save_genome,
 )
-from cortex.sica.strategy import (
+from legacy_research.sica.strategy import (
     SearchStrategy,
     StrategyGenome,
     StrategyMutation,

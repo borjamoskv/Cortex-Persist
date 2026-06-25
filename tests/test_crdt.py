@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 
-from cortex.extensions.sync.crdt import ConflictRecord, CortexCRDT, FactReplica
-from cortex.extensions.sync.hlc import HLCTimestamp
+from legacy_research.extensions.sync.crdt import ConflictRecord, CortexCRDT, FactReplica
+from legacy_research.extensions.sync.hlc import HLCTimestamp
 
 
 def _make_replica(

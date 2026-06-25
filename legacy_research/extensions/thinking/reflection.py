@@ -46,7 +46,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
 logger = logging.getLogger("cortex.reflection")
 
@@ -263,7 +263,7 @@ def _semantic_arm(  # nosec B608 - parameterized query
 ) -> list[dict]:
     """Semantic vector search arm."""
     try:
-        from cortex.embeddings import LocalEmbedder
+        from legacy_research.embeddings import LocalEmbedder
 
         embedding = LocalEmbedder().embed(query)
     except (ImportError, RuntimeError, OSError, ValueError):

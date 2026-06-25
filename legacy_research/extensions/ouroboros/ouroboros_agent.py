@@ -9,7 +9,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
-from cortex.extensions.ouroboros_mythos.ouroboros_loop import MythosOuroborosEngine
+from legacy_research.extensions.ouroboros_mythos.ouroboros_loop import MythosOuroborosEngine
 
 app = FastAPI(title="Ouroboros Node Keeper")
 logging.basicConfig(level=logging.INFO)

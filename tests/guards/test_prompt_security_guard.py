@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from cortex.guards.prompt_security_guard import PromptSecurityGuard, PromptExtractionBlockedError
+from legacy_research.guards.prompt_security_guard import PromptSecurityGuard, PromptExtractionBlockedError
 
 
 def test_prompt_security_guard_init() -> None:

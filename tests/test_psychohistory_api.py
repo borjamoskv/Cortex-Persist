@@ -4,12 +4,12 @@ from unittest.mock import AsyncMock
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from cortex.api.core import app
-from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.auth.deps import require_auth
-from cortex.extensions.swarm.psychohistory import AGENT_BIASES
-from cortex.utils.result import Ok
+from legacy_research.api.core import app
+from legacy_research.api.deps import get_async_engine
+from legacy_research.auth import AuthResult, require_permission
+from legacy_research.auth.deps import require_auth
+from legacy_research.extensions.swarm.psychohistory import AGENT_BIASES
+from legacy_research.utils.result import Ok
 
 # Mock Auth
 mock_auth = AuthResult("test_key", "test_hash")

@@ -11,14 +11,14 @@ import logging
 import time
 from typing import Any
 
-from cortex.pipeline import (
+from legacy_research.pipeline import (
     PipelineRequest,
     PipelineResult,
     PipelineStage,
     PipelineStatus,
     StageTrace,
 )
-from cortex.pipeline._orchestrator_exceptions import (
+from legacy_research.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )

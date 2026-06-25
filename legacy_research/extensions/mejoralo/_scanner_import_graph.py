@@ -12,8 +12,8 @@ import ast
 import os
 from pathlib import Path
 
-from cortex.extensions.mejoralo.constants import MAX_FAN_OUT, SKIP_DIRS
-from cortex.extensions.mejoralo.models import AntipatternFinding
+from legacy_research.extensions.mejoralo.constants import MAX_FAN_OUT, SKIP_DIRS
+from legacy_research.extensions.mejoralo.models import AntipatternFinding
 
 __all__ = [
     "MAX_FAN_OUT",

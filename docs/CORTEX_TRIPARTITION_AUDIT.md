@@ -12,8 +12,8 @@
 - `cortex/engine/causality.py` & `causal_scheduler.py`: Grafo acíclico dirigido (DAG) real para dependencias de estado.
 - `cortex/engine/fact_store_core.py` & `snapshots.py`: SQLite-vec, transacciones ACID, y persistencia vectorial.
 - `cortex/engine/lock.py` & `rollback_engine.py`: Prevención de race-conditions y reversión atómica (SAGA Pattern).
-- `cortex/audit/decision_ledger.py`: Cadena de bloques local/append-only log. Hash criptográfico.
-- `cortex/guards/smt_guard.py` & `z3_anvil.py`: Verificación formal real usando satisfactibilidad booleana (Z3 Theorem Prover).
+- `legacy_research/audit/decision_ledger.py`: Cadena de bloques local/append-only log. Hash criptográfico.
+- `legacy_research/guards/smt_guard.py` & `z3_anvil.py`: Verificación formal real usando satisfactibilidad booleana (Z3 Theorem Prover).
 
 **Veredicto:** El núcleo es un motor de base de datos vectorial transaccional con control de concurrencia y auditoría inmutable. **100% Real.**
 
@@ -25,7 +25,7 @@
 **Vectores Identificados:**
 - `cortex/engine/cost_scheduler.py` & `performance_tracker.py`: Limitadores de rate y exergía computacional (tokens/segundo, latencia).
 - `cortex/engine/blast_radius.py` & `circuit_breaker.py`: Aislamiento de fallos en cascada.
-- `cortex/guards/entropy_guard.py` & `anti_limerence.py`: Heurísticas que cortan bucles generativos infinitos (Kill Criteria).
+- `legacy_research/guards/entropy_guard.py` & `anti_limerence.py`: Heurísticas que cortan bucles generativos infinitos (Kill Criteria).
 - `cortex/engine/cognitive_router.py`: Ruteo semántico entre sub-agentes basado en el coste de la tarea.
 
 **Veredicto:** Envoltura determinista sobre llamadas probabilísticas. Es instrumentación de control clásico aplicada a LLMs. **Real, pero heurística.**

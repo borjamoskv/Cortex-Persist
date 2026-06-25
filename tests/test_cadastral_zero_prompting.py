@@ -4,19 +4,19 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.engine.evolution_metrics import CortexMetrics
-from cortex.engine.evolution_types import (
+from legacy_research.engine.evolution_metrics import CortexMetrics
+from legacy_research.engine.evolution_types import (
     DomainMetrics,
     Mutation,
     SovereignAgent,
     SubAgent,
 )
-from cortex.engine.zero_prompting import (
+from legacy_research.engine.zero_prompting import (
     ResolutionReport,
     ZeroPromptingEvolutionStrategy,
 )
-from cortex.extensions.skills.cadastral.engine import CadastralEngine
-from cortex.extensions.skills.cadastral.models import (
+from legacy_research.extensions.skills.cadastral.engine import CadastralEngine
+from legacy_research.extensions.skills.cadastral.models import (
     CadastralReport,
     Coordinate,
     ExpropiationStatus,
@@ -340,13 +340,13 @@ class TestZeroPromptingEvolution:
 
 class TestAxiomRegistry:
     def test_sovereign_axiom_registered(self) -> None:
-        from cortex.extensions.axioms.registry import AXIOM_REGISTRY
+        from legacy_research.extensions.axioms.registry import AXIOM_REGISTRY
 
         ax = AXIOM_REGISTRY.get("AX-VII")
         assert ax is not None
 
     def test_total_axiom_count(self) -> None:
-        from cortex.extensions.axioms.registry import AXIOM_REGISTRY
+        from legacy_research.extensions.axioms.registry import AXIOM_REGISTRY
 
         assert len(AXIOM_REGISTRY) == 7
 

@@ -19,7 +19,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
 
-from cortex.utils.errors import CortexError
+from legacy_research.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.extensions.llm.boundary")
 

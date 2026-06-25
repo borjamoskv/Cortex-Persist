@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 from unittest.mock import patch
-from cortex.guards.gates.audit import check_gate_11_cobbler
+from legacy_research.guards.gates.audit import check_gate_11_cobbler
 
 
 @pytest.mark.asyncio

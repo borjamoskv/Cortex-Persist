@@ -5,9 +5,9 @@ from __future__ import annotations
 import logging
 import threading
 
-from cortex.extensions.aether.models import AetherAlert, AgentTask, TaskStatus
-from cortex.extensions.aether.queue import TaskQueue
-from cortex.extensions.aether.runner import AetherAgent
+from legacy_research.extensions.aether.models import AetherAlert, AgentTask, TaskStatus
+from legacy_research.extensions.aether.queue import TaskQueue
+from legacy_research.extensions.aether.runner import AetherAgent
 
 __all__ = ["AetherDaemon", "AetherMonitor"]
 
@@ -116,7 +116,7 @@ class AetherDaemon:
         if not token:
             return
 
-        from cortex.extensions.aether.github_ingestor import GitHubIngestor
+        from legacy_research.extensions.aether.github_ingestor import GitHubIngestor
 
         ingestor = GitHubIngestor(
             token=token,

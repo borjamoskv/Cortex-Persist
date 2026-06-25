@@ -6,7 +6,7 @@ import os
 
 from click.testing import CliRunner
 
-from cortex.cli import cli
+from legacy_research.cli import cli
 
 
 class _DummyEngine:

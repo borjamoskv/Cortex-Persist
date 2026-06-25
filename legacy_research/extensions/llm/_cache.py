@@ -18,7 +18,7 @@ import logging
 import time
 from typing import Final
 
-from cortex.database.tlru_cache import TLRUCache
+from legacy_research.database.tlru_cache import TLRUCache
 
 __all__ = ["NegativeCache", "PositiveCache"]
 

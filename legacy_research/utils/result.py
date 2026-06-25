@@ -10,7 +10,7 @@ Sovereign implementation of the Result pattern for deterministic error flow.
 Replaces exception-based control flow in liminal layers (LLM <-> Engine <-> MCP).
 
 Usage:
-    from cortex.result import Ok, Err, Result
+    from legacy_research.result import Ok, Err, Result
 
     def parse_agent_output(raw: str) -> Result[dict, str]:
         try:

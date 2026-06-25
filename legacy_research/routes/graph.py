@@ -27,11 +27,11 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette.requests import Request
 
-from cortex.api.deps import get_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine
-from cortex.graph import get_graph as _get_graph
-from cortex.utils.i18n import get_trans
+from legacy_research.api.deps import get_engine
+from legacy_research.auth import AuthResult, require_permission
+from legacy_research.engine import CortexEngine
+from legacy_research.graph import get_graph as _get_graph
+from legacy_research.utils.i18n import get_trans
 
 __all__ = ["get_graph", "get_graph_all"]
 

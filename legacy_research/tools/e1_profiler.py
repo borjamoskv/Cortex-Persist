@@ -7,8 +7,8 @@ Usage (CLI):
 
 Usage (library):
 
-    from cortex.tools.e1_profiler import E1Profiler
-    from cortex.tools.trace_adapter import ExecutionTrace
+    from legacy_research.tools.e1_profiler import E1Profiler
+    from legacy_research.tools.trace_adapter import ExecutionTrace
 
     profiler = E1Profiler()
     report = profiler.profile(traces)
@@ -29,9 +29,9 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
-from cortex.engine.meta_arbiter import MetaArbiterKernel, TrajectoryScore
-from cortex.tools.trace_adapter import ExecutionTrace
-from cortex.tools.trace_builder import TraceBuilder
+from legacy_research.engine.meta_arbiter import MetaArbiterKernel, TrajectoryScore
+from legacy_research.tools.trace_adapter import ExecutionTrace
+from legacy_research.tools.trace_builder import TraceBuilder
 
 # ---------------------------------------------------------------------------
 # Report types

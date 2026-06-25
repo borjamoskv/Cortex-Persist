@@ -124,7 +124,7 @@ class SubagentRunner:
         self._locks: dict[str, asyncio.Semaphore] = {}
         self.audit_callback = audit_callback
         
-        from cortex.swarm.router import SwarmRouter
+        from legacy_research.swarm.router import SwarmRouter
         self.router = SwarmRouter(registry)
 
     def register_handler(self, name: str, handler: AgentHandler, max_concurrent: int = 1) -> None:

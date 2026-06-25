@@ -12,9 +12,9 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from cortex.extensions.health.collectors import BUILTINS
-from cortex.extensions.health.models import MetricSnapshot
-from cortex.extensions.health.registry import CollectorRegistry
+from legacy_research.extensions.health.collectors import BUILTINS
+from legacy_research.extensions.health.models import MetricSnapshot
+from legacy_research.extensions.health.registry import CollectorRegistry
 
 logger = logging.getLogger("cortex.extensions.health.collector")
 

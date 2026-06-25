@@ -1,6 +1,6 @@
 import pytest
 import time
-from cortex.reality.rul import RealityClaim, Source, submit_claim
+from legacy_research.reality.rul import RealityClaim, Source, submit_claim
 
 
 def now_ms():

@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex.extensions.ui_control.keyboard import KeyboardEngine
-from cortex.extensions.ui_control.models import AppTarget, KeyCombo
+from legacy_research.extensions.ui_control.keyboard import KeyboardEngine
+from legacy_research.extensions.ui_control.models import AppTarget, KeyCombo
 
 
 @pytest.fixture

@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from cortex.api.core import app
-from cortex.auth.deps import require_auth, require_permission
+from legacy_research.api.core import app
+from legacy_research.auth.deps import require_auth, require_permission
 
 # Mock AuthResult
 mock_auth = MagicMock()

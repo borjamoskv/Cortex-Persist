@@ -5,7 +5,7 @@ import json
 from dataclasses import asdict, is_dataclass
 from typing import Any
 
-from cortex.types.evidence import ClosurePayload
+from legacy_research.types.evidence import ClosurePayload
 
 
 class ClosureContractError(RuntimeError):

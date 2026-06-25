@@ -30,7 +30,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Final
 
-from cortex.utils.void_vec import cosine_similarity
+from legacy_research.utils.void_vec import cosine_similarity
 
 logger = logging.getLogger("cortex.memory.dream")
 

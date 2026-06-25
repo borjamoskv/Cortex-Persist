@@ -29,7 +29,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
-from cortex.extensions.aether.models import AgentTask, TaskStatus
+from legacy_research.extensions.aether.models import AgentTask, TaskStatus
 
 __all__ = ["TaskQueue"]
 
@@ -164,7 +164,7 @@ class TaskQueue:
         """Update arbitrary fields on a task."""
         if not fields:
             return
-        from cortex.utils.sql_identifiers import validate_sql_identifier
+        from legacy_research.utils.sql_identifiers import validate_sql_identifier
 
         allowed_fields = {
             "title",

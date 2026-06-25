@@ -77,7 +77,7 @@ CORTEX Persist provides native architectural support for SOC 2 Type II complianc
 
 | Criterion (CC) | CORTEX Implementation | Evidence |
 |:---|:---|:---|
-| **CC6.1:** Logical access security | Multi-tenant isolation via cryptographic scoping. Z3 SMT Guards prevent unauthorized state mutations. | `cortex/guards/zk_guard.py` |
+| **CC6.1:** Logical access security | Multi-tenant isolation via cryptographic scoping. Z3 SMT Guards prevent unauthorized state mutations. | `legacy_research/guards/zk_guard.py` |
 | **CC6.8:** Prevention of unauthorized execution | All mutations require `CORTEX-TAINT` signature. Unsigned executions are aborted at SAGA-1. | `cortex/engine/causal/taint_engine.py` |
 | **CC7.2:** Security event logging | Immutable SHA-256 hash-chaining of all `store()` operations. Cryptographically tamper-evident. | `ImmutableLedger` |
 

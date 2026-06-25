@@ -3,8 +3,8 @@ import logging
 import random
 from typing import Any, Optional
 
-from cortex.consensus.babylon_quorum import BabylonQuorum
-from cortex.guards.z3_anvil import SovereignAnvil
+from legacy_research.consensus.babylon_quorum import BabylonQuorum
+from legacy_research.guards.z3_anvil import SovereignAnvil
 
 logger = logging.getLogger(__name__)
 

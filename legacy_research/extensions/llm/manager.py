@@ -23,7 +23,7 @@ from __future__ import annotations
 import logging
 import os
 
-from cortex.extensions.llm.router import IntentProfile
+from legacy_research.extensions.llm.router import IntentProfile
 
 __all__ = ["LLMManager"]
 
@@ -54,7 +54,7 @@ class LLMManager:
             return None
 
         try:
-            from cortex.extensions.llm.provider import LLMProvider
+            from legacy_research.extensions.llm.provider import LLMProvider
 
             self._provider = LLMProvider(provider=self._provider_name)
             logger.info("LLM provider loaded: %s", self._provider)
@@ -97,7 +97,7 @@ class LLMManager:
             return None
             
         try:
-            from cortex.guards.exergy_compiler import ExergyCompilerGuard
+            from legacy_research.guards.exergy_compiler import ExergyCompilerGuard
             exergy_lvl = int(os.environ.get("CORTEX_EXERGY_LEVEL", "0"))
             prompt = ExergyCompilerGuard.compile_payload(prompt, level=exergy_lvl)
         except ImportError:
@@ -125,7 +125,7 @@ class LLMManager:
             return
             
         try:
-            from cortex.guards.exergy_compiler import ExergyCompilerGuard
+            from legacy_research.guards.exergy_compiler import ExergyCompilerGuard
             exergy_lvl = int(os.environ.get("CORTEX_EXERGY_LEVEL", "0"))
             prompt = ExergyCompilerGuard.compile_payload(prompt, level=exergy_lvl)
         except ImportError:

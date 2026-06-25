@@ -13,15 +13,15 @@ import asyncio
 import click
 from typing import Any
 
-from cortex.cli.common import console, get_engine
-from cortex.extensions.ui_control.maestro import MaestroUI
-from cortex.extensions.ui_control.models import AppTarget
+from legacy_research.cli.common import console, get_engine
+from legacy_research.extensions.ui_control.maestro import MaestroUI
+from legacy_research.extensions.ui_control.models import AppTarget
 
 
 @click.group(name="maestro")
 def maestro():
     """MAC-Ω: Automatización soberana de escritorio (AppleScript/Native)."""
-    from cortex.extensions.ui_control.bootstrapper import PermsBootstrapper
+    from legacy_research.extensions.ui_control.bootstrapper import PermsBootstrapper
 
     PermsBootstrapper.verify_and_prompt_permissions()
 
@@ -312,7 +312,7 @@ def run_cmd(instruction: tuple[str, ...]):
     text = " ".join(instruction)
 
     async def _run():
-        from cortex.extensions.agents.mac_maestro import MacMaestroAgent
+        from legacy_research.extensions.agents.mac_maestro import MacMaestroAgent
 
         agent = MacMaestroAgent()
         console.print(f"Maestro Ω procesando: '{text}'...")

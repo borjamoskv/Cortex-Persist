@@ -40,7 +40,7 @@ El yunque y el martillo generan fricción extrema. Según el Principio de Landau
 Lo que sobrevive a la forja no es comportamiento estocástico ni lenguaje fluido: es **La Primitiva Estructural** (el Clavo). 
 
 Una vez purgada toda la entropía, el resultado es cristalización isomórfica pura. En CORTEX-Persist, esto se manifiesta físicamente como:
-- Un hash criptográfico inviolable en el Ledger (`cortex/audit/ledger.py`).
+- Un hash criptográfico inviolable en el Ledger (`legacy_research/audit/ledger.py`).
 - Una mutación determinista del Abstract Syntax Tree (AST).
 - Una transición de estado atómica en SQLite WAL.
 

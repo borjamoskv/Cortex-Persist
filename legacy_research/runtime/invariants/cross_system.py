@@ -19,9 +19,9 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.engine.evolution_ledger import EvolutionLedger, MutationRecord
-from cortex.shannon.env.trace import EpisodeTrace
-from cortex.shannon.verification.cross_verifier import CrossVerifier
+from legacy_research.engine.evolution_ledger import EvolutionLedger, MutationRecord
+from legacy_research.shannon.env.trace import EpisodeTrace
+from legacy_research.shannon.verification.cross_verifier import CrossVerifier
 
 logger = logging.getLogger("cortex.runtime.invariants")
 

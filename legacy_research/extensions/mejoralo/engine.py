@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Any
 
-from cortex.engine import CortexEngine
+from legacy_research.engine import CortexEngine
 
 from .heal import heal_proj
 from .scan import MejoraloScanner, ScanResult

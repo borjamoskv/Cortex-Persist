@@ -2,7 +2,7 @@
 # This file is part of CORTEX. Apache-2.0.
 import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
-from cortex.guards.seals import check_seal_1_code_quality, GlobalSourceCache
+from legacy_research.guards.seals import check_seal_1_code_quality, GlobalSourceCache
 from pathlib import Path
 
 

@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     pass
 
-from cortex.extensions.daemon.models import (
+from legacy_research.extensions.daemon.models import (
     CORTEX_DB,
     CORTEX_DIR,
     DEFAULT_CERT_WARN_DAYS,
@@ -23,7 +23,7 @@ from cortex.extensions.daemon.models import (
     DEFAULT_MEMORY_STALE_HOURS,
     DEFAULT_STALE_HOURS,
 )
-from cortex.extensions.daemon.monitors import (
+from legacy_research.extensions.daemon.monitors import (
     CertMonitor,
     DiskMonitor,
     EngineHealthCheck,
@@ -75,7 +75,7 @@ class HealingMixin:
         MAX_CONSECUTIVE_FAILURES. Logs the healing event and increments
         the healed counter.
         """
-        from cortex.extensions.daemon.core import MAX_CONSECUTIVE_FAILURES
+        from legacy_research.extensions.daemon.core import MAX_CONSECUTIVE_FAILURES
 
         logger.warning(
             "🩹 Self-healing: %s failed %d times consecutively. Re-instantiating...",

@@ -13,11 +13,11 @@ class TestADKModuleImport:
 
     def test_adk_package_import(self):
         """ADK package should be importable."""
-        import cortex.adk
+        import legacy_research.adk
 
     def test_tools_module_import(self):
         """Tools module should be importable."""
-        from cortex.adk import tools as adk_tools
+        from legacy_research.adk import tools as adk_tools
 
         assert hasattr(adk_tools, "adk_store")
         assert hasattr(adk_tools, "adk_search")
@@ -28,7 +28,7 @@ class TestADKModuleImport:
 
     def test_all_tools_list(self):
         """ALL_TOOLS should contain all 4 tool functions."""
-        from cortex.adk.tools import ALL_TOOLS
+        from legacy_research.adk.tools import ALL_TOOLS
 
         assert len(ALL_TOOLS) == 5
         names = [f.__name__ for f in ALL_TOOLS]
@@ -40,7 +40,7 @@ class TestADKModuleImport:
 
     def test_agents_module_import(self):
         """Agents module should be importable."""
-        from cortex.adk import agents as adk_agents
+        from legacy_research.adk import agents as adk_agents
 
         assert hasattr(adk_agents, "create_memory_agent")
         assert hasattr(adk_agents, "create_analyst_agent")
@@ -50,7 +50,7 @@ class TestADKModuleImport:
 
     def test_runner_module_import(self):
         """Runner module should be importable."""
-        from cortex.adk import runner as adk_runner
+        from legacy_research.adk import runner as adk_runner
 
         assert hasattr(adk_runner, "main")
         assert hasattr(adk_runner, "run_cli")
@@ -63,7 +63,7 @@ class TestADKTools:
         """adk_store should accept expected parameters."""
         import inspect
 
-        from cortex.adk.tools import adk_store
+        from legacy_research.adk.tools import adk_store
 
         sig = inspect.signature(adk_store)
         params = list(sig.parameters.keys())
@@ -77,7 +77,7 @@ class TestADKTools:
         """adk_search should accept expected parameters."""
         import inspect
 
-        from cortex.adk.tools import adk_search
+        from legacy_research.adk.tools import adk_search
 
         sig = inspect.signature(adk_search)
         params = list(sig.parameters.keys())
@@ -89,7 +89,7 @@ class TestADKTools:
         """adk_status should accept no parameters."""
         import inspect
 
-        from cortex.adk.tools import adk_status
+        from legacy_research.adk.tools import adk_status
 
         sig = inspect.signature(adk_status)
         assert len(sig.parameters) == 0
@@ -98,14 +98,14 @@ class TestADKTools:
         """adk_ledger_verify should accept no parameters."""
         import inspect
 
-        from cortex.adk.tools import adk_ledger_verify
+        from legacy_research.adk.tools import adk_ledger_verify
 
         sig = inspect.signature(adk_ledger_verify)
         assert len(sig.parameters) == 0
 
     def test_tools_have_docstrings(self):
         """All ADK tools should have proper docstrings."""
-        from cortex.adk.tools import ALL_TOOLS
+        from legacy_research.adk.tools import ALL_TOOLS
 
         for tool in ALL_TOOLS:
             assert tool.__doc__, f"{tool.__name__} missing docstring"
@@ -115,7 +115,7 @@ class TestADKTools:
         """All tools should have dict return type annotation."""
         import inspect
 
-        from cortex.adk.tools import ALL_TOOLS
+        from legacy_research.adk.tools import ALL_TOOLS
 
         for tool in ALL_TOOLS:
             sig = inspect.signature(tool)
@@ -129,7 +129,7 @@ class TestADKTools:
         """adk_deprecate should accept expected parameters."""
         import inspect
 
-        from cortex.adk.tools import adk_deprecate
+        from legacy_research.adk.tools import adk_deprecate
 
         sig = inspect.signature(adk_deprecate)
         params = list(sig.parameters.keys())
@@ -142,17 +142,17 @@ class TestADKAgentCreation:
 
     def test_adk_availability_flag(self):
         """is_adk_available should return a bool."""
-        from cortex.adk.agents import is_adk_available
+        from legacy_research.adk.agents import is_adk_available
 
         assert isinstance(is_adk_available(), bool)
 
     def test_create_memory_agent_without_adk(self):
         """If ADK is not installed, create_memory_agent should raise ImportError."""
-        from cortex.adk.agents import is_adk_available
+        from legacy_research.adk.agents import is_adk_available
 
         if not is_adk_available():
             with pytest.raises(ImportError, match="google-adk"):
-                from cortex.adk.agents import create_memory_agent
+                from legacy_research.adk.agents import create_memory_agent
 
                 create_memory_agent()
         else:
@@ -160,11 +160,11 @@ class TestADKAgentCreation:
 
     def test_create_analyst_agent_without_adk(self):
         """If ADK is not installed, create_analyst_agent should raise ImportError."""
-        from cortex.adk.agents import is_adk_available
+        from legacy_research.adk.agents import is_adk_available
 
         if not is_adk_available():
             with pytest.raises(ImportError, match="google-adk"):
-                from cortex.adk.agents import create_analyst_agent
+                from legacy_research.adk.agents import create_analyst_agent
 
                 create_analyst_agent()
         else:
@@ -172,11 +172,11 @@ class TestADKAgentCreation:
 
     def test_create_guardian_agent_without_adk(self):
         """If ADK is not installed, create_guardian_agent should raise ImportError."""
-        from cortex.adk.agents import is_adk_available
+        from legacy_research.adk.agents import is_adk_available
 
         if not is_adk_available():
             with pytest.raises(ImportError, match="google-adk"):
-                from cortex.adk.agents import create_guardian_agent
+                from legacy_research.adk.agents import create_guardian_agent
 
                 create_guardian_agent()
         else:
@@ -184,11 +184,11 @@ class TestADKAgentCreation:
 
     def test_create_swarm_without_adk(self):
         """If ADK is not installed, create_cortex_swarm should raise ImportError."""
-        from cortex.adk.agents import is_adk_available
+        from legacy_research.adk.agents import is_adk_available
 
         if not is_adk_available():
             with pytest.raises(ImportError, match="google-adk"):
-                from cortex.adk.agents import create_cortex_swarm
+                from legacy_research.adk.agents import create_cortex_swarm
 
                 create_cortex_swarm()
         else:

@@ -10,7 +10,7 @@ from typing import Any
 
 import httpx
 
-from cortex.extensions.llm._resilience import CircuitBreakerError, is_retryable
+from legacy_research.extensions.llm._resilience import CircuitBreakerError, is_retryable
 
 logger = logging.getLogger("cortex.extensions.llm")
 

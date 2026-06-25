@@ -2,8 +2,8 @@ import pytest
 import os
 import json
 import asyncio
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.crypto.identity import generate_event_identity
+from legacy_research.audit.ledger import EnterpriseAuditLedger
+from legacy_research.crypto.identity import generate_event_identity
 import cortex_core_rs
 
 @pytest.mark.asyncio
@@ -60,7 +60,7 @@ async def test_full_cortex_v2_pipeline(tmp_path):
     assert "signature" in batch_root_event
     
     # Verify we can replay
-    from cortex.engine.replay_verifier import ReplayVerifier
+    from legacy_research.engine.replay_verifier import ReplayVerifier
     verifier = ReplayVerifier(log_path=log_file)
     exec_events = [e for e in verifier.events if e.get("type") != "BATCH_ROOT"]
     assert len(exec_events) == 2

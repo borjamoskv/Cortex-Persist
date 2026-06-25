@@ -3,10 +3,10 @@ import asyncio
 
 import pytest
 
-from cortex.agents.base import BaseAgent
-from cortex.agents.builtins.omega_prime import OmegaPrimeAgent
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind
+from legacy_research.agents.base import BaseAgent
+from legacy_research.agents.builtins.omega_prime import OmegaPrimeAgent
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import AgentMessage, MessageKind
 
 
 class InMemoryMessageBus:

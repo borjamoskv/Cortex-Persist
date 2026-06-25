@@ -37,15 +37,15 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.guards.contradiction_guard.models import ConflictCandidate
-from cortex.guards.contradiction_guard.nlp import (
+from legacy_research.guards.contradiction_guard.models import ConflictCandidate
+from legacy_research.guards.contradiction_guard.nlp import (
     _classify_conflict,
     _decrypt_content,
     _is_noise,
     _jaccard,
     _tokenize,
 )
-from cortex.utils.void_vec import cosine_similarity
+from legacy_research.utils.void_vec import cosine_similarity
 
 _embedding_cosine_similarity = cosine_similarity
 

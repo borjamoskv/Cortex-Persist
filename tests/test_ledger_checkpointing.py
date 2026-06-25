@@ -3,11 +3,11 @@ import os
 
 import pytest
 
-from cortex.ledger.models import ActionResult, ActionTarget, LedgerEvent
-from cortex.ledger.queue import EnrichmentQueue
-from cortex.ledger.store import LedgerStore
-from cortex.ledger.verifier import LedgerVerifier
-from cortex.ledger.writer import LedgerWriter
+from legacy_research.ledger.models import ActionResult, ActionTarget, LedgerEvent
+from legacy_research.ledger.queue import EnrichmentQueue
+from legacy_research.ledger.store import LedgerStore
+from legacy_research.ledger.verifier import LedgerVerifier
+from legacy_research.ledger.writer import LedgerWriter
 
 
 @pytest.fixture

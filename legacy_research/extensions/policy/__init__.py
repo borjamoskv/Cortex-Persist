@@ -5,7 +5,7 @@ Converts memory (facts, ghosts, errors, bridges) into prioritized actions
 via a Bellman-inspired value function: V(s) = R(s,a) + γ·V(s').
 """
 
-from cortex.extensions.policy.engine import PolicyEngine
-from cortex.extensions.policy.models import ActionItem, PolicyConfig
+from legacy_research.extensions.policy.engine import PolicyEngine
+from legacy_research.extensions.policy.models import ActionItem, PolicyConfig
 
 __all__ = ["ActionItem", "PolicyConfig", "PolicyEngine"]

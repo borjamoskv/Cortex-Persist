@@ -28,10 +28,10 @@ import logging
 import time
 from typing import Any
 
-from cortex.extensions.zkortex.commitment import KnowledgeCommitment
-from cortex.extensions.zkortex.merkle import ZKMembershipProof
-from cortex.extensions.zkortex.prover import ZKOrtexProver
-from cortex.extensions.zkortex.range_proof import ZKRangeProof
+from legacy_research.extensions.zkortex.commitment import KnowledgeCommitment
+from legacy_research.extensions.zkortex.merkle import ZKMembershipProof
+from legacy_research.extensions.zkortex.prover import ZKOrtexProver
+from legacy_research.extensions.zkortex.range_proof import ZKRangeProof
 
 logger = logging.getLogger("cortex.extensions.zkortex.opacity")
 

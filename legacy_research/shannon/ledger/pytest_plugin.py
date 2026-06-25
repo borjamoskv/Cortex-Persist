@@ -7,7 +7,7 @@ import os
 
 import pytest
 
-from cortex.shannon.ledger.determinism import apply_deterministic_patches
+from legacy_research.shannon.ledger.determinism import apply_deterministic_patches
 
 
 def pytest_addoption(parser):

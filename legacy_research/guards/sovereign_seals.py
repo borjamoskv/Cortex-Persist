@@ -14,7 +14,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from cortex.guards._seal_printer import SealPrinter
+from legacy_research.guards._seal_printer import SealPrinter
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -410,7 +410,7 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
 
     # ── EU AI Act Audit Trail ──
     try:
-        from cortex.engine import CortexEngine
+        from legacy_research.engine import CortexEngine
 
         engine = CortexEngine(":memory:", auto_embed=False)
         await engine.init_db()
@@ -429,7 +429,7 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
 
     # ── SSRF URLGuard Verification (CodeQL #95) ──
     try:
-        from cortex.guards.url_guard import is_safe_url
+        from legacy_research.guards.url_guard import is_safe_url
 
         if is_safe_url("https://sunoapi.org/api/v1"):
             printer.success("SSRF URLGuard: Logic active and functional.")

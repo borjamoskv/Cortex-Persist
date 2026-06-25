@@ -3,8 +3,8 @@ import sys
 from pathlib import Path
 import click
 from rich.console import Console
-from cortex.cli.common import cli
-from cortex.cli.errors import err_execution_failed, err_skill_not_found
+from legacy_research.cli.common import cli
+from legacy_research.cli.errors import err_execution_failed, err_skill_not_found
 
 # [C5-REAL] Exergy-Maximized
 import sqlite3

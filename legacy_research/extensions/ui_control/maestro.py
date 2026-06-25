@@ -12,22 +12,22 @@ import asyncio
 import logging
 from typing import TYPE_CHECKING, Any
 
-from cortex.extensions.ui_control.accessibility import AccessibilityEngine
-from cortex.extensions.ui_control.applescript import (
+from legacy_research.extensions.ui_control.accessibility import AccessibilityEngine
+from legacy_research.extensions.ui_control.applescript import (
     is_app_running,
     run_applescript,
 )
-from cortex.extensions.ui_control.keyboard import KeyboardEngine
-from cortex.extensions.ui_control.models import (
+from legacy_research.extensions.ui_control.keyboard import KeyboardEngine
+from legacy_research.extensions.ui_control.models import (
     AppTarget,
     InteractionResult,
 )
-from cortex.extensions.ui_control.mouse import MouseEngine
-from cortex.extensions.ui_control.vision import VisionEngine
-from cortex.extensions.ui_control.window import WindowEngine
+from legacy_research.extensions.ui_control.mouse import MouseEngine
+from legacy_research.extensions.ui_control.vision import VisionEngine
+from legacy_research.extensions.ui_control.window import WindowEngine
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.ui_control.maestro")
 
@@ -108,7 +108,7 @@ class MaestroUI:
                 return method
 
         # Applescript fallbacks
-        import cortex.extensions.ui_control.applescript as applescript
+        import legacy_research.extensions.ui_control.applescript as applescript
 
         if hasattr(applescript, name):
             return getattr(applescript, name)

@@ -4,7 +4,7 @@ import hashlib
 import logging
 from typing import Any
 
-from cortex.extensions.llm.router import CortexPrompt, IntentProfile
+from legacy_research.extensions.llm.router import CortexPrompt, IntentProfile
 
 logger = logging.getLogger("cortex.extensions.swarm.psychohistory")
 

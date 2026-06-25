@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from cryptography.exceptions import InvalidSignature
 
-from cortex.ledger.public_verifier_utils import (
+from legacy_research.ledger.public_verifier_utils import (
     PublicVerifierError,
     _manifest_signature_scope,
     _merkle_root_v1,
@@ -15,7 +15,7 @@ from cortex.ledger.public_verifier_utils import (
 )
 
 if TYPE_CHECKING:
-    from cortex.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier
+    from legacy_research.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier
 
 
 def verify_manifest(verifier: _PublicLedgerVerifier) -> None:

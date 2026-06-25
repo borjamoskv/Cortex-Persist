@@ -24,7 +24,7 @@ from typing import Any
 
 import yaml
 
-from cortex.audit.ledger import EnterpriseAuditLedger
+from legacy_research.audit.ledger import EnterpriseAuditLedger
 
 logger = logging.getLogger("cortex.audit.cognitive_router")
 

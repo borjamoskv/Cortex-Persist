@@ -4,8 +4,8 @@ from __future__ import annotations
 import logging
 from collections import Counter
 
-from cortex.sica.object_level import ExecutionTrace, StepOutcome
-from cortex.sica.strategy import Heuristic
+from legacy_research.sica.object_level import ExecutionTrace, StepOutcome
+from legacy_research.sica.strategy import Heuristic
 
 logger = logging.getLogger("cortex.sica.autonomy.trace")
 

@@ -32,10 +32,10 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.graph.backends.base import GraphBackend
-from cortex.graph.backends.sqlite.algorithms import SQLiteAlgorithmsMixin
-from cortex.graph.backends.sqlite.query import SQLiteQueryMixin
-from cortex.graph.backends.sqlite.store import SQLiteStoreMixin
+from legacy_research.graph.backends.base import GraphBackend
+from legacy_research.graph.backends.sqlite.algorithms import SQLiteAlgorithmsMixin
+from legacy_research.graph.backends.sqlite.query import SQLiteQueryMixin
+from legacy_research.graph.backends.sqlite.store import SQLiteStoreMixin
 
 logger = logging.getLogger("cortex.graph.backends")
 

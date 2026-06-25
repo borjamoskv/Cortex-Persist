@@ -6,8 +6,8 @@ Ambient signal collection, multi-signal inference for contextual intelligence,
 and HiAgent subgoal compression for long-horizon loops.
 """
 
-from cortex.extensions.context.collector import ContextCollector
-from cortex.extensions.context.hiagent import HiAgentTraceManager
-from cortex.extensions.context.inference import ContextInference
+from legacy_research.extensions.context.collector import ContextCollector
+from legacy_research.extensions.context.hiagent import HiAgentTraceManager
+from legacy_research.extensions.context.inference import ContextInference
 
 __all__ = ["ContextCollector", "ContextInference", "HiAgentTraceManager"]

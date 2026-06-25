@@ -37,6 +37,6 @@ CORTEX enforces atomic mutations physically at the SQLite layer, abolishing pure
 
 Any artifact, code block, or text string output by a generative agent must be wrapped in `EpistemicNode` structures.
 - **CORTEX-TAINT Flag:** Unverified AI outputs carry a taint. Taint metadata propagates downstream.
-- **Audit Ledger:** All validations, threshold failures, and MTK token emissions are hashed (SHA-256) into `cortex/audit/ledger.py` utilizing `SERIALIZABLE` isolation.
+- **Audit Ledger:** All validations, threshold failures, and MTK token emissions are hashed (SHA-256) into `legacy_research/audit/ledger.py` utilizing `SERIALIZABLE` isolation.
 
 `Status`: C5-REAL | `Version`: v10.0

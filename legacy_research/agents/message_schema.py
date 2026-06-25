@@ -9,7 +9,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field, model_validator
 
-from cortex.agents.contracts import (
+from legacy_research.agents.contracts import (
     HandoffRequestPayload,
     TaskCompletedPayload,
     TaskFailedPayload,

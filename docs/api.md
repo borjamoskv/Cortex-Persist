@@ -27,7 +27,7 @@ The default core API bootstrap fails closed unless `CORTEX_STORAGE=local`.
 To export a static OpenAPI document:
 
 ```bash
-python -c "from cortex.api.openapi import export_openapi_spec; print(export_openapi_spec())"
+python -c "from legacy_research.api.openapi import export_openapi_spec; print(export_openapi_spec())"
 ```
 
 By default this writes `docs/openapi.json`.

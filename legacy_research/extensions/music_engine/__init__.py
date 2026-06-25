@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 
-from cortex.extensions.music_engine.orchestrator import (
+from legacy_research.extensions.music_engine.orchestrator import (
     AlbumContext,
     GRAMMYOrchestrator,
     TrackContext,

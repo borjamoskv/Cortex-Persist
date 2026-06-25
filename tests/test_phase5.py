@@ -5,8 +5,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.extensions.aether.models import AgentTask, PlanOutput
-from cortex.extensions.aether.runner import AetherAgent
+from legacy_research.extensions.aether.models import AgentTask, PlanOutput
+from legacy_research.extensions.aether.runner import AetherAgent
 
 
 @pytest.fixture
@@ -59,7 +59,7 @@ async def test_siege_verification_instruction_injection(mock_queue):
 async def test_bash_fail_format():
     """Verify that AgentToolkit.bash returns [FAIL] on non-zero exit."""
 
-    from cortex.extensions.aether.tools import AgentToolkit
+    from legacy_research.extensions.aether.tools import AgentToolkit
 
     # Create a temp dir for the repo
     repo = Path("/tmp/cortex_test_repro")

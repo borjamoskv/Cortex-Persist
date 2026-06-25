@@ -71,7 +71,7 @@ The persistence and trust layer is organized into sovereign domains matching the
 | `cortex/auth/` | **[PRODUCTION] SovereignIdentity:** Tenant-aware isolation and Role-Based Access Control (RBAC). |
 | `cortex_rs/src/krgs.rs` | **[SPECIFICATION] Keyed Retrieval Graph System (Rust):** Lock-free DAG (`G`) tracking logical transitions, orthogonal to the heuristic retrieval space (`R_K`). Enforces strict causal truth propagation. |
 | `cortex/gateway/` | **[PRODUCTION] CodeGovernanceGateway:** The enforcement boundary. Blocks or approves code mutations based on Entropy Score and EDG traversal. |
-| `cortex/audit/` | **[PRODUCTION] EnterpriseAuditLedger:** Immutable hash-chain recording every PR evaluation and state transition. |
+| `legacy_research/audit/` | **[PRODUCTION] EnterpriseAuditLedger:** Immutable hash-chain recording every PR evaluation and state transition. |
 
 **Execution & Delivery (`cortex/delivery/` & `cortex/swarm/`):**
 - `outbox.py` — **[PRODUCTION]** Lock-free task dispatch integration.
@@ -317,7 +317,7 @@ Multiple audit surfaces:
 - **[EXPERIMENTAL] Z3 thermodynamic validation** for AST mutations
 - **[PRODUCTION] Ed25519 seal verification** (`verify_zk_seal()`)
 - **[RESEARCH] DarkPoolZK** anchor validation for swarm mutations
-- **[PRODUCTION] Formal verification** integration via `cortex/guards/virgo.py`
+- **[PRODUCTION] Formal verification** integration via `legacy_research/guards/virgo.py`
 
 ---
 
@@ -545,7 +545,7 @@ These domains deserve explicit review before release.
 
 Before release, review:
 
-- [ ] guard behavior changes (14+ guards in `cortex/guards/`)
+- [ ] guard behavior changes (14+ guards in `legacy_research/guards/`)
 - [ ] ledger continuity changes (SHA-256 chain, AOF format, Ed25519 seal)
 - [ ] encryption path changes (`cortex/crypto/`)
 - [ ] policy/gate changes (TelemetryGate, AEON-0 admission)

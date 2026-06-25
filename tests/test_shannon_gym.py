@@ -2,9 +2,9 @@
 # [C5-REAL] Exergy-Maximized
 
 import pytest
-import cortex.shannon as shannon
-from cortex.shannon.env.client import HeuristicGenesisAgent
-from cortex.shannon.benchmark.runner import run_episode
+import legacy_research.shannon as shannon
+from legacy_research.shannon.env.client import HeuristicGenesisAgent
+from legacy_research.shannon.benchmark.runner import run_episode
 
 
 def test_genesis_gym_env_direct():
@@ -69,7 +69,7 @@ def test_genesis_gym_trace():
 
     # 2. Test JSON Serialization/Deserialization
     json_str = trace.to_json()
-    from cortex.shannon.env.trace import EpisodeTrace
+    from legacy_research.shannon.env.trace import EpisodeTrace
 
     loaded_trace = EpisodeTrace.from_json(json_str)
     assert loaded_trace.verify() is True

@@ -134,7 +134,7 @@ class HypothesisEngineTool:
         }
 
         try:
-            from cortex.engine import CortexEngine
+            from legacy_research.engine import CortexEngine
 
             engine = CortexEngine()
             await engine.store(

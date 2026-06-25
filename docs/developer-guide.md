@@ -85,7 +85,7 @@ Located in `cortex/engine/__init__.py`. The main entry point used by both CLI an
 - Delegates CRUD to mixins: `StoreMixin`, `QueryMixin`, `ConsensusMixin`
 
 ```python
-from cortex.engine import CortexEngine
+from legacy_research.engine import CortexEngine
 
 engine = CortexEngine(db_path="my.db", auto_embed=True)
 engine.init_db_sync()
@@ -107,8 +107,8 @@ compatibility alias exported from `cortex.engine`, not a separate `cortex/engine
 - Handles transaction logging and hash chain maintenance
 
 ```python
-from cortex.database.pool import CortexConnectionPool
-from cortex.engine import CortexEngine
+from legacy_research.database.pool import CortexConnectionPool
+from legacy_research.engine import CortexEngine
 
 pool = CortexConnectionPool(db_path, read_only=False)
 await pool.initialize()
@@ -125,8 +125,8 @@ fact_id = await engine.store(project="x", content="Hello", fact_type="knowledge"
 
 ```python
 from fastapi import APIRouter, Depends
-from cortex.auth import AuthResult, require_permission
-from cortex.api.deps import get_async_engine
+from legacy_research.auth import AuthResult, require_permission
+from legacy_research.api.deps import get_async_engine
 
 router = APIRouter(tags=["my-feature"])
 
@@ -142,7 +142,7 @@ async def my_endpoint(
 2. **Register in** `cortex/routes/__init__.py`:
 
 ```python
-from cortex.routes.my_feature import router as my_feature_router
+from legacy_research.routes.my_feature import router as my_feature_router
 api_router.include_router(my_feature_router)
 ```
 
@@ -154,8 +154,8 @@ api_router.include_router(my_feature_router)
 
 ```python
 import click
-from cortex.cli.common import cli
-from cortex.engine import CortexEngine
+from legacy_research.cli.common import cli
+from legacy_research.engine import CortexEngine
 
 @cli.command("my-command")
 @click.argument("project")
@@ -199,7 +199,7 @@ async def cortex_my_tool(param: str) -> str:
 All config lives in `cortex/config.py`. Variables are loaded from environment at import time:
 
 ```python
-from cortex import config
+from legacy_research import config
 
 # Read value
 print(config.DB_PATH)
@@ -221,7 +221,7 @@ Tests use temporary databases and `config.reload()` for isolation:
 
 ```python
 import pytest
-from cortex.engine import CortexEngine
+from legacy_research.engine import CortexEngine
 
 @pytest.fixture
 def engine(tmp_path):
@@ -239,11 +239,11 @@ def test_store(engine):
 
 ```python
 from fastapi.testclient import TestClient
-import cortex.api as api_mod
+import legacy_research.api as api_mod
 
 def test_health(tmp_path):
     os.environ["CORTEX_DB"] = str(tmp_path / "test.db")
-    from cortex import config
+    from legacy_research import config
     config.reload()
 
     with TestClient(api_mod.app) as c:
@@ -277,7 +277,7 @@ make format        # Auto-format
 All user-facing error messages go through `cortex/i18n.py`:
 
 ```python
-from cortex.i18n import get_trans
+from legacy_research.i18n import get_trans
 
 msg = get_trans("error_not_found", lang="es")
 # → "Recurso no encontrado"
@@ -296,7 +296,7 @@ To add a new translation:
 
 When adding a new table:
 
-1. Add `CREATE TABLE` to `cortex/database/schema.py` or `cortex/database/schema_extensions.py`
+1. Add `CREATE TABLE` to `legacy_research/database/schema.py` or `legacy_research/database/schema_extensions.py`
 2. Add it to the appropriate schema list such as `ALL_SCHEMA`
 3. Create or register a migration in `cortex/migrations/` for existing databases
 4. Test with `cortex init` on a fresh DB and `cortex migrate` on existing

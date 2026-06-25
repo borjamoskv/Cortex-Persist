@@ -10,10 +10,10 @@ import logging
 import time
 from typing import TYPE_CHECKING
 
-from cortex.extensions.llm._models import CascadeTier, IntentProfile
+from legacy_research.extensions.llm._models import CascadeTier, IntentProfile
 
 if TYPE_CHECKING:
-    from cortex.extensions.llm._models import BaseProvider
+    from legacy_research.extensions.llm._models import BaseProvider
 
 logger = logging.getLogger("cortex.extensions.llm.cascade")
 

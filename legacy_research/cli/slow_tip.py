@@ -128,8 +128,8 @@ class SlowOpTipEmitter:
         try:
             from rich.panel import Panel
 
-            from cortex.cli.common import console
-            from cortex.engine.tips import TipsEngine
+            from legacy_research.cli.common import console
+            from legacy_research.engine.tips import TipsEngine
 
             tips_engine = TipsEngine(
                 None,
@@ -218,7 +218,7 @@ def slow_tips_spinner(
         from rich.spinner import Spinner
         from rich.text import Text
 
-        from cortex.cli.common import console
+        from legacy_research.cli.common import console
 
         spin = Spinner(spinner, text=Text(f" {label}", style="noir.violet"))
 

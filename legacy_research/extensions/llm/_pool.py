@@ -17,7 +17,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 
-from cortex.extensions.llm._models import BaseProvider
+from legacy_research.extensions.llm._models import BaseProvider
 
 __all__ = ["ProviderMetrics", "WeightedProviderPool"]
 

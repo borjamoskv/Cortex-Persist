@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from cortex.engine import CortexEngine
+from legacy_research.engine import CortexEngine
 
 logger = logging.getLogger("cortex.taas")
 

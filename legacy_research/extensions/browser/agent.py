@@ -4,9 +4,9 @@ import json
 import logging
 from typing import Any
 
-from cortex.extensions.browser.engine import BrowserEngine
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import IntentProfile
+from legacy_research.extensions.browser.engine import BrowserEngine
+from legacy_research.extensions.llm.provider import LLMProvider
+from legacy_research.extensions.llm.router import IntentProfile
 
 LOG = logging.getLogger("cortex.extensions.browser")
 

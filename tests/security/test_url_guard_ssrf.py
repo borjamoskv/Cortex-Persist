@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 
-from cortex.guards.url_guard import SafeTransport
+from legacy_research.guards.url_guard import SafeTransport
 
 
 def test_url_guard_blocks_metadata_ip():

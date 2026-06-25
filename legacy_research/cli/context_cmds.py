@@ -1,8 +1,8 @@
 import click
 from rich.panel import Panel
 from rich.table import Table
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
-from cortex.cli.errors import err_empty_results, handle_cli_error
+from legacy_research.cli.common import DEFAULT_DB, cli, console, get_engine
+from legacy_research.cli.errors import err_empty_results, handle_cli_error
 
 # [C5-REAL] Exergy-Maximized
 """
@@ -43,9 +43,9 @@ def infer_cmd(db: str, persist: bool, as_json: bool):
 
 
 async def _infer_async(db: str, persist: bool, as_json: bool):
-    from cortex import config
-    from cortex.extensions.context.collector import ContextCollector
-    from cortex.extensions.context.inference import ContextInference
+    from legacy_research import config
+    from legacy_research.extensions.context.collector import ContextCollector
+    from legacy_research.extensions.context.inference import ContextInference
 
     engine = get_engine(db)
     await engine.init_db()
@@ -122,8 +122,8 @@ def signals_cmd(db: str, as_json: bool):
 
 
 async def _signals_async(db: str, as_json: bool):
-    from cortex import config
-    from cortex.extensions.context.collector import ContextCollector
+    from legacy_research import config
+    from legacy_research.extensions.context.collector import ContextCollector
 
     engine = get_engine(db)
     await engine.init_db()
@@ -178,7 +178,7 @@ def history_cmd(db: str, limit: int, as_json: bool):
 
 
 async def _history_async(db: str, limit: int, as_json: bool):
-    from cortex.extensions.context.inference import ContextInference
+    from legacy_research.extensions.context.inference import ContextInference
 
     engine = get_engine(db)
     await engine.init_db()

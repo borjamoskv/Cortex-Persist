@@ -20,10 +20,10 @@ def _bft_sqlite_connect(*args, **kwargs):
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 
-from cortex.compat.optional import np
-from cortex.guards.exergy_guard import calculate_exergy
-from cortex.memory.models import CortexFactModel
-from cortex.utils import void_vec
+from legacy_research.compat.optional import np
+from legacy_research.guards.exergy_guard import calculate_exergy
+from legacy_research.memory.models import CortexFactModel
+from legacy_research.utils import void_vec
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class WriteTrait:
         encrypted PII fragments are persisted in the metadata field.
         """
         conn = self._get_conn()  # pyright: ignore[reportAttributeAccessIssue]
-        from cortex.engine.causal.taint_engine import enforce_taint_check
+        from legacy_research.engine.causal.taint_engine import enforce_taint_check
 
         token = fact.metadata.get("cortex_taint") if fact.metadata else None
         await enforce_taint_check(conn, token, fact.content)
@@ -119,7 +119,7 @@ class WriteTrait:
                             (rowid, binary_bytes),
                         )
                         # MIH Indexing
-                        from cortex.utils.void_mih import slice_void_bit
+                        from legacy_research.utils.void_mih import slice_void_bit
 
                         shards = slice_void_bit(binary_bytes)
                         insert_mih_sql = (

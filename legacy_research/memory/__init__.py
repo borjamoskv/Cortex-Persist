@@ -14,7 +14,7 @@ eagerly on package import (PEP 562).
 
 Usage::
 
-    from cortex.memory import CortexMemoryManager, WorkingMemoryL1
+    from legacy_research.memory import CortexMemoryManager, WorkingMemoryL1
 
 """
 
@@ -24,20 +24,20 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.memory.consolidation import SilentEngram, SystemsConsolidator
-    from cortex.memory.drift import DriftMonitor, DriftSignature
-    from cortex.memory.encoder import AsyncEncoder
-    from cortex.memory.engrams import CortexSemanticEngram
-    from cortex.memory.frequency import (
+    from legacy_research.memory.consolidation import SilentEngram, SystemsConsolidator
+    from legacy_research.memory.drift import DriftMonitor, DriftSignature
+    from legacy_research.memory.encoder import AsyncEncoder
+    from legacy_research.memory.engrams import CortexSemanticEngram
+    from legacy_research.memory.frequency import (
         BIFTRouter,
         ContinuousMemorySystem,
         MemoryFrequency,
         RetrievalBand,
     )
-    from cortex.memory.homeostasis import DynamicSynapseUpdate, EntropyPruner
-    from cortex.memory.ledger import EventLedgerL3
-    from cortex.memory.manager import CortexMemoryManager
-    from cortex.memory.metamemory import (
+    from legacy_research.memory.homeostasis import DynamicSynapseUpdate, EntropyPruner
+    from legacy_research.memory.ledger import EventLedgerL3
+    from legacy_research.memory.manager import CortexMemoryManager
+    from legacy_research.memory.metamemory import (
         MemoryCard,
         MetacognitiveJudge,
         MetaJudgment,
@@ -48,30 +48,30 @@ if TYPE_CHECKING:
         Verdict,
         build_memory_card,
     )
-    from cortex.memory.models import EpisodicSnapshot, MemoryEntry, MemoryEvent
-    from cortex.memory.navigator import (
+    from legacy_research.memory.models import EpisodicSnapshot, MemoryEntry, MemoryEvent
+    from legacy_research.memory.navigator import (
         ClusterInfo,
         KnowledgeMap,
         NavigationState,
         SemanticNavigator,
         SemanticPath,
     )
-    from cortex.memory.pipeline import NeuromorphicPipeline, QueryResult, StoreResult
-    from cortex.memory.resonance import AdaptiveResonanceGate
-    from cortex.memory.sleep import SleepCycleReport, SleepOrchestrator
-    from cortex.memory.sparse import MushroomBodyEncoder
-    from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2 as VectorStoreL2
-    from cortex.memory.temporal_health import (
+    from legacy_research.memory.pipeline import NeuromorphicPipeline, QueryResult, StoreResult
+    from legacy_research.memory.resonance import AdaptiveResonanceGate
+    from legacy_research.memory.sleep import SleepCycleReport, SleepOrchestrator
+    from legacy_research.memory.sparse import MushroomBodyEncoder
+    from legacy_research.memory.sqlite_vec_store import SovereignVectorStoreL2 as VectorStoreL2
+    from legacy_research.memory.temporal_health import (
         HealthReport,
         SchedulerConfig,
         TemporalHealthScheduler,
     )
-    from cortex.memory.void_detector import (
+    from legacy_research.memory.void_detector import (
         RetrievalAnalysis,
         RetrievalState,
         RetrievalVoidDetector,
     )
-    from cortex.memory.working import WorkingMemoryL1
+    from legacy_research.memory.working import WorkingMemoryL1
 
 __all__ = [  # type: ignore[reportUnsupportedDunderAll]
     "AdaptiveResonanceGate",
@@ -194,7 +194,7 @@ def __getattr__(name: str) -> object:
     if name == "VectorStoreL2":
         # Special case: VectorStoreL2 has a fallback chain
         try:
-            from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+            from legacy_research.memory.sqlite_vec_store import SovereignVectorStoreL2
 
             val = SovereignVectorStoreL2
         except ImportError:

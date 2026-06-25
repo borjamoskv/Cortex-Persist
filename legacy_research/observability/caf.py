@@ -4,7 +4,7 @@ from typing import Any
 
 import numpy as np
 
-from cortex.observability.fdf import FailureField, Particle
+from legacy_research.observability.fdf import FailureField, Particle
 
 
 def memory_entropy(history: list[float]) -> float:

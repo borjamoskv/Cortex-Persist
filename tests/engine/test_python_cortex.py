@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized Test Suite
 import pytest
-from cortex.engine.cortex import Cortex
-from cortex.engine.exergy_optimizer import ExergyOptimizer
-from cortex.engine.swarm_10k import NodeMetrics
+from legacy_research.engine.cortex import Cortex
+from legacy_research.engine.exergy_optimizer import ExergyOptimizer
+from legacy_research.engine.swarm_10k import NodeMetrics
 
 
 def test_python_cortex_init():

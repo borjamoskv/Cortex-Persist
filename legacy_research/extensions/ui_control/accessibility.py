@@ -12,10 +12,10 @@ except ImportError:
     ApplicationServices = None
     NSWorkspace = None
 
-from cortex.extensions.ui_control.models import AXElement, InteractionResult
+from legacy_research.extensions.ui_control.models import AXElement, InteractionResult
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.ui_control.accessibility")
 

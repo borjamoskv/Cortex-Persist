@@ -13,7 +13,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from cortex.cli.common import cli
+from legacy_research.cli.common import cli
 
 console = Console()
 
@@ -35,7 +35,7 @@ def produce_cmd(title, concept, bpm, key):
     Dispara el pipeline de producción de GRAMMY-Ω para un nuevo track.
     """
     try:
-        from cortex.extensions.music_engine.orchestrator import (
+        from legacy_research.extensions.music_engine.orchestrator import (
             GRAMMYOrchestrator,
             TrackContext,
             TrackState,

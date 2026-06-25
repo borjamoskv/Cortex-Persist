@@ -24,8 +24,8 @@ def _bft_sqlite_connect(*args, **kwargs):
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 
-from cortex.graph.backends import GraphBackend, SQLiteBackend
-from cortex.graph.patterns import COMMON_WORDS, ENTITY_PATTERNS, RELATION_SIGNALS
+from legacy_research.graph.backends import GraphBackend, SQLiteBackend
+from legacy_research.graph.patterns import COMMON_WORDS, ENTITY_PATTERNS, RELATION_SIGNALS
 
 __all__ = [
     "detect_relationships",
@@ -48,7 +48,7 @@ def get_backend(conn=None) -> GraphBackend:
     """Get the appropriate graph backend."""
     backend_type = os.environ.get("CORTEX_GRAPH_BACKEND", "sqlite").lower()
     if backend_type == "neo4j":
-        from cortex.graph.backends import Neo4jBackend
+        from legacy_research.graph.backends import Neo4jBackend
 
         return Neo4jBackend()  # type: ignore[abstract]
     return SQLiteBackend(conn)  # type: ignore[arg-type]

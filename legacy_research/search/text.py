@@ -52,16 +52,16 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.memory.temporal import build_temporal_filter_params
-from cortex.search.models import SearchResult
-from cortex.search.utils import (
+from legacy_research.memory.temporal import build_temporal_filter_params
+from legacy_research.search.models import SearchResult
+from legacy_research.search.utils import (
     _has_fts5,
     _has_fts5_sync,
     _parse_row_sync,
     _rows_to_results,
     _sanitize_fts_query,
 )
-from cortex.storage import StorageMode, get_storage_mode
+from legacy_research.storage import StorageMode, get_storage_mode
 
 __all__ = ["text_search", "text_search_sync"]
 

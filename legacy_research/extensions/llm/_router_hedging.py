@@ -5,15 +5,15 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from cortex.extensions.llm._hedging import HedgedRequestStrategy
-from cortex.extensions.llm._models import CascadeEvent, CascadeTier
-from cortex.utils.result import Ok
+from legacy_research.extensions.llm._hedging import HedgedRequestStrategy
+from legacy_research.extensions.llm._models import CascadeEvent, CascadeTier
+from legacy_research.utils.result import Ok
 
 if TYPE_CHECKING:
-    from cortex.extensions.llm._cascade import CascadeManager
-    from cortex.extensions.llm._models import BaseProvider, CortexPrompt
-    from cortex.extensions.llm._telemetry import CascadeTelemetry
-    from cortex.utils.result import Result
+    from legacy_research.extensions.llm._cascade import CascadeManager
+    from legacy_research.extensions.llm._models import BaseProvider, CortexPrompt
+    from legacy_research.extensions.llm._telemetry import CascadeTelemetry
+    from legacy_research.utils.result import Result
 
 logger = logging.getLogger("cortex.extensions.llm._router_hedging")
 
@@ -63,7 +63,7 @@ async def execute_swarm(
     telemetry: CascadeTelemetry,
 ) -> Result[str, str] | None:
     """Ω₂₁: Parallel Swarm Racing."""
-    from cortex.extensions.llm._models import ReasoningMode
+    from legacy_research.extensions.llm._models import ReasoningMode
 
     swarm_peers = []
     reasoning_mode = getattr(prompt, "reasoning_mode", None)

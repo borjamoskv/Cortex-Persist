@@ -13,8 +13,8 @@ from __future__ import annotations
 import sqlite3
 
 
-from cortex.search.causal_gap import CausalGap
-from cortex.search.hybrid import hybrid_search_sync
+from legacy_research.search.causal_gap import CausalGap
+from legacy_research.search.hybrid import hybrid_search_sync
 
 
 

@@ -2,13 +2,13 @@
 """CORTEX Config - Backward-compatible shim.
 
 Real implementation lives in cortex.core.config.
-This module re-exports everything so existing `from cortex.config import X` works.
+This module re-exports everything so existing `from legacy_research.config import X` works.
 """
 
 from typing import Any
 
-import cortex.core.config as _core
-from cortex.core.config import reload as _core_reload
+import legacy_research.core.config as _core
+from legacy_research.core.config import reload as _core_reload
 
 
 def reload() -> None:

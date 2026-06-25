@@ -8,38 +8,38 @@ import time
 from typing import Any
 
 # Memory OS (RFC-CORTEX-MEMORY-OS)
-from cortex.compaction.mem0_pipeline import Mem0Pipeline
-from cortex.memory._manager_bg import (
+from legacy_research.compaction.mem0_pipeline import Mem0Pipeline
+from legacy_research.memory._manager_bg import (
     cancel_background_tasks,
     compression_worker_loop,
 )
-from cortex.memory._manager_init import (
+from legacy_research.memory._manager_init import (
     init_dynamic_space,
     init_hologram,
     init_metamemory,
     init_resonance_gate,
 )
-from cortex.memory._manager_store import check_deduplication, store_fact
-from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.models import MemoryEvent
-from cortex.memory.schemas import SchemaEngine
-from cortex.memory.thalamus import ThalamusGate
-from cortex.memory.working import WorkingMemoryL1
+from legacy_research.memory._manager_store import check_deduplication, store_fact
+from legacy_research.memory.encoder import AsyncEncoder
+from legacy_research.memory.ledger import EventLedgerL3
+from legacy_research.memory.models import MemoryEvent
+from legacy_research.memory.schemas import SchemaEngine
+from legacy_research.memory.thalamus import ThalamusGate
+from legacy_research.memory.working import WorkingMemoryL1
 
 try:
-    from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
+    from legacy_research.memory.hdc import HDCEncoder, HDCVectorStoreL2
 except ImportError:
     HDCEncoder = Any  # type: ignore[assignment,misc]
     HDCVectorStoreL2 = Any  # type: ignore[assignment,misc]
 
 try:
-    from cortex.extensions.policy.memory_os import MemoryOS
+    from legacy_research.extensions.policy.memory_os import MemoryOS
 except ImportError:
     MemoryOS = None  # type: ignore
 
 try:
-    from cortex.extensions.security.tenant import get_tenant_id
+    from legacy_research.extensions.security.tenant import get_tenant_id
 except ImportError:
 
     def get_tenant_id() -> str:
@@ -47,20 +47,20 @@ except ImportError:
 
 
 try:
-    from cortex.extensions.sovereign.endocrine import DigitalEndocrine
+    from legacy_research.extensions.sovereign.endocrine import DigitalEndocrine
 except ImportError:
     DigitalEndocrine = None  # type: ignore
 
-from cortex.telemetry.metrics import metrics
+from legacy_research.telemetry.metrics import metrics
 
 try:
-    from cortex.extensions.thinking.fusion import ContextFusion
+    from legacy_research.extensions.thinking.fusion import ContextFusion
 except ImportError:
     ContextFusion = None  # type: ignore
 
 try:
-    from cortex.memory.semantic_ram import DynamicSemanticSpace
-    from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+    from legacy_research.memory.semantic_ram import DynamicSemanticSpace
+    from legacy_research.memory.sqlite_vec_store import SovereignVectorStoreL2
 
     VectorStoreL2 = SovereignVectorStoreL2
 except ImportError:
@@ -261,7 +261,7 @@ class CortexMemoryManager:
         working_set = self._l1.get_context(tenant_id=tenant_id)
 
         _start_recall = time.perf_counter()
-        from cortex.memory.memory_retrieval import retrieve_episodic_context
+        from legacy_research.memory.memory_retrieval import retrieve_episodic_context
 
         episodic_facts = await retrieve_episodic_context(
             self, tenant_id, project_id, query, max_episodes, layer=layer
@@ -293,7 +293,7 @@ class CortexMemoryManager:
         if not events:
             return None
         hvs = [self._hdc_encoder.encode_text(e["content"]) for e in events]
-        from cortex.memory.hdc.algebra import bundle
+        from legacy_research.memory.hdc.algebra import bundle
 
         try:
             return hvs[0] if len(hvs) == 1 else bundle(*hvs)
@@ -304,9 +304,9 @@ class CortexMemoryManager:
     # ─── NREM Consolidation ─────────────────────────────────────────
 
     async def nrem_consolidation(self, tenant_id: str, project_id: str | None = None) -> dict:
-        from cortex.memory.consolidation import SystemsConsolidator
-        from cortex.memory.homeostasis import EntropyPruner, HomeostaticScaler
-        from cortex.memory.nrem_cycle import NREMConsolidationCycle
+        from legacy_research.memory.consolidation import SystemsConsolidator
+        from legacy_research.memory.homeostasis import EntropyPruner, HomeostaticScaler
+        from legacy_research.memory.nrem_cycle import NREMConsolidationCycle
 
         consolidator = SystemsConsolidator(self._l2) if self._l2 else None
         pruner = EntropyPruner(self._l2) if self._l2 else None

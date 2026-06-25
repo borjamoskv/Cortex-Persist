@@ -9,7 +9,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.verification.invariants import SOVEREIGN_INVARIANTS, SafetyInvariant
+from legacy_research.verification.invariants import SOVEREIGN_INVARIANTS, SafetyInvariant
 
 logger = logging.getLogger("cortex.verification.verifier")
 
@@ -54,7 +54,7 @@ class SovereignVerifier:
         logger.info("Verifying mutation for %s...", file_path)
 
         # 1. AST-based Heuristic Extraction
-        from cortex.verification.extractor import extract_constraints
+        from legacy_research.verification.extractor import extract_constraints
 
         findings = extract_constraints(code)
 

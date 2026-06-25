@@ -7,8 +7,8 @@ import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.compaction.compactor import CompactionResult
-    from cortex.engine import CortexEngine
+    from legacy_research.compaction.compactor import CompactionResult
+    from legacy_research.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compaction.lateral")
 _LOG_FMT = "Compactor [%s] %s"

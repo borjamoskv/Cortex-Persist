@@ -8,8 +8,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field, ValidationError
 
-from cortex.extensions.llm.boundary import ImmuneBoundary
-from cortex.extensions.thinking.fusion_models import (
+from legacy_research.extensions.llm.boundary import ImmuneBoundary
+from legacy_research.extensions.thinking.fusion_models import (
     FusedThought,
     FusionStrategy,
     ModelResponse,

@@ -18,9 +18,9 @@ import time
 from collections.abc import AsyncGenerator
 from pathlib import Path
 
-from cortex.engine.context_cache import ContextCacheManager
-from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
-from cortex.extensions.llm._result_cache import ResultCache
+from legacy_research.engine.context_cache import ContextCacheManager
+from legacy_research.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
+from legacy_research.extensions.llm._result_cache import ResultCache
 
 logger = logging.getLogger("cortex.extensions.llm.vllm_edge")
 

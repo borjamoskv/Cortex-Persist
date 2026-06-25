@@ -42,7 +42,7 @@ async def ledger(audit_conn):
         "cortex.audit.ledger.os.path.exists",
         side_effect=lambda p: False if p == pem_path else os.path.exists(p),
     ):
-        from cortex.audit.ledger import EnterpriseAuditLedger
+        from legacy_research.audit.ledger import EnterpriseAuditLedger
 
         ledger = object.__new__(EnterpriseAuditLedger)
         from cryptography.hazmat.primitives.asymmetric import ed25519
@@ -64,7 +64,7 @@ async def ledger(audit_conn):
 @pytest.fixture
 async def aegis(ledger):
     """Creates a MoskvAegisEngine auditor instance."""
-    from cortex.audit.moskv_aegis import MoskvAegisEngine
+    from legacy_research.audit.moskv_aegis import MoskvAegisEngine
 
     engine = MoskvAegisEngine(ledger)
     engine.oracle._get_git_diff = lambda: ""
@@ -76,7 +76,7 @@ class TestMoskvAegisEngine:
 
     def test_constraint_modeler_fallback(self):
         """MoskvAegisModeler should fallback to default ruleset if file does not exist."""
-        from cortex.audit.moskv_aegis import MoskvAegisModeler
+        from legacy_research.audit.moskv_aegis import MoskvAegisModeler
 
         modeler = MoskvAegisModeler(agents_md_path="/nonexistent/path/AGENTS.md")
         ruleset = modeler.build_from_agents_md()
@@ -86,7 +86,7 @@ class TestMoskvAegisEngine:
 
     def test_constraint_modeler_default(self):
         """MoskvAegisModeler.get_default_ruleset returns expected dictionary."""
-        from cortex.audit.moskv_aegis import MoskvAegisModeler
+        from legacy_research.audit.moskv_aegis import MoskvAegisModeler
 
         modeler = MoskvAegisModeler()
         ruleset = modeler.get_default_ruleset()
@@ -95,8 +95,8 @@ class TestMoskvAegisEngine:
 
     def test_symbolic_attack_generator(self):
         """MoskvVidentiaOracle should generate specific attacks based on constraints."""
-        from cortex.audit.moskv_aegis import MoskvAegisModeler
-        from cortex.audit.moskv_videntia import MoskvVidentiaOracle
+        from legacy_research.audit.moskv_aegis import MoskvAegisModeler
+        from legacy_research.audit.moskv_videntia import MoskvVidentiaOracle
 
         modeler = MoskvAegisModeler()
         constraints = modeler.get_default_ruleset()
@@ -113,7 +113,7 @@ class TestMoskvAegisEngine:
 
     def test_exploit_chain_constructor(self):
         """MoskvVidentiaChainBuilder chains generated attacks into paths."""
-        from cortex.audit.moskv_videntia import MoskvVidentiaChainBuilder
+        from legacy_research.audit.moskv_videntia import MoskvVidentiaChainBuilder
 
         attacks = [{"attack": "A", "target": "T1"}, {"attack": "B", "target": "T2"}]
         constructor = MoskvVidentiaChainBuilder()

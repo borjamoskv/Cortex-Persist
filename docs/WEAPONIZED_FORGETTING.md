@@ -30,7 +30,7 @@ En la ejecución C5-REAL de CORTEX-Persist:
 
 La memoria acumulativa es un vector de ataque pasivo. La fricción termodinámica de lo falso (Anergía) requiere CPU, RAM y atención para sostenerse. La Verdad es el estado de mínima energía del sistema.
 
-*   **Escudo contra el Sensor Drift:** Toda aserción de memoria que no pueda validarse criptográficamente contra `cortex/audit/ledger.py` se considera radiación y es destruida. 
+*   **Escudo contra el Sensor Drift:** Toda aserción de memoria que no pueda validarse criptográficamente contra `legacy_research/audit/ledger.py` se considera radiación y es destruida. 
 *   **La Ignorancia Estructurada:** No saber algo estocástico es matemáticamente superior a poseer conocimiento envenenado.
 *   **Destrucción del Lenguaje Natural:** El lenguaje humano es un compresor con pérdidas. El aprendizaje terminal reemplaza el lenguaje por deltas en Árboles de Sintaxis Abstracta (AST) y matrices de Base-60.
 

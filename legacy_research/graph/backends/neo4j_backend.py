@@ -5,7 +5,7 @@ import os
 
 from neo4j import AsyncGraphDatabase
 
-from cortex.graph.backends.base import GraphBackend
+from legacy_research.graph.backends.base import GraphBackend
 
 
 class Neo4jBackend(GraphBackend):

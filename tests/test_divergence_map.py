@@ -14,10 +14,10 @@ Demuestra:
 import os
 import pytest
 
-from cortex.runtime.state import RuntimeState
-from cortex.runtime.replay.engine import ReplayEngine
-from cortex.runtime.replay.ci_gate import fixed_event_trace
-from cortex.runtime.replay.divergence import (
+from legacy_research.runtime.state import RuntimeState
+from legacy_research.runtime.replay.engine import ReplayEngine
+from legacy_research.runtime.replay.ci_gate import fixed_event_trace
+from legacy_research.runtime.replay.divergence import (
     DivergenceMap,
     DivergenceReport,
     StateDistance,

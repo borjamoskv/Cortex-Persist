@@ -11,8 +11,8 @@ import pandas as pd
 from pytrends.request import TrendReq  # pyright: ignore[reportMissingImports]
 from requests.exceptions import RequestException
 
-from cortex.extensions.daemon.models import TrendsAlert
-from cortex.extensions.daemon.sidecar.trends_oracle.config import TrendsConfig
+from legacy_research.extensions.daemon.models import TrendsAlert
+from legacy_research.extensions.daemon.sidecar.trends_oracle.config import TrendsConfig
 
 logger = logging.getLogger("moskv-daemon")
 

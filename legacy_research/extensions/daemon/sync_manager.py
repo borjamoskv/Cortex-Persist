@@ -13,11 +13,11 @@ import asyncio
 import logging
 from typing import TYPE_CHECKING, Any
 
-from cortex.extensions.sync import SyncResult, WritebackResult
-from cortex.extensions.sync.common import file_hash, load_sync_state
+from legacy_research.extensions.sync import SyncResult, WritebackResult
+from legacy_research.extensions.sync.common import file_hash, load_sync_state
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
 
 logger = logging.getLogger("cortex.extensions.daemon.sync")
@@ -67,7 +67,7 @@ class CortexSyncManager:
         Only syncs files that have changed since the last pulse.
         """
         loop = asyncio.get_running_loop()
-        from cortex.extensions.sync.common import MEMORY_DIR
+        from legacy_research.extensions.sync.common import MEMORY_DIR
 
         persisted_state = load_sync_state()
         # 1. Detect changes using hashes
@@ -89,19 +89,19 @@ class CortexSyncManager:
 
     async def _run_sync_memory(self) -> SyncResult:
         """Internal async sync wrapper."""
-        from cortex.extensions.sync import sync_memory
+        from legacy_research.extensions.sync import sync_memory
 
         return await sync_memory(self._engine)
 
     async def _run_export_to_json(self) -> WritebackResult:
         """Internal async export wrapper."""
-        from cortex.extensions.sync import export_to_json
+        from legacy_research.extensions.sync import export_to_json
 
         return await export_to_json(self._engine)
 
     async def _run_export_snapshot(self) -> None:
         """Asynchronous snapshot export."""
-        from cortex.extensions.sync import export_snapshot
+        from legacy_research.extensions.sync import export_snapshot
 
         await export_snapshot(self._engine)
 

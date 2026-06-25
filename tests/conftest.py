@@ -85,7 +85,7 @@ def mock_local_embedder(monkeypatch):
                 return [0.0] * 384
             return [[0.0] * 384 for _ in content]
 
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
     monkeypatch.setattr(CortexEngine, "_get_embedder", lambda self: DummyEmbedder())
 
@@ -93,7 +93,7 @@ def mock_local_embedder(monkeypatch):
 @pytest.fixture(autouse=True)
 def reset_anomaly_detector():
     """Reset the anomaly detector before each test to prevent bulk mutation blocks."""
-    from cortex.extensions.security.anomaly_detector import DETECTOR
+    from legacy_research.extensions.security.anomaly_detector import DETECTOR
 
     DETECTOR.reset()
 

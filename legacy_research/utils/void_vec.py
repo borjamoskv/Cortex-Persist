@@ -13,7 +13,7 @@ import ctypes
 import math
 import os
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 __all__ = [
     "cosine_similarity",

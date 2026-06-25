@@ -9,7 +9,7 @@ and imports them into the v4.0 database. Non-destructive: never modifies source 
 from __future__ import annotations
 
 from pathlib import Path
-from cortex.engine import CortexEngine
+from legacy_research.engine import CortexEngine
 
 
 

@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 
-from cortex.guards.exergy_guard import ExergyGuard, calculate_exergy
+from legacy_research.guards.exergy_guard import ExergyGuard, calculate_exergy
 
 
 @pytest.mark.parametrize(

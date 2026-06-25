@@ -59,10 +59,10 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
-    from cortex.extensions.llm.sovereign import SovereignLLM
+    from legacy_research.extensions.llm.sovereign import SovereignLLM
 except ImportError:
     SovereignLLM = None  # type: ignore[assignment, misc]
 
@@ -284,7 +284,7 @@ class MemoryArchaeologist:
         primary_parent_id: str | None,
         l2_conn: sqlite3.Connection,
     ) -> None:
-        from cortex.engine.mutation_engine import MUTATION_ENGINE
+        from legacy_research.engine.mutation_engine import MUTATION_ENGINE
 
         old_ids = [str(f["id"]) for f in cluster_facts]
         ts = datetime.now(timezone.utc).isoformat()

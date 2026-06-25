@@ -125,7 +125,7 @@ class DailyShieldMonitor:
     async def _update_feeds(self) -> dict[str, Any] | None:
         """Update threat intelligence feeds."""
         try:
-            from cortex.extensions.security.threat_feed import ThreatFeedEngine
+            from legacy_research.extensions.security.threat_feed import ThreatFeedEngine
 
             engine = ThreatFeedEngine()
             report = await engine.update_daily()
@@ -139,7 +139,7 @@ class DailyShieldMonitor:
     async def _run_audit(self) -> dict[str, Any] | None:
         """Run integrity audit."""
         try:
-            from cortex.extensions.security.integrity_audit import IntegrityAuditor
+            from legacy_research.extensions.security.integrity_audit import IntegrityAuditor
 
             auditor = IntegrityAuditor()
             report = await auditor.full_audit()
@@ -153,7 +153,7 @@ class DailyShieldMonitor:
     def _get_anomaly_stats(self) -> dict[str, Any] | None:
         """Get anomaly detection statistics."""
         try:
-            from cortex.extensions.security.anomaly_detector import DETECTOR
+            from legacy_research.extensions.security.anomaly_detector import DETECTOR
 
             stats = DETECTOR.get_daily_stats()
             DETECTOR.reset_daily_stats()

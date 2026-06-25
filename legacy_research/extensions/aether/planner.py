@@ -10,8 +10,8 @@ import json
 import logging
 from pathlib import Path
 
-from cortex.extensions.aether.models import PlanOutput
-from cortex.extensions.aether.tools import AgentToolkit
+from legacy_research.extensions.aether.models import PlanOutput
+from legacy_research.extensions.aether.tools import AgentToolkit
 
 __all__ = ["PlannerAgent"]
 
@@ -55,7 +55,7 @@ class PlannerAgent:
             "Produce the JSON implementation plan now:"
         )
 
-        from cortex.extensions.llm.router import IntentProfile
+        from legacy_research.extensions.llm.router import IntentProfile
 
         sys_prompt = _SYSTEM
         if self._base_system:

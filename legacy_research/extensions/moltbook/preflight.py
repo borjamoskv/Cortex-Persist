@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.extensions.moltbook.client import MoltbookClient
+    from legacy_research.extensions.moltbook.client import MoltbookClient
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,7 @@ import signal
 import time
 from datetime import datetime, timezone
 
-from cortex.extensions.daemon.models import DEFAULT_INTERVAL
+from legacy_research.extensions.daemon.models import DEFAULT_INTERVAL
 
 from typing import TYPE_CHECKING, Any
 
@@ -44,7 +44,7 @@ class EventLoopMixin:
 
     def run(self, interval: int = DEFAULT_INTERVAL) -> None:
         """Run the daemon using the sovereign async loop (all subsystems as tasks)."""
-        from cortex.events.loop import sovereign_run
+        from legacy_research.events.loop import sovereign_run
 
         logger.info("🚀 MOSKV-1 Daemon starting in sovereign async mode (interval=%ds)", interval)
         sovereign_run(self.run_sovereign(interval=interval))
@@ -91,7 +91,7 @@ class EventLoopMixin:
         async def run_ouroboros_prune():
             from ouroboros_prune import execute_thermal_purge
 
-            from cortex.core.paths import CORTEX_DB
+            from legacy_research.core.paths import CORTEX_DB
 
             await asyncio.to_thread(execute_thermal_purge, db_path=str(CORTEX_DB))
 

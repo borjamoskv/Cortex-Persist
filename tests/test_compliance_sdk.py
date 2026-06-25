@@ -27,9 +27,9 @@ pytestmark = [
 @pytest.fixture
 def tracker(tmp_path: Path):
     """Create a ComplianceTracker with a temp database."""
-    from cortex.compliance import ComplianceTracker
-    from cortex.compliance.policy_engine import PolicyEngine
-    from cortex.compliance.comply_signer import ComplySigner
+    from legacy_research.compliance import ComplianceTracker
+    from legacy_research.compliance.policy_engine import PolicyEngine
+    from legacy_research.compliance.comply_signer import ComplySigner
 
     t = ComplianceTracker(db_path=str(tmp_path / "compliance_test.db"), project="test-agent")
     t._signer = ComplySigner(keys_dir=tmp_path / "keys")
@@ -72,7 +72,7 @@ class TestLogDecision:
         conn.close()
         assert row is not None
 
-        from cortex.crypto import get_default_encrypter
+        from legacy_research.crypto import get_default_encrypter
 
         enc = get_default_encrypter()
         meta = enc.decrypt_json(row[0], tenant_id="default")
@@ -95,7 +95,7 @@ class TestLogDecision:
         row = cursor.fetchone()
         conn.close()
 
-        from cortex.crypto import get_default_encrypter
+        from legacy_research.crypto import get_default_encrypter
 
         enc = get_default_encrypter()
         meta = enc.decrypt_json(row[0], tenant_id="default")
@@ -222,9 +222,9 @@ class TestExportAudit:
 
 class TestContextManager:
     def test_context_manager_works(self, tmp_path: Path):
-        from cortex.compliance import ComplianceTracker
-        from cortex.compliance.policy_engine import PolicyEngine
-        from cortex.compliance.comply_signer import ComplySigner
+        from legacy_research.compliance import ComplianceTracker
+        from legacy_research.compliance.policy_engine import PolicyEngine
+        from legacy_research.compliance.comply_signer import ComplySigner
 
         with ComplianceTracker(
             db_path=str(tmp_path / "ctx_test.db"),

@@ -6,13 +6,13 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from cortex.ledger.public_verifier_utils import (
+from legacy_research.ledger.public_verifier_utils import (
     _load_json_object,
     _loads_json_strict,
 )
 
 if TYPE_CHECKING:
-    from cortex.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier
+    from legacy_research.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier
 
 
 def load_events(verifier: _PublicLedgerVerifier) -> list[dict[str, Any]]:

@@ -10,13 +10,13 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.extensions.immune.filters.adversarial import AdversarialFilter
-from cortex.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
-from cortex.extensions.immune.filters.causal import CausalFilter
-from cortex.extensions.immune.filters.confidence import ConfidenceFilter
-from cortex.extensions.immune.filters.entropic_quarantine import EntropicQuarantineFilter
-from cortex.extensions.immune.filters.entropy import EntropyFilter
-from cortex.extensions.immune.filters.reversibility import ReversibilityFilter
+from legacy_research.extensions.immune.filters.adversarial import AdversarialFilter
+from legacy_research.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
+from legacy_research.extensions.immune.filters.causal import CausalFilter
+from legacy_research.extensions.immune.filters.confidence import ConfidenceFilter
+from legacy_research.extensions.immune.filters.entropic_quarantine import EntropicQuarantineFilter
+from legacy_research.extensions.immune.filters.entropy import EntropyFilter
+from legacy_research.extensions.immune.filters.reversibility import ReversibilityFilter
 
 logger = logging.getLogger("cortex.extensions.immune.membrane")
 

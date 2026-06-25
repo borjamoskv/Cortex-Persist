@@ -11,13 +11,13 @@ import asyncio
 import logging
 from pathlib import Path
 
-from cortex.extensions.aether.critic import CriticAgent
-from cortex.extensions.aether.executor import ExecutorAgent
-from cortex.extensions.aether.models import AgentTask, TaskStatus
-from cortex.extensions.aether.planner import PlannerAgent
-from cortex.extensions.aether.queue import TaskQueue
-from cortex.extensions.aether.tester import TesterAgent
-from cortex.extensions.aether.tools import AgentToolkit
+from legacy_research.extensions.aether.critic import CriticAgent
+from legacy_research.extensions.aether.executor import ExecutorAgent
+from legacy_research.extensions.aether.models import AgentTask, TaskStatus
+from legacy_research.extensions.aether.planner import PlannerAgent
+from legacy_research.extensions.aether.queue import TaskQueue
+from legacy_research.extensions.aether.tester import TesterAgent
+from legacy_research.extensions.aether.tools import AgentToolkit
 
 __all__ = ["AetherAgent"]
 
@@ -36,8 +36,8 @@ class AetherAgent:
     """
 
     def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
-        from cortex.extensions.agents.registry import AgentRegistry
-        from cortex.extensions.llm.provider import LLMProvider
+        from legacy_research.extensions.agents.registry import AgentRegistry
+        from legacy_research.extensions.llm.provider import LLMProvider
 
         self._llm = LLMProvider(provider=llm_provider)
 

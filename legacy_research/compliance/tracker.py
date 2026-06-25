@@ -2,7 +2,7 @@
 """ComplianceTracker - EU AI Act Article 12 compliance in 3 methods.
 
 Usage:
-    from cortex.compliance import ComplianceTracker
+    from legacy_research.compliance import ComplianceTracker
 
     tracker = ComplianceTracker()
     tracker.log_decision("my-agent", "Approved loan #443", agent_id="agent:loan")
@@ -19,9 +19,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.compliance.comply_signer import ComplySigner
-from cortex.compliance.policy_engine import PolicyEngine
-from cortex.config import DEFAULT_DB_PATH
+from legacy_research.compliance.comply_signer import ComplySigner
+from legacy_research.compliance.policy_engine import PolicyEngine
+from legacy_research.config import DEFAULT_DB_PATH
 
 __all__ = ["ComplianceTracker"]
 
@@ -56,7 +56,7 @@ class ComplianceTracker:
         db_path: str | Path = DEFAULT_DB_PATH,
         project: str = "default",
     ) -> None:
-        from cortex.engine import CortexEngine
+        from legacy_research.engine import CortexEngine
 
         self._engine = CortexEngine(db_path=str(db_path), auto_embed=False)
         self._default_project = project
@@ -284,7 +284,7 @@ class ComplianceTracker:
         violations = []
         valid = True
 
-        from cortex.crypto import get_default_encrypter
+        from legacy_research.crypto import get_default_encrypter
         enc = get_default_encrypter()
 
         async with self._engine.session() as conn:

@@ -37,7 +37,7 @@ try:
 except ImportError:
     sqlite_vec = None
 
-from cortex.memory.encoder import AsyncEncoder
+from legacy_research.memory.encoder import AsyncEncoder
 
 __all__ = ["SovereignVectorStoreL2"]
 
@@ -56,9 +56,9 @@ def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_li
     return float(0.5 ** (age / half_life))
 
 
-from cortex.memory.traits.read import ReadTrait
-from cortex.memory.traits.schema import SchemaTrait
-from cortex.memory.traits.write import WriteTrait
+from legacy_research.memory.traits.read import ReadTrait
+from legacy_research.memory.traits.schema import SchemaTrait
+from legacy_research.memory.traits.write import WriteTrait
 
 
 class SovereignVectorStoreL2(SchemaTrait, ReadTrait, WriteTrait):

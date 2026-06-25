@@ -12,7 +12,7 @@ from pathlib import Path
 
 import click
 
-from cortex.cli.common import console
+from legacy_research.cli.common import console
 
 
 @click.group("genesis")
@@ -53,7 +53,7 @@ def create(
 
     NAME is the system identifier (snake_case).
     """
-    from cortex.extensions.genesis import GenesisEngine, SystemSpec
+    from legacy_research.extensions.genesis import GenesisEngine, SystemSpec
 
     engine = GenesisEngine(
         cortex_root=Path(target_dir) if target_dir else None,
@@ -117,7 +117,7 @@ def from_yaml(path: str) -> None:
     """Create a system from a YAML specification file."""
     import yaml
 
-    from cortex.extensions.genesis import GenesisEngine
+    from legacy_research.extensions.genesis import GenesisEngine
 
     try:
         with open(path, encoding="utf-8") as f:
@@ -140,7 +140,7 @@ def from_yaml(path: str) -> None:
 @genesis_group.command("self")
 def self_create() -> None:
     """Ω₀: Generate the Genesis Engine's own specification (auto-reference proof)."""
-    from cortex.extensions.genesis import GenesisEngine
+    from legacy_research.extensions.genesis import GenesisEngine
 
     engine = GenesisEngine()
     spec = engine.self_create()
@@ -173,7 +173,7 @@ def self_create() -> None:
 @click.option("--type", "system_type", default="module")
 def preview(name: str, system_type: str) -> None:
     """Preview what files would be created without writing anything."""
-    from cortex.extensions.genesis import GenesisEngine, SystemSpec
+    from legacy_research.extensions.genesis import GenesisEngine, SystemSpec
 
     engine = GenesisEngine()
     components = _default_components_for_type(system_type)
@@ -195,7 +195,7 @@ def preview(name: str, system_type: str) -> None:
 @genesis_group.command("templates")
 def list_templates() -> None:
     """List all available system templates."""
-    from cortex.extensions.genesis import TemplateRegistry
+    from legacy_research.extensions.genesis import TemplateRegistry
 
     registry = TemplateRegistry()
     templates = registry.list_templates()
@@ -227,7 +227,7 @@ def extend(
     PATH is the existing system directory.
     COMPONENTS are the names of new components to add.
     """
-    from cortex.extensions.genesis import ComponentSpec, GenesisEngine
+    from legacy_research.extensions.genesis import ComponentSpec, GenesisEngine
 
     engine = GenesisEngine()
     new_comps = [ComponentSpec(name=name, component_type=component_type) for name in components]
@@ -261,7 +261,7 @@ def compose(
     NAME is the component name.
     TEMPLATES are the template names to chain (e.g. module test mixin).
     """
-    from cortex.extensions.genesis import GenesisEngine
+    from legacy_research.extensions.genesis import GenesisEngine
 
     engine = GenesisEngine()
     result = engine.compose_templates(
@@ -294,7 +294,7 @@ def list_specs() -> None:
 
 def _default_components_for_type(system_type: str) -> list:
     """Generate sensible default components for a system type."""
-    from cortex.extensions.genesis import ComponentSpec
+    from legacy_research.extensions.genesis import ComponentSpec
 
     if system_type == "module":
         return [

@@ -7,7 +7,7 @@ Tests the full pipeline flow: Ingress → Context → Plan → Execute → Persi
 import pytest
 import time
 
-from cortex.pipeline import (
+from legacy_research.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -17,14 +17,14 @@ from cortex.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from cortex.pipeline.orchestrator import CortexOrchestrator
-from cortex.pipeline._orchestrator_exceptions import (
+from legacy_research.pipeline.orchestrator import CortexOrchestrator
+from legacy_research.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )
-from cortex.router.router import AgentRouter, AgentCapability
-from cortex.context.assembler import ContextAssembler
-from cortex.delivery.manager import DeliveryManager
+from legacy_research.router.router import AgentRouter, AgentCapability
+from legacy_research.context.assembler import ContextAssembler
+from legacy_research.delivery.manager import DeliveryManager
 
 
 # ── Context Assembler Tests ──

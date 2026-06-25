@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cortex.extensions.ui_control.mouse import MouseEngine
+from legacy_research.extensions.ui_control.mouse import MouseEngine
 
 
 @pytest.fixture
@@ -82,7 +82,7 @@ class TestMouseDrag:
     def test_drag_and_drop(self, mouse):
         """drag_and_drop delega a drag con parámetros convertidos."""
         with patch.object(mouse, "drag") as mock_drag:
-            from cortex.extensions.ui_control.models import InteractionResult
+            from legacy_research.extensions.ui_control.models import InteractionResult
 
             mock_drag.return_value = InteractionResult(success=True)
             result = mouse.drag_and_drop(10, 20, 30, 40, duration_ms=100)
@@ -124,7 +124,7 @@ class TestMouseRightClick:
     def test_right_click_delegates(self, mouse):
         """right_click delega a click(button='right')."""
         with patch.object(mouse, "click") as mock_click:
-            from cortex.extensions.ui_control.models import InteractionResult
+            from legacy_research.extensions.ui_control.models import InteractionResult
 
             mock_click.return_value = InteractionResult(success=True)
             result = mouse.right_click(50, 60)

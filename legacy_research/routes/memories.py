@@ -38,9 +38,9 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 
-from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from legacy_research.api.deps import get_async_engine
+from legacy_research.auth import AuthResult, require_permission
+from legacy_research.engine import CortexEngine as AsyncCortexEngine
 
 __all__ = [
     "batch_store",
@@ -59,7 +59,7 @@ logger = logging.getLogger(__name__)
 # ─── Request / Response Models ───────────────────────────────────────
 
 
-from cortex.routes.facts import (
+from legacy_research.routes.facts import (
     BatchStoreRequest,
     SearchMemoryRequest,
     StoreMemoryRequest,

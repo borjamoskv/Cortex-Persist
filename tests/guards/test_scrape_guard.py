@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX. Apache-2.0.
 import pytest
-from cortex.guards.scrape_guard import (
+from legacy_research.guards.scrape_guard import (
     ScrapeSanitizerGuard,
     MAX_RAW_PAGE_SIZE,
     CORTEX_TAINT_SIGNATURE,

@@ -1,7 +1,7 @@
 import pytest
 import struct
 import hashlib
-from cortex.extensions.ouroboros_mythos.mcts_planner import MCTSPlanner
+from legacy_research.extensions.ouroboros_mythos.mcts_planner import MCTSPlanner
 
 @pytest.mark.asyncio
 async def test_mcts_planner_real_mode():

@@ -168,7 +168,7 @@ Integra el sustrato de memoria CORTEX en cualquier pipeline de agentes existente
 
 ```python
 import asyncio
-from cortex.magic import sovereign_persist
+from legacy_research.magic import sovereign_persist
 
 @sovereign_persist(memory="cortex-cloud", strict=True)
 async def my_agent_chain(user_prompt: str):

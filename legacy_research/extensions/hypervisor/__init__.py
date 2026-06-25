@@ -5,7 +5,7 @@ The Telescope Inversion: maximum simplicity on the outside.
 
 Usage::
 
-    from cortex.extensions.hypervisor import AgencyHypervisor, Memory, HealthReport
+    from legacy_research.extensions.hypervisor import AgencyHypervisor, Memory, HealthReport
 
     hypervisor = AgencyHypervisor(engine)
     handle = hypervisor.create_handle("tenant-abc", "my-project")
@@ -15,11 +15,11 @@ Usage::
     health = await handle.reflect()
 """
 
-from cortex.extensions.hypervisor.belief_engine import BeliefEngine
-from cortex.extensions.hypervisor.belief_object import BeliefObject, BeliefVerdict
-from cortex.extensions.hypervisor.core import AgencyHypervisor
-from cortex.extensions.hypervisor.handle import AgentHandle
-from cortex.extensions.hypervisor.models import HealthReport, Memory, Receipt
+from legacy_research.extensions.hypervisor.belief_engine import BeliefEngine
+from legacy_research.extensions.hypervisor.belief_object import BeliefObject, BeliefVerdict
+from legacy_research.extensions.hypervisor.core import AgencyHypervisor
+from legacy_research.extensions.hypervisor.handle import AgentHandle
+from legacy_research.extensions.hypervisor.models import HealthReport, Memory, Receipt
 
 __all__ = [
     "AgencyHypervisor",

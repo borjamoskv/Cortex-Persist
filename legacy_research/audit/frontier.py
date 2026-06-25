@@ -12,9 +12,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.engine import CortexEngine
-from cortex.extensions.llm.router import IntentProfile
-from cortex.extensions.llm.sovereign import SovereignLLM
+from legacy_research.engine import CortexEngine
+from legacy_research.extensions.llm.router import IntentProfile
+from legacy_research.extensions.llm.sovereign import SovereignLLM
 
 logger = logging.getLogger("cortex.audit.frontier")
 

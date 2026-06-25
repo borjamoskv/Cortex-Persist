@@ -15,7 +15,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.vex.models import ExecutionReceipt, VEXStatus, _sha256
+from legacy_research.extensions.vex.models import ExecutionReceipt, VEXStatus, _sha256
 
 __all__ = ["export_receipt", "load_receipt", "verify_receipt"]
 

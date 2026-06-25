@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-from cortex.engine.ultrathink_physics import UltrathinkPhysicsEngine
+from legacy_research.engine.ultrathink_physics import UltrathinkPhysicsEngine
 
 
 def test_exergy_yield_calculation():

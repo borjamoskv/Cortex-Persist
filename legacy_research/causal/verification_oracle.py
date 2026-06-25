@@ -14,7 +14,7 @@ class InvariantViolationError(ValueError):
 async def verify_ledger_continuity(conn) -> bool:
     """Inv-1 & Inv-2: Re-verifies the event ledger chain cryptographic continuity."""
     try:
-        from cortex.memory.ledger import EventLedgerL3
+        from legacy_research.memory.ledger import EventLedgerL3
 
         ledger = EventLedgerL3(conn)
         res = await ledger.verify_chain("default")

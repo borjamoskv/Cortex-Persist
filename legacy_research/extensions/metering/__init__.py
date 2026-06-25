@@ -5,8 +5,8 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.metering.quotas import PLAN_QUOTAS, QuotaEnforcer
-    from cortex.extensions.metering.tracker import UsageTracker
+    from legacy_research.extensions.metering.quotas import PLAN_QUOTAS, QuotaEnforcer
+    from legacy_research.extensions.metering.tracker import UsageTracker
 
 __all__ = ["PLAN_QUOTAS", "QuotaEnforcer", "UsageTracker"]
 

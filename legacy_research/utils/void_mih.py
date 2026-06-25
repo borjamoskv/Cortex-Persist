@@ -42,7 +42,7 @@ def get_mih_shards(vector: Sequence[float] | bytes, shard_count: int = 16) -> li
     """
     Convenience wrapper to get MIH shards from floats or already packed bytes.
     """
-    from cortex.utils import void_vec
+    from legacy_research.utils import void_vec
 
     if isinstance(vector, bytes):
         packed = vector

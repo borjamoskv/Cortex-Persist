@@ -8,7 +8,7 @@ to SUSPECT → DEAD progression.
 Axiom: "I verify, then trust. Never reversed."
 
 Usage:
-    from cortex.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
+    from legacy_research.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
 
     # In each daemon thread's main loop:
     SWARM_HEARTBEAT.pulse("neural_sync", "NeuralSync")

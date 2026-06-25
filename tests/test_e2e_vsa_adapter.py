@@ -7,7 +7,7 @@ Tests the full pipeline flow: Ingress → Context → Plan → Execute → Persi
 import pytest
 import time
 
-from cortex.pipeline import (
+from legacy_research.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -17,14 +17,14 @@ from cortex.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from cortex.pipeline.orchestrator import CortexOrchestrator
-from cortex.pipeline._orchestrator_exceptions import (
+from legacy_research.pipeline.orchestrator import CortexOrchestrator
+from legacy_research.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )
-from cortex.router.router import AgentRouter, AgentCapability
-from cortex.context.assembler import ContextAssembler
-from cortex.delivery.manager import DeliveryManager
+from legacy_research.router.router import AgentRouter, AgentCapability
+from legacy_research.context.assembler import ContextAssembler
+from legacy_research.delivery.manager import DeliveryManager
 
 
 # ── VSA Adapter Tests ──
@@ -35,7 +35,7 @@ class TestVSAAdapter:
 
     def test_adapter_graceful_when_unavailable(self):
         """Adapter returns empty results when VSA engine not importable."""
-        from cortex.context.vsa_adapter import VSAContextAdapter
+        from legacy_research.context.vsa_adapter import VSAContextAdapter
 
         adapter = VSAContextAdapter.__new__(VSAContextAdapter)
         adapter._available = False
@@ -53,7 +53,7 @@ class TestVSAAdapter:
 
     def test_adapter_diagnostics_unavailable(self):
         """Diagnostics report unavailable state."""
-        from cortex.context.vsa_adapter import VSAContextAdapter
+        from legacy_research.context.vsa_adapter import VSAContextAdapter
 
         adapter = VSAContextAdapter.__new__(VSAContextAdapter)
         adapter._available = False

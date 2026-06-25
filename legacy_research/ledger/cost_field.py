@@ -12,7 +12,7 @@ from statistics import mean, median
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.ledger.execution_trace import ExecutionTraceLedger
+    from legacy_research.ledger.execution_trace import ExecutionTraceLedger
 
 logger = logging.getLogger("cortex.ledger.cost_field")
 

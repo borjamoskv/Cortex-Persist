@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 
-from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier
-from cortex.guards.capability_guard import CapabilityGuard
+from legacy_research.guards.capabilities import AgentCredentials, Capability, RiskTier
+from legacy_research.guards.capability_guard import CapabilityGuard
 
 
 @pytest.fixture

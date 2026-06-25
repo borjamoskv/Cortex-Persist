@@ -15,8 +15,8 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
-from cortex.ledger.models import LedgerEvent, LedgerOriginSignature
-from cortex.ledger.public_verifier_utils import _canonical_public_json
+from legacy_research.ledger.models import LedgerEvent, LedgerOriginSignature
+from legacy_research.ledger.public_verifier_utils import _canonical_public_json
 
 
 class OriginSignatureError(ValueError):

@@ -31,15 +31,15 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from cortex.guards._seals_cache import GlobalSourceCache, printer
-from cortex.guards._seals_checks_1_5 import (
+from legacy_research.guards._seals_cache import GlobalSourceCache, printer
+from legacy_research.guards._seals_checks_1_5 import (
     check_seal_1_code_quality,
     check_seal_2_type_safety,
     check_seal_3_security,
     check_seal_4_tests,
     check_seal_5_ledger,
 )
-from cortex.guards._seals_checks_6_10 import (
+from legacy_research.guards._seals_checks_6_10 import (
     check_seal_6_async_perf,
     check_seal_7_axiom_registry,
     check_seal_8_dependency,

@@ -11,8 +11,8 @@ import json
 import logging
 from typing import Any
 
-from cortex.pipeline import ContextPacket, PipelineRequest
-from cortex.pipeline._orchestrator_exceptions import BudgetExhaustedError
+from legacy_research.pipeline import ContextPacket, PipelineRequest
+from legacy_research.pipeline._orchestrator_exceptions import BudgetExhaustedError
 
 logger = logging.getLogger("cortex.pipeline.orchestrator")
 
@@ -123,7 +123,7 @@ class StagesMixin:
             try:
                 import asyncio
 
-                from cortex.utils.time_utils import (
+                from legacy_research.utils.time_utils import (
                     get_utc_timestamp,  # pyright: ignore[reportMissingImports]
                 )
 

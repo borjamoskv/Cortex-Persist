@@ -4,7 +4,7 @@ import logging
 import time
 from typing import Any, Optional, Dict, List, Tuple
 
-from cortex.crypto.keys import ZKSwarmIdentity
+from legacy_research.crypto.keys import ZKSwarmIdentity
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,5 @@
 import pytest
-from cortex.pipeline.sovereign_audit import SovereignAuditPipeline
+from legacy_research.pipeline.sovereign_audit import SovereignAuditPipeline
 
 def test_pipeline_robust_rule():
     pipeline = SovereignAuditPipeline()

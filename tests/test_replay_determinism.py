@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from cortex.runtime.state import RuntimeState
-from cortex.runtime.replay.ledger import EventLedger
-from cortex.runtime.replay.engine import ReplayEngine, DivergenceException
+from legacy_research.runtime.state import RuntimeState
+from legacy_research.runtime.replay.ledger import EventLedger
+from legacy_research.runtime.replay.engine import ReplayEngine, DivergenceException
 
 
 def test_deterministic_replay():

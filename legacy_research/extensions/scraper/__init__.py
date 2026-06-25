@@ -5,7 +5,7 @@ Multi-strategy extraction with automatic fallback cascade,
 deduplication, rate limiting, and robots.txt compliance.
 """
 
-from cortex.extensions.scraper.models import (
+from legacy_research.extensions.scraper.models import (
     ExtractionStrategy,
     ScrapeJob,
     ScrapeRequest,

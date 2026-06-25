@@ -25,8 +25,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Literal
 
-from cortex.ledger.models import LedgerEvent, LedgerOriginSignature
-from cortex.ledger.public_verifier_utils import _canonical_public_json
+from legacy_research.ledger.models import LedgerEvent, LedgerOriginSignature
+from legacy_research.ledger.public_verifier_utils import _canonical_public_json
 
 
 class ReplayAdmissionError(ValueError):
@@ -158,7 +158,7 @@ def validate_batch_import_manifest(export_dir: str | Path) -> dict[str, Any]:
     if not (root / "manifest.json").exists():
         raise ReplayAdmissionError("batch_import_manifest_missing")
 
-    from cortex.ledger.public_verifier import verify_export
+    from legacy_research.ledger.public_verifier import verify_export
 
     report = verify_export(root)
     if report.get("result") != "VALID_FULL_STRICT":

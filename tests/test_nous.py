@@ -2,7 +2,7 @@
 """Tests for the NOUS Language Runtime."""
 
 import pytest
-from cortex.extensions.nous.interpreter import NousCompiler, NousRuntime, NousIntentAST
+from legacy_research.extensions.nous.interpreter import NousCompiler, NousRuntime, NousIntentAST
 
 
 @pytest.mark.asyncio
@@ -50,7 +50,7 @@ async def test_nous_runtime_guard_block() -> None:
 
 def test_ast_nous_compiler() -> None:
     """Verifies the file-based NOUS AST Compiler."""
-    from cortex.extensions.nous.compiler import NousCompiler as ASTNousCompiler
+    from legacy_research.extensions.nous.compiler import NousCompiler as ASTNousCompiler
 
     compiler = ASTNousCompiler()
     raw_nous = """

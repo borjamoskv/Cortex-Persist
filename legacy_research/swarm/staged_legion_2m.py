@@ -21,8 +21,8 @@ import logging
 import os
 import time
 
-from cortex.compat.optional import np
-from cortex.swarm.tensor_glial import TensorGlialLegion
+from legacy_research.compat.optional import np
+from legacy_research.swarm.tensor_glial import TensorGlialLegion
 
 # setup_cortex_logging()
 logger = logging.getLogger("cortex.swarm.staged_legion")
@@ -120,7 +120,7 @@ def execute_staged_reverse_engineering(
 
     # --- L3: Global Consensus from all Centurions ---
     logger.info("🪐 Collapsing %d Centurions into Global Consensus...", len(centurion_states))
-    from cortex.vsa_engine import VSAEngine
+    from legacy_research.vsa_engine import VSAEngine
 
     vsa = VSAEngine(D=d_dim, algebra="HRR")  # pyright: ignore[reportCallIssue]
 

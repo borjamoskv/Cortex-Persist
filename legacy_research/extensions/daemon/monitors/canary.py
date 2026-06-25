@@ -25,9 +25,9 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from cortex import config
-from cortex.database.core import connect_async
-from cortex.extensions.daemon.models import SecurityAlert
+from legacy_research import config
+from legacy_research.database.core import connect_async
+from legacy_research.extensions.daemon.models import SecurityAlert
 
 logger = logging.getLogger("moskv-daemon")
 

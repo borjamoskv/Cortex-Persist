@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from cortex.extensions.signals.models import Signal
+from legacy_research.extensions.signals.models import Signal
 
 __all__ = [
     "ActionType",

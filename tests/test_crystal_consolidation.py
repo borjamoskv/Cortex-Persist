@@ -20,13 +20,13 @@ import pytest
 pytest.importorskip("numpy")
 import numpy as np
 
-from cortex.extensions.swarm.crystal_consolidator import (
+from legacy_research.extensions.swarm.crystal_consolidator import (
     ConsolidationResult,
     _execute_cold_purge,
     _execute_diamond_promotion,
     consolidate,
 )
-from cortex.extensions.swarm.crystal_thermometer import (
+from legacy_research.extensions.swarm.crystal_thermometer import (
 
 
     TEMPERATURE_COLD,

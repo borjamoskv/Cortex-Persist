@@ -26,25 +26,25 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 from typing import TYPE_CHECKING
 
-from cortex.extensions.evolution.action import SymbolicActionState
-from cortex.extensions.evolution.agents import (
+from legacy_research.extensions.evolution.action import SymbolicActionState
+from legacy_research.extensions.evolution.agents import (
     AgentDomain,
     Mutation,
     MutationType,
     SovereignAgent,
     SubAgent,
 )
-from cortex.extensions.evolution.cortex_metrics import DomainMetrics
-from cortex.extensions.evolution.models import EvolutionMetric, EvolutionMutation
-from cortex.extensions.evolution.strategies import DEFAULT_STRATEGIES
+from legacy_research.extensions.evolution.cortex_metrics import DomainMetrics
+from legacy_research.extensions.evolution.models import EvolutionMetric, EvolutionMutation
+from legacy_research.extensions.evolution.strategies import DEFAULT_STRATEGIES
 
 if TYPE_CHECKING:
-    from cortex.extensions.evolution.action import SymbolicActionEngine
-    from cortex.extensions.evolution.ledger_db import EvolutionLedgerDB
-    from cortex.extensions.evolution.models import EngineParameters
-    from cortex.extensions.gate.ouroboros import OuroborosGate
-    from cortex.extensions.sovereign.endocrine import DigitalEndocrine
-    from cortex.ledger import SovereignLedger
+    from legacy_research.extensions.evolution.action import SymbolicActionEngine
+    from legacy_research.extensions.evolution.ledger_db import EvolutionLedgerDB
+    from legacy_research.extensions.evolution.models import EngineParameters
+    from legacy_research.extensions.gate.ouroboros import OuroborosGate
+    from legacy_research.extensions.sovereign.endocrine import DigitalEndocrine
+    from legacy_research.ledger import SovereignLedger
 
 logger = logging.getLogger("cortex.extensions.evolution.engine.ops")
 
@@ -245,7 +245,7 @@ class EvolutionOpsMixin:
             await asyncio.to_thread(self._ouroboros.trigger_pruning, target)
 
             try:
-                from cortex.routes.notch_ws import notch_hub
+                from legacy_research.routes.notch_ws import notch_hub
 
                 if notch_hub:
                     self._broadcast_task = asyncio.create_task(

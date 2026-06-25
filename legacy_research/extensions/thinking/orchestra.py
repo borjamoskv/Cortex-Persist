@@ -33,25 +33,25 @@ import random
 import time
 from typing import Any
 
-from cortex.extensions.llm._presets import load_presets
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
-from cortex.extensions.thinking.fusion import (
+from legacy_research.extensions.llm._presets import load_presets
+from legacy_research.extensions.llm.provider import LLMProvider
+from legacy_research.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
+from legacy_research.extensions.thinking.fusion import (
     FusedThought,
     FusionStrategy,
     ModelResponse,
     ThoughtFusion,
 )
-from cortex.extensions.thinking.orchestra_introspection import OrchestraIntrospectionMixin
-from cortex.extensions.thinking.pool import ProviderPool, ThinkingRecord
-from cortex.extensions.thinking.presets import (
+from legacy_research.extensions.thinking.orchestra_introspection import OrchestraIntrospectionMixin
+from legacy_research.extensions.thinking.pool import ProviderPool, ThinkingRecord
+from legacy_research.extensions.thinking.presets import (
     DEFAULT_ROUTING,
     MODE_SYSTEM_PROMPTS,
     OrchestraConfig,
     ThinkingMode,
 )
-from cortex.extensions.thinking.semantic_router import SemanticRouter
-from cortex.utils.respiration import oxygenate
+from legacy_research.extensions.thinking.semantic_router import SemanticRouter
+from legacy_research.utils.respiration import oxygenate
 
 __all__ = ["ThoughtOrchestra"]
 
@@ -201,7 +201,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
 
         Falls back to a safe generic list only when the mode is unknown.
         """
-        from cortex.extensions.thinking.presets import DEFAULT_ROUTING, ThinkingMode
+        from legacy_research.extensions.thinking.presets import DEFAULT_ROUTING, ThinkingMode
 
         fallbacks: list[Any] = []
         available = self._available_cache or self._detect_available_providers()

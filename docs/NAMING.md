@@ -10,7 +10,7 @@ This document is the authoritative source of truth for all public-facing names a
 | Surface | Name | Notes |
 |:---|:---|:---|
 | **PyPI package** | `cortex-persist` | `pip install cortex-persist` |
-| **Python import** | `cortex` | `from cortex import CortexEngine` |
+| **Python import** | `cortex` | `from legacy_research import CortexEngine` |
 | **CLI entry point** | `cortex` | `cortex init`, `cortex memory store`, `cortex verify ledger` |
 | **Cloud SDK import** | `cortex_persist` | From `cortex-sdk/` — thin HTTP wrapper for the hosted API |
 | **JS/TS SDK** | `@cortex-persist/sdk` | Not yet published on npm — roadmap item |
@@ -28,7 +28,7 @@ The root `pyproject.toml` defines the canonical PyPI distribution name as `corte
 The Python source tree lives under the `cortex/` directory at the root of the repository. When users install `pip install cortex-persist`, they import from `cortex`:
 
 ```python
-from cortex import CortexEngine
+from legacy_research import CortexEngine
 ```
 
 This is the **local-first engine** — no cloud dependency, no API key required.
@@ -61,7 +61,7 @@ The JavaScript/TypeScript SDK lives in `sdks/js/` and will eventually be publish
 
 | ❌ Wrong | ✅ Correct | Why |
 |:---|:---|:---|
-| `from cortex_persist import CortexMemory` (in core docs) | `from cortex import CortexEngine` | Cloud SDK, not local engine |
+| `from cortex_persist import CortexMemory` (in core docs) | `from legacy_research import CortexEngine` | Cloud SDK, not local engine |
 | `pip install cortex_persist` | `pip install cortex-persist` | Underscore is wrong |
 | `npm install @cortex-persist/sdk` (without caveat) | Add "⏳ Coming Soon" note | Not yet on npm |
 | Referring to the package as "Cortex Persist SDK" | "CORTEX Persist" | Canonical product name |

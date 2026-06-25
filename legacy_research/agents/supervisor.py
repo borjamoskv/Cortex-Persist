@@ -20,8 +20,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.agents.base import BaseAgent
-from cortex.agents.state import AgentStatus
+from legacy_research.agents.base import BaseAgent
+from legacy_research.agents.state import AgentStatus
 
 logger = logging.getLogger("cortex.agents.supervisor")
 

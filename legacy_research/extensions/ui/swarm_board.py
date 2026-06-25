@@ -36,7 +36,7 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.extensions.signals.bus import SignalBus
+from legacy_research.extensions.signals.bus import SignalBus
 
 console = Console()
 

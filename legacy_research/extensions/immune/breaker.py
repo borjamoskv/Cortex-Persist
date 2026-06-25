@@ -5,7 +5,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.engine import CortexEngine
+from legacy_research.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.immune.breaker")
 
@@ -77,7 +77,7 @@ async def execute_circuit_trip(gap_description: str, cortex_engine: CortexEngine
 
     # 3. Trigger Autodidact (mocked or actual if integrated)
     try:
-        from cortex.agents.autodidact import (
+        from legacy_research.agents.autodidact import (
             force_ingestion,  # pyright: ignore[reportMissingImports]
         )
 

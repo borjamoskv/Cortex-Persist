@@ -12,14 +12,14 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.agents.base import BaseAgent
-from cortex.agents.bus import MessageBus
-from cortex.agents.contracts import TaskCompletedPayload, TaskFailedPayload, TaskRequestPayload
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind
-from cortex.agents.tools import ToolRegistry
-from cortex.engine.sota_vector_engine import SOTAVectorEngine
-from cortex.engine.semantic_collapse import kolmogorov_approx
+from legacy_research.agents.base import BaseAgent
+from legacy_research.agents.bus import MessageBus
+from legacy_research.agents.contracts import TaskCompletedPayload, TaskFailedPayload, TaskRequestPayload
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import AgentMessage, MessageKind
+from legacy_research.agents.tools import ToolRegistry
+from legacy_research.engine.sota_vector_engine import SOTAVectorEngine
+from legacy_research.engine.semantic_collapse import kolmogorov_approx
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 
-from cortex.extensions.alma.engine import AlmaEngine, SoulState
-from cortex.extensions.alma.taste import (
+from legacy_research.extensions.alma.engine import AlmaEngine, SoulState
+from legacy_research.extensions.alma.taste import (
     GRADE_DEAD,
     GRADE_FUNCTIONAL,
     GRADE_GOAT,

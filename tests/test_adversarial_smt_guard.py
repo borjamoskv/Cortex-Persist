@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from cortex.guards.smt_guard import SMTConstraintGuard
+from legacy_research.guards.smt_guard import SMTConstraintGuard
 
 
 def test_adversarial_kill_mutants_smt_guard():

@@ -50,7 +50,7 @@ La surface core expone `cortex trust-ledger verify`; `checkpoint` existe en `cor
 | Guard layer | ✅ **IMPLEMENTADO** | `cortex/mcp/guard.py` |
 | Mega tools (batch operations) | ✅ **IMPLEMENTADO** | `cortex/mcp/mega_tools.py` |
 | SSE / WebSocket transport | ❌ **PENDIENTE** | Diseñado, no implementado |
-| LRU query cache | ⚠️ **VERIFICAR** | `cortex/database/cache.py` existe — ¿está conectado al MCP? |
+| LRU query cache | ⚠️ **VERIFICAR** | `legacy_research/database/cache.py` existe — ¿está conectado al MCP? |
 | Métricas p99 / throughput 1000 req/s | ❌ **PENDIENTE** | Sin benchmark implementado |
 | `cortex/mcp_server_v2.py` | ❌ **OBSOLETO** | El diseño v4 proponía este archivo; v6 usa `cortex/mcp/` como package |
 
@@ -64,8 +64,8 @@ La surface core expone `cortex trust-ledger verify`; `checkpoint` existe en `cor
 |---|---|---|
 | PostgreSQL backend | ✅ **IMPLEMENTADO** | `cortex/storage/postgres.py` — v6.0, asyncpg, AlloyDB/CloudSQL/RDS |
 | Multi-backend router (TenantRouter) | ✅ **IMPLEMENTADO** | `cortex/storage/router.py` |
-| SQLite backend | ✅ **IMPLEMENTADO** | `cortex/database/` package completo |
-| Connection pooling (async) | ✅ **IMPLEMENTADO** | `cortex/database/pool.py` |
+| SQLite backend | ✅ **IMPLEMENTADO** | `legacy_research/database/` package completo |
+| Connection pooling (async) | ✅ **IMPLEMENTADO** | `legacy_research/database/pool.py` |
 | Qdrant vector backend | ✅ **IMPLEMENTADO** | `cortex/storage/qdrant.py` |
 | Turso edge backend | ✅ **IMPLEMENTADO** | `cortex/storage/turso.py` |
 | Replica mode (read-only guard) | ✅ **IMPLEMENTADO** | `CORTEX_PG_REPLICA_MODE` env var |

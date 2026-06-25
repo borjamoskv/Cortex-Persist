@@ -10,7 +10,7 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.sync.common import (
+    from legacy_research.extensions.sync.common import (
         AGENT_DIR,
         CORTEX_DIR,
         MEMORY_DIR,
@@ -18,16 +18,16 @@ if TYPE_CHECKING:
         SyncResult,
         WritebackResult,
     )
-    from cortex.extensions.sync.common import (
+    from legacy_research.extensions.sync.common import (
         db_content_hash as _db_content_hash,
     )
-    from cortex.extensions.sync.common import (
+    from legacy_research.extensions.sync.common import (
         file_hash as _file_hash,
     )
-    from cortex.extensions.sync.obsidian import export_obsidian
-    from cortex.extensions.sync.read import sync_memory
-    from cortex.extensions.sync.snapshot import export_snapshot
-    from cortex.extensions.sync.write import export_to_json
+    from legacy_research.extensions.sync.obsidian import export_obsidian
+    from legacy_research.extensions.sync.read import sync_memory
+    from legacy_research.extensions.sync.snapshot import export_snapshot
+    from legacy_research.extensions.sync.write import export_to_json
 
 __all__ = [
     "AGENT_DIR",

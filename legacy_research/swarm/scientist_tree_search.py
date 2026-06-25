@@ -9,8 +9,8 @@ import logging
 import uuid
 from typing import Any
 
-from cortex.engine.causality_models import BeliefObject, BeliefState
-from cortex.extensions.signals.bus import AsyncSignalBus
+from legacy_research.engine.causality_models import BeliefObject, BeliefState
+from legacy_research.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex.swarm.scientist_tree_search")
 

@@ -11,8 +11,8 @@ import sqlite3
 import pytest
 from unittest.mock import patch
 
-from cortex.crypto.aes import CortexEncrypter, get_default_encrypter, reset_default_encrypter
-from cortex.core.config import reload as reload_config
+from legacy_research.crypto.aes import CortexEncrypter, get_default_encrypter, reset_default_encrypter
+from legacy_research.core.config import reload as reload_config
 
 
 
@@ -64,7 +64,7 @@ async def test_dynamic_salt_resolution(tmp_path):
     conn.close()
 
     # Create ConnectionMixin context to run _ensure_schema_ready
-    from cortex.engine._engine_connection import ConnectionMixin
+    from legacy_research.engine._engine_connection import ConnectionMixin
 
     class DummyEngine(ConnectionMixin):
         def __init__(self, db_path):
@@ -86,7 +86,7 @@ async def test_dynamic_salt_resolution(tmp_path):
     await engine._ensure_schema_ready(conn)
     await conn.close()
 
-    import cortex.core.config as config
+    import legacy_research.core.config as config
 
     assert config.HKDF_SALT == "custom_db_salt_value"
 
@@ -106,7 +106,7 @@ def test_singleton_thread_safety_exceptions():
             get_default_encrypter()
 
     # The singleton should remain None, allowing a retry
-    from cortex.crypto.aes import _default_encrypter_instance
+    from legacy_research.crypto.aes import _default_encrypter_instance
 
     assert _default_encrypter_instance is None
 

@@ -13,8 +13,8 @@ import os
 import time
 from pathlib import Path
 
-from cortex.memory.hdc.codec import HDCEncoder
-from cortex.memory.hdc.item_memory import ItemMemory
+from legacy_research.memory.hdc.codec import HDCEncoder
+from legacy_research.memory.hdc.item_memory import ItemMemory
 
 logger = logging.getLogger("cortex.extensions.songlines.emitter")
 

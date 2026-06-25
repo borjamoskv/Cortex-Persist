@@ -16,14 +16,14 @@ import re
 import time
 from typing import Any
 
-from cortex.extensions.llm._models import CortexPrompt
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexLLMRouter, IntentProfile
-from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.models import CortexFactModel
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
-from cortex.utils.pulmones import sovereign_circuit_breaker
-from cortex.utils.turboquant import optimize_vector_qjl
+from legacy_research.extensions.llm._models import CortexPrompt
+from legacy_research.extensions.llm.provider import LLMProvider
+from legacy_research.extensions.llm.router import CortexLLMRouter, IntentProfile
+from legacy_research.memory.encoder import AsyncEncoder
+from legacy_research.memory.models import CortexFactModel
+from legacy_research.memory.sqlite_vec_store import SovereignVectorStoreL2
+from legacy_research.utils.pulmones import sovereign_circuit_breaker
+from legacy_research.utils.turboquant import optimize_vector_qjl
 
 logger = logging.getLogger("CORTEX.AUTODIDACT.SYNTHESIS")
 
@@ -116,7 +116,7 @@ async def generate_cortex_embedding(text: str) -> list[float]:
 
 async def check_semantic_redundancy(text_snippet: str) -> tuple[bool, str | None]:
     """Axioma Ω₂: Si ya sabemos esto, aniquilamos la operación."""
-    from cortex.extensions.security.tenant import get_tenant_id
+    from legacy_research.extensions.security.tenant import get_tenant_id
     try:
         nearest = await vector_db.recall(
             query=text_snippet[:1000],
@@ -253,7 +253,7 @@ async def execute_cognitive_synthesis(
     logger.info("✅ Destilación: %.1f%% ruido eliminado. Entidades: %d", rendimiento, len(entities))
 
     # ── EPISTEMIC CONTRADICTION GUARD (Axioma Ω₁) ──
-    from cortex.guards.contradiction_guard import detect_contradictions
+    from legacy_research.guards.contradiction_guard import detect_contradictions
 
     conflict_report = await detect_contradictions(
         new_content=memo_content,
@@ -280,7 +280,7 @@ async def execute_cognitive_synthesis(
     # Inyección Axioma Ω₂ + TurboQuant (arXiv:2504.19874)
     final_embedding = optimize_vector_qjl(base_embedding, bits=3.5)
 
-    from cortex.extensions.security.tenant import get_tenant_id
+    from legacy_research.extensions.security.tenant import get_tenant_id
     memo_id = f"MEMO_{os.urandom(4).hex().upper()}"
     fact = CortexFactModel(
         id=memo_id,

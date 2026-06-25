@@ -12,15 +12,15 @@ __all__ = [
 def __getattr__(name: str):  # noqa: ANN001
     """Lazy imports."""
     if name == "MicroSaaSVector":
-        from cortex.extensions.revenue.vectors.microsaas import MicroSaaSVector
+        from legacy_research.extensions.revenue.vectors.microsaas import MicroSaaSVector
 
         return MicroSaaSVector
     if name == "ArbitrageVector":
-        from cortex.extensions.revenue.vectors.arbitrage import ArbitrageVector
+        from legacy_research.extensions.revenue.vectors.arbitrage import ArbitrageVector
 
         return ArbitrageVector
     if name == "OutreachVector":
-        from cortex.extensions.revenue.vectors.outreach import OutreachVector
+        from legacy_research.extensions.revenue.vectors.outreach import OutreachVector
 
         return OutreachVector
     raise AttributeError(f"module 'cortex.extensions.revenue.vectors' has no attribute {name!r}")

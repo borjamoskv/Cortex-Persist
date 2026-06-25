@@ -6,9 +6,9 @@ Vector substrate for semantic memory and similarity search.
 
 from __future__ import annotations
 
-from cortex.embeddings import local as _local
-from cortex.embeddings.manager import EmbeddingManager
-from cortex.embeddings.provider import EmbeddingProvider
+from legacy_research.embeddings import local as _local
+from legacy_research.embeddings.manager import EmbeddingManager
+from legacy_research.embeddings.provider import EmbeddingProvider
 
 _DEVICE = _local._DEVICE
 EMBEDDING_DIM = _local.EMBEDDING_DIM

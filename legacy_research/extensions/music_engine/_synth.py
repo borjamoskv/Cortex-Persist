@@ -6,7 +6,7 @@ Extracted from midi_engine.py for LOC compliance (AX-IV).
 
 from __future__ import annotations
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 DEFAULT_SR = 44100
 

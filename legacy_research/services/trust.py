@@ -31,7 +31,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 import time
 from typing import Any
 
-from cortex.database.core import connect as db_connect
+from legacy_research.database.core import connect as db_connect
 
 logger = logging.getLogger("cortex.services.trust")
 

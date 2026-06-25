@@ -29,8 +29,8 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Any, TypeAlias, TypeVar
 
-from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
-from cortex.utils.result import Err, Result
+from legacy_research.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+from legacy_research.utils.result import Err, Result
 
 # Optional LangSmith - graceful degradation, never a hard dep
 try:

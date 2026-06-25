@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock, AsyncMock
-from cortex.guards.sovereign_seals import (
+from legacy_research.guards.sovereign_seals import (
     _resolve_git_hook_path,
     _parse_pyproject_deps,
     _extract_imports,
@@ -42,7 +42,7 @@ def test_extract_imports():
 import os
 from pathlib import Path
 import json, sys
-from cortex.guards import seals
+from legacy_research.guards import seals
 """
     imports = _extract_imports(source)
     assert "os" in imports
@@ -84,8 +84,8 @@ async def test_check_gate_21_preservation_happy(tmp_path):
         patch("subprocess.run") as mock_run,
     ):
         mock_hook.return_value.exists.return_value = True
-        (tmp_path / "cortex/guards").mkdir(parents=True)
-        (tmp_path / "cortex/guards/seals.py").write_text("code")
+        (tmp_path / "legacy_research/guards").mkdir(parents=True)
+        (tmp_path / "legacy_research/guards/seals.py").write_text("code")
 
         mock_run.return_value.returncode = 0
 

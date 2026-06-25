@@ -8,11 +8,11 @@ import time
 import urllib.error
 import urllib.request
 
-from cortex.ledger.models import IntentPayload
-from cortex.ledger.writer import LedgerWriter
-from cortex.mac_maestro.events import build_mac_maestro_event
-from cortex.mac_maestro.intent import MacAction, MacIntent
-from cortex.mac_maestro.oracle import VerificationOracle
+from legacy_research.ledger.models import IntentPayload
+from legacy_research.ledger.writer import LedgerWriter
+from legacy_research.mac_maestro.events import build_mac_maestro_event
+from legacy_research.mac_maestro.intent import MacAction, MacIntent
+from legacy_research.mac_maestro.oracle import VerificationOracle
 
 logger = logging.getLogger("cortex.mac_maestro.executor")
 

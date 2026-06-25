@@ -41,7 +41,7 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.consensus.vote_ledger import ImmutableVoteLedger
+from legacy_research.consensus.vote_ledger import ImmutableVoteLedger
 
 logger = logging.getLogger("cortex.epochs")
 

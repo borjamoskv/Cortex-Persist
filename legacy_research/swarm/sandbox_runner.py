@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 
-from cortex.extensions.signals.bus import AsyncSignalBus
+from legacy_research.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex.swarm.sandbox_runner")
 

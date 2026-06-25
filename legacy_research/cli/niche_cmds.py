@@ -7,9 +7,9 @@ import asyncio
 
 import click
 
-from cortex.cli.common import console
-from cortex.extensions.skills.niche_arbitrage.models import NicheTarget
-from cortex.extensions.skills.niche_arbitrage.pipeline import NicheArbitrageEngine
+from legacy_research.cli.common import console
+from legacy_research.extensions.skills.niche_arbitrage.models import NicheTarget
+from legacy_research.extensions.skills.niche_arbitrage.pipeline import NicheArbitrageEngine
 
 
 @click.group(name="niche", help="Niche Arbitrage - Market Intelligence Pipeline")

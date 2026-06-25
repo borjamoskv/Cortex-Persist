@@ -7,11 +7,11 @@ import datetime
 from typing import Any
 import pytest
 
-from cortex.search.models import SearchResult
-from cortex.search.text import text_search
-from cortex.search.vector import semantic_search
-from cortex.search.hybrid import hybrid_search
-from cortex.storage import StorageMode
+from legacy_research.search.models import SearchResult
+from legacy_research.search.text import text_search
+from legacy_research.search.vector import semantic_search
+from legacy_research.search.hybrid import hybrid_search
+from legacy_research.storage import StorageMode
 
 
 class MockPostgresConn:

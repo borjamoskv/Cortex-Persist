@@ -1,6 +1,6 @@
 import pytest
-from cortex.engine.causal.decision_parser import DecisionParser, CausalInvariant
-from cortex.engine.causality_models import ValidationStatus, KRGSE_DERIVED_FROM
+from legacy_research.engine.causal.decision_parser import DecisionParser, CausalInvariant
+from legacy_research.engine.causality_models import ValidationStatus, KRGSE_DERIVED_FROM
 
 def test_parse_decision_valid():
     parser = DecisionParser()

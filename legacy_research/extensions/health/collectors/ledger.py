@@ -22,7 +22,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 from pathlib import Path
 
-from cortex.extensions.health.models import MetricSnapshot
+from legacy_research.extensions.health.models import MetricSnapshot
 
 logger = logging.getLogger("cortex.extensions.health.ledger")
 
@@ -54,7 +54,7 @@ class LedgerCollector:
                 weight=self.weight,
             )
         try:
-            from cortex.database.core import connect
+            from legacy_research.database.core import connect
 
             with connect(db_path, timeout=2.0) as conn:  # pyright: ignore
                 conn.row_factory = sqlite3.Row

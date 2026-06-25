@@ -10,8 +10,8 @@ import click
 from rich.panel import Panel
 from rich.syntax import Syntax
 
-from cortex.cli.common import _run_async, cli, console
-from cortex.extensions.evolution.demiurge import DemiurgeCompiler
+from legacy_research.cli.common import _run_async, cli, console
+from legacy_research.extensions.evolution.demiurge import DemiurgeCompiler
 
 
 @cli.group(name="demiurge")

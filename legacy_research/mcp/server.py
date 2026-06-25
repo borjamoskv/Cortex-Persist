@@ -10,30 +10,30 @@ import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from cortex.engine import CortexEngine
-from cortex.extensions.immune.filters.base import Verdict
-from cortex.extensions.immune.membrane import ImmuneMembrane
-from cortex.ledger import ImmutableLedger
-from cortex.mcp.apollo_tools import register_apollo_tools
-from cortex.mcp.core_tools import (
+from legacy_research.engine import CortexEngine
+from legacy_research.extensions.immune.filters.base import Verdict
+from legacy_research.extensions.immune.membrane import ImmuneMembrane
+from legacy_research.ledger import ImmutableLedger
+from legacy_research.mcp.apollo_tools import register_apollo_tools
+from legacy_research.mcp.core_tools import (
     _register_embed_status_tool,
     _register_embed_tool,
 )
-from cortex.mcp.genesis_tools import register_genesis_tools
-from cortex.mcp.guard import MCPGuard
-from cortex.mcp.health_tools import register_health_tools
-from cortex.mcp.knowledge_watcher import start_knowledge_daemon
-from cortex.mcp.mega_tools import register_mega_tools
-from cortex.mcp.music_tools import register_music_tools
-from cortex.mcp.singularity_tools import register_singularity_tools
-from cortex.mcp.trust_tools import register_trust_tools
-from cortex.mcp.utils import (
+from legacy_research.mcp.genesis_tools import register_genesis_tools
+from legacy_research.mcp.guard import MCPGuard
+from legacy_research.mcp.health_tools import register_health_tools
+from legacy_research.mcp.knowledge_watcher import start_knowledge_daemon
+from legacy_research.mcp.mega_tools import register_mega_tools
+from legacy_research.mcp.music_tools import register_music_tools
+from legacy_research.mcp.singularity_tools import register_singularity_tools
+from legacy_research.mcp.trust_tools import register_trust_tools
+from legacy_research.mcp.utils import (
     AsyncConnectionPool,
     MCPMetrics,
     MCPServerConfig,
     SimpleAsyncCache,
 )
-from cortex.swarm import start_swarm_daemon
+from legacy_research.swarm import start_swarm_daemon
 
 __all__ = ["create_mcp_server", "run_server"]
 
@@ -311,7 +311,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
         register_trust_tools(mcp, ctx)
         register_mega_tools(mcp, ctx)
 
-        from cortex.mcp.hilbert_tools import register_hilbert_tools
+        from legacy_research.mcp.hilbert_tools import register_hilbert_tools
 
         register_hilbert_tools(mcp, ctx)
 
@@ -320,7 +320,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
         register_music_tools(mcp)
         register_singularity_tools(mcp)
 
-        from cortex.mcp.pipeline_tools import register_pipeline_tools
+        from legacy_research.mcp.pipeline_tools import register_pipeline_tools
 
         register_pipeline_tools(mcp, ctx)
 

@@ -2,7 +2,7 @@
 
 import click
 
-from cortex.cli.common import cli, console
+from legacy_research.cli.common import cli, console
 
 
 @cli.group(name="fiscal")

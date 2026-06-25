@@ -4,7 +4,7 @@ import hashlib
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.utils.canonical import canonical_json
+from legacy_research.utils.canonical import canonical_json
 
 
 def canonical_json_bytes(payload: Any) -> bytes:

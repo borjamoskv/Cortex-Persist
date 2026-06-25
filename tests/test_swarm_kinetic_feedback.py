@@ -3,7 +3,7 @@ import asyncio
 
 import pytest
 
-from cortex.engine.swarm_10k import CenturionSuperv, SwarmCommander
+from legacy_research.engine.swarm_10k import CenturionSuperv, SwarmCommander
 
 
 @pytest.mark.asyncio

@@ -3,8 +3,8 @@ import json
 import logging
 from pathlib import Path
 
-from cortex.guards.models import ALLOWED_TIERS
-from cortex.utils.errors import SovereignViolation
+from legacy_research.guards.models import ALLOWED_TIERS
+from legacy_research.utils.errors import SovereignViolation
 
 logger = logging.getLogger("cortex.guards.frontier")
 

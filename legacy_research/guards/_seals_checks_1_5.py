@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from cortex.guards._seals_cache import GlobalSourceCache, arun_cmd, printer
+from legacy_research.guards._seals_cache import GlobalSourceCache, arun_cmd, printer
 
 GateResult = tuple[bool, str]
 
@@ -110,7 +110,7 @@ async def check_seal_3_security() -> GateResult:
     _EXCLUDE = frozenset(["legion_vectors.py", "legion.py"])
 
     try:
-        from cortex.engine.legion_vectors import EntropyDemon, Intruder
+        from legacy_research.engine.legion_vectors import EntropyDemon, Intruder
     except ImportError:
         printer.warn("Cobbler skipped: legion_vectors not importable.")
         return passed, "verified"
@@ -190,7 +190,7 @@ async def check_seal_5_ledger() -> GateResult:
 
     # ── Schema Init ──
     try:
-        from cortex.engine import CortexEngine
+        from legacy_research.engine import CortexEngine
 
         engine = CortexEngine(":memory:", auto_embed=False)
         await engine.init_db()

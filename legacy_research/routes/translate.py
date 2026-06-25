@@ -8,7 +8,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from cortex.auth import AuthResult, require_permission
+from legacy_research.auth import AuthResult, require_permission
 
 __all__ = ["TranslateRequest", "TranslateResponse", "router", "translate_texts"]
 

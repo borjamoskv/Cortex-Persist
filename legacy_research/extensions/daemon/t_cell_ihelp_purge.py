@@ -13,7 +13,7 @@ import logging
 from datetime import datetime, timezone
 
 # Import the existing router from the engine
-from cortex.engine.causal.taint_engine import MHCAntigenRouter, canonicalize_content
+from legacy_research.engine.causal.taint_engine import MHCAntigenRouter, canonicalize_content
 
 logger = logging.getLogger("cortex.daemon.t_cell_ihelp")
 
@@ -62,7 +62,7 @@ class IHelpPurgeDaemon:
             "exergy_metrics": {"bytes_saved": waste_bytes, "tokens_saved": tokens_saved},
         }
 
-        # In a full run, this invokes `from cortex.audit.ledger import emit_rejection`
+        # In a full run, this invokes `from legacy_research.audit.ledger import emit_rejection`
         return audit_trail
 
 

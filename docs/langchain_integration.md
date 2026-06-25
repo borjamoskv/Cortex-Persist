@@ -51,7 +51,7 @@ El flujo recomendado es el siguiente:
 ### Inicializar Cortex-Persist
 
 ```python
-from cortex import CortexEngine
+from legacy_research import CortexEngine
 
 engine = CortexEngine()
 ```
@@ -145,7 +145,7 @@ print(result)
 Cortex-Persist expone un decorator de zero-friction que intercepta, sella y loguea criptográficamente sin boilerplate:
 
 ```python
-from cortex.magic import sovereign_persist
+from legacy_research.magic import sovereign_persist
 
 @sovereign_persist(strict=True)
 async def my_langchain_agent(prompt: str):

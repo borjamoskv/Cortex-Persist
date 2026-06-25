@@ -6,9 +6,9 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.gateway.i10_consensus import I10ConsensusGateway, LLMJudgeAdapter
-from cortex.guards.i10_consensus import RetrievalConsensusError
+from legacy_research.extensions.llm.provider import LLMProvider
+from legacy_research.gateway.i10_consensus import I10ConsensusGateway, LLMJudgeAdapter
+from legacy_research.guards.i10_consensus import RetrievalConsensusError
 
 
 @pytest.fixture(autouse=True)

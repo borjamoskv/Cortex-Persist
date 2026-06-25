@@ -6,9 +6,9 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.ledger.ledger_core import SovereignLedger
-    from cortex.ledger.models import LedgerEvent, LedgerOriginSignature, SemanticStatus
-    from cortex.ledger.origin import (
+    from legacy_research.ledger.ledger_core import SovereignLedger
+    from legacy_research.ledger.models import LedgerEvent, LedgerOriginSignature, SemanticStatus
+    from legacy_research.ledger.origin import (
         OriginKeyRecord,
         OriginKeyRegistry,
         OriginSignatureError,
@@ -17,17 +17,17 @@ if TYPE_CHECKING:
         sign_event_origin,
         verify_event_origin,
     )
-    from cortex.ledger.queue import EnrichmentQueue
-    from cortex.ledger.replay import (
+    from legacy_research.ledger.queue import EnrichmentQueue
+    from legacy_research.ledger.replay import (
         ReplayAdmissionError,
         ReplayAdmissionPolicy,
         ReplayAdmissionResult,
         replay_request_hash,
         validate_batch_import_manifest,
     )
-    from cortex.ledger.store import LedgerStore
-    from cortex.ledger.verifier import LedgerVerifier
-    from cortex.ledger.writer import LedgerWriter
+    from legacy_research.ledger.store import LedgerStore
+    from legacy_research.ledger.verifier import LedgerVerifier
+    from legacy_research.ledger.writer import LedgerWriter
 
 __all__ = [
     "EnrichmentQueue",

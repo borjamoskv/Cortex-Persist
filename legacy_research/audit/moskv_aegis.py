@@ -19,8 +19,8 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.audit.moskv_videntia import MoskvVidentiaChainBuilder, MoskvVidentiaOracle
+from legacy_research.audit.ledger import EnterpriseAuditLedger
+from legacy_research.audit.moskv_videntia import MoskvVidentiaChainBuilder, MoskvVidentiaOracle
 
 logger = logging.getLogger("cortex.audit.moskv_aegis")
 

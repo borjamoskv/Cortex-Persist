@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import httpx
 
-from cortex.utils.pulmones import sovereign_circuit_breaker
+from legacy_research.utils.pulmones import sovereign_circuit_breaker
 
 logger = logging.getLogger("CORTEX.AUTODIDACT.FETCHERS")
 

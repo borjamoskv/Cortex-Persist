@@ -11,7 +11,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Literal
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 __all__ = ["HealthReport", "HealthTier", "SchedulerConfig"]
 

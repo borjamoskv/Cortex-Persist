@@ -5,15 +5,15 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.gate.core import SovereignGate, get_gate, reset_gate
-    from cortex.extensions.gate.enums import ActionLevel, ActionStatus, GatePolicy
-    from cortex.extensions.gate.errors import (
+    from legacy_research.extensions.gate.core import SovereignGate, get_gate, reset_gate
+    from legacy_research.extensions.gate.enums import ActionLevel, ActionStatus, GatePolicy
+    from legacy_research.extensions.gate.errors import (
         GateError,
         GateExpired,
         GateInvalidSignature,
         GateNotApproved,
     )
-    from cortex.extensions.gate.models import PendingAction
+    from legacy_research.extensions.gate.models import PendingAction
 
 __all__ = [
     "ActionLevel",

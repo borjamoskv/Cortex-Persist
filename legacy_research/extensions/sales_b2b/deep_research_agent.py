@@ -13,12 +13,12 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.agents.autonomous import AutonomousAgent
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
-from cortex.agents.tools import ToolRegistry
-from cortex.extensions.sales_b2b.context_compressor import ContextCompressor
-from cortex.extensions.sales_b2b.messaging_flow import MessagingFSM, MessagingStage
+from legacy_research.agents.autonomous import AutonomousAgent
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import AgentMessage, MessageKind, new_message
+from legacy_research.agents.tools import ToolRegistry
+from legacy_research.extensions.sales_b2b.context_compressor import ContextCompressor
+from legacy_research.extensions.sales_b2b.messaging_flow import MessagingFSM, MessagingStage
 
 logger = logging.getLogger("cortex.extensions.sales_b2b.deep_research_agent")
 

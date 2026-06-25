@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from cortex.sica.meta_level import MetaJudgment
+from legacy_research.sica.meta_level import MetaJudgment
 
 
 class _LifetimeStats:

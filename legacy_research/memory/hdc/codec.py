@@ -21,8 +21,8 @@ import re
 from collections.abc import Sequence
 from typing import Final
 
-from cortex.memory.hdc.algebra import HVType, bind, bundle, permute
-from cortex.memory.hdc.item_memory import ItemMemory
+from legacy_research.memory.hdc.algebra import HVType, bind, bundle, permute
+from legacy_research.memory.hdc.item_memory import ItemMemory
 
 __all__ = ["HDCEncoder"]
 

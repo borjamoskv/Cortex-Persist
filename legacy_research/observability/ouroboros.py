@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from cortex.observability.exergy_engine import ExecutionTrace
+from legacy_research.observability.exergy_engine import ExecutionTrace
 
 MAX_FAILURE_REVENUE_MULTIPLIER = 3.0
 SYSTEM_REFLEX_TIME_SEC = 300  # Δt (billing -> execution) must be > 5 min

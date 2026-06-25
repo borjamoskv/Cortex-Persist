@@ -8,7 +8,7 @@ import asyncio
 import logging
 import time
 
-from cortex.audit.ledger import EnterpriseAuditLedger
+from legacy_research.audit.ledger import EnterpriseAuditLedger
 
 from .exergy_monitor import ExergyMonitor
 from .mcts_planner import MCTSPlanner
@@ -139,7 +139,7 @@ class MythosOuroborosEngine:
         primary_action = steps[0]
         action_name = primary_action.decode("utf-8")
         
-        from cortex.extensions.ouroboros.executor import execute_plan
+        from legacy_research.extensions.ouroboros.executor import execute_plan
         status = await execute_plan({"name": action_name})
 
         return {

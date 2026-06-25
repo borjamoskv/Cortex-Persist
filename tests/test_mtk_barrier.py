@@ -3,7 +3,7 @@ import sqlite3
 
 import pytest
 import os
-from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer, mtk_active_token, mtk_payload_hash
+from legacy_research.engine.mtk_sqlite_authorizer import install_mtk_authorizer, mtk_active_token, mtk_payload_hash
 
 
 

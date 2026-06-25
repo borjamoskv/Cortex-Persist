@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from cortex.guards.z3_anvil import SovereignAnvil, HAS_Z3
+from legacy_research.guards.z3_anvil import SovereignAnvil, HAS_Z3
 
 class TestSovereignAnvil:
     """

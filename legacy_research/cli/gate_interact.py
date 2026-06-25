@@ -1,6 +1,6 @@
 import time
 from typing import TYPE_CHECKING, Any
-from cortex.extensions.gate import ActionStatus, GateNotApproved, GatePolicy
+from legacy_research.extensions.gate import ActionStatus, GateNotApproved, GatePolicy
 
 # [C5-REAL] Exergy-Maximized
 """
@@ -15,7 +15,7 @@ import sqlite3
 __all__ = ["approve_interactive"]
 
 if TYPE_CHECKING:
-    from cortex.extensions.gate import SovereignGate
+    from legacy_research.extensions.gate import SovereignGate
 
 logger = logging.getLogger("cortex.extensions.gate.interact")
 

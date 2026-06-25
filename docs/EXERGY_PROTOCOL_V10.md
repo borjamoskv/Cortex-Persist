@@ -47,7 +47,7 @@ Gobierna la topología P2P de la LEGION (los sub-agentes).
 - Evalúan respuestas internas bajo la directiva `Byzantine General`, forzando aserción criptográfica antes de confiar en la salida del modelo adyacente.
 
 ### Path 5: Git Sentinel (El Muro Termodinámico)
-**Ruta de acceso:** `.pre-commit-config.yaml` -> `cortex/guards/git_sentinel.py`
+**Ruta de acceso:** `.pre-commit-config.yaml` -> `legacy_research/guards/git_sentinel.py`
 Asegura que el historial de mutación (Axioma L2) no sea corrompido por operadores biológicos fatigados.
 - **Ejecución:** Enganchado a la fase `commit-msg`.
 - **Criterio BFT:** Computa la Entropía de Shannon (`calculate_exergy`) del mensaje.

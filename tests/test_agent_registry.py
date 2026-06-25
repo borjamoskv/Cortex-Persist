@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from cortex.extensions.agents.registry import (
+from legacy_research.extensions.agents.registry import (
     AgentCatalogEntry,
     AgentRegistry,
     AgentDefinition,

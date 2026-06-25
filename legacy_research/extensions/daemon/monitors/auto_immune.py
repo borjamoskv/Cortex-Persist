@@ -12,12 +12,12 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from cortex.extensions.daemon.models import AGENT_DIR, DEFAULT_STALE_HOURS
-from cortex.extensions.daemon.monitors.base import BaseMonitor
+from legacy_research.extensions.daemon.models import AGENT_DIR, DEFAULT_STALE_HOURS
+from legacy_research.extensions.daemon.monitors.base import BaseMonitor
 
 try:
-    from cortex.extensions.aether.models import AgentTask, TaskSource
-    from cortex.extensions.aether.queue import TaskQueue
+    from legacy_research.extensions.aether.models import AgentTask, TaskSource
+    from legacy_research.extensions.aether.queue import TaskQueue
 
     _AETHER_AVAILABLE = True
 except ImportError:

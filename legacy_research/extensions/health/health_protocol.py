@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from cortex.extensions.health.models import MetricSnapshot
+from legacy_research.extensions.health.models import MetricSnapshot
 
 
 @runtime_checkable

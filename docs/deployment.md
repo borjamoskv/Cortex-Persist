@@ -252,7 +252,7 @@ cp ~/.cortex/cortex.db ~/.cortex/cortex.db.bak
 
 # Or use the Python engine snapshot helper
 python - <<'PY'
-from cortex import CortexEngine
+from legacy_research import CortexEngine
 
 engine = CortexEngine()
 engine.export_snapshot("./snapshot.md")

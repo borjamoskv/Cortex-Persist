@@ -16,15 +16,15 @@ import json
 import click
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, console
-from cortex.database.core import connect as db_connect
+from legacy_research.cli.common import DEFAULT_DB, cli, console
+from legacy_research.database.core import connect as db_connect
 
 __all__: list[str] = []
 
 
 def _get_signal_bus(db: str):
     """Create a SignalBus instance from a database path."""
-    from cortex.extensions.signals.bus import SignalBus
+    from legacy_research.extensions.signals.bus import SignalBus
 
     conn = db_connect(db)
     return SignalBus(conn), conn

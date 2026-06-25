@@ -11,7 +11,7 @@ import time
 
 from pydantic import Field
 
-from cortex.memory.models import CortexFactModel
+from legacy_research.memory.models import CortexFactModel
 
 
 class CortexSemanticEngram(CortexFactModel):

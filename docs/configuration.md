@@ -130,7 +130,7 @@ The extended MCP families live behind a separate gate.
 ## Usage in Code
 
 ```python
-from cortex import config
+from legacy_research import config
 
 # Read a value
 print(config.DB_PATH)

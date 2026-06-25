@@ -18,8 +18,8 @@ from pathlib import Path
 
 from rich.console import Console
 
-from cortex.guards import analysis
-from cortex.guards.models import DependencyViolation
+from legacy_research.guards import analysis
+from legacy_research.guards.models import DependencyViolation
 
 __all__ = ["DependencyViolation", "scan_directory", "scan_file"]
 

@@ -8,8 +8,8 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from cortex.extensions.daemon.models import AGENT_DIR, DEFAULT_STALE_HOURS, GhostAlert
-from cortex.extensions.daemon.monitors.base import BaseMonitor
+from legacy_research.extensions.daemon.models import AGENT_DIR, DEFAULT_STALE_HOURS, GhostAlert
+from legacy_research.extensions.daemon.monitors.base import BaseMonitor
 
 logger = logging.getLogger("moskv-daemon")
 

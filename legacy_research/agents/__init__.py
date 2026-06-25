@@ -7,21 +7,21 @@ templates remain in ``cortex.extensions.agents``.
 
 from __future__ import annotations
 
-from cortex.agents.base import BaseAgent, ReactiveTaskAgent
-from cortex.agents.bus import MessageBus, SqliteMessageBus
-from cortex.agents.consolidator import ConsolidatorAgent
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import (
+from legacy_research.agents.base import BaseAgent, ReactiveTaskAgent
+from legacy_research.agents.bus import MessageBus, SqliteMessageBus
+from legacy_research.agents.consolidator import ConsolidatorAgent
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import (
     AgentMessage,
     MessageKind,
     MessageState,
     new_message,
 )
-from cortex.agents.ontological_consolidator import OntologicalConsolidator
-from cortex.agents.schema import AgentRole
-from cortex.agents.state import AgentState, AgentStatus, WorkingMemory
-from cortex.agents.supervisor import Supervisor
-from cortex.agents.tools import Tool, ToolRegistry
+from legacy_research.agents.ontological_consolidator import OntologicalConsolidator
+from legacy_research.agents.schema import AgentRole
+from legacy_research.agents.state import AgentState, AgentStatus, WorkingMemory
+from legacy_research.agents.supervisor import Supervisor
+from legacy_research.agents.tools import Tool, ToolRegistry
 
 __all__ = [
     # Core runtime

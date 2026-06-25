@@ -5,8 +5,8 @@ import logging
 
 import httpx
 
-from cortex.extensions.llm._resilience import resilient_call
-from cortex.extensions.llm._stealth import apply_causal_jitter, sanitize_response
+from legacy_research.extensions.llm._resilience import resilient_call
+from legacy_research.extensions.llm._stealth import apply_causal_jitter, sanitize_response
 
 logger = logging.getLogger("cortex.extensions.llm")
 

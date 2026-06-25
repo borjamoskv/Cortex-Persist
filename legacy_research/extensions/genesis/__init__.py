@@ -6,7 +6,7 @@ specs, and templates from here.
 
 Example::
 
-    from cortex.extensions.genesis import GenesisEngine, SystemSpec, ComponentSpec
+    from legacy_research.extensions.genesis import GenesisEngine, SystemSpec, ComponentSpec
 
     engine = GenesisEngine()
     spec = SystemSpec(name="my_module", components=[
@@ -32,7 +32,7 @@ __all__ = [
 def __getattr__(name: str) -> object:
     """Lazy imports for all public symbols."""
     if name in ("SystemSpec", "ComponentSpec", "GenesisResult"):
-        from cortex.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
+        from legacy_research.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
 
         _map = {
             "SystemSpec": SystemSpec,
@@ -42,23 +42,23 @@ def __getattr__(name: str) -> object:
         return _map[name]
 
     if name == "GenesisEngine":
-        from cortex.extensions.genesis.engine import GenesisEngine
+        from legacy_research.extensions.genesis.engine import GenesisEngine
 
         return GenesisEngine
 
     if name in ("TemplateRegistry", "SystemTemplate"):
-        from cortex.extensions.genesis.templates import SystemTemplate, TemplateRegistry
+        from legacy_research.extensions.genesis.templates import SystemTemplate, TemplateRegistry
 
         _map = {"TemplateRegistry": TemplateRegistry, "SystemTemplate": SystemTemplate}
         return _map[name]
 
     if name == "SystemAssembler":
-        from cortex.extensions.genesis.assembler import SystemAssembler
+        from legacy_research.extensions.genesis.assembler import SystemAssembler
 
         return SystemAssembler
 
     if name == "GenesisValidator":
-        from cortex.extensions.genesis.validator import GenesisValidator
+        from legacy_research.extensions.genesis.validator import GenesisValidator
 
         return GenesisValidator
 

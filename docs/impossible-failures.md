@@ -23,7 +23,7 @@ def test_constants_are_hardcoded_not_env_injectable():
     at the same time. This test closes that gap.
     """
     import inspect
-    import cortex.security.constants as m
+    import legacy_research.security.constants as m
     source = inspect.getsource(m)
     assert 'ENCRYPTION_VERSION = "v6_aesgcm"' in source
 ```

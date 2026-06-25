@@ -1,6 +1,6 @@
 import asyncio
 
-from cortex.extensions.bci.osc_bridge import AetherOscBridge
+from legacy_research.extensions.bci.osc_bridge import AetherOscBridge
 
 
 async def test_osc():

@@ -16,7 +16,7 @@ import random
 import time
 from typing import Any
 
-from cortex.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
+from legacy_research.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
 
 logger = logging.getLogger("cortex.federation.gossip")
 

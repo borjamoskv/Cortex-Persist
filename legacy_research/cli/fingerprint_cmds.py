@@ -6,8 +6,8 @@ import json as json_mod
 
 import click
 
-from cortex.cli.common import _run_async, cli, close_engine_sync, console, get_engine
-from cortex.cli.errors import handle_cli_error
+from legacy_research.cli.common import _run_async, cli, close_engine_sync, console, get_engine
+from legacy_research.cli.errors import handle_cli_error
 
 __all__ = ["fingerprint", "fingerprint_extract"]
 
@@ -53,7 +53,7 @@ def fingerprint_extract(
     top: int,
 ) -> None:
     """Extract the Cognitive Fingerprint from the CORTEX Ledger."""
-    from cortex.extensions.fingerprint.extractor import FingerprintExtractor
+    from legacy_research.extensions.fingerprint.extractor import FingerprintExtractor
 
     engine = get_engine()
     try:

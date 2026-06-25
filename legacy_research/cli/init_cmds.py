@@ -9,8 +9,8 @@ from contextlib import contextmanager
 import click
 from rich.panel import Panel
 
-from cortex import __version__
-from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
+from legacy_research import __version__
+from legacy_research.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 
 
 @contextmanager
@@ -78,7 +78,7 @@ def init(db, ouroboros: bool) -> None:
                     source="ag:genesis",
                 )
             if ouroboros:
-                from cortex.extensions.gate.ouroboros import get_ouroboros_gate
+                from legacy_research.extensions.gate.ouroboros import get_ouroboros_gate
 
                 og = get_ouroboros_gate(engine)
                 entropy = og.measure_entropy()
@@ -113,7 +113,7 @@ def init(db, ouroboros: bool) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def migrate(source, db) -> None:
     """Import CORTEX v3.1 data into v4.0."""
-    from cortex.migrate import migrate_v31_to_v40
+    from legacy_research.migrate import migrate_v31_to_v40
 
     async def _migrate_flow():
         engine = get_engine(db)

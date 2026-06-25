@@ -75,4 +75,4 @@ To avoid transactional deadlocks and hash chain bifurcations:
 ### Key Symlinks Map
 * `cortex/pipeline` $\rightarrow$ `legacy_research/pipeline`
 * `cortex/semantic` $\rightarrow$ `legacy_research/semantic`
-* `cortex/audit/ledger.py` $\rightarrow$ `cortex/storage/ledger.py`
+* `legacy_research/audit/ledger.py` $\rightarrow$ `cortex/storage/ledger.py`

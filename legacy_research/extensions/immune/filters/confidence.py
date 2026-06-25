@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from cortex.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
+from legacy_research.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
 
 
 class ConfidenceFilter(ImmuneFilter):

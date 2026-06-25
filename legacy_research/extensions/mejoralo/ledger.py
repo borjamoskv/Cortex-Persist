@@ -4,8 +4,8 @@ import json
 import logging
 from typing import Any
 
-from cortex.engine import CortexEngine
-from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
+from legacy_research.engine import CortexEngine
+from legacy_research.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 
 __all__ = ["get_history", "get_scars", "record_scar", "record_session"]
 

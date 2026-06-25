@@ -13,7 +13,7 @@ Este documento especifica el cierre operacional del sistema **BABYLON-60** dentr
 Aplica estrictamente a los siguientes módulos del núcleo:
 * `cortex/storage/*`: Motores de persistencia y serialización.
 * `cortex/math/*`: Funciones de cálculo de distancia y métricas.
-* `cortex/audit/ledger.py`: Registro de transiciones de estado.
+* `legacy_research/audit/ledger.py`: Registro de transiciones de estado.
 * `cortex/embeddings/*`: Capas de cuantización y proyección entera.
 * `mtk_core.py`: Núcleo de transformación de estados.
 

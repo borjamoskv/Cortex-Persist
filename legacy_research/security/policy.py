@@ -8,8 +8,8 @@ import time
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.security.haiku import HaikuGuard
-from cortex.security.types import (
+from legacy_research.security.haiku import HaikuGuard
+from legacy_research.security.types import (
     ImmuneArtifact,
     ImmunityState,
     PathogenProfile,

@@ -200,7 +200,7 @@ open http://localhost:8484/docs
 ## 11. Python SDK
 
 ```python
-from cortex import CortexEngine
+from legacy_research import CortexEngine
 
 engine = CortexEngine()
 

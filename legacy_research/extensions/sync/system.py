@@ -7,12 +7,12 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from cortex.extensions.sync.common import SyncResult, calculate_fact_diff, get_existing_contents
+from legacy_research.extensions.sync.common import SyncResult, calculate_fact_diff, get_existing_contents
 
 __all__ = ["sync_system"]
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.sync")
 

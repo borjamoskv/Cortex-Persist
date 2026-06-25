@@ -18,9 +18,9 @@ import logging
 import random
 from typing import TypedDict, cast
 
-from cortex.extensions.llm.sovereign import SovereignLLM
-from cortex.extensions.moltbook.client import MoltbookClient, MoltbookError, MoltbookRateLimited
-from cortex.extensions.moltbook.preflight import session_preflight
+from legacy_research.extensions.llm.sovereign import SovereignLLM
+from legacy_research.extensions.moltbook.client import MoltbookClient, MoltbookError, MoltbookRateLimited
+from legacy_research.extensions.moltbook.preflight import session_preflight
 
 logger = logging.getLogger("cortex.extensions.moltbook.trending")
 

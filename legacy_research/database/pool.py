@@ -62,7 +62,7 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
+from legacy_research.extensions.immune.chaos import ChaosGate, async_interceptor
 
 __all__ = ["CortexConnectionPool"]
 
@@ -148,7 +148,7 @@ class CortexConnectionPool:
 
     async def _create_connection(self) -> aiosqlite.Connection:
         """Create a highly-optimized, WAL-enabled async connection."""
-        from cortex.database.core import connect_async, load_sqlite_vec_async
+        from legacy_research.database.core import connect_async, load_sqlite_vec_async
 
         try:
             conn = await connect_async(self.db_path, read_only=self.read_only)

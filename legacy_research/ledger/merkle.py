@@ -98,7 +98,7 @@ class SemanticMerkleTree:
         embedder: Any = None,
         threshold: float = 0.98,
     ):
-        from cortex.engine.semantic_hash import (
+        from legacy_research.engine.semantic_hash import (
             SemanticFingerprint,
             batch_fingerprint,
         )
@@ -133,7 +133,7 @@ class SemanticMerkleTree:
           - exact_match: bool (byte-exact hash match)
           - threshold: float
         """
-        from cortex.engine.semantic_hash import (
+        from legacy_research.engine.semantic_hash import (
             cosine_similarity,
             semantic_fingerprint,
         )
@@ -162,7 +162,7 @@ class SemanticMerkleTree:
 
     def verify_batch(self, contents: list[str], embedder: Any = None) -> list[dict]:
         """Verify multiple content entries. GPU-accelerated via batch embedding."""
-        from cortex.engine.semantic_hash import batch_fingerprint, cosine_similarity
+        from legacy_research.engine.semantic_hash import batch_fingerprint, cosine_similarity
 
         if not self._fingerprints:
             return []

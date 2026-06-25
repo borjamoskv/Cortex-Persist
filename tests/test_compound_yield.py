@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from cortex.engine.compound_yield import (
+from legacy_research.engine.compound_yield import (
 
 
     CompoundProjector,

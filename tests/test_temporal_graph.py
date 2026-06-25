@@ -2,8 +2,8 @@
 import pytest
 import aiosqlite
 
-from cortex.engine.causality import AsyncCausalGraph
-from cortex.migrations.mig_temporal_kg import _migration_027_temporal_kg
+from legacy_research.engine.causality import AsyncCausalGraph
+from legacy_research.migrations.mig_temporal_kg import _migration_027_temporal_kg
 
 
 

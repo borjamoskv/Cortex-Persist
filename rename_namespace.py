@@ -14,16 +14,20 @@ def process_file(path):
         except UnicodeDecodeError:
             return
     
-    if "cortex" not in content and "cortex-persist" not in content and "Cortex" not in content:
+    if "cortex" not in content and "Cortex" not in content:
         return
         
-    new_content = content.replace("cortex", "cortex")
-    new_content = new_content.replace("Cortex", "Cortex")
-    new_content = new_content.replace("cortex-persist", "cortex-persist")
+    new_content = content.replace("from cortex.", "from legacy_research.")
+    new_content = new_content.replace("from cortex import", "from legacy_research import")
+    new_content = new_content.replace("import cortex.", "import legacy_research.")
+    new_content = new_content.replace("cortex/guards", "legacy_research/guards")
+    new_content = new_content.replace("cortex/data", "legacy_research/data")
+    new_content = new_content.replace("cortex/audit", "legacy_research/audit")
     
     with open(path, "w", encoding="utf-8") as f:
         f.write(new_content)
-    print(f"Updated {path}")
+    if new_content != content:
+        print(f"Updated {path}")
 
 for d in DIRS_TO_SCAN:
     dir_path = os.path.join(ROOT, d)

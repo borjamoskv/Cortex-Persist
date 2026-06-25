@@ -29,11 +29,11 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.sync")
 
-from cortex.core.paths import (
+from legacy_research.core.paths import (
     AGENT_DIR,
     CORTEX_DIR,
     MEMORY_DIR,

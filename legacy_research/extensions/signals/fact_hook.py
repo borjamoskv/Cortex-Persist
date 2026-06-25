@@ -42,7 +42,7 @@ from __future__ import annotations
 
 import logging
 
-from cortex.database.core import connect as db_connect
+from legacy_research.database.core import connect as db_connect
 
 __all__ = ["emit_fact_stored"]
 
@@ -90,7 +90,7 @@ def emit_fact_stored(
                      (passed in to avoid a double read inside this hook).
     """
     try:
-        from cortex.extensions.signals.bus import SignalBus
+        from legacy_research.extensions.signals.bus import SignalBus
 
         conn = db_connect(db_path, timeout=3)
 

@@ -49,7 +49,7 @@ def test_fastapi_app_uses_module_version() -> None:
     source = core_path.read_text(encoding="utf-8")
 
     # 1. Verify the import is present
-    assert "from cortex import __version__" in source, (
+    assert "from legacy_research import __version__" in source, (
         "cortex/api/core.py must import __version__ from cortex"
     )
 

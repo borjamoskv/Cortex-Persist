@@ -696,7 +696,7 @@ Dict[str, Any] = {}\n   708\t        self._cache_lock = asyncio.Lock()\n   709\t
 self.pool = AsyncConnectionPool(db_path, 
 max_connections=self.config.max_workers)\n   718\t        await 
 self.pool.initialize()\n   719\t        \n   720\t        # Initialize 
-database\n   721\t        from cortex.migrations import run_migrations\n   722\t
+database\n   721\t        from legacy_research.migrations import run_migrations\n   722\t
 async with self.pool.acquire() as conn:\n   723\t            loop = 
 asyncio.get_event_loop()\n   724\t            await 
 loop.run_in_executor(self.executor, run_migrations, conn)\n   725\t        \n   
@@ -727,7 +727,7 @@ bool = False\n   765\t    ) -> dict:\n   766\t        """\n   767\t        Store
 a fact (or batch of facts) in CORTEX.\n   768\t        \n   769\t        
 Optimizations:\n   770\t        - Batch mode for multiple facts\n   771\t       
 - Async execution with connection pooling\n   772\t        """\n   773\t        
-from cortex.engine import CortexEngine\n   774\t        \n   775\t        start 
+from legacy_research.engine import CortexEngine\n   774\t        \n   775\t        start 
 = time.time()\n   776\t        \n   777\t        async with self.pool.acquire() 
 as conn:\n   778\t            # Create engine wrapper\n   779\t            
 engine = CortexEngine(self.config.db_path, auto_embed=False)\n   780\t          
@@ -767,7 +767,7 @@ self,\n   839\t        query: str,\n   840\t        project: str = "",\n   841\t
 top_k: int = 5,\n   842\t        as_of: str = "",\n   843\t        use_cache: 
 bool = True\n   844\t    ) -> dict:\n   845\t        """\n   846\t        Search
 CORTEX with caching and performance optimizations.\n   847\t        """\n   
-848\t        from cortex.engine import CortexEngine\n   849\t        \n   850\t 
+848\t        from legacy_research.engine import CortexEngine\n   849\t        \n   850\t 
 cache_key = self._get_cache_key(\n   851\t            "search",\n   852\t       
 query=query,\n   853\t            project=project,\n   854\t            
 top_k=top_k,\n   855\t            as_of=as_of\n   856\t        )\n   857\t      
@@ -802,7 +802,7 @@ with caching.\n   907\t        """\n   908\t        cache_key =
 self._get_cache_key(\n   909\t            "recall",\n   910\t            
 project=project,\n   911\t            limit=limit,\n   912\t            
 include_deprecated=include_deprecated\n   913\t        )\n   914\t        \n   
-915\t        async def _do_recall():\n   916\t            from cortex.engine 
+915\t        async def _do_recall():\n   916\t            from legacy_research.engine 
 import CortexEngine\n   917\t            \n   918\t            async with 
 self.pool.acquire() as conn:\n   919\t                engine = 
 CortexEngine(self.config.db_path, auto_embed=False)\n   920\t                
@@ -828,7 +828,7 @@ _do_recall()\n   948\t        \n   949\t        return {\n   950\t
 cortex_vote(\n   956\t        self,\n   957\t        fact_id: int,\n   958\t    
 agent: str,\n   959\t        vote: int,\n   960\t        reason: str = ""\n   
 961\t    ) -> dict:\n   962\t        """\n   963\t        Cast a consensus vote 
-on a fact.\n   964\t        """\n   965\t        from cortex.engine import 
+on a fact.\n   964\t        """\n   965\t        from legacy_research.engine import 
 CortexEngine\n   966\t        \n   967\t        start = time.time()\n   968\t   
 \n   969\t        async with self.pool.acquire() as conn:\n   970\t            
 engine = CortexEngine(self.config.db_path, auto_embed=False)\n   971\t          
@@ -890,7 +890,7 @@ Partial | `cortex/routes/facts.py:119-159` (missing `VoteV2Request` import) |\n
 32\t\n    33\t### 1.2 Implementation Gaps Identified\n    34\t\n    
 35\t```python\n    36\t# BUG: facts.py imports VoteV2Request but it\'s not 
 imported at the top\n    37\t# Line 122: req: VoteV2Request - but VoteV2Request 
-not in imports\n    38\t# Missing: from cortex.models import VoteV2Request\n    
+not in imports\n    38\t# Missing: from legacy_research.models import VoteV2Request\n    
 39\t\n    40\t# BUG: Engine method vote_v2() referenced but not implemented\n   
 41\t# Line 141: api_state.engine.vote_v2(...) - method doesn\'t exist in 
 engine.py\n    42\t```\n    43\t\n    44\t### 1.3 Consensus Architecture 
@@ -1114,7 +1114,7 @@ Phase Breakdown\n   216\t\n   217\t```\n
 284\t└──────────────────────────────────────────────────────────────────────────
 ───┘\n   285\t```\n   286\t\n   287\t### 4.2 Detailed Implementation Plan\n   
 288\t\n   289\t#### Sprint 1-2: Critical Security Fixes\n   290\t\n   
-291\t```python\n   292\t# cortex/api.py - CORS Fix\n   293\tfrom cortex.config 
+291\t```python\n   292\t# cortex/api.py - CORS Fix\n   293\tfrom legacy_research.config 
 import ALLOWED_ORIGINS\n   294\t\n   295\tapp.add_middleware(\n   296\t    
 CORSMiddleware,\n   297\t    allow_origins=ALLOWED_ORIGINS,  # No more 
 wildcard\n   298\t    allow_credentials=True,\n   299\t    allow_methods=["GET",
@@ -1301,7 +1301,7 @@ MCPServerConfig(\n  1078\t        db_path=os.environ.get("CORTEX_DB",
 1084\t\n  1085\t### 2.4 Performance Benchmarks\n  1086\t\n  1087\t```python\n  
 1088\t# tests/benchmark_mcp.py\n  1089\t"""\n  1090\tBenchmark suite for MCP 
 server performance.\n  1091\t"""\n  1092\t\n  1093\timport asyncio\n  
-1094\timport time\n  1095\timport statistics\n  1096\tfrom cortex.mcp_server_v2 
+1094\timport time\n  1095\timport statistics\n  1096\tfrom legacy_research.mcp_server_v2 
 import OptimizedMCPServer, MCPServerConfig\n  1097\t\n  1098\t\n  1099\tasync 
 def benchmark_search():\n  1100\t    """Benchmark search performance with and 
 without cache."""\n  1101\t    config = MCPServerConfig(query_cache_size=1000)\n
@@ -1481,13 +1481,13 @@ ToolResult(
 10\timport hashlib\n    11\timport json\n    12\timport logging\n    13\timport 
 sqlite3\n    14\tfrom dataclasses import dataclass\n    15\tfrom pathlib import 
 Path\n    16\tfrom typing import Optional\n    17\t\n    18\timport sqlite_vec\n
-19\t\n    20\tfrom cortex.embeddings import LocalEmbedder\n    21\tfrom 
-cortex.embeddings import LocalEmbedder\n    22\tfrom cortex.schema import 
-get_init_meta\n    23\tfrom cortex.migrations import run_migrations\n    
-24\tfrom cortex.search import SearchResult, semantic_search, text_search\n    
-25\tfrom cortex.graph import get_graph, query_entity\n    26\tfrom 
+19\t\n    20\tfrom legacy_research.embeddings import LocalEmbedder\n    21\tfrom 
+cortex.embeddings import LocalEmbedder\n    22\tfrom legacy_research.schema import 
+get_init_meta\n    23\tfrom legacy_research.migrations import run_migrations\n    
+24\tfrom legacy_research.search import SearchResult, semantic_search, text_search\n    
+25\tfrom legacy_research.graph import get_graph, query_entity\n    26\tfrom 
 cortex.temporal import build_temporal_filter_params, now_iso\n    27\t\n    
-28\tlogger = logging.getLogger("cortex")\n    29\t\n    30\tfrom cortex.config 
+28\tlogger = logging.getLogger("cortex")\n    29\t\n    30\tfrom legacy_research.config 
 import DEFAULT_DB_PATH\n    31\t\n    32\t\n    33\t@dataclass\n    34\tclass 
 Fact:\n    35\t    """A single fact stored in CORTEX."""\n    36\t\n    37\t    
 id: int\n    38\t    project: str\n    39\t    content: str\n    40\t    
@@ -1550,7 +1550,7 @@ self._embedder = LocalEmbedder()\n   139\t        return self._embedder\n
 140\t\n   141\t    # ─── Database Initialization 
 ──────────────────────────────────\n   142\t\n   143\t    def init_db(self) -> 
 None:\n   144\t        """Initialize database schema using migrations. Safe to 
-call multiple times."""\n   145\t        from cortex.schema import ALL_SCHEMA, 
+call multiple times."""\n   145\t        from legacy_research.schema import ALL_SCHEMA, 
 get_init_meta\n   146\t        conn = self._get_conn()\n   147\t        \n   
 148\t        # 1. Initialize base schema if not existing\n   149\t        for 
 stmt in ALL_SCHEMA:\n   150\t            # Skip vector tables if extension is 
@@ -1603,7 +1603,7 @@ VALUES (?, ?)",\n   228\t                    (fact_id, embedding_json),\n
 229\t                )\n   230\t            except (ValueError, sqlite3.Error) 
 as e:\n   231\t                logger.warning("Embedding failed for fact %d: 
 %s", fact_id, e)\n   232\t        \n   233\t        # Auto-extract Graph 
-Entities & Relationships\n   234\t        from cortex.graph import 
+Entities & Relationships\n   234\t        from legacy_research.graph import 
 process_fact_graph\n   235\t        try:\n   236\t            
 process_fact_graph(conn, fact_id, content, project, ts)\n   237\t        except 
 Exception as e:\n   238\t            logger.warning("Graph extraction failed for
@@ -2405,7 +2405,7 @@ _migration_009_reputation_consensus(conn: sqlite3.Connection):\n   197\t
 """Implement Reputation-Weighted Consensus (RWC) with agents and v2 votes."""\n 
 198\t    # 1. Create tables (using scripts from schema.py)\n   199\t    # Note: 
 These are \'IF NOT EXISTS\' so safe to run even if schema.py were applied\n   
-200\t    from cortex.schema import (\n   201\t        CREATE_AGENTS,\n   202\t  
+200\t    from legacy_research.schema import (\n   201\t        CREATE_AGENTS,\n   202\t  
 CREATE_VOTES_V2,\n   203\t        CREATE_TRUST_EDGES,\n   204\t        
 CREATE_OUTCOMES,\n   205\t        CREATE_RWC_INDEXES,\n   206\t    )\n   207\t\n
 208\t    conn.executescript(CREATE_AGENTS)\n   209\t    
@@ -2446,7 +2446,7 @@ score)", _migration_007_consensus_layer),\n   261\t    (8, "Consensus refinement
 -> int:\n   267\t    """Run all pending migrations.\n   268\t\n   269\t    
 Args:\n   270\t        conn: SQLite connection.\n   271\t\n   272\t    
 Returns:\n   273\t        Number of migrations applied.\n   274\t    """\n   
-275\t    from cortex.schema import ALL_SCHEMA\n   276\t\n   277\t    
+275\t    from legacy_research.schema import ALL_SCHEMA\n   276\t\n   277\t    
 ensure_migration_table(conn)\n   278\t    current = get_current_version(conn)\n 
 279\t    \n   280\t    # Apply base schema if database is fresh (version 0)\n   
 281\t    if current == 0:\n   282\t        logger.info("Fresh database detected.
@@ -3544,7 +3544,7 @@ Initialize connection pool\\n        db_path =
 os.path.expanduser(self.config.db_path)\\n        self.pool = 
 AsyncConnectionPool(db_path, max_connections=self.config.max_workers)\\n        
 await self.pool.initialize()\\n        \\n        # Initialize database\\n      
-from cortex.migrations import run_migrations\\n        async with 
+from legacy_research.migrations import run_migrations\\n        async with 
 self.pool.acquire() as conn:\\n            loop = asyncio.get_event_loop()\\n   
 await loop.run_in_executor(self.executor, run_migrations, conn)\\n        \\n   
 self._running = True\\n        logger.info(\\"Edge MCP server initialized\\")\\n
@@ -3552,7 +3552,7 @@ self._running = True\\n        logger.info(\\"Edge MCP server initialized\\")\\n
 content: str,\\n        fact_type: str = \\"knowledge\\",\\n        tags: str = 
 \\"[]\\",\\n        source: str = \\"\\",\\n        batch: bool = False\\n    ) 
 -> dict:\\n        \\"\\"\\"\\n        Store a fact (or batch of facts) in 
-CORTEX with optimizations.\\n        \\"\\"\\"\\n        from cortex.engine 
+CORTEX with optimizations.\\n        \\"\\"\\"\\n        from legacy_research.engine 
 import CortexEngine\\n        \\n        start = time.time()\\n        \\n      
 async with self.pool.acquire() as conn:\\n            engine = 
 CortexEngine(self.config.db_path, auto_embed=False)\\n            engine._conn =
@@ -4551,7 +4551,7 @@ initialize(self):\n        """Initialize the server."""\n        # Initialize
 connection pool\n        db_path = os.path.expanduser(self.config.db_path)\n    
 self.pool = AsyncConnectionPool(db_path, 
 max_connections=self.config.max_workers)\n        await self.pool.initialize()\n
-\n        # Initialize database\n        from cortex.migrations import 
+\n        # Initialize database\n        from legacy_research.migrations import 
 run_migrations\n        async with self.pool.acquire() as conn:\n            
 loop = asyncio.get_event_loop()\n            await 
 loop.run_in_executor(self.executor, run_migrations, conn)\n        \n        
@@ -4560,7 +4560,7 @@ async def cortex_store(\n        self,\n        project: str,\n        content:
 str,\n        fact_type: str = "knowledge",\n        tags: str = "[]",\n        
 source: str = "",\n        batch: bool = False\n    ) -> dict:\n        """\n   
 Store a fact (or batch of facts) in CORTEX with optimizations.\n        """\n   
-from cortex.engine import CortexEngine\n        \n        start = time.time()\n 
+from legacy_research.engine import CortexEngine\n        \n        start = time.time()\n 
 \n        async with self.pool.acquire() as conn:\n            engine = 
 CortexEngine(self.config.db_path, auto_embed=False)\n            engine._conn = 
 conn\n            \n            try:\n                if batch:\n               

@@ -8,7 +8,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
+from legacy_research.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 
 __all__ = ["github_cmds"]
 
@@ -34,7 +34,7 @@ def sync(token: str | None, owner: str, repo: str | None, db: str) -> None:
     engine = get_engine(db)
 
     async def _async_sync():
-        from cortex.extensions.sync.github_bridge import GitHubCortexBridge
+        from legacy_research.extensions.sync.github_bridge import GitHubCortexBridge
 
         try:
             await engine.init_db()
@@ -135,8 +135,8 @@ def telemetry(token: str | None, owner: str, repo: str | None, db: str) -> None:
     engine = get_engine(db)
 
     async def _async_telemetry():
-        from cortex.agents.builtins.github_telemetry_agent import GithubTelemetryAgent
-        from cortex.agents.manifest import AgentManifest
+        from legacy_research.agents.builtins.github_telemetry_agent import GithubTelemetryAgent
+        from legacy_research.agents.manifest import AgentManifest
 
         try:
             await engine.init_db()

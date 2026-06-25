@@ -6,27 +6,27 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
-from cortex.ledger._verifier_checkpoints import (
+from legacy_research.ledger._verifier_checkpoints import (
     verify_checkpoints,
 )
-from cortex.ledger._verifier_events import (
+from legacy_research.ledger._verifier_events import (
     verify_events,
 )
-from cortex.ledger._verifier_io import (
+from legacy_research.ledger._verifier_io import (
     build_key_index,
     load_checkpoints,
     load_events,
     load_optional_object,
 )
-from cortex.ledger._verifier_manifest import (
+from legacy_research.ledger._verifier_manifest import (
     manifest_export_authority_ok,
     verify_manifest,
 )
-from cortex.ledger.public_verifier_utils import (
+from legacy_research.ledger.public_verifier_utils import (
     _load_json_object,
     _sha256_file,
 )
-from cortex.utils.canonical import canonical_json, compute_tx_hash
+from legacy_research.utils.canonical import canonical_json, compute_tx_hash
 
 PUBLIC_V1_STRICT = "public-v1-strict"
 LEGACY_V0 = "legacy-v0"

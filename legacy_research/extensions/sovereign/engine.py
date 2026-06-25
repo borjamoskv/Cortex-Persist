@@ -16,10 +16,10 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.immune import ImmuneArbiter, Verdict
-from cortex.extensions.sovereign.bridge import SovereignBridge
-from cortex.extensions.sovereign.endocrine import DigitalEndocrine
-from cortex.extensions.sovereign.observability import (
+from legacy_research.extensions.immune import ImmuneArbiter, Verdict
+from legacy_research.extensions.sovereign.bridge import SovereignBridge
+from legacy_research.extensions.sovereign.endocrine import DigitalEndocrine
+from legacy_research.extensions.sovereign.observability import (
     Dimension,
     PowerLevel,
     compute_power,
@@ -129,7 +129,7 @@ async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
     """Phase 3 - Legion-Omega swarm execution."""
     t0 = time.monotonic()
     try:
-        from cortex.engine.legion import LEGION_OMEGA
+        from legacy_research.engine.legion import LEGION_OMEGA
 
         intent = "Evaluate system immunity and forge defensive core"
         result = await LEGION_OMEGA.forge(intent, context={"ctx": ctx})
@@ -233,7 +233,7 @@ async def _phase_evolution(ctx: SovereignContext) -> PipelineResult:
     """Phase - Run one evolution cycle for continuous agent improvement."""
     t0 = time.monotonic()
     try:
-        from cortex.extensions.evolution.engine import EvolutionEngine
+        from legacy_research.extensions.evolution.engine import EvolutionEngine
 
         # Thermodynamic God-Tier Engine
         engine = EvolutionEngine()

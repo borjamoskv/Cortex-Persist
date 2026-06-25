@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import textwrap
 
-from cortex.extensions.genesis.models import ComponentSpec
+from legacy_research.extensions.genesis.models import ComponentSpec
 
 
 def _render_skill_md(system_name: str, comp: ComponentSpec) -> str:

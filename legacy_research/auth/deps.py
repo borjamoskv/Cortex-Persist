@@ -7,9 +7,9 @@ from typing import Any
 
 from fastapi import Depends, Header, HTTPException, Request
 
-from cortex.auth.manager import get_auth_manager
-from cortex.auth.models import AuthResult
-from cortex.auth.rbac import RBAC, Permission
+from legacy_research.auth.manager import get_auth_manager
+from legacy_research.auth.models import AuthResult
+from legacy_research.auth.rbac import RBAC, Permission
 
 __all__ = [
     "require_auth",
@@ -29,7 +29,7 @@ async def require_auth(
     ),
 ) -> AuthResult:
     """Extract and validate API key from Authorization header."""
-    from cortex.utils.i18n import get_trans
+    from legacy_research.utils.i18n import get_trans
 
     lang = request.headers.get("Accept-Language", "en")
 
@@ -53,7 +53,7 @@ async def require_auth(
         raise HTTPException(status_code=401, detail=error_msg)
 
     # SECURE LINK: Bind the dynamic tenant context to the authenticated identity
-    from cortex.extensions.security.tenant import tenant_id_var
+    from legacy_research.extensions.security.tenant import tenant_id_var
 
     tenant_id_var.set(result.tenant_id)
 
@@ -80,7 +80,7 @@ def require_permission(permission: str | Permission):
             has_perm = True
 
         if not has_perm:
-            from cortex.utils.i18n import get_trans
+            from legacy_research.utils.i18n import get_trans
 
             lang = request.headers.get("Accept-Language", "en")
             perm_name = permission.name if isinstance(permission, Permission) else permission
@@ -100,8 +100,8 @@ async def require_consensus(
     engine: Any = Depends(lambda: None),
 ) -> bool:
     """Verify a claim has reached sufficient consensus with KV-Aware Caching (Ω₂)."""
-    from cortex.auth.cache import AUTH_CACHE
-    from cortex.extensions.security.tenant import get_tenant_id
+    from legacy_research.auth.cache import AUTH_CACHE
+    from legacy_research.extensions.security.tenant import get_tenant_id
 
     tenant_id = get_tenant_id()
     cached_score = AUTH_CACHE.get(claim, tenant_id)
@@ -109,7 +109,7 @@ async def require_consensus(
         return cached_score >= min_score
 
     if engine is None:
-        from cortex.api.deps import get_async_engine
+        from legacy_research.api.deps import get_async_engine
 
         async for e in get_async_engine():  # type: ignore[reportCallIssue]
             engine = e
@@ -151,7 +151,7 @@ def require_verified_permission(
         auth: AuthResult = Depends(require_auth),
     ) -> AuthResult:
         if permission not in auth.permissions:
-            from cortex.utils.i18n import get_trans
+            from legacy_research.utils.i18n import get_trans
 
             lang = request.headers.get("Accept-Language", "en")
             detail = get_trans(
@@ -160,7 +160,7 @@ def require_verified_permission(
             ).format(permission=permission)
             raise HTTPException(status_code=403, detail=detail)
 
-        from cortex.api.deps import get_async_engine
+        from legacy_research.api.deps import get_async_engine
 
         engine = None
         async for e in get_async_engine():  # type: ignore[reportCallIssue]

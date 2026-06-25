@@ -1,6 +1,6 @@
 import pytest
-from cortex.swarm.graph_source import MockSNGraphSource, SalienceCandidate
-from cortex.swarm.router import SwarmRouter
+from legacy_research.swarm.graph_source import MockSNGraphSource, SalienceCandidate
+from legacy_research.swarm.router import SwarmRouter
 
 
 # ---------------------------------------------------------------------------
@@ -28,7 +28,7 @@ def router(sn_candidates, tmp_path):
     reg = _FakeRegistry()
     r = SwarmRouter(registry=reg, graph_source=mock_source)
     # Redirect ledger DB to temp dir for test isolation
-    import cortex.swarm.ledger.engine as eng
+    import legacy_research.swarm.ledger.engine as eng
     r.ledger = eng.SwarmLedger(path=str(tmp_path / "test_swarm.db"))
     return r
 

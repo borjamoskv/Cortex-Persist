@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from cortex.database.pool import CortexConnectionPool
+from legacy_research.database.pool import CortexConnectionPool
 
 
 

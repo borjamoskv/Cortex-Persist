@@ -13,9 +13,9 @@ import re
 import time
 from typing import Any
 
-from cortex.extensions.llm._models import CortexPrompt
-from cortex.extensions.llm.router import CortexLLMRouter, IntentProfile
-from cortex.utils.pulmones import sovereign_circuit_breaker
+from legacy_research.extensions.llm._models import CortexPrompt
+from legacy_research.extensions.llm.router import CortexLLMRouter, IntentProfile
+from legacy_research.utils.pulmones import sovereign_circuit_breaker
 
 logger = logging.getLogger("CORTEX.AUTODIDACT.CANARY_EMULATOR")
 
@@ -154,7 +154,7 @@ class GlasswingVulnerabilityScanner:
 
 async def execute_canary_audit(target_code: str) -> dict[str, Any]:
     """Facilitates an end-to-end audit demonstrating reverse-engineered model capabilities."""
-    from cortex.extensions.skills.autodidact.synthesis import _get_synthesis_router
+    from legacy_research.extensions.skills.autodidact.synthesis import _get_synthesis_router
 
     router = _get_synthesis_router()
     detector = GPTCanaryDetector(router)

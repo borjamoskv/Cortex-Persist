@@ -24,7 +24,7 @@ repos:
     hooks:
       - id: exergy-commit-guard
         name: C5-REAL Exergy Git Sentinel
-        entry: .venv/bin/python cortex/guards/git_sentinel.py
+        entry: .venv/bin/python legacy_research/guards/git_sentinel.py
         language: system
         stages: [commit-msg]
 

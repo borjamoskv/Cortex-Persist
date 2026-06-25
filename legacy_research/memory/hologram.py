@@ -15,11 +15,11 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-from cortex.memory.models import CortexFactModel
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.memory.models import CortexFactModel
 
 if TYPE_CHECKING:
-    from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+    from legacy_research.memory.sqlite_vec_store import SovereignVectorStoreL2
 
 logger = logging.getLogger("cortex.memory.hologram")
 

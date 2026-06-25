@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from cortex.agents.builtins.copilot_agent import (
+from legacy_research.agents.builtins.copilot_agent import (
     CopilotAgent,
     InlineCompletionStrategy,
     DiagnosticFixStrategy,
@@ -25,7 +25,7 @@ from cortex.agents.builtins.copilot_agent import (
     SuggestionStrategy,
     create_copilot_agent,
 )
-from cortex.agents.copilot_contracts import (
+from legacy_research.agents.copilot_contracts import (
     CodeEdit,
     Confidence,
     CopilotContextPayload,
@@ -38,9 +38,9 @@ from cortex.agents.copilot_contracts import (
     SuggestionStatus,
     SuggestionVerdict,
 )
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
-from cortex.agents.state import AgentStatus
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import AgentMessage, MessageKind, new_message
+from legacy_research.agents.state import AgentStatus
 
 
 # ── Fixtures ──────────────────────────────────────────────────────

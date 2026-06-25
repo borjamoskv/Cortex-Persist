@@ -33,7 +33,7 @@ class LedgerStore:
         self._init_db()
 
     def _connect(self) -> sqlite3.Connection:
-        from cortex.database.core import connect
+        from legacy_research.database.core import connect
 
         return connect(self.db_path, row_factory=sqlite3.Row)
 
@@ -250,7 +250,7 @@ class LedgerStore:
 
     def _ensure_compat_columns(self, conn: sqlite3.Connection, table_name: str) -> None:
         """Backfill compatibility columns for legacy ledger job tables."""
-        from cortex.utils.sql_identifiers import validate_sql_identifier
+        from legacy_research.utils.sql_identifiers import validate_sql_identifier
 
         validate_sql_identifier(table_name)
         existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table_name})").fetchall()}

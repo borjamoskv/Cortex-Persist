@@ -16,7 +16,7 @@ from typing import Final
 logger = logging.getLogger("cortex.extensions.sovereign.infrastructure")
 
 # Paths for the Sovereign Air-Gap simulation
-from cortex.core.paths import CORTEX_DIR as _CORTEX_DIR
+from legacy_research.core.paths import CORTEX_DIR as _CORTEX_DIR
 
 SOVEREIGN_STORAGE: Final[Path] = _CORTEX_DIR / "mailing" / "vault"
 

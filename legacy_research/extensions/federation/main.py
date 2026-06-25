@@ -32,7 +32,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from pathlib import Path
 from typing import Any
 
-from cortex.config import FEDERATION_MODE, SHARD_DIR
+from legacy_research.config import FEDERATION_MODE, SHARD_DIR
 
 __all__ = ["FederatedEngine", "get_engine"]
 
@@ -69,7 +69,7 @@ class FederatedEngine:
             if safe_id in self._shards:
                 return self._shards[safe_id]
 
-            from cortex.engine import CortexEngine
+            from legacy_research.engine import CortexEngine
 
             db_path = self._shard_dir / f"{safe_id}.db"
             engine = CortexEngine(db_path=db_path, auto_embed=self._auto_embed)
@@ -183,6 +183,6 @@ def get_engine(auto_embed: bool = True):
     if FEDERATION_MODE == "federated":
         logger.info("Starting in FEDERATED mode (shard_dir=%s)", SHARD_DIR)
         return FederatedEngine(auto_embed=auto_embed)
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
     return CortexEngine(auto_embed=auto_embed)

@@ -24,7 +24,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from cortex.extensions.daemon.models import TombstoneAlert
+from legacy_research.extensions.daemon.models import TombstoneAlert
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -69,7 +69,7 @@ class TombstoneMonitor:
         self._last_run = now
 
         try:
-            from cortex.database.core import connect as db_connect
+            from legacy_research.database.core import connect as db_connect
 
             # Fix HIGH-005 lock contention: use auto-commit mode (isolation_level=None)
             # to avoid taking a write-lock on the first SELECT. We'll manage transactions manually.

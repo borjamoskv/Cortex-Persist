@@ -5,8 +5,8 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.graph.backends.base import GraphBackend
-    from cortex.graph.backends.sqlite import SQLiteBackend
+    from legacy_research.graph.backends.base import GraphBackend
+    from legacy_research.graph.backends.sqlite import SQLiteBackend
 
 __all__ = ["GraphBackend", "SQLiteBackend", "Neo4jBackend"]
 

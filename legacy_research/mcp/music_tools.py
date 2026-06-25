@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 
-from cortex.extensions.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext
+from legacy_research.extensions.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext
 from mcp.server.fastmcp import FastMCP
 
 logger = logging.getLogger("cortex.mcp.music")

@@ -20,16 +20,16 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.memory.metamemory import (
+from legacy_research.memory.metamemory import (
     FOKDirective,
     MetaJudgment,
     MetamemoryMonitor,
     RetrievalOutcome,
 )
-from cortex.memory.schemas import SchemaEngine
-from cortex.memory.stdp import STDPEngine
-from cortex.memory.valence import ValenceRecord, classify_valence
-from cortex.memory.void_detector import (
+from legacy_research.memory.schemas import SchemaEngine
+from legacy_research.memory.stdp import STDPEngine
+from legacy_research.memory.valence import ValenceRecord, classify_valence
+from legacy_research.memory.void_detector import (
     RetrievalAnalysis,
     RetrievalVoidDetector,
 )

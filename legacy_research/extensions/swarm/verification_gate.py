@@ -16,7 +16,7 @@ class RiskLevel(str, Enum):
 
 RISK_PATH_MAP = {
     "cortex/engine": RiskLevel.CRITICAL,
-    "cortex/guards": RiskLevel.CRITICAL,
+    "legacy_research/guards": RiskLevel.CRITICAL,
     "cortex/crypto": RiskLevel.CRITICAL,
     "cortex/extensions/swarm": RiskLevel.HIGH,
     "cortex/api": RiskLevel.MEDIUM,

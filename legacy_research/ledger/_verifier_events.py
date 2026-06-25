@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 from cryptography.exceptions import InvalidSignature
 
-from cortex.ledger.public_verifier_utils import (
+from legacy_research.ledger.public_verifier_utils import (
     PublicVerifierError,
     _event_hash,
     _event_signature_scope,
@@ -19,7 +19,7 @@ from cortex.ledger.public_verifier_utils import (
 )
 
 if TYPE_CHECKING:
-    from cortex.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier
+    from legacy_research.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier
 
 STRICT_REQUIRED_EVENT_FIELDS = frozenset(
     {

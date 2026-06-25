@@ -17,10 +17,10 @@ except ImportError:
     ImageIO = None
     kUTTypePNG = None
 
-from cortex.extensions.ui_control.models import InteractionResult
+from legacy_research.extensions.ui_control.models import InteractionResult
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.ui_control.vision")
 

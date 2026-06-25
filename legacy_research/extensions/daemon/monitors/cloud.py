@@ -23,9 +23,9 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 import time
 from typing import Any
 
-from cortex import config
-from cortex.extensions.daemon.models import CloudSyncAlert
-from cortex.storage.turso import TursoBackend
+from legacy_research import config
+from legacy_research.extensions.daemon.models import CloudSyncAlert
+from legacy_research.storage.turso import TursoBackend
 
 logger = logging.getLogger("moskv-daemon")
 

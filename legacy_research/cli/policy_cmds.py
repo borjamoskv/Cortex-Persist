@@ -9,7 +9,7 @@ from __future__ import annotations
 import click
 from rich.table import Table
 
-from cortex.cli.common import (
+from legacy_research.cli.common import (
     DEFAULT_DB,
     _run_async,
     close_engine_sync,
@@ -30,7 +30,7 @@ def policy_cmds() -> None:
 @click.option("--gamma", "-g", default=0.9, type=float, help="Discount factor (0-1)")
 def evaluate_cmd(project: str | None, db: str, limit: int, gamma: float) -> None:
     """Evaluate memory and output prioritized action queue."""
-    from cortex.extensions.policy import PolicyConfig, PolicyEngine
+    from legacy_research.extensions.policy import PolicyConfig, PolicyEngine
 
     engine = get_engine(db)
     try:
@@ -84,7 +84,7 @@ def evaluate_cmd(project: str | None, db: str, limit: int, gamma: float) -> None
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def status_cmd(db: str) -> None:
     """Show policy engine status and configuration."""
-    from cortex.extensions.policy import PolicyConfig
+    from legacy_research.extensions.policy import PolicyConfig
 
     config = PolicyConfig()
     console.print("[bold #CCFF00]Policy Engine Config[/bold #CCFF00]")

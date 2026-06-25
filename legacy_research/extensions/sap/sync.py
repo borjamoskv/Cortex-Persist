@@ -13,8 +13,8 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.extensions.sap.client import SAPClient
-from cortex.extensions.sap.mapper import SAPMapper
+from legacy_research.extensions.sap.client import SAPClient
+from legacy_research.extensions.sap.mapper import SAPMapper
 
 __all__ = ["SAPSync", "SAPSyncResult"]
 

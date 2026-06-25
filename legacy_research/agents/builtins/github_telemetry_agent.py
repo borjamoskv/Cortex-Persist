@@ -16,13 +16,13 @@ from typing import Any
 
 import httpx
 
-from cortex.agents.base import BaseAgent
-from cortex.agents.bus import MessageBus
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind
-from cortex.agents.tools import ToolRegistry
-from cortex.memory.temporal import now_iso
-from cortex.telemetry.metrics import metrics
+from legacy_research.agents.base import BaseAgent
+from legacy_research.agents.bus import MessageBus
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import AgentMessage, MessageKind
+from legacy_research.agents.tools import ToolRegistry
+from legacy_research.memory.temporal import now_iso
+from legacy_research.telemetry.metrics import metrics
 
 logger = logging.getLogger(__name__)
 

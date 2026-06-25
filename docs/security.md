@@ -124,7 +124,7 @@ The **fourth leakage vector** — and the most insidious — is **composition le
 CORTEX provides an encrypted vault for sensitive configuration:
 
 ```python
-from cortex.crypto import CortexVault
+from legacy_research.crypto import CortexVault
 
 vault = CortexVault(key_path="~/.cortex/vault.key")
 vault.encrypt("api_token", "sk-xxx...")

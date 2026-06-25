@@ -2,8 +2,8 @@
 # [C5-REAL] Exergy-Maximized
 
 import pytest
-from cortex.shannon.env.trace import EpisodeTrace, StepTrace
-from cortex.shannon.verification.cross_verifier import (
+from legacy_research.shannon.env.trace import EpisodeTrace, StepTrace
+from legacy_research.shannon.verification.cross_verifier import (
     CrossVerifier,
     DivergenceType,
 )
@@ -32,7 +32,7 @@ def sample_episode_trace() -> EpisodeTrace:
         ),
     ]
     # Compute valid checksum
-    from cortex.shannon.env.trace import compute_trace_checksum
+    from legacy_research.shannon.env.trace import compute_trace_checksum
 
     checksum = compute_trace_checksum("genesis-v1", "000000", steps)
     return EpisodeTrace(

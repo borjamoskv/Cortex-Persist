@@ -20,8 +20,8 @@ from typing import Any
 import yaml
 
 # ─── Constantes ──────────────────────────────────────────────────────────────
-from cortex.core.paths import SKILLS_DIR as SKILLS_BASE_DIR
-from cortex.extensions.skills.taxonomy import (
+from legacy_research.core.paths import SKILLS_DIR as SKILLS_BASE_DIR
+from legacy_research.extensions.skills.taxonomy import (
     is_transcendent_skill,
     normalize_danger_level,
     normalize_skill_category,

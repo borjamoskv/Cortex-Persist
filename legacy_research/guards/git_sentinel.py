@@ -13,7 +13,7 @@ from pathlib import Path
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 try:
-    from cortex.guards.exergy_guard import calculate_exergy
+    from legacy_research.guards.exergy_guard import calculate_exergy
 except ImportError:
     print("\n[C5-REAL] ERROR FATAL: No se puede importar calculate_exergy. Abortando commit.")
     sys.exit(1)

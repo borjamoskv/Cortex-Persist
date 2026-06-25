@@ -155,7 +155,7 @@ class AnomalyDetector:
 
     def entropy_score(self, content: str) -> float:
         """Calculate Shannon entropy of content."""
-        from cortex.shannon.entropy import compute_character_entropy
+        from legacy_research.shannon.entropy import compute_character_entropy
         return compute_character_entropy(content)
 
     def get_baseline(self, project: str) -> ProjectBaseline:

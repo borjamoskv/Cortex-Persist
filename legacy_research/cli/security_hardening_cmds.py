@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import click
 
-from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
+from legacy_research.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 
 __all__ = ["quarantine", "reap_ghosts", "unquarantine"]
 
@@ -49,7 +49,7 @@ def unquarantine(fact_id: int, db: str) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def reap_ghosts(ttl_days: int, db: str) -> None:
     """Reap expired ghosts (DB + Songlines)."""
-    from cortex.engine.reaper import GhostReaper
+    from legacy_research.engine.reaper import GhostReaper
 
     engine = get_engine(db)
     reaper = GhostReaper(ttl_days=ttl_days)
@@ -79,7 +79,7 @@ def reap_ghosts(ttl_days: int, db: str) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def bridge_audit(db: str) -> None:
     """Audit active bridges for quarantine contamination."""
-    from cortex.engine.bridge_guard import BridgeGuard
+    from legacy_research.engine.bridge_guard import BridgeGuard
 
     engine = get_engine(db)
     try:

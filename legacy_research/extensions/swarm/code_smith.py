@@ -22,7 +22,7 @@ logger = logging.getLogger("cortex.extensions.swarm.code_smith")
 # ── Constants ──────────────────────────────────────────────────────────────
 
 # Re-exported from ast_validator for backward compatibility
-from cortex.extensions.swarm.ast_validator import (
+from legacy_research.extensions.swarm.ast_validator import (
     ASTValidationResult,
     ASTValidator,
 )

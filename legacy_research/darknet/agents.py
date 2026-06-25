@@ -10,9 +10,9 @@ from __future__ import annotations
 import logging
 import time
 
-from cortex.darknet.ingestor import RawWorldData
-from cortex.darknet.social_ledger import DarknetPost
-from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
+from legacy_research.darknet.ingestor import RawWorldData
+from legacy_research.darknet.social_ledger import DarknetPost
+from legacy_research.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 
 logger = logging.getLogger("cortex.darknet.agents")
 

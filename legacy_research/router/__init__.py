@@ -5,19 +5,19 @@ Routes pipeline requests to the correct agent(s) based on
 intent classification and capability matching.
 """
 
-from cortex.router.adapter import ExergyConfigAdapter
-from cortex.router.arbitrator import ExecutionContext, ModelType, RetrievalArbitrator
-from cortex.router.causal import CausalPolicyGradientRouter, CausalTrajectory
-from cortex.router.contract import (
+from legacy_research.router.adapter import ExergyConfigAdapter
+from legacy_research.router.arbitrator import ExecutionContext, ModelType, RetrievalArbitrator
+from legacy_research.router.causal import CausalPolicyGradientRouter, CausalTrajectory
+from legacy_research.router.contract import (
     CognitiveMode,
     InformationState,
     RoutingContext,
     RoutingDecision,
     Severity,
 )
-from cortex.router.nash import NashCausalRouter, RoutingUtilities
-from cortex.router.policy import RetrievalPolicyNetwork, SignalVector
-from cortex.router.router import AgentRouter
+from legacy_research.router.nash import NashCausalRouter, RoutingUtilities
+from legacy_research.router.policy import RetrievalPolicyNetwork, SignalVector
+from legacy_research.router.router import AgentRouter
 
 __all__ = [
     "AgentRouter",

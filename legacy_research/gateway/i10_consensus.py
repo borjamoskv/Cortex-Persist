@@ -13,11 +13,11 @@ import os
 import time
 from typing import Any
 
-from cortex import config
-from cortex.database.core import connect_async_ctx
-from cortex.embeddings.local import LocalEmbedder
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.guards.i10_consensus import I10ConsensusGuard, RetrievalConsensusError, TriadOutputs
+from legacy_research import config
+from legacy_research.database.core import connect_async_ctx
+from legacy_research.embeddings.local import LocalEmbedder
+from legacy_research.extensions.llm.provider import LLMProvider
+from legacy_research.guards.i10_consensus import I10ConsensusGuard, RetrievalConsensusError, TriadOutputs
 
 logger = logging.getLogger("cortex.gateway.i10")
 

@@ -15,7 +15,7 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 from uuid import uuid4
 
-from cortex.agents.copilot_contracts import CopilotContextPayload
+from legacy_research.agents.copilot_contracts import CopilotContextPayload
 
 logger = logging.getLogger("cortex.agents.copilot.debounce")
 

@@ -14,8 +14,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.training.ttt_engine import TTTEngine
-from cortex.extensions.training.verifier import AdapterVerifier
+from legacy_research.extensions.training.ttt_engine import TTTEngine
+from legacy_research.extensions.training.verifier import AdapterVerifier
 
 logger = logging.getLogger("cortex.extensions.training.daemon")
 

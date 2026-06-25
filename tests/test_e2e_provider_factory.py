@@ -7,7 +7,7 @@ Tests the full pipeline flow: Ingress → Context → Plan → Execute → Persi
 import pytest
 import time
 
-from cortex.pipeline import (
+from legacy_research.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -17,14 +17,14 @@ from cortex.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from cortex.pipeline.orchestrator import CortexOrchestrator
-from cortex.pipeline._orchestrator_exceptions import (
+from legacy_research.pipeline.orchestrator import CortexOrchestrator
+from legacy_research.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )
-from cortex.router.router import AgentRouter, AgentCapability
-from cortex.context.assembler import ContextAssembler
-from cortex.delivery.manager import DeliveryManager
+from legacy_research.router.router import AgentRouter, AgentCapability
+from legacy_research.context.assembler import ContextAssembler
+from legacy_research.delivery.manager import DeliveryManager
 
 
 # ── Provider Factory Tests ──
@@ -37,7 +37,7 @@ class TestProviderFactory:
         """Factory returns (None, None) when no API keys are set."""
         import os
 
-        from cortex.pipeline.provider_factory import build_executor_stack
+        from legacy_research.pipeline.provider_factory import build_executor_stack
 
         # Ensure no relevant keys are set (save and restore)
         saved = {}
@@ -68,7 +68,7 @@ class TestProviderFactory:
 
     def test_factory_priority_order(self):
         """Provider priority list is correctly ordered."""
-        from cortex.pipeline.provider_factory import _PROVIDER_PRIORITY
+        from legacy_research.pipeline.provider_factory import _PROVIDER_PRIORITY
 
         assert _PROVIDER_PRIORITY[0] == "gemini"
         assert "anthropic" in _PROVIDER_PRIORITY
@@ -77,7 +77,7 @@ class TestProviderFactory:
 
     def test_executor_uses_factory(self):
         """AgentExecutor._ensure_stack() calls factory on first use."""
-        from cortex.pipeline.executor import AgentExecutor
+        from legacy_research.pipeline.executor import AgentExecutor
 
         executor = AgentExecutor()
         assert executor._initialized is False
@@ -89,7 +89,7 @@ class TestProviderFactory:
 
     def test_executor_accepts_pre_built_provider(self):
         """Executor respects injected provider over factory."""
-        from cortex.pipeline.executor import AgentExecutor
+        from legacy_research.pipeline.executor import AgentExecutor
 
         class MockProvider:
             provider_name = "mock"

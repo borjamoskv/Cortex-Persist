@@ -86,7 +86,7 @@ class InjectionGuardWrapper(BaseGuard):
 
     def evaluate(self, context: dict[str, Any]) -> GuardOutcome:
         try:
-            from cortex.extensions.security.injection_guard import GUARD
+            from legacy_research.extensions.security.injection_guard import GUARD
 
             report = GUARD.scan(context["content"], source=context.get("source"))
             if not report.is_safe:
@@ -114,7 +114,7 @@ class AnomalyGuardWrapper(BaseGuard):
 
     def evaluate(self, context: dict[str, Any]) -> GuardOutcome:
         try:
-            from cortex.extensions.security.anomaly_detector import DETECTOR, SecurityEvent
+            from legacy_research.extensions.security.anomaly_detector import DETECTOR, SecurityEvent
 
             anomaly = DETECTOR.record_event(
                 SecurityEvent(
@@ -149,7 +149,7 @@ class HoneypotGuardWrapper(BaseGuard):
 
     def evaluate(self, context: dict[str, Any]) -> GuardOutcome:
         try:
-            from cortex.extensions.security.honeypot import HONEY_POT
+            from legacy_research.extensions.security.honeypot import HONEY_POT
 
             decoy = HONEY_POT.check_exploitation(context["content"])
             if decoy:

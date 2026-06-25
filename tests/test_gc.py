@@ -11,7 +11,7 @@ import sqlite3
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from cortex.compaction.gc import GarbageCollector
+from legacy_research.compaction.gc import GarbageCollector
 
 
 

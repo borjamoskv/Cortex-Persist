@@ -31,7 +31,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from cortex.extensions.context.signals import InferenceResult, Signal
+from legacy_research.extensions.context.signals import InferenceResult, Signal
 
 __all__ = ["ContextInference"]
 

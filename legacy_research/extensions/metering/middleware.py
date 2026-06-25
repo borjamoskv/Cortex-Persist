@@ -13,8 +13,8 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from cortex.extensions.metering.quotas import QuotaEnforcer
-from cortex.extensions.metering.tracker import UsageTracker
+from legacy_research.extensions.metering.quotas import QuotaEnforcer
+from legacy_research.extensions.metering.tracker import UsageTracker
 
 __all__ = ["MeteringMiddleware"]
 

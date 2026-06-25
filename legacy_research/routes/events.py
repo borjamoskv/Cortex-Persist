@@ -11,9 +11,9 @@ from collections.abc import AsyncGenerator
 from fastapi import APIRouter, Depends, Query, Request
 from sse_starlette.sse import EventSourceResponse
 
-from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from legacy_research.api.deps import get_async_engine
+from legacy_research.auth import AuthResult, require_permission
+from legacy_research.engine import CortexEngine as AsyncCortexEngine
 
 __all__ = ["events_router"]
 

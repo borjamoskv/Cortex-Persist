@@ -14,7 +14,7 @@ logger = logging.getLogger("cortex.extensions.llm.stealth")
 
 def prepare_stealth_headers(extra_headers: dict[str, str]) -> dict[str, str]:
     """Ω₁₇: Phantom Sovereignty - Full header suite randomization."""
-    from cortex.config import LLM_STEALTH_MODE
+    from legacy_research.config import LLM_STEALTH_MODE
 
     headers: dict[str, str] = {"Content-Type": "application/json", **extra_headers}
     if not LLM_STEALTH_MODE:
@@ -50,7 +50,7 @@ def prepare_stealth_headers(extra_headers: dict[str, str]) -> dict[str, str]:
 
 def sanitize_response(text: str) -> str:
     """Ω₁₈: GHOST_FILTER - Semantic response scrubbing to remove AI signatures."""
-    from cortex.config import LLM_STEALTH_MODE
+    from legacy_research.config import LLM_STEALTH_MODE
 
     if not LLM_STEALTH_MODE or not text:
         return text
@@ -67,7 +67,7 @@ def sanitize_response(text: str) -> str:
 
 async def apply_causal_jitter(tokens_estimate: int = 100):
     """Ω₁₉: CAUSAL_JITTER - Variable timing to break automated detection."""
-    from cortex.config import LLM_STEALTH_MODE
+    from legacy_research.config import LLM_STEALTH_MODE
 
     if not LLM_STEALTH_MODE:
         return

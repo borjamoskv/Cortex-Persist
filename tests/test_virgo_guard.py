@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from cortex.utils.errors import CortexError
-from cortex.guards.virgo import VirgoValidationError, ContextPoisoningError
+from legacy_research.utils.errors import CortexError
+from legacy_research.guards.virgo import VirgoValidationError, ContextPoisoningError
 
 # Mark all tests in this module as slow due to CortexEngine.init_db()
 pytestmark = pytest.mark.slow
@@ -34,7 +34,7 @@ def mock_omega_auditor(monkeypatch):
 @pytest.fixture
 async def engine(tmp_path: Path):
     """Create a CortexEngine with a temp database, close after test."""
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
     # Unblock tests from thermodynamic enforcement
     os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"

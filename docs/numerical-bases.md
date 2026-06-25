@@ -157,7 +157,7 @@ Este documento especifica el cierre operacional del sistema BABYLON-60 dentro de
 Aplica a los módulos:
 * `cortex/storage/*`
 * `cortex/math/*`
-* `cortex/audit/ledger.py`
+* `legacy_research/audit/ledger.py`
 * `cortex/embeddings/*`
 * `mtk_core.py`
 

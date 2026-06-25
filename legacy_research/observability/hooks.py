@@ -4,7 +4,7 @@ import time
 
 from google.antigravity import hooks
 
-from cortex.observability.telemetry import telemetry
+from legacy_research.observability.telemetry import telemetry
 
 _timers = {}
 

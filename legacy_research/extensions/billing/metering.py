@@ -27,8 +27,8 @@ def _bft_sqlite_connect(*args, **kwargs):
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 
-from cortex.extensions.billing.gateway import StripeBillingGateway
-from cortex.extensions.billing.models import BillingEvent, FailureType
+from legacy_research.extensions.billing.gateway import StripeBillingGateway
+from legacy_research.extensions.billing.models import BillingEvent, FailureType
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class CausalMetering:
 
     def __init__(self, db_path: str | None = None, gateway: StripeBillingGateway | None = None):
         if db_path is None:
-            from cortex.core.config import DB_PATH
+            from legacy_research.core.config import DB_PATH
             db_path = DB_PATH
 
         self._db_path = db_path

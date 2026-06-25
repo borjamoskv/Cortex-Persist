@@ -63,7 +63,7 @@ class SentinelMonitor:
     def _log_fact(self, tx_hash: str, to_addr: str, value: str, asset: str) -> None:
         """Store a high-priority Fact in CORTEX about the movement."""
         try:
-            from cortex.engine import CortexEngine
+            from legacy_research.engine import CortexEngine
 
             engine = CortexEngine()
             content = (

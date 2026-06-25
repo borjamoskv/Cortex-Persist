@@ -12,11 +12,11 @@ import aiosqlite
 
 import pytest
 
-from cortex.crypto.aes import CortexEncrypter
-from cortex.database.schema import CREATE_FACTS
-from cortex.database.schema_extensions import CREATE_FACTS_FTS
-from cortex.engine.fact_store_core import insert_fact_record
-from cortex.search.hybrid import hybrid_search
+from legacy_research.crypto.aes import CortexEncrypter
+from legacy_research.database.schema import CREATE_FACTS
+from legacy_research.database.schema_extensions import CREATE_FACTS_FTS
+from legacy_research.engine.fact_store_core import insert_fact_record
+from legacy_research.search.hybrid import hybrid_search
 
 
 

@@ -11,11 +11,11 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, console  # type: ignore[reportAttributeAccessIssue]
+from legacy_research.cli.common import DEFAULT_DB, console  # type: ignore[reportAttributeAccessIssue]
 
 
 def _render_grade_panel(hs, path: str) -> None:
-    from cortex.extensions.health.models import Grade
+    from legacy_research.extensions.health.models import Grade
 
     grade_colors = {
         Grade.SOVEREIGN: "bright_green",
@@ -147,8 +147,8 @@ def _render_warnings(hs, metrics) -> None:
 @click.option("--db", "db_path", default=None, help="DB path override.")
 def dashboard(db_path: str | None) -> None:
     """Rich interactive live dashboard for CORTEX Health."""
-    from cortex.extensions.health.collector import HealthCollector
-    from cortex.extensions.health.scorer import HealthScorer
+    from legacy_research.extensions.health.collector import HealthCollector
+    from legacy_research.extensions.health.scorer import HealthScorer
 
     path = db_path or str(DEFAULT_DB)
     collector = HealthCollector(db_path=path)

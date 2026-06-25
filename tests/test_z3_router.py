@@ -7,9 +7,9 @@ import os
 os.environ.setdefault("CORTEX_TESTING", "1")
 
 import pytest
-from cortex.extensions.llm._models import BaseProvider, IntentProfile, ReasoningMode, CortexPrompt
-from cortex.extensions.llm.router import CortexLLMRouter
-from cortex.config import LLM_LOCAL_FIRST
+from legacy_research.extensions.llm._models import BaseProvider, IntentProfile, ReasoningMode, CortexPrompt
+from legacy_research.extensions.llm.router import CortexLLMRouter
+from legacy_research.config import LLM_LOCAL_FIRST
 
 
 class MockProvider(BaseProvider):

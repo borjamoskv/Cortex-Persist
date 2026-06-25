@@ -1,10 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 """CORTEX ADK Tools - Bridge between ADK agents and CortexEngine.
 
-Re-exports from cortex.adk.tools to avoid code duplication.
+Re-exports from legacy_research.adk.tools to avoid code duplication.
 """
 
-from cortex.adk.tools import (
+from legacy_research.adk.tools import (
     ALL_TOOLS,
     adk_deprecate,
     adk_ledger_verify,

@@ -7,7 +7,7 @@ local sandbox, and delivers a Git branch + optional PR.
 
 Usage::
 
-    from cortex.extensions.aether import AetherAgent, TaskQueue
+    from legacy_research.extensions.aether import AetherAgent, TaskQueue
 
     queue = TaskQueue()
     queue.enqueue(AgentTask(
@@ -22,10 +22,10 @@ Usage::
     agent.run_task(queue.pop_next())
 """
 
-from cortex.extensions.aether.daemon import AetherDaemon, AetherMonitor
-from cortex.extensions.aether.models import AgentTask, TaskStatus
-from cortex.extensions.aether.queue import TaskQueue
-from cortex.extensions.aether.runner import AetherAgent
+from legacy_research.extensions.aether.daemon import AetherDaemon, AetherMonitor
+from legacy_research.extensions.aether.models import AgentTask, TaskStatus
+from legacy_research.extensions.aether.queue import TaskQueue
+from legacy_research.extensions.aether.runner import AetherAgent
 
 __all__ = [
     "AetherAgent",

@@ -10,7 +10,7 @@ CORTEX runs natively on **macOS, Linux, and Windows** without Docker. This guide
 All OS-dependent code is routed through a single abstraction layer. Direct OS checks scattered across the codebase are **prohibited**.
 
 ```python
-from cortex.platform.sys import (
+from legacy_research.platform.sys import (
     is_macos, is_linux, is_windows,
     platform_name,
     get_cortex_dir, get_service_dir, get_python_executable,

@@ -7,7 +7,7 @@ Supports Qwen (DashScope), OpenRouter, Ollama, and OpenAI.
 
 from __future__ import annotations
 
-from cortex.extensions.llm.manager import LLMManager
-from cortex.extensions.llm.provider import LLMProvider
+from legacy_research.extensions.llm.manager import LLMManager
+from legacy_research.extensions.llm.provider import LLMProvider
 
 __all__ = ["LLMManager", "LLMProvider"]

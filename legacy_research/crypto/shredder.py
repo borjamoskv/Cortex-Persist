@@ -391,7 +391,7 @@ class CryptoShredder:
         we poison the cache entry so decryption attempts fail fast.
         """
         try:
-            from cortex.crypto.aes import get_default_encrypter
+            from legacy_research.crypto.aes import get_default_encrypter
 
             enc = get_default_encrypter()
             # Remove the fact-specific key derivation marker

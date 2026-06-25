@@ -37,8 +37,8 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Final
 
-from cortex.extensions.episodic.main import Episode, EpisodicMemory, Pattern
-from cortex.memory.temporal import now_iso
+from legacy_research.extensions.episodic.main import Episode, EpisodicMemory, Pattern
+from legacy_research.memory.temporal import now_iso
 
 __all__ = [
     "DEFAULT_LOOKBACK_HOURS",
@@ -358,9 +358,9 @@ async def _get_semantic_recalls(
     Never raises - all failures degrade gracefully to None.
     """
     try:
-        from cortex.config import VECTOR_STORE_PATH
-        from cortex.memory.encoder import AsyncEncoder
-        from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+        from legacy_research.config import VECTOR_STORE_PATH
+        from legacy_research.memory.encoder import AsyncEncoder
+        from legacy_research.memory.sqlite_vec_store import SovereignVectorStoreL2
 
         if not VECTOR_STORE_PATH:
             return None

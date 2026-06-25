@@ -5,8 +5,8 @@ import random
 import time
 from dataclasses import dataclass, field
 
-from cortex.sica.meta_level import MetaLevel
-from cortex.sica.strategy import SearchStrategy
+from legacy_research.sica.meta_level import MetaLevel
+from legacy_research.sica.strategy import SearchStrategy
 
 
 @dataclass

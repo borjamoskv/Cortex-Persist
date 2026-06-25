@@ -61,14 +61,14 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.search.causal_gap import (
+from legacy_research.search.causal_gap import (
     CausalGap,
     SearchCandidate,
     compute_candidate_score,
 )
-from cortex.search.models import SearchResult
-from cortex.search.text import text_search, text_search_sync
-from cortex.search.vector import semantic_search, semantic_search_sync
+from legacy_research.search.models import SearchResult
+from legacy_research.search.text import text_search, text_search_sync
+from legacy_research.search.vector import semantic_search, semantic_search_sync
 
 __all__ = ["hybrid_search", "hybrid_search_sync"]
 

@@ -18,7 +18,7 @@ pip install cortex-persist langchain-openai
 ```
 
 ```python
-from cortex.engine import CortexEngine
+from legacy_research.engine import CortexEngine
 
 engine = CortexEngine(db_path="~/.cortex/cortex.db")
 engine.init_db()
@@ -95,7 +95,7 @@ def agent_step(project: str, user_input: str) -> str:
 For distributed agents, use the REST API:
 
 ```python
-from cortex.client import CortexClient
+from legacy_research.client import CortexClient
 
 client = CortexClient(base_url="http://localhost:8742", api_key="your-key")
 

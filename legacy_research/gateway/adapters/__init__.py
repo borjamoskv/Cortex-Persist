@@ -6,8 +6,8 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.gateway.adapters.rest import router as rest_router
-    from cortex.gateway.adapters.telegram import router as telegram_router
+    from legacy_research.gateway.adapters.rest import router as rest_router
+    from legacy_research.gateway.adapters.telegram import router as telegram_router
 
 __all__ = ["rest_router", "telegram_router"]
 

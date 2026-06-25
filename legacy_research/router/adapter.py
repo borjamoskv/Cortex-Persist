@@ -23,14 +23,14 @@ from typing import Any
 
 import yaml
 
-from cortex.router.contract import (
+from legacy_research.router.contract import (
     CONTRACT_VERSION,
     CognitiveMode,
     RoutingContext,
     RoutingDecision,
     Severity,
 )
-from cortex.router.contract import (
+from legacy_research.router.contract import (
     resolve as contract_resolve,
 )
 

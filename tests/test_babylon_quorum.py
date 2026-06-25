@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from cortex.consensus.babylon_quorum import BabylonQuorum
-from cortex.crypto.keys import ZKSwarmIdentity
+from legacy_research.consensus.babylon_quorum import BabylonQuorum
+from legacy_research.crypto.keys import ZKSwarmIdentity
 
 def test_babylon_quorum_mock_fallback():
     """Verify that reach_consensus defaults to simulation when no signatures are provided."""

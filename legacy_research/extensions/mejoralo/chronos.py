@@ -4,7 +4,7 @@
 Extracted from heal.py to maintain thermodynamic LOC limits.
 """
 
-from cortex.extensions.mejoralo.constants import (
+from legacy_research.extensions.mejoralo.constants import (
     CHRONOS_COMPLEXITY_DIVISOR,
     CHRONOS_HOURS_PER_CODEPATH,
     CHRONOS_HOURS_PER_FILE,

@@ -5,9 +5,9 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import _run_async, console, get_engine
-from cortex.engine.decalcifier import SovereignDecalcifier
-from cortex.extensions.songlines.sensor import TopographicSensor
+from legacy_research.cli.common import _run_async, console, get_engine
+from legacy_research.engine.decalcifier import SovereignDecalcifier
+from legacy_research.extensions.songlines.sensor import TopographicSensor
 
 
 @click.group(name="radar")

@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 def test_full_sovereign_opacity_protocol() -> None:
     """Test completo del protocolo de opacidad soberana."""
-    from cortex.extensions.zkortex import SovereignOpacityLayer, ZKOrtexVerifier
+    from legacy_research.extensions.zkortex import SovereignOpacityLayer, ZKOrtexVerifier
 
     print("\n" + "═" * 60)
     print("  ZKORTEX - SOVEREIGN OPACITY PROTOCOL")
@@ -111,7 +111,7 @@ def _fact_fingerprint(fact: str) -> str:
 
 def test_commitment_binding() -> None:
     """Verifica que el commitment es binding: no se puede forjar."""
-    from cortex.extensions.zkortex.commitment import commit
+    from legacy_research.extensions.zkortex.commitment import commit
 
     plaintext = "El Berghain tiene 3 puertas de seguridad"
     c, blinding = commit(plaintext)
@@ -124,7 +124,7 @@ def test_commitment_binding() -> None:
 
 def test_merkle_membership() -> None:
     """Verifica la integridad del árbol Merkle."""
-    from cortex.extensions.zkortex.merkle import MerkleTree
+    from legacy_research.extensions.zkortex.merkle import MerkleTree
 
     elements = ["alpha", "beta", "gamma", "delta"]
     tree = MerkleTree()
@@ -141,7 +141,7 @@ def test_merkle_membership() -> None:
 def test_range_proof_honesty() -> None:
     """Verifica que un range proof honesto siempre es válido,
     y que uno deshonesto no se puede construir."""
-    from cortex.extensions.zkortex.range_proof import prove_range, verify_range_proof
+    from legacy_research.extensions.zkortex.range_proof import prove_range, verify_range_proof
 
     # Honesto
     proof = prove_range(42, 10, 100)

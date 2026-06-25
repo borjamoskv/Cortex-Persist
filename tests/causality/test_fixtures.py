@@ -28,10 +28,10 @@ import aiosqlite
 
 import pytest
 
-from cortex.engine.fact_store_core import insert_fact_record
-from cortex.engine.mixins.base import FACT_COLUMNS
-from cortex.engine.models import Fact
-from cortex.engine.query_mixin import QueryMixin
+from legacy_research.engine.fact_store_core import insert_fact_record
+from legacy_research.engine.mixins.base import FACT_COLUMNS
+from legacy_research.engine.models import Fact
+from legacy_research.engine.query_mixin import QueryMixin
 
 
 

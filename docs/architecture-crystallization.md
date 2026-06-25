@@ -151,7 +151,7 @@ Deterministic persistence and trust primitives.
 - `cortex/engine/`
 - `cortex/ledger/`
 - `cortex/facts/`
-- `cortex/guards/`
+- `legacy_research/guards/`
 - `cortex/verification/`
 - `cortex/crypto/`
 

@@ -4,11 +4,11 @@ import tempfile
 
 import pytest
 
-from cortex.agents.loader import compile_agent
-from cortex.agents.schema import AgentRole, GuardrailConfig, MemoryConfig
-from cortex.memory.guardrails import SessionGuardrail
-from cortex.memory.models import MemoryEvent
-from cortex.memory.working import WorkingMemoryL1
+from legacy_research.agents.loader import compile_agent
+from legacy_research.agents.schema import AgentRole, GuardrailConfig, MemoryConfig
+from legacy_research.memory.guardrails import SessionGuardrail
+from legacy_research.memory.models import MemoryEvent
+from legacy_research.memory.working import WorkingMemoryL1
 
 # ─── Agent Schema Tests ─────────────────────────────────────────────
 

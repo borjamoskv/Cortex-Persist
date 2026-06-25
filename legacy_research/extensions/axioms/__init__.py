@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from cortex.extensions.axioms.registry import AXIOM_REGISTRY, Axiom, AxiomCategory
+from legacy_research.extensions.axioms.registry import AXIOM_REGISTRY, Axiom, AxiomCategory
 
 __all__ = ["AXIOM_REGISTRY", "Axiom", "AxiomCategory"]

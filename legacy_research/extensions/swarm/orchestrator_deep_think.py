@@ -3,10 +3,10 @@ import asyncio
 import logging
 from typing import Any
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
-    from cortex.extensions.agents.factory import create_agent  # type: ignore[import-not-found]
+    from legacy_research.extensions.agents.factory import create_agent  # type: ignore[import-not-found]
 except ImportError:
 
     async def create_agent(*args: Any, **kwargs: Any) -> Any:  # type: ignore[misc]
@@ -14,12 +14,12 @@ except ImportError:
         raise NotImplementedError("cortex.extensions.agents.factory was removed")
 
 
-from cortex.extensions.swarm.infinite_minds import InfiniteMindsManager
+from legacy_research.extensions.swarm.infinite_minds import InfiniteMindsManager
 
 try:
-    from cortex.memory.hdc.algebra import DEFAULT_DIM, bundle
-    from cortex.memory.hdc.codec import HDCEncoder
-    from cortex.memory.hdc.item_memory import ItemMemory
+    from legacy_research.memory.hdc.algebra import DEFAULT_DIM, bundle
+    from legacy_research.memory.hdc.codec import HDCEncoder
+    from legacy_research.memory.hdc.item_memory import ItemMemory
 except ImportError:
     import logging
 
@@ -107,7 +107,7 @@ class DeepThinkOrchestrator:
                 # or custom interact(). We'll wrap deliberate or send a cortex_prompt directly.
                 # BaseCortexAgent generic usage:
                 if hasattr(agent, "router"):
-                    from cortex.extensions.llm.router import CortexPrompt, IntentProfile
+                    from legacy_research.extensions.llm.router import CortexPrompt, IntentProfile
 
                     cortex_prompt = CortexPrompt(
                         system_instruction=f"{agent.persona.vision}\n{';'.join(agent.persona.axioms)}",
@@ -121,7 +121,7 @@ class DeepThinkOrchestrator:
                     text_response = await agent.deliberate()
 
             # Encode response to HDC vector and Bind Author (Vectorial Entanglement)
-            from cortex.memory.hdc.algebra import bind
+            from legacy_research.memory.hdc.algebra import bind
 
             text_hv = self.encoder.encode_text(text_response[:2000])  # cap for speed
             agent_id_hv = self.encoder.encode_text(agent_id)
@@ -161,7 +161,7 @@ class DeepThinkOrchestrator:
         hv_signature = hashlib.sha256(collapsed_hv.tobytes()).hexdigest()[:16]
 
         # Resonancia Bizantina (Consensus Calculation)
-        from cortex.memory.hdc.algebra import similarity  # type: ignore[reportAttributeAccessIssue]
+        from legacy_research.memory.hdc.algebra import similarity  # type: ignore[reportAttributeAccessIssue]
 
         sims = []
         for i in range(len(hvs)):

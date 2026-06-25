@@ -12,8 +12,8 @@ import asyncio
 import click
 from rich.panel import Panel
 
-from cortex.cli.common import cli, console
-from cortex.observability.exergy_engine import ExergyEngine
+from legacy_research.cli.common import cli, console
+from legacy_research.observability.exergy_engine import ExergyEngine
 
 __all__ = [
     "exergy_cmds",
@@ -158,7 +158,7 @@ def compile_prompt(prompt: str, level: int) -> None:
     
     # Asegurar que cortex es accesible
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-    from cortex.guards.exergy_compiler import ExergyCompilerGuard
+    from legacy_research.guards.exergy_compiler import ExergyCompilerGuard
     
     console.print(f"[bold #2B3BE5]⚡ COMPILADOR DE EXERGÍA (Nivel {level})[/bold #2B3BE5]")
     compiled = ExergyCompilerGuard.compile_payload(prompt, level=level)

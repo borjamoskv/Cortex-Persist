@@ -28,7 +28,7 @@ def calculate_recall_precision(engine, limit: int = 20, top_k: int = 5) -> dict[
     db_path = getattr(engine, "db_path", None)
     if not db_path:
         # Fallback to defaults
-        from cortex.core.paths import CORTEX_DB
+        from legacy_research.core.paths import CORTEX_DB
 
         db_path = CORTEX_DB
 

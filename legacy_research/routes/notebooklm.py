@@ -14,7 +14,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, Query
 
-from cortex.auth import AuthResult, require_permission
+from legacy_research.auth import AuthResult, require_permission
 
 router = APIRouter(tags=["notebooklm"])
 
@@ -28,7 +28,7 @@ async def notebooklm_status(
     import time
     from datetime import datetime, timezone
 
-    from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
+    from legacy_research.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
 
     result: dict = {}
 
@@ -92,8 +92,8 @@ async def notebooklm_digest(
     """Generate Master Digest with Shadow Key anchors."""
     from fastapi import HTTPException
 
-    from cortex.config import DEFAULT_DB_PATH
-    from cortex.services.notebooklm import NotebookLMService
+    from legacy_research.config import DEFAULT_DB_PATH
+    from legacy_research.services.notebooklm import NotebookLMService
 
     base_dir = Path.cwd().resolve()
     target_file = (base_dir / output).resolve()
@@ -121,8 +121,8 @@ async def notebooklm_fragment(
     """Fragment CORTEX facts into semantic domain files."""
     from fastapi import HTTPException
 
-    from cortex.config import DEFAULT_DB_PATH
-    from cortex.services.notebooklm import NotebookLMService
+    from legacy_research.config import DEFAULT_DB_PATH
+    from legacy_research.services.notebooklm import NotebookLMService
 
     base_dir = Path.cwd().resolve()
     target_dir = (base_dir / output_dir).resolve()
@@ -147,7 +147,7 @@ async def notebooklm_sync(
     import time
     from datetime import datetime, timezone
 
-    from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
+    from legacy_research.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
 
     target = None
     provider_name = "Custom"

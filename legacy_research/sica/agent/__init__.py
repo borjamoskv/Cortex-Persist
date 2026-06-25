@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
 
-from cortex.sica.agent.core import SICAAgent
+from legacy_research.sica.agent.core import SICAAgent
 
 __all__ = ["SICAAgent"]

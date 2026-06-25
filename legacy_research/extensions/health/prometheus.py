@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import cast
 
-from cortex.extensions.health.models import Grade, HealthReport, HealthScore
+from legacy_research.extensions.health.models import Grade, HealthReport, HealthScore
 
 
 def _grade_to_numeric(grade: Grade) -> int:

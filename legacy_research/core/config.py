@@ -15,12 +15,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from cortex.core.paths import (
+from legacy_research.core.paths import (
     CORTEX_DB as DEFAULT_DB_PATH,
 )
 
-# ─── Base Paths (canonical, from cortex.core.paths) ─────────────────
-from cortex.core.paths import (
+# ─── Base Paths (canonical, from legacy_research.core.paths) ─────────────────
+from legacy_research.core.paths import (
     CORTEX_DIR,
 )
 
@@ -229,5 +229,5 @@ def __getattr__(name: str) -> Any:
 
 
 # Initialize module-level attributes for backwards compatibility
-# (so `from cortex.config import DB_PATH` still works)
+# (so `from legacy_research.config import DB_PATH` still works)
 reload()

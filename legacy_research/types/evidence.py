@@ -114,7 +114,7 @@ class ClosurePayload:
         # [C5-REAL] Dynamic Thermodynamic Calculation (E-INFO-01)
         if info_exergy is None:
             try:
-                from cortex.shannon.entropy import compute_fact_entropy
+                from legacy_research.shannon.entropy import compute_fact_entropy
                 evidence_text = _canonical_json(evidence.canonical())
                 h = compute_fact_entropy(evidence_text)
                 if h <= 0:

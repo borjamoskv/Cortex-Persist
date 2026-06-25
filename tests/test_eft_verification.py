@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from cortex.engine.models import KnowledgeObject, Justification, EvidenceType
-from cortex.engine.guard_adapters import EFTVerificationGuardAdapter
+from legacy_research.engine.models import KnowledgeObject, Justification, EvidenceType
+from legacy_research.engine.guard_adapters import EFTVerificationGuardAdapter
 
 @pytest.fixture(autouse=True)
 def disable_exergy_skip(monkeypatch):

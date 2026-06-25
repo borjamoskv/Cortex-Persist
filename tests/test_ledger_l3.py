@@ -14,8 +14,8 @@ import aiosqlite
 
 import pytest
 
-from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.models import MemoryEvent
+from legacy_research.memory.ledger import EventLedgerL3
+from legacy_research.memory.models import MemoryEvent
 
 
 

@@ -7,8 +7,8 @@ import asyncio
 import sqlite3
 
 import numpy as np
-from cortex.core.lineage import LineageVerifier
-from cortex.memory.memory_archaeology import MemoryArchaeologist
+from legacy_research.core.lineage import LineageVerifier
+from legacy_research.memory.memory_archaeology import MemoryArchaeologist
 from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Any

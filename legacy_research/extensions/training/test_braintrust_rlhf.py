@@ -4,9 +4,9 @@ import datetime
 import time
 import uuid
 
-from cortex.extensions.episodic.base import Episode
-from cortex.extensions.training.collector import TrajectoryCollector
-from cortex.extensions.training.reward_engine import RewardEngine
+from legacy_research.extensions.episodic.base import Episode
+from legacy_research.extensions.training.collector import TrajectoryCollector
+from legacy_research.extensions.training.reward_engine import RewardEngine
 
 
 class MockEpisodicMemory:

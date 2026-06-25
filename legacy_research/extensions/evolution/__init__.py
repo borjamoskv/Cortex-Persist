@@ -5,7 +5,7 @@
 10 agents × 10 subagents = 100 entities improving forever.
 """
 
-from cortex.extensions.evolution.agents import (
+from legacy_research.extensions.evolution.agents import (
     AgentDomain,
     Mutation,
     MutationType,
@@ -13,14 +13,14 @@ from cortex.extensions.evolution.agents import (
     SubAgent,
     create_sovereign_swarm,
 )
-from cortex.extensions.evolution.engine import EvolutionEngine
-from cortex.extensions.evolution.ledger_db import EvolutionLedgerDB
-from cortex.extensions.evolution.models import (
+from legacy_research.extensions.evolution.engine import EvolutionEngine
+from legacy_research.extensions.evolution.ledger_db import EvolutionLedgerDB
+from legacy_research.extensions.evolution.models import (
     EvolutionMetric,
     EvolutionMutation,
     EvolutionType,
 )
-from cortex.extensions.evolution.persistence import load_swarm, save_swarm
+from legacy_research.extensions.evolution.persistence import load_swarm, save_swarm
 
 __all__ = [
     "AgentDomain",

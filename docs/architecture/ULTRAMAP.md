@@ -72,7 +72,7 @@ Ensures that executions respect tenant limits, compliance guidelines, and crypto
 | :--- | :--- | :--- | :--- |
 | `cortex/auth/` | Authentication manager, token issuers, API Key hashing, RBAC. | `rbac.py`, `manager.py` | `database`, `types` |
 | `cortex/security/` | Token quota rules, tenant isolation, fraud pattern recognition. | `quota.py`, `fraud.py` | `auth`, `telemetry` |
-| `cortex/guards/` | Admission validators, cryptographic ZK guards, contradiction check. | `sovereign_seals.py`, `virgo.py` | `crypto`, `engine` |
+| `legacy_research/guards/` | Admission validators, cryptographic ZK guards, contradiction check. | `sovereign_seals.py`, `virgo.py` | `crypto`, `engine` |
 | `cortex/compliance/` | EU AI Act compliance checks, inline redaction rules. | `pii_redactor.py` | `guards`, `routes` |
 | `cortex/darknet/` | Adversarial penetration testing sandbox for prompt injection validation. | `adversary.py` | `guards`, `agents` |
 | `cortex/evm/` | Ethereum VM integration for on-chain identity credentials. | `contract_bridge.py` | `crypto`, `auth` |
@@ -88,7 +88,7 @@ Coordinates working memories, embedding generation, and persistent database mapp
 | `cortex/engine/` | Aggregated fact orchestrator (`CortexEngine`) via Mixin architecture. | `crystallizer.py`, `entropy.py` | `database`, `ledger`, `cache` |
 | `cortex/memory/` | Tripartite Memory Stack (L1 Working, L2 Vector, L3 Event Ledger). | `manager.py`, `vector_providers/` | `cache`, `embeddings`, `database` |
 | `cortex/facts/` | Domain definitions and serialization protocols for Fact states. | `models.py` | `types` |
-| `cortex/database/` | SQLite WAL & Postgres connection pools and active adapter routing. | `pool.py`, `postgres_core.py` | `core`, `config` |
+| `legacy_research/database/` | SQLite WAL & Postgres connection pools and active adapter routing. | `pool.py`, `postgres_core.py` | `core`, `config` |
 | `cortex/storage/` | Data persistence layers, parquet cold archiving, storage routers. | `postgres.py`, `parquet.py` | `database`, `types` |
 | `cortex/cache/` | Redis L1 caching layer with automatic query coherence. | `redis_client.py` | `config` |
 | `cortex/embeddings/` | Local ONNX embedding generations and transformer batching. | `onnx_runtime.py` | `config` |
@@ -105,7 +105,7 @@ Ensures that every write contains a cryptographic proof trail (`CORTEX-TAINT`).
 
 | Directory | Core Responsibility | Primary Files / Handles | Inter-Module Dependencies |
 | :--- | :--- | :--- | :--- |
-| `cortex/audit/` | Master Ledger — immutable SHA-256 hash-chain mapping database writes. | `ledger.py` | `database`, `crypto` |
+| `legacy_research/audit/` | Master Ledger — immutable SHA-256 hash-chain mapping database writes. | `ledger.py` | `database`, `crypto` |
 | `cortex/ledger/` | Origin validation metadata, ledger state verification, exports. | `origin.py`, `public_export.py` | `audit`, `crypto` |
 | `cortex/consensus/` | Byzantine fault tolerance (BFT) vote ledger and consensus protocols. | `merkle.py`, `byzantine.py` | `ledger`, `database` |
 | `cortex/crypto/` | Key generation (Ed25519), AES-GCM encryption, native Keyring wraps. | `keys.py`, `aes.py` | `utils` |

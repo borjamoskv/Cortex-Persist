@@ -11,10 +11,10 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 
-from cortex.extensions.health.collector import HealthCollector
-from cortex.extensions.health.models import Grade
-from cortex.extensions.health.scorer import HealthScorer
-from cortex.extensions.health.trend import TrendDetector
+from legacy_research.extensions.health.collector import HealthCollector
+from legacy_research.extensions.health.models import Grade
+from legacy_research.extensions.health.scorer import HealthScorer
+from legacy_research.extensions.health.trend import TrendDetector
 
 logger = logging.getLogger("moskv-daemon.health")
 

@@ -8,7 +8,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import (
+from legacy_research.cli.common import (
     DEFAULT_DB,
     _detect_agent_source,
     _run_async,
@@ -17,8 +17,8 @@ from cortex.cli.common import (
     console,
     get_engine,
 )
-from cortex.cli.errors import err_empty_results
-from cortex.cli.slow_tip import with_slow_tips
+from legacy_research.cli.errors import err_empty_results
+from legacy_research.cli.slow_tip import with_slow_tips
 
 
 def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
@@ -44,7 +44,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
         priv_b64 = os.environ.get("CORTEX_ED25519_PRIVATE_KEY")
 
     if priv_b64:
-        from cortex.engine.causal.taint_engine import generate_secure_taint_token
+        from legacy_research.engine.causal.taint_engine import generate_secure_taint_token
 
         try:
             token = generate_secure_taint_token(
@@ -55,7 +55,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
             )
             meta["cortex_taint"] = token
         except Exception as e:
-            from cortex.cli.common import console
+            from legacy_research.cli.common import console
 
             console.print(f"[yellow]Warning: Failed to generate taint token: {e}[/]")
             os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
@@ -137,7 +137,7 @@ def store(
         if ai_time is not None and complexity is not None:
             import dataclasses
 
-            from cortex.extensions.timing.chronos import ChronosEngine
+            from legacy_research.extensions.timing.chronos import ChronosEngine
 
             metrics = ChronosEngine.analyze(ai_time, complexity)
             meta["chronos"] = dataclasses.asdict(metrics)
@@ -276,7 +276,7 @@ def search(query, project, top, scope, db, retrieval) -> None:
                 )
         else:
             # Federated search across partitioned databases
-            from cortex.search.federation import federated_search_sync
+            from legacy_research.search.federation import federated_search_sync
 
             with console.status(
                 f"[noir.violet]Federated search (scope={scope})...[/]",
@@ -319,7 +319,7 @@ def search(query, project, top, scope, db, retrieval) -> None:
 
         # Retrieval analysis overlay
         if retrieval:
-            from cortex.memory.void_detector import RetrievalVoidDetector
+            from legacy_research.memory.void_detector import RetrievalVoidDetector
 
             detector = RetrievalVoidDetector()
             candidates = [

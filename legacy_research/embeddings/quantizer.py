@@ -1,5 +1,5 @@
 
-from cortex.math.babylon import CortexVector
+from legacy_research.math.babylon import CortexVector
 
 
 class AutocrystallizerQuantizationEdge:

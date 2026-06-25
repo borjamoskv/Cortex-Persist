@@ -13,7 +13,7 @@ import logging
 from enum import Enum
 from typing import Any
 
-from cortex.math.babylon import Cortex
+from legacy_research.math.babylon import Cortex
 
 logger = logging.getLogger("cortex.extensions.sales_b2b.messaging_flow")
 

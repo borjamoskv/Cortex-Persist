@@ -3,14 +3,14 @@ import asyncio
 
 import pytest
 
-from cortex.consensus.manager import ConsensusManager
-from cortex.database.schema import get_all_schema
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from legacy_research.consensus.manager import ConsensusManager
+from legacy_research.database.schema import get_all_schema
+from legacy_research.engine import CortexEngine as AsyncCortexEngine
 
 
 @pytest.fixture
 async def engine(tmp_path):
-    from cortex.database.pool import CortexConnectionPool
+    from legacy_research.database.pool import CortexConnectionPool
 
     # Setup temporary DB file
     db_path = str(tmp_path / "test_cortex.db")
@@ -139,7 +139,7 @@ async def test_taint_propagation_crypto_safety(engine):
         await conn.commit()
 
     # 3. Propagate taint from fact 500
-    from cortex.engine.causality import AsyncCausalGraph
+    from legacy_research.engine.causality import AsyncCausalGraph
 
     async with engine.session() as conn:
         graph = AsyncCausalGraph(conn)

@@ -3,7 +3,7 @@ import asyncio
 import threading
 import time
 import pytest
-from cortex.engine import CortexEngine
+from legacy_research.engine import CortexEngine
 
 
 def test_sync_mixin_concurrent_execution(tmp_path):

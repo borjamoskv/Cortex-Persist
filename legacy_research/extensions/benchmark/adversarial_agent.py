@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.agents.base import ReactiveTaskAgent
+from legacy_research.agents.base import ReactiveTaskAgent
 
 logger = logging.getLogger("moskv.benchmark.adversarial_agent")
 

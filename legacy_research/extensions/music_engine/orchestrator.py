@@ -13,15 +13,15 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from cortex.extensions.llm.manager import LLMManager
-from cortex.extensions.llm.router import IntentProfile
-from cortex.extensions.music_engine.adapters import (
+from legacy_research.extensions.llm.manager import LLMManager
+from legacy_research.extensions.llm.router import IntentProfile
+from legacy_research.extensions.music_engine.adapters import (
     LocalMIDIAdapter,
     Lyria3Adapter,
     SunoV5Adapter,
     UdioV4Adapter,
 )
-from cortex.extensions.music_engine.dsp_apotheosis import DSPApotheosis
+from legacy_research.extensions.music_engine.dsp_apotheosis import DSPApotheosis
 
 logger = logging.getLogger(__name__)
 

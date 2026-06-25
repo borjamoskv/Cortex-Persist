@@ -6,25 +6,25 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.daemon.monitors.auto_immune import AutoImmuneMonitor
-    from cortex.extensions.daemon.monitors.cert import CertMonitor
-    from cortex.extensions.daemon.monitors.cloud import CloudSyncMonitor
-    from cortex.extensions.daemon.monitors.compaction import CompactionMonitor
-    from cortex.extensions.daemon.monitors.disk import DiskMonitor
-    from cortex.extensions.daemon.monitors.engine import EngineHealthCheck
-    from cortex.extensions.daemon.monitors.evaluation import EvaluationMonitor
-    from cortex.extensions.daemon.monitors.ghosts import GhostWatcher
-    from cortex.extensions.daemon.monitors.mejoralo import UnifiedMejoraloMonitor
-    from cortex.extensions.daemon.monitors.memory import MemorySyncer
-    from cortex.extensions.daemon.monitors.network import SiteMonitor
-    from cortex.extensions.daemon.monitors.neural import NeuralIntentMonitor
-    from cortex.extensions.daemon.monitors.perception import PerceptionMonitor
-    from cortex.extensions.daemon.monitors.retrieval import RetrievalMonitor
-    from cortex.extensions.daemon.monitors.security import SecurityMonitor
-    from cortex.extensions.daemon.monitors.signals import SignalMonitor
-    from cortex.extensions.daemon.monitors.tombstone import TombstoneMonitor
-    from cortex.extensions.daemon.monitors.trends import TrendsMonitor
-    from cortex.extensions.daemon.monitors.workflow import WorkflowMonitor
+    from legacy_research.extensions.daemon.monitors.auto_immune import AutoImmuneMonitor
+    from legacy_research.extensions.daemon.monitors.cert import CertMonitor
+    from legacy_research.extensions.daemon.monitors.cloud import CloudSyncMonitor
+    from legacy_research.extensions.daemon.monitors.compaction import CompactionMonitor
+    from legacy_research.extensions.daemon.monitors.disk import DiskMonitor
+    from legacy_research.extensions.daemon.monitors.engine import EngineHealthCheck
+    from legacy_research.extensions.daemon.monitors.evaluation import EvaluationMonitor
+    from legacy_research.extensions.daemon.monitors.ghosts import GhostWatcher
+    from legacy_research.extensions.daemon.monitors.mejoralo import UnifiedMejoraloMonitor
+    from legacy_research.extensions.daemon.monitors.memory import MemorySyncer
+    from legacy_research.extensions.daemon.monitors.network import SiteMonitor
+    from legacy_research.extensions.daemon.monitors.neural import NeuralIntentMonitor
+    from legacy_research.extensions.daemon.monitors.perception import PerceptionMonitor
+    from legacy_research.extensions.daemon.monitors.retrieval import RetrievalMonitor
+    from legacy_research.extensions.daemon.monitors.security import SecurityMonitor
+    from legacy_research.extensions.daemon.monitors.signals import SignalMonitor
+    from legacy_research.extensions.daemon.monitors.tombstone import TombstoneMonitor
+    from legacy_research.extensions.daemon.monitors.trends import TrendsMonitor
+    from legacy_research.extensions.daemon.monitors.workflow import WorkflowMonitor
 
 # Aliases for backward compatibility
 _ALIASES: dict[str, str] = {

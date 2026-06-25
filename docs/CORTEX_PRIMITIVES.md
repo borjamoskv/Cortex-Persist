@@ -75,7 +75,7 @@ El blindaje de la procedencia. Nada existe sin hash verificable.
 
 41. **`ED25519_SIGN`**: Firma asimétrica de cada transacción bajo la autoridad del SYS_ID del Operador (`borjamoskv`).
 42. **`AES_GCM_ISOLATION`**: Cifrado AES-GCM en reposo de variables y metadatos con enclave OS nativo.
-43. **`SHA256_CHAIN_APPEND`**: Encadenamiento inmutable de eventos MTK en `cortex/audit/ledger.py`.
+43. **`SHA256_CHAIN_APPEND`**: Encadenamiento inmutable de eventos MTK en `legacy_research/audit/ledger.py`.
 44. **`PROVENANCE_AUDIT`**: Rastreo de origen O(1) determinando la cadena epistémica exacta hasta la primera semilla (Seed).
 45. **`SOVEREIGN_SEAL_VERIFY`**: Bloqueo de PRs si el Ledger carece del sello de autoría inmutable.
 46. **`TAMPER_EVIDENT_LOCK`**: Parálisis del motor (P0) si la validación criptográfica N ≠ N-1 detecta alteración.

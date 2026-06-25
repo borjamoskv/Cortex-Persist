@@ -11,9 +11,9 @@ from __future__ import annotations
 import logging
 from typing import Any, Final
 
-from cortex.extensions.skills.registry import SkillManifest, SkillRegistry
-from cortex.memory.metamemory import MetamemoryMonitor
-from cortex.memory.procedural import ProceduralMemory
+from legacy_research.extensions.skills.registry import SkillManifest, SkillRegistry
+from legacy_research.memory.metamemory import MetamemoryMonitor
+from legacy_research.memory.procedural import ProceduralMemory
 
 logger = logging.getLogger(__name__)
 

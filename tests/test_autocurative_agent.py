@@ -13,18 +13,18 @@ import asyncio
 import pytest
 import time
 
-from cortex.engine.autocurative_agent import (
+from legacy_research.engine.autocurative_agent import (
     AutoCurativeAgent,
     AutoCurativeConfig,
     HealingPhase,
 )
-from cortex.engine.repair_strategies import (
+from legacy_research.engine.repair_strategies import (
     REPAIR_REGISTRY,
     RepairResult,
     RepairStatus,
     RepairRegistry,
 )
-from cortex.engine.circuit_breaker import CircuitBreaker, CircuitState
+from legacy_research.engine.circuit_breaker import CircuitBreaker, CircuitState
 
 
 # ─── Fixtures ─────────────────────────────────────────────────────
@@ -457,7 +457,7 @@ async def test_full_healing_loop_integration():
     assert health.status == "healthy"
 
     # Verify endocrine impact
-    from cortex.engine.endocrine import ENDOCRINE, HormoneType
+    from legacy_research.engine.endocrine import ENDOCRINE, HormoneType
     # Cortisol should have been pulsed (both up and down)
     # Neural growth should have been rewarded
     # These are integration checks - exact values depend on decay

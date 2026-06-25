@@ -11,8 +11,8 @@ from pathlib import Path
 
 import httpx
 
-from cortex.extensions.aether.models import AgentTask, TaskSource
-from cortex.extensions.aether.queue import TaskQueue
+from legacy_research.extensions.aether.models import AgentTask, TaskSource
+from legacy_research.extensions.aether.queue import TaskQueue
 
 __all__ = ["GitHubIngestor"]
 

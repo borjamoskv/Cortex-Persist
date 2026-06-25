@@ -3,7 +3,7 @@
 
 import pytest
 
-from cortex.extensions.sales_b2b.messaging_flow import MessagingFSM, MessagingStage
+from legacy_research.extensions.sales_b2b.messaging_flow import MessagingFSM, MessagingStage
 
 
 def test_fsm_valid_transitions():

@@ -66,9 +66,9 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.database.core import connect_async_ctx
-from cortex.extensions.evolution.agents import SovereignAgent
-from cortex.extensions.evolution.persistence import (
+from legacy_research.database.core import connect_async_ctx
+from legacy_research.extensions.evolution.agents import SovereignAgent
+from legacy_research.extensions.evolution.persistence import (
     SCHEMA_VERSION,
     _agent_to_dict,  # type: ignore[reportAttributeAccessIssue]
     _reconstruct_agents,

@@ -19,11 +19,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, HttpUrl
 
-from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.extensions.llm.manager import LLMManager
-from cortex.extensions.llm.router import IntentProfile
+from legacy_research.api.deps import get_async_engine
+from legacy_research.auth import AuthResult, require_permission
+from legacy_research.engine import CortexEngine as AsyncCortexEngine
+from legacy_research.extensions.llm.manager import LLMManager
+from legacy_research.extensions.llm.router import IntentProfile
 
 __all__ = [
     "OracleRequest",

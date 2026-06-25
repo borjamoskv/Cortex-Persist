@@ -10,10 +10,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
 # CORTEX L2 Membrane
-from cortex.engine import CortexEngine
-from cortex.extensions.immune.membrane import ImmuneMembrane, Verdict
-from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+from legacy_research.engine import CortexEngine
+from legacy_research.extensions.immune.membrane import ImmuneMembrane, Verdict
+from legacy_research.memory.encoder import AsyncEncoder
+from legacy_research.memory.sqlite_vec_store import SovereignVectorStoreL2
 
 app = FastAPI(title="Claude Code Router (CCR)")
 

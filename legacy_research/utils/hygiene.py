@@ -27,7 +27,7 @@ def get_orphaned_browsers():
 
 def get_snapshot_age():
     """Return the age of the CORTEX snapshot in minutes."""
-    from cortex.core.paths import CORTEX_DIR
+    from legacy_research.core.paths import CORTEX_DIR
 
     snapshot_path = CORTEX_DIR / "context-snapshot.md"
     if not snapshot_path.exists():

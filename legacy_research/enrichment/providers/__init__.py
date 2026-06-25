@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
-from cortex.enrichment.providers.null import NullEmbeddingProvider
-from cortex.enrichment.providers.remote import RemoteEmbeddingProvider
-from cortex.enrichment.providers.torch_local import TorchEmbeddingProvider
+from legacy_research.enrichment.providers.null import NullEmbeddingProvider
+from legacy_research.enrichment.providers.remote import RemoteEmbeddingProvider
+from legacy_research.enrichment.providers.torch_local import TorchEmbeddingProvider
 
 __all__ = [
     "NullEmbeddingProvider",

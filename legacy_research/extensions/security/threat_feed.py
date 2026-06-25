@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.security.threat_signatures import BUILT_IN_SIGNATURES
+from legacy_research.extensions.security.threat_signatures import BUILT_IN_SIGNATURES
 
 logger = logging.getLogger("cortex.extensions.security.threat_feed")
 __all__ = ["BUILT_IN_SIGNATURES", "ThreatFeedEngine", "ThreatFeedReport", "ThreatMatch"]
@@ -183,5 +183,5 @@ class ThreatFeedEngine:
 
         High entropy (>4.5) suggests encoded/encrypted payloads.
         """
-        from cortex.shannon.entropy import compute_character_entropy
+        from legacy_research.shannon.entropy import compute_character_entropy
         return compute_character_entropy(content)

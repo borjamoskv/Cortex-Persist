@@ -7,8 +7,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from cortex.runtime.replay.divergence import DivergenceCoordinates, DivergenceMetricEngine
-from cortex.shannon.env.trace import EpisodeTrace
+from legacy_research.runtime.replay.divergence import DivergenceCoordinates, DivergenceMetricEngine
+from legacy_research.shannon.env.trace import EpisodeTrace
 
 
 class DivergenceType(Enum):

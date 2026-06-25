@@ -16,7 +16,7 @@ import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from cortex.extensions.policy.models import (
+from legacy_research.extensions.policy.models import (
     ACTION_TYPE_MAP,
     REWARD_MAP,
     ActionItem,
@@ -24,8 +24,8 @@ from cortex.extensions.policy.models import (
 )
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
-    from cortex.engine.models import Fact
+    from legacy_research.engine import CortexEngine
+    from legacy_research.engine.models import Fact
 
 logger = logging.getLogger("cortex.extensions.policy")
 

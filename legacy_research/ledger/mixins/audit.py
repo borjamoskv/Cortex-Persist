@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     pass
-from cortex.ledger.merkle import MerkleTree
-from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1, now_iso
+from legacy_research.ledger.merkle import MerkleTree
+from legacy_research.utils.canonical import compute_tx_hash, compute_tx_hash_v1, now_iso
 
 logger = logging.getLogger("cortex.ledger")
 
@@ -161,8 +161,8 @@ class LedgerAuditMixin:
                 }
         await fact_cursor.close()
 
-        from cortex.crypto import get_default_encrypter
-        from cortex.utils.canonical import compute_fact_hash
+        from legacy_research.crypto import get_default_encrypter
+        from legacy_research.utils.canonical import compute_fact_hash
 
         enc = get_default_encrypter()
         for f_tx_id, info in list(active_facts_by_tx.items()):

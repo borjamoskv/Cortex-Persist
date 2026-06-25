@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 
-from cortex.extensions.market_maker.models import MVPArtifact, Opportunity
+from legacy_research.extensions.market_maker.models import MVPArtifact, Opportunity
 
 log = logging.getLogger(__name__)
 

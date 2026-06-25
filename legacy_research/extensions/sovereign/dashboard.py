@@ -13,7 +13,7 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from cortex.extensions.sovereign.observability import (
+from legacy_research.extensions.sovereign.observability import (
     Dimension,
     compute_power,
     run_security_scans,
@@ -27,7 +27,7 @@ async def get_power_level() -> dict[str, Any]:
     """Return current sovereign power level."""
     scores = {}
     try:
-        from cortex.extensions.mejoralo.scan import scan  # real scanner
+        from legacy_research.extensions.mejoralo.scan import scan  # real scanner
 
         result = scan("cortex/")  # type: ignore[reportCallIssue]
         # Map scan result dimensions to our Dimension enum
@@ -74,7 +74,7 @@ async def health() -> dict[str, str]:
 @router.get("/skills")
 async def list_skills() -> dict[str, Any]:
     """List all discovered sovereign skills."""
-    from cortex.extensions.sovereign.engine import (
+    from legacy_research.extensions.sovereign.engine import (
         discover_skills,  # type: ignore[reportAttributeAccessIssue]
     )
 

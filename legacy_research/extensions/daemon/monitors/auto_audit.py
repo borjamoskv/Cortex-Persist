@@ -23,10 +23,10 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 import time
 from typing import Any
 
-from cortex.extensions.daemon.models import (
+from legacy_research.extensions.daemon.models import (
     AutoAuditAlert,
 )
-from cortex.extensions.daemon.monitors.base import BaseMonitor
+from legacy_research.extensions.daemon.monitors.base import BaseMonitor
 
 logger = logging.getLogger("moskv-daemon")
 

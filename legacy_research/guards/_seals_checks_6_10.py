@@ -3,8 +3,8 @@ import ast
 import asyncio
 from pathlib import Path
 
-from cortex.guards._seals_cache import ROOT_DIR, GlobalSourceCache, printer
-from cortex.guards.sovereign_seals import (
+from legacy_research.guards._seals_cache import ROOT_DIR, GlobalSourceCache, printer
+from legacy_research.guards.sovereign_seals import (
     check_gate_21_preservation,
     check_seal_8_dependency_impl,
     check_seal_9_compliance_impl,
@@ -89,7 +89,7 @@ def _has_temperature_drift(tree: ast.AST) -> bool:
 async def _check_latency_telemetry() -> list[str]:
     """Audit local provider latency from telemetry."""
     try:
-        from cortex.extensions.llm._telemetry import CascadeTelemetry
+        from legacy_research.extensions.llm._telemetry import CascadeTelemetry
 
         telemetry = CascadeTelemetry()
         stats = telemetry.stats()
@@ -136,7 +136,7 @@ async def check_seal_6_async_perf() -> GateResult:
     critical = [
         ROOT_DIR / "cortex/llm/router.py",
         ROOT_DIR / "cortex/llm/provider.py",
-        ROOT_DIR / "cortex/guards/seals.py",
+        ROOT_DIR / "legacy_research/guards/seals.py",
     ]
     temp_violations = await _check_temperature_determinism(critical)
     if temp_violations:
@@ -157,8 +157,8 @@ async def check_seal_7_axiom_registry() -> GateResult:
     printer.seal(7, "Registry Integrity", "Axiom Registry + Prompt Budget")
     passed = True
     try:
-        from cortex.extensions.axioms import AXIOM_REGISTRY
-        from cortex.extensions.axioms.registry import enforced
+        from legacy_research.extensions.axioms import AXIOM_REGISTRY
+        from legacy_research.extensions.axioms.registry import enforced
 
         total = len(AXIOM_REGISTRY)
         enf = len(enforced())

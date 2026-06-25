@@ -17,8 +17,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.extensions.evolution.agents import AgentDomain, SovereignAgent
-from cortex.extensions.evolution.cortex_metrics import DomainMetrics
+from legacy_research.extensions.evolution.agents import AgentDomain, SovereignAgent
+from legacy_research.extensions.evolution.cortex_metrics import DomainMetrics
 
 logger = logging.getLogger(__name__)
 

@@ -14,9 +14,9 @@ from typing import Any, TypedDict, cast
 
 from pydantic import BaseModel, Field
 
-from cortex.engine.aleph_omega import AxiomaticLeapEngine
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.extensions.swarm.byzantine import ByzantineConsensus
+from legacy_research.engine.aleph_omega import AxiomaticLeapEngine
+from legacy_research.engine.endocrine import ENDOCRINE, HormoneType
+from legacy_research.extensions.swarm.byzantine import ByzantineConsensus
 
 __all__ = [
     "CentauroEngine",
@@ -87,7 +87,7 @@ class VirtualAgent:
         if self._router is not None:
             # ── C5-REAL path ──────────────────────────────────────────
             try:
-                from cortex.extensions.llm._models import CortexPrompt, IntentProfile
+                from legacy_research.extensions.llm._models import CortexPrompt, IntentProfile
 
                 # War Council: Cognitive Diversity Mapping
                 intent_map = {

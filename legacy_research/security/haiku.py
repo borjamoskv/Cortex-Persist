@@ -11,7 +11,7 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.security.types import GuardViolation
+from legacy_research.security.types import GuardViolation
 
 logger = logging.getLogger("cortex.security.haiku")
 

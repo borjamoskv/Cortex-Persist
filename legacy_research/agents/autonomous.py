@@ -33,16 +33,16 @@ import logging
 import time
 from typing import Any
 
-from cortex.agents.base import BaseAgent
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
-from cortex.agents.planner import (
+from legacy_research.agents.base import BaseAgent
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import AgentMessage, MessageKind, new_message
+from legacy_research.agents.planner import (
     ExecutionPlan,
     ExergyPlanner,
     PlanStep,
     StepStatus,
 )
-from cortex.agents.tools import ToolRegistry
+from legacy_research.agents.tools import ToolRegistry
 
 logger = logging.getLogger("cortex.agents.autonomous")
 

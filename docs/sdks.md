@@ -28,7 +28,7 @@ uvicorn cortex.api:app --host 0.0.0.0 --port 8484
 ### Basic Usage
 
 ```python
-from cortex import CortexEngine
+from legacy_research import CortexEngine
 
 # Synchronous usage
 engine = CortexEngine(db_path="~/.cortex/cortex.db", auto_embed=True)
@@ -48,7 +48,7 @@ facts = engine.recall_sync("my-project")
 
 ```python
 import asyncio
-from cortex import CortexEngine
+from legacy_research import CortexEngine
 
 
 async def main() -> None:
@@ -74,7 +74,7 @@ asyncio.run(main())
 
 ```python
 import asyncio
-from cortex import CortexEngine
+from legacy_research import CortexEngine
 
 
 async def main() -> None:
@@ -96,7 +96,7 @@ asyncio.run(main())
 
 ```python
 import asyncio
-from cortex import CortexEngine
+from legacy_research import CortexEngine
 
 
 async def main() -> None:

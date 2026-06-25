@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-from cortex.engine.causality import CausalGraph, ValidationStatus, LedgerEvent, propagate_refutation
+from legacy_research.engine.causality import CausalGraph, ValidationStatus, LedgerEvent, propagate_refutation
 
 
 def test_refuted_propagates_taint():

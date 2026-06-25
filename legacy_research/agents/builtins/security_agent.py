@@ -11,12 +11,12 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.agents.base import BaseAgent
-from cortex.agents.bus import MessageBus
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
-from cortex.agents.tools import ToolRegistry
-from cortex.extensions.daemon.monitors.security import SecurityMonitor
+from legacy_research.agents.base import BaseAgent
+from legacy_research.agents.bus import MessageBus
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import AgentMessage, MessageKind, new_message
+from legacy_research.agents.tools import ToolRegistry
+from legacy_research.extensions.daemon.monitors.security import SecurityMonitor
 
 logger = logging.getLogger(__name__)
 

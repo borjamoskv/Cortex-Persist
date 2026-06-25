@@ -18,7 +18,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from cortex.agents.builtins import (
+from legacy_research.agents.builtins import (
     MoskvVidentiaAgent,
     HandoffAgent,
     MemoryAgent,
@@ -27,10 +27,10 @@ from cortex.agents.builtins import (
     SupervisorAgent,
     VerificationAgent,
 )
-from cortex.agents.bus import SqliteMessageBus
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import MessageKind, new_message
-from cortex.agents.supervisor import Supervisor
+from legacy_research.agents.bus import SqliteMessageBus
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import MessageKind, new_message
+from legacy_research.agents.supervisor import Supervisor
 
 # ── Helpers ────────────────────────────────────────────────────────
 

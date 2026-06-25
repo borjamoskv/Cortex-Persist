@@ -28,8 +28,8 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 import time
 from pathlib import Path
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-from cortex.extensions.daemon.models import DriftAlert
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.extensions.daemon.models import DriftAlert
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -78,7 +78,7 @@ class DriftMonitorDaemon:
 
     def _run_check(self) -> list[DriftAlert]:
         """Execute the actual drift check against persisted baseline."""
-        from cortex.memory.drift import DriftMonitor, model_hash_from_name
+        from legacy_research.memory.drift import DriftMonitor, model_hash_from_name
 
         model_hash = model_hash_from_name(self.model_name)
         signature_dir = self.cortex_dir / "drift"
@@ -132,7 +132,7 @@ class DriftMonitorDaemon:
             return None
 
         try:
-            from cortex.database.core import connect as db_connect
+            from legacy_research.database.core import connect as db_connect
 
             conn = db_connect(str(self.vectors_db_path), timeout=10)
             conn.execute("PRAGMA busy_timeout=10000")

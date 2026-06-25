@@ -16,8 +16,8 @@ import os
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from cortex.telemetry.pipeline_metrics import PipelineMetrics
-from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
+from legacy_research.telemetry.pipeline_metrics import PipelineMetrics
+from legacy_research.types.evidence import ClosurePayload, EvidenceBundle, Source
 
 logger = logging.getLogger("cortex.pipeline.cve_orchestrator")
 
@@ -169,7 +169,7 @@ class CVEOrchestrator:
             metrics.record_cost(Decimal("0.01"))
         except LookupError:
             pass
-        from cortex.guards.causal_closure_guard import CausalClosureGuard
+        from legacy_research.guards.causal_closure_guard import CausalClosureGuard
         
         payload = ClosurePayload.seal(
             claims=claims,

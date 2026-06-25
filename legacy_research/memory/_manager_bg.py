@@ -4,7 +4,7 @@ import asyncio
 import logging
 from typing import Any
 
-from cortex.memory.memory_compression import compress_and_store
+from legacy_research.memory.memory_compression import compress_and_store
 
 logger = logging.getLogger("cortex.memory._manager_bg")
 

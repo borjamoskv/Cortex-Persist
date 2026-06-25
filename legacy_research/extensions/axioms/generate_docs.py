@@ -14,13 +14,13 @@ from __future__ import annotations
 import datetime
 from pathlib import Path
 
-from cortex.extensions.axioms.registry import (
+from legacy_research.extensions.axioms.registry import (
     AXIOM_REGISTRY,
     AxiomCategory,
     by_category,
     enforced,
 )
-from cortex.extensions.axioms.ttl import FACT_TTL, ttl_days
+from legacy_research.extensions.axioms.ttl import FACT_TTL, ttl_days
 
 
 def _header() -> str:

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.embeddings.local import LocalEmbedder
+from legacy_research.embeddings.local import LocalEmbedder
 
 __all__ = ["EmbeddingManager"]
 
@@ -26,14 +26,14 @@ class EmbeddingManager:
     @property
     def mode(self) -> str:
         """Return the current embeddings mode (local|api)."""
-        from cortex import config
+        from legacy_research import config
 
         return config.EMBEDDINGS_MODE
 
     @property
     def provider(self) -> str:
         """Return the configured provider name."""
-        from cortex import config
+        from legacy_research import config
 
         return config.EMBEDDINGS_PROVIDER
 
@@ -48,10 +48,10 @@ class EmbeddingManager:
             return self._embedder
 
         if self.mode == "api":
-            from cortex import config
+            from legacy_research import config
 
             try:
-                from cortex.embeddings.api_embedder import APIEmbedder
+                from legacy_research.embeddings.api_embedder import APIEmbedder
             except Exception as exc:
                 raise RuntimeError(f"API embeddings unavailable: {exc}") from exc
 
@@ -175,8 +175,8 @@ class EmbeddingManager:
         This method is called by the EnrichmentWorker to finalize a fact's
         entry into the Double-Plane architecture.
         """
-        from cortex.engine.embedding_engine import embed_fact_async
-        from cortex.engine.metadata_engine import MetadataEngine
+        from legacy_research.engine.embedding_engine import embed_fact_async
+        from legacy_research.engine.metadata_engine import MetadataEngine
 
         async with self.engine.session() as conn:
             # 1. Dense & Specular Embeddings

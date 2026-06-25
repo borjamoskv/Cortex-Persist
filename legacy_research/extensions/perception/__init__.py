@@ -10,16 +10,16 @@ Three-layer behavioral perception:
 Re-exports all public symbols for backward-compatible imports.
 """
 
-from cortex.extensions.perception.base import (
+from legacy_research.extensions.perception.base import (
     BehavioralSnapshot,
     FileEvent,
     classify_file,
     infer_project_from_path,
     should_ignore,
 )
-from cortex.extensions.perception.inference import compute_event_stats, infer_behavior
-from cortex.extensions.perception.observer import FileActivityObserver
-from cortex.extensions.perception.pipeline import PerceptionPipeline, PerceptionRecorder
+from legacy_research.extensions.perception.inference import compute_event_stats, infer_behavior
+from legacy_research.extensions.perception.observer import FileActivityObserver
+from legacy_research.extensions.perception.pipeline import PerceptionPipeline, PerceptionRecorder
 
 __all__ = [
     "BehavioralSnapshot",

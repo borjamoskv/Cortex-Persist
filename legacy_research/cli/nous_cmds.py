@@ -8,9 +8,9 @@ from pathlib import Path
 
 import click
 
-from cortex.cli.common import _run_async, cli, console, get_engine
-from cortex.extensions.nous.compiler_v2 import NousCompilerV2
-from cortex.extensions.nous.runtime import NousRuntime
+from legacy_research.cli.common import _run_async, cli, console, get_engine
+from legacy_research.extensions.nous.compiler_v2 import NousCompilerV2
+from legacy_research.extensions.nous.runtime import NousRuntime
 
 
 @cli.group("nous")

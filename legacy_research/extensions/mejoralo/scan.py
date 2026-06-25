@@ -12,7 +12,7 @@ import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
-from cortex.extensions.mejoralo.constants import (
+from legacy_research.extensions.mejoralo.constants import (
     GHOST_MIN_SUBTREE_SIZE,
     GHOST_PENALTY_PER_FINDING,
     INDENT_NESTING_THRESHOLD,
@@ -30,9 +30,9 @@ from cortex.extensions.mejoralo.constants import (
     SKIP_DIRS,
     SOVEREIGN_BONUS_FACTOR,
 )
-from cortex.extensions.mejoralo.models import DimensionResult, ScanResult
-from cortex.extensions.mejoralo.utils import detect_stack
-from cortex.guards.path_guard import is_safe_path
+from legacy_research.extensions.mejoralo.models import DimensionResult, ScanResult
+from legacy_research.extensions.mejoralo.utils import detect_stack
+from legacy_research.guards.path_guard import is_safe_path
 
 __all__ = ["scan"]
 

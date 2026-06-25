@@ -3,81 +3,81 @@ import logging
 from pathlib import Path
 
 try:
-    from cortex.extensions.daemon.centaur.engine import CentauroEngine
-    from cortex.extensions.daemon.centaur.entropic_queue import EntropicQueue
+    from legacy_research.extensions.daemon.centaur.engine import CentauroEngine
+    from legacy_research.extensions.daemon.centaur.entropic_queue import EntropicQueue
 
-    from cortex.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
+    from legacy_research.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
 
     _CENTAUR_AVAILABLE = True
 except ImportError:
     _CENTAUR_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.frontier import FrontierDaemon
+    from legacy_research.extensions.daemon.frontier import FrontierDaemon
 
     _FRONTIER_AVAILABLE = True
 except ImportError:
     _FRONTIER_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.zero_prompting import ZeroPromptingDaemon
+    from legacy_research.extensions.daemon.zero_prompting import ZeroPromptingDaemon
 
     _ZERO_PROMPTING_AVAILABLE = True
 except ImportError:
     _ZERO_PROMPTING_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.retrieval_breaker import RetrievalBreakerDaemon
+    from legacy_research.extensions.daemon.retrieval_breaker import RetrievalBreakerDaemon
 
     _EPISTEMIC_BREAKER_AVAILABLE = True
 except ImportError:
     _EPISTEMIC_BREAKER_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.hot_state import HotStateDB
+    from legacy_research.extensions.daemon.hot_state import HotStateDB
 
     _HOT_STATE_AVAILABLE = True
 except ImportError:
     _HOT_STATE_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.scheduler import SovereignScheduler
+    from legacy_research.extensions.daemon.scheduler import SovereignScheduler
 
     _SCHEDULER_AVAILABLE = True
 except ImportError:
     _SCHEDULER_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.watchers import WatchdogHub
+    from legacy_research.extensions.daemon.watchers import WatchdogHub
 
     _WATCHDOG_HUB_AVAILABLE = True
 except ImportError:
     _WATCHDOG_HUB_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.api import HumanCallbackAPI
+    from legacy_research.extensions.daemon.api import HumanCallbackAPI
 
     _API_AVAILABLE = True
 except ImportError:
     _API_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.entropic_wake import EntropicWakeDaemon
+    from legacy_research.extensions.daemon.entropic_wake import EntropicWakeDaemon
 
     _ENTROPIC_WAKE_AVAILABLE = True
 except ImportError:
     _ENTROPIC_WAKE_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.primitive_synthesis import PrimitiveSynthesisDaemon
+    from legacy_research.extensions.daemon.primitive_synthesis import PrimitiveSynthesisDaemon
 
     _PRIMITIVE_SYNTHESIS_AVAILABLE = True
 except ImportError:
     _PRIMITIVE_SYNTHESIS_AVAILABLE = False
 
 
-from cortex.extensions.daemon.models import CORTEX_DB, CORTEX_DIR
-from cortex.extensions.daemon.monitors import CloudSyncMonitor, DiskMonitor, EngineHealthCheck
+from legacy_research.extensions.daemon.models import CORTEX_DB, CORTEX_DIR
+from legacy_research.extensions.daemon.monitors import CloudSyncMonitor, DiskMonitor, EngineHealthCheck
 
 from typing import TYPE_CHECKING, Any
 
@@ -165,7 +165,7 @@ class ResourceMgrMixin:
         # 2. Event Bus (reuse existing or create)
         self._event_bus = None
         try:
-            from cortex.events.bus import DistributedEventBus
+            from legacy_research.events.bus import DistributedEventBus
 
             self._event_bus = DistributedEventBus()
             logger.info("📡 DistributedEventBus ENABLED")
@@ -176,9 +176,9 @@ class ResourceMgrMixin:
         self.sovereignty_runtime = None
         if self._event_bus:
             try:
-                from cortex.engine.auth_gateway import QuorumGateway
-                from cortex.engine.causal.anomaly_bridge import AnomalyBridge
-                from cortex.engine.event_sovereignty import EventSovereigntyRuntime
+                from legacy_research.engine.auth_gateway import QuorumGateway
+                from legacy_research.engine.causal.anomaly_bridge import AnomalyBridge
+                from legacy_research.engine.event_sovereignty import EventSovereigntyRuntime
 
                 auth_gw = QuorumGateway(self._shared_engine)
                 # ensure table is created, though we should probably run this asynchronously,
@@ -298,8 +298,8 @@ class ResourceMgrMixin:
             _sqlite3_bft_orig.connect = _bft_sqlite_connect
             # -------------------------------
 
-            from cortex.database.core import connect
-            from cortex.extensions.timing import TimingTracker
+            from legacy_research.database.core import connect
+            from legacy_research.extensions.timing import TimingTracker
 
             self.timing_conn = connect(file_config.get("db_path", str(CORTEX_DB)))
             self.tracker = TimingTracker(self.timing_conn)

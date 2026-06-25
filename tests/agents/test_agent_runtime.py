@@ -17,13 +17,13 @@ import uuid
 
 import pytest
 
-from cortex.agents.base import BaseAgent
-from cortex.agents.bus import SqliteMessageBus
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
-from cortex.agents.state import AgentStatus, WorkingMemory
-from cortex.agents.supervisor import Supervisor
-from cortex.agents.tools import ToolRegistry
+from legacy_research.agents.base import BaseAgent
+from legacy_research.agents.bus import SqliteMessageBus
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import AgentMessage, MessageKind, new_message
+from legacy_research.agents.state import AgentStatus, WorkingMemory
+from legacy_research.agents.supervisor import Supervisor
+from legacy_research.agents.tools import ToolRegistry
 
 # ── Test fixtures ────────────────────────────────────────────────
 

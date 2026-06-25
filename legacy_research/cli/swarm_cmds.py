@@ -8,8 +8,8 @@ from pathlib import Path
 import click
 from rich.panel import Panel
 
-from cortex.cli.common import cli, console
-from cortex.cli.slow_tip import tip_on_slow
+from legacy_research.cli.common import cli, console
+from legacy_research.cli.slow_tip import tip_on_slow
 
 
 @cli.group()
@@ -23,7 +23,7 @@ def swarm():
 @tip_on_slow(threshold=2.0, label="El Enjambre está auditando…", use_spinner=True)
 def swarm_audit(path, level):
     """Deep semantic audit of a file or directory using the swarm."""
-    from cortex.extensions.mejoralo.swarm import MejoraloSwarm
+    from legacy_research.extensions.mejoralo.swarm import MejoraloSwarm
 
     p = Path(path)
     files = [p] if p.is_file() else list(p.glob("**/*.py"))
@@ -63,7 +63,7 @@ def swarm_audit(path, level):
 @tip_on_slow(threshold=2.0, label="El Enjambre está refactorizando…", use_spinner=True)
 def swarm_refactor(file, level, issue, dry_run):
     """Refactor a specific file using the full specialist squad."""
-    from cortex.extensions.mejoralo.swarm import MejoraloSwarm
+    from legacy_research.extensions.mejoralo.swarm import MejoraloSwarm
 
     p = Path(file)
     swarm_engine = MejoraloSwarm(level=level)
@@ -155,7 +155,7 @@ def swarm_deploy(mode, target, db):
 @click.option("--db", default="~/.cortex/cortex.db", help="Database path")
 def swarm_board_cmd(db):
     """Launch the real-time Swarm Kanban TUI."""
-    from cortex.extensions.ui.swarm_board import SwarmBoard
+    from legacy_research.extensions.ui.swarm_board import SwarmBoard
 
     board = SwarmBoard(db)
     board.start()
@@ -168,11 +168,11 @@ def swarm_up(db):
     import asyncio
     from uuid import uuid4
 
-    from cortex.agents.builtins.omega_prime import OmegaPrimeAgent
-    from cortex.agents.bus import SqliteMessageBus
-    from cortex.agents.manifest import AgentManifest
-    from cortex.agents.message_schema import AgentMessage, MessageKind
-    from cortex.agents.supervisor import Supervisor
+    from legacy_research.agents.builtins.omega_prime import OmegaPrimeAgent
+    from legacy_research.agents.bus import SqliteMessageBus
+    from legacy_research.agents.manifest import AgentManifest
+    from legacy_research.agents.message_schema import AgentMessage, MessageKind
+    from legacy_research.agents.supervisor import Supervisor
 
     class CliToolExecutor:
         async def execute(self, tool_name: str, arguments: dict) -> dict:
@@ -251,7 +251,7 @@ def swarm_up(db):
 @click.option("--path", "-p", help="Base path for worktrees")
 def swarm_cleanup(path):
     """Force-remove all ephemeral worktrees and their git metadata."""
-    from cortex.extensions.swarm.worktree_isolation import cleanup_all_worktrees
+    from legacy_research.extensions.swarm.worktree_isolation import cleanup_all_worktrees
 
     count = asyncio.run(cleanup_all_worktrees(path))
     if count == 0:
@@ -273,7 +273,7 @@ def swarm_strike(phalanx, target):
     """Deploy CORTEX-SWARM-100 Architecture (20 Sovereign Vessels)"""
     import asyncio
 
-    from cortex.engine.squadrons import (
+    from legacy_research.engine.squadrons import (
         AutonomousRouter,
         GoldPhalanx,
         LeadPhalanx,

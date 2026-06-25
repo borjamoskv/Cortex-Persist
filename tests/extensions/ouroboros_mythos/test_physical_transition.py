@@ -3,7 +3,7 @@ import os
 import json
 import asyncio
 from pathlib import Path
-from cortex.extensions.ouroboros_mythos.ouroboros_loop import MythosOuroborosEngine
+from legacy_research.extensions.ouroboros_mythos.ouroboros_loop import MythosOuroborosEngine
 
 @pytest.mark.asyncio
 async def test_ouroboros_physical_transition_cycle(tmp_path):

@@ -17,14 +17,14 @@ Returns a ConflictReport with scored candidates.
 
 from __future__ import annotations
 
-from cortex.guards.contradiction_guard.batch import scan_all_contradictions
-from cortex.guards.contradiction_guard.detector import (
+from legacy_research.guards.contradiction_guard.batch import scan_all_contradictions
+from legacy_research.guards.contradiction_guard.detector import (
     MAX_CANDIDATES,
     MIN_OVERLAP_SCORE,
     detect_contradictions,
 )
-from cortex.guards.contradiction_guard.models import ConflictCandidate, ConflictReport
-from cortex.guards.contradiction_guard.scoring import (
+from legacy_research.guards.contradiction_guard.models import ConflictCandidate, ConflictReport
+from legacy_research.guards.contradiction_guard.scoring import (
     EMBEDDING_BOOST_WEIGHT,
     _embedding_cosine_similarity,
 )

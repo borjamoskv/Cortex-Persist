@@ -135,7 +135,7 @@ class ProceduralMemory:
                     "DB Operational error on load: %s", e
                 )
                 try:
-                    from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+                    from legacy_research.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
                     ErrorGhostPipeline().capture_sync(
                         e, source="procedural:load", project="CORTEX_SYSTEM"
@@ -150,7 +150,7 @@ class ProceduralMemory:
                 "Unexpected procedural load error: %s", e
             )
             try:
-                from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+                from legacy_research.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
                 ErrorGhostPipeline().capture_sync(
                     e, source="procedural:load", project="CORTEX_SYSTEM"

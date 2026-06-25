@@ -5,11 +5,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.moltbook.client import MoltbookClient, MoltbookRateLimited
-from cortex.extensions.moltbook.verification import solve_challenge
+from legacy_research.extensions.moltbook.client import MoltbookClient, MoltbookRateLimited
+from legacy_research.extensions.moltbook.verification import solve_challenge
 
 try:
-    from cortex.nexus_v8 import NexusWorldModel, moltbook_post_published
+    from legacy_research.nexus_v8 import NexusWorldModel, moltbook_post_published
 
     _NEXUS = NexusWorldModel()
     _NEXUS_OK = True

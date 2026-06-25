@@ -13,8 +13,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 try:
-    from cortex.extensions.llm.provider import LLMProvider
-    from cortex.extensions.llm.router import CortexPrompt, IntentProfile
+    from legacy_research.extensions.llm.provider import LLMProvider
+    from legacy_research.extensions.llm.router import CortexPrompt, IntentProfile
 except ImportError:
     LLMProvider = None  # type: ignore
     CortexPrompt = None  # type: ignore
@@ -137,7 +137,7 @@ INSTRUCTIONS:
                 logger.warning("🐍 [OUROBOROS-MUTATION] Bypassing deep audit due to missing LLM.")
                 # Trigger Ouroboros Autopoiesis
                 try:
-                    from cortex.extensions.evolution.ouroboros import OuroborosKernel
+                    from legacy_research.extensions.evolution.ouroboros import OuroborosKernel
                     import traceback
                     tb = traceback.format_exc()
                     if not tb or tb.strip() == "NoneType: None":

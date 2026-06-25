@@ -13,7 +13,7 @@ from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.extensions.alma.taste import TasteVerdict
+    from legacy_research.extensions.alma.taste import TasteVerdict
 
 import aiosqlite
 
@@ -45,9 +45,9 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.config import DB_PATH
-from cortex.database.core import connect_async_ctx
-from cortex.telemetry.metrics import metrics
+from legacy_research.config import DB_PATH
+from legacy_research.database.core import connect_async_ctx
+from legacy_research.telemetry.metrics import metrics
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +184,7 @@ class AlmaEngine:
         Caches the last verdict for inclusion in SoulState.
         """
         if self._taste_engine is None:
-            from cortex.extensions.alma.taste import TasteEngine
+            from legacy_research.extensions.alma.taste import TasteEngine
 
             self._taste_engine = TasteEngine()
 

@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-from cortex.extensions.episodic.base import Episode
+from legacy_research.extensions.episodic.base import Episode
 
 logger = logging.getLogger("cortex.extensions.training")
 

@@ -11,8 +11,8 @@ from __future__ import annotations
 import logging
 from collections.abc import Sequence
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-from cortex.utils import void_vec
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.utils import void_vec
 
 logger = logging.getLogger("cortex.utils.turboquant")
 

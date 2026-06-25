@@ -13,8 +13,8 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from cortex.extensions.daemon.models import AGENT_DIR, CORTEX_DB, WorkflowAlert
-from cortex.extensions.daemon.monitors.base import BaseMonitor
+from legacy_research.extensions.daemon.models import AGENT_DIR, CORTEX_DB, WorkflowAlert
+from legacy_research.extensions.daemon.monitors.base import BaseMonitor
 
 __all__ = ["WorkflowMonitor"]
 

@@ -14,7 +14,7 @@ import ast
 import logging
 from pathlib import Path
 
-from cortex.extensions.genesis.models import SystemSpec
+from legacy_research.extensions.genesis.models import SystemSpec
 
 __all__ = ["GenesisValidator"]
 

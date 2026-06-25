@@ -15,10 +15,10 @@ from typing import TYPE_CHECKING, Any
 
 import httpx
 
-from cortex.memory.temporal import now_iso
+from legacy_research.memory.temporal import now_iso
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
 __all__ = ["GitHubCortexBridge", "SyncResult"]
 
@@ -315,7 +315,7 @@ class GitHubCortexBridge:
                 )
                 rows = await cursor.fetchall()
 
-            from cortex.crypto import get_default_encrypter
+            from legacy_research.crypto import get_default_encrypter
 
             enc = get_default_encrypter()
 

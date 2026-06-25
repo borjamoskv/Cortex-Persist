@@ -22,7 +22,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 import time
 from pathlib import Path
 
-from cortex.extensions.health.models import HealthThresholds, MetricSnapshot
+from legacy_research.extensions.health.models import HealthThresholds, MetricSnapshot
 
 
 class EntropyCollector:
@@ -53,7 +53,7 @@ class EntropyCollector:
                 weight=self.weight,
             )
         try:
-            from cortex.database.core import connect
+            from legacy_research.database.core import connect
 
             with connect(db_path, timeout=2.0) as conn:  # pyright: ignore
                 try:
@@ -115,7 +115,7 @@ class FactCountCollector:
                 weight=self.weight,
             )
         try:
-            from cortex.database.core import connect
+            from legacy_research.database.core import connect
 
             with connect(db_path, timeout=2.0) as conn:  # pyright: ignore
                 try:
@@ -161,7 +161,7 @@ class SnapshotAgeCollector:
         if not db_path or not Path(db_path).exists():
             return MetricSnapshot(name=self.name, value=0.5, weight=self.weight)
         try:
-            from cortex.database.core import connect
+            from legacy_research.database.core import connect
 
             with connect(db_path, timeout=2.0) as conn:  # pyright: ignore
                 try:

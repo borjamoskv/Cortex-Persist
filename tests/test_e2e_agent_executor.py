@@ -7,7 +7,7 @@ Tests the full pipeline flow: Ingress → Context → Plan → Execute → Persi
 import pytest
 import time
 
-from cortex.pipeline import (
+from legacy_research.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -17,14 +17,14 @@ from cortex.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from cortex.pipeline.orchestrator import CortexOrchestrator
-from cortex.pipeline._orchestrator_exceptions import (
+from legacy_research.pipeline.orchestrator import CortexOrchestrator
+from legacy_research.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )
-from cortex.router.router import AgentRouter, AgentCapability
-from cortex.context.assembler import ContextAssembler
-from cortex.delivery.manager import DeliveryManager
+from legacy_research.router.router import AgentRouter, AgentCapability
+from legacy_research.context.assembler import ContextAssembler
+from legacy_research.delivery.manager import DeliveryManager
 
 
 # ── Agent Executor Tests ──
@@ -37,7 +37,7 @@ class TestAgentExecutor:
         """When no LLM is available, executor returns structured stub."""
         import asyncio
 
-        from cortex.pipeline.executor import AgentExecutor
+        from legacy_research.pipeline.executor import AgentExecutor
 
         executor = AgentExecutor()
         # Force stub path by preventing provider init
@@ -56,7 +56,7 @@ class TestAgentExecutor:
 
     def test_executor_system_prompt_construction(self):
         """System prompts contain agent-specific instructions."""
-        from cortex.pipeline.executor import AgentExecutor
+        from legacy_research.pipeline.executor import AgentExecutor
 
         executor = AgentExecutor()
         prompt = executor._build_system_prompt("security-analyst", None)
@@ -69,7 +69,7 @@ class TestAgentExecutor:
 
     def test_executor_working_memory_from_context(self):
         """Working memory includes facts when context is provided."""
-        from cortex.pipeline.executor import AgentExecutor
+        from legacy_research.pipeline.executor import AgentExecutor
 
         executor = AgentExecutor()
         ctx = ContextPacket(
@@ -85,7 +85,7 @@ class TestAgentExecutor:
 
     def test_executor_working_memory_no_context(self):
         """Working memory contains only intent when no context."""
-        from cortex.pipeline.executor import AgentExecutor
+        from legacy_research.pipeline.executor import AgentExecutor
 
         executor = AgentExecutor()
         messages = executor._build_working_memory("simple query", None)
@@ -94,7 +94,7 @@ class TestAgentExecutor:
 
     def test_orchestrator_with_executor_stub(self):
         """Orchestrator uses executor when provided (stub path)."""
-        from cortex.pipeline.executor import AgentExecutor
+        from legacy_research.pipeline.executor import AgentExecutor
 
         executor = AgentExecutor()
         executor._provider = None

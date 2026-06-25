@@ -18,10 +18,10 @@ import sys
 
 os.environ.setdefault("CORTEX_TESTING", "1")  # Allow testing overrides
 
-from cortex.core.paths import CORTEX_DB
-from cortex.cli.bounty_cmds import BountyHunterRunner
-from cortex.cli.common import get_engine, close_engine_sync
-from cortex.crypto.keys import ZKSwarmIdentity
+from legacy_research.core.paths import CORTEX_DB
+from legacy_research.cli.bounty_cmds import BountyHunterRunner
+from legacy_research.cli.common import get_engine, close_engine_sync
+from legacy_research.crypto.keys import ZKSwarmIdentity
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-8s | %(message)s")

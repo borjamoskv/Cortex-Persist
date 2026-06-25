@@ -15,7 +15,7 @@ Opt-in via CORTEX_HDC=1 environment variable.
 
 from __future__ import annotations
 
-from cortex.memory.hdc.algebra import (
+from legacy_research.memory.hdc.algebra import (
     bind,
     bundle,
     cosine_similarity,
@@ -23,9 +23,9 @@ from cortex.memory.hdc.algebra import (
     random_bipolar,
     unbind,
 )
-from cortex.memory.hdc.codec import HDCEncoder
-from cortex.memory.hdc.item_memory import ItemMemory
-from cortex.memory.hdc.store import HDCVectorStoreL2
+from legacy_research.memory.hdc.codec import HDCEncoder
+from legacy_research.memory.hdc.item_memory import ItemMemory
+from legacy_research.memory.hdc.store import HDCVectorStoreL2
 
 __all__ = [
     "HDCEncoder",

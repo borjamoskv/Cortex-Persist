@@ -23,13 +23,13 @@ import time
 from typing import Any
 from uuid import uuid4
 
-from cortex.agents.builtins.copilot_agent import CopilotAgent, create_copilot_agent
-from cortex.agents.copilot_contracts import (
+from legacy_research.agents.builtins.copilot_agent import CopilotAgent, create_copilot_agent
+from legacy_research.agents.copilot_contracts import (
     CopilotContextPayload,
     SuggestionVerdict,
 )
-from cortex.agents.message_schema import MessageKind, new_message
-from cortex.guards import AntiLimerenceGuard
+from legacy_research.agents.message_schema import MessageKind, new_message
+from legacy_research.guards import AntiLimerenceGuard
 
 logger = logging.getLogger("cortex.agents.copilot.server")
 

@@ -2,9 +2,9 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from cortex.api.core import app
-from cortex.api.deps import get_async_engine
-from cortex.auth.deps import require_auth, require_permission
+from legacy_research.api.core import app
+from legacy_research.api.deps import get_async_engine
+from legacy_research.auth.deps import require_auth, require_permission
 from unittest.mock import MagicMock, AsyncMock
 
 # Mock AuthResult

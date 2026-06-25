@@ -13,7 +13,7 @@ Verifies:
 
 import pytest
 
-from cortex.routes.demo import (
+from legacy_research.routes.demo import (
     ensure_demo_tables,
     get_demo_state,
     init_demo_events,
@@ -27,8 +27,8 @@ from cortex.routes.demo import (
 @pytest.fixture(autouse=True)
 async def _clean_events_table():
     """Ensure events table is clean before each test."""
-    from cortex import config
-    from cortex.database.core import connect_async_ctx
+    from legacy_research import config
+    from legacy_research.database.core import connect_async_ctx
 
     async with connect_async_ctx(config.DB_PATH) as conn:
         await ensure_demo_tables(conn)

@@ -14,7 +14,7 @@ This module exists to make it ARCHITECTURALLY IMPOSSIBLE to create
 an unprotected SQLite connection that could cause lock cascade hangs.
 
 Usage (sync):
-    from cortex.db import connect
+    from legacy_research.db import connect
     conn = connect("/path/to/db")
 
 Usage (read-only pool):
@@ -24,7 +24,7 @@ Usage (writer - disables auto WAL checkpoint):
     conn = connect_writer("/path/to/db")
 
 Usage (async):
-    from cortex.db import connect_async, apply_pragmas_async
+    from legacy_research.db import connect_async, apply_pragmas_async
     conn = await connect_async("/path/to/db")
 """
 
@@ -116,7 +116,7 @@ except ImportError:  # pragma: no cover - sqlite-vec is a base dependency in rel
 # Python 3.12 deprecates the default datetime adapter. We register our own to prevent DeprecationWarning.
 import datetime
 
-from cortex.utils.errors import DBLockError
+from legacy_research.utils.errors import DBLockError
 
 sqlite3.register_adapter(datetime.datetime, lambda val: val.isoformat())
 sqlite3.register_adapter(datetime.date, lambda val: val.isoformat())
@@ -198,7 +198,7 @@ def _apply_pragmas_sync(
         conn.execute(f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT}")
 
     # [MTK] C5-REAL Physical Boundary
-    from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer
+    from legacy_research.engine.mtk_sqlite_authorizer import install_mtk_authorizer
     install_mtk_authorizer(conn)
 
 
@@ -207,7 +207,7 @@ def _apply_pragmas_sync(
 class SovereignConnection(sqlite3.Connection):
     """Hardened connection class that prevents removing the MTK authorizer."""
     def set_authorizer(self, authorizer_callback: Any) -> None:
-        from cortex.engine.mtk_sqlite_authorizer import mtk_authorizer_callback
+        from legacy_research.engine.mtk_sqlite_authorizer import mtk_authorizer_callback
         if authorizer_callback is not mtk_authorizer_callback:
             raise sqlite3.DatabaseError("MTK-LOCK: Cannot override sovereign authorizer callback.")
         super().set_authorizer(authorizer_callback)
@@ -378,7 +378,7 @@ async def apply_pragmas_async(conn: aiosqlite.Connection) -> None:
     
     # [MTK] C5-REAL Physical Boundary
     def _install_authorizer_sync(raw_conn: sqlite3.Connection):
-        from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer
+        from legacy_research.engine.mtk_sqlite_authorizer import install_mtk_authorizer
         install_mtk_authorizer(raw_conn)
         
     await conn._execute(_install_authorizer_sync, conn._conn)

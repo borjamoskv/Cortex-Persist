@@ -8,7 +8,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import (
+from legacy_research.cli.common import (
     DEFAULT_DB,
     _run_async,
     cli,
@@ -31,7 +31,7 @@ def anomaly_hunt_cmd(hours: int, project: str | None, db: str) -> None:
     """Escaneo completo: detecta anomalías ontológicas en el Ledger."""
     engine = get_engine(db)
     try:
-        from cortex.engine.anomaly_hunter import AnomalyHunterEngine
+        from legacy_research.engine.anomaly_hunter import AnomalyHunterEngine
 
         hunter = AnomalyHunterEngine(engine, lookback_hours=hours)
 
@@ -57,7 +57,7 @@ def contradiction_scan_cmd(entity: str, db: str) -> None:
     """TARGETED: Buscar contradicciones sobre una entidad específica."""
     engine = get_engine(db)
     try:
-        from cortex.engine.anomaly_hunter import AnomalyHunterEngine
+        from legacy_research.engine.anomaly_hunter import AnomalyHunterEngine
 
         hunter = AnomalyHunterEngine(engine)
 
@@ -104,7 +104,7 @@ def memory_clean_cmd(db: str) -> None:
     """PURGE: Aplicar acciones automáticas para anomalías de baja severidad."""
     engine = get_engine(db)
     try:
-        from cortex.engine.anomaly_hunter import AnomalyHunterEngine
+        from legacy_research.engine.anomaly_hunter import AnomalyHunterEngine
 
         hunter = AnomalyHunterEngine(engine)
 

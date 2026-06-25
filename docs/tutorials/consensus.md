@@ -68,7 +68,7 @@ Fact #42: "Use PostgreSQL for the user service"
 ## Python API
 
 ```python
-from cortex import CortexEngine
+from legacy_research import CortexEngine
 
 engine = CortexEngine()
 

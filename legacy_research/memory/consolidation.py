@@ -24,7 +24,7 @@ import time
 
 from pydantic import Field
 
-from cortex.memory.engrams import CortexSemanticEngram
+from legacy_research.memory.engrams import CortexSemanticEngram
 
 logger = logging.getLogger("cortex.memory.consolidation")
 

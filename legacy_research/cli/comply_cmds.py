@@ -10,13 +10,13 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import (
+from legacy_research.cli.common import (
     DEFAULT_DB,
     cli,
     console,
 )
-from cortex.compliance.comply_signer import ComplySigner
-from cortex.compliance.tracker import ComplianceTracker
+from legacy_research.compliance.comply_signer import ComplySigner
+from legacy_research.compliance.tracker import ComplianceTracker
 
 
 @click.group("comply")

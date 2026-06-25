@@ -5,9 +5,9 @@ import logging
 import time
 from typing import Any
 
-from cortex.sica.meta_level import MetaLevel
-from cortex.sica.object_level import ObjectLevel
-from cortex.sica.strategy import SearchStrategy
+from legacy_research.sica.meta_level import MetaLevel
+from legacy_research.sica.object_level import ObjectLevel
+from legacy_research.sica.strategy import SearchStrategy
 
 from .meta_meta_controller import MetaMetaController
 from .trace_synthesizer import TraceSynthesizer

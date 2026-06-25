@@ -13,7 +13,7 @@ pytestmark = pytest.mark.slow
 @pytest.fixture
 async def engine(tmp_path: Path):
     """Create a CortexEngine with a temp database, close after test."""
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
     os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
     db = str(tmp_path / "test_concurrency.db")
@@ -21,7 +21,7 @@ async def engine(tmp_path: Path):
     await e.init_db()
 
     # Ensure causal_edges exists
-    from cortex.engine.causality import AsyncCausalGraph
+    from legacy_research.engine.causality import AsyncCausalGraph
 
     async with e.session() as conn:
         cg = AsyncCausalGraph(conn)

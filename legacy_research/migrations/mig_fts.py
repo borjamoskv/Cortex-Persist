@@ -18,7 +18,7 @@ def _bft_sqlite_connect(*args, **kwargs):
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 
-from cortex.crypto import get_default_encrypter
+from legacy_research.crypto import get_default_encrypter
 
 logger = logging.getLogger("cortex")
 

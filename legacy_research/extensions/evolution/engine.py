@@ -8,25 +8,25 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.database.core import connect as db_connect
-from cortex.extensions.evolution.action import SymbolicActionEngine
-from cortex.extensions.evolution.agents import (
+from legacy_research.database.core import connect as db_connect
+from legacy_research.extensions.evolution.action import SymbolicActionEngine
+from legacy_research.extensions.evolution.agents import (
     AgentDomain,
     SovereignAgent,
     SubAgent,
 )
-from cortex.extensions.evolution.cortex_metrics import fetch_all_domain_metrics
-from cortex.extensions.evolution.ledger_db import EvolutionLedgerDB
-from cortex.extensions.evolution.lnn import LagrangianController
-from cortex.extensions.evolution.models import (
+from legacy_research.extensions.evolution.cortex_metrics import fetch_all_domain_metrics
+from legacy_research.extensions.evolution.ledger_db import EvolutionLedgerDB
+from legacy_research.extensions.evolution.lnn import LagrangianController
+from legacy_research.extensions.evolution.models import (
     CycleReport,
     EngineParameters,
 )
-from cortex.extensions.evolution.operations_mixin import EvolutionOpsMixin
-from cortex.extensions.evolution.persistence import load_swarm, save_swarm
-from cortex.extensions.gate.ouroboros import OuroborosGate
-from cortex.extensions.sovereign.endocrine import DigitalEndocrine
-from cortex.ledger import SovereignLedger  # pyright: ignore
+from legacy_research.extensions.evolution.operations_mixin import EvolutionOpsMixin
+from legacy_research.extensions.evolution.persistence import load_swarm, save_swarm
+from legacy_research.extensions.gate.ouroboros import OuroborosGate
+from legacy_research.extensions.sovereign.endocrine import DigitalEndocrine
+from legacy_research.ledger import SovereignLedger  # pyright: ignore
 
 random = secrets.SystemRandom()
 

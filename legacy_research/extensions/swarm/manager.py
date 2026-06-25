@@ -15,12 +15,12 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.signals.bus import AsyncSignalBus
-from cortex.extensions.swarm.auto_fix import AutoFixPipeline
-from cortex.extensions.swarm.budget import get_budget_manager
-from cortex.extensions.swarm.protocols import AgentRole, SwarmIntent, SwarmSignalSchema
-from cortex.extensions.swarm.verification_gate import RiskLevel, VerificationGate
-from cortex.extensions.swarm.worktree_isolation import isolated_worktree
+from legacy_research.extensions.signals.bus import AsyncSignalBus
+from legacy_research.extensions.swarm.auto_fix import AutoFixPipeline
+from legacy_research.extensions.swarm.budget import get_budget_manager
+from legacy_research.extensions.swarm.protocols import AgentRole, SwarmIntent, SwarmSignalSchema
+from legacy_research.extensions.swarm.verification_gate import RiskLevel, VerificationGate
+from legacy_research.extensions.swarm.worktree_isolation import isolated_worktree
 
 logger = logging.getLogger("cortex.extensions.swarm.manager")
 
@@ -176,7 +176,7 @@ class CapatazOrchestrator:
         self.tasks: dict[str, SwarmTask] = {}
         self.budget = get_budget_manager()
 
-        from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
+        from legacy_research.extensions.swarm.kv_prefix_registry import get_kv_registry
 
         self._kv_registry = get_kv_registry()
 
@@ -225,7 +225,7 @@ class CapatazOrchestrator:
                     )
             else:
                 with engine.session() as conn:
-                    from cortex.extensions.signals.bus import SignalBus
+                    from legacy_research.extensions.signals.bus import SignalBus
 
                     bus = SignalBus(conn)
                     bus.emit(
@@ -433,7 +433,7 @@ class CapatazOrchestrator:
     async def preheat_prefix(self, system_prompt: str, tenant_id: str) -> None:
         """AX-042: Ping provider to cache prefix before the swarm hits it concurrently."""
         try:
-            from cortex.extensions.llm.provider import LLMProvider
+            from legacy_research.extensions.llm.provider import LLMProvider
 
             logger.info("[%s] Capataz: Pre-heating KV Cache for swarm...", self.mission_id)
 

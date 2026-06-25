@@ -11,7 +11,7 @@ from typing import Any, Literal, TypedDict
 
 from pydantic import BaseModel, Field, field_validator
 
-from cortex.types.epistemics import EpistemicNode
+from legacy_research.types.epistemics import EpistemicNode
 
 
 class FactType(str, Enum):

@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 
-from cortex.compliance.comply_signer import ComplySigner
-from cortex.compliance.policy_engine import PolicyEngine
-from cortex.compliance.tracker import ComplianceTracker
+from legacy_research.compliance.comply_signer import ComplySigner
+from legacy_research.compliance.policy_engine import PolicyEngine
+from legacy_research.compliance.tracker import ComplianceTracker
 
 __all__ = ["ComplianceTracker", "ComplySigner", "PolicyEngine"]

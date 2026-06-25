@@ -20,14 +20,14 @@ import pytest
 import time
 from pathlib import Path
 
-from cortex.engine.supervisor import (
+from legacy_research.engine.supervisor import (
     CortexSupervisor,
     SupervisorConfig,
     AgentStatus,
 )
-from cortex.engine._autocurative_config import AutoCurativeConfig
-from cortex.engine.self_optimizer import OptimizerConfig
-from cortex.engine.predictive_healer import Prediction, PredictionType
+from legacy_research.engine._autocurative_config import AutoCurativeConfig
+from legacy_research.engine.self_optimizer import OptimizerConfig
+from legacy_research.engine.predictive_healer import Prediction, PredictionType
 
 
 # ─── Fixtures ─────────────────────────────────────────────────────

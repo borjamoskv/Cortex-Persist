@@ -50,7 +50,7 @@ _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from cortex.audit.ledger import AsyncFileLock
+from legacy_research.audit.ledger import AsyncFileLock
 
 logger = logging.getLogger("cortex.audit.decision_ledger")
 

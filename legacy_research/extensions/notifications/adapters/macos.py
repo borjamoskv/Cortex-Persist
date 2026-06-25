@@ -11,8 +11,8 @@ import asyncio
 import logging
 import sys
 
-from cortex.extensions.notifications.adapters.base import BaseAdapter
-from cortex.extensions.notifications.events import CortexEvent
+from legacy_research.extensions.notifications.adapters.base import BaseAdapter
+from legacy_research.extensions.notifications.events import CortexEvent
 
 logger = logging.getLogger("cortex.extensions.notifications.macos")
 

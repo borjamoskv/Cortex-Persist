@@ -8,8 +8,8 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from cortex.ledger.queue import EnrichmentQueue
-from cortex.ledger.store import LedgerStore
+from legacy_research.ledger.queue import EnrichmentQueue
+from legacy_research.ledger.store import LedgerStore
 
 logger = logging.getLogger("cortex.enrichment")
 

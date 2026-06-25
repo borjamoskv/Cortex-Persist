@@ -11,16 +11,16 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from cortex.extensions.daemon.alerts import AlertHandlerMixin
-from cortex.extensions.daemon.core_support import (
+from legacy_research.extensions.daemon.alerts import AlertHandlerMixin
+from legacy_research.extensions.daemon.core_support import (
     init_advanced_monitors,
     init_background_agents,
     init_core_monitors,
     init_external_oracles,
 )
-from cortex.extensions.daemon.healing import HealingMixin
-from cortex.extensions.daemon.loops_mixin import LoopsMixin
-from cortex.extensions.daemon.models import (
+from legacy_research.extensions.daemon.healing import HealingMixin
+from legacy_research.extensions.daemon.loops_mixin import LoopsMixin
+from legacy_research.extensions.daemon.models import (
     AGENT_DIR,
     DEFAULT_COOLDOWN,
     DEFAULT_MEMORY_STALE_HOURS,
@@ -68,8 +68,8 @@ except ImportError:
 __all__ = ["MoskvDaemon"]
 logger = logging.getLogger("moskv-daemon")
 MAX_CONSECUTIVE_FAILURES = 3
-from cortex.extensions.daemon.event_loop import EventLoopMixin
-from cortex.extensions.daemon.resource_mgr import ResourceMgrMixin
+from legacy_research.extensions.daemon.event_loop import EventLoopMixin
+from legacy_research.extensions.daemon.resource_mgr import ResourceMgrMixin
 
 
 class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin, EventLoopMixin):

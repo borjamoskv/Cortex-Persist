@@ -7,7 +7,7 @@ import sqlite3
 import aiosqlite
 
 from unittest.mock import MagicMock
-from cortex.ledger.ledger_core import MerkleTree, SovereignLedger
+from legacy_research.ledger.ledger_core import MerkleTree, SovereignLedger
 
 
 

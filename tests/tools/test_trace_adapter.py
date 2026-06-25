@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.tools.trace_adapter import ExecutionTrace, TraceEvent
-from cortex.tools.trace_builder import TraceBuilder
+from legacy_research.tools.trace_adapter import ExecutionTrace, TraceEvent
+from legacy_research.tools.trace_builder import TraceBuilder
 
 
 # ---------------------------------------------------------------------------

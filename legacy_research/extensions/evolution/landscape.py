@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.extensions.evolution.agents import SovereignAgent
+    from legacy_research.extensions.evolution.agents import SovereignAgent
 
 logger = logging.getLogger(__name__)
 

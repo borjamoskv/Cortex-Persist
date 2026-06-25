@@ -37,7 +37,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from cortex.memory.metamemory import MemoryCard, MetaJudgment, Verdict
+from legacy_research.memory.metamemory import MemoryCard, MetaJudgment, Verdict
 
 logger = logging.getLogger("cortex.extensions.llm.metacognitive_boundary")
 

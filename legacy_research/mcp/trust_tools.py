@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 __all__ = ["register_trust_tools"]
 
 if TYPE_CHECKING:
-    from cortex.mcp.server import _MCPContext
+    from legacy_research.mcp.server import _MCPContext
     from mcp.server.fastmcp import FastMCP
 
 logger = logging.getLogger("cortex.mcp.trust")
@@ -31,7 +31,7 @@ logger = logging.getLogger("cortex.mcp.trust")
 
 def register_trust_tools(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register all Trust/Compliance tools on the MCP server."""
-    from cortex.mcp.trust_compliance import register_compliance_tools
+    from legacy_research.mcp.trust_compliance import register_compliance_tools
 
     _register_audit_trail(mcp, ctx)
     _register_verify_fact(mcp, ctx)

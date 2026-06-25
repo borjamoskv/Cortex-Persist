@@ -400,7 +400,7 @@ hkdf = HKDF(
 
 **Fix:**
 ```python
-from cortex.config import CORTEX_DIR
+from legacy_research.config import CORTEX_DIR
 import hashlib
 
 def _get_salt(self) -> bytes:

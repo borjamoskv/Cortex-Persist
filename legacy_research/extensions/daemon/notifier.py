@@ -12,8 +12,8 @@ from __future__ import annotations
 import logging
 import subprocess
 
-from cortex.extensions.daemon.models import GhostAlert, MemoryAlert, SiteStatus
-from cortex.extensions.platform.sys import is_linux, is_macos, is_windows
+from legacy_research.extensions.daemon.models import GhostAlert, MemoryAlert, SiteStatus
+from legacy_research.extensions.platform.sys import is_linux, is_macos, is_windows
 
 __all__ = ["Notifier"]
 

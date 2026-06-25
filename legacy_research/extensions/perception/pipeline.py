@@ -13,8 +13,8 @@ import logging
 import time
 from typing import TYPE_CHECKING
 
-from cortex.extensions.episodic.main import EpisodicMemory
-from cortex.extensions.perception.base import (
+from legacy_research.extensions.episodic.main import EpisodicMemory
+from legacy_research.extensions.perception.base import (
     INFERENCE_WINDOW_SECONDS,
     MIN_EVENTS_FOR_INFERENCE,
     RECORD_COOLDOWN_SECONDS,

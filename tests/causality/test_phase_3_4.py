@@ -28,10 +28,10 @@ import aiosqlite
 
 import pytest
 
-from cortex.engine.fact_store_core import insert_fact_record
-from cortex.engine.mixins.base import FACT_COLUMNS
-from cortex.engine.models import Fact
-from cortex.engine.query_mixin import QueryMixin
+from legacy_research.engine.fact_store_core import insert_fact_record
+from legacy_research.engine.mixins.base import FACT_COLUMNS
+from legacy_research.engine.models import Fact
+from legacy_research.engine.query_mixin import QueryMixin
 
 
 
@@ -40,13 +40,13 @@ class TestCLI:
     """CLI commands have correct params."""
 
     def test_store_has_parent_flag(self):
-        from cortex.cli.memory_cmds import store
+        from legacy_research.cli.memory_cmds import store
 
         params = {p.name for p in store.params}
         assert "parent_id" in params
 
     def test_trace_chain_exists(self):
-        from cortex.cli.causal_cmds import trace_chain
+        from legacy_research.cli.causal_cmds import trace_chain
 
         params = {p.name for p in trace_chain.params}
         assert "fact_id" in params

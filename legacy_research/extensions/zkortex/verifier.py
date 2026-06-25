@@ -16,9 +16,9 @@ import logging
 import time
 from dataclasses import dataclass
 
-from cortex.extensions.zkortex.commitment import KnowledgeCommitment
-from cortex.extensions.zkortex.merkle import ZKMembershipProof
-from cortex.extensions.zkortex.range_proof import ZKRangeProof, verify_range_proof
+from legacy_research.extensions.zkortex.commitment import KnowledgeCommitment
+from legacy_research.extensions.zkortex.merkle import ZKMembershipProof
+from legacy_research.extensions.zkortex.range_proof import ZKRangeProof, verify_range_proof
 
 logger = logging.getLogger("cortex.extensions.zkortex.verifier")
 

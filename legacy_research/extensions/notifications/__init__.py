@@ -6,7 +6,7 @@ channels (Telegram, macOS, Slack, webhooks, etc.).
 
 Usage::
 
-    from cortex.extensions.notifications import get_notification_bus, CortexEvent, EventSeverity
+    from legacy_research.extensions.notifications import get_notification_bus, CortexEvent, EventSeverity
 
     bus = get_notification_bus()
     await bus.emit(CortexEvent(
@@ -17,8 +17,8 @@ Usage::
     ))
 """
 
-from cortex.extensions.notifications.bus import NotificationBus, get_notification_bus
-from cortex.extensions.notifications.events import CortexEvent, EventSeverity
+from legacy_research.extensions.notifications.bus import NotificationBus, get_notification_bus
+from legacy_research.extensions.notifications.events import CortexEvent, EventSeverity
 
 __all__ = [
     "CortexEvent",

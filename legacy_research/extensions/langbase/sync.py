@@ -19,10 +19,10 @@ from typing import TYPE_CHECKING
 __all__ = ["enrich_from_langbase", "sync_to_langbase"]
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine as AsyncCortexEngine
-    from cortex.extensions.langbase.client import LangbaseClient
+    from legacy_research.engine import CortexEngine as AsyncCortexEngine
+    from legacy_research.extensions.langbase.client import LangbaseClient
 
-from cortex.extensions.langbase.client import LangbaseError
+from legacy_research.extensions.langbase.client import LangbaseError
 
 logger = logging.getLogger("cortex.extensions.langbase.sync")
 

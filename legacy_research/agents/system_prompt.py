@@ -78,7 +78,7 @@ You will produce one of the following:
 
 [DATABASE CONSTRAINTS]
 ```python
-from cortex.db import get_connection       # REQUIRED: WAL + busy_timeout=5000 + FK=ON
+from legacy_research.db import get_connection       # REQUIRED: WAL + busy_timeout=5000 + FK=ON
 classify_content(data)                     # REQUIRED: BEFORE every INSERT
 store(..., fact_type="UI_ACTION", meta={"expected_ui_hash": 123456}) # REQUIRED
 except (sqlite3.Error, OSError, ValueError):  # REQUIRED

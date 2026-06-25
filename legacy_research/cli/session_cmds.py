@@ -3,7 +3,7 @@ import sys
 import time
 import click
 from rich.panel import Panel
-from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
+from legacy_research.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 
 # [C5-REAL] Exergy-Maximized
 
@@ -123,7 +123,7 @@ def logout_cmd(db: str, force: bool) -> None:
         )
 
         # Show Sovereign Tip
-        from cortex.cli.common import _show_tip
+        from legacy_research.cli.common import _show_tip
 
         _show_tip(engine)
 

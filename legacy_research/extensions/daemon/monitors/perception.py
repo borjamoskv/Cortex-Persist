@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.extensions.daemon.models import PerceptionAlert
+from legacy_research.extensions.daemon.models import PerceptionAlert
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -31,8 +31,8 @@ class PerceptionMonitor:
 
         import uuid
 
-        from cortex.engine import CortexEngine
-        from cortex.extensions.perception import PerceptionPipeline
+        from legacy_research.engine import CortexEngine
+        from legacy_research.extensions.perception import PerceptionPipeline
 
         if self._engine:
             conn = await self._engine.get_conn()

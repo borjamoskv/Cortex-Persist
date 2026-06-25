@@ -16,7 +16,7 @@ import aiosqlite
 
 import pytest
 
-from cortex.engine.fact_store_core import insert_fact_record
+from legacy_research.engine.fact_store_core import insert_fact_record
 
 
 

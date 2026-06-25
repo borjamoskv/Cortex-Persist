@@ -4,9 +4,9 @@
 import time
 from typing import Any
 
-from cortex.shannon.env.client import BinaryAgent
-from cortex.shannon.env.trace import EpisodeTrace, StepTrace, compute_trace_checksum
-from cortex.shannon.registry import make
+from legacy_research.shannon.env.client import BinaryAgent
+from legacy_research.shannon.env.trace import EpisodeTrace, StepTrace, compute_trace_checksum
+from legacy_research.shannon.registry import make
 
 
 def run_episode(env_id: str, agent: BinaryAgent, **env_kwargs) -> dict[str, Any]:

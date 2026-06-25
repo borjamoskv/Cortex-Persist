@@ -12,7 +12,7 @@ from typing import Any
 
 from stripe_config import StripeBillingConfig, load_stripe_billing_config
 
-from cortex.extensions.billing.models import BillingEvent, FailureType
+from legacy_research.extensions.billing.models import BillingEvent, FailureType
 
 logger = logging.getLogger(__name__)
 

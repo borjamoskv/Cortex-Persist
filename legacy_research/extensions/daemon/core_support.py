@@ -6,8 +6,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.daemon.models import CORTEX_DB, CORTEX_DIR, DEFAULT_CERT_WARN_DAYS
-from cortex.extensions.daemon.monitors import (
+from legacy_research.extensions.daemon.models import CORTEX_DB, CORTEX_DIR, DEFAULT_CERT_WARN_DAYS
+from legacy_research.extensions.daemon.monitors import (
     AutoImmuneMonitor,
     CertMonitor,
     CompactionMonitor,
@@ -24,22 +24,22 @@ from cortex.extensions.daemon.monitors import (
     UnifiedMejoraloMonitor,
     WorkflowMonitor,
 )
-from cortex.extensions.daemon.monitors.ast_oracle import ASTOracleMonitor
-from cortex.extensions.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
-from cortex.extensions.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
+from legacy_research.extensions.daemon.monitors.ast_oracle import ASTOracleMonitor
+from legacy_research.extensions.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
+from legacy_research.extensions.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
 
 logger = logging.getLogger("moskv-daemon")
 
 try:
-    from cortex.extensions.aether.daemon import AetherDaemon, AetherMonitor
-    from cortex.extensions.aether.queue import TaskQueue
+    from legacy_research.extensions.aether.daemon import AetherDaemon, AetherMonitor
+    from legacy_research.extensions.aether.queue import TaskQueue
 
     _AETHER_AVAILABLE = True
 except ImportError:
     _AETHER_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.sidecar.telemetry.iot_oracle import IoTOracle
+    from legacy_research.extensions.daemon.sidecar.telemetry.iot_oracle import IoTOracle
 
     _IOT_ORACLE_AVAILABLE = True
 except ImportError:
@@ -66,7 +66,7 @@ def init_core_monitors(
     )
     daemon.evaluation_monitor = EvaluationMonitor(db_path=CORTEX_DB)
     try:
-        from cortex.engine import CortexEngine
+        from legacy_research.engine import CortexEngine
 
         daemon._shared_engine = CortexEngine()
     except ImportError:
@@ -129,9 +129,9 @@ def init_external_oracles(
     daemon.tombstone_monitor = TombstoneMonitor(db_path=file_config.get("db_path", str(CORTEX_DB)))
 
     try:
-        from cortex.database.pool import CortexConnectionPool
-        from cortex.engine import CortexEngine as AsyncCortexEngine
-        from cortex.extensions.daemon.sidecar.telemetry import ASTOracle
+        from legacy_research.database.pool import CortexConnectionPool
+        from legacy_research.engine import CortexEngine as AsyncCortexEngine
+        from legacy_research.extensions.daemon.sidecar.telemetry import ASTOracle
 
         db_path = file_config.get("db_path", str(CORTEX_DB))
         pool = CortexConnectionPool(db_path)
@@ -154,7 +154,7 @@ def init_external_oracles(
             check_interval=file_config.get("sentinel_interval", 60),
         )
         try:
-            from cortex.extensions.daemon.monitors.agy2_planner import AGY2PlannerMonitor
+            from legacy_research.extensions.daemon.monitors.agy2_planner import AGY2PlannerMonitor
 
             daemon.agy2_planner_daemon = AGY2PlannerMonitor(engine=daemon._shared_engine)
         except ImportError:
@@ -167,8 +167,8 @@ def init_external_oracles(
         daemon.agy2_planner_daemon = None
 
     try:
-        from cortex.engine.email_ingest_daemon import EmailIngestDaemon
-        from cortex.audit.ledger import EnterpriseAuditLedger
+        from legacy_research.engine.email_ingest_daemon import EmailIngestDaemon
+        from legacy_research.audit.ledger import EnterpriseAuditLedger
         
         ledger = EnterpriseAuditLedger()
         daemon.email_ingest_daemon = EmailIngestDaemon(ledger=ledger)

@@ -10,9 +10,9 @@ De un directorio de .md a un grafo cognitivo vivo.
 Skills que se registran solos, declaran capacidades y se componen bajo demanda.
 """
 
-from cortex.extensions.skills.registry import SkillManifest, SkillRegistry
-from cortex.extensions.skills.router import SkillRouter
-from cortex.extensions.skills.taxonomy import (
+from legacy_research.extensions.skills.registry import SkillManifest, SkillRegistry
+from legacy_research.extensions.skills.router import SkillRouter
+from legacy_research.extensions.skills.taxonomy import (
     ANTIGRAVITY_CORTEX_NEXUS_SKILL,
     ANTIGRAVITY_CORTEX_NEXUS_TAG,
     CANONICAL_DANGER_LEVELS,

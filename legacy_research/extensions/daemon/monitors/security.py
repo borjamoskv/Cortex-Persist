@@ -27,8 +27,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.daemon.models import SecurityAlert
-from cortex.memory import AsyncEncoder, VectorStoreL2
+from legacy_research.extensions.daemon.models import SecurityAlert
+from legacy_research.memory import AsyncEncoder, VectorStoreL2
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -144,11 +144,11 @@ class SecurityMonitor:
 
     async def _blacklist_ips(self, alerts: list[SecurityAlert]) -> None:
         """Persist C5 alerts to the threat_intel blacklist."""
-        from cortex import config
+        from legacy_research import config
 
         db_path = config.DB_PATH
         try:
-            from cortex.database.core import connect_async
+            from legacy_research.database.core import connect_async
 
             async with await connect_async(db_path) as conn:
                 for alert in alerts:

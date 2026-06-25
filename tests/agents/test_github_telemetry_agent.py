@@ -11,11 +11,11 @@ from unittest.mock import AsyncMock, MagicMock
 import httpx
 import pytest
 
-from cortex.agents.builtins.github_telemetry_agent import GithubTelemetryAgent
-from cortex.agents.bus import SqliteMessageBus
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import MessageKind, new_message
-from cortex.telemetry.metrics import metrics
+from legacy_research.agents.builtins.github_telemetry_agent import GithubTelemetryAgent
+from legacy_research.agents.bus import SqliteMessageBus
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import MessageKind, new_message
+from legacy_research.telemetry.metrics import metrics
 
 
 def _uid() -> str:

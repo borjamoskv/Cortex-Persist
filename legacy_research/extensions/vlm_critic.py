@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.extensions.signals.bus import AsyncSignalBus
+from legacy_research.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex.extensions.vlm_critic")
 

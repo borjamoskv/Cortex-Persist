@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cortex.extensions.aether.tools import AgentToolkit
-from cortex.extensions.swarm.auto_fix import AutoFixPipeline
+from legacy_research.extensions.aether.tools import AgentToolkit
+from legacy_research.extensions.swarm.auto_fix import AutoFixPipeline
 
 
 @pytest.fixture
@@ -168,7 +168,7 @@ async def test_hooked_tool_execution_timeout():
     """Verify that hooked_tool_execution enforces the timeout limit."""
     import time
     import asyncio
-    from cortex.extensions.aether.hooks import hooked_tool_execution
+    from legacy_research.extensions.aether.hooks import hooked_tool_execution
 
     @hooked_tool_execution(timeout_limit=0.1)
     async def async_slow_tool():
@@ -206,9 +206,9 @@ async def test_hooked_tool_execution_timeout():
 @pytest.mark.asyncio
 async def test_evolution_supervisor_multipass_loop():
     """Verify that EvolutionSupervisor executes the multipass loop with pre/post-eval."""
-    from cortex.agents.supervisor import EvolutionSupervisor
-    from cortex.agents.base import BaseAgent
-    from cortex.agents.manifest import AgentManifest
+    from legacy_research.agents.supervisor import EvolutionSupervisor
+    from legacy_research.agents.base import BaseAgent
+    from legacy_research.agents.manifest import AgentManifest
 
     # Create dummy agent
     manifest = AgentManifest(

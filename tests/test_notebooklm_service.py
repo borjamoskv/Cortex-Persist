@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from cortex.cli.notebooklm_data import (
+from legacy_research.cli.notebooklm_data import (
     _PROJECT_DOMAIN,
     DOMAIN_MAP,
     _format_fact_obj,
@@ -117,7 +117,7 @@ class TestCloudDetection:
     """Cloud sync provider detection."""
 
     def test_detect_returns_none_when_no_provider(self) -> None:
-        from cortex.cli.notebooklm_data import _detect_cloud_sync
+        from legacy_research.cli.notebooklm_data import _detect_cloud_sync
 
         # In CI/test environments, cloud providers typically don't exist.
         # This test validates graceful fallback.
@@ -133,7 +133,7 @@ class TestNotebookLMService:
     """NotebookLM service layer from services/notebooklm.py."""
 
     def test_format_fact_basic(self) -> None:
-        from cortex.services.notebooklm import NotebookLMService
+        from legacy_research.services.notebooklm import NotebookLMService
 
         svc = NotebookLMService(":memory:")
         fact = MagicMock()
@@ -153,7 +153,7 @@ class TestNotebookLMService:
         assert "∆_CTX:" in result
 
     def test_get_signature(self) -> None:
-        from cortex.services.notebooklm import NotebookLMService
+        from legacy_research.services.notebooklm import NotebookLMService
 
         svc = NotebookLMService(":memory:")
         sig = svc.get_signature()
@@ -162,7 +162,7 @@ class TestNotebookLMService:
         assert "mosaic-v8" in sig
 
     def test_detect_cloud_sync_returns_path_or_none(self) -> None:
-        from cortex.services.notebooklm import NotebookLMService
+        from legacy_research.services.notebooklm import NotebookLMService
 
         svc = NotebookLMService(":memory:")
         result = svc.detect_cloud_sync()
@@ -174,7 +174,7 @@ class TestMCPToolRegistration:
     """Verify MCP tool registration doesn't error."""
 
     def test_register_creates_tools(self) -> None:
-        from cortex.mcp.notebooklm_tools import register_notebooklm_tools
+        from legacy_research.mcp.notebooklm_tools import register_notebooklm_tools
 
         mock_mcp = MagicMock()
         mock_mcp.tool.return_value = lambda fn: fn

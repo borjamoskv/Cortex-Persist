@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from cortex.extensions.manifold.models import DimensionType, WaveState
+from legacy_research.extensions.manifold.models import DimensionType, WaveState
 
 
 class ConvergenceEngine:

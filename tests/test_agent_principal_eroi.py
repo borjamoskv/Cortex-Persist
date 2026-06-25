@@ -2,8 +2,8 @@
 import asyncio
 import pytest
 
-from cortex.engine import CortexEngine
-from cortex.extensions.swarm.manager import CapatazOrchestrator
+from legacy_research.engine import CortexEngine
+from legacy_research.extensions.swarm.manager import CapatazOrchestrator
 
 
 @pytest.fixture

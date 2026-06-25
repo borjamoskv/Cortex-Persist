@@ -10,17 +10,17 @@ import logging
 import os
 from pathlib import Path
 
-from cortex.extensions.mejoralo.constants import SCAN_EXTENSIONS, SKIP_DIRS
-from cortex.extensions.mejoralo.models import ShipResult, ShipSeal
-from cortex.extensions.mejoralo.scan import scan
-from cortex.extensions.mejoralo.utils import (
+from legacy_research.extensions.mejoralo.constants import SCAN_EXTENSIONS, SKIP_DIRS
+from legacy_research.extensions.mejoralo.models import ShipResult, ShipSeal
+from legacy_research.extensions.mejoralo.scan import scan
+from legacy_research.extensions.mejoralo.utils import (
     detect_stack,
     get_build_cmd,
     get_lint_cmd,
     get_test_cmd,
     run_quiet,
 )
-from cortex.guards.path_guard import is_safe_path
+from legacy_research.guards.path_guard import is_safe_path
 
 __all__ = ["check_ship_gate"]
 

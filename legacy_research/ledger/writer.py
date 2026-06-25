@@ -19,9 +19,9 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 from typing import Protocol
 
-from cortex.ledger.models import LedgerEvent
-from cortex.ledger.queue import EnrichmentQueue
-from cortex.ledger.store import LedgerStore
+from legacy_research.ledger.models import LedgerEvent
+from legacy_research.ledger.queue import EnrichmentQueue
+from legacy_research.ledger.store import LedgerStore
 
 
 class _OriginSignaturePolicy(Protocol):

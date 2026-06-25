@@ -14,7 +14,7 @@ import time
 
 # type: ignore
 # try:
-#     from cortex.extensions.perception.config import PERCEPTION_INTENSITY
+#     from legacy_research.extensions.perception.config import PERCEPTION_INTENSITY
 # except ImportError:
 PERCEPTION_INTENSITY = 0.5
 

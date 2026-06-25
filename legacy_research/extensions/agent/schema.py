@@ -1,10 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Declarative Agent Schema (YAML → Engine).
 
-Re-exports from cortex.agents.schema to avoid code duplication.
+Re-exports from legacy_research.agents.schema to avoid code duplication.
 """
 
-from cortex.agents.schema import (
+from legacy_research.agents.schema import (
     AgentRole,
     GuardrailConfig,
     MemoryConfig,

@@ -38,7 +38,7 @@ CORTEX Persist provides out-of-the-box MCP (Model Context Protocol) compatibilit
 For an orchestration pipeline heavily reliant on Python:
 
 ```python
-from cortex import CortexEngine
+from legacy_research import CortexEngine
 import asyncio
 
 async def orchestrate_decision(context: str, agent_name: str):

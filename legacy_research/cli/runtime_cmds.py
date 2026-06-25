@@ -3,8 +3,8 @@ import logging
 
 import click
 
-from cortex.cli.common import cli
-from cortex.engine.runtime_kernel import CortexRuntime
+from legacy_research.cli.common import cli
+from legacy_research.engine.runtime_kernel import CortexRuntime
 
 logger = logging.getLogger(__name__)
 

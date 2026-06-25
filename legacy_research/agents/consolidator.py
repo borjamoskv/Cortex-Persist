@@ -27,7 +27,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from pathlib import Path
 from typing import Any
 
-from cortex.agents.base import ReactiveTaskAgent
+from legacy_research.agents.base import ReactiveTaskAgent
 
 logger = logging.getLogger("cortex.agents.consolidator")
 

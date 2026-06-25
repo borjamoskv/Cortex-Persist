@@ -19,7 +19,7 @@ Derivation: Ω₂ (Entropic Asymmetry) + Ω₃ (Byzantine Default)
 import logging
 from typing import Any
 
-from cortex.memory.memory_retrieval import _fetch_dense_results
+from legacy_research.memory.memory_retrieval import _fetch_dense_results
 
 logger = logging.getLogger("cortex.memory.thalamus")
 

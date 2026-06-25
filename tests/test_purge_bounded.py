@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from cortex.engine import CortexEngine
-from cortex.engine.causality import KRGSE_DERIVED_FROM, AsyncCausalGraph
+from legacy_research.engine import CortexEngine
+from legacy_research.engine.causality import KRGSE_DERIVED_FROM, AsyncCausalGraph
 
 
 @pytest.fixture
@@ -13,7 +13,7 @@ async def engine(tmp_path: Path, monkeypatch):
     # Mock Frontier-compliant configuration to satisfy Rule 1.3
     monkeypatch.setenv("CORTEX_LLM_PROVIDER", "gemini")
     monkeypatch.setenv("CORTEX_LLM_MODEL", "gemini-3.1-pro-preview")
-    from cortex import config
+    from legacy_research import config
 
     config.reload()
 

@@ -16,9 +16,9 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from cortex.consensus.byzantine import ByzantineVerdict, WBFTConsensus
-from cortex.extensions.ha.gossip import GossipProtocol
-from cortex.extensions.thinking.fusion_models import ModelResponse, ThinkingHistory
+from legacy_research.consensus.byzantine import ByzantineVerdict, WBFTConsensus
+from legacy_research.extensions.ha.gossip import GossipProtocol
+from legacy_research.extensions.thinking.fusion_models import ModelResponse, ThinkingHistory
 
 __all__ = ["GEACLCoordinator", "GeaclCommitResult"]
 

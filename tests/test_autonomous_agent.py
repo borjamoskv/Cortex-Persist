@@ -20,12 +20,12 @@ import pytest
 from typing import Any
 from uuid import uuid4
 
-from cortex.agents.autonomous import AutonomousAgent, create_autonomous_agent
-from cortex.agents.builtin_tools import NoOpTool, register_all_builtin_tools
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
-from cortex.agents.planner import ExecutionPlan, ExergyPlanner, PlanStep, StepStatus
-from cortex.agents.tools import ToolRegistry
+from legacy_research.agents.autonomous import AutonomousAgent, create_autonomous_agent
+from legacy_research.agents.builtin_tools import NoOpTool, register_all_builtin_tools
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import AgentMessage, MessageKind, new_message
+from legacy_research.agents.planner import ExecutionPlan, ExergyPlanner, PlanStep, StepStatus
+from legacy_research.agents.tools import ToolRegistry
 
 logger = logging.getLogger("cortex.test.autonomous")
 
@@ -420,7 +420,7 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_full_lifecycle(self) -> None:
         """Test complete: register → start → execute → stop."""
-        from cortex.agents.supervisor import Supervisor
+        from legacy_research.agents.supervisor import Supervisor
 
         bus = InMemoryBus()
         registry = ToolRegistry()

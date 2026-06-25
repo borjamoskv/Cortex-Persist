@@ -9,8 +9,8 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from cortex.config import DEFAULT_DB_PATH
-from cortex.extensions.timing.chronos import ChronosEngine
+from legacy_research.config import DEFAULT_DB_PATH
+from legacy_research.extensions.timing.chronos import ChronosEngine
 
 __all__ = ["analyze", "chronos_cmds", "compound", "projection"]
 
@@ -89,7 +89,7 @@ def compound(project: str | None, persist: bool) -> None:
     """Detect compound causal chains and report exponential Ω₁₁ yield."""
     from rich.table import Table
 
-    from cortex.engine.compound_yield import CompoundYieldTracker
+    from legacy_research.engine.compound_yield import CompoundYieldTracker
 
     try:
         tracker = CompoundYieldTracker(db_path=str(DEFAULT_DB_PATH))
@@ -142,7 +142,7 @@ def projection(years: int, base_hours: float, rate: float) -> None:
     """Project Linear vs Compound CHRONOS-1 yield over a decade."""
     from rich.table import Table
 
-    from cortex.engine.compound_yield import CompoundProjector
+    from legacy_research.engine.compound_yield import CompoundProjector
 
     try:
         report = CompoundProjector.project(

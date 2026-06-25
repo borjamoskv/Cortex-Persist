@@ -3,7 +3,7 @@
 
 Usage::
 
-    from cortex.extensions.health import HealthCollector, HealthScorer, Grade
+    from legacy_research.extensions.health import HealthCollector, HealthScorer, Grade
 
     collector = HealthCollector(db_path="~/.cortex/cortex.db")
     metrics = collector.collect_all()
@@ -11,15 +11,15 @@ Usage::
     print(score.grade)  # Grade.SOVEREIGN
 """
 
-from cortex.extensions.health.collector import (
+from legacy_research.extensions.health.collector import (
     CollectorRegistry,
     HealthCollector,
     create_default_registry,
 )
-from cortex.extensions.health.health_mixin import HealthMixin
-from cortex.extensions.health.health_protocol import MetricCollectorProtocol
-from cortex.extensions.health.invariants import verify_health_system
-from cortex.extensions.health.models import (
+from legacy_research.extensions.health.health_mixin import HealthMixin
+from legacy_research.extensions.health.health_protocol import MetricCollectorProtocol
+from legacy_research.extensions.health.invariants import verify_health_system
+from legacy_research.extensions.health.models import (
     Grade,
     HealthReport,
     HealthScore,
@@ -28,11 +28,11 @@ from cortex.extensions.health.models import (
     HealthThresholds,
     MetricSnapshot,
 )
-from cortex.extensions.health.scorer import HealthScorer
-from cortex.extensions.health.trend import TrendDetector
+from legacy_research.extensions.health.scorer import HealthScorer
+from legacy_research.extensions.health.trend import TrendDetector
 
 try:
-    from cortex.extensions.health.prometheus import export_prometheus
+    from legacy_research.extensions.health.prometheus import export_prometheus
 
     HAS_PROMETHEUS = True
 except ImportError:

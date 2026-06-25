@@ -12,9 +12,9 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.mcp.resilient_gateway import create_resilient_gateway, run_resilient_gateway
-    from cortex.mcp.server import create_mcp_server, run_server
-    from cortex.mcp.utils import MCPServerConfig
+    from legacy_research.mcp.resilient_gateway import create_resilient_gateway, run_resilient_gateway
+    from legacy_research.mcp.server import create_mcp_server, run_server
+    from legacy_research.mcp.utils import MCPServerConfig
 
 __all__ = [
     "MCPServerConfig",

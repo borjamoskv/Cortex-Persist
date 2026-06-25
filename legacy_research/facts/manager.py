@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING, Any, cast
 
 from pydantic import ValidationError
 
-from cortex.engine.models import Fact, row_to_fact
-from cortex.engine.store_validators import validate_content
-from cortex.utils.canonical import now_iso
+from legacy_research.engine.models import Fact, row_to_fact
+from legacy_research.engine.store_validators import validate_content
+from legacy_research.utils.canonical import now_iso
 
 if TYPE_CHECKING:
-    from cortex.extensions.interfaces.engine import EngineProtocol
+    from legacy_research.extensions.interfaces.engine import EngineProtocol
 
 _FACT_FIELDS = {f.name for f in dataclasses.fields(Fact)}
 
@@ -21,7 +21,7 @@ __all__ = ["FactManager"]
 logger = logging.getLogger("cortex.facts")
 
 try:
-    from cortex.security.haiku import HaikuGuard
+    from legacy_research.security.haiku import HaikuGuard
 except ImportError:
     HaikuGuard = None
 
@@ -139,7 +139,7 @@ class FactManager:
                 content=content, project_id=project, tenant_id=tenant_id, fact_type=fact_type
             )
             if not should_process:
-                from cortex.routes.notch_ws import notify_notch_pruning
+                from legacy_research.routes.notch_ws import notify_notch_pruning
 
                 await notify_notch_pruning()
                 raise ValueError(f"Thalamus: Fact rejected ({action})")
@@ -195,7 +195,7 @@ class FactManager:
         except (OSError, RuntimeError, ValueError) as e:
             logger.warning("V8 Ingestion check failed: %s", e)
 
-        from cortex.engine.store_mixin import StoreMixin
+        from legacy_research.engine.store_mixin import StoreMixin
 
         return await StoreMixin._store_impl(
             cast("StoreMixin", self.engine),
@@ -288,26 +288,26 @@ class FactManager:
 
     async def graph(self, *args, **kwargs) -> Any:
         """Retrieve graph visualization data, delegated to QueryMixin."""
-        import cortex.graph
+        import legacy_research.graph
 
         async with self.engine.session() as conn:
             return await cortex.graph.get_graph(conn, *args, **kwargs)
 
     async def query_entity(self, *args, **kwargs) -> Any:
         """Query detailed information about an entity, delegated to QueryMixin."""
-        import cortex.graph
+        import legacy_research.graph
 
         async with self.engine.session() as conn:
             return await cortex.graph.query_entity(conn, *args, **kwargs)
 
     async def find_path(self, *args, **kwargs) -> Any:
-        import cortex.graph
+        import legacy_research.graph
 
         async with self.engine.session() as conn:
             return await cortex.graph.find_path(conn, *args, **kwargs)
 
     async def get_context_subgraph(self, *args, **kwargs) -> Any:
-        import cortex.graph
+        import legacy_research.graph
 
         async with self.engine.session() as conn:
             return await cortex.graph.get_context_subgraph(conn, *args, **kwargs)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from cortex.extensions.immune.metastability import assess_metastability
+from legacy_research.extensions.immune.metastability import assess_metastability
 
 
 def test_dormant_system_detected() -> None:

@@ -1,5 +1,5 @@
 import pytest
-from cortex.extensions.ouroboros_mythos.ouroboros_loop import MythosOuroborosEngine
+from legacy_research.extensions.ouroboros_mythos.ouroboros_loop import MythosOuroborosEngine
 
 @pytest.mark.asyncio
 async def test_ouroboros_loop_initialization(tmp_path):

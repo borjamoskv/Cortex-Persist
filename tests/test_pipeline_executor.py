@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.pipeline import ContextPacket
-from cortex.pipeline.executor import AgentExecutor
+from legacy_research.pipeline import ContextPacket
+from legacy_research.pipeline.executor import AgentExecutor
 
 
 # ── Construction ─────────────────────────────────────────────────────────

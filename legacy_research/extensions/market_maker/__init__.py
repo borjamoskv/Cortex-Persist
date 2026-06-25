@@ -11,8 +11,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.market_maker.detector import TrendDetector
-    from cortex.extensions.market_maker.models import (
+    from legacy_research.extensions.market_maker.detector import TrendDetector
+    from legacy_research.extensions.market_maker.models import (
         Experiment,
         ExperimentStatus,
         MVPArtifact,
@@ -20,10 +20,10 @@ if TYPE_CHECKING:
         TrendSignal,
         Verdict,
     )
-    from cortex.extensions.market_maker.mvp_generator import MVPGenerator
-    from cortex.extensions.market_maker.orchestrator import MarketMakerOrchestrator
-    from cortex.extensions.market_maker.scorer import OpportunityScorer
-    from cortex.extensions.market_maker.validator import DemandValidator
+    from legacy_research.extensions.market_maker.mvp_generator import MVPGenerator
+    from legacy_research.extensions.market_maker.orchestrator import MarketMakerOrchestrator
+    from legacy_research.extensions.market_maker.scorer import OpportunityScorer
+    from legacy_research.extensions.market_maker.validator import DemandValidator
 
 __all__ = [
     "DemandValidator",
@@ -51,7 +51,7 @@ def __getattr__(name: str) -> object:
         "TrendSignal",
         "Verdict",
     ):
-        from cortex.extensions.market_maker.models import (
+        from legacy_research.extensions.market_maker.models import (
             Experiment,
             ExperimentStatus,
             MVPArtifact,
@@ -72,27 +72,27 @@ def __getattr__(name: str) -> object:
 
     # Components
     if name == "TrendDetector":
-        from cortex.extensions.market_maker.detector import TrendDetector
+        from legacy_research.extensions.market_maker.detector import TrendDetector
 
         return TrendDetector
 
     if name == "OpportunityScorer":
-        from cortex.extensions.market_maker.scorer import OpportunityScorer
+        from legacy_research.extensions.market_maker.scorer import OpportunityScorer
 
         return OpportunityScorer
 
     if name == "MVPGenerator":
-        from cortex.extensions.market_maker.mvp_generator import MVPGenerator
+        from legacy_research.extensions.market_maker.mvp_generator import MVPGenerator
 
         return MVPGenerator
 
     if name == "DemandValidator":
-        from cortex.extensions.market_maker.validator import DemandValidator
+        from legacy_research.extensions.market_maker.validator import DemandValidator
 
         return DemandValidator
 
     if name == "MarketMakerOrchestrator":
-        from cortex.extensions.market_maker.orchestrator import MarketMakerOrchestrator
+        from legacy_research.extensions.market_maker.orchestrator import MarketMakerOrchestrator
 
         return MarketMakerOrchestrator
 

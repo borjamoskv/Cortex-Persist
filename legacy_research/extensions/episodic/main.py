@@ -18,13 +18,13 @@ import re
 from collections import Counter, defaultdict
 from typing import TYPE_CHECKING, Any, Final
 
-from cortex.extensions.episodic.base import (
+from legacy_research.extensions.episodic.base import (
     EMOTIONS,
     EVENT_TYPES,
     Episode,
     Pattern,
 )
-from cortex.memory.temporal import now_iso
+from legacy_research.memory.temporal import now_iso
 
 __all__ = ["EpisodicMemory"]
 

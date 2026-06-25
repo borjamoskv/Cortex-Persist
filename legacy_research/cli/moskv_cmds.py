@@ -9,7 +9,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import cli, console
+from legacy_research.cli.common import cli, console
 
 
 @click.command("moskv-videntia")

@@ -7,13 +7,13 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from cortex.cli.common import cli
-from cortex.config import DEFAULT_DB_PATH
-from cortex.darknet.agents import AVATARS, DarknetAgent
-from cortex.darknet.ingestor import DarknetIngestor
-from cortex.darknet.social_ledger import DarknetLedger
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexLLMRouter
+from legacy_research.cli.common import cli
+from legacy_research.config import DEFAULT_DB_PATH
+from legacy_research.darknet.agents import AVATARS, DarknetAgent
+from legacy_research.darknet.ingestor import DarknetIngestor
+from legacy_research.darknet.social_ledger import DarknetLedger
+from legacy_research.extensions.llm.provider import LLMProvider
+from legacy_research.extensions.llm.router import CortexLLMRouter
 
 console = Console()
 

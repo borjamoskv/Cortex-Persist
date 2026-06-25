@@ -18,7 +18,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
-from cortex.utils.errors import DecryptionPolicyError
+from legacy_research.utils.errors import DecryptionPolicyError
 
 logger = logging.getLogger("cortex.crypto")
 
@@ -45,7 +45,7 @@ class CortexEncrypter:
         self.strict_mode = strict_mode
         if hkdf_salt is None:
             try:
-                import cortex.core.config as config
+                import legacy_research.core.config as config
                 self.hkdf_salt = config.HKDF_SALT.encode("utf-8")
             except (ImportError, AttributeError):
                 self.hkdf_salt = b"cortex_v6_tenant_isolation_salt"
@@ -160,7 +160,7 @@ def get_default_encrypter() -> CortexEncrypter:
     if _default_encrypter_instance is None:
         with _encrypter_lock:
             if _default_encrypter_instance is None:
-                from cortex.crypto.keyring import get_master_key
+                from legacy_research.crypto.keyring import get_master_key
 
                 _default_encrypter_instance = CortexEncrypter(get_master_key())
     return _default_encrypter_instance

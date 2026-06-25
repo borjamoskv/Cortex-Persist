@@ -16,7 +16,7 @@ import pytest
 
 @pytest.fixture
 def pipeline():
-    from cortex.engine.guard_pipeline import GuardPipeline
+    from legacy_research.engine.guard_pipeline import GuardPipeline
 
     return GuardPipeline()
 

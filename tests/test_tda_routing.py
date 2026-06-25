@@ -10,7 +10,7 @@ import pytest
 import sqlite3
 
 from pathlib import Path
-from cortex.utils.tda_routing import HodgeMemoryRouter
+from legacy_research.utils.tda_routing import HodgeMemoryRouter
 
 
 

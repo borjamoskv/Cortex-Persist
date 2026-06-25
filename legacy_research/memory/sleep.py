@@ -31,9 +31,9 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.memory.dream import AssociativeDreamEngine
-    from cortex.memory.metamemory import MetamemoryMonitor
-    from cortex.memory.replay import HippocampalReplay
+    from legacy_research.memory.dream import AssociativeDreamEngine
+    from legacy_research.memory.metamemory import MetamemoryMonitor
+    from legacy_research.memory.replay import HippocampalReplay
 
 logger = logging.getLogger("cortex.memory.sleep")
 

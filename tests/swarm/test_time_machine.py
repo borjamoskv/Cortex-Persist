@@ -1,7 +1,7 @@
 import pytest
-from cortex.swarm.graph_source import MockSNGraphSource, SalienceCandidate
-from cortex.swarm.router import SwarmRouter
-from cortex.swarm.ledger import SwarmLedger, SwarmTimeMachine
+from legacy_research.swarm.graph_source import MockSNGraphSource, SalienceCandidate
+from legacy_research.swarm.router import SwarmRouter
+from legacy_research.swarm.ledger import SwarmLedger, SwarmTimeMachine
 
 
 # ---------------------------------------------------------------------------
@@ -27,7 +27,7 @@ def candidates():
 def router_and_tm(candidates, tmp_path):
     mock_source = MockSNGraphSource(candidates)
     r = SwarmRouter(registry=_FakeRegistry(), graph_source=mock_source)
-    import cortex.swarm.ledger.engine as eng
+    import legacy_research.swarm.ledger.engine as eng
     r.ledger = eng.SwarmLedger(path=str(tmp_path / "tm_test.db"))
     tm = SwarmTimeMachine(r.ledger)
     return r, tm

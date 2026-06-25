@@ -7,7 +7,7 @@ Identifies structural discrepancies in input graphs without simulation.
 import time
 from typing import Protocol
 
-from cortex.extensions.structural_arbitrage.models import ArbitrageSignal, CortexAmount
+from legacy_research.extensions.structural_arbitrage.models import ArbitrageSignal, CortexAmount
 
 
 class MarketOracle(Protocol):

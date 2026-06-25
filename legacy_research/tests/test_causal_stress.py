@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from cortex.guards.causal_closure_guard import CausalClosureGuard, ClosureContractError
-from cortex.types.evidence import ClosurePayload, EvidenceBundle, Source
+from legacy_research.guards.causal_closure_guard import CausalClosureGuard, ClosureContractError
+from legacy_research.types.evidence import ClosurePayload, EvidenceBundle, Source
 from legacy_research.pipeline.cve_orchestrator import CVEOrchestrator
 
 

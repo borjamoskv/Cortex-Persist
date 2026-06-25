@@ -7,7 +7,7 @@ Each designed to collapse the predictable response space and force genuine thoug
 
 Usage::
 
-    from cortex.extensions.agents.pitches import PITCH_CTO_SKEPTIC, PITCH_MEMO_DEV, PITCH_OS_CONTRIBUTOR
+    from legacy_research.extensions.agents.pitches import PITCH_CTO_SKEPTIC, PITCH_MEMO_DEV, PITCH_OS_CONTRIBUTOR
     print(PITCH_CTO_SKEPTIC)
 """
 

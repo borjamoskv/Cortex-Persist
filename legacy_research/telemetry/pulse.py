@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.extensions.signals.bus import SignalBus
+    from legacy_research.extensions.signals.bus import SignalBus
 
 logger = logging.getLogger("cortex.telemetry.pulse")
 

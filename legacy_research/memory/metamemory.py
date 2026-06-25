@@ -17,7 +17,7 @@ from typing import Any, Final
 logger = logging.getLogger("cortex.memory.metamemory")
 
 # Re-export schema layer for backward compatibility (Ω₂: zero import breakage)
-from cortex.memory.metamemory_schema import (
+from legacy_research.memory.metamemory_schema import (
     ConsolidationStatus,
     FOKDirective,
     MemoryCard,

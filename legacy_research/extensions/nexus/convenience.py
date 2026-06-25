@@ -3,8 +3,8 @@
 Domain Convenience Functions
 """
 
-from cortex.extensions.nexus.model import NexusWorldModel
-from cortex.extensions.nexus.types import (
+from legacy_research.extensions.nexus.model import NexusWorldModel
+from legacy_research.extensions.nexus.types import (
     _INTENT_PRIORITY,
     DomainOrigin,
     IntentType,

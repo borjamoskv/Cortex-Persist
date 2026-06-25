@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.evolution.engine import CycleReport
+    from legacy_research.extensions.evolution.engine import CycleReport
 
 logger = logging.getLogger(__name__)
 

@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.daemon.zero_prompting")
 
@@ -40,7 +40,7 @@ class ZeroPromptingDaemon:
     async def _observe(self) -> dict[str, Any]:
         """Observes the current thermodynamic and structural state."""
         logger.debug("[ZERO-PROMPTING] [OBSERVE] Reading system state with MEJORAlo...")
-        from cortex.extensions.mejoralo.engine import MejoraloEngine
+        from legacy_research.extensions.mejoralo.engine import MejoraloEngine
 
         m_engine = MejoraloEngine(self.engine)
         scan_result = await asyncio.to_thread(m_engine.scan, "CORTEX_ZERO", str(self.root))
@@ -74,8 +74,8 @@ class ZeroPromptingDaemon:
     async def _act(self, _hypothesis: str, state: dict[str, Any]) -> dict[str, Any]:
         """Executes the Sovereign mutation."""
         logger.debug("[ZERO-PROMPTING] [ACT] Mutating infrastructure...")
-        from cortex.extensions.evolution.ouroboros_omega import OuroborosOmega
-        from cortex.extensions.mejoralo.engine import MejoraloEngine
+        from legacy_research.extensions.evolution.ouroboros_omega import OuroborosOmega
+        from legacy_research.extensions.mejoralo.engine import MejoraloEngine
 
         scan_result = state.get("scan_result")
 

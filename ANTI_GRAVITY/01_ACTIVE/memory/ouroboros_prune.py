@@ -34,7 +34,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Protocol, runtime_checkable
 
-from cortex.engine.semantic_collapse import collapse_eligible, kolmogorov_approx, semantic_collapse, compute_ncd
+from legacy_research.engine.semantic_collapse import collapse_eligible, kolmogorov_approx, semantic_collapse, compute_ncd
 
 
 
@@ -217,7 +217,7 @@ def execute_thermal_purge(
                     except Exception:
                         pass
                 
-                from cortex.engine.immunity.origin_policy import get_policy
+                from legacy_research.engine.immunity.origin_policy import get_policy
                 policy = get_policy(origin_type)
                 floor = max(policy.criticality_floor, locked_floor)
 
@@ -590,7 +590,7 @@ def hebbian_reinforce(node: FactNode, now: Optional[float] = None, depth: int = 
     LTP: invoked ONLY from consolidate_retrieval_graph.
     Never from semantic router — prevents latent space poisoning.
     """
-    from cortex.engine.immunity.origin_policy import get_policy
+    from legacy_research.engine.immunity.origin_policy import get_policy
 
     t = now or time.time()
     node.last_accessed_at = t

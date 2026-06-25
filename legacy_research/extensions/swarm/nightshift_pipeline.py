@@ -143,7 +143,7 @@ class ExecutorNode:
             task_id = task["id"]
 
             try:
-                from cortex.extensions.skills.autodidact.actuator import autodidact_pipeline
+                from legacy_research.extensions.skills.autodidact.actuator import autodidact_pipeline
 
                 result = await autodidact_pipeline(
                     target=task["target"],

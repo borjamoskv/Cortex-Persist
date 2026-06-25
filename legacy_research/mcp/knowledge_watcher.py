@@ -13,9 +13,9 @@ import time
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.models import CortexFactModel
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+from legacy_research.memory.encoder import AsyncEncoder
+from legacy_research.memory.models import CortexFactModel
+from legacy_research.memory.sqlite_vec_store import SovereignVectorStoreL2
 
 logger = logging.getLogger("cortex.mcp.knowledge_watcher")
 

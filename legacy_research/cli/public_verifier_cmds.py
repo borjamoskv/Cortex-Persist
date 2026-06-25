@@ -5,8 +5,8 @@ import json
 
 import click
 
-from cortex.cli.common import cli
-from cortex.ledger.public_verifier import verify_export
+from legacy_research.cli.common import cli
+from legacy_research.ledger.public_verifier import verify_export
 
 
 @cli.command("verify-ledger-export")

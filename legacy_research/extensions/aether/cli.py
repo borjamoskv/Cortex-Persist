@@ -10,8 +10,8 @@ import argparse
 import sys
 from pathlib import Path
 
-from cortex.extensions.aether.models import AgentTask, TaskSource
-from cortex.extensions.aether.queue import TaskQueue
+from legacy_research.extensions.aether.models import AgentTask, TaskSource
+from legacy_research.extensions.aether.queue import TaskQueue
 
 
 def _make_queue() -> TaskQueue:
@@ -90,7 +90,7 @@ def cmd_cancel(args: argparse.Namespace) -> int:
 
 def cmd_run(args: argparse.Namespace) -> int:
     """Immediately run the next pending task (foreground, for testing)."""
-    from cortex.extensions.aether.runner import AetherAgent
+    from legacy_research.extensions.aether.runner import AetherAgent
 
     queue = _make_queue()
     task = queue.pop_next()

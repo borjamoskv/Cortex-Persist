@@ -8,7 +8,7 @@ delivers validation-first results for human review.
 
 Architecture:
     JosuProactiveDaemon.proactive_loop()
-      └─> _query_pending_targets()      # Fetch ghosts from cortex.db
+      └─> _query_pending_targets()      # Fetch ghosts from legacy_research.db
             └─> for each target:
                   └─> _spawn_pulse()     # Ephemeral Pulse agent (max_beats=15)
                         └─> _execute_and_validate()
@@ -46,8 +46,8 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
-from cortex.extensions.swarm.worktree_isolation import isolated_worktree
+from legacy_research.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
+from legacy_research.extensions.swarm.worktree_isolation import isolated_worktree
 
 logger = logging.getLogger("cortex.extensions.swarm.josu_daemon")
 
@@ -129,7 +129,7 @@ class JosuProactiveDaemon:
 
         # Co-launch Toolbox watchdog (Ω₀ self-reference)
         try:
-            from cortex.mcp.toolbox_watchdog import (
+            from legacy_research.mcp.toolbox_watchdog import (
                 ToolboxWatchdog,
             )
 
@@ -192,7 +192,7 @@ class JosuProactiveDaemon:
             try:
                 # Signal planning
                 async with self.db.session() as conn:
-                    from cortex.extensions.signals.bus import AsyncSignalBus
+                    from legacy_research.extensions.signals.bus import AsyncSignalBus
 
                     bus = AsyncSignalBus(conn)
                     await bus.emit(
@@ -235,7 +235,7 @@ class JosuProactiveDaemon:
                                 source=source_id,
                             )
                             # Invoke HumanEscalationPulse structurally
-                            from cortex.extensions.swarm.escalation import HumanEscalationPulse
+                            from legacy_research.extensions.swarm.escalation import HumanEscalationPulse
 
                             raise HumanEscalationPulse(
                                 source_id,
@@ -264,7 +264,7 @@ class JosuProactiveDaemon:
                 logger.info("🌿 [JOSU] Worktree lab created at %s", wt_path)
 
                 async with self.db.session() as conn:
-                    from cortex.extensions.signals.bus import AsyncSignalBus
+                    from legacy_research.extensions.signals.bus import AsyncSignalBus
 
                     bus = AsyncSignalBus(conn)
                     await bus.emit(
@@ -272,7 +272,7 @@ class JosuProactiveDaemon:
                     )
 
                 # Import Pulse lazily to avoid circular deps
-                from cortex.engine.metabolism import Metabolism
+                from legacy_research.engine.metabolism import Metabolism
 
                 metabolism = Metabolism(flatline_threshold=3.0)
 
@@ -285,7 +285,7 @@ class JosuProactiveDaemon:
                 #   agent.live()
 
                 # For now: delegate to AgentToolkit + simple heuristic
-                from cortex.extensions.aether.tools import AgentToolkit
+                from legacy_research.extensions.aether.tools import AgentToolkit
 
                 toolkit = AgentToolkit(wt_path)
 

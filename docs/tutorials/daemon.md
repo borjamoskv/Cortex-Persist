@@ -74,8 +74,8 @@ On macOS, the daemon sends native notifications via `osascript`. You'll see aler
 Use the daemon programmatically:
 
 ```python
-from cortex.daemon import CortexDaemon
-from cortex.engine import CortexEngine
+from legacy_research.daemon import CortexDaemon
+from legacy_research.engine import CortexEngine
 
 engine = CortexEngine()
 engine.init_db()
@@ -112,8 +112,8 @@ jobs:
       - run: pip install cortex-persist
       - run: |
           python -c "
-          from cortex.daemon import CortexDaemon
-          from cortex.engine import CortexEngine
+          from legacy_research.daemon import CortexDaemon
+          from legacy_research.engine import CortexEngine
           engine = CortexEngine()
           engine.init_db()
           d = CortexDaemon(engine)

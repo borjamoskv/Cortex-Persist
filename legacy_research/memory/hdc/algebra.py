@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Final
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray

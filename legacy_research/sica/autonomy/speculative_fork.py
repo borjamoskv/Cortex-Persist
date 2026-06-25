@@ -4,9 +4,9 @@ from __future__ import annotations
 import logging
 import random
 
-from cortex.sica.meta_level import MetaJudgment
-from cortex.sica.object_level import ExecutionTrace, StepOutcome
-from cortex.sica.strategy import SearchStrategy
+from legacy_research.sica.meta_level import MetaJudgment
+from legacy_research.sica.object_level import ExecutionTrace, StepOutcome
+from legacy_research.sica.strategy import SearchStrategy
 
 logger = logging.getLogger("cortex.sica.autonomy.fork")
 from dataclasses import dataclass

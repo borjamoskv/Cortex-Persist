@@ -203,7 +203,7 @@ class LocalMIDIAdapter(AudioAdapter):
     """Local MIDI → WAV adapter. No API keys needed."""
 
     def __init__(self):
-        from cortex.extensions.music_engine.midi_engine import (
+        from legacy_research.extensions.music_engine.midi_engine import (
             generate_euclidean_groove,
             generate_harmonic_sequence,
             generate_texture_layer,

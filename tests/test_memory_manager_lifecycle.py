@@ -7,9 +7,9 @@ import pytest
 import pytest_asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from cortex.memory.manager import CortexMemoryManager
-from cortex.memory.engrams import CortexSemanticEngram
-from cortex.memory.models import MemoryEvent
+from legacy_research.memory.manager import CortexMemoryManager
+from legacy_research.memory.engrams import CortexSemanticEngram
+from legacy_research.memory.models import MemoryEvent
 
 
 @pytest.fixture

@@ -10,8 +10,8 @@ Status: IMPLEMENTED (upgraded from PARTIAL via Ω₁₃ enforcement).
 
 from __future__ import annotations
 
-from cortex.extensions.causality.models import Confidence, FactNode, TaintStatus
-from cortex.extensions.causality.taint import (
+from legacy_research.extensions.causality.models import Confidence, FactNode, TaintStatus
+from legacy_research.extensions.causality.taint import (
     downgrade_confidence,
     propagate_taint,
     recompute_effective_confidence,

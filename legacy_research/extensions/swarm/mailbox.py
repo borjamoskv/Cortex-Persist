@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from cortex.database.core import connect_async
+from legacy_research.database.core import connect_async
 
 
 class AtomicMailbox:

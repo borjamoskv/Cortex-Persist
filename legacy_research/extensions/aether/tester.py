@@ -9,8 +9,8 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from cortex.extensions.aether.models import AetherTestResult
-from cortex.extensions.aether.tools import AgentToolkit
+from legacy_research.extensions.aether.models import AetherTestResult
+from legacy_research.extensions.aether.tools import AgentToolkit
 
 __all__ = ["TesterAgent"]
 

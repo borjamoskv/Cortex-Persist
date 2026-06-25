@@ -8,8 +8,8 @@ import json
 import click
 from rich.table import Table
 
-from cortex.cli.common import console
-from cortex.extensions.llm.quota import SovereignQuotaManager
+from legacy_research.cli.common import console
+from legacy_research.extensions.llm.quota import SovereignQuotaManager
 
 
 @click.group()

@@ -29,7 +29,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.songlines.sensor import TopographicSensor
+from legacy_research.extensions.songlines.sensor import TopographicSensor
 
 logger = logging.getLogger("cortex.extensions.daemon.entropic_wake")
 

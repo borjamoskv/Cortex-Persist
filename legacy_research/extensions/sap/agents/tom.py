@@ -42,7 +42,7 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.extensions.signals.bus import AsyncSignalBus
+from legacy_research.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex.extensions.sap.tom")
 

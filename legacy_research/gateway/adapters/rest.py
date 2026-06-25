@@ -23,7 +23,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from cortex.gateway import GatewayIntent, GatewayRequest, GatewayRouter
+from legacy_research.gateway import GatewayIntent, GatewayRequest, GatewayRouter
 
 logger = logging.getLogger("cortex.gateway.rest")
 
@@ -71,7 +71,7 @@ class AskBody(BaseModel):
 
 def _get_router(request: Request) -> GatewayRouter:
     """Build a GatewayRouter from app state for each request."""
-    import cortex.api.state as api_state
+    import legacy_research.api.state as api_state
 
     engine = getattr(api_state, "async_engine", None) or getattr(api_state, "engine", None)
     bus = getattr(api_state, "notification_bus", None)

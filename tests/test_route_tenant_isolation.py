@@ -7,10 +7,10 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 
-from cortex.api.deps import get_async_engine, get_engine
-from cortex.auth.models import AuthResult
-from cortex.routes import agents as agents_router
-from cortex.routes import graph as graph_router
+from legacy_research.api.deps import get_async_engine, get_engine
+from legacy_research.auth.models import AuthResult
+from legacy_research.routes import agents as agents_router
+from legacy_research.routes import graph as graph_router
 
 
 def _dependency_for(path: str, method: str, app_route: APIRoute) -> Callable:

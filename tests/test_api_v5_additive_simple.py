@@ -4,9 +4,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from fastapi.testclient import TestClient
 
-from cortex.api.core import app
-from cortex.api.deps import get_async_engine
-from cortex.auth.deps import require_auth, require_permission
+from legacy_research.api.core import app
+from legacy_research.api.deps import get_async_engine
+from legacy_research.auth.deps import require_auth, require_permission
 
 # Mock AuthResult for dependency override
 mock_auth = MagicMock()

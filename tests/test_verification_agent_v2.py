@@ -5,11 +5,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from cortex.agents.builtins.verification_agent import VerificationAgent
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import MessageKind, new_message
-from cortex.verification.oracle import VerificationOracleResult
-from cortex.verification.verifier import VerificationResult
+from legacy_research.agents.builtins.verification_agent import VerificationAgent
+from legacy_research.agents.manifest import AgentManifest
+from legacy_research.agents.message_schema import MessageKind, new_message
+from legacy_research.verification.oracle import VerificationOracleResult
+from legacy_research.verification.verifier import VerificationResult
 
 
 @pytest.fixture

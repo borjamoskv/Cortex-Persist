@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any
 logger = logging.getLogger("cortex.extensions.thinking")
 
 if TYPE_CHECKING:
-    from cortex.extensions.thinking.fusion import FusedThought
+    from legacy_research.extensions.thinking.fusion import FusedThought
 
 __all__ = ["OrchestraIntrospectionMixin"]
 
@@ -73,7 +73,7 @@ class OrchestraIntrospectionMixin:
         2. Subjects the hypothesis to an Inquisitorial siege (Red Team).
         3. Folds the siege critique into a final, invulnerable response.
         """
-        from cortex.extensions.llm.sovereign import Inquisitor
+        from legacy_research.extensions.llm.sovereign import Inquisitor
 
         # Phase 1: Hypothesis Synthesis
         hypothesis = await self.think(  # type: ignore[reportAttributeAccessIssue]
@@ -133,7 +133,7 @@ class OrchestraIntrospectionMixin:
     @property
     def available_modes(self) -> list[str]:
         """Modos con al menos 1 modelo configurado."""
-        from cortex.extensions.thinking.presets import ThinkingMode
+        from legacy_research.extensions.thinking.presets import ThinkingMode
 
         return [m.value for m in ThinkingMode if self._resolve_models(m)]  # type: ignore[reportAttributeAccessIssue]
 
@@ -144,7 +144,7 @@ class OrchestraIntrospectionMixin:
 
     def status(self) -> dict[str, Any]:
         """Estado completo del orchestra."""
-        from cortex.extensions.thinking.presets import ThinkingMode
+        from legacy_research.extensions.thinking.presets import ThinkingMode
 
         mode_status = {}
         for mode in ThinkingMode:

@@ -15,16 +15,16 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.search.causal_gap import (
+    from legacy_research.search.causal_gap import (
         CausalGap,
         SearchCandidate,
         compute_candidate_score,
         retrieve_for_causal_gap,
     )
-    from cortex.search.hybrid import hybrid_search, hybrid_search_sync
-    from cortex.search.models import SearchResult
-    from cortex.search.text import text_search, text_search_sync
-    from cortex.search.vector import semantic_search, semantic_search_sync
+    from legacy_research.search.hybrid import hybrid_search, hybrid_search_sync
+    from legacy_research.search.models import SearchResult
+    from legacy_research.search.text import text_search, text_search_sync
+    from legacy_research.search.vector import semantic_search, semantic_search_sync
 
 __all__ = [
     "CausalGap",

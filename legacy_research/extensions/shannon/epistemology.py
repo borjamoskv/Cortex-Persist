@@ -26,7 +26,7 @@ from __future__ import annotations
 import math
 import zlib
 
-from cortex.extensions.shannon.analyzer import kl_divergence, shannon_entropy
+from legacy_research.extensions.shannon.analyzer import kl_divergence, shannon_entropy
 
 __all__ = [
     "compression_intelligence",

@@ -11,7 +11,7 @@ Architecture: ATTACH DATABASE (SQLite native) for zero-copy
 cross-database queries. Each result carries `db_origin` provenance.
 
 Usage:
-    from cortex.search.federation import federated_search_sync
+    from legacy_research.search.federation import federated_search_sync
     results = federated_search_sync(conn, "NAROA routing", scope="all")
 """
 
@@ -67,9 +67,9 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.core.paths import COLD_STORAGE_DB, PERSONAL_DB
-from cortex.search.models import SearchResult, SearchScope
-from cortex.search.text import text_search, text_search_sync
+from legacy_research.core.paths import COLD_STORAGE_DB, PERSONAL_DB
+from legacy_research.search.models import SearchResult, SearchScope
+from legacy_research.search.text import text_search, text_search_sync
 
 __all__ = [
     "attach_federated_dbs",
@@ -195,8 +195,8 @@ def _search_attached_db(
     Handles AES-GCM encrypted content by decrypting client-side.
     Falls back to LIKE for unencrypted DBs.
     """
-    from cortex.crypto import get_default_encrypter
-    from cortex.crypto.aes import CortexEncrypter
+    from legacy_research.crypto import get_default_encrypter
+    from legacy_research.crypto.aes import CortexEncrypter
 
     enc = get_default_encrypter()
     v6_prefix = CortexEncrypter.PREFIX
@@ -282,8 +282,8 @@ async def _search_attached_db_async(
     limit: int = 20,
 ) -> list[SearchResult]:
     """Search an attached database's facts table (async)."""
-    from cortex.crypto import get_default_encrypter
-    from cortex.crypto.aes import CortexEncrypter
+    from legacy_research.crypto import get_default_encrypter
+    from legacy_research.crypto.aes import CortexEncrypter
 
     enc = get_default_encrypter()
     v6_prefix = CortexEncrypter.PREFIX

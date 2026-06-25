@@ -12,8 +12,8 @@ from pathlib import Path
 
 import pytest
 
-from cortex.tools.e1_profiler import ComponentStats, E1Profiler, ProfileReport
-from cortex.tools.trace_builder import TraceBuilder
+from legacy_research.tools.e1_profiler import ComponentStats, E1Profiler, ProfileReport
+from legacy_research.tools.trace_builder import TraceBuilder
 
 
 # ---------------------------------------------------------------------------

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.shannon.maxwell import filter_context
+from legacy_research.shannon.maxwell import filter_context
 
 
 def test_empty_content() -> None:

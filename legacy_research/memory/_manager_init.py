@@ -10,7 +10,7 @@ def init_dynamic_space(l2: Any, manager: Any) -> Any | None:
     if not l2:
         return None
     try:
-        from cortex.memory.semantic_ram import DynamicSemanticSpace
+        from legacy_research.memory.semantic_ram import DynamicSemanticSpace
 
         return DynamicSemanticSpace(l2, manager=manager)
     except ImportError:
@@ -24,7 +24,7 @@ def init_hologram(l2: Any) -> Any | None:
     if not l2:
         return None
     try:
-        from cortex.memory.hologram import HolographicMemory
+        from legacy_research.memory.hologram import HolographicMemory
 
         return HolographicMemory(l2)
     except Exception as exc:
@@ -34,7 +34,7 @@ def init_hologram(l2: Any) -> Any | None:
 
 def init_metamemory() -> Any | None:
     try:
-        from cortex.memory.metamemory import MetamemoryMonitor
+        from legacy_research.memory.metamemory import MetamemoryMonitor
 
         return MetamemoryMonitor()
     except Exception as exc:
@@ -48,14 +48,14 @@ def init_resonance_gate(l2: Any, endocrine: Any) -> Any | None:
 
     sensor = None
     try:
-        from cortex.extensions.songlines.sensor import TopographicSensor
+        from legacy_research.extensions.songlines.sensor import TopographicSensor
 
         sensor = TopographicSensor()
     except Exception as exc:
         logger.warning("Topographic sensor unavailable for resonance gate: %s", exc)
 
     try:
-        from cortex.memory.resonance import AdaptiveResonanceGate
+        from legacy_research.memory.resonance import AdaptiveResonanceGate
 
         return AdaptiveResonanceGate(
             vector_store=l2,

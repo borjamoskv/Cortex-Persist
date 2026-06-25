@@ -6,8 +6,8 @@ import ast
 
 import pytest
 
-from cortex.engine.ast_validator import validate_ast
-from cortex.math.fpu_interceptor import FPUFirewall, FPUViolationError, no_float
+from legacy_research.engine.ast_validator import validate_ast
+from legacy_research.math.fpu_interceptor import FPUFirewall, FPUViolationError, no_float
 
 
 # ─── FPUFirewall Tests ───────────────────────────────────────────

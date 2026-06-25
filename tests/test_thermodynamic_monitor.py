@@ -6,7 +6,7 @@ import asyncio
 
 import pytest
 
-from cortex.extensions.daemon.monitors.thermodynamic import ThermodynamicMemoryMonitor
+from legacy_research.extensions.daemon.monitors.thermodynamic import ThermodynamicMemoryMonitor
 
 
 class _Manager:

@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 
-from cortex.extensions.agent.degradation import (
+from legacy_research.extensions.agent.degradation import (
     AgentAction,
     AgentCalcificationError,
     AgentDegradedError,
@@ -13,7 +13,7 @@ from cortex.extensions.agent.degradation import (
     ToolRegistrationError,
     sovereign_execute,
 )
-from cortex.extensions.agent.schema import AgentRole, GuardrailConfig, MemoryConfig
+from legacy_research.extensions.agent.schema import AgentRole, GuardrailConfig, MemoryConfig
 
 __all__ = [
     # schema

@@ -160,8 +160,8 @@ You can also use BABYLON-60 directly in Python to gate your own autonomous agent
 
 ```python
 import asyncio
-from cortex.gateway.code_governance import CodeGovernanceGateway
-from cortex.auth.enterprise_identity import SovereignIdentity
+from legacy_research.gateway.code_governance import CodeGovernanceGateway
+from legacy_research.auth.enterprise_identity import SovereignIdentity
 
 async def evaluate_agent_mutation():
     # Initialize the CI Firewall

@@ -10,8 +10,8 @@ import logging
 import re
 from typing import Any
 
-from cortex.agents.base import ReactiveTaskAgent
-from cortex.agents.copilot_llm_strategy import DeterministicFallbackClient
+from legacy_research.agents.base import ReactiveTaskAgent
+from legacy_research.agents.copilot_llm_strategy import DeterministicFallbackClient
 
 logger = logging.getLogger("cortex.agents.epistemic_validator")
 

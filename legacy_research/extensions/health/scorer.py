@@ -6,7 +6,7 @@ Uses sealed Grade enum. Supports configurable weight overrides.
 
 from __future__ import annotations
 
-from cortex.extensions.health.models import Grade, HealthScore, MetricSnapshot
+from legacy_research.extensions.health.models import Grade, HealthScore, MetricSnapshot
 
 # Default metric weights (override via HealthScorer.score(weights=...))
 DEFAULT_WEIGHTS: dict[str, float] = {

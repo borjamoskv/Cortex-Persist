@@ -19,7 +19,7 @@ Architecture:
     └──────────────────────┘
 
 Usage:
-    from cortex.event_loop import sovereign_run
+    from legacy_research.event_loop import sovereign_run
 
     # Replace: asyncio.run(coro())
     # With:    sovereign_run(coro())

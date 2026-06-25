@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.utils.errors import CortexError
+from legacy_research.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.security.i10")
 

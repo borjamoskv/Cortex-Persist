@@ -11,7 +11,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
-from cortex.extensions.daemon.models import SiteStatus
+from legacy_research.extensions.daemon.models import SiteStatus
 
 logger = logging.getLogger("cortex.monitors.heartbeat")
 

@@ -12,8 +12,8 @@ import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 
-from cortex.extensions.aether.models import PlanOutput, ToolCall
-from cortex.extensions.aether.tools import AgentToolkit
+from legacy_research.extensions.aether.models import PlanOutput, ToolCall
+from legacy_research.extensions.aether.tools import AgentToolkit
 
 __all__ = ["ExecutorAgent"]
 
@@ -81,7 +81,7 @@ class ExecutorAgent:
         toolkit: AgentToolkit,
     ) -> str:
         """Run the execution loop. Returns a summary of what was done."""
-        from cortex.extensions.llm.router import IntentProfile
+        from legacy_research.extensions.llm.router import IntentProfile
 
         sys_prompt = _SYSTEM
         if self._base_system:

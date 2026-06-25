@@ -49,7 +49,7 @@ try:
 except ImportError:
     FastMCP = None  # type: ignore
 
-from cortex.utils.pulmones import CircuitBreaker, PulmonesQueue
+from legacy_research.utils.pulmones import CircuitBreaker, PulmonesQueue
 
 logger = logging.getLogger("cortex.mcp.resilient_gateway")
 
@@ -167,7 +167,7 @@ class ResilientFetcher:
         timeout: float = DEFAULT_TIMEOUT,
     ) -> dict[str, Any]:
         """Execute cascading fetch. Returns dict with content or error trace."""
-        from cortex.http.client import SSRFBlockedError, validate_url
+        from legacy_research.http.client import SSRFBlockedError, validate_url
 
         errors: list[str] = []
         try:

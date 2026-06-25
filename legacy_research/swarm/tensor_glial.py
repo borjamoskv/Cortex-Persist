@@ -12,7 +12,7 @@ import os
 import threading
 import time
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
     from numba import njit, prange  # pyright: ignore[reportMissingImports]
@@ -21,7 +21,7 @@ try:
 except ImportError:
     HAS_NUMBA = False
 
-from cortex.vsa_engine import VSAEngine
+from legacy_research.vsa_engine import VSAEngine
 
 # --- Direct-Silicon JIT Kernels ---
 if HAS_NUMBA:

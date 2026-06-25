@@ -13,8 +13,8 @@ from pathlib import Path
 
 from rich.console import Console
 
-from cortex.extensions.daemon import BUNDLE_ID
-from cortex.extensions.platform.sys import get_service_dir
+from legacy_research.extensions.daemon import BUNDLE_ID
+from legacy_research.extensions.platform.sys import get_service_dir
 
 __all__ = [
     "install_linux",

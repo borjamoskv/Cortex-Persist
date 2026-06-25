@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-from cortex.security.quarantine import BlastRadiusReport, evaluate_demolition
+from legacy_research.security.quarantine import BlastRadiusReport, evaluate_demolition
 
 
 def test_high_blast_radius_no_direct_purge():

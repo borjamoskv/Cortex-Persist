@@ -7,13 +7,13 @@ import time
 
 import httpx
 
-from cortex.extensions.daemon.models import (
+from legacy_research.extensions.daemon.models import (
     DEFAULT_RETRIES,
     DEFAULT_TIMEOUT,
     RETRY_BACKOFF,
     SiteStatus,
 )
-from cortex.utils.respiration import breathe
+from legacy_research.utils.respiration import breathe
 
 logger = logging.getLogger("moskv-daemon")
 

@@ -19,8 +19,8 @@ import aiosqlite
 from pathlib import Path
 from typing import Any
 
-from cortex.guards.virgo import VirgoContextGuard, ContextPoisoningError, VirgoValidationError
-from cortex.guards.exergy_guard import ExergyGuard
+from legacy_research.guards.virgo import VirgoContextGuard, ContextPoisoningError, VirgoValidationError
+from legacy_research.guards.exergy_guard import ExergyGuard
 
 
 

@@ -2,8 +2,8 @@
 import pytest
 from unittest.mock import Mock
 
-from cortex.runtime.divergence import ExecutionDiff, Trace, DivergenceEngine
-from cortex.runtime.homeostasis import HomeostaticController, DriftThresholds
+from legacy_research.runtime.divergence import ExecutionDiff, Trace, DivergenceEngine
+from legacy_research.runtime.homeostasis import HomeostaticController, DriftThresholds
 
 
 @pytest.fixture

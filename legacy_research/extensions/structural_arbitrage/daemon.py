@@ -8,9 +8,9 @@ import asyncio
 import logging
 from typing import Protocol
 
-from cortex.extensions.structural_arbitrage.kernel import ExecutionKernel
-from cortex.extensions.structural_arbitrage.models import CortexAmount
-from cortex.extensions.structural_arbitrage.scanner import InefficiencyScanner
+from legacy_research.extensions.structural_arbitrage.kernel import ExecutionKernel
+from legacy_research.extensions.structural_arbitrage.models import CortexAmount
+from legacy_research.extensions.structural_arbitrage.scanner import InefficiencyScanner
 
 log = logging.getLogger(__name__)
 

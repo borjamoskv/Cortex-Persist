@@ -4,7 +4,7 @@ import hashlib
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.engine.causality_models import (
+from legacy_research.engine.causality_models import (
     KRGSE_DERIVED_FROM,
     ValidationStatus,
 )

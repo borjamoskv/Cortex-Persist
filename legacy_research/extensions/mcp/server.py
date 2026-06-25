@@ -19,9 +19,9 @@ try:
 except ImportError:
     MCP_AVAILABLE = False
 
-from cortex.extensions.mcp.claude_tool import run_claude_query
-from cortex.extensions.policy.jis_auditor import JISAuditor
-from cortex.memory.vsa import VSAPipelineBridge
+from legacy_research.extensions.mcp.claude_tool import run_claude_query
+from legacy_research.extensions.policy.jis_auditor import JISAuditor
+from legacy_research.memory.vsa import VSAPipelineBridge
 
 logger = logging.getLogger("cortex.mcp.server")
 

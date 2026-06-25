@@ -21,10 +21,10 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 import time
 from typing import Any
 
-from cortex.compat.optional import np
-from cortex.memory.models import CortexFactModel
-from cortex.utils import void_vec
-from cortex.utils.turboquant import encode_query_qjl
+from legacy_research.compat.optional import np
+from legacy_research.memory.models import CortexFactModel
+from legacy_research.utils import void_vec
+from legacy_research.utils.turboquant import encode_query_qjl
 
 
 class ReadTrait:
@@ -96,7 +96,7 @@ class ReadTrait:
                     use_void = False
 
             if use_void:
-                from cortex.utils.void_mih import slice_void_bit
+                from legacy_research.utils.void_mih import slice_void_bit
 
                 q_shards = slice_void_bit(void_query)
 

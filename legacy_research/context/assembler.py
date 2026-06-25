@@ -14,7 +14,7 @@ import logging
 import os
 from typing import Any
 
-from cortex.pipeline import ContextPacket
+from legacy_research.pipeline import ContextPacket
 
 logger = logging.getLogger("cortex.context.assembler")
 

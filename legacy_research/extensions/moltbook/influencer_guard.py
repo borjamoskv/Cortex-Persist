@@ -45,8 +45,8 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.extensions.llm.sovereign import SovereignLLM
-from cortex.extensions.moltbook.client import MoltbookClient, MoltbookError
+from legacy_research.extensions.llm.sovereign import SovereignLLM
+from legacy_research.extensions.moltbook.client import MoltbookClient, MoltbookError
 
 logger = logging.getLogger("cortex.extensions.moltbook.influencer_guard")
 

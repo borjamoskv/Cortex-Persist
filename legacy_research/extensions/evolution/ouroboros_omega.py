@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.evolution.ast_mutators import (
+from legacy_research.extensions.evolution.ast_mutators import (
     _AstAnalyzer,
     _BlockingPatternDetector,
     _DeadCodePurge,
@@ -173,7 +173,7 @@ class OuroborosOmega:
             if self.p0_scan:
                 logger.info("Phase 1.5 [P0 Scan] Dispatching to Deepthink-R1 cluster...")
                 try:
-                    from cortex.extensions.evolution.p0_extractor import P0VulnerabilityExtractor
+                    from legacy_research.extensions.evolution.p0_extractor import P0VulnerabilityExtractor
 
                     extractor = P0VulnerabilityExtractor()
                     p0_report = await extractor.extract(

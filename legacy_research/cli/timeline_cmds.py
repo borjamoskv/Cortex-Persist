@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import click
 from rich.table import Table
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
-from cortex.cli.errors import err_empty_results, handle_cli_error
+from legacy_research.cli.common import DEFAULT_DB, cli, console, get_engine
+from legacy_research.cli.errors import err_empty_results, handle_cli_error
 
 
 
@@ -119,7 +119,7 @@ def snapshot_create(name, db):
     """Create a new physical snapshot."""
 
     async def _snapshot_create_async():
-        from cortex.engine.snapshots import SnapshotManager
+        from legacy_research.engine.snapshots import SnapshotManager
 
         engine = get_engine(db)
         try:
@@ -157,7 +157,7 @@ def snapshot_list(db):
     async def _snapshot_list_async():
         import sqlite3
 
-        from cortex.engine.snapshots import SnapshotManager
+        from legacy_research.engine.snapshots import SnapshotManager
 
         try:
             sm = SnapshotManager(db_path=db)

@@ -34,9 +34,9 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.config import DB_PATH
-from cortex.extensions.signals.bus import AsyncSignalBus
-from cortex.swarm.tensor_glial import TensorGlialLegion
+from legacy_research.config import DB_PATH
+from legacy_research.extensions.signals.bus import AsyncSignalBus
+from legacy_research.swarm.tensor_glial import TensorGlialLegion
 
 # setup_cortex_logging()
 logger = logging.getLogger("cortex.swarm.autopulse")

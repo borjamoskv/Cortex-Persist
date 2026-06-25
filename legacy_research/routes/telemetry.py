@@ -11,8 +11,8 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
-from cortex.api.deps import get_async_engine
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from legacy_research.api.deps import get_async_engine
+from legacy_research.engine import CortexEngine as AsyncCortexEngine
 
 logger = logging.getLogger("cortex.api.telemetry")
 router = APIRouter(tags=["telemetry"])

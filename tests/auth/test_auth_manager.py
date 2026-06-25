@@ -23,9 +23,9 @@ import aiosqlite
 
 import pytest
 
-from cortex.auth.manager import AuthManager, reset_auth_manager
-from cortex.auth.models import APIKey, AuthResult
-from cortex.auth.rbac import (
+from legacy_research.auth.manager import AuthManager, reset_auth_manager
+from legacy_research.auth.models import APIKey, AuthResult
+from legacy_research.auth.rbac import (
     DEFAULT_POLICIES,
     RBAC,
     Permission,
@@ -33,7 +33,7 @@ from cortex.auth.rbac import (
     Role,
     ROLE_HIERARCHY,
 )
-from cortex.auth.cache import AUTH_CACHE, CacheEntry, PermissionCache
+from legacy_research.auth.cache import AUTH_CACHE, CacheEntry, PermissionCache
 
 
 
@@ -273,7 +273,7 @@ class TestRBAC:
 
     def test_authorize_raises_on_denial(self):
         """authorize() must raise PermissionDeniedError on missing permission."""
-        from cortex.utils.errors import PermissionDeniedError
+        from legacy_research.utils.errors import PermissionDeniedError
 
         with pytest.raises(PermissionDeniedError):
             RBAC.authorize("viewer", Permission.WRITE_FACTS)

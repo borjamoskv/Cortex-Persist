@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 
-from cortex.extensions.swarm.kv_prefix_registry import KVPrefixRegistry
+from legacy_research.extensions.swarm.kv_prefix_registry import KVPrefixRegistry
 
 
 def test_tenant_isolation_invariants():

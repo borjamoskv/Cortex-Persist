@@ -417,8 +417,8 @@ def print_report(report: dict) -> None:
 def persist_to_cortex(report: dict) -> None:
     """Anchor the score to the CORTEX-Persist ledger with a CORTEX-TAINT signature."""
     try:
-        from cortex.cli.common import DEFAULT_DB, _detect_agent_source, _run_async, get_engine
-        from cortex.cli.memory_cmds import _inject_cli_taint
+        from legacy_research.cli.common import DEFAULT_DB, _detect_agent_source, _run_async, get_engine
+        from legacy_research.cli.memory_cmds import _inject_cli_taint
     except ImportError:
         print("\n⚠️  CORTEX-Persist not found. Cannot emit C5-REAL ledger event.")
         return

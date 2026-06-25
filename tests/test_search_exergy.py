@@ -5,8 +5,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from cortex.memory.models import CortexFactModel
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+from legacy_research.memory.models import CortexFactModel
+from legacy_research.memory.sqlite_vec_store import SovereignVectorStoreL2
 
 
 @pytest.fixture

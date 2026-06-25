@@ -261,7 +261,7 @@ class PIISanitizer:
     def _try_encrypt(self, value: str, tenant_id: str) -> str | None:
         """Attempt field-level encryption using CortexEncrypter."""
         try:
-            from cortex.crypto import get_default_encrypter
+            from legacy_research.crypto import get_default_encrypter
 
             enc = get_default_encrypter()
             return enc.encrypt_str(value, tenant_id=tenant_id)

@@ -7,7 +7,7 @@ import random
 import time
 from typing import Any
 
-from cortex.sica.strategy import Heuristic, SearchStrategy, StrategyGenome
+from legacy_research.sica.strategy import Heuristic, SearchStrategy, StrategyGenome
 
 from .types import GeneFragment
 

@@ -12,9 +12,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from cortex.api.core import app
-from cortex.auth.deps import require_auth, require_permission
-from cortex.storage import StorageMode
+from legacy_research.api.core import app
+from legacy_research.auth.deps import require_auth, require_permission
+from legacy_research.storage import StorageMode
 
 
 class MockPostgresRecord(dict):

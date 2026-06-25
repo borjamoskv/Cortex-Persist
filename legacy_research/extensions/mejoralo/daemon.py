@@ -15,16 +15,16 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex import CortexEngine
-from cortex.extensions.daemon.monitors.canary import CanaryMonitor
-from cortex.extensions.mejoralo.constants import (
+from legacy_research import CortexEngine
+from legacy_research.extensions.daemon.monitors.canary import CanaryMonitor
+from legacy_research.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_SCAN_INTERVAL,
     DAEMON_DEFAULT_TARGET_SCORE,
     DAEMON_DIM_SCORE_THRESHOLD,
 )
-from cortex.extensions.mejoralo.engine import MejoraloEngine
-from cortex.extensions.thinking.fusion import ContextFusion
-from cortex.telemetry.metrics import MetricsRegistry
+from legacy_research.extensions.mejoralo.engine import MejoraloEngine
+from legacy_research.extensions.thinking.fusion import ContextFusion
+from legacy_research.telemetry.metrics import MetricsRegistry
 
 logger = logging.getLogger("cortex.extensions.mejoralo.daemon")
 
@@ -50,7 +50,7 @@ class MejoraloDaemon:
         self.metrics = metrics or MetricsRegistry()
 
         # 🛡️ Sovereign Security & Context
-        from cortex.config import DEFAULT_DB_PATH
+        from legacy_research.config import DEFAULT_DB_PATH
 
         self.cortex_engine = CortexEngine(
             db_path or DEFAULT_DB_PATH,  # type: ignore[type-error]
@@ -212,7 +212,7 @@ class MejoraloDaemon:
         # Inject historical trend data for informed reasoning
         trend_ctx = ""
         try:
-            from cortex.extensions.mejoralo.effectiveness import EffectivenessTracker
+            from legacy_research.extensions.mejoralo.effectiveness import EffectivenessTracker
 
             tracker = EffectivenessTracker(self.cortex_engine)
             trend = tracker.project_trend(self.project)
@@ -225,8 +225,8 @@ class MejoraloDaemon:
             logger.debug("Effectiveness context unavailable: %s", e)
 
         try:
-            from cortex.extensions.thinking.orchestra import ThoughtOrchestra
-            from cortex.extensions.thinking.presets import ThinkingMode
+            from legacy_research.extensions.thinking.orchestra import ThoughtOrchestra
+            from legacy_research.extensions.thinking.presets import ThinkingMode
 
             logger.info("🐍 OUROBOROS-∞: Analyzing causal degradation...")
             async with ThoughtOrchestra() as orchestra:
@@ -245,8 +245,8 @@ class MejoraloDaemon:
     async def _ouroboros_absorb(self):
         """🐍 OUROBOROS-∞ PHASE 2: Pattern Absorption."""
         try:
-            from cortex.extensions.thinking.orchestra import ThoughtOrchestra
-            from cortex.extensions.thinking.presets import ThinkingMode
+            from legacy_research.extensions.thinking.orchestra import ThoughtOrchestra
+            from legacy_research.extensions.thinking.presets import ThinkingMode
 
             logger.info("🐍 OUROBOROS-∞: Extracting proven pattern...")
             async with ThoughtOrchestra() as orchestra:

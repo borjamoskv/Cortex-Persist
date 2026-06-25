@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from cortex.extensions.genesis.models import ComponentSpec
-from cortex.extensions.genesis.renderers.utils import _ensure_self_param
+from legacy_research.extensions.genesis.models import ComponentSpec
+from legacy_research.extensions.genesis.renderers.utils import _ensure_self_param
 
 
 def _render_module(system_name: str, comp: ComponentSpec) -> str:

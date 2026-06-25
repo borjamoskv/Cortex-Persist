@@ -1,6 +1,6 @@
 import hashlib
 
-from cortex.compaction.pruner import FactRecord, MerklePruner
+from legacy_research.compaction.pruner import FactRecord, MerklePruner
 
 
 def test_pruner():

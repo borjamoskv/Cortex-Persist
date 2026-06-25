@@ -325,8 +325,8 @@ class InjectionGuard:
         if len(content) > 10:
             try:
                 # Lazy import to avoid circular dependencies with cortex.llm.router
-                from cortex.extensions.llm._models import CortexPrompt
-                from cortex.extensions.llm.router import CortexLLMRouter
+                from legacy_research.extensions.llm._models import CortexPrompt
+                from legacy_research.extensions.llm.router import CortexLLMRouter
 
                 router = CortexLLMRouter.__new__(CortexLLMRouter)
                 prompt_text = (
@@ -388,7 +388,7 @@ class InjectionGuard:
     @staticmethod
     def _entropy(text: str) -> float:
         """Shannon entropy of text. High = possibly encoded/encrypted."""
-        from cortex.shannon.entropy import compute_character_entropy
+        from legacy_research.shannon.entropy import compute_character_entropy
         return compute_character_entropy(text)
 
 

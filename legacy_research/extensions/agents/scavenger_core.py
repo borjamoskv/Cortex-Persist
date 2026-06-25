@@ -15,12 +15,12 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-from cortex.events.bus import DistributedEventBus
-from cortex.extensions.skills.cadastral.models import (
+from legacy_research.events.bus import DistributedEventBus
+from legacy_research.extensions.skills.cadastral.models import (
     ZoneClassification,
 )
-from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.models import MemoryEvent
+from legacy_research.memory.ledger import EventLedgerL3
+from legacy_research.memory.models import MemoryEvent
 
 logger = logging.getLogger("cortex.extensions.agents.scavenger_core")
 

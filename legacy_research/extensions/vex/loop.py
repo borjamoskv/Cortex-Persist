@@ -22,7 +22,7 @@ import time
 from collections.abc import Callable, Coroutine
 from typing import TYPE_CHECKING, Any
 
-from cortex.extensions.vex.models import (
+from legacy_research.extensions.vex.models import (
     ExecutionReceipt,
     PlannedStep,
     StepResult,
@@ -33,7 +33,7 @@ from cortex.extensions.vex.models import (
 )
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
 __all__ = ["VEXRunner"]
 

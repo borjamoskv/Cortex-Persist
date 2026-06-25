@@ -26,7 +26,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from pathlib import Path
 from typing import Any
 
-from cortex.engine import CortexEngine
+from legacy_research.engine import CortexEngine
 
 __all__ = ["DEFAULT_SWARM_PATH", "MissionOrchestrator"]
 
@@ -85,7 +85,7 @@ class MissionOrchestrator:
 
         # 3. Execute via SovereignGate (L3 interception)
         try:
-            from cortex.extensions.gate import ActionLevel, get_gate
+            from legacy_research.extensions.gate import ActionLevel, get_gate
 
             logger.info("Executing swarm mission: %s", " ".join(cmd))
 

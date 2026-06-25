@@ -14,8 +14,8 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-from cortex.extensions.evolution.action import SymbolicActionState
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.extensions.evolution.action import SymbolicActionState
 
 logger = logging.getLogger(__name__)
 

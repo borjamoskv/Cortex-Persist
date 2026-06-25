@@ -68,7 +68,7 @@ class SQLiteHealthCheck(HealthCheck):
 
     def __init__(self, db_path: str | None = None):
         super().__init__(name="sqlite")
-        from cortex.config import DEFAULT_DB_PATH
+        from legacy_research.config import DEFAULT_DB_PATH
 
         self.db_path = db_path or str(DEFAULT_DB_PATH)
 
@@ -79,7 +79,7 @@ class SQLiteHealthCheck(HealthCheck):
         if not Path(self.db_path).exists():
             return DependencyAlert("sqlite", "unavailable", f"DB not found: {self.db_path}")
         try:
-            from cortex.database.core import connect as db_connect
+            from legacy_research.database.core import connect as db_connect
 
             conn = db_connect(self.db_path, timeout=2)
             conn.execute("SELECT 1")
@@ -168,7 +168,7 @@ class EmbeddingModelHealthCheck(HealthCheck):
 
     def check(self) -> DependencyAlert | None:
         try:
-            from cortex.embeddings.manager import EmbeddingManager
+            from legacy_research.embeddings.manager import EmbeddingManager
 
             provider = EmbeddingManager(engine=None)
             # Quick sanity check

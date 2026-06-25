@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from cortex.extensions.git.poet import CommitPoet, generate_candidates, generate_commit_message
+from legacy_research.extensions.git.poet import CommitPoet, generate_candidates, generate_commit_message
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -202,7 +202,7 @@ class TestEdgeCases:
         assert "void" in msg.lower() or "chore" in msg.lower()
 
     def test_single_file(self, poet: CommitPoet):
-        msg = poet.compose("foo.py | 1 +", ["cortex/guards/injection_guard.py"])
+        msg = poet.compose("foo.py | 1 +", ["legacy_research/guards/injection_guard.py"])
         assert msg
         assert CONVENTIONAL_PATTERN.match(msg)
 

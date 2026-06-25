@@ -14,21 +14,21 @@ from typing import Any
 
 import httpx
 
-from cortex.extensions.llm._audit import spectral_audit
-from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
-from cortex.extensions.llm._presets import get_prefix_cache_config, load_presets
-from cortex.extensions.llm._provider_config import resolve_provider_config
-from cortex.extensions.llm._provider_gemini import execute_gemini_native
-from cortex.extensions.llm._provider_stream import execute_stream
-from cortex.extensions.llm._resilience import CircuitBreaker, resilient_call
-from cortex.extensions.llm._result_cache import ResultCache
-from cortex.extensions.llm._stealth import (
+from legacy_research.extensions.llm._audit import spectral_audit
+from legacy_research.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
+from legacy_research.extensions.llm._presets import get_prefix_cache_config, load_presets
+from legacy_research.extensions.llm._provider_config import resolve_provider_config
+from legacy_research.extensions.llm._provider_gemini import execute_gemini_native
+from legacy_research.extensions.llm._provider_stream import execute_stream
+from legacy_research.extensions.llm._resilience import CircuitBreaker, resilient_call
+from legacy_research.extensions.llm._result_cache import ResultCache
+from legacy_research.extensions.llm._stealth import (
     apply_causal_jitter,
     prepare_stealth_headers,
     sanitize_response,
 )
-from cortex.extensions.llm.gemini_cache import get_gemini_gateway
-from cortex.extensions.llm.quota import SovereignQuotaManager
+from legacy_research.extensions.llm.gemini_cache import get_gemini_gateway
+from legacy_research.extensions.llm.quota import SovereignQuotaManager
 
 __all__ = ["LLMProvider"]
 
@@ -217,14 +217,14 @@ class LLMProvider(BaseProvider):
                 e.response.text[:500],
             )
             if wrap_errors:
-                from cortex.utils.errors import CortexError
+                from legacy_research.utils.errors import CortexError
 
                 raise CortexError(f"HTTP {e.response.status_code} from {self._provider}") from e
             raise
         except (KeyError, IndexError, json.JSONDecodeError) as e:
             logger.error("LLM Parse Error [%s]: %s", self._provider, e)
             if wrap_errors:
-                from cortex.utils.errors import CortexError
+                from legacy_research.utils.errors import CortexError
 
                 raise CortexError(f"Unexpected JSON format from {self._provider}") from e
             raise ValueError(f"Unexpected response format from {self._provider}") from e

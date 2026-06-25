@@ -14,7 +14,7 @@ import os
 import time
 from typing import Any, Protocol
 
-from cortex.agents.message_schema import AgentMessage
+from legacy_research.agents.message_schema import AgentMessage
 
 logger = logging.getLogger("cortex.agents.bus")
 
@@ -45,7 +45,7 @@ class SqliteMessageBus:
     async def _get_conn(self) -> Any:
         """Lazy-init async connection."""
         if self._conn is None:
-            from cortex.database.core import connect_async
+            from legacy_research.database.core import connect_async
 
             self._conn = await connect_async(self.db_path)
             await self._conn.execute("""

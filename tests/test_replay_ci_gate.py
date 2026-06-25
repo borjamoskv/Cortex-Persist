@@ -12,13 +12,13 @@ Demuestra:
 
 import pytest
 
-from cortex.runtime.state import RuntimeState
-from cortex.runtime.replay.ci_gate import (
+from legacy_research.runtime.state import RuntimeState
+from legacy_research.runtime.replay.ci_gate import (
     ReplayCIGate,
     ReplayCIResult,
     fixed_event_trace,
 )
-from cortex.runtime.replay.engine import ReplayEngine
+from legacy_research.runtime.replay.engine import ReplayEngine
 
 
 # ── 1. Execution Identity ──────────────────────────────────────────

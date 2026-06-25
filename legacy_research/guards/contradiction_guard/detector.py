@@ -38,11 +38,11 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-from cortex.database.core import connect_async_ctx
-from cortex.guards.contradiction_guard.models import ConflictReport
-from cortex.guards.contradiction_guard.nlp import _is_noise, _tokenize
-from cortex.guards.contradiction_guard.scoring import _score_candidate
+from legacy_research.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+from legacy_research.database.core import connect_async_ctx
+from legacy_research.guards.contradiction_guard.models import ConflictReport
+from legacy_research.guards.contradiction_guard.nlp import _is_noise, _tokenize
+from legacy_research.guards.contradiction_guard.scoring import _score_candidate
 
 logger = logging.getLogger("cortex.guards.contradiction")
 

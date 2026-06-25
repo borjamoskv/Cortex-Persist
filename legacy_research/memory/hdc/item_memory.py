@@ -21,8 +21,8 @@ import logging
 from pathlib import Path
 from typing import Final
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-from cortex.memory.hdc.algebra import DEFAULT_DIM, HVType, random_bipolar
+from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from legacy_research.memory.hdc.algebra import DEFAULT_DIM, HVType, random_bipolar
 
 __all__ = ["ItemMemory"]
 
@@ -98,7 +98,7 @@ class ItemMemory:
         self, query_hv: HVType, candidates: list[str] | None = None, top_k: int = 1
     ) -> list[tuple[str, float]]:
         """Find the nearest symbols to a query hypervector."""
-        from cortex.memory.hdc.algebra import cosine_similarity
+        from legacy_research.memory.hdc.algebra import cosine_similarity
 
         search_space = candidates or list(self._cache.keys())
         scores: list[tuple[str, float]] = []

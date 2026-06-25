@@ -19,11 +19,11 @@ import pytest
 from pathlib import Path
 from typing import Any
 
-from cortex.utils.errors import CortexError
-from cortex.guards.virgo import VirgoValidationError, ContextPoisoningError
-from cortex.guards.zk_guard import ZKSwarmGuard, VoidStateSecurityError
-from cortex.guards.contradiction_guard import detect_contradictions, ConflictReport
-from cortex.crypto.keys import ZKSwarmIdentity
+from legacy_research.utils.errors import CortexError
+from legacy_research.guards.virgo import VirgoValidationError, ContextPoisoningError
+from legacy_research.guards.zk_guard import ZKSwarmGuard, VoidStateSecurityError
+from legacy_research.guards.contradiction_guard import detect_contradictions, ConflictReport
+from legacy_research.crypto.keys import ZKSwarmIdentity
 
 
 # Enable testing mode and auto-mock auditors
@@ -43,7 +43,7 @@ def mock_omega_auditor(monkeypatch):
 @pytest.fixture
 async def engine(tmp_path: Path):
     """Initialize a clean test instance of the CortexEngine."""
-    from cortex.engine import CortexEngine
+    from legacy_research.engine import CortexEngine
 
     os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
     os.environ["CORTEX_STRICT_GUARDS"] = "1"
@@ -249,7 +249,7 @@ async def test_event_sourcing_state_replay(engine):
         stored_ids.append(fid)
 
     # 2. Extract event stream (raw facts query from SQLite)
-    from cortex.crypto import get_default_encrypter
+    from legacy_research.crypto import get_default_encrypter
 
     enc = get_default_encrypter()
 

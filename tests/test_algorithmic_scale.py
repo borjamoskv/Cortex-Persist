@@ -20,7 +20,7 @@ class TestCoveringIndices:
 
     def test_tenant_valid_index_exists(self, tmp_path):
         """idx_facts_tenant_valid covers (tenant_id, valid_until)."""
-        from cortex.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES
+        from legacy_research.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES
 
         db = str(tmp_path / "test.db")
         conn = sqlite3.connect(db)
@@ -42,7 +42,7 @@ class TestCoveringIndices:
 
     def test_proj_valid_index_exists(self, tmp_path):
         """idx_facts_proj_valid covers (project, valid_until)."""
-        from cortex.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES
+        from legacy_research.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES
 
         db = str(tmp_path / "test.db")
         conn = sqlite3.connect(db)
@@ -72,7 +72,7 @@ class TestFTS5Triggers:
     @pytest.mark.asyncio
     async def test_insert_trigger_populates_fts(self, tmp_path):
         """Storing via CortexEngine populates facts_fts."""
-        from cortex.engine import CortexEngine
+        from legacy_research.engine import CortexEngine
 
         db = str(tmp_path / "test_fts_insert.db")
         engine = CortexEngine(db_path=db, auto_embed=False)
@@ -97,7 +97,7 @@ class TestFTS5Triggers:
     @pytest.mark.asyncio
     async def test_update_trigger_syncs_fts(self, tmp_path):
         """Updating via CortexEngine syncs facts_fts."""
-        from cortex.engine import CortexEngine
+        from legacy_research.engine import CortexEngine
 
         db = str(tmp_path / "test_fts_update.db")
         engine = CortexEngine(db_path=db, auto_embed=False)
@@ -130,7 +130,7 @@ class TestFTS5Triggers:
     @pytest.mark.asyncio
     async def test_delete_trigger_removes_from_fts(self, tmp_path):
         """Purging via CortexEngine removes from facts_fts."""
-        from cortex.engine import CortexEngine
+        from legacy_research.engine import CortexEngine
 
         db = str(tmp_path / "test_fts_delete.db")
         engine = CortexEngine(db_path=db, auto_embed=False)
@@ -161,7 +161,7 @@ class TestWALCheckpoint:
 
     def test_sync_wal_autocheckpoint(self, tmp_path):
         """Sync connections get wal_autocheckpoint=1000."""
-        from cortex.database.core import WAL_AUTOCHECKPOINT, connect
+        from legacy_research.database.core import WAL_AUTOCHECKPOINT, connect
 
         db = str(tmp_path / "test.db")
         conn = connect(db)
@@ -174,7 +174,7 @@ class TestWALCheckpoint:
 
     def test_wal_autocheckpoint_constant(self):
         """WAL_AUTOCHECKPOINT is 1000 pages."""
-        from cortex.database.core import WAL_AUTOCHECKPOINT
+        from legacy_research.database.core import WAL_AUTOCHECKPOINT
 
         assert WAL_AUTOCHECKPOINT == 1000
 
@@ -194,7 +194,7 @@ class TestPoolExpansion:
 
         try:
             # Re-import to pick up clean env
-            from cortex.database.pool import CortexConnectionPool
+            from legacy_research.database.pool import CortexConnectionPool
 
             pool = CortexConnectionPool(db_path=":memory:")
             assert pool.min_connections == 4, f"Expected min=4, got {pool.min_connections}"
@@ -209,7 +209,7 @@ class TestPoolExpansion:
         os.environ.pop("CORTEX_POOL_MAX", None)
 
         try:
-            from cortex.database.pool import CortexConnectionPool
+            from legacy_research.database.pool import CortexConnectionPool
 
             pool = CortexConnectionPool(db_path=":memory:")
             assert pool.max_connections == 32, f"Expected max=32, got {pool.max_connections}"
@@ -223,7 +223,7 @@ class TestPoolExpansion:
         os.environ["CORTEX_POOL_MIN"] = "8"
 
         try:
-            from cortex.database.pool import CortexConnectionPool
+            from legacy_research.database.pool import CortexConnectionPool
 
             pool = CortexConnectionPool(db_path=":memory:")
             assert pool.min_connections == 8, f"Expected min=8, got {pool.min_connections}"
@@ -237,7 +237,7 @@ class TestPoolExpansion:
         os.environ["CORTEX_POOL_MAX"] = "64"
 
         try:
-            from cortex.database.pool import CortexConnectionPool
+            from legacy_research.database.pool import CortexConnectionPool
 
             pool = CortexConnectionPool(db_path=":memory:")
             assert pool.max_connections == 64, f"Expected max=64, got {pool.max_connections}"
@@ -252,7 +252,7 @@ class TestPoolExpansion:
         os.environ["CORTEX_POOL_MAX"] = "64"
 
         try:
-            from cortex.database.pool import CortexConnectionPool
+            from legacy_research.database.pool import CortexConnectionPool
 
             pool = CortexConnectionPool(
                 db_path=":memory:",

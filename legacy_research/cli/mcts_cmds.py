@@ -6,11 +6,11 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from cortex.cli.common import cli
-from cortex.config import DEFAULT_DB_PATH
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexLLMRouter
-from cortex.mcts.tree import MCTSEngine
+from legacy_research.cli.common import cli
+from legacy_research.config import DEFAULT_DB_PATH
+from legacy_research.extensions.llm.provider import LLMProvider
+from legacy_research.extensions.llm.router import CortexLLMRouter
+from legacy_research.mcts.tree import MCTSEngine
 
 console = Console()
 
