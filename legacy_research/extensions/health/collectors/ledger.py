@@ -54,7 +54,7 @@ class LedgerCollector:
                 weight=self.weight,
             )
         try:
-            from legacy_research.database.core import connect
+            from cortex.database.core import connect
 
             with connect(db_path, timeout=2.0) as conn:  # pyright: ignore
                 conn.row_factory = sqlite3.Row

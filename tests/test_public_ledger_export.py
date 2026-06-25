@@ -14,7 +14,7 @@ from click.testing import CliRunner
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
-from legacy_research.cli import cli
+from cortex.cli import cli
 from legacy_research.ledger.public_export import (
     ExportAuthority,
     public_key_record,

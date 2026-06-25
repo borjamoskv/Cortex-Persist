@@ -66,7 +66,7 @@ def init_core_monitors(
     )
     daemon.evaluation_monitor = EvaluationMonitor(db_path=CORTEX_DB)
     try:
-        from legacy_research.engine import CortexEngine
+        from cortex.engine import CortexEngine
 
         daemon._shared_engine = CortexEngine()
     except ImportError:
@@ -129,8 +129,8 @@ def init_external_oracles(
     daemon.tombstone_monitor = TombstoneMonitor(db_path=file_config.get("db_path", str(CORTEX_DB)))
 
     try:
-        from legacy_research.database.pool import CortexConnectionPool
-        from legacy_research.engine import CortexEngine as AsyncCortexEngine
+        from cortex.database.pool import CortexConnectionPool
+        from cortex.engine import CortexEngine as AsyncCortexEngine
         from legacy_research.extensions.daemon.sidecar.telemetry import ASTOracle
 
         db_path = file_config.get("db_path", str(CORTEX_DB))
@@ -167,7 +167,7 @@ def init_external_oracles(
         daemon.agy2_planner_daemon = None
 
     try:
-        from legacy_research.engine.email_ingest_daemon import EmailIngestDaemon
+        from cortex.engine.email_ingest_daemon import EmailIngestDaemon
         from legacy_research.audit.ledger import EnterpriseAuditLedger
         
         ledger = EnterpriseAuditLedger()

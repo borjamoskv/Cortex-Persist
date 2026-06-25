@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from legacy_research.engine import CortexEngine
-from legacy_research.engine.causality import KRGSE_DERIVED_FROM, AsyncCausalGraph
+from cortex.engine import CortexEngine
+from cortex.engine.causality import KRGSE_DERIVED_FROM, AsyncCausalGraph
 
 
 @pytest.fixture

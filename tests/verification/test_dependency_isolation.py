@@ -20,7 +20,7 @@ class TestDependencyIsolation(unittest.TestCase):
 
     def test_engine_init_no_torch(self):
         """Verify that initializing CortexEngine does not load torch."""
-        from legacy_research.engine import CortexEngine
+        from cortex.engine import CortexEngine
 
         baseline = {
             name
@@ -41,7 +41,7 @@ class TestDependencyIsolation(unittest.TestCase):
 
     def test_store_no_torch(self):
         """Verify that basic store operation does not load torch."""
-        from legacy_research.engine import CortexEngine
+        from cortex.engine import CortexEngine
 
         baseline = {
             name

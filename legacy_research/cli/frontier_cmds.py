@@ -9,7 +9,7 @@ import asyncio
 import click
 from rich.table import Table
 
-from legacy_research.cli.common import cli, console, get_engine
+from cortex.cli.common import cli, console, get_engine
 from legacy_research.extensions.daemon.frontier import FrontierDaemon
 
 

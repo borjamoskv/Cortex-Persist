@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import time
 
-from legacy_research.cli.bicameral import bicameral
+from cortex.cli.bicameral import bicameral
 
 
 def run_bicameral_demo():

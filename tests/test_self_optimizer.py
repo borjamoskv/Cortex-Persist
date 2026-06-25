@@ -13,12 +13,12 @@ import asyncio
 import pytest
 import time
 
-from legacy_research.engine.performance_tracker import (
+from cortex.engine.performance_tracker import (
     PerformanceTracker,
     SubsystemMetrics,
     StrategyEffectiveness,
 )
-from legacy_research.engine.self_optimizer import (
+from cortex.engine.self_optimizer import (
     SelfOptimizer,
     OptimizerConfig,
     TuningType,

@@ -12,7 +12,7 @@ import base64
 import time
 from unittest.mock import MagicMock, patch
 
-from legacy_research.engine.auth_gateway import QuorumGateway
+from cortex.engine.auth_gateway import QuorumGateway
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives import serialization
 

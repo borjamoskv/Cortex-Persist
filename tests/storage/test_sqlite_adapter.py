@@ -16,8 +16,8 @@ import aiosqlite
 import pytest
 import pytest_asyncio
 
-from legacy_research.storage.adapter import StorageAdapter
-from legacy_research.storage.sqlite_adapter import SQLiteAdapter
+from cortex.storage.adapter import StorageAdapter
+from cortex.storage.sqlite_adapter import SQLiteAdapter
 
 
 

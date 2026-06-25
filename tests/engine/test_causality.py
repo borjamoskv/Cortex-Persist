@@ -4,7 +4,7 @@ import pytest
 import aiosqlite
 
 import json
-from legacy_research.engine.causality import (
+from cortex.engine.causality import (
 
 
     CausalGraph,

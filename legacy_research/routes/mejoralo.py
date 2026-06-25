@@ -7,9 +7,9 @@ API endpoints for the MEJORAlo v7.3 protocol.
 
 from fastapi import APIRouter, Depends, Query
 
-from legacy_research.api.deps import get_engine
+from cortex.api.deps import get_engine
 from legacy_research.auth import require_permission
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 from legacy_research.extensions.mejoralo import MejoraloEngine
 from legacy_research.types.models import (
     DimensionResultModel,

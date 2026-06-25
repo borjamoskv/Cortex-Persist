@@ -17,7 +17,7 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from legacy_research.cli.errors import err_execution_failed
+from cortex.cli.errors import err_execution_failed
 from legacy_research.extensions.llm.manager import LLMManager
 
 console = Console()

@@ -47,7 +47,7 @@ _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
 from legacy_research.config import DB_PATH
-from legacy_research.database.core import connect_async_ctx
+from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +125,7 @@ class BillingIntegrityGateway:
     async def _handle_event(self, action: str, payload: dict[str, Any]) -> None:
         """Route the specific action to the AuthManager."""
         # We decouple imperative logic from stripe.py
-        import legacy_research.api.state as api_state
+        import cortex.api.state as api_state
 
         if action == "checkout.session.completed":
             session = payload["data"]["object"]

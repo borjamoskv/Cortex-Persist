@@ -8,7 +8,7 @@ import hashlib
 import logging
 from datetime import datetime, timezone
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 from legacy_research.extensions.nous.dry_run import DryRunEngine
 from legacy_research.extensions.nous.models import DryRunResult, MigrationTaint, NousAST
 from legacy_research.extensions.nous.sql_synthesizer import SQLSynthesizer

@@ -727,7 +727,7 @@ bool = False\n   765\t    ) -> dict:\n   766\t        """\n   767\t        Store
 a fact (or batch of facts) in CORTEX.\n   768\t        \n   769\t        
 Optimizations:\n   770\t        - Batch mode for multiple facts\n   771\t       
 - Async execution with connection pooling\n   772\t        """\n   773\t        
-from legacy_research.engine import CortexEngine\n   774\t        \n   775\t        start 
+from cortex.engine import CortexEngine\n   774\t        \n   775\t        start 
 = time.time()\n   776\t        \n   777\t        async with self.pool.acquire() 
 as conn:\n   778\t            # Create engine wrapper\n   779\t            
 engine = CortexEngine(self.config.db_path, auto_embed=False)\n   780\t          
@@ -767,7 +767,7 @@ self,\n   839\t        query: str,\n   840\t        project: str = "",\n   841\t
 top_k: int = 5,\n   842\t        as_of: str = "",\n   843\t        use_cache: 
 bool = True\n   844\t    ) -> dict:\n   845\t        """\n   846\t        Search
 CORTEX with caching and performance optimizations.\n   847\t        """\n   
-848\t        from legacy_research.engine import CortexEngine\n   849\t        \n   850\t 
+848\t        from cortex.engine import CortexEngine\n   849\t        \n   850\t 
 cache_key = self._get_cache_key(\n   851\t            "search",\n   852\t       
 query=query,\n   853\t            project=project,\n   854\t            
 top_k=top_k,\n   855\t            as_of=as_of\n   856\t        )\n   857\t      
@@ -802,7 +802,7 @@ with caching.\n   907\t        """\n   908\t        cache_key =
 self._get_cache_key(\n   909\t            "recall",\n   910\t            
 project=project,\n   911\t            limit=limit,\n   912\t            
 include_deprecated=include_deprecated\n   913\t        )\n   914\t        \n   
-915\t        async def _do_recall():\n   916\t            from legacy_research.engine 
+915\t        async def _do_recall():\n   916\t            from cortex.engine 
 import CortexEngine\n   917\t            \n   918\t            async with 
 self.pool.acquire() as conn:\n   919\t                engine = 
 CortexEngine(self.config.db_path, auto_embed=False)\n   920\t                
@@ -828,7 +828,7 @@ _do_recall()\n   948\t        \n   949\t        return {\n   950\t
 cortex_vote(\n   956\t        self,\n   957\t        fact_id: int,\n   958\t    
 agent: str,\n   959\t        vote: int,\n   960\t        reason: str = ""\n   
 961\t    ) -> dict:\n   962\t        """\n   963\t        Cast a consensus vote 
-on a fact.\n   964\t        """\n   965\t        from legacy_research.engine import 
+on a fact.\n   964\t        """\n   965\t        from cortex.engine import 
 CortexEngine\n   966\t        \n   967\t        start = time.time()\n   968\t   
 \n   969\t        async with self.pool.acquire() as conn:\n   970\t            
 engine = CortexEngine(self.config.db_path, auto_embed=False)\n   971\t          
@@ -3552,7 +3552,7 @@ self._running = True\\n        logger.info(\\"Edge MCP server initialized\\")\\n
 content: str,\\n        fact_type: str = \\"knowledge\\",\\n        tags: str = 
 \\"[]\\",\\n        source: str = \\"\\",\\n        batch: bool = False\\n    ) 
 -> dict:\\n        \\"\\"\\"\\n        Store a fact (or batch of facts) in 
-CORTEX with optimizations.\\n        \\"\\"\\"\\n        from legacy_research.engine 
+CORTEX with optimizations.\\n        \\"\\"\\"\\n        from cortex.engine 
 import CortexEngine\\n        \\n        start = time.time()\\n        \\n      
 async with self.pool.acquire() as conn:\\n            engine = 
 CortexEngine(self.config.db_path, auto_embed=False)\\n            engine._conn =
@@ -4560,7 +4560,7 @@ async def cortex_store(\n        self,\n        project: str,\n        content:
 str,\n        fact_type: str = "knowledge",\n        tags: str = "[]",\n        
 source: str = "",\n        batch: bool = False\n    ) -> dict:\n        """\n   
 Store a fact (or batch of facts) in CORTEX with optimizations.\n        """\n   
-from legacy_research.engine import CortexEngine\n        \n        start = time.time()\n 
+from cortex.engine import CortexEngine\n        \n        start = time.time()\n 
 \n        async with self.pool.acquire() as conn:\n            engine = 
 CortexEngine(self.config.db_path, auto_embed=False)\n            engine._conn = 
 conn\n            \n            try:\n                if batch:\n               

@@ -29,7 +29,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.consolidator")
 
@@ -160,7 +160,7 @@ class BeliefConsolidator:
         Simple single-pass clustering: O(N²) but N is bounded
         by _MAX_EVENTS_PER_CYCLE (200). GPU-accelerated embedding.
         """
-        from legacy_research.engine.semantic_hash import (
+        from cortex.engine.semantic_hash import (
             batch_fingerprint,
             cosine_similarity,
         )

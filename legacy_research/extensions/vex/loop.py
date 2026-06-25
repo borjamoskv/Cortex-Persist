@@ -33,7 +33,7 @@ from legacy_research.extensions.vex.models import (
 )
 
 if TYPE_CHECKING:
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
 __all__ = ["VEXRunner"]
 

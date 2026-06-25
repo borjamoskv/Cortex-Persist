@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 import pytest
 
-from legacy_research.database.tlru_cache import TLRUCache
+from cortex.database.tlru_cache import TLRUCache
 
 
 # ── Construction ─────────────────────────────────────────────────────────

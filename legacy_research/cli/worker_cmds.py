@@ -9,7 +9,7 @@ import logging
 
 import click
 
-from legacy_research.cli.common import DEFAULT_DB, _run_async, console
+from cortex.cli.common import DEFAULT_DB, _run_async, console
 
 logger = logging.getLogger("cortex")
 

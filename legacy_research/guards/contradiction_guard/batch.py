@@ -40,7 +40,7 @@ _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
 from legacy_research.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-from legacy_research.database.core import connect_async_ctx
+from cortex.database.core import connect_async_ctx
 from legacy_research.guards.contradiction_guard.models import ConflictCandidate
 from legacy_research.guards.contradiction_guard.nlp import (
     _decrypt_content,

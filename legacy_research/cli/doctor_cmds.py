@@ -7,7 +7,7 @@ from pathlib import Path
 import click
 from rich.panel import Panel
 from rich.table import Table
-from legacy_research.cli.common import DEFAULT_DB, cli, console
+from cortex.cli.common import DEFAULT_DB, cli, console
 
 
 
@@ -47,7 +47,7 @@ def check_dependencies() -> dict:
 
     # Check for sqlite-vec (critical for search)
     try:
-        from legacy_research.database.core import connect
+        from cortex.database.core import connect
 
         conn = connect(":memory:")
         # This is a heuristic, real check depends on how it's loaded
@@ -65,7 +65,7 @@ def check_database(db_path: str) -> dict:
         return {"status": "missing", "path": str(path)}
 
     try:
-        from legacy_research.database.core import connect
+        from cortex.database.core import connect
 
         conn = connect(db_path, read_only=True)
         res = conn.execute("SELECT count(*) FROM facts").fetchone()

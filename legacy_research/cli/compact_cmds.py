@@ -6,7 +6,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from legacy_research.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 from legacy_research.compaction.compactor import (
     CompactionStrategy,
     compact,
@@ -83,7 +83,7 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
     Deduplicates, consolidates errors, and prunes stale facts.
     Original facts are deprecated (never deleted) - full audit trail preserved.
     """
-    from legacy_research.cli.common import _run_async
+    from cortex.cli.common import _run_async
 
     engine = get_engine(db)
     try:
@@ -153,7 +153,7 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
 @click.option("--db", default=DEFAULT_DB, help="Database path.")
 def compact_status(project, db) -> None:
     """Show compaction history and statistics."""
-    from legacy_research.cli.common import _run_async
+    from cortex.cli.common import _run_async
 
     engine = get_engine(db)
     try:
@@ -205,7 +205,7 @@ def compact_session_cmd(project, max_facts, db) -> None:
     grouped by type and sorted by importance. Ideal for pasting into
     a new conversation to avoid context rot.
     """
-    from legacy_research.cli.common import _run_async
+    from cortex.cli.common import _run_async
 
     engine = get_engine(db)
     try:
@@ -227,7 +227,7 @@ def gc_cmd(batch_size, force, db) -> None:
     Physically deletes facts and embeddings marked as tombstoned. Defers
     execution to off-peak hours by default to protect database IOPS.
     """
-    from legacy_research.cli.common import _run_async
+    from cortex.cli.common import _run_async
     from legacy_research.compaction.gc import GarbageCollector
 
     engine = get_engine(db)

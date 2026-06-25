@@ -5,8 +5,8 @@ from __future__ import annotations
 import click
 from rich.panel import Panel
 from rich.table import Table
-from legacy_research.cli.common import DEFAULT_DB, cli, console, get_engine
-from legacy_research.cli.errors import err_empty_results, handle_cli_error
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, handle_cli_error
 from legacy_research.extensions.agents.handoff import generate_handoff, load_handoff, save_handoff
 
 

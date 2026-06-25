@@ -9,7 +9,7 @@ from typing import Any
 import click
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from legacy_research.cli.common import cli
+from cortex.cli.common import cli
 from legacy_research.ledger.public_export import (
     ExportAuthority,
     write_public_ledger_export,

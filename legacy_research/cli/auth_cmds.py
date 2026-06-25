@@ -3,9 +3,9 @@
 import click
 from rich.console import Console
 
-from legacy_research.cli.common import cli, run_async
-from legacy_research.engine import CortexEngine
-from legacy_research.engine.auth_gateway import QuorumGateway
+from cortex.cli.common import cli, run_async
+from cortex.engine import CortexEngine
+from cortex.engine.auth_gateway import QuorumGateway
 
 console = Console()
 

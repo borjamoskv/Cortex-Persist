@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from legacy_research.database.core import (
+from cortex.database.core import (
     CACHE_SIZE_KB,
     PAGE_SIZE,
     connect,
@@ -78,7 +78,7 @@ class TestSQLitePragmasAsync:
     @pytest.mark.asyncio
     async def test_pragmas_applied_async(self, tmp_path):
         """Async connections get the same pragmas."""
-        from legacy_research.database.core import connect_async
+        from cortex.database.core import connect_async
 
         db = str(tmp_path / "async_test.db")
         conn = await connect_async(db)
@@ -106,7 +106,7 @@ class TestWriterPragmaDedup:
 
     def test_writer_no_duplicate_pragmas(self):
         """_create_connection must NOT contain cache_size or temp_store."""
-        from legacy_research.database.writer import SqliteWriteWorker
+        from cortex.database.writer import SqliteWriteWorker
 
         source = inspect.getsource(SqliteWriteWorker._create_connection)
         assert "cache_size" not in source

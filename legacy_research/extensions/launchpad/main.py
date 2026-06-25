@@ -26,7 +26,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from pathlib import Path
 from typing import Any
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 __all__ = ["DEFAULT_SWARM_PATH", "MissionOrchestrator"]
 

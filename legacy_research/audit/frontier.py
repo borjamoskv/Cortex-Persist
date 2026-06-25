@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 from legacy_research.extensions.llm.router import IntentProfile
 from legacy_research.extensions.llm.sovereign import SovereignLLM
 

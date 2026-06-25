@@ -17,8 +17,8 @@ import traceback
 from datetime import datetime, timezone
 from typing import Any
 
-from legacy_research.cli.common import DEFAULT_DB, _detect_agent_source, _run_async, get_engine
-from legacy_research.cli.loop_models import LoopSession, PersistenceType, TaskResult, TaskStatus
+from cortex.cli.common import DEFAULT_DB, _detect_agent_source, _run_async, get_engine
+from cortex.cli.loop_models import LoopSession, PersistenceType, TaskResult, TaskStatus
 
 __all__ = ["PERSIST_INTERVAL", "ExecutionLoop", "PersistSupervisor"]
 
@@ -160,7 +160,7 @@ class ExecutionLoop:
 
     def _run_keter(self, task: str) -> str:
         """Execute task through KETER Engine phases."""
-        from legacy_research.engine.keter import KeterEngine
+        from cortex.engine.keter import KeterEngine
 
         async def _ignite():
             keter = KeterEngine()

@@ -40,7 +40,7 @@ def seal_decision(fact_type: str, client_id_kwarg: str = "client_id"):
 
             # 3. Forge the TaxFact payload (C5-REAL integration)
             try:
-                from legacy_research.cli.common import get_engine
+                from cortex.cli.common import get_engine
                 from legacy_research.events.loop import sovereign_run
                 from legacy_research.extensions.fiscal.models import TaxFact, TaxFactPayload
 

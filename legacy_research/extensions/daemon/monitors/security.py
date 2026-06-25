@@ -148,7 +148,7 @@ class SecurityMonitor:
 
         db_path = config.DB_PATH
         try:
-            from legacy_research.database.core import connect_async
+            from cortex.database.core import connect_async
 
             async with await connect_async(db_path) as conn:
                 for alert in alerts:

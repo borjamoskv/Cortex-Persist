@@ -7,7 +7,7 @@ import asyncio
 
 import click
 
-from legacy_research.cli.common import console
+from cortex.cli.common import console
 from legacy_research.extensions.skills.niche_arbitrage.models import NicheTarget
 from legacy_research.extensions.skills.niche_arbitrage.pipeline import NicheArbitrageEngine
 

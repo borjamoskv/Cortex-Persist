@@ -129,7 +129,7 @@ async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
     """Phase 3 - Legion-Omega swarm execution."""
     t0 = time.monotonic()
     try:
-        from legacy_research.engine.legion import LEGION_OMEGA
+        from cortex.engine.legion import LEGION_OMEGA
 
         intent = "Evaluate system immunity and forge defensive core"
         result = await LEGION_OMEGA.forge(intent, context={"ctx": ctx})

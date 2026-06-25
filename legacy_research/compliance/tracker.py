@@ -56,7 +56,7 @@ class ComplianceTracker:
         db_path: str | Path = DEFAULT_DB_PATH,
         project: str = "default",
     ) -> None:
-        from legacy_research.engine import CortexEngine
+        from cortex.engine import CortexEngine
 
         self._engine = CortexEngine(db_path=str(db_path), auto_embed=False)
         self._default_project = project

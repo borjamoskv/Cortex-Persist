@@ -3,7 +3,7 @@
 Provides ExecutionTrace and TraceEvent — the stable boundary between
 the live runtime (CortexEngine) and the observability layer (E1, phase detector).
 
-Does NOT import from legacy_research.engine to avoid circular dependencies.
+Does NOT import from cortex.engine to avoid circular dependencies.
 """
 
 from __future__ import annotations

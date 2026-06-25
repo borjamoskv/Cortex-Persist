@@ -13,7 +13,7 @@ import logging
 from datetime import datetime, timezone
 
 # Import the existing router from the engine
-from legacy_research.engine.causal.taint_engine import MHCAntigenRouter, canonicalize_content
+from cortex.engine.causal.taint_engine import MHCAntigenRouter, canonicalize_content
 
 logger = logging.getLogger("cortex.daemon.t_cell_ihelp")
 

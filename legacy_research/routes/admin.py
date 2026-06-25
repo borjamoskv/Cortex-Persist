@@ -20,12 +20,12 @@ from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 from starlette.requests import Request
 
-import legacy_research.api.state as api_state
+import cortex.api.state as api_state
 from legacy_research import __version__
-from legacy_research.api.deps import get_engine
+from cortex.api.deps import get_engine
 from legacy_research.auth import AuthResult, get_auth_manager, require_permission
-from legacy_research.database.schema import SCHEMA_VERSION
-from legacy_research.engine import CortexEngine
+from cortex.database.schema import SCHEMA_VERSION
+from cortex.engine import CortexEngine
 from legacy_research.routes.admin_health_probes import build_health_probes as _build_health_probes
 from legacy_research.routes.middleware import AuditLogger, RateLimiter, SelfHealingHook
 from legacy_research.types.models import (
@@ -455,7 +455,7 @@ async def execute_credibility_strike(
     if hasattr(engine, "_extensions") and hasattr(engine._extensions, "credibility_stack"):  # pyright: ignore[reportAttributeAccessIssue]
         stack = engine._extensions.credibility_stack  # pyright: ignore[reportAttributeAccessIssue]
     else:
-        from legacy_research.engine.credibility_stack import LedgerCredibilityStack
+        from cortex.engine.credibility_stack import LedgerCredibilityStack
 
         stack = LedgerCredibilityStack(engine)
 

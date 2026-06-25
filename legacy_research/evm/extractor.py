@@ -16,8 +16,8 @@ import aiohttp
 
 from legacy_research.evm.topography import EVMTopographyMapper
 from legacy_research.crypto.keys import ZKSwarmIdentity
-from legacy_research.engine.mtk_sqlite_authorizer import mtk_active_token
-from legacy_research.engine.causal.taint_engine import generate_secure_taint_token
+from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+from cortex.engine.causal.taint_engine import generate_secure_taint_token
 
 logger = logging.getLogger("cortex.evm.extractor")
 

@@ -24,7 +24,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from legacy_research.cli.notebooklm_data import (
+from cortex.cli.notebooklm_data import (
     _PROJECT_DOMAIN,
     DIGEST_FILE,
     DOMAINS_DIR,
@@ -282,7 +282,7 @@ def ingest_cmd(drive_path: str | None) -> None:
     """Silent daemon-like ingest: Parse NotebookLM notes back into CORTEX."""
     import json
 
-    from legacy_research.cli.common import get_engine
+    from cortex.cli.common import get_engine
     from legacy_research.extensions.llm.router import IntentProfile
     from legacy_research.extensions.llm.sovereign import SovereignLLM
 

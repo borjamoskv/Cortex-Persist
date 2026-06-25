@@ -235,7 +235,7 @@ def _run_async(coro: Any) -> Any:
 
 async def _get_engine_active_facts(project: str | None = None) -> list[Any]:
     """Fetch cleartext facts using CortexEngine."""
-    from legacy_research.cli.common import get_engine
+    from cortex.cli.common import get_engine
 
     engine = get_engine()
     try:

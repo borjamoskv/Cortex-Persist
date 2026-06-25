@@ -13,7 +13,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from legacy_research.cli.common import cli
+from cortex.cli.common import cli
 
 console = Console()
 

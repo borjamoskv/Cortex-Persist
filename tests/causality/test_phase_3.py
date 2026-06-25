@@ -28,10 +28,10 @@ import aiosqlite
 
 import pytest
 
-from legacy_research.engine.fact_store_core import insert_fact_record
-from legacy_research.engine.mixins.base import FACT_COLUMNS
-from legacy_research.engine.models import Fact
-from legacy_research.engine.query_mixin import QueryMixin
+from cortex.engine.fact_store_core import insert_fact_record
+from cortex.engine.mixins.base import FACT_COLUMNS
+from cortex.engine.models import Fact
+from cortex.engine.query_mixin import QueryMixin
 
 
 
@@ -51,6 +51,6 @@ class TestEngineAPI:
         assert "tenant_id" in params
 
     def test_sync_wrapper_exists(self):
-        from legacy_research.engine import CortexEngine
+        from cortex.engine import CortexEngine
 
         assert hasattr(CortexEngine, "get_causal_chain_sync")

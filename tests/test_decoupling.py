@@ -8,7 +8,7 @@ is delayed or failing.
 import pytest
 
 from legacy_research.core.config import CortexConfig
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 from legacy_research.enrichment.worker import EnrichmentWorker
 from legacy_research.verification.oracle import VerificationOracle
 

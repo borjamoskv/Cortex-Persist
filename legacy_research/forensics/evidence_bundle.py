@@ -30,7 +30,7 @@ from collections.abc import Mapping
 from pathlib import PurePosixPath
 from typing import Any
 
-from legacy_research.database.core import connect
+from cortex.database.core import connect
 from legacy_research.forensics._evidence_ledger import (
     EVIDENCE_COMMIT_ACTION,
     _commit_detail,

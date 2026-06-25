@@ -15,7 +15,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from legacy_research.cli.common import _run_async, cli, console
+from cortex.cli.common import _run_async, cli, console
 
 
 @cli.command("storage-init-pg")
@@ -61,7 +61,7 @@ def storage_init_pg(dsn: str | None, dry_run: bool, skip_extensions: bool) -> No
         raise click.Abort()
 
     async def _run() -> None:
-        from legacy_research.storage.postgres import PostgresBackend
+        from cortex.storage.postgres import PostgresBackend
 
         with console.status("[bold #CCFF00]Connecting to PostgreSQL...[/]"):
             backend = PostgresBackend(
@@ -88,7 +88,7 @@ def storage_init_pg(dsn: str | None, dry_run: bool, skip_extensions: bool) -> No
 
         # Skip extensions if requested
         if skip_extensions:
-            from legacy_research.storage.pg_schema import PG_ALL_SCHEMA
+            from cortex.storage.pg_schema import PG_ALL_SCHEMA
 
             with console.status(
                 f"[bold blue]Applying {len(PG_ALL_SCHEMA)} schema statements (no extensions)...[/]"
@@ -137,7 +137,7 @@ def storage_status() -> None:
     """Show current storage backend mode and health."""
 
     async def _run() -> None:
-        from legacy_research.storage import get_storage_mode
+        from cortex.storage import get_storage_mode
 
         mode = get_storage_mode()
 
@@ -199,7 +199,7 @@ def _sanitize_dsn(dsn: str) -> str:
 
 async def _check_pg_health(dsn: str, grid: Table) -> None:
     """Probe PostgreSQL connectivity and add health row to grid."""
-    from legacy_research.storage.postgres import PostgresBackend
+    from cortex.storage.postgres import PostgresBackend
 
     try:
         backend = PostgresBackend(

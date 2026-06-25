@@ -33,7 +33,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from legacy_research.database.core import connect as db_connect
+from cortex.database.core import connect as db_connect
 from legacy_research.extensions.evolution.models import EvolutionMutation
 
 logger = logging.getLogger("cortex.extensions.evolution.ledger_db")

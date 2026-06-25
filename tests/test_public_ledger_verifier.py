@@ -7,7 +7,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from legacy_research.cli import cli
+from cortex.cli import cli
 from legacy_research.ledger.public_verifier import verify_export
 
 FIXTURES = Path(__file__).parent / "fixtures" / "ledger_verifier"

@@ -12,7 +12,7 @@ import asyncio
 import click
 from rich.panel import Panel
 
-from legacy_research.cli.common import cli, console
+from cortex.cli.common import cli, console
 from legacy_research.observability.exergy_engine import ExergyEngine
 
 __all__ = [

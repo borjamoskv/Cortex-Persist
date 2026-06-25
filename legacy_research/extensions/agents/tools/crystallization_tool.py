@@ -71,7 +71,7 @@ class CrystallizationTool:
             project,
         )
         try:
-            from legacy_research.engine import CortexEngine
+            from cortex.engine import CortexEngine
 
             engine = CortexEngine()
             await engine.store(

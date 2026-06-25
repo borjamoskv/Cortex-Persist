@@ -12,3 +12,4 @@ class PublicVerifierProtocol(Protocol):
     manifest: dict[str, Any] | None
     event_hashes: list[str]
     guarantees: dict[str, bool]
+    paths: Any

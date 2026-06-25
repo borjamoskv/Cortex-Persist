@@ -31,7 +31,7 @@ class PerceptionMonitor:
 
         import uuid
 
-        from legacy_research.engine import CortexEngine
+        from cortex.engine import CortexEngine
         from legacy_research.extensions.perception import PerceptionPipeline
 
         if self._engine:

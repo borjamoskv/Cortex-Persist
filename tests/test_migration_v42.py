@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime, timezone
 import hashlib
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 from legacy_research.extensions.nous.runtime import NousRuntime
 from legacy_research.extensions.nous.models import (
     NousAST,

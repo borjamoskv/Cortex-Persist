@@ -287,7 +287,7 @@ class RevenueEngine:
     async def _persist_opportunities(self, opportunities: list[Opportunity]) -> None:
         """Persist detected opportunities to CORTEX ledger."""
         try:
-            from legacy_research.engine import CortexEngine
+            from cortex.engine import CortexEngine
 
             engine = CortexEngine()
             for opp in opportunities:
@@ -308,7 +308,7 @@ class RevenueEngine:
     async def _persist_result(self, result: ExecutionResult) -> None:
         """Persist execution result to CORTEX ledger."""
         try:
-            from legacy_research.engine import CortexEngine
+            from cortex.engine import CortexEngine
 
             engine = CortexEngine()
             fact_type = "decision" if result.success else "error"

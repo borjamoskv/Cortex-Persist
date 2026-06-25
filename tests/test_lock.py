@@ -4,8 +4,8 @@ import asyncio
 
 import pytest
 
-from legacy_research.engine import CortexEngine
-from legacy_research.engine.lock import SovereignLock
+from cortex.engine import CortexEngine
+from cortex.engine.lock import SovereignLock
 
 
 @pytest.fixture

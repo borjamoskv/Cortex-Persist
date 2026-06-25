@@ -45,7 +45,7 @@ class SqliteMessageBus:
     async def _get_conn(self) -> Any:
         """Lazy-init async connection."""
         if self._conn is None:
-            from legacy_research.database.core import connect_async
+            from cortex.database.core import connect_async
 
             self._conn = await connect_async(self.db_path)
             await self._conn.execute("""

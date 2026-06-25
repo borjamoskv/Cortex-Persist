@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from legacy_research.extensions.hypervisor.models import HealthReport, Memory, Receipt
 
 if TYPE_CHECKING:
-    from legacy_research.engine.models import Fact
+    from cortex.engine.models import Fact
     from legacy_research.search import SearchResult
 
 __all__ = ["ComplexityCompressor"]

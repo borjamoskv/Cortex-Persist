@@ -29,7 +29,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
-from legacy_research.engine.meta_arbiter import MetaArbiterKernel, TrajectoryScore
+from cortex.engine.meta_arbiter import MetaArbiterKernel, TrajectoryScore
 from legacy_research.tools.trace_adapter import ExecutionTrace
 from legacy_research.tools.trace_builder import TraceBuilder
 

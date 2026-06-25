@@ -24,8 +24,8 @@ from legacy_research.extensions.policy.models import (
 )
 
 if TYPE_CHECKING:
-    from legacy_research.engine import CortexEngine
-    from legacy_research.engine.models import Fact
+    from cortex.engine import CortexEngine
+    from cortex.engine.models import Fact
 
 logger = logging.getLogger("cortex.extensions.policy")
 

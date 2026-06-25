@@ -15,7 +15,7 @@ from typing import Any
 
 import click
 
-from legacy_research.cli.common import cli
+from cortex.cli.common import cli
 
 
 @cli.command("run")

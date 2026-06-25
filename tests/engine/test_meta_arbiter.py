@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from legacy_research.engine.meta_arbiter import MetaArbiterKernel
+from cortex.engine.meta_arbiter import MetaArbiterKernel
 from legacy_research.tools.trace_builder import TraceBuilder
 
 

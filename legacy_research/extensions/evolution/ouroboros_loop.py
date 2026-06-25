@@ -12,7 +12,7 @@ from legacy_research.swarm.dispatcher import invoke_subagent
 
 from legacy_research.audit.ledger import inject_ledger_event
 from legacy_research.core.thermodynamics import EntropyAnnihilator
-from legacy_research.engine.mtk_core import ClosurePayload, mtk_authorizer_callback
+from cortex.engine.mtk_core import ClosurePayload, mtk_authorizer_callback
 
 
 class OuroborosLoop:

@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from legacy_research.api.core import app
-from legacy_research.api.deps import get_async_engine
+from cortex.api.core import app
+from cortex.api.deps import get_async_engine
 from legacy_research.auth import AuthResult, require_permission
 from legacy_research.auth.deps import require_auth
 from legacy_research.extensions.swarm.psychohistory import AGENT_BIASES

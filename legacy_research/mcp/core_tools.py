@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 if TYPE_CHECKING:
     from legacy_research.mcp.server import _MCPContext

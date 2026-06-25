@@ -11,7 +11,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from legacy_research.cli.common import DEFAULT_DB, console  # type: ignore[reportAttributeAccessIssue]
+from cortex.cli.common import DEFAULT_DB, console  # type: ignore[reportAttributeAccessIssue]
 
 
 def _render_grade_panel(hs, path: str) -> None:

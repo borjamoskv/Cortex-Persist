@@ -304,7 +304,7 @@ def heal_project(
     engine: MejoraloEngine | None = None,
 ) -> bool:
     """Orchestrate autonomous healing: detect, rewrite, test, commit - RELENTLESSLY."""
-    from legacy_research.cli.common import console
+    from cortex.cli.common import console
 
     current_result = scan_result
     iteration = 0

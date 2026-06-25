@@ -13,7 +13,7 @@ import statistics
 from dataclasses import dataclass, field
 from typing import Any
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 from legacy_research.extensions.mejoralo.ledger import get_history
 
 __all__ = ["EffectivenessTracker", "TrendReport"]

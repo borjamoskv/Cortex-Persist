@@ -25,7 +25,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from starlette.concurrency import run_in_threadpool
 
-import legacy_research.api.state as api_state
+import cortex.api.state as api_state
 from legacy_research.auth import AuthResult, require_permission
 from legacy_research.types.models import HeartbeatRequest, TimeSummaryResponse
 from legacy_research.utils.i18n import get_trans

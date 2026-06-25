@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from legacy_research.engine.swarm_10k import SwarmCommander
+    from cortex.engine.swarm_10k import SwarmCommander
 
 logger = logging.getLogger("cortex.forensics.strike")
 
@@ -117,7 +117,7 @@ class ForensicStrikeCommander:
 
 async def execute_demo_strike(db_path: str):
     """Sovereign Demo: SSV Network Liquidation Audit."""
-    from legacy_research.engine.swarm_10k import SwarmCommander
+    from cortex.engine.swarm_10k import SwarmCommander
 
     commander = SwarmCommander(db_path)
     await commander.initialize()

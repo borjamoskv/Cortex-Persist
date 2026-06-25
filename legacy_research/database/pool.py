@@ -148,7 +148,7 @@ class CortexConnectionPool:
 
     async def _create_connection(self) -> aiosqlite.Connection:
         """Create a highly-optimized, WAL-enabled async connection."""
-        from legacy_research.database.core import connect_async, load_sqlite_vec_async
+        from cortex.database.core import connect_async, load_sqlite_vec_async
 
         try:
             conn = await connect_async(self.db_path, read_only=self.read_only)

@@ -75,7 +75,7 @@ Use the daemon programmatically:
 
 ```python
 from legacy_research.daemon import CortexDaemon
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 engine = CortexEngine()
 engine.init_db()
@@ -113,7 +113,7 @@ jobs:
       - run: |
           python -c "
           from legacy_research.daemon import CortexDaemon
-          from legacy_research.engine import CortexEngine
+          from cortex.engine import CortexEngine
           engine = CortexEngine()
           engine.init_db()
           d = CortexDaemon(engine)

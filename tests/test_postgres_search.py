@@ -11,7 +11,7 @@ from legacy_research.search.models import SearchResult
 from legacy_research.search.text import text_search
 from legacy_research.search.vector import semantic_search
 from legacy_research.search.hybrid import hybrid_search
-from legacy_research.storage import StorageMode
+from cortex.storage import StorageMode
 
 
 class MockPostgresConn:

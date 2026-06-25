@@ -68,7 +68,7 @@ class MejoraloOmegaAgent:
         if self._engine is not None:
             return
 
-        from legacy_research.cli import get_engine  # pyright: ignore
+        from cortex.cli import get_engine  # pyright: ignore
         from legacy_research.config import DEFAULT_DB_PATH
         from legacy_research.extensions.mejoralo.engine import MejoraloEngine
 
@@ -138,7 +138,7 @@ class MejoraloOmegaAgent:
 
     async def _execute_cycle(self) -> None:
         """Single improvement cycle: scan → prioritize → heal → verify → absorb."""
-        from legacy_research.cli import console  # pyright: ignore
+        from cortex.cli import console  # pyright: ignore
 
         console.rule(f"[cyan]MEJORALO-Ω Cycle {self._cycle_count}")
 

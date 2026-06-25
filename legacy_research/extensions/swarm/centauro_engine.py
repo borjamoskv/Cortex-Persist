@@ -14,8 +14,8 @@ from typing import Any, TypedDict, cast
 
 from pydantic import BaseModel, Field
 
-from legacy_research.engine.aleph_omega import AxiomaticLeapEngine
-from legacy_research.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.aleph_omega import AxiomaticLeapEngine
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from legacy_research.extensions.swarm.byzantine import ByzantineConsensus
 
 __all__ = [

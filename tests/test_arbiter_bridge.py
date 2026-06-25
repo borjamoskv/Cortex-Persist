@@ -13,13 +13,13 @@ from __future__ import annotations
 
 import pytest
 
-from legacy_research.engine.arbiter_bridge import (
+from cortex.engine.arbiter_bridge import (
     ArbiterBridge,
     BridgeResult,
     RESOLUTION_BLAST_RADIUS,
     SEVERITY_THRESHOLDS,
 )
-from legacy_research.engine.meta_arbiter import (
+from cortex.engine.meta_arbiter import (
     ArbiterVerdict,
     LayerID,
     LayerSignal,

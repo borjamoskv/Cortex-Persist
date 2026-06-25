@@ -2,7 +2,7 @@
 
 import click
 
-from legacy_research.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 
 
 @cli.command("eval")

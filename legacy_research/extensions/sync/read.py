@@ -40,7 +40,7 @@ __all__ = ["sync_memory"]
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.sync")
 

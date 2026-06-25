@@ -25,7 +25,7 @@ from legacy_research.extensions.shannon.analyzer import normalized_entropy
 from legacy_research.extensions.shannon.scanner import MemoryScanner
 
 if TYPE_CHECKING:
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
 __all__ = ["ImmortalityIndex"]
 

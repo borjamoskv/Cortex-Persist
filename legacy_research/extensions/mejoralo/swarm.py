@@ -14,7 +14,7 @@ import textwrap
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from legacy_research.cli.common import console  # pyright: ignore
+from cortex.cli.common import console  # pyright: ignore
 from legacy_research.extensions.mejoralo.constants import (
     DEVILS_ADVOCATE_THRESHOLD,
     SWARM_BASE_TEMPERATURE,

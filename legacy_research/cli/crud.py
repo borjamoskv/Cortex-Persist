@@ -6,8 +6,8 @@ from collections.abc import Coroutine
 from typing import Any, TypeVar, cast
 import click
 from rich.table import Table
-from legacy_research.cli.common import DEFAULT_DB, cli, console, get_engine
-from legacy_research.cli.errors import err_empty_results, err_fact_not_found
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, err_fact_not_found
 from legacy_research.extensions.sync import export_to_json
 
 
@@ -47,7 +47,7 @@ def delete(fact_id, reason, tenant_id, db) -> None:
                 err_fact_not_found(fact_id)
                 return
 
-            from legacy_research.engine.models import Fact
+            from cortex.engine.models import Fact
 
             fact = cast(Fact, fact)
 
@@ -164,7 +164,7 @@ def edit(fact_id, new_content, tenant_id, db) -> None:
                 err_fact_not_found(fact_id)
                 return
 
-            from legacy_research.engine.models import Fact
+            from cortex.engine.models import Fact
 
             fact = cast(Fact, fact)
 

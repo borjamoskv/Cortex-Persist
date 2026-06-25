@@ -23,7 +23,7 @@ __all__ = [
     "nirvana_cmd",
 ]
 
-from legacy_research.cli.common import cli, console
+from cortex.cli.common import cli, console
 
 PROGRESS_DESC_FMT = "[progress.description]{task.description}"
 
@@ -59,7 +59,7 @@ def manifest_cmd(intent: str) -> None:
 
         # Real: Connect to CortexEngine and store intent
         try:
-            from legacy_research.engine import CortexEngine
+            from cortex.engine import CortexEngine
 
             engine = CortexEngine()
             progress.update(
@@ -232,8 +232,8 @@ def aix_cmd() -> None:
     """
     import asyncio
 
-    from legacy_research.cli.aix import calculate_aix, print_aix_report
-    from legacy_research.cli.common import get_engine
+    from cortex.cli.aix import calculate_aix, print_aix_report
+    from cortex.cli.common import get_engine
 
     async def run():
         engine = get_engine()

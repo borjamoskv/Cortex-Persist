@@ -1,5 +1,5 @@
 import pytest
-from legacy_research.engine.ingest.landauer_compression import LandauerCompressor
+from cortex.engine.ingest.landauer_compression import LandauerCompressor
 
 def test_landauer_ast_pruning_removes_docstrings():
     source = '''

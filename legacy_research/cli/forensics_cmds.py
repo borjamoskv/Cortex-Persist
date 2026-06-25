@@ -9,7 +9,7 @@ from typing import Any
 
 import click
 
-from legacy_research.cli.common import DEFAULT_DB, cli
+from cortex.cli.common import DEFAULT_DB, cli
 from legacy_research.forensics.evidence_bundle import (
     build_evidence_manifest,
     commit_evidence_manifest,

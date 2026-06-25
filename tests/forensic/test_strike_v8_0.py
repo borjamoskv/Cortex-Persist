@@ -4,7 +4,7 @@ import time
 
 import pytest
 
-from legacy_research.engine.swarm_10k import ForensicLegion, SwarmCommander
+from cortex.engine.swarm_10k import ForensicLegion, SwarmCommander
 from legacy_research.forensics.forensic_strike import ForensicStrikeCommander, StrikeTarget
 
 

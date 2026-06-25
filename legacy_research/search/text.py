@@ -61,7 +61,7 @@ from legacy_research.search.utils import (
     _rows_to_results,
     _sanitize_fts_query,
 )
-from legacy_research.storage import StorageMode, get_storage_mode
+from cortex.storage import StorageMode, get_storage_mode
 
 __all__ = ["text_search", "text_search_sync"]
 

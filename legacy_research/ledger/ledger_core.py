@@ -65,7 +65,7 @@ _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
 if TYPE_CHECKING:
-    from legacy_research.database.pool import CortexConnectionPool
+    from cortex.database.pool import CortexConnectionPool
 
 from legacy_research.utils.canonical import (
     canonical_json,
@@ -427,7 +427,7 @@ class SovereignLedger(LedgerAuditMixin):
                     db_path = None
 
             if db_path:
-                from legacy_research.database.core import connect_async
+                from cortex.database.core import connect_async
 
                 conn = await connect_async(str(db_path))
                 try:

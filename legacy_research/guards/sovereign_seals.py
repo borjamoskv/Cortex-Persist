@@ -410,7 +410,7 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
 
     # ── EU AI Act Audit Trail ──
     try:
-        from legacy_research.engine import CortexEngine
+        from cortex.engine import CortexEngine
 
         engine = CortexEngine(":memory:", auto_embed=False)
         await engine.init_db()

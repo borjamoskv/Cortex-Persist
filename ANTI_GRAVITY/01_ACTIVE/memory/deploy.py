@@ -33,7 +33,9 @@ from schema.event_v1 import EventV1
 # Re-use existing deploy logic (no duplication)
 # deploy.py lives at repo root and is kept for backward compat during cutover
 try:
-    import deploy as _deploy_module
+    from typing import Any
+    import deploy as _deploy_module_ref  # type: ignore
+    _deploy_module: Any = _deploy_module_ref
     _DEPLOY_AVAILABLE = True
 except ImportError:
     _DEPLOY_AVAILABLE = False

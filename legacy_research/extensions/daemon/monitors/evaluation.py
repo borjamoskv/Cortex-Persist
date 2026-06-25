@@ -38,7 +38,7 @@ class EvaluationMonitor:
         self._last_run = now
 
         try:
-            from legacy_research.database.core import connect as db_connect
+            from cortex.database.core import connect as db_connect
 
             alerts = []
             with db_connect(self.db_path) as conn:  # type: ignore[type-error]

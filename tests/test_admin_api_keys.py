@@ -8,7 +8,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-import legacy_research.api.state as api_state
+import cortex.api.state as api_state
 import legacy_research.auth.manager as auth_manager_module
 from legacy_research.auth.manager import AuthManager
 from legacy_research.routes import admin as admin_router

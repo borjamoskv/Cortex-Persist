@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from legacy_research.engine import shared_bus as shared_bus_module
-from legacy_research.engine.swarm_10k import SwarmCommander
+from cortex.engine import shared_bus as shared_bus_module
+from cortex.engine.swarm_10k import SwarmCommander
 from legacy_research.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 

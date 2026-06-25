@@ -85,7 +85,7 @@ Located in `cortex/engine/__init__.py`. The main entry point used by both CLI an
 - Delegates CRUD to mixins: `StoreMixin`, `QueryMixin`, `ConsensusMixin`
 
 ```python
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 engine = CortexEngine(db_path="my.db", auto_embed=True)
 engine.init_db_sync()
@@ -107,8 +107,8 @@ compatibility alias exported from `cortex.engine`, not a separate `cortex/engine
 - Handles transaction logging and hash chain maintenance
 
 ```python
-from legacy_research.database.pool import CortexConnectionPool
-from legacy_research.engine import CortexEngine
+from cortex.database.pool import CortexConnectionPool
+from cortex.engine import CortexEngine
 
 pool = CortexConnectionPool(db_path, read_only=False)
 await pool.initialize()
@@ -126,7 +126,7 @@ fact_id = await engine.store(project="x", content="Hello", fact_type="knowledge"
 ```python
 from fastapi import APIRouter, Depends
 from legacy_research.auth import AuthResult, require_permission
-from legacy_research.api.deps import get_async_engine
+from cortex.api.deps import get_async_engine
 
 router = APIRouter(tags=["my-feature"])
 
@@ -154,8 +154,8 @@ api_router.include_router(my_feature_router)
 
 ```python
 import click
-from legacy_research.cli.common import cli
-from legacy_research.engine import CortexEngine
+from cortex.cli.common import cli
+from cortex.engine import CortexEngine
 
 @cli.command("my-command")
 @click.argument("project")
@@ -221,7 +221,7 @@ Tests use temporary databases and `config.reload()` for isolation:
 
 ```python
 import pytest
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 @pytest.fixture
 def engine(tmp_path):
@@ -239,7 +239,7 @@ def test_store(engine):
 
 ```python
 from fastapi.testclient import TestClient
-import legacy_research.api as api_mod
+import cortex.api as api_mod
 
 def test_health(tmp_path):
     os.environ["CORTEX_DB"] = str(tmp_path / "test.db")
@@ -296,7 +296,7 @@ To add a new translation:
 
 When adding a new table:
 
-1. Add `CREATE TABLE` to `legacy_research/database/schema.py` or `legacy_research/database/schema_extensions.py`
+1. Add `CREATE TABLE` to `cortex/database/schema.py` or `cortex/database/schema_extensions.py`
 2. Add it to the appropriate schema list such as `ALL_SCHEMA`
 3. Create or register a migration in `cortex/migrations/` for existing databases
 4. Test with `cortex init` on a fresh DB and `cortex migrate` on existing

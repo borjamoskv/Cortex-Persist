@@ -47,7 +47,7 @@ async def check_gate_11_cobbler(cached_files: dict[Path, str]) -> GateResult:
     _EXCLUDE = frozenset(["legion_vectors.py", "legion.py"])
 
     try:
-        from legacy_research.engine.legion_vectors import EntropyDemon, Intruder
+        from cortex.engine.legion_vectors import EntropyDemon, Intruder
     except ImportError as e:
         printer.fail(f"Cannot import legion_vectors: {e}")
         return False, "verified"

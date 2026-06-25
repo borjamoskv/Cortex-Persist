@@ -10,7 +10,7 @@ live in schema_extensions.py to satisfy the Landauer LOC barrier.
 from __future__ import annotations
 
 # Re-export extended tables for backward compat
-from legacy_research.database.schema_extensions import (
+from cortex.database.schema_extensions import (
     CREATE_AGENTS,
     CREATE_AUDIT_EXPORTS,
     CREATE_CONTEXT_SNAPSHOTS,
@@ -36,7 +36,7 @@ from legacy_research.database.schema_extensions import (
     EXTENSION_SCHEMA,
 )
 
-from legacy_research.database.c5_real_schema import (
+from cortex.database.c5_real_schema import (
     CREATE_C5_AUDIT_LEDGER,
     CREATE_C5_EDG_NODES,
     CREATE_C5_EDG_EDGES,

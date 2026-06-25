@@ -8,7 +8,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from legacy_research.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 
 __all__ = ["github_cmds"]
 

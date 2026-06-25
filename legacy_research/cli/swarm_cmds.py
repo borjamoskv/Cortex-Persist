@@ -8,8 +8,8 @@ from pathlib import Path
 import click
 from rich.panel import Panel
 
-from legacy_research.cli.common import cli, console
-from legacy_research.cli.slow_tip import tip_on_slow
+from cortex.cli.common import cli, console
+from cortex.cli.slow_tip import tip_on_slow
 
 
 @cli.group()
@@ -273,7 +273,7 @@ def swarm_strike(phalanx, target):
     """Deploy CORTEX-SWARM-100 Architecture (20 Sovereign Vessels)"""
     import asyncio
 
-    from legacy_research.engine.squadrons import (
+    from cortex.engine.squadrons import (
         AutonomousRouter,
         GoldPhalanx,
         LeadPhalanx,

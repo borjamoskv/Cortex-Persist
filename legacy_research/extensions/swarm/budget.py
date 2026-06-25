@@ -29,7 +29,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from legacy_research.database.core import connect as db_connect
+from cortex.database.core import connect as db_connect
 
 logger = logging.getLogger("cortex.extensions.swarm.budget")
 

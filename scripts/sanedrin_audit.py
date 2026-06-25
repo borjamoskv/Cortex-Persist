@@ -11,7 +11,7 @@ import logging
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
-from legacy_research.storage.ledger import EnterpriseAuditLedger
+from cortex.storage.ledger import EnterpriseAuditLedger
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("sanedrin")

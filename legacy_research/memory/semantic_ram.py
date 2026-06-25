@@ -13,9 +13,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import sqlite3
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any, Final, TypedDict
+
+import aiosqlite
 
 from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
@@ -301,7 +304,7 @@ class DynamicSemanticSpace:
         self.autonomic_buffer = AutonomicMemoryBuffer(capacity=buffer_capacity)
         
         # RiM / NF-CoT Integration
-        from legacy_research.engine.rim_latent_blocks import ReasoningInMemoryEngine
+        from cortex.engine.rim_latent_blocks import ReasoningInMemoryEngine
         self.rim_engine = ReasoningInMemoryEngine()
 
         self._active_flushes: set[asyncio.Task[Any]] = set()

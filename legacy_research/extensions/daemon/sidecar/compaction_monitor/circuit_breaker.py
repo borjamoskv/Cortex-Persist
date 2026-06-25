@@ -133,7 +133,7 @@ async def call_external_compact(
         if db_path:
 
             def _checkpoint():
-                from legacy_research.database.core import connect as db_connect
+                from cortex.database.core import connect as db_connect
 
                 conn = db_connect(db_path, timeout=10)  # type: ignore[reportArgumentType]
                 try:

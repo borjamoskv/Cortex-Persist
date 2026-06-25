@@ -11,7 +11,7 @@ os.environ.setdefault("CORTEX_TESTING", "1")
 
 import pytest
 
-from legacy_research.engine.forgetting_models import PolicyRecommendation
+from cortex.engine.forgetting_models import PolicyRecommendation
 from legacy_research.extensions.immune.arbiter import (
     ImmuneArbiter,
     Verdict,

@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 import time
-from legacy_research.engine.rhizome_mesh import RhizomeMesh
+from cortex.engine.rhizome_mesh import RhizomeMesh
 
 @pytest.mark.asyncio
 async def test_rhizome_mesh_non_hierarchical_routing_h_rhizome_01():

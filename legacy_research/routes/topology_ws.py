@@ -9,7 +9,7 @@ import logging
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from legacy_research.engine.metacognition import DoubtCircuit
+from cortex.engine.metacognition import DoubtCircuit
 
 router = APIRouter(tags=["topology"])
 logger = logging.getLogger("cortex.api.topology")

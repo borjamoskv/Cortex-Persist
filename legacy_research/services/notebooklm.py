@@ -24,9 +24,9 @@ import time
 from pathlib import Path
 from typing import Any
 
-from legacy_research.database.core import connect as db_connect
-from legacy_research.engine import CortexEngine
-from legacy_research.engine.models import Fact
+from cortex.database.core import connect as db_connect
+from cortex.engine import CortexEngine
+from cortex.engine.models import Fact
 
 logger = logging.getLogger("cortex.services.notebooklm")
 

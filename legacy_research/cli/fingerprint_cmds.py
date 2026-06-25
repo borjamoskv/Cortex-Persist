@@ -6,8 +6,8 @@ import json as json_mod
 
 import click
 
-from legacy_research.cli.common import _run_async, cli, close_engine_sync, console, get_engine
-from legacy_research.cli.errors import handle_cli_error
+from cortex.cli.common import _run_async, cli, close_engine_sync, console, get_engine
+from cortex.cli.errors import handle_cli_error
 
 __all__ = ["fingerprint", "fingerprint_extract"]
 

@@ -1,5 +1,5 @@
 import pytest
-from legacy_research.engine.ppi_index import PPIIndex, PPILevel
+from cortex.engine.ppi_index import PPIIndex, PPILevel
 
 def test_ppi_index_reality_check():
     index = PPIIndex()

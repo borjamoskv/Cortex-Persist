@@ -1,6 +1,6 @@
 import pytest
 import jax.numpy as jnp
-from legacy_research.engine.primitive_exergy_agent import PrimitiveExergyMaximizerAgent
+from cortex.engine.primitive_exergy_agent import PrimitiveExergyMaximizerAgent
 
 @pytest.mark.asyncio
 async def test_exergy_agent_limit():

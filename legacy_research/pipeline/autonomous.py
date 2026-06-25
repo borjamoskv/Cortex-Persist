@@ -11,7 +11,7 @@ import uuid
 from typing import Any
 
 from legacy_research.context.assembler import ContextAssembler
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 from legacy_research.pipeline import DeliveryTarget, PipelineRequest, PipelineResult
 from legacy_research.pipeline.executor import AgentExecutor
 from legacy_research.pipeline.orchestrator import CortexOrchestrator

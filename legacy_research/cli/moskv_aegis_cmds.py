@@ -14,8 +14,8 @@ from rich.table import Table
 
 from legacy_research.audit.ledger import EnterpriseAuditLedger
 from legacy_research.audit.moskv_aegis import MoskvAegisEngine
-from legacy_research.cli.common import DEFAULT_DB, cli, console
-from legacy_research.database.core import connect_async_ctx
+from cortex.cli.common import DEFAULT_DB, cli, console
+from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger(__name__)
 

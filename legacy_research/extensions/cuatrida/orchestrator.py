@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from legacy_research.engine import CortexEngine as AsyncCortexEngine
+from cortex.engine import CortexEngine as AsyncCortexEngine
 from legacy_research.extensions.cuatrida.models import CuatridaMetrics, DecisionNode, Dimension
 from legacy_research.extensions.mejoralo.engine import MejoraloEngine
 

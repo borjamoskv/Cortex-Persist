@@ -2,8 +2,8 @@
 # Created by Borja Moskv (borjamoskv)
 import pytest
 import datetime
-from legacy_research.policies.mythos_guard import MythosInvariantGuard
-from legacy_research.engine.mtk_core import MTKGuard
+from cortex.policies.mythos_guard import MythosInvariantGuard
+from cortex.engine.mtk_core import MTKGuard
 from legacy_research.types.evidence import ClosurePayload, EvidenceBundle
 
 def test_mythos_invariant_guard_detection():

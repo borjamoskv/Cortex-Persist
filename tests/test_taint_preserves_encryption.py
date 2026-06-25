@@ -13,7 +13,7 @@ import aiosqlite
 import pytest
 
 from legacy_research.crypto.aes import CortexEncrypter
-from legacy_research.engine.causality import KRGSE_DERIVED_FROM, AsyncCausalGraph, TaintStatus
+from cortex.engine.causality import KRGSE_DERIVED_FROM, AsyncCausalGraph, TaintStatus
 
 
 

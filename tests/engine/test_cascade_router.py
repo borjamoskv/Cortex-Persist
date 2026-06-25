@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch, AsyncMock
 
 import pytest
 
-from legacy_research.engine.cascade_router import CascadeRouter
+from cortex.engine.cascade_router import CascadeRouter
 
 
 class TestCascadeRouter:

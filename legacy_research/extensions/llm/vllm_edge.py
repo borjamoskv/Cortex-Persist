@@ -18,7 +18,7 @@ import time
 from collections.abc import AsyncGenerator
 from pathlib import Path
 
-from legacy_research.engine.context_cache import ContextCacheManager
+from cortex.engine.context_cache import ContextCacheManager
 from legacy_research.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
 from legacy_research.extensions.llm._result_cache import ResultCache
 

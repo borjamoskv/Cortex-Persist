@@ -9,7 +9,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from legacy_research.cli.forensics_cmds import forensics_cmds
+from cortex.cli.forensics_cmds import forensics_cmds
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FIXED_TS = "2026-05-05T00:00:00+00:00"
@@ -173,8 +173,8 @@ def test_forensics_cli_rejects_manifest_paths_outside_base(tmp_path) -> None:
 
 def test_forensics_command_is_experimental_in_root_cli(monkeypatch) -> None:
     import importlib
-    import legacy_research.cli.common
-    import legacy_research.cli.forensics_cmds
+    import cortex.cli.common
+    import cortex.cli.forensics_cmds
 
     if "forensics" in cortex.cli.common.cli.commands:
         del cortex.cli.common.cli.commands["forensics"]

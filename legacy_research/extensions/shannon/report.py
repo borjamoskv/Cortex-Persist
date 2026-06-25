@@ -24,7 +24,7 @@ from legacy_research.extensions.shannon.exergy import compute_exergy_report
 from legacy_research.extensions.shannon.scanner import MemoryScanner
 
 if TYPE_CHECKING:
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
 __all__ = ["EntropyReport"]
 

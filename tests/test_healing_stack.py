@@ -13,17 +13,17 @@ import tempfile
 import time
 from pathlib import Path
 
-from legacy_research.engine.predictive_healer import (
+from cortex.engine.predictive_healer import (
     PredictiveHealer,
     Prediction,
     PredictionType,
     _TrendWindow,
 )
-from legacy_research.engine.tuning_store import TuningStore
-from legacy_research.engine.performance_tracker import PerformanceTracker
-from legacy_research.engine.healing_stack import HealingStack, HealingStackConfig
-from legacy_research.engine._autocurative_config import AutoCurativeConfig
-from legacy_research.engine.self_optimizer import OptimizerConfig
+from cortex.engine.tuning_store import TuningStore
+from cortex.engine.performance_tracker import PerformanceTracker
+from cortex.engine.healing_stack import HealingStack, HealingStackConfig
+from cortex.engine._autocurative_config import AutoCurativeConfig
+from cortex.engine.self_optimizer import OptimizerConfig
 
 
 # ═══════════════════════════════════════════════════════════════════

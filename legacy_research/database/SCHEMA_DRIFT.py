@@ -2,7 +2,7 @@
 """CORTEX Schema Drift Documentation.
 
 The live database (~/.cortex/cortex.db) has EVOLVED beyond the DDL
-defined in legacy_research/database/schema.py. This is a known and documented state.
+defined in cortex/database/schema.py. This is a known and documented state.
 
 Live DB: 32 columns in `facts` table (accumulated via ALTER TABLE over time).
 DDL:     16 columns (the "target" clean schema).

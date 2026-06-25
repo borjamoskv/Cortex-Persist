@@ -4,7 +4,7 @@ import pytest
 llama_index = pytest.importorskip("llama_index")
 from unittest.mock import MagicMock
 from llama_index.core.callbacks.schema import CBEventType
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 from legacy_research.extensions.llamaindex_bridge import CortexIndexCallback
 
 

@@ -15,7 +15,7 @@ except ImportError:
 from legacy_research.extensions.ui_control.models import AXElement, InteractionResult
 
 if TYPE_CHECKING:
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.ui_control.accessibility")
 

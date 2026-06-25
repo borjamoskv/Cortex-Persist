@@ -13,7 +13,7 @@ import asyncio
 import click
 from rich.panel import Panel
 
-from legacy_research.cli.common import console, get_engine
+from cortex.cli.common import console, get_engine
 from legacy_research.utils.errors import CortexError
 
 
@@ -27,7 +27,7 @@ def pathogen_cmds():
 @click.option("--polarity", "-p", default="high", help="Polarity level (high, medium, low)")
 def craft(ghost: str, polarity: str):
     """Craft a polarizing Moltbook thesis from a Ghost (O(1) Outsource)."""
-    from legacy_research.engine.pathogen import PathogenEngine
+    from cortex.engine.pathogen import PathogenEngine
 
     engine = get_engine()
     pathogen_engine = PathogenEngine(engine)
@@ -73,7 +73,7 @@ def craft(ghost: str, polarity: str):
 @click.option("--url", "-u", required=True, help="Moltbook post URL to monitor")
 def monitor(url: str):
     """Monitor a deployed pathogen post to extract the winning algorithm."""
-    from legacy_research.engine.pathogen import PathogenEngine
+    from cortex.engine.pathogen import PathogenEngine
 
     pathogen_engine = PathogenEngine(None)
 

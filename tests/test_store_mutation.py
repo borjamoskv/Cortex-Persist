@@ -2,7 +2,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
-from legacy_research.engine.store_mutation import (
+from cortex.engine.store_mutation import (
     deprecate_impl_logic,
     invalidate_impl_logic,
     purge_logic,

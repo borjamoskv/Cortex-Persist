@@ -33,7 +33,7 @@ class LedgerStore:
         self._init_db()
 
     def _connect(self) -> sqlite3.Connection:
-        from legacy_research.database.core import connect
+        from cortex.database.core import connect
 
         return connect(self.db_path, row_factory=sqlite3.Row)
 

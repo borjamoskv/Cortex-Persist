@@ -8,7 +8,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from legacy_research.cli.common import (
+from cortex.cli.common import (
     DEFAULT_DB,
     _run_async,
     _show_tip,
@@ -16,7 +16,7 @@ from legacy_research.cli.common import (
     console,
     get_engine,
 )
-from legacy_research.cli.memory_cmds import memory_cmds
+from cortex.cli.memory_cmds import memory_cmds
 
 
 @memory_cmds.command("trace-episode")
@@ -56,7 +56,7 @@ def trace_episode(query, fact_id, project, limit, db) -> None:
             with console.status("[noir.violet]Searching causal episodes...[/]"):
                 episodes = _run_async(engine.recall_episode(query, project, limit))
             if not episodes:
-                from legacy_research.cli.errors import err_empty_results
+                from cortex.cli.errors import err_empty_results
 
                 err_empty_results(
                     "episodios causales",

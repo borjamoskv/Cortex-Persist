@@ -52,7 +52,7 @@ class CortexPipelineBridge:
             return
 
         # 1. CortexEngine (memory, facts, ledger)
-        from legacy_research.engine import CortexEngine
+        from cortex.engine import CortexEngine
 
         self._engine = CortexEngine(self._db_path)
         await self._engine.init_db()

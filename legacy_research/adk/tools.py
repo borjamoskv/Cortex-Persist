@@ -31,7 +31,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Final
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 __all__ = [
     "ALL_TOOLS",

@@ -5,6 +5,7 @@ pub mod mtk;
 pub mod fixed60;
 pub mod causal;
 pub mod topology;
+pub mod shim;
 
 use pyo3::prelude::*;
 
@@ -22,6 +23,17 @@ fn cortex_core_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Add C5-REAL Cognitive Kernel classes
     m.add_class::<fixed60::Fixed60>()?;
     m.add_class::<topology::CognitiveState>()?;
+
+    // Add Shim bindings
+    m.add_function(wrap_pyfunction!(shim::verify_ephemeral_token, m)?)?;
+    m.add_function(wrap_pyfunction!(shim::ingest_reality_claim, m)?)?;
+    m.add_function(wrap_pyfunction!(shim::validate_metric_json, m)?)?;
+    m.add_function(wrap_pyfunction!(shim::validate_exergy_mutation, m)?)?;
+    m.add_function(wrap_pyfunction!(shim::init_c5_gate_1_schema, m)?)?;
+    m.add_function(wrap_pyfunction!(shim::verify_causal_assertion, m)?)?;
+    m.add_function(wrap_pyfunction!(shim::execute_mee_transfer, m)?)?;
+    m.add_function(wrap_pyfunction!(shim::calculate_entropy_b60, m)?)?;
+    m.add_class::<shim::ExergyRouter>()?;
     
     Ok(())
 }

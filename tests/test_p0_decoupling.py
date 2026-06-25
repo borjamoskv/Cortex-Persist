@@ -4,8 +4,8 @@ import aiosqlite
 
 import pytest
 
-from legacy_research.database.schema import ALL_SCHEMA
-from legacy_research.engine import CortexEngine
+from cortex.database.schema import ALL_SCHEMA
+from cortex.engine import CortexEngine
 
 
 

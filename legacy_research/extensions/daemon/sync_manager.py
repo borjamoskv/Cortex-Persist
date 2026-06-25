@@ -17,7 +17,7 @@ from legacy_research.extensions.sync import SyncResult, WritebackResult
 from legacy_research.extensions.sync.common import file_hash, load_sync_state
 
 if TYPE_CHECKING:
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
 
 logger = logging.getLogger("cortex.extensions.daemon.sync")

@@ -11,7 +11,7 @@ import sqlite3
 
 import pytest
 
-from legacy_research.engine.causality import (
+from cortex.engine.causality import (
 
 
     CONFIDENCE_LEVELS,
@@ -107,7 +107,7 @@ async def test_propagate_taint_single_child() -> None:
     conn = await aiosqlite.connect(":memory:")
     await conn.execute("PRAGMA journal_mode=WAL")
 
-    from legacy_research.engine.causality import AsyncCausalGraph
+    from cortex.engine.causality import AsyncCausalGraph
 
     graph = AsyncCausalGraph(conn)
     await graph.ensure_table()

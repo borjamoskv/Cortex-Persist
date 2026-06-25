@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from legacy_research.engine import CortexEngine as AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
 
 
 class FSEntropyOracle:

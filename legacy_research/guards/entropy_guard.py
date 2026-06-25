@@ -7,7 +7,7 @@ Applies thermodynamic constraints over generated changes.
 from dataclasses import dataclass
 from enum import Enum
 
-from legacy_research.engine.entropy_core import EntropyState, SystemRegime
+from cortex.engine.entropy_core import EntropyState, SystemRegime
 
 
 class GuardAction(str, Enum):

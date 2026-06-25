@@ -16,7 +16,7 @@ from pathlib import Path
 import click
 from rich.table import Table
 
-from legacy_research.cli.common import cli, console
+from cortex.cli.common import cli, console
 
 
 @click.group("agent")

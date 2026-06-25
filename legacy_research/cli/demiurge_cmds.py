@@ -10,7 +10,7 @@ import click
 from rich.panel import Panel
 from rich.syntax import Syntax
 
-from legacy_research.cli.common import _run_async, cli, console
+from cortex.cli.common import _run_async, cli, console
 from legacy_research.extensions.evolution.demiurge import DemiurgeCompiler
 
 

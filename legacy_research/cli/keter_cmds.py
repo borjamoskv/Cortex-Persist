@@ -10,8 +10,8 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from legacy_research.cli.common import _run_async, cli
-from legacy_research.engine.keter import KeterEngine
+from cortex.cli.common import _run_async, cli
+from cortex.engine.keter import KeterEngine
 from legacy_research.utils.errors import CortexError
 
 console = Console()

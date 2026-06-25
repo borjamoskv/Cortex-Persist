@@ -65,10 +65,10 @@ import time
 from contextlib import asynccontextmanager
 from typing import Any
 
-from legacy_research.database.messages import (
+from cortex.database.messages import (
     TransactionProxy as _TransactionProxy,
 )
-from legacy_research.database.messages import (
+from cortex.database.messages import (
     _Message,
     _Shutdown,
     _TxBegin,
@@ -139,7 +139,7 @@ class SqliteWriteWorker:
 
     def _create_connection(self) -> sqlite3.Connection:
         """Create and configure the single writer connection (runs in executor)."""
-        from legacy_research.database.core import connect_writer
+        from cortex.database.core import connect_writer
 
         conn = connect_writer(self._db_path)
         # Manual transaction control (autocommit mode)

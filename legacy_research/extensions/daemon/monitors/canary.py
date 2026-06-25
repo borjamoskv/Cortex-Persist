@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from legacy_research import config
-from legacy_research.database.core import connect_async
+from cortex.database.core import connect_async
 from legacy_research.extensions.daemon.models import SecurityAlert
 
 logger = logging.getLogger("moskv-daemon")

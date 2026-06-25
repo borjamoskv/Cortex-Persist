@@ -9,12 +9,12 @@ from __future__ import annotations
 
 import click
 
-from legacy_research.cli.common import (  # type: ignore[reportAttributeAccessIssue]
+from cortex.cli.common import (  # type: ignore[reportAttributeAccessIssue]
     DEFAULT_DB,
     cli,
     console,
 )
-from legacy_research.cli.health_dashboard import dashboard
+from cortex.cli.health_dashboard import dashboard
 
 
 def _resolve_db(db_path: str | None) -> str:

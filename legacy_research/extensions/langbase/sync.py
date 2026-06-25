@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING
 __all__ = ["enrich_from_langbase", "sync_to_langbase"]
 
 if TYPE_CHECKING:
-    from legacy_research.engine import CortexEngine as AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
     from legacy_research.extensions.langbase.client import LangbaseClient
 
 from legacy_research.extensions.langbase.client import LangbaseError

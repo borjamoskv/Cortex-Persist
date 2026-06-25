@@ -13,7 +13,7 @@ __all__ = ["execute_dedup", "find_duplicates"]
 
 if TYPE_CHECKING:
     from legacy_research.compaction.compactor import CompactionResult
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compaction.dedup")
 _LOG_FMT = "Compactor [%s] %s"

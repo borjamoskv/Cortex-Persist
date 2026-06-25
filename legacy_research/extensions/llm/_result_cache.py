@@ -35,7 +35,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
-from legacy_research.database.core import connect as db_connect
+from cortex.database.core import connect as db_connect
 
 logger = logging.getLogger("cortex.extensions.llm.cache")
 

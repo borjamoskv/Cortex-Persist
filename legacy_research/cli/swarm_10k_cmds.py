@@ -8,8 +8,8 @@ from pathlib import Path
 import click
 from rich.panel import Panel
 
-from legacy_research.cli.common import cli, console
-from legacy_research.engine.swarm_10k import SwarmCommander
+from cortex.cli.common import cli, console
+from cortex.engine.swarm_10k import SwarmCommander
 
 
 @cli.group()
@@ -81,7 +81,7 @@ def swarm_10k_status(db_path):
         commander = SwarmCommander(bus_path=p)
         await commander.initialize()
 
-        from legacy_research.engine.shared_bus import SovereignSharedBus
+        from cortex.engine.shared_bus import SovereignSharedBus
 
         if isinstance(commander.bus, SovereignSharedBus):
             metrics = commander.bus.metrics

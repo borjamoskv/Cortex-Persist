@@ -8,7 +8,7 @@ import sys
 import time
 
 from legacy_research.config import DB_PATH
-from legacy_research.database.core import connect
+from cortex.database.core import connect
 from legacy_research.extensions.signals.bus import SignalBus
 
 # Sovereign Memory & Execution Imports

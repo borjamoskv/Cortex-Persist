@@ -42,7 +42,7 @@ from __future__ import annotations
 
 import logging
 
-from legacy_research.database.core import connect as db_connect
+from cortex.database.core import connect as db_connect
 
 __all__ = ["emit_fact_stored"]
 

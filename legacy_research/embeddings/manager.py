@@ -175,8 +175,8 @@ class EmbeddingManager:
         This method is called by the EnrichmentWorker to finalize a fact's
         entry into the Double-Plane architecture.
         """
-        from legacy_research.engine.embedding_engine import embed_fact_async
-        from legacy_research.engine.metadata_engine import MetadataEngine
+        from cortex.engine.embedding_engine import embed_fact_async
+        from cortex.engine.metadata_engine import MetadataEngine
 
         async with self.engine.session() as conn:
             # 1. Dense & Specular Embeddings

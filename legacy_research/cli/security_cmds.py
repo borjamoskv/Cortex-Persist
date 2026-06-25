@@ -16,7 +16,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from legacy_research.cli.common import cli
+from cortex.cli.common import cli
 
 logger = logging.getLogger("cortex.cli.security")
 

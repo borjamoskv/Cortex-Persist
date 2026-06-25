@@ -10,7 +10,7 @@ import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 from legacy_research.extensions.immune.filters.base import Verdict
 from legacy_research.extensions.immune.membrane import ImmuneMembrane
 from legacy_research.ledger import ImmutableLedger

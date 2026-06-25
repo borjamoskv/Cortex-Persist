@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from legacy_research.database.connection_guard import (
+from cortex.database.connection_guard import (
 
 
     ConnectionViolation,
@@ -98,7 +98,7 @@ class TestScanFileLines:
         py_file = tmp_path / "clean.py"
         py_file.write_text(
             textwrap.dedent("""\
-            from legacy_research.database.core import connect
+            from cortex.database.core import connect
             conn = connect()
         """)
         )

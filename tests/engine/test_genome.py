@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from legacy_research.engine.genome import StrategyGenome, GenomeMutator, MutationType
+from cortex.engine.genome import StrategyGenome, GenomeMutator, MutationType
 from legacy_research.isa.builder import dispatch, noop, cond, Predicate
 
 

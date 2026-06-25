@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 
-from legacy_research.api.deps import get_async_engine, get_engine
+from cortex.api.deps import get_async_engine, get_engine
 from legacy_research.auth.models import AuthResult
 from legacy_research.routes import agents as agents_router
 from legacy_research.routes import graph as graph_router

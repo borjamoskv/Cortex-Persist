@@ -27,11 +27,11 @@ __all__ = ["ConnectionViolation", "scan_raw_connects"]
 _WHITELISTED_MODULES: frozenset[str] = frozenset(
     {
         # Core database layer
-        "legacy_research/database/core.py",
-        "legacy_research/database/pool.py",
-        "legacy_research/database/writer.py",
+        "cortex/database/core.py",
+        "cortex/database/pool.py",
+        "cortex/database/writer.py",
         "cortex/engine/sync_compat.py",
-        "legacy_research/database/connection_guard.py",
+        "cortex/database/connection_guard.py",
         # Memory subsystems needing raw/sync access
         "cortex/memory/sqlite_vec_store.py",  # Low-level vec extension needs raw connect
         "cortex/memory/hdc/store.py",  # HDC Specular Memory needs raw access

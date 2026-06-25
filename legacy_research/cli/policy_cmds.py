@@ -9,7 +9,7 @@ from __future__ import annotations
 import click
 from rich.table import Table
 
-from legacy_research.cli.common import (
+from cortex.cli.common import (
     DEFAULT_DB,
     _run_async,
     close_engine_sync,

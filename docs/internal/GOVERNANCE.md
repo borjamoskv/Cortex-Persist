@@ -38,7 +38,7 @@ We actively seek co-maintainers for:
 
 | Area | Modules | Skills Needed |
 |:---|:---|:---|
-| **Distributed Backends** | `cortex/storage/`, `legacy_research/database/` | PostgreSQL, Qdrant, Redis |
+| **Distributed Backends** | `cortex/storage/`, `cortex/database/` | PostgreSQL, Qdrant, Redis |
 | **SDKs** | `sdks/` | TypeScript, Go |
 | **Kubernetes** | `infra/` | Helm, K8s operators |
 | **Security** | `cortex/auth/`, `cortex/crypto/` | Cryptography, RBAC |

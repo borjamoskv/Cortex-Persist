@@ -144,8 +144,13 @@ cortex-adk = "cortex.adk.runner:main"
 cortex-mcp = "cortex.mcp.server:run_server"
 
 [build-system]
-requires = ["setuptools>=68.0"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "cortex_core_rs"
+manifest-path = "cortex_core_rs/Cargo.toml"
 
 [tool.setuptools.packages.find]
 include = ["cortex", "cortex.*"]

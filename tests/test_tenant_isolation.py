@@ -5,7 +5,7 @@ import tempfile
 
 import pytest
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 from legacy_research.extensions.security.tenant import tenant_id_var
 
 

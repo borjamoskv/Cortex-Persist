@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pathlib import Path
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 from legacy_research.cache.redis_l1 import RedisL1Cache
 from legacy_research.search.models import SearchResult
 
@@ -68,7 +68,7 @@ async def engine(tmp_path: Path):
     e = CortexEngine(db_path=db, auto_embed=False)
     await e.init_db()
 
-    from legacy_research.engine.causality import AsyncCausalGraph
+    from cortex.engine.causality import AsyncCausalGraph
 
     async with e.session() as conn:
         cg = AsyncCausalGraph(conn)

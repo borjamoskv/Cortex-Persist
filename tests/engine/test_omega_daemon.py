@@ -1,6 +1,6 @@
 import pytest
 from decimal import Decimal
-from legacy_research.engine.omega_daemon import ExergyGuard
+from cortex.engine.omega_daemon import ExergyGuard
 
 
 def test_exergy_guard_success():
@@ -23,7 +23,7 @@ def test_exergy_guard_floor():
 
 @pytest.mark.asyncio
 async def test_omega_kernel_hibernation():
-    from legacy_research.engine.omega_daemon import OmegaKernel
+    from cortex.engine.omega_daemon import OmegaKernel
 
     kernel = OmegaKernel(tick_rate_seconds=1)
 

@@ -224,7 +224,7 @@ class ErrorGhostPipeline:
     ) -> int | None:
         """Store ghost via CortexEngine (async path)."""
         try:
-            from legacy_research.engine import CortexEngine
+            from cortex.engine import CortexEngine
 
             engine = CortexEngine()
             fact_id = await engine.store(

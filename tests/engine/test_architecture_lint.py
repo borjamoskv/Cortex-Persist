@@ -7,7 +7,7 @@ def test_no_raw_sqlite_connect():
     Architecture Lint Test.
     Ensures that `sqlite3.connect` and `aiosqlite.connect` are never used directly
     anywhere in the codebase except within the single Sovereign Connection Factory
-    (`legacy_research/database/core.py`).
+    (`cortex/database/core.py`).
     """
     repo_root = Path(__file__).parent.parent.parent
     cortex_dir = repo_root / "cortex"

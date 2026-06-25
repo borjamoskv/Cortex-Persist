@@ -56,7 +56,7 @@ def sources(docs: list[dict]) -> list[dict]:
 @pytest.fixture(scope="module")
 def cortex_db() -> sqlite3.Connection:
     """Create in-memory SQLite DB with CORTEX schema for SQL validation."""
-    from legacy_research.database.schema import ALL_SCHEMA
+    from cortex.database.schema import ALL_SCHEMA
 
     conn = sqlite3.connect(":memory:")
     for stmt in ALL_SCHEMA:

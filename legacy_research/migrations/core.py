@@ -54,7 +54,7 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from legacy_research.database.schema import get_all_schema
+from cortex.database.schema import get_all_schema
 from legacy_research.migrations.registry import MIGRATIONS
 
 __all__ = [

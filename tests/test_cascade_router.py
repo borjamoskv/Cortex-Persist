@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from legacy_research.engine.cascade_router import CascadeRouter
+from cortex.engine.cascade_router import CascadeRouter
 
 def test_select_engine():
     router = CascadeRouter()

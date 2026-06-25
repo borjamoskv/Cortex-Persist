@@ -22,12 +22,12 @@ if str(_REPO_ROOT) not in sys.path:
 if str(_REPO_ROOT / "cortex-core") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "cortex-core"))
 
-from legacy_research.engine.smte.parser import AgentASTParser
-from legacy_research.engine.smte.analyzer import calculate_ast_complexity, estimate_dead_code_ratio
-from legacy_research.engine.smte.exergy import ExergyMonitor, evaluate_module_exergy
-from legacy_research.engine.smte.ouroboros_compiler import OuroborosCompiler
-from legacy_research.engine.smte.weismann_barrier import enforce_weismann_barrier
-from legacy_research.engine.smte.llm_mutator import llm_driven_mutator
+from cortex.engine.smte.parser import AgentASTParser
+from cortex.engine.smte.analyzer import calculate_ast_complexity, estimate_dead_code_ratio
+from cortex.engine.smte.exergy import ExergyMonitor, evaluate_module_exergy
+from cortex.engine.smte.ouroboros_compiler import OuroborosCompiler
+from cortex.engine.smte.weismann_barrier import enforce_weismann_barrier
+from cortex.engine.smte.llm_mutator import llm_driven_mutator
 
 
 # Sample code for testing AST parsing and analysis
@@ -164,7 +164,7 @@ class TestExergyMonitor:
         assert metrics["limerence_penalty"] == 25.0
 
     def test_circuit_breaker_tripped(self):
-        from legacy_research.engine.smte.exergy import CircuitBreakerTripped
+        from cortex.engine.smte.exergy import CircuitBreakerTripped
 
         monitor = ExergyMonitor("test_breaker", circuit_breaker_threshold=20.0)
         # 5.0 / 2.0 * 10.0 = 25.0 > 20.0

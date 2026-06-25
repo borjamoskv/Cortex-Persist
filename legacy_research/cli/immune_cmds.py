@@ -3,7 +3,7 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from legacy_research.cli.common import cli, get_engine
+from cortex.cli.common import cli, get_engine
 from legacy_research.extensions.immune.breaker import (
     RetrievalState,
     evaluate_circuit_breaker,

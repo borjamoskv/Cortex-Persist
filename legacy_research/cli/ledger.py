@@ -7,7 +7,7 @@ import click
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from rich.console import Console
 
-from legacy_research.cli.common import DEFAULT_DB, cli
+from cortex.cli.common import DEFAULT_DB, cli
 from legacy_research.ledger.public_export import (
     ExportAuthority,
     public_key_record,

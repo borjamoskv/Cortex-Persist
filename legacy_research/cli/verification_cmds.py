@@ -5,7 +5,7 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-from legacy_research.cli.common import cli
+from cortex.cli.common import cli
 from legacy_research.verification.verifier import SovereignVerifier
 
 console = Console()

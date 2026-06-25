@@ -8,8 +8,8 @@ from __future__ import annotations
 import pytest
 from click.testing import CliRunner
 
-from legacy_research.cli import cli
-from legacy_research.engine import CortexEngine
+from cortex.cli import cli
+from cortex.engine import CortexEngine
 
 
 @pytest.fixture

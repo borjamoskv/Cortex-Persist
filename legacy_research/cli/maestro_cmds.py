@@ -13,7 +13,7 @@ import asyncio
 import click
 from typing import Any
 
-from legacy_research.cli.common import console, get_engine
+from cortex.cli.common import console, get_engine
 from legacy_research.extensions.ui_control.maestro import MaestroUI
 from legacy_research.extensions.ui_control.models import AppTarget
 

@@ -396,7 +396,7 @@ class GenesisEngine:
         """
         import os
 
-        from legacy_research.engine import CortexEngine
+        from cortex.engine import CortexEngine
 
         if os.environ.get("CORTEX_TESTING") == "1":
             logger.info("📦 [TESTING] Skipping persistence to CORTEX ledger.")

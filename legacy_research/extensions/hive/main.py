@@ -67,7 +67,7 @@ def get_hive_graph(
     Nodes are facts, links are semantic similarities.
     """
     from legacy_research.config import DB_PATH
-    from legacy_research.database.core import connect
+    from cortex.database.core import connect
 
     conn = connect(DB_PATH, row_factory=sqlite3.Row)
 

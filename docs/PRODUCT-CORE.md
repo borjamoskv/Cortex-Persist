@@ -32,7 +32,7 @@ These modules form the public surface of `cortex-persist`. Their APIs are covere
 | **Verification** | `cortex/verification/` | Ledger integrity verification. |
 | **Audit** | `legacy_research/audit/` | Audit pack generation and compliance exports. |
 | **CLI** | `cortex/cli/` | Command-line interface (`cortex` entry point). |
-| **Database** | `legacy_research/database/` | SQLite storage layer, schema, migrations. |
+| **Database** | `cortex/database/` | SQLite storage layer, schema, migrations. |
 | **Embeddings** | `cortex/embeddings/` | ONNX-based local embedding generation. |
 | **Guards** | `legacy_research/guards/` | Write-path admission guards (thermodynamic, contradiction). |
 | **Auth** | `cortex/auth/` | RBAC engine and tenant isolation. |

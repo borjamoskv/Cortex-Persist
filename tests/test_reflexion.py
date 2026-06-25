@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import pytest
 
-from legacy_research.engine.reflexion import (
+from cortex.engine.reflexion import (
     DiagnosisStrategy,
     Reflection,
     ReflexionConfig,

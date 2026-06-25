@@ -2,7 +2,7 @@
 
 import time
 
-from legacy_research.engine.context_cache import ContextCacheManager, EvictionPolicy
+from cortex.engine.context_cache import ContextCacheManager, EvictionPolicy
 
 
 class TestContextCacheManager:

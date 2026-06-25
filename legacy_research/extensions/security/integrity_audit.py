@@ -47,7 +47,7 @@ _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
 from legacy_research import config
-from legacy_research.database.core import connect_async_ctx
+from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger("cortex.extensions.security.integrity_audit")
 

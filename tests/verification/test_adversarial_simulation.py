@@ -43,7 +43,7 @@ def mock_omega_auditor(monkeypatch):
 @pytest.fixture
 async def engine(tmp_path: Path):
     """Initialize a clean test instance of the CortexEngine."""
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
     os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
     os.environ["CORTEX_STRICT_GUARDS"] = "1"

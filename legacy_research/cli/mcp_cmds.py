@@ -10,7 +10,7 @@ import logging
 
 import click
 
-from legacy_research.cli.common import cli, console
+from cortex.cli.common import cli, console
 
 logger = logging.getLogger("cortex.cli.mcp")
 

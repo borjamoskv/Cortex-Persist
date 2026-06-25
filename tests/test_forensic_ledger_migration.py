@@ -7,7 +7,7 @@ from __future__ import annotations
 import sqlite3
 
 
-from legacy_research.database.schema import SCHEMA_VERSION
+from cortex.database.schema import SCHEMA_VERSION
 from legacy_research.migrations import get_current_version, run_migrations
 from legacy_research.migrations.registry import MIGRATIONS
 

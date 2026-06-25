@@ -53,7 +53,7 @@ def scrape(
     persist: bool,
 ):
     """Extract content from a single URL."""
-    from legacy_research.cli.common import _run_async
+    from cortex.cli.common import _run_async
     from legacy_research.extensions.scraper.engine import ScraperEngine
     from legacy_research.extensions.scraper.models import ExtractionStrategy, ScrapeRequest
 
@@ -138,7 +138,7 @@ def batch(
     output: str | None,
 ):
     """Batch extract URLs from a newline-delimited file."""
-    from legacy_research.cli.common import _run_async
+    from cortex.cli.common import _run_async
     from legacy_research.extensions.scraper.engine import ScraperEngine
     from legacy_research.extensions.scraper.models import ExtractionStrategy
 
@@ -201,7 +201,7 @@ def batch(
 @click.option("--output", "-o", type=click.Path(), default=None, help="Output file for URLs.")
 def map_site(url: str, depth: int, output: str | None):
     """Discover URLs from a website (sitemap)."""
-    from legacy_research.cli.common import _run_async
+    from cortex.cli.common import _run_async
     from legacy_research.extensions.scraper.engine import ScraperEngine
 
     console.print(
@@ -229,7 +229,7 @@ def map_site(url: str, depth: int, output: str | None):
 def _persist_to_cortex(result) -> None:
     """Persist a ScrapeResult to the CORTEX ledger."""
     try:
-        from legacy_research.cli.common import _run_async, get_engine
+        from cortex.cli.common import _run_async, get_engine
 
         engine = get_engine()
         _run_async(

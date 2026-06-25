@@ -198,7 +198,7 @@ def _apply_pragmas_sync(
         conn.execute(f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT}")
 
     # [MTK] C5-REAL Physical Boundary
-    from legacy_research.engine.mtk_sqlite_authorizer import install_mtk_authorizer
+    from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer
     install_mtk_authorizer(conn)
 
 
@@ -207,7 +207,7 @@ def _apply_pragmas_sync(
 class SovereignConnection(sqlite3.Connection):
     """Hardened connection class that prevents removing the MTK authorizer."""
     def set_authorizer(self, authorizer_callback: Any) -> None:
-        from legacy_research.engine.mtk_sqlite_authorizer import mtk_authorizer_callback
+        from cortex.engine.mtk_sqlite_authorizer import mtk_authorizer_callback
         if authorizer_callback is not mtk_authorizer_callback:
             raise sqlite3.DatabaseError("MTK-LOCK: Cannot override sovereign authorizer callback.")
         super().set_authorizer(authorizer_callback)
@@ -378,7 +378,7 @@ async def apply_pragmas_async(conn: aiosqlite.Connection) -> None:
     
     # [MTK] C5-REAL Physical Boundary
     def _install_authorizer_sync(raw_conn: sqlite3.Connection):
-        from legacy_research.engine.mtk_sqlite_authorizer import install_mtk_authorizer
+        from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer
         install_mtk_authorizer(raw_conn)
         
     await conn._execute(_install_authorizer_sync, conn._conn)

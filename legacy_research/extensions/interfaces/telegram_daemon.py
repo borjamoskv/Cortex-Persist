@@ -11,7 +11,7 @@ import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
 
-from legacy_research.cli.common import get_engine
+from cortex.cli.common import get_engine
 
 # Configure logging (C5-REAL Zero Noise)
 # setup_cortex_logging()

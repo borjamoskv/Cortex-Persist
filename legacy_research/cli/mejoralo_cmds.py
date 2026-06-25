@@ -7,7 +7,7 @@ import time
 import click
 from rich.table import Table
 
-from legacy_research.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 
 __all__ = [
     "mejoralo",

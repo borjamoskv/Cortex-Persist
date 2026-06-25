@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Any, cast
 
 from pydantic import ValidationError
 
-from legacy_research.engine.models import Fact, row_to_fact
-from legacy_research.engine.store_validators import validate_content
+from cortex.engine.models import Fact, row_to_fact
+from cortex.engine.store_validators import validate_content
 from legacy_research.utils.canonical import now_iso
 
 if TYPE_CHECKING:
@@ -195,7 +195,7 @@ class FactManager:
         except (OSError, RuntimeError, ValueError) as e:
             logger.warning("V8 Ingestion check failed: %s", e)
 
-        from legacy_research.engine.store_mixin import StoreMixin
+        from cortex.engine.store_mixin import StoreMixin
 
         return await StoreMixin._store_impl(
             cast("StoreMixin", self.engine),

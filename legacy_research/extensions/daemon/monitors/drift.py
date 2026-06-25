@@ -132,7 +132,7 @@ class DriftMonitorDaemon:
             return None
 
         try:
-            from legacy_research.database.core import connect as db_connect
+            from cortex.database.core import connect as db_connect
 
             conn = db_connect(str(self.vectors_db_path), timeout=10)
             conn.execute("PRAGMA busy_timeout=10000")

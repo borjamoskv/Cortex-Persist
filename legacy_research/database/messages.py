@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 from legacy_research.utils.result import Result
 
 if TYPE_CHECKING:
-    from legacy_research.database.writer import SqliteWriteWorker
+    from cortex.database.writer import SqliteWriteWorker
 
 __all__ = [
     "TransactionProxy",

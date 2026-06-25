@@ -21,9 +21,9 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
-from legacy_research.api.deps import get_async_engine
+from cortex.api.deps import get_async_engine
 from legacy_research.auth import AuthResult, require_permission
-from legacy_research.engine import CortexEngine as AsyncCortexEngine
+from cortex.engine import CortexEngine as AsyncCortexEngine
 from legacy_research.extensions.llm._presets import list_providers, provider_inventory
 from legacy_research.extensions.llm.manager import LLMManager
 from legacy_research.extensions.llm.provider import LLMProvider

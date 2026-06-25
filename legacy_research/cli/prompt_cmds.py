@@ -23,7 +23,7 @@ import click
 from rich.panel import Panel
 from rich.syntax import Syntax
 
-from legacy_research.cli.common import cli, console
+from cortex.cli.common import cli, console
 
 __all__ = ["prompt"]
 
@@ -104,7 +104,7 @@ def _count_cli_commands(root: Path) -> int:
 def _count_secret_patterns() -> int:
     """Count patterns in the Privacy Shield classifier."""
     try:
-        from legacy_research.storage.classifier import SECRET_PATTERNS
+        from cortex.storage.classifier import SECRET_PATTERNS
 
         return len(SECRET_PATTERNS)
     except ImportError:

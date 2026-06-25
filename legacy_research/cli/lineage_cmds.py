@@ -12,9 +12,9 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.tree import Tree
 
-from legacy_research.cli.common import DEFAULT_DB, cli
+from cortex.cli.common import DEFAULT_DB, cli
 from legacy_research.core.lineage import LineageNode, LineageVerifier
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 console = Console()
 

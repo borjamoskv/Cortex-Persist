@@ -10,8 +10,8 @@ import shutil
 import pytest
 from pathlib import Path
 
-from legacy_research.storage import StorageMode
-from legacy_research.storage.router import TenantRouter, get_router
+from cortex.storage import StorageMode
+from cortex.storage.router import TenantRouter, get_router
 
 
 @pytest.fixture
@@ -84,7 +84,7 @@ async def test_router_eviction(clean_shard_dir, monkeypatch) -> None:
     monkeypatch.setenv("CORTEX_STORAGE", "local_sharded")
     
     # Temporarily set max backends to a very small number for testing eviction
-    import legacy_research.storage.router
+    import cortex.storage.router
     monkeypatch.setattr(cortex.storage.router, "_MAX_BACKENDS", 2)
     
     router = TenantRouter()

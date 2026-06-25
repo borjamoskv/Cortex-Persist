@@ -71,7 +71,7 @@ class AskBody(BaseModel):
 
 def _get_router(request: Request) -> GatewayRouter:
     """Build a GatewayRouter from app state for each request."""
-    import legacy_research.api.state as api_state
+    import cortex.api.state as api_state
 
     engine = getattr(api_state, "async_engine", None) or getattr(api_state, "engine", None)
     bus = getattr(api_state, "notification_bus", None)

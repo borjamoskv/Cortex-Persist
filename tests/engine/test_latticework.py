@@ -7,12 +7,12 @@ import tempfile
 import pytest
 import aiosqlite
 
-from legacy_research.engine.latticework_store import LatticeworkStore
-from legacy_research.engine.latticework_daemon import LatticeworkDaemon
-from legacy_research.engine.cortex import Cortex
+from cortex.engine.latticework_store import LatticeworkStore
+from cortex.engine.latticework_daemon import LatticeworkDaemon
+from cortex.engine.cortex import Cortex
 from legacy_research.ledger.execution_trace import ExecutionTraceLedger
 from legacy_research.ledger.causal_graph import CausalGraph
-from legacy_research.engine.causal_scheduler import CausalScheduler
+from cortex.engine.causal_scheduler import CausalScheduler
 
 
 

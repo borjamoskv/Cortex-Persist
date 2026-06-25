@@ -6,8 +6,8 @@ from pathlib import Path
 import click
 from rich.panel import Panel
 from rich.table import Table
-from legacy_research.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
-from legacy_research.cli.errors import err_empty_results, err_validation, handle_cli_error
+from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
+from cortex.cli.errors import err_empty_results, err_validation, handle_cli_error
 from legacy_research.extensions.launchpad.main import MissionOrchestrator
 
 

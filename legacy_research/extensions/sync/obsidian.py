@@ -21,7 +21,7 @@ from legacy_research.memory.temporal import now_iso
 __all__ = ["export_obsidian"]
 
 if TYPE_CHECKING:
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.sync.obsidian")
 

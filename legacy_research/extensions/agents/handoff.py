@@ -29,7 +29,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.handoff")
 

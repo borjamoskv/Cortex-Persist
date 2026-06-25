@@ -43,7 +43,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from legacy_research import config
-from legacy_research.database.core import connect_async_ctx
+from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger("cortex.api.demo")
 router = APIRouter(prefix="/v0/demo", tags=["demo"])
@@ -73,7 +73,7 @@ class AuditReportResponse(BaseModel):
 
 # Helper to initialize demo tables
 async def ensure_demo_tables(conn: aiosqlite.Connection):
-    from legacy_research.engine.mtk_sqlite_authorizer import mtk_active_token
+    from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
     token_id = mtk_active_token.set("mtk_auth_demo")
     try:
         await conn.execute("""
@@ -103,7 +103,7 @@ async def ensure_demo_tables(conn: aiosqlite.Connection):
 @router.post("/init")
 async def init_demo_events() -> dict[str, Any]:
     """Generates 10,000 demo events sequentially, building a cryptographic hash chain."""
-    from legacy_research.engine.mtk_sqlite_authorizer import mtk_active_token
+    from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
     token_id = mtk_active_token.set("mtk_auth_demo")
     try:
         async with connect_async_ctx(config.DB_PATH) as conn:
@@ -374,7 +374,7 @@ async def run_cryptographic_audit() -> AuditReportResponse:
 @router.post("/tamper/{event_id}")
 async def tamper_event(event_id: int) -> dict[str, Any]:
     """Simulates an adversarial attack by altering an event's payload in SQLite."""
-    from legacy_research.engine.mtk_sqlite_authorizer import mtk_active_token
+    from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
     token_id = mtk_active_token.set("mtk_auth_demo")
     try:
         async with connect_async_ctx(config.DB_PATH) as conn:
@@ -396,7 +396,7 @@ async def tamper_event(event_id: int) -> dict[str, Any]:
 @router.post("/repair")
 async def repair_ledger() -> dict[str, Any]:
     """Repairs tampered events by recomputing the cryptographic hash chain sequentially."""
-    from legacy_research.engine.mtk_sqlite_authorizer import mtk_active_token
+    from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
     token_id = mtk_active_token.set("mtk_auth_demo")
     try:
         async with connect_async_ctx(config.DB_PATH) as conn:

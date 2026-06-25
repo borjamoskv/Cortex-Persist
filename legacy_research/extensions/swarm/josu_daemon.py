@@ -272,7 +272,7 @@ class JosuProactiveDaemon:
                     )
 
                 # Import Pulse lazily to avoid circular deps
-                from legacy_research.engine.metabolism import Metabolism
+                from cortex.engine.metabolism import Metabolism
 
                 metabolism = Metabolism(flatline_threshold=3.0)
 

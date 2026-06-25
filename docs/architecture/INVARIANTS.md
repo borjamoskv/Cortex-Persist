@@ -75,7 +75,7 @@ drift_velocity          = integrity_failures / ingested_total  (if > 0 → inves
 
 ## Mutation Policy
 
-Any PR that touches `legacy_research/database/`, `cortex/migrations/`, `cortex/engine/`, or `cortex/memory/`
+Any PR that touches `cortex/database/`, `cortex/migrations/`, `cortex/engine/`, or `cortex/memory/`
 **must** include:
 1. A migration that passes `verify_db_invariants.py --strict`.
 2. Regression coverage proving the new invariant still holds post-mutation.

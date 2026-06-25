@@ -10,7 +10,7 @@ import asyncio
 import logging
 from typing import Any
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 from legacy_research.extensions.llm.manager import LLMManager
 
 logger = logging.getLogger("cortex.extensions.evolution.demiurge")
@@ -21,7 +21,7 @@ class DemiurgeCompiler:
 
     def __init__(self, engine: CortexEngine | None = None):
         if engine is None:
-            from legacy_research.cli.common import get_engine
+            from cortex.cli.common import get_engine
 
             self.engine = get_engine()
         else:

@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import pytest
 
-from legacy_research.engine.meta_arbiter import (
+from cortex.engine.meta_arbiter import (
     ArbiterVerdict,
     ConflictPair,
     LayerID,

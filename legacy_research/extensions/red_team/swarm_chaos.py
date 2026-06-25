@@ -6,7 +6,7 @@ import re
 from collections.abc import Callable
 from typing import Any
 
-from legacy_research.engine.nemesis import NemesisProtocol
+from cortex.engine.nemesis import NemesisProtocol
 from legacy_research.extensions.immune.falsification import EvolutionaryFalsifier
 from legacy_research.extensions.red_team.discovery import DiscoveryProvider
 

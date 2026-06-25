@@ -18,8 +18,8 @@ from legacy_research.agents.contracts import TaskCompletedPayload, TaskFailedPay
 from legacy_research.agents.manifest import AgentManifest
 from legacy_research.agents.message_schema import AgentMessage, MessageKind
 from legacy_research.agents.tools import ToolRegistry
-from legacy_research.engine.sota_vector_engine import SOTAVectorEngine
-from legacy_research.engine.semantic_collapse import kolmogorov_approx
+from cortex.engine.sota_vector_engine import SOTAVectorEngine
+from cortex.engine.semantic_collapse import kolmogorov_approx
 
 logger = logging.getLogger(__name__)
 

@@ -176,9 +176,9 @@ class ResourceMgrMixin:
         self.sovereignty_runtime = None
         if self._event_bus:
             try:
-                from legacy_research.engine.auth_gateway import QuorumGateway
-                from legacy_research.engine.causal.anomaly_bridge import AnomalyBridge
-                from legacy_research.engine.event_sovereignty import EventSovereigntyRuntime
+                from cortex.engine.auth_gateway import QuorumGateway
+                from cortex.engine.causal.anomaly_bridge import AnomalyBridge
+                from cortex.engine.event_sovereignty import EventSovereigntyRuntime
 
                 auth_gw = QuorumGateway(self._shared_engine)
                 # ensure table is created, though we should probably run this asynchronously,
@@ -298,7 +298,7 @@ class ResourceMgrMixin:
             _sqlite3_bft_orig.connect = _bft_sqlite_connect
             # -------------------------------
 
-            from legacy_research.database.core import connect
+            from cortex.database.core import connect
             from legacy_research.extensions.timing import TimingTracker
 
             self.timing_conn = connect(file_config.get("db_path", str(CORTEX_DB)))

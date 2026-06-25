@@ -1,5 +1,5 @@
 import pytest
-from legacy_research.engine.immuno_router import MHCRouter, MicroAgent
+from cortex.engine.immuno_router import MHCRouter, MicroAgent
 
 @pytest.fixture
 def mhc_mesh():

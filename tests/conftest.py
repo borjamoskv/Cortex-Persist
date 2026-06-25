@@ -59,6 +59,7 @@ for extra_path in (
     _REPO_ROOT / "cortex-core",
     _REPO_ROOT / "scripts" / "sortu",
     _REPO_ROOT / "legacy_research" / "extensions",
+    _REPO_ROOT / "ANTI_GRAVITY" / "02_SYSTEMS",
     _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "memory",
     _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "memory" / "lab",
     _REPO_ROOT / "ANTI_GRAVITY" / "01_ACTIVE" / "memory" / "sortu",
@@ -85,9 +86,11 @@ def mock_local_embedder(monkeypatch):
                 return [0.0] * 384
             return [[0.0] * 384 for _ in content]
 
-    from legacy_research.engine import CortexEngine
-
-    monkeypatch.setattr(CortexEngine, "_get_embedder", lambda self: DummyEmbedder())
+    try:
+        from cortex.engine import CortexEngine
+        monkeypatch.setattr(CortexEngine, "_get_embedder", lambda self: DummyEmbedder())
+    except ImportError:
+        pass
 
 
 @pytest.fixture(autouse=True)

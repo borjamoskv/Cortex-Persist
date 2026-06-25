@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from click.testing import CliRunner
 
-from legacy_research.cli import cli
+from cortex.cli import cli
 
 
 def test_github_group_is_registered_on_root_cli() -> None:

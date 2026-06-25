@@ -64,7 +64,7 @@ def _mock_transport(routes: dict[str, list]) -> httpx.MockTransport:
 @pytest.fixture
 async def engine(tmp_path: Path):
     """Create a CortexEngine with a temp database."""
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
     db = str(tmp_path / "test_gh_bridge.db")
     e = CortexEngine(db_path=db, auto_embed=False)

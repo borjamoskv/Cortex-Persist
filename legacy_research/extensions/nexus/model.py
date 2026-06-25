@@ -9,7 +9,7 @@ import os
 import time
 from typing import Any, Final
 
-from legacy_research.database.tlru_cache import TLRUCache
+from cortex.database.tlru_cache import TLRUCache
 from legacy_research.extensions.nexus.db import NexusDB
 from legacy_research.extensions.nexus.types import DomainOrigin, IntentType, WorldMutation
 

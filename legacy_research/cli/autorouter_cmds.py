@@ -20,7 +20,7 @@ from pathlib import Path
 import click
 from rich.console import Console
 
-from legacy_research.cli.errors import err_execution_failed, err_platform_unsupported, err_skill_not_found
+from cortex.cli.errors import err_execution_failed, err_platform_unsupported, err_skill_not_found
 from legacy_research.core.paths import CORTEX_DIR
 
 __all__ = [

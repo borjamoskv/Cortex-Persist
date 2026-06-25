@@ -99,7 +99,7 @@ def get_gate(...) -> SovereignGate:
 ### P1: Single Writer Queue Bottleneck
 
 #### Issue SPOF-006
-- **File:** `legacy_research/database/writer.py`
+- **File:** `cortex/database/writer.py`
 - **Line:** 71-403
 - **Severity:** P1
 - **Description:** `SqliteWriteWorker` uses a single asyncio.Queue (maxsize=10,000) with one writer task. All writes serialize through this single point. If the writer task crashes, the entire write path fails with no automatic recovery.
@@ -110,7 +110,7 @@ self._task: asyncio.Task[None] | None = None  # Single task
 - **Fix:** Implement health checks and automatic task restart; consider sharded write workers for horizontal scaling.
 
 #### Issue SPOF-007
-- **File:** `legacy_research/database/pool.py`
+- **File:** `cortex/database/pool.py`
 - **Line:** 23-181
 - **Severity:** P1
 - **Description:** Single connection pool with fixed max_connections. Under high load, semaphore exhaustion causes cascading failures.
@@ -248,7 +248,7 @@ await asyncio.gather(*tasks, return_exceptions=True)  # Exceptions returned but 
 - **Fix:** Ensure all error information is propagated to caller.
 
 #### Issue ERR-008
-- **File:** `legacy_research/database/writer.py`
+- **File:** `cortex/database/writer.py`
 - **Line:** 297-299
 - **Severity:** P2
 - **Description:** Writer loop catches exceptions but continues processing. A poison message could cause infinite error loop.
@@ -293,7 +293,7 @@ from legacy_research.graph import process_fact_graph  # Lazy import indicates cy
 - **Description:** Circular dependency between auth and API deps. Lazy import in `require_consensus()` (line 422) indicates design issue.
 ```python
 # Line 422
-from legacy_research.api.deps import get_async_engine  # Lazy import inside function
+from cortex.api.deps import get_async_engine  # Lazy import inside function
 ```
 - **Fix:** Move `get_async_engine` to shared module; use protocol/abstract base class.
 
@@ -412,7 +412,7 @@ fetch_limit = top_k * 2  # Can be large if top_k is large
 ### P1: Lock Contention
 
 #### Issue SCALE-006
-- **File:** `legacy_research/database/pool.py`
+- **File:** `cortex/database/pool.py`
 - **Line:** 51, 128
 - **Severity:** P1
 - **Description:** Lock acquired during connection release (`self._semaphore.release()` happens in finally, but lock during put). High contention under load.
@@ -472,7 +472,7 @@ while True:
 ### P2: Unbounded Queues
 
 #### Issue SCALE-011
-- **File:** `legacy_research/database/cache.py`
+- **File:** `cortex/database/cache.py`
 - **Line:** 41, 87-98
 - **Severity:** P2
 - **Description:** Subscriber queues (`list[asyncio.Queue]`) have no size limit. Slow subscriber can cause memory exhaustion.
@@ -572,7 +572,7 @@ overflowed = self._l1.add_event(event)  # ...but this fails, inconsistency
 ### P2: Missing Metrics
 
 #### Issue OBS-001
-- **File:** `legacy_research/database/writer.py`
+- **File:** `cortex/database/writer.py`
 - **Line:** 91-95
 - **Severity:** P2
 - **Description:** Only basic metrics tracked. No queue depth metric, no error rate metric.

@@ -9,8 +9,8 @@ from typing import Any
 import click
 from rich.panel import Panel
 
-from legacy_research.cli.common import DEFAULT_DB, cli, console, get_engine
-from legacy_research.cli.slow_tip import tip_on_slow
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.slow_tip import tip_on_slow
 from legacy_research.extensions.sync import export_obsidian, export_snapshot, export_to_json, sync_memory
 
 __all__ = [
@@ -34,7 +34,7 @@ def sync(db) -> None:
     engine = get_engine(db)
 
     async def _async_sync():
-        from legacy_research.engine.mtk_sqlite_authorizer import mtk_active_token
+        from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
         token_id = mtk_active_token.set("mtk_auth_sync_cli")
         try:
             await engine.init_db()

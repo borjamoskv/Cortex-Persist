@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from legacy_research.cli.notebooklm_data import _detect_cloud_sync
+from cortex.cli.notebooklm_data import _detect_cloud_sync
 
 logger = logging.getLogger("cortex.extensions.adk.goog_tools")
 

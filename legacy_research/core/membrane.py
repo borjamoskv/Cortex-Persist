@@ -141,9 +141,9 @@ class Z3Guard:
         # Constraints preset SMT (industriales)
         p = self.declare_var("price", "Real")
         c = self.declare_var("confidence", "Real")
-        self.add_constraint("price_nonneg", p >= 0)
-        self.add_constraint("confidence_range", And(c >= 0, c <= 100))
-        self.add_constraint("price_reasonable", p <= 100000)
+        self.add_constraint("price_nonneg", p >= 0)  # type: ignore
+        self.add_constraint("confidence_range", And(c >= 0, c <= 100))  # type: ignore
+        self.add_constraint("price_reasonable", p <= 100000)  # type: ignore
 
         # Guards personalizados
         if guards:
@@ -262,7 +262,7 @@ class SemanticBoundary:
         )
 
     def check(
-        self, key: str, value: Any, metadata: dict = None, guards: list[str] = None
+        self, key: str, value: Any, metadata: dict | None = None, guards: list[str] | None = None
     ) -> RetrievalEvent:
         metadata = metadata or {}
         reality_level = "C4-SIM"

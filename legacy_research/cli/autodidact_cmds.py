@@ -10,7 +10,7 @@ import click
 from rich.panel import Panel
 from rich.syntax import Syntax
 
-from legacy_research.cli.common import _run_async, cli, console
+from cortex.cli.common import _run_async, cli, console
 from legacy_research.extensions.swarm.autodidact_actuator import autodidact_ingest
 
 
@@ -71,14 +71,14 @@ def jit_eval(code_snippet: str) -> None:
 @autodidact_group.command(name="audit")
 def audit():
     """Mide el impacto termodinámico de las inferencias previas usando crystal_thermometer.py."""
-    from legacy_research.cli.common import get_engine
+    from cortex.cli.common import get_engine
     from legacy_research.extensions.swarm.crystal_thermometer import scan_all_crystals
 
     console.print("[bold cyan]🔍 CORTEX: Autodidact-Ω Audit[/bold cyan]")
     engine = get_engine()
 
     async def _audit():
-        from legacy_research.database.core import connect
+        from cortex.database.core import connect
 
         conn = connect(engine._db_path)  # pyright: ignore[reportArgumentType]
         return await scan_all_crystals(conn, project="autodidact_knowledge")

@@ -38,9 +38,9 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 
-from legacy_research.api.deps import get_async_engine
+from cortex.api.deps import get_async_engine
 from legacy_research.auth import AuthResult, require_permission
-from legacy_research.engine import CortexEngine as AsyncCortexEngine
+from cortex.engine import CortexEngine as AsyncCortexEngine
 
 __all__ = [
     "batch_store",

@@ -58,7 +58,7 @@ if TYPE_CHECKING:
 
 from legacy_research.memory.temporal import build_temporal_filter_params
 from legacy_research.search.models import SearchResult
-from legacy_research.storage import StorageMode, get_storage_mode
+from cortex.storage import StorageMode, get_storage_mode
 
 __all__ = ["semantic_search", "semantic_search_sync"]
 

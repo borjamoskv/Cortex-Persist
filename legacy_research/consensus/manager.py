@@ -6,7 +6,7 @@ import logging
 import math
 import uuid
 
-from legacy_research.engine.slashing import SlashingEngine
+from cortex.engine.slashing import SlashingEngine
 
 __all__ = ["ConsensusManager"]
 
@@ -159,7 +159,7 @@ class ConsensusManager:
         return score
 
     async def _update_fact_score(self, fact_id: int, score: float, conn) -> None:
-        from legacy_research.engine.mutation_engine import MUTATION_ENGINE
+        from cortex.engine.mutation_engine import MUTATION_ENGINE
 
         if score >= 1.5:
             conf = "verified"

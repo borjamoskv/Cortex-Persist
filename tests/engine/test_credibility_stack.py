@@ -5,7 +5,7 @@ import os
 import shutil
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from legacy_research.engine.credibility_stack import LedgerCredibilityStack
+from cortex.engine.credibility_stack import LedgerCredibilityStack
 
 
 @pytest.mark.asyncio

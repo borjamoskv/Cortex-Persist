@@ -22,7 +22,7 @@ from legacy_research.extensions.hypervisor.models import HealthReport, Memory, R
 from legacy_research.extensions.hypervisor.projector import EventProjector
 
 if TYPE_CHECKING:
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
 __all__ = ["AgencyHypervisor"]
 

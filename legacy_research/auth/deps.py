@@ -109,7 +109,7 @@ async def require_consensus(
         return cached_score >= min_score
 
     if engine is None:
-        from legacy_research.api.deps import get_async_engine
+        from cortex.api.deps import get_async_engine
 
         async for e in get_async_engine():  # type: ignore[reportCallIssue]
             engine = e
@@ -160,7 +160,7 @@ def require_verified_permission(
             ).format(permission=permission)
             raise HTTPException(status_code=403, detail=detail)
 
-        from legacy_research.api.deps import get_async_engine
+        from cortex.api.deps import get_async_engine
 
         engine = None
         async for e in get_async_engine():  # type: ignore[reportCallIssue]

@@ -32,7 +32,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 from typing import Any
 
-from legacy_research.database.core import connect as db_connect
+from cortex.database.core import connect as db_connect
 from legacy_research.extensions.daemon.models import SignalAlert
 
 logger = logging.getLogger("moskv-daemon")

@@ -11,11 +11,11 @@ Validates the structural integrity and high-throughput execution of the 5 inject
 
 import time
 import pytest
-from legacy_research.engine.data_surgery import DataSurgeon
+from cortex.engine.data_surgery import DataSurgeon
 from legacy_research.extensions.hardware.schgen_router import SchGenRouter
-from legacy_research.engine.vision_reasoner import VisAnomReasoner
-from legacy_research.engine.video_mla_cache import VideoMLACache
-from legacy_research.engine.rim_latent_blocks import ReasoningInMemoryEngine
+from cortex.engine.vision_reasoner import VisAnomReasoner
+from cortex.engine.video_mla_cache import VideoMLACache
+from cortex.engine.rim_latent_blocks import ReasoningInMemoryEngine
 
 
 @pytest.mark.asyncio

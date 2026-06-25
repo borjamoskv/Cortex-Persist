@@ -3,7 +3,7 @@
 import pytest
 import asyncio
 from pathlib import Path
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 
 

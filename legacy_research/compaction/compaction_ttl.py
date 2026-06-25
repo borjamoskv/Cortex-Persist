@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from legacy_research.compaction.compactor import CompactionResult
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compactor.ttl")
 _LOG_FMT = "Compactor TTL [%s] %s"
@@ -64,7 +64,7 @@ async def commit_ttl_mutations(
     now: datetime,
 ) -> None:
     """Commit deprecation or tombstone mutations for expired facts."""
-    from legacy_research.engine.mutation_engine import MUTATION_ENGINE
+    from cortex.engine.mutation_engine import MUTATION_ENGINE
 
     ts = now.isoformat()
     tombstone_set = {fid for fid, _ in tombstonable_ids}

@@ -36,7 +36,7 @@ cortex history my-api --at "2026-02-05T00:00:00"
 ### Python
 
 ```python
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 engine = CortexEngine()
 engine.init_db()

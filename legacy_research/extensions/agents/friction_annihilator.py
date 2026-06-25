@@ -12,7 +12,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from legacy_research.engine.smte.llm_mutator import LLMMutator  # pyright: ignore[reportAttributeAccessIssue]
+from cortex.engine.smte.llm_mutator import LLMMutator  # pyright: ignore[reportAttributeAccessIssue]
 
 logger = logging.getLogger("cortex.extensions.agents.friction_annihilator")
 
@@ -28,7 +28,7 @@ class FrictionAnnihilatorAgent:
     def _ensure_engine(self) -> None:
         if self._engine is not None:
             return
-        from legacy_research.cli import get_engine  # pyright: ignore[reportAttributeAccessIssue]
+        from cortex.cli import get_engine  # pyright: ignore[reportAttributeAccessIssue]
         from legacy_research.config import DEFAULT_DB_PATH
 
         db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH

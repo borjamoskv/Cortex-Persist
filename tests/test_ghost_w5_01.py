@@ -6,7 +6,7 @@ import pytest
 from pathlib import Path
 from click.testing import CliRunner
 
-from legacy_research.cli import cli
+from cortex.cli import cli
 from legacy_research.ledger.models import ActionResult, ActionTarget, LedgerEvent
 from legacy_research.ledger.queue import EnrichmentQueue
 from legacy_research.ledger.store import LedgerStore

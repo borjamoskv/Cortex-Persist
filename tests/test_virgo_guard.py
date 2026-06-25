@@ -34,7 +34,7 @@ def mock_omega_auditor(monkeypatch):
 @pytest.fixture
 async def engine(tmp_path: Path):
     """Create a CortexEngine with a temp database, close after test."""
-    from legacy_research.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
     # Unblock tests from thermodynamic enforcement
     os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"

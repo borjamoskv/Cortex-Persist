@@ -281,7 +281,7 @@ class FreeEnergyMonitor:
 
     def total_free_energy(self) -> float:
         """Aggregate F across all domains - system-level health."""
-        from legacy_research.engine.endocrine import ENDOCRINE
+        from cortex.engine.endocrine import ENDOCRINE
 
         states = self.snapshot()
         total_f = sum(s.free_energy for s in states.values())

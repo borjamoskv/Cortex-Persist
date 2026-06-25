@@ -7,7 +7,7 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from legacy_research.cli.common import cli
+from cortex.cli.common import cli
 from legacy_research.config import DEFAULT_DB_PATH
 from legacy_research.darknet.agents import AVATARS, DarknetAgent
 from legacy_research.darknet.ingestor import DarknetIngestor

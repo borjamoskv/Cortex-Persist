@@ -12,7 +12,7 @@ import pytest
 
 from legacy_research.shannon.env.trace import EpisodeTrace, StepTrace
 from legacy_research.runtime.invariants.cross_system import CrossSystemInvariantCompiler
-from legacy_research.engine.evolution_ledger import ControlVector, MutationRecord, EvolutionLedger
+from cortex.engine.evolution_ledger import ControlVector, MutationRecord, EvolutionLedger
 
 
 @pytest.fixture

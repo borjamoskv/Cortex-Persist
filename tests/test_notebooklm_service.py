@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from legacy_research.cli.notebooklm_data import (
+from cortex.cli.notebooklm_data import (
     _PROJECT_DOMAIN,
     DOMAIN_MAP,
     _format_fact_obj,
@@ -117,7 +117,7 @@ class TestCloudDetection:
     """Cloud sync provider detection."""
 
     def test_detect_returns_none_when_no_provider(self) -> None:
-        from legacy_research.cli.notebooklm_data import _detect_cloud_sync
+        from cortex.cli.notebooklm_data import _detect_cloud_sync
 
         # In CI/test environments, cloud providers typically don't exist.
         # This test validates graceful fallback.

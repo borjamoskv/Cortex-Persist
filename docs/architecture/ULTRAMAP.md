@@ -88,7 +88,7 @@ Coordinates working memories, embedding generation, and persistent database mapp
 | `cortex/engine/` | Aggregated fact orchestrator (`CortexEngine`) via Mixin architecture. | `crystallizer.py`, `entropy.py` | `database`, `ledger`, `cache` |
 | `cortex/memory/` | Tripartite Memory Stack (L1 Working, L2 Vector, L3 Event Ledger). | `manager.py`, `vector_providers/` | `cache`, `embeddings`, `database` |
 | `cortex/facts/` | Domain definitions and serialization protocols for Fact states. | `models.py` | `types` |
-| `legacy_research/database/` | SQLite WAL & Postgres connection pools and active adapter routing. | `pool.py`, `postgres_core.py` | `core`, `config` |
+| `cortex/database/` | SQLite WAL & Postgres connection pools and active adapter routing. | `pool.py`, `postgres_core.py` | `core`, `config` |
 | `cortex/storage/` | Data persistence layers, parquet cold archiving, storage routers. | `postgres.py`, `parquet.py` | `database`, `types` |
 | `cortex/cache/` | Redis L1 caching layer with automatic query coherence. | `redis_client.py` | `config` |
 | `cortex/embeddings/` | Local ONNX embedding generations and transformer batching. | `onnx_runtime.py` | `config` |

@@ -5,7 +5,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.immune.breaker")
 

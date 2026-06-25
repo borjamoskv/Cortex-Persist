@@ -11,7 +11,7 @@ from llama_index.core.postprocessor.types import (
 from llama_index.core.schema import NodeWithScore  # pyright: ignore[reportMissingImports]
 from pydantic import Field
 
-from legacy_research.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 
 class ExergyFilter(BaseNodePostprocessor):

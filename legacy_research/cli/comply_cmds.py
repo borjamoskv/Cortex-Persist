@@ -10,7 +10,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from legacy_research.cli.common import (
+from cortex.cli.common import (
     DEFAULT_DB,
     cli,
     console,

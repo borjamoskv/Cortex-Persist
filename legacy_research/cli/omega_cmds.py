@@ -17,8 +17,8 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from legacy_research.cli.common import cli
-from legacy_research.engine.omega_daemon import OmegaKernel
+from cortex.cli.common import cli
+from cortex.engine.omega_daemon import OmegaKernel
 
 console = Console()
 logger = logging.getLogger(__name__)

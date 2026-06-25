@@ -55,7 +55,7 @@ def main():
     try:
         from legacy_research.mejoralo import MejoraloEngine
 
-        from legacy_research.cli import DEFAULT_DB, get_engine
+        from cortex.cli import DEFAULT_DB, get_engine
 
         engine = get_engine(DEFAULT_DB)
         m = MejoraloEngine(engine)

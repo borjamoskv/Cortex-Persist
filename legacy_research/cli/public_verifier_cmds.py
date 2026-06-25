@@ -5,7 +5,7 @@ import json
 
 import click
 
-from legacy_research.cli.common import cli
+from cortex.cli.common import cli
 from legacy_research.ledger.public_verifier import verify_export
 
 

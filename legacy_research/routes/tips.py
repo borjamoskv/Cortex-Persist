@@ -15,10 +15,10 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 
-from legacy_research.api.deps import get_engine
+from cortex.api.deps import get_engine
 from legacy_research.auth import AuthResult, require_permission
-from legacy_research.engine import CortexEngine
-from legacy_research.engine.tips import Tip, TipCategory, TipsEngine
+from cortex.engine import CortexEngine
+from cortex.engine.tips import Tip, TipCategory, TipsEngine
 
 __all__ = [
     "LANG_DESC",

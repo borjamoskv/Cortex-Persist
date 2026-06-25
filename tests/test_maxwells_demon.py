@@ -1,5 +1,5 @@
 import pytest
-from legacy_research.engine.maxwells_demon import MaxwellsDemon
+from cortex.engine.maxwells_demon import MaxwellsDemon
 
 @pytest.fixture
 def demon():

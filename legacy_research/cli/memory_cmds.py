@@ -8,7 +8,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from legacy_research.cli.common import (
+from cortex.cli.common import (
     DEFAULT_DB,
     _detect_agent_source,
     _run_async,
@@ -17,8 +17,8 @@ from legacy_research.cli.common import (
     console,
     get_engine,
 )
-from legacy_research.cli.errors import err_empty_results
-from legacy_research.cli.slow_tip import with_slow_tips
+from cortex.cli.errors import err_empty_results
+from cortex.cli.slow_tip import with_slow_tips
 
 
 def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
@@ -44,7 +44,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
         priv_b64 = os.environ.get("CORTEX_ED25519_PRIVATE_KEY")
 
     if priv_b64:
-        from legacy_research.engine.causal.taint_engine import generate_secure_taint_token
+        from cortex.engine.causal.taint_engine import generate_secure_taint_token
 
         try:
             token = generate_secure_taint_token(
@@ -55,7 +55,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
             )
             meta["cortex_taint"] = token
         except Exception as e:
-            from legacy_research.cli.common import console
+            from cortex.cli.common import console
 
             console.print(f"[yellow]Warning: Failed to generate taint token: {e}[/]")
             os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"

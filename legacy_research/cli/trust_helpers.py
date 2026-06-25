@@ -131,7 +131,7 @@ def _check_chain_integrity(conn) -> tuple[bool, int]:
 
 def _get_audit_trail(conn, project: str, limit: int):
     """Internal helper to get the audit trail rows."""
-    from legacy_research.cli.errors import err_empty_results
+    from cortex.cli.errors import err_empty_results
 
     conditions = ["f.valid_until IS NULL"]
     params: list = []

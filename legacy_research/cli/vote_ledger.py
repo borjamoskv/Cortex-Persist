@@ -5,8 +5,8 @@ from __future__ import annotations
 import sys
 import click
 from rich.panel import Panel
-from legacy_research.cli.common import DEFAULT_DB, cli, console, get_engine
-from legacy_research.cli.errors import err_empty_results, err_validation, handle_cli_error
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, err_validation, handle_cli_error
 # Importe actualizado para Wave 5 Fase 2
 from legacy_research.consensus.vote_ledger import ImmutableVoteLedger
 
