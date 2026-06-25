@@ -66,7 +66,7 @@ class ConnectionMixin:
                 await conn.execute("BEGIN IMMEDIATE")
                 yield conn
                 await conn.commit()
-            except Exception:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
                 await conn.rollback()
                 raise
 
@@ -106,7 +106,7 @@ class ConnectionMixin:
                 ):
                     try:
                         await conn.close()
-                    except Exception as exc:
+                    except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
                         logger.warning("Suppressed exception: %s", exc)
                     self._conns_by_loop.pop(current_loop, None)
                     conn = None
@@ -173,13 +173,13 @@ class ConnectionMixin:
                         import babylon60.core.config as config
                         config.HKDF_SALT = row[0]
                         config._cfg.HKDF_SALT = row[0]
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.warning("Failed to load tenant_isolation_salt: %s", e)
 
             # Ensure we do not leave a read transaction open on the connection
             try:
                 await conn.commit()
-            except Exception:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
                 pass
 
             if self._ledger is None:
@@ -218,7 +218,7 @@ class ConnectionMixin:
             conn.enable_load_extension(True)
             conn.load_extension(sqlite_vec.loadable_path())
             conn.enable_load_extension(False)
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
             logger.warning("Suppressed exception: %s", exc)
         if not hasattr(self, "_sync_conns"):
             self._sync_conns = []

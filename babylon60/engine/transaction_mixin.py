@@ -53,7 +53,7 @@ class TransactionMixin(EngineMixinBase):
                 )
                 # Depending on strictness, we might raise an Exception here,
                 # but for now we log it as an error to track entropy.
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
             logger.warning("Suppressed exception: %s", exc)
 
         dj = canonical_json(detail)

@@ -25,7 +25,7 @@ class PronoicErrorTransducer:
         """
         try:
             return func(*args, **kwargs)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.warning(f"[PRONOIA] Excepción interceptada como estímulo: {type(e).__name__} - {str(e)}")
             context = {"args": args, "kwargs": kwargs, "func_name": func.__name__}
             

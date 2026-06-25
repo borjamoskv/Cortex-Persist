@@ -88,7 +88,7 @@ async def execute_with_healing(
 
             return result
 
-        except Exception as error:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as error:  # P0-PURGED
             last_error = error
             breaker._on_failure()
 
@@ -344,7 +344,7 @@ async def start_daemon(
 
             agent._phase = HealingPhase.IDLE
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error("[AUTOCURATIVE] Daemon probe error: %s", e)
 
         await asyncio.sleep(agent.config.monitor_interval_s)
@@ -359,7 +359,7 @@ async def probe_system_health(agent: AutoCurativeAgent, engine: Any) -> dict[str
             if hasattr(engine, "health_check"):
                 h = await asyncio.wait_for(engine.health_check(), timeout=5.0)
                 health.update(h if isinstance(h, dict) else {"engine_status": str(h)})
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             health["status"] = "degraded"
             health["error"] = str(e)
 

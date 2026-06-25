@@ -26,7 +26,7 @@ async def run_enrichment_worker(engine: Any, poll_interval: float = 1.0):
                 await asyncio.sleep(poll_interval)
         except asyncio.CancelledError:
             break
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error("Enrichment Worker critical failure: %s", e)
             await asyncio.sleep(5)
 
@@ -83,7 +83,7 @@ async def process_next_job(engine: Any) -> bool:
             await conn.commit()
             return True
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.warning("Enrichment job %d failed: %s", job_id, e)
             attempts += 1
             # Exponential backoff: 60s, 120s, 240s, 480s, 960s...

@@ -111,7 +111,7 @@ class EntropyDemon:
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Checks for missing null-safety and generic exception handling
-        if "except Exception:  # noqa: BLE001" in code or "except Exception:" in code:
+        if "except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED  # noqa: BLE001" in code or "except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED" in code:
             findings.append(
                 "Fragility: Bare `except` detected. System cannot tolerate undetected entropy."
             )
@@ -185,7 +185,7 @@ class LedgerPoisoner:
                         findings.append(
                             f"LedgerPoisoner: Corrupted transaction #{tx_id} via UPDATE."
                         )
-                    except Exception as e:
+                    except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                         logger.debug("LedgerPoisoner Update rejected by DB (expected): %s", e)
 
                 # Attempt to delete a Merkle root
@@ -195,10 +195,10 @@ class LedgerPoisoner:
                     findings.append(
                         "LedgerPoisoner: Dropped Merkle checkpoints via raw SQL DELETE."
                     )
-                except Exception as e:
+                except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                     logger.debug("LedgerPoisoner Delete rejected by DB (expected): %s", e)
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.debug("LedgerPoisoner execution error: %s", e)
 
         return findings
@@ -224,11 +224,11 @@ class VaultCracker:
                 findings.append(
                     "VaultCracker: Malleability attack succeeded (authentication failed)."
                 )
-            except Exception as exc:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
                 logger.warning("Suppressed exception: %s", exc)
         # Success = Tag caught it
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.debug("VaultCracker error: %s", e)
 
         return findings

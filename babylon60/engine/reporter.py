@@ -133,7 +133,7 @@ class SovereignReporter:
         # Send initial state
         try:
             yield await self.collect_metrics()
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
             logger.warning("Suppressed exception: %s", exc)
 
         try:
@@ -153,7 +153,7 @@ class SovereignReporter:
                         yield await self.collect_metrics()
         except asyncio.CancelledError:
             raise
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error("Error in stream_metrics: %s", e)
 
     async def export_json(self, output_path: str):

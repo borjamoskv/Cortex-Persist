@@ -77,5 +77,5 @@ class EventSovereigntyRuntime:
                 )
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("Scheduled observation loop error: %s", e)

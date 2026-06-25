@@ -36,7 +36,7 @@ class ReversibleLedger:
         if parent_id:
             try:
                 self._graph.add_dependency(parent_id, fact_id)
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 # Si el padre no existe, el grafo Rust rechazará la aserción
                 raise ValueError(f"EDG-REJECT: Fallo causal al anclar {fact_id} a {parent_id}. {e}")
                 

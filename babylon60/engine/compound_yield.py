@@ -161,7 +161,7 @@ class CompoundYieldTracker:
             # Check if chronos explicit report exists in meta
             if "hours_saved" in meta:
                 return float(meta["hours_saved"])
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
             logger.warning("Suppressed exception: %s", exc)
 
         # If no explicit hours, assign a default baseline value of 0.5 hours

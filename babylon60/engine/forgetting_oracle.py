@@ -232,7 +232,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             decay_factor = math.exp(-lambda_rate * time_delta_hours)
             return base_mass * decay_factor
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.debug("[ORACLE] Error calculating semantic gravity: %s", e)
             return 1.0  # Safe default on error
 
@@ -268,7 +268,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             logger.info("🔮 [ORACLE] Fact %d evaporated into a ghost.", fact_id)
             return True
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error("🔮 [ORACLE] Failed to evaporate fact %d: %s", fact_id, e)
             return False
 
@@ -304,7 +304,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             if fact and fact.get("fact_type") in ("decision", "error", "axiom"):
                 return True
 
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
             logger.warning("Suppressed exception: %s", exc)
 
         return False

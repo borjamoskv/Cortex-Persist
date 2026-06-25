@@ -66,7 +66,7 @@ class LandauerCompressor:
         try:
             compressed_code = ast.unparse(purified_tree)
             return compressed_code
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error(f"Landauer API Unparse Error: {e}")
             return source_code
 

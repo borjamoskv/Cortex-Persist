@@ -39,7 +39,7 @@ class LatticeworkStore:
         try:
             with open(mapping_path, encoding="utf-8") as f:
                 lines = f.readlines()
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error(f"[LatticeworkStore] Error al leer el manifiesto: {e}")
             return
 

@@ -378,7 +378,7 @@ class EFTVerificationGuardAdapter:
         for name, guard in guards:
             try:
                 await guard.verify(content, project, fact_type, meta)
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 failures.append((name, str(e)))
 
         if len(failures) >= 2:

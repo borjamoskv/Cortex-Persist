@@ -140,7 +140,7 @@ class LatticeworkDaemon:
                     # Inyectar exergía matemática de vuelta al CausalScheduler
                     await self.scheduler.inject_exergy(anomaly["id"], exergy.to_float())
 
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("[LatticeworkDaemon] Fallo topológico: %s", e)
 
             await asyncio.sleep(self.interval)
@@ -159,6 +159,6 @@ class LatticeworkDaemon:
                 await self._task
             except asyncio.CancelledError:
                 pass
-            except Exception as exc:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
                 logger.warning("Suppressed exception: %s", exc)
             logger.info("[LatticeworkDaemon] Terminado. Ouroboros Infinity en reposo termodinámico.")

@@ -106,7 +106,7 @@ class SovereignArbiter:
             logger.warning("🛡️ Sovereign Arbiter Block: %s", msg)
             return False, msg
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             msg = f"[BLOQUEO BIZANTINO - Ω₃] Compilation Failed: {e}"
             logger.error("🛡️ Sovereign Arbiter Compilation Block: %s", msg)
             return False, msg

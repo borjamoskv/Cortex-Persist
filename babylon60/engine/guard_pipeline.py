@@ -114,7 +114,7 @@ class GuardPipeline:
                     source=source,
                     db_path=db_path,
                 )
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.debug(
                     "[GuardPipeline] Post-hook %s failed: %s",
                     type(hook).__name__,

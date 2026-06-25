@@ -361,7 +361,7 @@ We believe the verification of {title} signals an imminent collapse in tradition
                     tags=["sota", "feedback", "performance"],
                     meta=payload
                 )
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("Failed to log historical feedback: %s", e)
 
         # [C5-REAL] Ontología Cero: Cero mocks, lectura física desde el Motor Causal
@@ -377,7 +377,7 @@ We believe the verification of {title} signals an imminent collapse in tradition
                     accuracy = acc_sum / samples if samples > 0 else 0.0
                     reliability = accuracy * 0.95 # Base calculada matemática
                     relevance = accuracy * 0.80
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("Error termodinámico en extracción física de SOTA: %s", e)
 
         return {
@@ -541,7 +541,7 @@ We believe the verification of {title} signals an imminent collapse in tradition
                             }
                         )
                         logger.info("[SOTA-ENGINE] Successfully persisted verified opportunity to Cortex Ledger.")
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("[SOTA-ENGINE] Failed to persist opportunity to Ledger: %s", e)
 
         return opportunity

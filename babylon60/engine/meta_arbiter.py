@@ -521,7 +521,7 @@ class MetaArbiterKernel:
             return state.height
         try:
             return hash(state)
-        except Exception:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
             return repr(state)
 
     # ------------------------------------------------------------------

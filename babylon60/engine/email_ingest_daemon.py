@@ -74,7 +74,7 @@ class EmailIngestDaemon:
                                 "body": str(body)
                             })
             mail.logout()
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error(f"[EmailIngestDaemon] Fallo en fetch IMAP: {e}")
         return messages
 
@@ -130,7 +130,7 @@ class EmailIngestDaemon:
 
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error(f"[EmailIngestDaemon] Fallo en ciclo de ingesta: {e}")
 
             if self._running:
@@ -150,6 +150,6 @@ class EmailIngestDaemon:
                 await self._task
             except asyncio.CancelledError:
                 pass
-            except Exception as exc:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
                 logger.warning("Suppressed exception: %s", exc)
             logger.info("[EmailIngestDaemon] Terminado. Conexión IMAP cerrada.")

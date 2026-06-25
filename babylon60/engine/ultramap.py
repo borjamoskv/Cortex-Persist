@@ -93,7 +93,7 @@ class UltramapSubstrate:
                 logger.info(
                     f"EVO-LKRGSER Active. Head: {self._evolution_ledger.head_hash[:12]}… Seq: {self._evolution_ledger.sequence}"
                 )
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.warning(f"EVO-LKRGSER init failed (non-fatal): {e}")
 
         logger.info(
@@ -109,10 +109,10 @@ class UltramapSubstrate:
                 mmap_obj.close()
             if f_obj:
                 f_obj.close()
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             try:
                 logger.debug("Error in ultramap _safe_close: %s", e)
-            except Exception:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
                 import logging
 
                 logging.getLogger(__name__).error(
@@ -124,7 +124,7 @@ class UltramapSubstrate:
             try:
                 self._checkpoint_manager.generate_index()
                 logger.info("EVO-LKRGSER Checkpoints synced on shutdown.")
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.warning(f"EVO-LKRGSER Checkpoint sync failed: {e}")
             self._checkpoint_manager = None
 
@@ -324,7 +324,7 @@ class UltramapSubstrate:
                 vector_after=vector_after,
                 source=source,
             )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.warning(f"EVO-LKRGSER write failed (non-fatal): {e}")
 
 

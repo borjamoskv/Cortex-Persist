@@ -22,7 +22,7 @@ class SupervisorDaemon:
     async def _l5_daemon(self, engine: Any = None) -> None:
         try:
             await self.sup._l5.start_daemon(engine=engine)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error("[SUPERVISOR] L5 daemon crashed: %s", e)
             self.sup._agents["l5"].status = AgentStatus.FAILED
             self.sup._agents["l5"].error_count += 1
@@ -35,7 +35,7 @@ class SupervisorDaemon:
                     self.sup._sync_l6_to_l5()
                     logger.info("[SUPERVISOR] L6 applied %d tunings", event.applied)
                 self.sup._agents["l6"].last_heartbeat = time.monotonic()
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("[SUPERVISOR] L6 error: %s", e)
                 self.sup._agents["l6"].error_count += 1
             await asyncio.sleep(self.config.optimization_interval_s)
@@ -53,7 +53,7 @@ class SupervisorDaemon:
                 for p in critical:
                     await self._apply_preemptive_action(p)
                 self.sup._agents["predictor"].last_heartbeat = time.monotonic()
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("[SUPERVISOR] Prediction error: %s", e)
                 self.sup._agents["predictor"].error_count += 1
             await asyncio.sleep(self.config.prediction_interval_s)
@@ -72,7 +72,7 @@ class SupervisorDaemon:
                 cortisol = ENDOCRINE.get_level(HormoneType.CORTISOL)
                 if cortisol > self.config.cortisol_alarm:
                     logger.warning("[SUPERVISOR] System cortisol alarm: %.3f", cortisol)
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("[SUPERVISOR] Health check error: %s", e)
             await asyncio.sleep(self.config.health_check_interval_s)
 
@@ -82,7 +82,7 @@ class SupervisorDaemon:
                 all_params = self.sup._l6.get_all_tuned_params()
                 if all_params:
                     self.sup._store.snapshot(all_params, self.sup._l6.stats)
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("[SUPERVISOR] Persist error: %s", e)
             await asyncio.sleep(self.config.persist_interval_s)
 

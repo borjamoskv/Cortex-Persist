@@ -126,7 +126,7 @@ class EntropyCore:
             failure_rate = (errors + failures) / tests
             return min(float(failure_rate) * 2.0, 1.0) # Multiply by 2 to make it sensitive
             
-        except Exception:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
             return 0.5 # Unknown operational state
             
     def _determine_regime(self, total_entropy: float) -> SystemRegime:

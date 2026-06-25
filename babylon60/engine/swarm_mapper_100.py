@@ -41,7 +41,7 @@ async def parse_file(file_path: Path) -> str:
         if len(output) > 1:
             return "\n".join(output) + "\n"
         return ""
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
         return f"### `{file_path.name}`\n- [ERROR] {str(e)}\n"
 
 async def swarm_worker(semaphore: asyncio.Semaphore, file_path: Path) -> str:

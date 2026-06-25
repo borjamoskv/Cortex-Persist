@@ -74,7 +74,7 @@ class SovereignDecalcifier:
             ENDOCRINE.pulse(HormoneType.SEROTONIN, 0.1, reason="REM Cycle Completed")
             ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.05, reason="Memory Compression")
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error("❌ [DECALCIFIER] REM Cycle interrupted by nightmare (Error): %s", e)
             ENDOCRINE.pulse(HormoneType.CORTISOL, 0.2, reason="REM Interruption")
             await conn.rollback()

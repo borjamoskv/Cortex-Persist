@@ -158,7 +158,7 @@ class AgentMixin(EngineMixinBase):
                 )
                 await conn.commit()
                 return new_rep
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 await conn.rollback()
                 raise e
 

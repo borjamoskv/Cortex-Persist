@@ -102,6 +102,6 @@ class APIKeyManager:
             
             self.conn.commit()
             return {"tenant_id": tenant_id, "tier": tier}
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             self.conn.rollback()
             raise e

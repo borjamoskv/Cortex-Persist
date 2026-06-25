@@ -29,7 +29,7 @@ class ExergyDaemon:
                 # 2. Guadaña termodinámica
                 await self.engine.prune_dead_branches(multiverse_state)
 
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error(f"[ExergyDaemon] Fallo en colapso causal: {e}")
 
             await asyncio.sleep(self.interval)
@@ -46,6 +46,6 @@ class ExergyDaemon:
             self._task.cancel()
             try:
                 await self._task
-            except Exception as exc:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
                 logger.warning("Suppressed exception: %s", exc)
             logger.info("[ExergyDaemon] Terminado. Multiverso congelado.")

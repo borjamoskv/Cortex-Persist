@@ -69,7 +69,7 @@ class SearchMixin(EngineMixinBase):
                     results = [SearchResult(**item) for item in data]
                     logger.debug("[L1 Cache] Hit for tenant=%s, query='%s'", tenant_id, query[:30])
                     return results
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.warning("[L1 Cache] Lookup failed: %s", e)
 
         async with self.session() as conn:
@@ -127,7 +127,7 @@ class SearchMixin(EngineMixinBase):
                     try:
                         serialized = json.dumps([asdict(r) for r in results]).encode("utf-8")
                         cache.set(cache_key, serialized)
-                    except Exception as e:
+                    except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                         logger.warning("[L1 Cache] Set failed: %s", e)
 
                 return results
@@ -164,7 +164,7 @@ class SearchMixin(EngineMixinBase):
                             "utf-8"
                         )
                         cache.set(cache_key, serialized)
-                    except Exception as e:
+                    except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                         logger.warning("[L1 Cache] Set failed: %s", e)
 
                 return fallback_results
@@ -175,7 +175,7 @@ class SearchMixin(EngineMixinBase):
         """Helper to enrich search results with graph context."""
         try:
             from babylon60.graph import extract_entities, get_context_subgraph
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
             logger.debug("Graph context enrichment unavailable: %s", exc)
             return
 
@@ -212,7 +212,7 @@ class SearchMixin(EngineMixinBase):
                     )
                     await conn.commit()
                 logger.debug("BM25 feedback injected: %s", engine_used)
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("Failed to inject BM25 feedback: %s", e)
 
         # Disparar tarea fire-and-forget sin bloquear el event loop principal

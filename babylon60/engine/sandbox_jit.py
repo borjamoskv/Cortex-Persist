@@ -109,6 +109,6 @@ class SandboxJIT:
             compiled_code = compile(tree, filename="<agent_jit>", mode="exec")
             exec(compiled_code, exec_globals, exec_locals)
             return exec_locals
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error(f"SandboxJIT RuntimeException: {e}")
             raise JITSandboxViolation(f"Error de ejecución en Sandbox: {e}")

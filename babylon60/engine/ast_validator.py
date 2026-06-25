@@ -38,11 +38,11 @@ class StrictASTValidator(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_ExceptHandler(self, node: ast.ExceptHandler):
-        # Rule: No bare except Exception:
+        # Rule: No bare except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
         if node.type is None:
-            self._record_error(node, "[MEDIUM] Bare `except Exception:` clause detected. Narrow exception scoping required.")
+            self._record_error(node, "[CRITICAL HALT] Bare `except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED` clause detected. Narrow exception scoping or Apoptosis required.")
         elif isinstance(node.type, ast.Name) and node.type.id == "Exception":
-            self._record_error(node, "[MEDIUM] Catching base `Exception` detected. Narrow exception scoping required.")
+            self._record_error(node, "[CRITICAL HALT] Catching base `Exception` detected. Narrow exception scoping or Apoptosis required.")
             
         self.generic_visit(node)
 

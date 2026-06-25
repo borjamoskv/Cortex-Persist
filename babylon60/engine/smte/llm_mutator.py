@@ -71,7 +71,7 @@ CÓDIGO FUENTE ACTUAL:
             mutated_code = res["choices"][0]["message"]["content"]
             mutated_code = mutated_code.replace("```python", "").replace("```", "").strip()
             return mutated_code
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
         logger.error(f"API Qwen mutation failed: {e!s}")
         return source_code
 

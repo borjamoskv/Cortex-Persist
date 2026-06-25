@@ -40,7 +40,7 @@ class GaaDEngine:
             blob_hash = stdout.decode('utf-8').strip()
             return blob_hash
             
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error(f"GaaD Exception: {str(e)}")
             return None
             
@@ -63,6 +63,6 @@ class GaaDEngine:
                 
             return json.loads(stdout.decode('utf-8'))
             
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error(f"GaaD Exception: {str(e)}")
             return None

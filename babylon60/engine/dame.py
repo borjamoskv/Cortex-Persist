@@ -35,7 +35,7 @@ class DAMEState:
                 with open(self.state_file_path, encoding="utf-8") as f:
                     self.state = json.load(f)
                 logger.info(f"[DAME-001] Estado cargado con éxito desde {self.state_file_path}")
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error(f"[DAME-001] Error leyendo estado externo: {e}")
                 self.state = {}
         else:
@@ -48,7 +48,7 @@ class DAMEState:
             with open(self.state_file_path, "w", encoding="utf-8") as f:
                 json.dump(self.state, f, indent=2)
             logger.info(f"[DAME-001] Estado guardado en {self.state_file_path}")
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error(f"[DAME-001] Error guardando estado externo: {e}")
             raise DAMEError(f"Fallo de persistencia física: {e}")
 
@@ -123,7 +123,7 @@ class DAMEExecutor:
                 self.state.update(retry_key, current_retries + 1)
                 return False
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error(f"Error ejecutando validador: {e}")
             self.state.update(retry_key, current_retries + 1)
             return False
@@ -160,7 +160,7 @@ class DAMEAsyncDelegator:
                     logger.info(f"[DAME-003] Tarea delegada {task_id} finalizada exitosamente.")
                 else:
                     logger.warning(f"[DAME-003] Tarea delegada {task_id} finalizó con error (code {exit_code}).")
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error(f"[DAME-003] Error ejecutando tarea delegada {task_id}: {e}")
 
         return asyncio.create_task(_run())

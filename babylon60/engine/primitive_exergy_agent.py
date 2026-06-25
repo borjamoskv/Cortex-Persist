@@ -71,7 +71,7 @@ class PrimitiveExergyMaximizerAgent:
                 }
             }
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error("[PRIMITIVE-EXERGY] Fallo en la evaluación JAX: %s", str(e))
             return {
                 "Claim": "APOPTOSIS",
@@ -122,5 +122,5 @@ class PrimitiveExergyAgentAdapter(SwarmAgent):
                     "target": signal.source,
                     "result": result
                 })
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("[%s] Error compilando o evaluando primitiva: %s", self.agent_id, str(e))

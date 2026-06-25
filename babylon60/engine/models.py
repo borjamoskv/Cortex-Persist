@@ -239,7 +239,7 @@ class KnowledgeObject:
                         except ValueError:
                             pass
             return elapsed > half_life_seconds
-        except Exception:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
             return False
 
     def __post_init__(self) -> None:
@@ -255,7 +255,7 @@ class KnowledgeObject:
                 try:
                     parsed = json.loads(val)
                     self.justification = Justification.from_dict(parsed)
-                except Exception:
+                except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
                     self.justification = Justification(evidence_type=EvidenceType.OBSERVATION, description=val)
             else:
                 self.justification = Justification(evidence_type=EvidenceType.OBSERVATION, description=val)

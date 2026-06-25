@@ -157,7 +157,7 @@ class TuningStore:
                         "snapshot_at": row[2],
                         "snapshot_at_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(row[2])),
                     }
-                except Exception as exc:
+                except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
                     logger.warning("Suppressed exception: %s", exc)
         return None
 

@@ -65,7 +65,7 @@ class OuroborosCompiler:
                         "mutate_prompt",
                     ):
                         llm_calls += 1
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as exc:  # P0-PURGED
             logger.warning("Suppressed exception: %s", exc)
 
         cost = (llm_calls * 10) + complexity
@@ -199,7 +199,7 @@ class OuroborosCompiler:
             )
             return True
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.error(f"OuroborosCompiler: Compilation failed - {e}")
             return False
 

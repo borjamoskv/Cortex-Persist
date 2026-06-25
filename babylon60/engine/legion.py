@@ -99,7 +99,7 @@ class SwarmAgent(ABC):
             try:
                 signal = await self.execute(target)
                 await self.bus.emit(signal)
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 await self.bus.emit(
                     SwarmSignal(
                         agent_id=self.agent_id,
@@ -227,7 +227,7 @@ class Squadron(ABC):
                 global_verdict = False
                 logger.warning("Cross-System verifier bypassed: Missing trace or ledger.")
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             if "Cross-System Invariance Violation" in str(e):
                 logger.error(
                     "[Crystallization] 🛑 Cross-System Invariance Divergence detected: %s", e
@@ -298,7 +298,7 @@ _EPIGENETIC_RULES = [
             "def safe_execute(func, *args):\n"
             "    try:\n"
             "        return func(*args)\n"
-            "    except Exception as e:  # noqa: BLE001\n"
+            "    except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED  # noqa: BLE001\n"
             "        return str(e)"
         ),
     ),

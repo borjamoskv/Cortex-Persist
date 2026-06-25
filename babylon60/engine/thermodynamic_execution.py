@@ -64,7 +64,7 @@ class ThermodynamicIntentVector:
             git_diff = os.popen('git diff --cached 2>/dev/null').read().strip()
             raw_state = f"{git_head}_{hashlib.sha256(git_diff.encode()).hexdigest()}"
             return hashlib.sha256(raw_state.encode()).hexdigest()
-        except Exception:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
             return hashlib.sha256(b"static_fallback").hexdigest()
 
     def execute_and_measure_delta(self, execution_callback: Callable[[str], Any]) -> float:

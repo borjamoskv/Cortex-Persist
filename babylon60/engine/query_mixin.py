@@ -55,7 +55,7 @@ class QueryMixin(EngineMixinBase):
                 """
                 await conn.execute(sql, [tenant_id, *fact_ids])
                 await conn.commit()
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.warning("Hebbian record_access failed (ignoring to prevent read-path blockage): %s", e)
 
     async def get_all_active_facts(

@@ -73,7 +73,7 @@ class MemoryMixin(EngineMixinBase):
             l3 = EventLedgerL3(conn)
             await l3.ensure_table()
             return l1, l3
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.warning("Memory L1/L3 unavailable: %s", e)
             return None, None
 
@@ -85,7 +85,7 @@ class MemoryMixin(EngineMixinBase):
             bus = SignalBus(sync_conn)
             bus.ensure_table()
             return bus
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.warning("SignalBus initialization failed: %s", e)
             return None
 
@@ -128,7 +128,7 @@ class MemoryMixin(EngineMixinBase):
             encoder = AsyncEncoder(self._get_embedder())
             l2 = SovereignVectorStoreL2(encoder=encoder, db_path=vector_path / "vectors.db")
             logger.info("Memory L2 (SovereignVectorStoreL2) initialized at %s", vector_path)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             if isinstance(e, ImportError | ModuleNotFoundError) or "numpy" in str(e).lower():
                 l2_skip_reason = str(e)
             else:
@@ -147,7 +147,7 @@ class MemoryMixin(EngineMixinBase):
                 encoder=hdc_encoder, item_memory=item_mem, db_path=hdc_path / "hdc.db"
             )
             logger.info("Vector Alpha (HDC) initialized at %s", hdc_path)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.warning("Vector Alpha (HDC) initialization failed: %s", e)
         return hdc_l2, hdc_encoder
 
@@ -164,7 +164,7 @@ class MemoryMixin(EngineMixinBase):
                 hdc_encoder=hdc_encoder,
                 bus=bus,
             )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
             logger.warning("Memory manager unavailable: %s", e)
             self._set_memory_state(None, l1, l3)
 

@@ -102,7 +102,7 @@ class GenomeMutator:
                     f"gen={child.lineage.generation} type={mutation_type.value} [Rust]"
                 )
                 child._invalidate_hash()
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error("Rust AST mutation failed: %s", e)
                 # Fallback to Python-based implementation
                 method_name = self._OPERATORS.get(mutation_type)

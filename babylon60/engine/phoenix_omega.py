@@ -116,7 +116,7 @@ class AnalysisEngine(BaseEngine):
                     atoms.update(file_atoms)
                 except SyntaxError as e:
                     logger.error("SyntaxError inside %s: %s", path, e)
-                except Exception as e:
+                except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                     logger.error("Failed to read %s: %s", path, e)
 
         # O(1) Graph linking

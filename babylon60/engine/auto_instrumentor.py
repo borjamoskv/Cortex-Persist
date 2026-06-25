@@ -47,7 +47,7 @@ def instrument_file(filepath: Path, dry_run: bool = False) -> int:
     """
     try:
         source_code = filepath.read_text(encoding="utf-8")
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
         logger.error(f"[!] Error reading {filepath}: {e}")
         return 0
 

@@ -30,7 +30,7 @@ class CascadeRouter:
 
             cb = CircuitBreaker(f"cascade_router_{engine}")
             cb._on_failure()
-        except Exception as cb_err:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as cb_err:  # P0-PURGED
             logger.debug(f"Could not update circuit breaker: {cb_err}")
         return f"Error: CLI tool '{engine}' not found in PATH. Subprocess execution failed."
 
@@ -166,11 +166,11 @@ class CascadeRouter:
                             try:
                                 status = "completed" if process.returncode == 0 else "failed"
                                 conn.execute("UPDATE tasks SET status=? WHERE id=?", (status, task_id))
-                            except Exception:
+                            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
                                 pass  # Ignorar si la tabla tasks no tiene esa estructura
                             conn.commit()
                             conn.close()
-                    except Exception as db_e:
+                    except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as db_e:  # P0-PURGED
                         logger.error(f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}")
 
                 if process.returncode != 0:
@@ -181,7 +181,7 @@ class CascadeRouter:
             except FileNotFoundError:
                 logger.error("🔌 [ROUTER] CLI no encontrado en PATH. Activando fallback...")
                 return self.fallback_response(engine, prompt)
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError) as e:  # P0-PURGED
                 logger.error(f"🔥 [ROUTER] Subprocess execution exception: {e}")
                 if attempt < max_retries:
                     delay = base_delay ** attempt

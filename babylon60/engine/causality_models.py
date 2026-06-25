@@ -115,5 +115,5 @@ class BeliefObject:
             
             from babylon60.engine.risk_math import calculate_decay_weight
             return calculate_decay_weight(self.confidence_score, delta_seconds, self.decay_rate)
-        except Exception:
+        except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
             return self.confidence_score
