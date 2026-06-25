@@ -13,7 +13,7 @@ try:
     __import__("pysqlite3")
     sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 except ImportError:
-    import logging
+    pass
 
 
 __version__ = "1.0.0"

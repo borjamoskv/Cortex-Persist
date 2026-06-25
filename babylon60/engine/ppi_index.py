@@ -48,7 +48,7 @@ class PPIIndex:
         """
         Evalúa una afirmación y su evidencia adjunta.
         """
-        claim_lower = claim_text.lower()
+        claim_text.lower()
         evidence_str = json.dumps(evidence_payload).lower()
         
         # 1. Evaluate Evidence (0-5)

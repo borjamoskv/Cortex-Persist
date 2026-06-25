@@ -32,8 +32,9 @@ import httpx
 if TYPE_CHECKING:
     from babylon60.extensions.llm.manager import LLMManager
 
-from babylon60.engine.autopoiesis import AutopoiesisEngine
 from babylon60.engine.crystallizer import AutoCrystallizer
+
+from babylon60.engine.autopoiesis import AutopoiesisEngine
 from babylon60.engine.swarm_10k import SwarmCommander
 from babylon60.utils.errors import CortexError
 

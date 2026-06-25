@@ -57,7 +57,7 @@ class MutationTester:
         }
 
         try:
-            tree = ast.parse(original_source)
+            ast.parse(original_source)
         except SyntaxError:
             logger.error(f"Syntax error in {file_path}")
             return results
@@ -80,8 +80,7 @@ class MutationTester:
                 # Run tests
                 proc = subprocess.run(
                     self.test_cmd.split(),
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    capture_output=True,
                     timeout=15
                 )
 

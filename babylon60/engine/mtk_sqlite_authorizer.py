@@ -86,7 +86,7 @@ def mtk_authorizer_callback(action: int, arg1: str | None, arg2: str | None, dbn
                 return sqlite3.SQLITE_OK
 
         token = mtk_active_token.get()
-        payload = mtk_payload_hash.get() or ""
+        mtk_payload_hash.get() or ""
         
         if not token or (not token.startswith("mtk_auth_") and not token.startswith("zk_seal_rs_")):
             logger.critical(f"[MTK-BLOCK] Unauthorized physical mutation attempt: Action {action} on {arg1}")

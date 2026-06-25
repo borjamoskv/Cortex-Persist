@@ -11,7 +11,6 @@ from typing import Any
 
 from babylon60.audit.ledger import EnterpriseAuditLedger
 from babylon60.auth.enterprise_identity import SovereignIdentity
-
 from babylon60.engine.chronos_roi import CHRONOS, ChronosReport
 from babylon60.guards.enterprise_guard import EnterpriseRBACGuard
 
