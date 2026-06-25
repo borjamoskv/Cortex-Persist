@@ -278,3 +278,23 @@ class SovereignSharedBus:
             except OSError as exc:
                 logger.debug("Shared memory unlink failed for %s: %s", self.name, exc)
             self._shm = None
+
+    async def broadcast_ultrathink_horizon(self, domain: str, blast_radius: int) -> bool:
+        """
+        Emits the P0 Singularity event globally across the shared memory bus.
+        Notifies all active Centurions to block low-priority writes and prepare for Overclocking.
+        """
+        logger.critical(
+            "✴️ [SHARED-BUS] BROADCASTING ULTRATHINK HORIZON - Domain: %s | Blast Radius: %d",
+            domain, blast_radius
+        )
+        return await self.emit(
+            event_type="governance:ultrathink_horizon",
+            payload={
+                "domain": domain,
+                "blast_radius": blast_radius,
+                "action": "HALT_LOW_PRIORITY_WRITES"
+            },
+            source="commander",
+            routing_key="global"
+        )

@@ -267,8 +267,8 @@ async def test_seal_6_temp_rejection(mock_cache):
 async def test_seal_7_happy():
     mock_registry = [1, 2, 3, 4, 5, 6, 7]
     with (
-        patch("cortex.extensions.axioms.AXIOM_REGISTRY", mock_registry),
-        patch("cortex.extensions.axioms.registry.enforced", return_value=mock_registry),
+        patch("legacy_research.extensions.axioms.AXIOM_REGISTRY", mock_registry),
+        patch("legacy_research.extensions.axioms.registry.enforced", return_value=mock_registry),
     ):
         passed, _ = await check_seal_7_axiom_registry()
         assert passed is True
@@ -278,8 +278,8 @@ async def test_seal_7_happy():
 async def test_seal_7_registry_rejection():
     mock_registry = [1, 2, 3, 4, 5]  # Only 5 axioms
     with (
-        patch("cortex.extensions.axioms.AXIOM_REGISTRY", mock_registry),
-        patch("cortex.extensions.axioms.registry.enforced", return_value=mock_registry),
+        patch("legacy_research.extensions.axioms.AXIOM_REGISTRY", mock_registry),
+        patch("legacy_research.extensions.axioms.registry.enforced", return_value=mock_registry),
     ):
         passed, _ = await check_seal_7_axiom_registry()
         assert passed is False
@@ -289,8 +289,8 @@ async def test_seal_7_registry_rejection():
 async def test_seal_7_prompt_size_warn(tmp_path):
     mock_registry = [1, 2, 3, 4, 5, 6, 7]
     with (
-        patch("cortex.extensions.axioms.AXIOM_REGISTRY", mock_registry),
-        patch("cortex.extensions.axioms.registry.enforced", return_value=mock_registry),
+        patch("legacy_research.extensions.axioms.AXIOM_REGISTRY", mock_registry),
+        patch("legacy_research.extensions.axioms.registry.enforced", return_value=mock_registry),
         patch("cortex.guards._seals_checks_6_10.ROOT_DIR", tmp_path),
     ):
         prompt_file = tmp_path / "SYSTEM_PROMPT.md"
