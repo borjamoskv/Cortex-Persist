@@ -149,6 +149,16 @@ An append-only, tamper-evident hash chain. Every PR evaluation, accepted code bl
 
 ---
 
+## ▀▄ ADVANCED KINEMATICS (v1.1.0)
+
+With the release of **v1.1.0**, BABYLON-60 introduces advanced autopoietic capabilities:
+
+- **Ouroboros L6 AST Transformer & Hot Swap Engine:** The engine securely transforms Abstract Syntax Trees (ASTs) on the fly and hot-swaps execution paths deterministically.
+- **Thermodynamic Defragmentation:** Continuously purges epistemic noise and "Anergy" from the system state, maintaining optimal token-to-exergy ratios.
+- **Causal ATMS (Assumption-Based Truth Maintenance System):** A rigorous causal inference engine that tracks dependencies and invalidates assertions structurally when root facts change.
+
+---
+
 ## ▀▄ SDK INTEGRATION
 
 You can also use BABYLON-60 directly in Python to gate your own autonomous agents before they apply mutations:
@@ -207,7 +217,7 @@ pip install "cortex-persist[secure]"          # OS keyring credentials vault
 AESTHETIC:    INDUSTRIAL NOIR 2026 (#0A0A0A / #2B3BE5)
 EPISTEMOLOGY: C5-REAL KRGS — Partitioned Vector Space
 CORE TENET:   Optimize for correction, not certainty. Uncertainty is telemetry, not weakness.
-UPDATED:      June 2026 — Falsifiable Memory Infrastructure
+UPDATED:      June 2026 — Ouroboros L6 & Thermodynamic Defragmentation (v1.1.0)
 ```
 
 > **LICENSE:** Apache-2.0 | **OPERATOR:** borjamoskv | [cortexpersist.com](https://cortexpersist.com) | [Sponsor](https://github.com/sponsors/borjamoskv)
