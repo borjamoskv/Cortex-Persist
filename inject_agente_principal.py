@@ -33,7 +33,7 @@ async def inject_primitives():
 
     # Extraer ID, Primitiva, Aplicación
     # Formato línea: - **AGENT-PRINCIPAL-001**: `Exergy-Based Reward Alignment` - Alineación de Recompensas por Exergía...
-    pattern = re.compile(r'-\s*\*\*(AGENT-PRINCIPAL-\d{3})\*\*:\s*`?([^`]+)`?\s*-\s*(.*)')
+    pattern = re.compile(r'-\s*\*\*(AGENT-PRINCIPAL-\d{3})\*\*:\s*`?([^`\n]+?)`?\s*-\s*(.*)')
     matches = pattern.findall(content)
 
     if not matches:

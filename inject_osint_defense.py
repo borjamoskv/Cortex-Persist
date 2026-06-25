@@ -33,7 +33,7 @@ async def inject_primitives():
 
     # Extraer ID, Primitiva, Aplicación
     # Formato línea: - **OSINT-DEF-001**: `Cryptographic Configuration Encapsulation` - Encapsulación Cifrada...
-    pattern = re.compile(r'-\s*\*\*(OSINT-DEF-\d{3})\*\*:\s*`?([^`]+)`?\s*-\s*(.*)')
+    pattern = re.compile(r'-\s*\*\*(OSINT-DEF-\d{3})\*\*:\s*`?([^`\n]+?)`?\s*-\s*(.*)')
     matches = pattern.findall(content)
 
     if not matches:

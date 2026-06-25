@@ -30,7 +30,7 @@ async def inject_primitives():
 
     # Extraer ID, Primitiva, Aplicación
     # Formato línea: - **GIT-EXERGY-001**: `git init` - Instanciación de Estado Cero
-    pattern = re.compile(r'-\s*\*\*(GIT-EXERGY-\d{3})\*\*:\s*`?([^`]+)`?\s*-\s*(.*)')
+    pattern = re.compile(r'-\s*\*\*(GIT-EXERGY-\d{3})\*\*:\s*`?([^`\n]+?)`?\s*-\s*(.*)')
     matches = pattern.findall(content)
 
     if not matches:

@@ -23,7 +23,7 @@ async def inject_primitives():
     with open(md_path, encoding="utf-8") as f:
         content = f.read()
 
-    pattern = re.compile(r'-\s*\*\*(ACADEMY-\d{3})\*\*:\s*`?([^`]+)`?\s*-\s*(.*)')
+    pattern = re.compile(r'-\s*\*\*(ACADEMY-\d{3})\*\*:\s*`?([^`\n]+?)`?\s*-\s*(.*)')
     matches = pattern.findall(content)
 
     agent_id = 99

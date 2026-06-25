@@ -33,7 +33,7 @@ async def inject_primitives():
         content = f.read()
 
     # Extraer ID, Primitiva, Aplicación
-    pattern = re.compile(r'-\s*\*\*(TEORIA-UNIFICADA-\d{3})\*\*:\s*`?([^`]+)`?\s*-\s*(.*)')
+    pattern = re.compile(r'-\s*\*\*(TEORIA-UNIFICADA-\d{3})\*\*:\s*`?([^`\n]+?)`?\s*-\s*(.*)')
     matches = pattern.findall(content)
 
     if not matches:

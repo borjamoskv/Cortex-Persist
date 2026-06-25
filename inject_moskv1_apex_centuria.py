@@ -48,7 +48,7 @@ async def inject_centuria():
     with open(md_path, encoding="utf-8") as f:
         content = f.read()
 
-    pattern = re.compile(r'-\s*\*\*(APEX-(\d{3}))\*\*:\s*`?([^`]+)`?\s*-\s*(.*)')
+    pattern = re.compile(r'-\s*\*\*(APEX-(\d{3}))\*\*:\s*`?([^`\n]+?)`?\s*-\s*(.*)')
     all_matches = pattern.findall(content)
 
     # Filter to only new primitives

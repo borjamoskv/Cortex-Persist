@@ -34,7 +34,7 @@ async def inject_primitives():
 
     # Extraer ID, Primitiva, Aplicación
     # Formato línea: - **DAME-001**: `External Memory Persistence` - Persistencia de Memoria...
-    pattern = re.compile(r'-\s*\*\*(DAME-\d{3})\*\*:\s*`?([^`]+)`?\s*-\s*(.*)')
+    pattern = re.compile(r'-\s*\*\*(DAME-\d{3})\*\*:\s*`?([^`\n]+?)`?\s*-\s*(.*)')
     matches = pattern.findall(content)
 
     if not matches:
