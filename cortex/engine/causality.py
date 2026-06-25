@@ -31,11 +31,7 @@ from cortex.engine.causality_models import (
 from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 
 try:
-    from cortex.engine.logic.atms import (  # noqa: F401, type: ignore
-        ATMSState,
-        CausalATMS,
-        LogicalNode,
-    )
+    from cortex.logic.atms import AtmsAdapter  # noqa: F401, type: ignore
 except ImportError:
     AtmsAdapter = None  # type: ignore
 

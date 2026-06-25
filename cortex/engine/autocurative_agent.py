@@ -84,7 +84,7 @@ class AutoCurativeAgent:
             self._breakers[subsystem] = CircuitBreaker(
                 name=f"autocurative:{subsystem}",
                 failure_threshold=self.config.breaker_failure_threshold,
-                recovery_timeout=self.config.breaker_recovery_timeout_s,
+                recovery_timeout=self.config.breaker_recovery_timeout_ms / 1000.0,
             )
         return self._breakers[subsystem]
 

@@ -16,7 +16,7 @@ from cortex.engine.autopoiesis.sandbox import SandboxValidator
 logger = logging.getLogger(__name__)
 
 class _HealingTransformer(ast.NodeTransformer):
-    def __init__(self, function_name: str, class_name: str | None, patch_node: ast.AST):
+    def __init__(self, function_name: str, class_name: str | None, patch_node: ast.stmt):
         self.function_name = function_name
         self.class_name = class_name
         self.patch_node = patch_node

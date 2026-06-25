@@ -293,13 +293,12 @@ class HealingStack:
 
             # Sync timeout into agent config
             new_timeout = params.get("timeout_ms")
-            if new_timeout is not None:
-                self._agent.config.healing_timeout_s = new_timeout / 1000.0
-
-            # Sync cooldown
+            if new_timeout:
+                self._agent.config.healing_timeout_ms = int(new_timeout)
+                
             new_cooldown = params.get("cooldown_s")
-            if new_cooldown is not None:
-                self._agent.config.cooldown_after_repair_s = new_cooldown
+            if new_cooldown:
+                self._agent.config.cooldown_after_repair_ms = int(new_cooldown * 1000)
 
     async def _sync_parameters(self) -> None:
         """Async wrapper for parameter sync."""

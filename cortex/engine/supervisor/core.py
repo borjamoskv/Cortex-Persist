@@ -145,10 +145,10 @@ class CortexSupervisor:
                     breaker._threshold = threshold
             timeout = params.get("timeout_ms")
             if timeout is not None:
-                self._l5.config.healing_timeout_s = timeout / 1000.0
+                self._l5.config.healing_timeout_ms = int(timeout)
             cooldown = params.get("cooldown_s")
             if cooldown is not None:
-                self._l5.config.cooldown_after_repair_s = cooldown
+                self._l5.config.cooldown_after_repair_ms = int(cooldown * 1000)
 
     async def _apply_preemptive_action(self, prediction: Any) -> None:  # pyright: ignore[reportUndefinedVariable]
         """Test proxy for the daemon method."""

@@ -42,7 +42,7 @@ async def execute_with_healing(
             )
             ENDOCRINE.pulse(
                 HormoneType.ADRENALINE,
-                agent.config.adrenaline_on_critical,
+                agent.config.adrenaline_on_critical.to_float(),
                 reason=f"Circuit OPEN: {subsystem}",
             )
             raise RuntimeError(
@@ -56,12 +56,12 @@ async def execute_with_healing(
             if inspect.iscoroutinefunction(task):
                 result = await asyncio.wait_for(
                     task(*args, **kwargs),
-                    timeout=agent.config.healing_timeout_s,
+                    timeout=agent.config.healing_timeout_ms / 1000.0,
                 )
             else:
                 result = await asyncio.wait_for(
                     asyncio.to_thread(task, *args, **kwargs),
-                    timeout=agent.config.healing_timeout_s,
+                    timeout=agent.config.healing_timeout_ms / 1000.0,
                 )
 
             # ─── SUCCESS ──────────────────────────────────
@@ -77,12 +77,12 @@ async def execute_with_healing(
                 )
                 ENDOCRINE.pulse(
                     HormoneType.NEURAL_GROWTH,
-                    agent.config.neural_growth_on_heal,
+                    agent.config.neural_growth_on_heal.to_float(),
                     reason=f"Self-healed: {subsystem}",
                 )
                 ENDOCRINE.pulse(
                     HormoneType.CORTISOL,
-                    agent.config.cortisol_on_repair,
+                    agent.config.cortisol_on_repair.to_float(),
                     reason=f"Repair relief: {subsystem}",
                 )
 
@@ -97,7 +97,7 @@ async def execute_with_healing(
             agent._total_errors += 1
             ENDOCRINE.pulse(
                 HormoneType.CORTISOL,
-                agent.config.cortisol_on_error,
+                agent.config.cortisol_on_error.to_float(),
                 reason=f"Error in {subsystem}: {type(error).__name__}",
             )
 
@@ -117,7 +117,7 @@ async def execute_with_healing(
             # ─── COOLDOWN ─────────────────────────────────
             if attempt < agent.config.max_healing_attempts - 1:
                 agent._phase = HealingPhase.COOLDOWN
-                await asyncio.sleep(agent.config.cooldown_after_repair_s)
+                await asyncio.sleep(agent.config.cooldown_after_repair_ms / 1000.0)
 
     # All attempts exhausted
     agent._phase = HealingPhase.IDLE
@@ -128,7 +128,7 @@ async def execute_with_healing(
     )
     ENDOCRINE.pulse(
         HormoneType.ADRENALINE,
-        agent.config.adrenaline_on_critical,
+        agent.config.adrenaline_on_critical.to_float(),
         reason=f"Healing exhausted: {subsystem}",
     )
 
@@ -309,7 +309,7 @@ async def start_daemon(
     agent._start_time = time.monotonic()
     logger.info(
         "[AUTOCURATIVE] 🚀 Level 5 Self-Healing Daemon started (interval=%.1fs)",
-        agent.config.monitor_interval_s,
+        agent.config.monitor_interval_ms / 1000.0,
     )
 
     while agent._is_running:
@@ -321,7 +321,7 @@ async def start_daemon(
             cortisol = ENDOCRINE.get_level(HormoneType.CORTISOL)
 
             # Thresholds
-            if cortisol > agent.config.cortisol_alarm_threshold:
+            if cortisol > agent.config.cortisol_alarm_threshold.to_float():
                 logger.warning(
                     "[AUTOCURATIVE] ⚠️ Cortisol alarm: %.3f > %.3f",
                     cortisol,
@@ -347,7 +347,7 @@ async def start_daemon(
         except Exception as e:
             logger.error("[AUTOCURATIVE] Daemon probe error: %s", e)
 
-        await asyncio.sleep(agent.config.monitor_interval_s)
+        await asyncio.sleep(agent.config.monitor_interval_ms / 1000.0)
 
 
 async def probe_system_health(agent: AutoCurativeAgent, engine: Any) -> dict[str, Any]:

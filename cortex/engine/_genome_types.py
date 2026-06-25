@@ -162,11 +162,13 @@ class StrategyGenome:
     def genome_hash(self) -> str:
         """Content-addressable hash of the genome (deterministic identity)."""
         if self._hash is None:
+            serialized_rates = {str(k): v.value if hasattr(v, 'value') else v for k, v in self.mutation_rates.items()}
+            serialized_params = {k: v.value if hasattr(v, 'value') else v for k, v in self.parameters.items()}
             hashable = {
                 "name": self.name,
                 "dispatch_tree": self.dispatch_tree,
-                "parameters": self.parameters,
-                "mutation_rates": self.mutation_rates,
+                "parameters": serialized_params,
+                "mutation_rates": serialized_rates,
                 "constraints": self.constraints,
             }
             content = json.dumps(hashable, sort_keys=True, default=str)
@@ -178,11 +180,25 @@ class StrategyGenome:
 
     def to_dict(self) -> dict[str, Any]:
         """Freeze the entire genome to a dict (quote)."""
+        
+        # Serialize Babylon60 inside mutation_rates
+        serialized_rates = {}
+        for k, v in self.mutation_rates.items():
+            serialized_rates[str(k)] = v.value if hasattr(v, 'value') else v
+            
+        # Optional: serialize B60 in parameters
+        serialized_params = {}
+        for k, v in self.parameters.items():
+            if hasattr(v, 'value'):
+                serialized_params[k] = v.value
+            else:
+                serialized_params[k] = v
+
         return {
             "name": self.name,
             "dispatch_tree": self.dispatch_tree,
-            "parameters": self.parameters,
-            "mutation_rates": self.mutation_rates,
+            "parameters": serialized_params,
+            "mutation_rates": serialized_rates,
             "constraints": self.constraints,
             "lineage": self.lineage.to_dict(),
             "genome_hash": self.genome_hash,
@@ -195,11 +211,32 @@ class StrategyGenome:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> StrategyGenome:
         """Reconstruct genome from dict (unquote)."""
+        
+        # Deserialize mutation_rates to Babylon60
+        raw_rates = data.get("mutation_rates", {})
+        parsed_rates = {}
+        for k, v in raw_rates.items():
+            try:
+                mt = MutationType(k)
+                if isinstance(v, (int, float)):
+                    # handle old floats, or direct values
+                    if v < 1.0:
+                        parsed_rates[mt] = Babylon60.from_float(float(v))
+                    else:
+                        parsed_rates[mt] = Babylon60(int(v))
+                else:
+                    parsed_rates[mt] = Babylon60(int(v))
+            except Exception:
+                pass
+                
+        # Parse parameters (if they were B60) - for simplicity we leave them as numbers unless specific
+        # We don't have typed parameters, so we just pass them as they are
+                
         genome = cls(
             name=data.get("name", "unnamed"),
             dispatch_tree=data.get("dispatch_tree"),
             parameters=data.get("parameters", {}),
-            mutation_rates=data.get("mutation_rates", {}),
+            mutation_rates=parsed_rates,
             constraints=data.get("constraints", []),
         )
         lineage_data = data.get("lineage", {})
