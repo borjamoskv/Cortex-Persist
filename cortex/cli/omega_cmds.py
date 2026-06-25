@@ -96,7 +96,7 @@ async def run_ui(kernel: OmegaKernel):
         entropy_bar = "█" * min(int(entropy / 5), 10) + "░" * (10 - min(int(entropy / 5), 10))
 
         sensors_table.add_row("Scanned Files", f"{kernel.sensor.last_scan_files} python files")
-        sensors_table.add_row("TODOs / FIX-MEs", f"[bold white]{kernel.sensor.last_scan_todos}[/]")
+        sensors_table.add_row("TO-DOs / FIX-MEs", f"[bold white]{kernel.sensor.last_scan_todos}[/]")
         sensors_table.add_row(
             "Ruff Violations", f"[bold {_RED}]{kernel.sensor.last_scan_violations}[/]"
         )

@@ -16,7 +16,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Build
-        run: cargo build --all
+        run: cd cortex_rs && cargo build --all
 
       - name: Test
-        run: cargo test --all
+        run: cd cortex_rs && cargo test --all
