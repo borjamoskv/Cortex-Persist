@@ -194,7 +194,7 @@ filterwarnings = [
 [tool.ruff]
 target-version = "py310"
 line-length = 100
-exclude = ["experimental", "notebooks", "skills", "engine-c5", "bounty_hunt", "cortex_mev_base"]
+exclude = ["experimental", "notebooks", "skills", "engine-c5", "bounty_hunt", "cortex_mev_base", "sdks"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "G", "TID"]
@@ -225,7 +225,8 @@ exclude = [
     "scripts",
     "cortex.agents",
     ".scratch",
-    ".venv"
+    ".venv",
+    "sdks"
 ]
 reportMissingImports = "warning"
 reportPrivateImportUsage = "none"
@@ -238,6 +239,7 @@ exclude = [
     "tests/",
     "scripts/",
     "cortex_mev_base/",
+    "sdks/",
 ]
 
 [tool.bumpversion]
