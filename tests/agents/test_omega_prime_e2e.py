@@ -3,10 +3,10 @@ import asyncio
 
 import pytest
 
-from babylon60.agents.base import BaseAgent
-from babylon60.agents.builtins.omega_prime import OmegaPrimeAgent
-from babylon60.agents.manifest import AgentManifest
-from babylon60.agents.message_schema import AgentMessage, MessageKind
+from cortex.agents.base import BaseAgent
+from cortex.agents.builtins.omega_prime import OmegaPrimeAgent
+from cortex.agents.manifest import AgentManifest
+from cortex.agents.message_schema import AgentMessage, MessageKind
 
 
 class InMemoryMessageBus:

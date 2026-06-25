@@ -6,7 +6,7 @@ import asyncio
 import hashlib
 import struct
 import pytest
-from babylon60.shannon.benchmark.genesis import GenesisBenchmark
+from cortex.shannon.benchmark.genesis import GenesisBenchmark
 
 
 @pytest.mark.asyncio

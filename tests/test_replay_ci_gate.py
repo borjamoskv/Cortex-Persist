@@ -12,13 +12,13 @@ Demuestra:
 
 import pytest
 
-from babylon60.runtime.state import RuntimeState
-from babylon60.runtime.replay.ci_gate import (
+from cortex.runtime.state import RuntimeState
+from cortex.runtime.replay.ci_gate import (
     ReplayCIGate,
     ReplayCIResult,
     fixed_event_trace,
 )
-from babylon60.runtime.replay.engine import ReplayEngine
+from cortex.runtime.replay.engine import ReplayEngine
 
 
 # ── 1. Execution Identity ──────────────────────────────────────────

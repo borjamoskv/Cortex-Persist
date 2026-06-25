@@ -7,9 +7,9 @@ import pytest
 import pytest_asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from babylon60.memory.manager import CortexMemoryManager
-from babylon60.memory.engrams import CortexSemanticEngram
-from babylon60.memory.models import MemoryEvent
+from cortex.memory.manager import CortexMemoryManager
+from cortex.memory.engrams import CortexSemanticEngram
+from cortex.memory.models import MemoryEvent
 
 
 @pytest.fixture
@@ -90,7 +90,7 @@ async def test_store_pipeline_states(manager, mock_encoder):
     )
     manager._resonance_gate.gate = AsyncMock(return_value=("reset", candidate_engram))
 
-    with patch("babylon60.memory.manager.CortexMemoryManager._check_deduplication", return_value=None):
+    with patch("cortex.memory.manager.CortexMemoryManager._check_deduplication", return_value=None):
         fact_id = await manager.store(
             tenant_id="t1", project_id="p1", content="Validated content", fact_type="knowledge"
         )
@@ -112,7 +112,7 @@ async def test_store_rollback_resonance_failure(manager):
     # Simulate a failure in resonance gate (e.g. database error)
     manager._resonance_gate.gate = AsyncMock(side_effect=RuntimeError("Resonance failure"))
 
-    with patch("babylon60.memory.manager.CortexMemoryManager._check_deduplication", return_value=None):
+    with patch("cortex.memory.manager.CortexMemoryManager._check_deduplication", return_value=None):
         with pytest.raises(RuntimeError, match="Resonance failure"):
             await manager.store(tenant_id="t1", content="This will fail")
 
@@ -121,7 +121,7 @@ async def test_store_rollback_resonance_failure(manager):
 async def test_assemble_context_isolation(manager, mock_l1):
     """Verify tenant isolation in context assembly."""
     with patch(
-        "babylon60.memory.memory_retrieval.retrieve_episodic_context", new_callable=AsyncMock
+        "cortex.memory.memory_retrieval.retrieve_episodic_context", new_callable=AsyncMock
     ) as mock_retrieve:
         mock_retrieve.return_value = []
 
@@ -148,7 +148,7 @@ async def test_deduplication_exact_match(manager, mock_l2):
     manager.thalamus.filter = AsyncMock(return_value=(True, "encode:new", None))
 
     with patch(
-        "babylon60.memory.manager.CortexMemoryManager._check_deduplication",
+        "cortex.memory.manager.CortexMemoryManager._check_deduplication",
         side_effect=manager._check_deduplication,
     ):
         fact_id = await manager.store(tenant_id="t1", project_id="p1", content="Already exists")
@@ -162,7 +162,7 @@ async def test_deduplication_exact_match(manager, mock_l2):
 async def test_wait_for_background_success(manager):
     """Test wait_for_background with actual task completion."""
     # Mock compress_and_store to do nothing
-    with patch("babylon60.memory._manager_bg.compress_and_store", new_callable=AsyncMock):
+    with patch("cortex.memory._manager_bg.compress_and_store", new_callable=AsyncMock):
         manager._bg_queue.put_nowait((["item"], "s", "t", "p"))
         # The worker should pick it up and call task_done
         await manager.wait_for_background(timeout=1.0)

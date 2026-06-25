@@ -10,7 +10,7 @@ from pathlib import Path
 import click
 from rich.table import Table
 
-from babylon60.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 
 __all__ = [
     "purge",

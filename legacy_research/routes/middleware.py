@@ -156,7 +156,7 @@ _HEAL_COUNTER: dict[str, int] = {}
 from starlette.middleware.base import BaseHTTPMiddleware
 
 
-class Babylon60TranslationMiddleware(BaseHTTPMiddleware):
+class CortexTranslationMiddleware(BaseHTTPMiddleware):
     """
     Physical Shim for Babylon-60 (Int64) <-> IEEE 754 (Float64) conversion.
     Protects the C5-REAL core from float drift while allowing external systems
@@ -170,7 +170,7 @@ class Babylon60TranslationMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         
         # Inject boundary headers
-        response.headers["X-Babylon60-Shim"] = "active"
+        response.headers["X-Cortex-Shim"] = "active"
         response.headers["X-Exergy-Maximized"] = "C5-REAL"
         
         return response

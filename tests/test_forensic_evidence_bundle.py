@@ -12,7 +12,7 @@ import aiosqlite
 
 import pytest
 
-from babylon60.forensics.evidence_bundle import (
+from cortex.forensics.evidence_bundle import (
     EVIDENCE_COMMIT_ACTION,
     build_evidence_manifest,
     canonical_json_bytes,
@@ -21,8 +21,8 @@ from babylon60.forensics.evidence_bundle import (
     verify_evidence_commit,
     verify_evidence_manifest,
 )
-from babylon60.ledger import SovereignLedger
-from babylon60.utils.canonical import canonical_json, compute_tx_hash, now_iso
+from cortex.ledger import SovereignLedger
+from cortex.utils.canonical import canonical_json, compute_tx_hash, now_iso
 
 
 

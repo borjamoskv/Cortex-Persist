@@ -13,7 +13,7 @@ from typing import Any
 
 
 @dataclass(frozen=True)
-class Babylon60Amount:
+class CortexAmount:
     """
     BABYLON-60 Epistemology (AX-011).
     Eradicates `float` and `float64`. Stores values as Base-60 scaled integers.
@@ -24,7 +24,7 @@ class Babylon60Amount:
     raw_value: int
 
     @classmethod
-    def from_string(cls, value: str) -> Babylon60Amount:
+    def from_string(cls, value: str) -> CortexAmount:
         """Parses a string safely into the Babylon-60 integer space."""
         parts = value.split(".")
         if len(parts) == 1:
@@ -42,16 +42,16 @@ class Babylon60Amount:
         """WARNING: Only use for observability. Never for state mutation."""
         return self.raw_value / self.SCALE_FACTOR
 
-    def __add__(self, other: Babylon60Amount) -> Babylon60Amount:
-        return Babylon60Amount(self.raw_value + other.raw_value)
+    def __add__(self, other: CortexAmount) -> CortexAmount:
+        return CortexAmount(self.raw_value + other.raw_value)
 
-    def __sub__(self, other: Babylon60Amount) -> Babylon60Amount:
-        return Babylon60Amount(self.raw_value - other.raw_value)
+    def __sub__(self, other: CortexAmount) -> CortexAmount:
+        return CortexAmount(self.raw_value - other.raw_value)
 
-    def __gt__(self, other: Babylon60Amount) -> bool:
+    def __gt__(self, other: CortexAmount) -> bool:
         return self.raw_value > other.raw_value
 
-    def __ge__(self, other: Babylon60Amount) -> bool:
+    def __ge__(self, other: CortexAmount) -> bool:
         return self.raw_value >= other.raw_value
 
 
@@ -64,9 +64,9 @@ class ArbitrageSignal:
     asset_pair: str
     buy_venue: str
     sell_venue: str
-    buy_price: Babylon60Amount
-    sell_price: Babylon60Amount
-    exergy_margin: Babylon60Amount
+    buy_price: CortexAmount
+    sell_price: CortexAmount
+    exergy_margin: CortexAmount
     timestamp_ns: int
 
     @classmethod
@@ -75,8 +75,8 @@ class ArbitrageSignal:
         asset_pair: str,
         buy_venue: str,
         sell_venue: str,
-        buy_price: Babylon60Amount,
-        sell_price: Babylon60Amount,
+        buy_price: CortexAmount,
+        sell_price: CortexAmount,
         timestamp_ns: int,
     ) -> ArbitrageSignal:
         margin = sell_price - buy_price

@@ -1305,7 +1305,7 @@
 > Babylon-60 fixed-point integer arithmetic and contiguous memory primitives.
 
 - **Func**: `_check_i64()`
-- **Class**: `_PurePythonBabylon60`
+- **Class**: `_PurePythonCortex`
   - `def __init__()`
   - `def from_float()`
   - `def from_int()`
@@ -1335,7 +1335,7 @@
   - `def __getitem__()`
   - `def to_list()`
   - `def as_memoryview()`
-- **Class**: `Babylon60Vector`
+- **Class**: `CortexVector`
   - `def __init__()`
   - `def push()`
   - `def __len__()`
@@ -2467,9 +2467,9 @@
 
 - **Class**: `NeuralGrowthEngine`
 
-### `babylon60.py`
+### `cortex.py`
 
-- **Class**: `Babylon60`
+- **Class**: `Cortex`
   - `def __init__()`
   - `def from_raw()`
   - `def to_float()`

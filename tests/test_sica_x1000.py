@@ -11,17 +11,17 @@ from __future__ import annotations
 
 import pytest
 
-from babylon60.sica.colony import (
+from cortex.sica.colony import (
     Colony,
     GenePool,
     GenomeCrossover,
     SpecializationDetector,
     Tournament,
 )
-from babylon60.sica.dream import DreamEngine, DreamInsight
-from babylon60.sica.object_level import ExecutionStep, ExecutionTrace, StepOutcome
-from babylon60.sica.strategy import Heuristic, SearchStrategy, StrategyGenome, default_genome
-from babylon60.sica.world_model import ToolBelief, WorldModel
+from cortex.sica.dream import DreamEngine, DreamInsight
+from cortex.sica.object_level import ExecutionStep, ExecutionTrace, StepOutcome
+from cortex.sica.strategy import Heuristic, SearchStrategy, StrategyGenome, default_genome
+from cortex.sica.world_model import ToolBelief, WorldModel
 
 
 # ═══════════════════════════════════════════════════════════════════

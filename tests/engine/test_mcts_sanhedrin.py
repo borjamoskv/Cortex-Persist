@@ -4,7 +4,7 @@ Unit tests for the Sanhedrin Monte Carlo Downsampling engine.
 """
 
 import pytest
-from babylon60.engine.mcts_sanhedrin import (
+from cortex.engine.mcts_sanhedrin import (
     VectorialDownsampling,
     ContextFusionEngine,
     ConstraintFirewall,

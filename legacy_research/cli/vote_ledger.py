@@ -5,10 +5,10 @@ from __future__ import annotations
 import sys
 import click
 from rich.panel import Panel
-from babylon60.cli.common import DEFAULT_DB, cli, console, get_engine
-from babylon60.cli.errors import err_empty_results, err_validation, handle_cli_error
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.errors import err_empty_results, err_validation, handle_cli_error
 # Importe actualizado para Wave 5 Fase 2
-from babylon60.consensus.vote_ledger import ImmutableVoteLedger
+from cortex.consensus.vote_ledger import ImmutableVoteLedger
 
 
 

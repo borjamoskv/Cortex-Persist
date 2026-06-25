@@ -9,8 +9,8 @@ import asyncio
 import click
 from rich.table import Table
 
-from babylon60.cli.common import cli, console, get_engine
-from babylon60.extensions.daemon.frontier import FrontierDaemon
+from cortex.cli.common import cli, console, get_engine
+from cortex.extensions.daemon.frontier import FrontierDaemon
 
 
 @click.group("frontier")
@@ -60,7 +60,7 @@ def intel_scan_cmd(source: str):
     console.print(f"[bold cyan]🔍 Scanning technical source for frontier signals:[/bold cyan] {source}")
     engine = get_engine()
     
-    from babylon60.extensions.frontier_intel.analyzer import FrontierIntelSystem
+    from cortex.extensions.frontier_intel.analyzer import FrontierIntelSystem
     system = FrontierIntelSystem(engine=engine)
     
     signals = asyncio.run(system.scan_source(source))
@@ -81,7 +81,7 @@ def signals_cmd(phase: str | None, min_novelty: float, limit: int):
     console.print("[bold cyan]📊 Querying frontier signals database...[/bold cyan]")
     engine = get_engine()
     
-    from babylon60.extensions.frontier_intel.analyzer import FrontierIntelSystem
+    from cortex.extensions.frontier_intel.analyzer import FrontierIntelSystem
     system = FrontierIntelSystem(engine=engine)
     
     signals = asyncio.run(system.get_signals(phase=phase, min_novelty=min_novelty, top_k=limit))
@@ -136,7 +136,7 @@ def analyze_cmd(text: str | None, file: str | None, source_url: str):
     console.print("[bold cyan]🧠 Analyzing raw technical text...[/bold cyan]")
     engine = get_engine()
     
-    from babylon60.extensions.frontier_intel.analyzer import FrontierIntelSystem
+    from cortex.extensions.frontier_intel.analyzer import FrontierIntelSystem
     system = FrontierIntelSystem(engine=engine)
     
     signals = asyncio.run(system.analyze_text(content, source_url=source_url))

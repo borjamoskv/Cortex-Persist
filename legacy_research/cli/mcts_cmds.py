@@ -6,11 +6,11 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from babylon60.cli.common import cli
-from babylon60.config import DEFAULT_DB_PATH
-from babylon60.extensions.llm.provider import LLMProvider
-from babylon60.extensions.llm.router import CortexLLMRouter
-from babylon60.mcts.tree import MCTSEngine
+from cortex.cli.common import cli
+from cortex.config import DEFAULT_DB_PATH
+from cortex.extensions.llm.provider import LLMProvider
+from cortex.extensions.llm.router import CortexLLMRouter
+from cortex.mcts.tree import MCTSEngine
 
 console = Console()
 

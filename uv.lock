@@ -391,233 +391,6 @@ wheels = [
 ]
 
 [[package]]
-name = "babylon-60"
-version = "1.0.0"
-source = { editable = "." }
-dependencies = [
-    { name = "aiosqlite" },
-    { name = "click" },
-    { name = "confluent-kafka" },
-    { name = "cryptography" },
-    { name = "fable-library" },
-    { name = "jax", version = "0.6.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "jax", version = "0.10.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "jaxlib", version = "0.6.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "jaxlib", version = "0.10.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "langchain-community" },
-    { name = "langchain-core" },
-    { name = "langchain-ollama" },
-    { name = "psutil" },
-    { name = "pydantic" },
-    { name = "rich" },
-    { name = "sqlite-vec" },
-]
-
-[package.optional-dependencies]
-acceleration = [
-    { name = "numba" },
-]
-adk = [
-    { name = "google-antigravity" },
-]
-all = [
-    { name = "aiofiles" },
-    { name = "aiohttp" },
-    { name = "arq" },
-    { name = "asyncpg" },
-    { name = "beautifulsoup4" },
-    { name = "chromadb" },
-    { name = "email-validator" },
-    { name = "fastapi" },
-    { name = "google-antigravity" },
-    { name = "httpx" },
-    { name = "keyring" },
-    { name = "markdownify" },
-    { name = "mcp" },
-    { name = "neo4j" },
-    { name = "numba" },
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "onnxruntime", version = "1.24.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "onnxruntime", version = "1.26.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "optimum", extra = ["onnxruntime"] },
-    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "pandas", version = "3.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "prometheus-client" },
-    { name = "pyobjc-core", marker = "sys_platform == 'darwin'" },
-    { name = "pyobjc-framework-cocoa", marker = "sys_platform == 'darwin'" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-    { name = "pytest-timeout" },
-    { name = "pytest-xdist" },
-    { name = "python-osc" },
-    { name = "pytrends" },
-    { name = "pyyaml" },
-    { name = "qdrant-client" },
-    { name = "radon" },
-    { name = "redis" },
-    { name = "ruff" },
-    { name = "sentence-transformers" },
-    { name = "sse-starlette" },
-    { name = "stripe" },
-    { name = "toolbox-core" },
-    { name = "uvicorn", extra = ["standard"] },
-    { name = "watchdog" },
-    { name = "z3-solver" },
-]
-api = [
-    { name = "email-validator" },
-    { name = "fastapi" },
-    { name = "httpx" },
-    { name = "sse-starlette" },
-    { name = "uvicorn", extra = ["standard"] },
-]
-authoring = [
-    { name = "pyyaml" },
-]
-bci = [
-    { name = "python-osc" },
-]
-billing = [
-    { name = "stripe" },
-]
-cloud = [
-    { name = "asyncpg" },
-    { name = "qdrant-client" },
-    { name = "redis" },
-]
-compute = [
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-]
-daemon = [
-    { name = "aiofiles" },
-    { name = "aiohttp" },
-    { name = "arq" },
-    { name = "prometheus-client" },
-    { name = "watchdog" },
-]
-dev = [
-    { name = "httpx" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-    { name = "pytest-timeout" },
-    { name = "pytest-xdist" },
-    { name = "ruff" },
-    { name = "z3-solver" },
-]
-embeddings = [
-    { name = "chromadb" },
-    { name = "onnxruntime", version = "1.24.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "onnxruntime", version = "1.26.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "optimum", extra = ["onnxruntime"] },
-    { name = "sentence-transformers" },
-]
-graph = [
-    { name = "neo4j" },
-]
-mcp = [
-    { name = "aiohttp" },
-    { name = "beautifulsoup4" },
-    { name = "markdownify" },
-    { name = "mcp" },
-    { name = "watchdog" },
-]
-platform = [
-    { name = "pyobjc-core", marker = "sys_platform == 'darwin'" },
-    { name = "pyobjc-framework-cocoa", marker = "sys_platform == 'darwin'" },
-]
-quality = [
-    { name = "radon" },
-]
-secure = [
-    { name = "keyring" },
-]
-toolbox = [
-    { name = "toolbox-core" },
-]
-trends = [
-    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "pandas", version = "3.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "pytrends" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "argon2-cffi" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aiofiles", marker = "extra == 'daemon'" },
-    { name = "aiohttp", marker = "extra == 'daemon'" },
-    { name = "aiohttp", marker = "extra == 'mcp'" },
-    { name = "aiosqlite", specifier = ">=0.20.0" },
-    { name = "arq", marker = "extra == 'daemon'" },
-    { name = "asyncpg", marker = "extra == 'cloud'", specifier = ">=0.29" },
-    { name = "babylon-60", extras = ["compute", "secure", "api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "acceleration", "bci", "graph", "quality"], marker = "extra == 'all'" },
-    { name = "beautifulsoup4", marker = "extra == 'mcp'" },
-    { name = "chromadb", marker = "extra == 'embeddings'", specifier = ">=1.5.9" },
-    { name = "click", specifier = ">=8.0" },
-    { name = "confluent-kafka", specifier = ">=2.1.0" },
-    { name = "cryptography", specifier = ">=46.0.7" },
-    { name = "email-validator", marker = "extra == 'api'", specifier = ">=2.1.0" },
-    { name = "fable-library", specifier = ">=5.4.0" },
-    { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.110" },
-    { name = "google-antigravity", marker = "extra == 'adk'", specifier = ">=0.1.0" },
-    { name = "httpx", marker = "extra == 'api'", specifier = ">=0.27" },
-    { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27" },
-    { name = "jax", specifier = ">=0.6.2" },
-    { name = "jaxlib", specifier = ">=0.6.2" },
-    { name = "keyring", marker = "extra == 'secure'", specifier = ">=25.7.0" },
-    { name = "langchain-community", specifier = ">=0.4.2" },
-    { name = "langchain-core", specifier = ">=1.4.7" },
-    { name = "langchain-ollama", specifier = ">=1.1.0" },
-    { name = "markdownify", marker = "extra == 'mcp'", specifier = ">=0.13" },
-    { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.0" },
-    { name = "neo4j", marker = "extra == 'graph'", specifier = ">=6.2.0" },
-    { name = "numba", marker = "extra == 'acceleration'", specifier = ">=0.65.0" },
-    { name = "numpy", marker = "extra == 'compute'" },
-    { name = "onnxruntime", marker = "python_full_version >= '3.11' and extra == 'embeddings'", specifier = ">=1.25.0" },
-    { name = "onnxruntime", marker = "python_full_version < '3.11' and extra == 'embeddings'", specifier = ">=1.17,<1.25.0" },
-    { name = "optimum", extras = ["onnxruntime"], marker = "extra == 'embeddings'", specifier = ">=1.17,<2.0.0" },
-    { name = "pandas", marker = "extra == 'trends'", specifier = ">=2.0" },
-    { name = "prometheus-client", marker = "extra == 'daemon'", specifier = ">=0.20.0" },
-    { name = "psutil", specifier = ">=7.2.2" },
-    { name = "pydantic", specifier = ">=2.0" },
-    { name = "pyobjc-core", marker = "sys_platform == 'darwin' and extra == 'platform'" },
-    { name = "pyobjc-framework-cocoa", marker = "sys_platform == 'darwin' and extra == 'platform'" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
-    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3" },
-    { name = "pytest-xdist", marker = "extra == 'dev'", specifier = ">=3.8.0" },
-    { name = "python-osc", marker = "extra == 'bci'", specifier = ">=1.10.2" },
-    { name = "pytrends", marker = "extra == 'trends'", specifier = ">=4.9" },
-    { name = "pyyaml", marker = "extra == 'authoring'", specifier = ">=6.0" },
-    { name = "qdrant-client", marker = "extra == 'cloud'", specifier = ">=1.9" },
-    { name = "radon", marker = "extra == 'quality'", specifier = ">=6.0.1" },
-    { name = "redis", marker = "extra == 'cloud'", specifier = ">=5.0" },
-    { name = "rich", specifier = ">=13.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11.0" },
-    { name = "sentence-transformers", marker = "extra == 'embeddings'", specifier = ">=3.0" },
-    { name = "sqlite-vec", specifier = ">=0.1.6" },
-    { name = "sse-starlette", marker = "extra == 'api'", specifier = ">=0.10.3" },
-    { name = "stripe", marker = "extra == 'billing'", specifier = ">=8.0" },
-    { name = "toolbox-core", marker = "extra == 'toolbox'", specifier = ">=0.1.0" },
-    { name = "uvicorn", extras = ["standard"], marker = "extra == 'api'", specifier = ">=0.27" },
-    { name = "watchdog", marker = "extra == 'daemon'", specifier = ">=6.0.0" },
-    { name = "watchdog", marker = "extra == 'mcp'", specifier = ">=6.0.0" },
-    { name = "z3-solver", marker = "extra == 'dev'", specifier = ">=4.13.0" },
-]
-provides-extras = ["compute", "secure", "api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "acceleration", "bci", "graph", "quality", "all"]
-
-[package.metadata.requires-dev]
-dev = [{ name = "argon2-cffi", specifier = ">=25.1.0" }]
-
-[[package]]
 name = "backoff"
 version = "1.11.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1039,6 +812,233 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/e8/fd/a8466ed8fd6d6f82a13fd852fa14eca8b71cbca192fe82d58677808fcae3/confluent_kafka-2.14.2-cp314-cp314-manylinux_2_28_x86_64.whl", hash = "sha256:d61e22e6cd24e518c47b3b608023d2476bca4a7525de7877ca28e323af98f832", size = 4598793, upload-time = "2026-06-03T09:52:37.059Z" },
     { url = "https://files.pythonhosted.org/packages/45/73/c74394c74541f4c06be482ef03e3d3f668a4df5e4b52bc50e6a43bb9c345/confluent_kafka-2.14.2-cp314-cp314-win_amd64.whl", hash = "sha256:cf18131b6b8137f5ea0de1ff0988eb2af40a372c31f8238b015d70ccd1c0945a", size = 4584051, upload-time = "2026-06-03T09:52:42.226Z" },
 ]
+
+[[package]]
+name = "cortex-persist"
+version = "1.0.0"
+source = { editable = "." }
+dependencies = [
+    { name = "aiosqlite" },
+    { name = "click" },
+    { name = "confluent-kafka" },
+    { name = "cryptography" },
+    { name = "fable-library" },
+    { name = "jax", version = "0.6.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "jax", version = "0.10.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "jaxlib", version = "0.6.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "jaxlib", version = "0.10.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "langchain-community" },
+    { name = "langchain-core" },
+    { name = "langchain-ollama" },
+    { name = "psutil" },
+    { name = "pydantic" },
+    { name = "rich" },
+    { name = "sqlite-vec" },
+]
+
+[package.optional-dependencies]
+acceleration = [
+    { name = "numba" },
+]
+adk = [
+    { name = "google-antigravity" },
+]
+all = [
+    { name = "aiofiles" },
+    { name = "aiohttp" },
+    { name = "arq" },
+    { name = "asyncpg" },
+    { name = "beautifulsoup4" },
+    { name = "chromadb" },
+    { name = "email-validator" },
+    { name = "fastapi" },
+    { name = "google-antigravity" },
+    { name = "httpx" },
+    { name = "keyring" },
+    { name = "markdownify" },
+    { name = "mcp" },
+    { name = "neo4j" },
+    { name = "numba" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "onnxruntime", version = "1.24.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "onnxruntime", version = "1.26.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "optimum", extra = ["onnxruntime"] },
+    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "pandas", version = "3.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "prometheus-client" },
+    { name = "pyobjc-core", marker = "sys_platform == 'darwin'" },
+    { name = "pyobjc-framework-cocoa", marker = "sys_platform == 'darwin'" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "pytest-timeout" },
+    { name = "pytest-xdist" },
+    { name = "python-osc" },
+    { name = "pytrends" },
+    { name = "pyyaml" },
+    { name = "qdrant-client" },
+    { name = "radon" },
+    { name = "redis" },
+    { name = "ruff" },
+    { name = "sentence-transformers" },
+    { name = "sse-starlette" },
+    { name = "stripe" },
+    { name = "toolbox-core" },
+    { name = "uvicorn", extra = ["standard"] },
+    { name = "watchdog" },
+    { name = "z3-solver" },
+]
+api = [
+    { name = "email-validator" },
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "sse-starlette" },
+    { name = "uvicorn", extra = ["standard"] },
+]
+authoring = [
+    { name = "pyyaml" },
+]
+bci = [
+    { name = "python-osc" },
+]
+billing = [
+    { name = "stripe" },
+]
+cloud = [
+    { name = "asyncpg" },
+    { name = "qdrant-client" },
+    { name = "redis" },
+]
+compute = [
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+daemon = [
+    { name = "aiofiles" },
+    { name = "aiohttp" },
+    { name = "arq" },
+    { name = "prometheus-client" },
+    { name = "watchdog" },
+]
+dev = [
+    { name = "httpx" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "pytest-timeout" },
+    { name = "pytest-xdist" },
+    { name = "ruff" },
+    { name = "z3-solver" },
+]
+embeddings = [
+    { name = "chromadb" },
+    { name = "onnxruntime", version = "1.24.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "onnxruntime", version = "1.26.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "optimum", extra = ["onnxruntime"] },
+    { name = "sentence-transformers" },
+]
+graph = [
+    { name = "neo4j" },
+]
+mcp = [
+    { name = "aiohttp" },
+    { name = "beautifulsoup4" },
+    { name = "markdownify" },
+    { name = "mcp" },
+    { name = "watchdog" },
+]
+platform = [
+    { name = "pyobjc-core", marker = "sys_platform == 'darwin'" },
+    { name = "pyobjc-framework-cocoa", marker = "sys_platform == 'darwin'" },
+]
+quality = [
+    { name = "radon" },
+]
+secure = [
+    { name = "keyring" },
+]
+toolbox = [
+    { name = "toolbox-core" },
+]
+trends = [
+    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "pandas", version = "3.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "pytrends" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "argon2-cffi" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aiofiles", marker = "extra == 'daemon'" },
+    { name = "aiohttp", marker = "extra == 'daemon'" },
+    { name = "aiohttp", marker = "extra == 'mcp'" },
+    { name = "aiosqlite", specifier = ">=0.20.0" },
+    { name = "arq", marker = "extra == 'daemon'" },
+    { name = "asyncpg", marker = "extra == 'cloud'", specifier = ">=0.29" },
+    { name = "beautifulsoup4", marker = "extra == 'mcp'" },
+    { name = "chromadb", marker = "extra == 'embeddings'", specifier = ">=1.5.9" },
+    { name = "click", specifier = ">=8.0" },
+    { name = "confluent-kafka", specifier = ">=2.1.0" },
+    { name = "cortex-persist", extras = ["compute", "secure", "api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "acceleration", "bci", "graph", "quality"], marker = "extra == 'all'" },
+    { name = "cryptography", specifier = ">=46.0.7" },
+    { name = "email-validator", marker = "extra == 'api'", specifier = ">=2.1.0" },
+    { name = "fable-library", specifier = ">=5.4.0" },
+    { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.110" },
+    { name = "google-antigravity", marker = "extra == 'adk'", specifier = ">=0.1.0" },
+    { name = "httpx", marker = "extra == 'api'", specifier = ">=0.27" },
+    { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27" },
+    { name = "jax", specifier = ">=0.6.2" },
+    { name = "jaxlib", specifier = ">=0.6.2" },
+    { name = "keyring", marker = "extra == 'secure'", specifier = ">=25.7.0" },
+    { name = "langchain-community", specifier = ">=0.4.2" },
+    { name = "langchain-core", specifier = ">=1.4.7" },
+    { name = "langchain-ollama", specifier = ">=1.1.0" },
+    { name = "markdownify", marker = "extra == 'mcp'", specifier = ">=0.13" },
+    { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.0" },
+    { name = "neo4j", marker = "extra == 'graph'", specifier = ">=6.2.0" },
+    { name = "numba", marker = "extra == 'acceleration'", specifier = ">=0.65.0" },
+    { name = "numpy", marker = "extra == 'compute'" },
+    { name = "onnxruntime", marker = "python_full_version >= '3.11' and extra == 'embeddings'", specifier = ">=1.25.0" },
+    { name = "onnxruntime", marker = "python_full_version < '3.11' and extra == 'embeddings'", specifier = ">=1.17,<1.25.0" },
+    { name = "optimum", extras = ["onnxruntime"], marker = "extra == 'embeddings'", specifier = ">=1.17,<2.0.0" },
+    { name = "pandas", marker = "extra == 'trends'", specifier = ">=2.0" },
+    { name = "prometheus-client", marker = "extra == 'daemon'", specifier = ">=0.20.0" },
+    { name = "psutil", specifier = ">=7.2.2" },
+    { name = "pydantic", specifier = ">=2.0" },
+    { name = "pyobjc-core", marker = "sys_platform == 'darwin' and extra == 'platform'" },
+    { name = "pyobjc-framework-cocoa", marker = "sys_platform == 'darwin' and extra == 'platform'" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
+    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3" },
+    { name = "pytest-xdist", marker = "extra == 'dev'", specifier = ">=3.8.0" },
+    { name = "python-osc", marker = "extra == 'bci'", specifier = ">=1.10.2" },
+    { name = "pytrends", marker = "extra == 'trends'", specifier = ">=4.9" },
+    { name = "pyyaml", marker = "extra == 'authoring'", specifier = ">=6.0" },
+    { name = "qdrant-client", marker = "extra == 'cloud'", specifier = ">=1.9" },
+    { name = "radon", marker = "extra == 'quality'", specifier = ">=6.0.1" },
+    { name = "redis", marker = "extra == 'cloud'", specifier = ">=5.0" },
+    { name = "rich", specifier = ">=13.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11.0" },
+    { name = "sentence-transformers", marker = "extra == 'embeddings'", specifier = ">=3.0" },
+    { name = "sqlite-vec", specifier = ">=0.1.6" },
+    { name = "sse-starlette", marker = "extra == 'api'", specifier = ">=0.10.3" },
+    { name = "stripe", marker = "extra == 'billing'", specifier = ">=8.0" },
+    { name = "toolbox-core", marker = "extra == 'toolbox'", specifier = ">=0.1.0" },
+    { name = "uvicorn", extras = ["standard"], marker = "extra == 'api'", specifier = ">=0.27" },
+    { name = "watchdog", marker = "extra == 'daemon'", specifier = ">=6.0.0" },
+    { name = "watchdog", marker = "extra == 'mcp'", specifier = ">=6.0.0" },
+    { name = "z3-solver", marker = "extra == 'dev'", specifier = ">=4.13.0" },
+]
+provides-extras = ["compute", "secure", "api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "acceleration", "bci", "graph", "quality", "all"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "argon2-cffi", specifier = ">=25.1.0" }]
 
 [[package]]
 name = "coverage"

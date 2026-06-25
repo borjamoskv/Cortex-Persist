@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from babylon60.extensions.aether.tools import AgentToolkit
-from babylon60.extensions.swarm.auto_fix import AutoFixPipeline
+from cortex.extensions.aether.tools import AgentToolkit
+from cortex.extensions.swarm.auto_fix import AutoFixPipeline
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def temp_repo(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
     subprocess.run(["git", "init", "-b", "master"], cwd=repo, check=True)
-    subprocess.run(["git", "config", "user.email", "tester@babylon60.com"], cwd=repo, check=True)
+    subprocess.run(["git", "config", "user.email", "tester@cortex.com"], cwd=repo, check=True)
     subprocess.run(["git", "config", "user.name", "Tester"], cwd=repo, check=True)
     (repo / "README.md").write_text("initial")
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
@@ -135,8 +135,8 @@ async def test_autonomous_merge_failure_conflict(temp_repo):
 
 
 @pytest.mark.asyncio
-@patch("babylon60.extensions.swarm.auto_fix.AutoFixPipeline._execute")
-@patch("babylon60.extensions.swarm.auto_fix.AutoFixPipeline._autonomous_merge")
+@patch("cortex.extensions.swarm.auto_fix.AutoFixPipeline._execute")
+@patch("cortex.extensions.swarm.auto_fix.AutoFixPipeline._autonomous_merge")
 async def test_process_ghost_triggers_merge(mock_merge, mock_execute):
     """Verify that process_ghost calls _autonomous_merge on success."""
     mock_execute.return_value = {
@@ -168,7 +168,7 @@ async def test_hooked_tool_execution_timeout():
     """Verify that hooked_tool_execution enforces the timeout limit."""
     import time
     import asyncio
-    from babylon60.extensions.aether.hooks import hooked_tool_execution
+    from cortex.extensions.aether.hooks import hooked_tool_execution
 
     @hooked_tool_execution(timeout_limit=0.1)
     async def async_slow_tool():
@@ -206,9 +206,9 @@ async def test_hooked_tool_execution_timeout():
 @pytest.mark.asyncio
 async def test_evolution_supervisor_multipass_loop():
     """Verify that EvolutionSupervisor executes the multipass loop with pre/post-eval."""
-    from babylon60.agents.supervisor import EvolutionSupervisor
-    from babylon60.agents.base import BaseAgent
-    from babylon60.agents.manifest import AgentManifest
+    from cortex.agents.supervisor import EvolutionSupervisor
+    from cortex.agents.base import BaseAgent
+    from cortex.agents.manifest import AgentManifest
 
     # Create dummy agent
     manifest = AgentManifest(

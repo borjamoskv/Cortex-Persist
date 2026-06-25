@@ -5,11 +5,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from babylon60.agents.builtins.verification_agent import VerificationAgent
-from babylon60.agents.manifest import AgentManifest
-from babylon60.agents.message_schema import MessageKind, new_message
-from babylon60.verification.oracle import VerificationOracleResult
-from babylon60.verification.verifier import VerificationResult
+from cortex.agents.builtins.verification_agent import VerificationAgent
+from cortex.agents.manifest import AgentManifest
+from cortex.agents.message_schema import MessageKind, new_message
+from cortex.verification.oracle import VerificationOracleResult
+from cortex.verification.verifier import VerificationResult
 
 
 @pytest.fixture

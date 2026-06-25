@@ -53,9 +53,9 @@ def scrape(
     persist: bool,
 ):
     """Extract content from a single URL."""
-    from babylon60.cli.common import _run_async
-    from babylon60.extensions.scraper.engine import ScraperEngine
-    from babylon60.extensions.scraper.models import ExtractionStrategy, ScrapeRequest
+    from cortex.cli.common import _run_async
+    from cortex.extensions.scraper.engine import ScraperEngine
+    from cortex.extensions.scraper.models import ExtractionStrategy, ScrapeRequest
 
     console.print(
         Panel(
@@ -138,9 +138,9 @@ def batch(
     output: str | None,
 ):
     """Batch extract URLs from a newline-delimited file."""
-    from babylon60.cli.common import _run_async
-    from babylon60.extensions.scraper.engine import ScraperEngine
-    from babylon60.extensions.scraper.models import ExtractionStrategy
+    from cortex.cli.common import _run_async
+    from cortex.extensions.scraper.engine import ScraperEngine
+    from cortex.extensions.scraper.models import ExtractionStrategy
 
     with open(file) as f:
         urls = [line.strip() for line in f if line.strip() and not line.startswith("#")]
@@ -201,8 +201,8 @@ def batch(
 @click.option("--output", "-o", type=click.Path(), default=None, help="Output file for URLs.")
 def map_site(url: str, depth: int, output: str | None):
     """Discover URLs from a website (sitemap)."""
-    from babylon60.cli.common import _run_async
-    from babylon60.extensions.scraper.engine import ScraperEngine
+    from cortex.cli.common import _run_async
+    from cortex.extensions.scraper.engine import ScraperEngine
 
     console.print(
         Panel(
@@ -229,7 +229,7 @@ def map_site(url: str, depth: int, output: str | None):
 def _persist_to_cortex(result) -> None:
     """Persist a ScrapeResult to the CORTEX ledger."""
     try:
-        from babylon60.cli.common import _run_async, get_engine
+        from cortex.cli.common import _run_async, get_engine
 
         engine = get_engine()
         _run_async(

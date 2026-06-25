@@ -1,1 +1,0 @@
-../../legacy_research/cli/fingerprint_cmds.py

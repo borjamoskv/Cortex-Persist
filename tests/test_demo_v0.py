@@ -13,7 +13,7 @@ Verifies:
 
 import pytest
 
-from babylon60.routes.demo import (
+from cortex.routes.demo import (
     ensure_demo_tables,
     get_demo_state,
     init_demo_events,
@@ -27,8 +27,8 @@ from babylon60.routes.demo import (
 @pytest.fixture(autouse=True)
 async def _clean_events_table():
     """Ensure events table is clean before each test."""
-    from babylon60 import config
-    from babylon60.database.core import connect_async_ctx
+    from cortex import config
+    from cortex.database.core import connect_async_ctx
 
     async with connect_async_ctx(config.DB_PATH) as conn:
         await ensure_demo_tables(conn)

@@ -14,10 +14,10 @@ from typing import Any
 
 import aiohttp
 
-from babylon60.evm.topography import EVMTopographyMapper
-from babylon60.crypto.keys import ZKSwarmIdentity
-from babylon60.engine.mtk_sqlite_authorizer import mtk_active_token
-from babylon60.engine.causal.taint_engine import generate_secure_taint_token
+from cortex.evm.topography import EVMTopographyMapper
+from cortex.crypto.keys import ZKSwarmIdentity
+from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+from cortex.engine.causal.taint_engine import generate_secure_taint_token
 
 logger = logging.getLogger("cortex.evm.extractor")
 

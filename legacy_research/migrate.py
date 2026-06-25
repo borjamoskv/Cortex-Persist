@@ -9,7 +9,7 @@ and imports them into the v4.0 database. Non-destructive: never modifies source 
 from __future__ import annotations
 
 from pathlib import Path
-from babylon60.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 
 
@@ -21,7 +21,7 @@ import sqlite3
 
 __all__ = ["migrate_v31_to_v40"]
 
-logger = logging.getLogger("babylon60.migrate")
+logger = logging.getLogger("cortex.migrate")
 
 
 def migrate_v31_to_v40(

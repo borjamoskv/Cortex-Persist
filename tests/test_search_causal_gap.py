@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from babylon60.search.causal_gap import CausalGap, retrieve_for_causal_gap
+from cortex.search.causal_gap import CausalGap, retrieve_for_causal_gap
 
 
 def test_missing_evidence_closes_gap_faster() -> None:

@@ -3,9 +3,9 @@ import asyncio
 
 import pytest
 
-from babylon60.engine import CortexEngine
-from babylon60.engine.lock import SovereignLock
-from babylon60.extensions.swarm.manager import CapatazOrchestrator
+from cortex.engine import CortexEngine
+from cortex.engine.lock import SovereignLock
+from cortex.extensions.swarm.manager import CapatazOrchestrator
 
 
 @pytest.fixture

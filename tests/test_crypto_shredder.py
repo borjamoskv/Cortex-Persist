@@ -6,7 +6,7 @@ import sqlite3
 
 import pytest
 
-from babylon60.crypto.shredder import CryptoShredder
+from cortex.crypto.shredder import CryptoShredder
 
 
 

@@ -4,8 +4,8 @@ from __future__ import annotations
 import pytest
 from fastapi import HTTPException
 
-from babylon60.routes.facts import _fact_data as fact_route_data
-from babylon60.routes.memories import _fact_data as memory_route_data
+from cortex.routes.facts import _fact_data as fact_route_data
+from cortex.routes.memories import _fact_data as memory_route_data
 
 
 class _UnsupportedFact:

@@ -7,9 +7,9 @@ import asyncio
 
 import click
 
-from babylon60.cli.common import console
-from babylon60.extensions.skills.niche_arbitrage.models import NicheTarget
-from babylon60.extensions.skills.niche_arbitrage.pipeline import NicheArbitrageEngine
+from cortex.cli.common import console
+from cortex.extensions.skills.niche_arbitrage.models import NicheTarget
+from cortex.extensions.skills.niche_arbitrage.pipeline import NicheArbitrageEngine
 
 
 @click.group(name="niche", help="Niche Arbitrage - Market Intelligence Pipeline")

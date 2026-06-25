@@ -9,10 +9,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from babylon60.extensions.llm.provider import LLMProvider
-from babylon60.extensions.llm.vllm_edge import NativeVLLMProvider
-from babylon60.extensions.training.daemon import AutonomousTrainingDaemon
-from babylon60.extensions.training.verifier import AdapterVerifier
+from cortex.extensions.llm.provider import LLMProvider
+from cortex.extensions.llm.vllm_edge import NativeVLLMProvider
+from cortex.extensions.training.daemon import AutonomousTrainingDaemon
+from cortex.extensions.training.verifier import AdapterVerifier
 
 
 @pytest.fixture
@@ -100,7 +100,7 @@ class TestAutonomousTrainingDaemon:
 
     @pytest.mark.asyncio
     @patch(
-        "babylon60.extensions.training.ttt_engine.TTTEngine.run_nocturnal_consolidation",
+        "cortex.extensions.training.ttt_engine.TTTEngine.run_nocturnal_consolidation",
         new_callable=AsyncMock,
     )
     async def test_run_cycle_success(self, mock_consolidate, mock_home) -> None:
@@ -154,7 +154,7 @@ class TestAutonomousTrainingDaemon:
 
     @pytest.mark.asyncio
     @patch(
-        "babylon60.extensions.training.ttt_engine.TTTEngine.run_nocturnal_consolidation",
+        "cortex.extensions.training.ttt_engine.TTTEngine.run_nocturnal_consolidation",
         new_callable=AsyncMock,
     )
     async def test_run_cycle_skipped(self, mock_consolidate, mock_home) -> None:
@@ -200,7 +200,7 @@ class TestAutonomousTrainingDaemon:
 
 
 class TestLLMProviderLoRARouting:
-    @patch("babylon60.extensions.llm.provider.load_presets")
+    @patch("cortex.extensions.llm.provider.load_presets")
     @patch.dict("os.environ", {"CORTEX_LLM_MODEL": ""})
     @pytest.mark.asyncio
     async def test_vllm_routes_to_adapter_when_verified(self, mock_load_presets, mock_home) -> None:
@@ -217,7 +217,7 @@ class TestLLMProviderLoRARouting:
 
         # 1. Without verified adapter registry
         provider = LLMProvider(provider="vllm")
-        from babylon60.extensions.llm._models import IntentProfile
+        from cortex.extensions.llm._models import IntentProfile
 
         resolved_model = provider._resolve_model(IntentProfile.GENERAL)
         assert resolved_model == "local-model"

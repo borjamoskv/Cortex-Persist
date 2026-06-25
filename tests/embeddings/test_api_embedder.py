@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 
-from babylon60.embeddings.api_embedder import (
+from cortex.embeddings.api_embedder import (
     PROVIDER_CONFIGS,
     SUPPORTED_IMAGE_MIMES,
     APIEmbedder,

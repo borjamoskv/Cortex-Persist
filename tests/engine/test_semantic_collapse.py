@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from babylon60.engine.semantic_collapse import (
+from cortex.engine.semantic_collapse import (
     kolmogorov_approx,
     compute_ncd,
     collapse_eligible,

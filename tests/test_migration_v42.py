@@ -2,9 +2,9 @@ import pytest
 from datetime import datetime, timezone
 import hashlib
 
-from babylon60.engine import CortexEngine
-from babylon60.extensions.nous.runtime import NousRuntime
-from babylon60.extensions.nous.models import (
+from cortex.engine import CortexEngine
+from cortex.extensions.nous.runtime import NousRuntime
+from cortex.extensions.nous.models import (
     NousAST,
     NousMetadata,
     NousOperation,

@@ -11,11 +11,11 @@ from unittest.mock import AsyncMock, MagicMock
 import httpx
 import pytest
 
-from babylon60.agents.builtins.github_telemetry_agent import GithubTelemetryAgent
-from babylon60.agents.bus import SqliteMessageBus
-from babylon60.agents.manifest import AgentManifest
-from babylon60.agents.message_schema import MessageKind, new_message
-from babylon60.telemetry.metrics import metrics
+from cortex.agents.builtins.github_telemetry_agent import GithubTelemetryAgent
+from cortex.agents.bus import SqliteMessageBus
+from cortex.agents.manifest import AgentManifest
+from cortex.agents.message_schema import MessageKind, new_message
+from cortex.telemetry.metrics import metrics
 
 
 def _uid() -> str:

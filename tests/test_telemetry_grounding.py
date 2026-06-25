@@ -2,7 +2,7 @@
 import pytest
 import json
 from cortex_rs import validate_metric_json
-from babylon60.telemetry.metrics import MetricsRegistry, validate_typed_metric
+from cortex.telemetry.metrics import MetricsRegistry, validate_typed_metric
 
 
 class TestRustTelemetrySchemaValidation:

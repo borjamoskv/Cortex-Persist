@@ -6,7 +6,7 @@ This allows the Ouroboros deterministic engine to execute without compiling Rust
 bypassing LOC constraints and sqlite_vec conflicts.
 """
 
-from babylon60.engine.ouroboros_core import (
+from cortex.engine.ouroboros_core import (
     ValidationStatus,
     RetrievalNode,
     RetrievalGraph,
@@ -15,7 +15,7 @@ from babylon60.engine.ouroboros_core import (
     ExergyError,
 )
 
-from babylon60.engine.mtk_python import mint_ephemeral_token
+from cortex.engine.mtk_python import mint_ephemeral_token
 
 def verify_ephemeral_token(token: str, payload: str, kernel_key: str) -> bool:
     # In pure Python Ouroboros engine, token generation is trusted within context
@@ -77,23 +77,23 @@ def calculate_entropy_b60(*args, **kwargs):
     return None
 
 
-class Babylon60:
+class Cortex:
     def __init__(self, value):
         self.value = value
     @classmethod
     def from_int(cls, value):
         return cls(value * 216000)
     def __add__(self, other):
-        return Babylon60(self.value + other.value)
+        return Cortex(self.value + other.value)
     def __sub__(self, other):
-        return Babylon60(self.value - other.value)
+        return Cortex(self.value - other.value)
     def __mul__(self, other):
         # Base 60 arithmetic: (v1 / 216000) * (v2 / 216000) * 216000
-        return Babylon60(int((self.value * other.value) / 216000))
+        return Cortex(int((self.value * other.value) / 216000))
     def mul(self, other):
         return self * other
     def __truediv__(self, other):
-        return Babylon60(int((self.value * 216000) / other.value))
+        return Cortex(int((self.value * 216000) / other.value))
     def __eq__(self, other):
         return self.value == other.value
     def __lt__(self, other):
@@ -109,10 +109,10 @@ class Babylon60:
     def get_value(self):
         return self.value
 
-def calculate_entropy_b60(data: bytes) -> Babylon60:
+def calculate_entropy_b60(data: bytes) -> Cortex:
     from math import log2
     if not data:
-        return Babylon60(0)
+        return Cortex(0)
     freq = {}
     for b in data:
         freq[b] = freq.get(b, 0) + 1
@@ -120,7 +120,7 @@ def calculate_entropy_b60(data: bytes) -> Babylon60:
     for f in freq.values():
         p = f / len(data)
         ent -= p * log2(p)
-    return Babylon60(round(ent * 216000))
+    return Cortex(round(ent * 216000))
 
 class ExergyRouter:
     def __init__(self):

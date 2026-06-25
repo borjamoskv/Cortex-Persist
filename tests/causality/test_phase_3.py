@@ -28,10 +28,10 @@ import aiosqlite
 
 import pytest
 
-from babylon60.engine.fact_store_core import insert_fact_record
-from babylon60.engine.mixins.base import FACT_COLUMNS
-from babylon60.engine.models import Fact
-from babylon60.engine.query_mixin import QueryMixin
+from cortex.engine.fact_store_core import insert_fact_record
+from cortex.engine.mixins.base import FACT_COLUMNS
+from cortex.engine.models import Fact
+from cortex.engine.query_mixin import QueryMixin
 
 
 
@@ -51,6 +51,6 @@ class TestEngineAPI:
         assert "tenant_id" in params
 
     def test_sync_wrapper_exists(self):
-        from babylon60.engine import CortexEngine
+        from cortex.engine import CortexEngine
 
         assert hasattr(CortexEngine, "get_causal_chain_sync")

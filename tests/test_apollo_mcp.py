@@ -4,7 +4,7 @@ import os
 import pytest
 from unittest.mock import patch, MagicMock
 
-from babylon60.mcp.apollo_tools import register_apollo_tools
+from cortex.mcp.apollo_tools import register_apollo_tools
 
 
 class MockFastMCP:
@@ -27,7 +27,7 @@ def mock_mcp():
 
 
 @patch.dict(os.environ, {"APOLLO_API_KEY": "fake_c5_real_key"})
-@patch("babylon60.mcp.apollo_tools.requests.post")
+@patch("cortex.mcp.apollo_tools.requests.post")
 def test_apollo_extract_leads_success(mock_post, mock_mcp, tmp_path):
     # Mock response from Apollo
     mock_response = MagicMock()

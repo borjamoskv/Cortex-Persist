@@ -3,11 +3,11 @@ import os
 
 import pytest
 
-from babylon60.ledger.models import ActionResult, ActionTarget, LedgerEvent
-from babylon60.ledger.queue import EnrichmentQueue
-from babylon60.ledger.store import LedgerStore
-from babylon60.ledger.verifier import LedgerVerifier
-from babylon60.ledger.writer import LedgerWriter
+from cortex.ledger.models import ActionResult, ActionTarget, LedgerEvent
+from cortex.ledger.queue import EnrichmentQueue
+from cortex.ledger.store import LedgerStore
+from cortex.ledger.verifier import LedgerVerifier
+from cortex.ledger.writer import LedgerWriter
 
 
 @pytest.fixture

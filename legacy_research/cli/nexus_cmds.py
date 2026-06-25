@@ -3,8 +3,8 @@ import sys
 from pathlib import Path
 import click
 from rich.console import Console
-from babylon60.cli.common import cli
-from babylon60.cli.errors import err_execution_failed, err_skill_not_found
+from cortex.cli.common import cli
+from cortex.cli.errors import err_execution_failed, err_skill_not_found
 
 # [C5-REAL] Exergy-Maximized
 import sqlite3

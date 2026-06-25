@@ -12,9 +12,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from babylon60.api.core import app
-from babylon60.auth.deps import require_auth, require_permission
-from babylon60.storage import StorageMode
+from cortex.api.core import app
+from cortex.auth.deps import require_auth, require_permission
+from cortex.storage import StorageMode
 
 
 class MockPostgresRecord(dict):
@@ -198,10 +198,10 @@ class MockPostgresPool:
 def mock_postgres_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("CORTEX_STORAGE", "postgres")
     monkeypatch.setenv("POSTGRES_DSN", "postgresql://user:pass@host:5432/cortex")
-    monkeypatch.setattr("babylon60.storage.get_storage_mode", lambda: StorageMode.POSTGRES)
-    monkeypatch.setattr("babylon60.search.vector.get_storage_mode", lambda: StorageMode.POSTGRES)
-    monkeypatch.setattr("babylon60.search.text.get_storage_mode", lambda: StorageMode.POSTGRES)
-    monkeypatch.setattr("babylon60.config.DEPLOY_MODE", "cloud")
+    monkeypatch.setattr("cortex.storage.get_storage_mode", lambda: StorageMode.POSTGRES)
+    monkeypatch.setattr("cortex.search.vector.get_storage_mode", lambda: StorageMode.POSTGRES)
+    monkeypatch.setattr("cortex.search.text.get_storage_mode", lambda: StorageMode.POSTGRES)
+    monkeypatch.setattr("cortex.config.DEPLOY_MODE", "cloud")
 
 
 def test_postgres_api_endpoints(mock_postgres_env: None) -> None:
@@ -229,9 +229,9 @@ def test_postgres_api_endpoints(mock_postgres_env: None) -> None:
 
     # Mock create_pool_async and PostgresBackend.connect/initialize_schema
     with (
-        patch("babylon60.database.postgres_core.create_pool_async", return_value=mock_pool),
-        patch("babylon60.storage.postgres.PostgresBackend.connect", new_callable=AsyncMock),
-        patch("babylon60.storage.postgres.PostgresBackend.close", new_callable=AsyncMock),
+        patch("cortex.database.postgres_core.create_pool_async", return_value=mock_pool),
+        patch("cortex.storage.postgres.PostgresBackend.connect", new_callable=AsyncMock),
+        patch("cortex.storage.postgres.PostgresBackend.close", new_callable=AsyncMock),
     ):
         with TestClient(app) as client:
             # 1. Test Store Fact Endpoint

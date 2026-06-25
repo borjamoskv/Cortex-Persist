@@ -8,7 +8,7 @@ import pytest
 
 def test_omega_daemon_cli_lifecycle():
     """Verify that omega daemon CLI starts and can be stopped gracefully."""
-    cmd = [sys.executable, "-m", "babylon60.cli", "omega", "start", "--tick-rate", "1"]
+    cmd = [sys.executable, "-m", "cortex.cli", "omega", "start", "--tick-rate", "1"]
     
     # Start the daemon with PYTHONPATH pointing to local codebase
     env = dict(os.environ, PYTHONPATH=os.getcwd())

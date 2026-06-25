@@ -1,5 +1,5 @@
 import pytest
-from babylon60.engine.pronoic_transducer import PronoicErrorTransducer, pronoic_decorator
+from cortex.engine.pronoic_transducer import PronoicErrorTransducer, pronoic_decorator
 
 # Simulación del estado global o base de datos que puede faltar (entropía)
 global_schema = {}

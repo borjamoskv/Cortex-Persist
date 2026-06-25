@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-from babylon60.types.models import UniversalMemorySchema
+from cortex.types.models import UniversalMemorySchema
 
 
 def test_universal_memory_schema_validation():

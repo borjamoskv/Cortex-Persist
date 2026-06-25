@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from babylon60.config import DEFAULT_DB_PATH
+from cortex.config import DEFAULT_DB_PATH
 
 # ── Constants ──────────────────────────────────────────────────────────
 NOTEBOOKLM_DIR = Path("notebooklm_sources")
@@ -79,7 +79,7 @@ DOMAIN_MAP: dict[str, list[str]] = {
         "TEST",
         "default",
     ],
-    "babylon60.agents": [
+    "cortex.agents": [
         "AGENT_SCIENCE",
         "AGENTICA",
         "moskv-swarm",
@@ -228,14 +228,14 @@ def _get_db_path() -> str:
 
 def _run_async(coro: Any) -> Any:
     """Helper to run async coroutines from sync CLI."""
-    from babylon60.events.loop import sovereign_run
+    from cortex.events.loop import sovereign_run
 
     return sovereign_run(coro)
 
 
 async def _get_engine_active_facts(project: str | None = None) -> list[Any]:
     """Fetch cleartext facts using CortexEngine."""
-    from babylon60.cli.common import get_engine
+    from cortex.cli.common import get_engine
 
     engine = get_engine()
     try:
@@ -262,7 +262,7 @@ def _get_entities_and_relations(
     """Load entity graph for NotebookLM context."""
     import pandas as pd
 
-    conn = __import__("babylon60.database.core", fromlist=["connect"]).connect(_get_db_path())
+    conn = __import__("cortex.database.core", fromlist=["connect"]).connect(_get_db_path())
     try:
         if project:
             entities = pd.read_sql_query(  # type: ignore[reportCallIssue]

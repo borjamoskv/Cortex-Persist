@@ -7,7 +7,7 @@ Tests the full pipeline flow: Ingress → Context → Plan → Execute → Persi
 import pytest
 import time
 
-from babylon60.pipeline import (
+from cortex.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -17,14 +17,14 @@ from babylon60.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from babylon60.pipeline.orchestrator import CortexOrchestrator
-from babylon60.pipeline._orchestrator_exceptions import (
+from cortex.pipeline.orchestrator import CortexOrchestrator
+from cortex.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )
-from babylon60.router.router import AgentRouter, AgentCapability
-from babylon60.context.assembler import ContextAssembler
-from babylon60.delivery.manager import DeliveryManager
+from cortex.router.router import AgentRouter, AgentCapability
+from cortex.context.assembler import ContextAssembler
+from cortex.delivery.manager import DeliveryManager
 
 
 # ── VSA-SDM Tests ──
@@ -35,7 +35,7 @@ class TestVSAAlgebra:
 
     def test_bind_self_inverse(self):
         """XOR bind is its own inverse."""
-        from babylon60.memory.vsa import bind, random_bipolar
+        from cortex.memory.vsa import bind, random_bipolar
 
         a = random_bipolar(500, seed=1)
         b = random_bipolar(500, seed=2)
@@ -45,7 +45,7 @@ class TestVSAAlgebra:
 
     def test_bundle_preserves_constituents(self):
         """Bundle is closer to constituents than random vectors."""
-        from babylon60.memory.vsa import bundle, cosine_similarity, random_bipolar
+        from cortex.memory.vsa import bundle, cosine_similarity, random_bipolar
 
         v1 = random_bipolar(500, seed=10)
         v2 = random_bipolar(500, seed=20)
@@ -56,7 +56,7 @@ class TestVSAAlgebra:
 
     def test_hamming_distance(self):
         """Hamming distance of identical vectors is 0."""
-        from babylon60.memory.vsa import hamming_distance, random_bipolar
+        from cortex.memory.vsa import hamming_distance, random_bipolar
 
         v = random_bipolar(500, seed=42)
         assert hamming_distance(v, v) == 0
@@ -68,7 +68,7 @@ class TestTextEncoder:
 
     def test_related_texts_higher_similarity(self):
         """Related texts have higher cosine similarity than unrelated."""
-        from babylon60.memory.vsa import TextEncoder, cosine_similarity
+        from cortex.memory.vsa import TextEncoder, cosine_similarity
 
         enc = TextEncoder(dim=1000)
         h1 = enc.encode("smart contract vulnerability")
@@ -80,7 +80,7 @@ class TestTextEncoder:
 
     def test_empty_text(self):
         """Empty text returns zero vector."""
-        from babylon60.memory.vsa import TextEncoder
+        from cortex.memory.vsa import TextEncoder
 
         enc = TextEncoder(dim=100)
         v = enc.encode("")
@@ -92,7 +92,7 @@ class TestSwarmMemory:
 
     def test_record_and_recall(self):
         """Record memories and recall by similarity."""
-        from babylon60.memory.vsa import SwarmMemory
+        from cortex.memory.vsa import SwarmMemory
 
         mem = SwarmMemory(agent_id="test_mem", dim=1000)
         mem.record("DeFi flash loan attack vector", tags=["security"])
@@ -105,7 +105,7 @@ class TestSwarmMemory:
 
     def test_consolidation(self):
         """Consolidation applies decay without crashing."""
-        from babylon60.memory.vsa import SwarmMemory
+        from cortex.memory.vsa import SwarmMemory
 
         mem = SwarmMemory(agent_id="test_decay", dim=500)
         mem.record("test memory 1")
@@ -115,7 +115,7 @@ class TestSwarmMemory:
 
     def test_persistence(self, tmp_path):
         """Persist and reload memories."""
-        from babylon60.memory.vsa import SwarmMemory
+        from cortex.memory.vsa import SwarmMemory
 
         mem = SwarmMemory(agent_id="test_persist", dim=500)
         mem._persistence_path = tmp_path / "test.vsa"
@@ -135,7 +135,7 @@ class TestVSAPipelineBridge:
 
     def test_bridge_query(self):
         """Bridge.query returns results in expected format."""
-        from babylon60.memory.vsa import SwarmMemory, VSAPipelineBridge
+        from cortex.memory.vsa import SwarmMemory, VSAPipelineBridge
 
         bridge = VSAPipelineBridge.__new__(VSAPipelineBridge)
         bridge._memory = SwarmMemory(agent_id="bridge_test", dim=1000)
@@ -149,7 +149,7 @@ class TestVSAPipelineBridge:
 
     def test_bridge_ingest(self):
         """Bridge.ingest stores and returns record ID."""
-        from babylon60.memory.vsa import SwarmMemory, VSAPipelineBridge
+        from cortex.memory.vsa import SwarmMemory, VSAPipelineBridge
 
         bridge = VSAPipelineBridge.__new__(VSAPipelineBridge)
         bridge._memory = SwarmMemory(agent_id="ingest_test", dim=500)

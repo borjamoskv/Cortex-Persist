@@ -1,1 +1,0 @@
-../../legacy_research/cli/auth_cmds.py

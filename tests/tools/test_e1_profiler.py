@@ -12,8 +12,8 @@ from pathlib import Path
 
 import pytest
 
-from babylon60.tools.e1_profiler import ComponentStats, E1Profiler, ProfileReport
-from babylon60.tools.trace_builder import TraceBuilder
+from cortex.tools.e1_profiler import ComponentStats, E1Profiler, ProfileReport
+from cortex.tools.trace_builder import TraceBuilder
 
 
 # ---------------------------------------------------------------------------

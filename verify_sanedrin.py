@@ -13,7 +13,7 @@ import shutil
 # Add current directory to path to allow importing cortex modules
 sys.path.insert(0, os.path.abspath('.'))
 
-from babylon60.storage.ledger import EnterpriseAuditLedger
+from cortex.storage.ledger import EnterpriseAuditLedger
 
 # Define paths for test logs
 VALID_LOG_PATH = "test_ledger_valid.jsonl"

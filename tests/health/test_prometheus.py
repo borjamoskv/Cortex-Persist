@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 
-from babylon60.extensions.health.models import Grade, HealthScore, MetricSnapshot
-from babylon60.extensions.health.prometheus import export_prometheus
+from cortex.extensions.health.models import Grade, HealthScore, MetricSnapshot
+from cortex.extensions.health.prometheus import export_prometheus
 
 
 def test_export_prometheus_formats_correctly() -> None:

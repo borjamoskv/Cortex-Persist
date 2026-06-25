@@ -8,9 +8,9 @@ Quantifies agent sovereignty and system evolution metrics.
 import logging
 import math
 
-from babylon60.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
 
-logger = logging.getLogger("babylon60.cli.aix")
+logger = logging.getLogger("cortex.cli.aix")
 
 
 async def calculate_aix(conn) -> dict:

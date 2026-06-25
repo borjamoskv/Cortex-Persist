@@ -10,9 +10,9 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from babylon60.cli.common import _run_async, cli
-from babylon60.engine.keter import KeterEngine
-from babylon60.utils.errors import CortexError
+from cortex.cli.common import _run_async, cli
+from cortex.engine.keter import KeterEngine
+from cortex.utils.errors import CortexError
 
 console = Console()
 
@@ -64,8 +64,8 @@ def sovereign_cmds() -> None:
 @sovereign_cmds.command("status")
 def sovereign_status_cmd() -> None:
     """Muestra el estado del DigitalEndocrine y el PowerLevel."""
-    from babylon60.extensions.sovereign.endocrine import DigitalEndocrine
-    from babylon60.extensions.sovereign.observability import Dimension, compute_power
+    from cortex.extensions.sovereign.endocrine import DigitalEndocrine
+    from cortex.extensions.sovereign.observability import Dimension, compute_power
 
     endocrine = DigitalEndocrine()
     # Mocking dimension scores for status display
@@ -86,7 +86,7 @@ def sovereign_status_cmd() -> None:
 @click.option("--env", default="production", help="Entorno de ejecución.")
 def sovereign_ignite_cmd(env: str) -> None:
     """Ejecuta el pipeline soberano completo."""
-    from babylon60.extensions.sovereign.engine import run_pipeline
+    from cortex.extensions.sovereign.engine import run_pipeline
 
     console.print(Panel("[bold green]⚡ INICIANDO IGNICIÓN SOBERANA[/]", border_style="green"))
 

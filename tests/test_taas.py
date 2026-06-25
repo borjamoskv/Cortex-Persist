@@ -2,9 +2,9 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from babylon60.api.core import app
-from babylon60.api.deps import get_async_engine
-from babylon60.auth.deps import require_auth, require_permission
+from cortex.api.core import app
+from cortex.api.deps import get_async_engine
+from cortex.auth.deps import require_auth, require_permission
 from unittest.mock import MagicMock, AsyncMock
 
 # Mock AuthResult

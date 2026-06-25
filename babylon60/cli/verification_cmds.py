@@ -1,1 +1,0 @@
-../../legacy_research/cli/verification_cmds.py

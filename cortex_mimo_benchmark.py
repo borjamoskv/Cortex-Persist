@@ -12,12 +12,12 @@ import sys
 sys.path.insert(0, os.path.abspath('.'))
 
 import httpx
-from cortex.engine.babylon60 import Babylon60
+from cortex.engine.cortex import Cortex
 
 
 async def fetch_completion(client: httpx.AsyncClient, url: str, payload: dict, agent_id: int) -> dict:
     start_time = time.perf_counter()
-    ttft = Babylon60(0.0)
+    ttft = Cortex(0.0)
     token_count = 0
     ttft_set = False
     
@@ -30,15 +30,15 @@ async def fetch_completion(client: httpx.AsyncClient, url: str, payload: dict, a
                     if data_str == "[DONE]":
                         break
                     if not ttft_set:
-                        ttft = Babylon60(time.perf_counter() - start_time)
+                        ttft = Cortex(time.perf_counter() - start_time)
                         ttft_set = True
                     # Approximate token count for continuous batching telemetry
                     token_count += 1
     except Exception as e:
         print(f"[Agent-{agent_id}] Evaluation Error: {e}")
 
-    total_time = Babylon60(time.perf_counter() - start_time)
-    tps = Babylon60(token_count) / total_time if total_time > 0.0 else Babylon60(0.0)
+    total_time = Cortex(time.perf_counter() - start_time)
+    tps = Cortex(token_count) / total_time if total_time > 0.0 else Cortex(0.0)
     
     return {
         "agent_id": agent_id,
@@ -72,15 +72,15 @@ async def run_swarm_benchmark(url: str, concurrency: int, prompt_len: int, max_t
         ]
         results = await asyncio.gather(*tasks)
     
-    total_time = Babylon60(time.perf_counter() - start_swarm)
+    total_time = Cortex(time.perf_counter() - start_swarm)
     total_tokens = sum(r["tokens"] for r in results)
     
-    sum_ttft = Babylon60(0.0)
+    sum_ttft = Cortex(0.0)
     for r in results:
         sum_ttft += r["ttft"]
-    avg_ttft = sum_ttft / Babylon60(concurrency) if concurrency > 0 else Babylon60(0.0)
+    avg_ttft = sum_ttft / Cortex(concurrency) if concurrency > 0 else Cortex(0.0)
     
-    throughput = Babylon60(total_tokens) / total_time if total_time > 0.0 else Babylon60(0.0)
+    throughput = Cortex(total_tokens) / total_time if total_time > 0.0 else Cortex(0.0)
     
     print("\n=== THERMODYNAMIC METRICS: LATENCY & THROUGHPUT (BABYLON-60) ===")
     print(f"Total Wall-clock Time: {total_time.to_float():.2f}s")

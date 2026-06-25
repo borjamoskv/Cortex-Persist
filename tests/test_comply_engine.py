@@ -15,9 +15,9 @@ from typing import Any
 
 import pytest
 
-from babylon60.compliance.comply_signer import ComplySigner
-from babylon60.compliance.policy_engine import PolicyEngine
-from babylon60.compliance.tracker import ComplianceTracker
+from cortex.compliance.comply_signer import ComplySigner
+from cortex.compliance.policy_engine import PolicyEngine
+from cortex.compliance.tracker import ComplianceTracker
 
 
 

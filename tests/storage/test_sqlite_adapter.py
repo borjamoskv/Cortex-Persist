@@ -16,8 +16,8 @@ import aiosqlite
 import pytest
 import pytest_asyncio
 
-from babylon60.storage.adapter import StorageAdapter
-from babylon60.storage.sqlite_adapter import SQLiteAdapter
+from cortex.storage.adapter import StorageAdapter
+from cortex.storage.sqlite_adapter import SQLiteAdapter
 
 
 

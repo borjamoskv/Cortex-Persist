@@ -62,7 +62,7 @@ To avoid transactional deadlocks and hash chain bifurcations:
   ```
 * **Tenant Isolation:** All reads and writes must include a `tenant_id` scope. Cross-tenant reads are treated as **P0 security incidents**.
 * **CLI Sandbox Isolation:** Any CLI command writing to the database for demo/testing purposes (e.g. `latticework daemon --real`) MUST use an isolated database located at `/tmp/cortex_test_*.db`.
-* **Babylon-60 Epistemology:** All internal metric, exergy, latency, and coordinate computations utilize Base-60 scaled integer types (`Babylon60`, where \(1.0 = 3600\) units) instead of `float64` to eliminate floating-point rounding errors and cognitive approximation entropy.
+* **Babylon-60 Epistemology:** All internal metric, exergy, latency, and coordinate computations utilize Base-60 scaled integer types (`Cortex`, where \(1.0 = 3600\) units) instead of `float64` to eliminate floating-point rounding errors and cognitive approximation entropy.
 
 ---
 

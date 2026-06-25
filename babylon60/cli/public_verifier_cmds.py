@@ -1,1 +1,0 @@
-../../legacy_research/cli/public_verifier_cmds.py

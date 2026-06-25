@@ -10,8 +10,8 @@ import click
 from rich.panel import Panel
 from rich.syntax import Syntax
 
-from babylon60.cli.common import _run_async, cli, console
-from babylon60.extensions.swarm.autodidact_actuator import autodidact_ingest
+from cortex.cli.common import _run_async, cli, console
+from cortex.extensions.swarm.autodidact_actuator import autodidact_ingest
 
 
 @cli.group(name="autodidact")
@@ -71,14 +71,14 @@ def jit_eval(code_snippet: str) -> None:
 @autodidact_group.command(name="audit")
 def audit():
     """Mide el impacto termodinámico de las inferencias previas usando crystal_thermometer.py."""
-    from babylon60.cli.common import get_engine
-    from babylon60.extensions.swarm.crystal_thermometer import scan_all_crystals
+    from cortex.cli.common import get_engine
+    from cortex.extensions.swarm.crystal_thermometer import scan_all_crystals
 
     console.print("[bold cyan]🔍 CORTEX: Autodidact-Ω Audit[/bold cyan]")
     engine = get_engine()
 
     async def _audit():
-        from babylon60.database.core import connect
+        from cortex.database.core import connect
 
         conn = connect(engine._db_path)  # pyright: ignore[reportArgumentType]
         return await scan_all_crystals(conn, project="autodidact_knowledge")
@@ -112,12 +112,12 @@ def crawl(url: str):
     """LIBRARIAN-1 ∪ DEMIURGE-OMEGA = Autopoiesis."""
     import urllib.request
 
-    from babylon60.extensions.evolution.demiurge import DemiurgeCompiler
+    from cortex.extensions.evolution.demiurge import DemiurgeCompiler
 
     console.print(f"[bold cyan]🕸️ LIBRARIAN-1 Ingesting: {url}[/bold cyan]")
     try:
         if url.startswith("http"):
-            from babylon60.guards.url_guard import is_safe_url
+            from cortex.guards.url_guard import is_safe_url
 
             if not is_safe_url(url):
                 console.print(

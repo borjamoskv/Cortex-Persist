@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for babylon60.consensus.rwa_bft - RWA-BFT Consensus Protocol.
+"""Tests for cortex.consensus.rwa_bft - RWA-BFT Consensus Protocol.
 
 C5-REAL audit remediation: consensus/ had 0% test coverage.
 Validates: supermajority condition, Markov reputation updates, Byzantine detection,
@@ -8,7 +8,7 @@ quorum enforcement, edge cases.
 
 import pytest
 
-from babylon60.consensus.rwa_bft import (
+from cortex.consensus.rwa_bft import (
     AgentVote,
     ConsensusResult,
     RWABFTConsensus,

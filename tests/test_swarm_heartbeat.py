@@ -6,10 +6,10 @@ import time
 
 import pytest
 
-from babylon60.extensions.daemon.monitors.swarm_heartbeat import (
+from cortex.extensions.daemon.monitors.swarm_heartbeat import (
     SwarmHeartbeatMonitor,
 )
-from babylon60.extensions.swarm.swarm_heartbeat import (
+from cortex.extensions.swarm.swarm_heartbeat import (
     SWARM_HEARTBEAT,
     NodeStatus,
     SwarmHeartbeat,

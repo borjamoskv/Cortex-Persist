@@ -9,26 +9,6 @@ from importlib.abc import Loader
 from importlib.machinery import ModuleSpec
 from pathlib import Path
 
-class RedirectLoader(Loader):
-    def create_module(self, spec):
-        cortex_name = spec.name.replace("babylon60", "cortex", 1)
-        return sys.modules[cortex_name]
-
-    def exec_module(self, module):
-        pass
-
-class BabylonRedirector:
-    def find_spec(self, fullname, path, target=None):
-        if fullname == "babylon60" or fullname.startswith("babylon60."):
-            cortex_name = fullname.replace("babylon60", "cortex", 1)
-            try:
-                mod = importlib.import_module(cortex_name)
-                return ModuleSpec(fullname, RedirectLoader(), is_package=hasattr(mod, "__path__"))
-            except ImportError:
-                return None
-        return None
-
-sys.meta_path.insert(0, BabylonRedirector())
 
 # Set environment variables for tests globally before any imports/fixtures run
 os.environ["CORTEX_TESTING"] = "1"
@@ -105,7 +85,7 @@ def mock_local_embedder(monkeypatch):
                 return [0.0] * 384
             return [[0.0] * 384 for _ in content]
 
-    from babylon60.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
     monkeypatch.setattr(CortexEngine, "_get_embedder", lambda self: DummyEmbedder())
 
@@ -113,7 +93,7 @@ def mock_local_embedder(monkeypatch):
 @pytest.fixture(autouse=True)
 def reset_anomaly_detector():
     """Reset the anomaly detector before each test to prevent bulk mutation blocks."""
-    from babylon60.extensions.security.anomaly_detector import DETECTOR
+    from cortex.extensions.security.anomaly_detector import DETECTOR
 
     DETECTOR.reset()
 

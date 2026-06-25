@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch, AsyncMock
-from babylon60.guards.heuristic_seals import (
+from cortex.guards.heuristic_seals import (
     check_gate_10_prompt_size,
     check_gate_11_cobbler,
     check_gate_12_determinism,
@@ -14,7 +14,7 @@ from babylon60.guards.heuristic_seals import (
 
 @pytest.mark.asyncio
 async def test_check_gate_10_prompt_size_happy(tmp_path):
-    with patch("babylon60.guards.heuristic_seals.ROOT_DIR", tmp_path):
+    with patch("cortex.guards.heuristic_seals.ROOT_DIR", tmp_path):
         prompt_file = tmp_path / "SYSTEM_PROMPT.md"
         prompt_file.write_text("This is a small prompt.")
 
@@ -25,7 +25,7 @@ async def test_check_gate_10_prompt_size_happy(tmp_path):
 
 @pytest.mark.asyncio
 async def test_check_gate_10_prompt_size_missing(tmp_path):
-    with patch("babylon60.guards.heuristic_seals.ROOT_DIR", tmp_path):
+    with patch("cortex.guards.heuristic_seals.ROOT_DIR", tmp_path):
         passed, status = await check_gate_10_prompt_size()
         assert passed is True
         assert status == "verified"
@@ -33,7 +33,7 @@ async def test_check_gate_10_prompt_size_missing(tmp_path):
 
 @pytest.mark.asyncio
 async def test_check_gate_10_prompt_size_large_boundary(tmp_path):
-    with patch("babylon60.guards.heuristic_seals.ROOT_DIR", tmp_path):
+    with patch("cortex.guards.heuristic_seals.ROOT_DIR", tmp_path):
         prompt_file = tmp_path / "SYSTEM_PROMPT.md"
         prompt_file.write_text("word " * 600)
 
@@ -55,8 +55,8 @@ async def test_check_gate_11_cobbler_happy():
     cached_files = {Path("cortex/engine/ok.py"): "def ok(): pass"}
 
     with (
-        patch("babylon60.engine.legion_vectors.EntropyDemon", return_value=mock_demon),
-        patch("babylon60.engine.legion_vectors.Intruder", return_value=mock_intruder),
+        patch("cortex.engine.legion_vectors.EntropyDemon", return_value=mock_demon),
+        patch("cortex.engine.legion_vectors.Intruder", return_value=mock_intruder),
     ):
         passed, status = await check_gate_11_cobbler(cached_files)
         assert passed is True
@@ -73,8 +73,8 @@ async def test_check_gate_11_cobbler_demon_violation():
     cached_files = {Path("cortex/engine/fail.py"): "try: pass\nexcept Exception: pass"}
 
     with (
-        patch("babylon60.engine.legion_vectors.EntropyDemon", return_value=mock_demon),
-        patch("babylon60.engine.legion_vectors.Intruder", return_value=mock_intruder),
+        patch("cortex.engine.legion_vectors.EntropyDemon", return_value=mock_demon),
+        patch("cortex.engine.legion_vectors.Intruder", return_value=mock_intruder),
     ):
         passed, status = await check_gate_11_cobbler(cached_files)
         assert passed is False
@@ -91,8 +91,8 @@ async def test_check_gate_11_cobbler_intruder_violation():
     cached_files = {Path("cortex/engine/fail.py"): "eval('1+1')"}
 
     with (
-        patch("babylon60.engine.legion_vectors.EntropyDemon", return_value=mock_demon),
-        patch("babylon60.engine.legion_vectors.Intruder", return_value=mock_intruder),
+        patch("cortex.engine.legion_vectors.EntropyDemon", return_value=mock_demon),
+        patch("cortex.engine.legion_vectors.Intruder", return_value=mock_intruder),
     ):
         passed, status = await check_gate_11_cobbler(cached_files)
         assert passed is False
@@ -104,7 +104,7 @@ async def test_check_gate_11_cobbler_intruder_violation():
 
 @pytest.mark.asyncio
 async def test_check_gate_12_determinism_happy(tmp_path):
-    with patch("babylon60.guards.heuristic_seals.ROOT_DIR", tmp_path):
+    with patch("cortex.guards.heuristic_seals.ROOT_DIR", tmp_path):
         router_py = tmp_path / "cortex/llm/router.py"
         router_py.parent.mkdir(parents=True)
         router_py.write_text("temperature=0")
@@ -117,7 +117,7 @@ async def test_check_gate_12_determinism_happy(tmp_path):
 
 @pytest.mark.asyncio
 async def test_check_gate_12_determinism_drift_warn(tmp_path):
-    with patch("babylon60.guards.heuristic_seals.ROOT_DIR", tmp_path):
+    with patch("cortex.guards.heuristic_seals.ROOT_DIR", tmp_path):
         router_py = tmp_path / "cortex/llm/router.py"
         router_py.parent.mkdir(parents=True)
         router_py.write_text("temperature=0.7")
@@ -130,7 +130,7 @@ async def test_check_gate_12_determinism_drift_warn(tmp_path):
 
 @pytest.mark.asyncio
 async def test_check_gate_12_determinism_boundary(tmp_path):
-    with patch("babylon60.guards.heuristic_seals.ROOT_DIR", tmp_path):
+    with patch("cortex.guards.heuristic_seals.ROOT_DIR", tmp_path):
         router_py = tmp_path / "cortex/llm/router.py"
         router_py.parent.mkdir(parents=True)
         router_py.write_text('{"temperature": 0}')  # JSON boundary
@@ -149,7 +149,7 @@ async def test_check_gate_13_latency_happy():
     mock_telemetry = MagicMock()
     mock_telemetry.stats.return_value = {"ollama": {"avg_latency_ms": 150}}
 
-    with patch("babylon60.extensions.llm._telemetry.CascadeTelemetry", return_value=mock_telemetry):
+    with patch("cortex.extensions.llm._telemetry.CascadeTelemetry", return_value=mock_telemetry):
         passed, status = await check_gate_13_latency()
         assert passed is True
         assert status == "verified"
@@ -160,7 +160,7 @@ async def test_check_gate_13_latency_slow_warn():
     mock_telemetry = MagicMock()
     mock_telemetry.stats.return_value = {"ollama": {"avg_latency_ms": 500}}
 
-    with patch("babylon60.extensions.llm._telemetry.CascadeTelemetry", return_value=mock_telemetry):
+    with patch("cortex.extensions.llm._telemetry.CascadeTelemetry", return_value=mock_telemetry):
         passed, status = await check_gate_13_latency()
         assert passed is True
         assert status == "verified"
@@ -169,7 +169,7 @@ async def test_check_gate_13_latency_slow_warn():
 @pytest.mark.asyncio
 async def test_check_gate_13_latency_missing_extension():
     with patch(
-        "babylon60.guards.heuristic_seals.CascadeTelemetry", side_effect=ImportError, create=True
+        "cortex.guards.heuristic_seals.CascadeTelemetry", side_effect=ImportError, create=True
     ):
         passed, status = await check_gate_13_latency()
         assert passed is True
@@ -182,7 +182,7 @@ async def test_check_gate_13_latency_missing_extension():
 @pytest.mark.asyncio
 async def test_check_gate_14_aesthetic_happy():
     cached_files = {Path("file.py"): "Clean code"}
-    with patch("babylon60.guards.gates.common.GlobalSourceCache.files", cached_files):
+    with patch("cortex.guards.gates.common.GlobalSourceCache.files", cached_files):
         passed, status = await check_gate_14_aesthetic()
         assert passed is True
         assert status == "verified"
@@ -191,7 +191,7 @@ async def test_check_gate_14_aesthetic_happy():
 @pytest.mark.asyncio
 async def test_check_gate_14_aesthetic_placeholder_warn():
     cached_files = {Path("file.py"): "TO" + "DO: placeholder"}
-    with patch("babylon60.guards.gates.common.GlobalSourceCache.files", cached_files):
+    with patch("cortex.guards.gates.common.GlobalSourceCache.files", cached_files):
         passed, status = await check_gate_14_aesthetic()
         assert passed is True
         assert status == "verified"
@@ -200,7 +200,7 @@ async def test_check_gate_14_aesthetic_placeholder_warn():
 @pytest.mark.asyncio
 async def test_check_gate_14_aesthetic_exclude_legion():
     cached_files = {Path("legion.py"): "FIX" + "ME: I am excluded"}
-    with patch("babylon60.guards.gates.common.GlobalSourceCache.files", cached_files):
+    with patch("cortex.guards.gates.common.GlobalSourceCache.files", cached_files):
         passed, status = await check_gate_14_aesthetic()
         assert passed is True
         assert status == "verified"

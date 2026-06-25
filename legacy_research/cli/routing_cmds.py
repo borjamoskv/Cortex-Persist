@@ -17,7 +17,7 @@ import click
 from rich.table import Table
 from rich.text import Text
 
-from babylon60.cli.common import cli, console
+from cortex.cli.common import cli, console
 
 # Industrial Noir Palette
 _CYBER = "#CCFF00"
@@ -52,7 +52,7 @@ def routing() -> None:
 @click.option("--intent", default=None, help="Filter by intent (code, reasoning, architect...)")
 def routing_matrix(intent: str | None) -> None:
     """Show the full intent→provider→model routing matrix."""
-    from babylon60.extensions.llm._presets import load_presets
+    from cortex.extensions.llm._presets import load_presets
 
     presets = load_presets()
     intents = ["code", "reasoning", "creative", "architect", "general"]
@@ -107,7 +107,7 @@ def routing_matrix(intent: str | None) -> None:
 @click.argument("intent")
 def routing_resolve(provider: str, intent: str) -> None:
     """Resolve the best model for a provider+intent pair."""
-    from babylon60.extensions.llm._presets import resolve_model
+    from cortex.extensions.llm._presets import resolve_model
 
     model = resolve_model(provider, intent)
     if model:
@@ -121,7 +121,7 @@ def routing_resolve(provider: str, intent: str) -> None:
 @click.option("--limit", "-n", default=10, help="Max results")
 def routing_cheapest(intent: str, limit: int) -> None:
     """Show cheapest providers for an intent."""
-    from babylon60.extensions.llm._presets import cheapest_providers, get_preset_info
+    from cortex.extensions.llm._presets import cheapest_providers, get_preset_info
 
     results = cheapest_providers(intent)[:limit]
 
@@ -155,7 +155,7 @@ def routing_cheapest(intent: str, limit: int) -> None:
 @click.argument("intent", default="general")
 def routing_frontier(intent: str) -> None:
     """Show frontier-tier providers for an intent."""
-    from babylon60.extensions.llm._presets import frontier_providers, get_preset_info
+    from cortex.extensions.llm._presets import frontier_providers, get_preset_info
 
     results = frontier_providers(intent)
 
@@ -185,7 +185,7 @@ def routing_frontier(intent: str) -> None:
 @routing.command("status")
 def routing_status() -> None:
     """Show LLM provider readiness and API key status. [STATUS_CLI]"""
-    from babylon60.extensions.llm._presets import provider_inventory
+    from cortex.extensions.llm._presets import provider_inventory
 
     inventory = provider_inventory()
 
@@ -219,7 +219,7 @@ def routing_status() -> None:
 @routing.command("agents")
 def routing_agents() -> None:
     """Show all registered agents with resolved models."""
-    from babylon60.extensions.agents.registry import AgentRegistry
+    from cortex.extensions.agents.registry import AgentRegistry
 
     registry = AgentRegistry()
     registry.clear()

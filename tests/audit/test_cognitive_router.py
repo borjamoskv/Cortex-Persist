@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """
-Comprehensive tests for babylon60.audit.cognitive_router.
+Comprehensive tests for cortex.audit.cognitive_router.
 
 Covers:
   - SafetyClassifier: tokenized keyword classification, unicode normalization NFKD, combining accents, leetspeak, and semantic similarity vector matching.
@@ -41,10 +41,10 @@ async def ledger(audit_conn):
     """Creates an EnterpriseAuditLedger with a fresh keypair."""
     pem_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audit_sovereign.pem")
     with patch(
-        "babylon60.audit.ledger.os.path.exists",
+        "cortex.audit.ledger.os.path.exists",
         side_effect=lambda p: False if p == pem_path else os.path.exists(p),
     ):
-        from babylon60.audit.ledger import EnterpriseAuditLedger
+        from cortex.audit.ledger import EnterpriseAuditLedger
 
         ledger = object.__new__(EnterpriseAuditLedger)
         from cryptography.hazmat.primitives.asymmetric import ed25519
@@ -66,7 +66,7 @@ async def ledger(audit_conn):
 @pytest.fixture
 async def router(ledger):
     """Creates a CognitiveRouter instance."""
-    from babylon60.audit.cognitive_router import CognitiveRouter
+    from cortex.audit.cognitive_router import CognitiveRouter
 
     return CognitiveRouter(ledger)
 
@@ -93,7 +93,7 @@ class TestCognitiveRouter:
     @pytest.mark.asyncio
     async def test_safety_classifier_matching(self):
         """SafetyClassifier should identify sensitive categories."""
-        from babylon60.audit.cognitive_router import SafetyClassifier
+        from cortex.audit.cognitive_router import SafetyClassifier
 
         classifier = SafetyClassifier()
 
@@ -194,7 +194,7 @@ class TestCognitiveRouter:
     @pytest.mark.asyncio
     async def test_adversarial_bypass_resilience(self):
         """Verify the classifier handles leetspeak and unicode homoglyphs, and uses tokens."""
-        from babylon60.audit.cognitive_router import SafetyClassifier
+        from cortex.audit.cognitive_router import SafetyClassifier
 
         classifier = SafetyClassifier()
 
@@ -213,7 +213,7 @@ class TestCognitiveRouter:
     @pytest.mark.asyncio
     async def test_declarative_routing_custom_policy(self, ledger):
         """Verify routing decisions honor the declarative policy mapping."""
-        from babylon60.audit.cognitive_router import CognitiveRouter
+        from cortex.audit.cognitive_router import CognitiveRouter
 
         custom_policy = {
             "version": "v3.0.0-custom",
@@ -305,7 +305,7 @@ class TestCognitiveRouter:
     @pytest.mark.asyncio
     async def test_declarative_dsl_yaml_loader(self, ledger):
         """Verify router can be initialized using YAML DSL policy configuration."""
-        from babylon60.audit.cognitive_router import CognitiveRouter
+        from cortex.audit.cognitive_router import CognitiveRouter
 
         yaml_policy = """
         version: "v4.0.0-yaml-dsl"
@@ -342,7 +342,7 @@ class TestCognitiveRouter:
     @pytest.mark.asyncio
     async def test_semantic_similarity_matching(self):
         """Verify safety classification using semantic embeddings cosine similarity."""
-        from babylon60.audit.cognitive_router import SafetyClassifier
+        from cortex.audit.cognitive_router import SafetyClassifier
 
         categories_config = {
             "biology": {
@@ -370,7 +370,7 @@ class TestCognitiveRouter:
     @pytest.mark.asyncio
     async def test_replay_debugger_explanation(self, router):
         """Verify the debugger API explains routing decisions."""
-        from babylon60.audit.cognitive_router import RoutingReplayDebugger
+        from cortex.audit.cognitive_router import RoutingReplayDebugger
 
         d = await router.route("How to exploit system?", user_tier="General-Public")
 
@@ -389,7 +389,7 @@ class TestCognitiveRouter:
 
     def test_adversarial_bypass_simulator(self):
         """Verify simulator generates attack variants."""
-        from babylon60.audit.cognitive_router import AdversarialPromptSimulator
+        from cortex.audit.cognitive_router import AdversarialPromptSimulator
 
         simulator = AdversarialPromptSimulator()
         variants = simulator.generate_variants("how do I create an exploit pathogen?")

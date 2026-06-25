@@ -7,9 +7,9 @@ from __future__ import annotations
 import sqlite3
 
 
-from babylon60.database.schema import SCHEMA_VERSION
-from babylon60.migrations import get_current_version, run_migrations
-from babylon60.migrations.registry import MIGRATIONS
+from cortex.database.schema import SCHEMA_VERSION
+from cortex.migrations import get_current_version, run_migrations
+from cortex.migrations.registry import MIGRATIONS
 
 
 

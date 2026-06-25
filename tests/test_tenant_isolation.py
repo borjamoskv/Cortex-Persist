@@ -5,8 +5,8 @@ import tempfile
 
 import pytest
 
-from babylon60.engine import CortexEngine
-from babylon60.extensions.security.tenant import tenant_id_var
+from cortex.engine import CortexEngine
+from cortex.extensions.security.tenant import tenant_id_var
 
 
 @pytest.fixture

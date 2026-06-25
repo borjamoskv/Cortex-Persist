@@ -15,9 +15,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/borjamoskv/babylon-60/stargazers"><img src="https://img.shields.io/github/stars/borjamoskv/babylon-60?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="GitHub Stars"></a>
-  <a href="https://pypi.org/project/babylon-60/"><img src="https://img.shields.io/pypi/v/babylon-60.svg?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="PyPI"></a>
-  <a href="https://github.com/borjamoskv/babylon-60/actions"><img src="https://img.shields.io/github/actions/workflow/status/borjamoskv/babylon-60/ci.yml?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="CI"></a>
+  <a href="https://github.com/borjamoskv/cortex-persist/stargazers"><img src="https://img.shields.io/github/stars/borjamoskv/cortex-persist?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="GitHub Stars"></a>
+  <a href="https://pypi.org/project/cortex-persist/"><img src="https://img.shields.io/pypi/v/cortex-persist.svg?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="PyPI"></a>
+  <a href="https://github.com/borjamoskv/cortex-persist/actions"><img src="https://img.shields.io/github/actions/workflow/status/borjamoskv/cortex-persist/ci.yml?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="License"></a>
 </p>
 
@@ -46,11 +46,11 @@ BABYLON-60-PERSIST is the CI/CD firewall for the agentic era:
 Inject verifiable event logging directly into your application stack in 30 seconds.
 
 ```bash
-npm install babylon-60
+npm install cortex-persist
 ```
 
 ```typescript
-import { CortexClient } from 'babylon-60';
+import { CortexClient } from 'cortex-persist';
 
 const cortex = new CortexClient({ apiKey: process.env.BABYLON-60_API_KEY });
 await cortex.logEvent({ type: 'agent.decision', actor: 'agent-1' });
@@ -59,7 +59,7 @@ await cortex.logEvent({ type: 'agent.decision', actor: 'agent-1' });
 We also offer an official LangChain integration to track agent events automatically:
 
 ```bash
-npm install babylon-60-langchain
+npm install cortex-persist-langchain
 ```
 
 ---
@@ -69,11 +69,11 @@ npm install babylon-60-langchain
 Inject verifiable event logging directly into your application stack in 30 seconds.
 
 ```bash
-npm install babylon-60
+npm install cortex-persist
 ```
 
 ```typescript
-import { CortexClient } from 'babylon-60';
+import { CortexClient } from 'cortex-persist';
 
 const cortex = new CortexClient({ apiKey: process.env.BABYLON-60_API_KEY });
 await cortex.logEvent({ type: 'agent.decision', actor: 'agent-1' });
@@ -82,7 +82,7 @@ await cortex.logEvent({ type: 'agent.decision', actor: 'agent-1' });
 We also offer an official LangChain integration to track agent events automatically:
 
 ```bash
-npm install babylon-60-langchain
+npm install cortex-persist-langchain
 ```
 
 ---
@@ -108,7 +108,7 @@ jobs:
           fetch-depth: 0
           
       - name: Install BABYLON-60
-        run: pip install babylon-60
+        run: pip install cortex-persist
 
       - name: Run BABYLON-60 Code Governance Gateway
         run: |
@@ -191,11 +191,11 @@ async def evaluate_agent_mutation():
 **Requirements:** `Python 3.10+`. Zero external daemons required.
 
 ```bash
-pip install babylon-60
+pip install cortex-persist
 
 # Optional extensions
-pip install "babylon-60[cloud]"           # PostgreSQL + Redis scalability
-pip install "babylon-60[secure]"          # OS keyring credentials vault
+pip install "cortex-persist[cloud]"           # PostgreSQL + Redis scalability
+pip install "cortex-persist[secure]"          # OS keyring credentials vault
 ```
 
 ---

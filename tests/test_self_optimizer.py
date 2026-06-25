@@ -13,12 +13,12 @@ import asyncio
 import pytest
 import time
 
-from babylon60.engine.performance_tracker import (
+from cortex.engine.performance_tracker import (
     PerformanceTracker,
     SubsystemMetrics,
     StrategyEffectiveness,
 )
-from babylon60.engine.self_optimizer import (
+from cortex.engine.self_optimizer import (
     SelfOptimizer,
     OptimizerConfig,
     TuningType,

@@ -7,9 +7,9 @@ import os
 os.environ.setdefault("CORTEX_TESTING", "1")
 
 import pytest
-from babylon60.extensions.llm._models import BaseProvider, IntentProfile, ReasoningMode, CortexPrompt
-from babylon60.extensions.llm.router import CortexLLMRouter
-from babylon60.config import LLM_LOCAL_FIRST
+from cortex.extensions.llm._models import BaseProvider, IntentProfile, ReasoningMode, CortexPrompt
+from cortex.extensions.llm.router import CortexLLMRouter
+from cortex.config import LLM_LOCAL_FIRST
 
 
 class MockProvider(BaseProvider):
@@ -124,12 +124,12 @@ def test_z3_local_first_ordering(dummy_primary, monkeypatch) -> None:
     )
 
     # Enable LLM_LOCAL_FIRST
-    monkeypatch.setattr("babylon60.config.LLM_LOCAL_FIRST", True)
+    monkeypatch.setattr("cortex.config.LLM_LOCAL_FIRST", True)
     ordered_local_first = router._ordered_fallbacks(prompt)
     assert ordered_local_first[0].provider_name == "p_local"
 
     # Disable LLM_LOCAL_FIRST
-    monkeypatch.setattr("babylon60.config.LLM_LOCAL_FIRST", False)
+    monkeypatch.setattr("cortex.config.LLM_LOCAL_FIRST", False)
     ordered_std = router._ordered_fallbacks(prompt)
     # With standard mode, p_local (free) will still be preferred over p_frontier (medium cost) due to cost minimization,
     # let's change p_local to have high cost to test tier preference.

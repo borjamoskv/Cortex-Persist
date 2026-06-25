@@ -2,7 +2,7 @@
 # This file is part of CORTEX. Apache-2.0.
 import pytest
 from unittest.mock import AsyncMock, patch
-from babylon60.guards.seals import _execute_gates_loop
+from cortex.guards.seals import _execute_gates_loop
 
 
 @pytest.mark.asyncio

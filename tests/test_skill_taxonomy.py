@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from babylon60.extensions.skills.registry import SkillRegistry
-from babylon60.extensions.skills.taxonomy import (
+from cortex.extensions.skills.registry import SkillRegistry
+from cortex.extensions.skills.taxonomy import (
     ANTIGRAVITY_CORTEX_NEXUS_SKILL,
     ANTIGRAVITY_CORTEX_NEXUS_TAG,
     category_for_agent_domain,

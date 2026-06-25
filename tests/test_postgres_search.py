@@ -7,11 +7,11 @@ import datetime
 from typing import Any
 import pytest
 
-from babylon60.search.models import SearchResult
-from babylon60.search.text import text_search
-from babylon60.search.vector import semantic_search
-from babylon60.search.hybrid import hybrid_search
-from babylon60.storage import StorageMode
+from cortex.search.models import SearchResult
+from cortex.search.text import text_search
+from cortex.search.vector import semantic_search
+from cortex.search.hybrid import hybrid_search
+from cortex.storage import StorageMode
 
 
 class MockPostgresConn:
@@ -27,9 +27,9 @@ class MockPostgresConn:
 @pytest.fixture
 def mock_postgres_mode(monkeypatch):
     monkeypatch.setenv("CORTEX_STORAGE", "postgres")
-    monkeypatch.setattr("babylon60.storage.get_storage_mode", lambda: StorageMode.POSTGRES)
-    monkeypatch.setattr("babylon60.search.vector.get_storage_mode", lambda: StorageMode.POSTGRES)
-    monkeypatch.setattr("babylon60.search.text.get_storage_mode", lambda: StorageMode.POSTGRES)
+    monkeypatch.setattr("cortex.storage.get_storage_mode", lambda: StorageMode.POSTGRES)
+    monkeypatch.setattr("cortex.search.vector.get_storage_mode", lambda: StorageMode.POSTGRES)
+    monkeypatch.setattr("cortex.search.text.get_storage_mode", lambda: StorageMode.POSTGRES)
 
 
 @pytest.mark.asyncio

@@ -7,7 +7,7 @@ Tests the full pipeline flow: Ingress → Context → Plan → Execute → Persi
 import pytest
 import time
 
-from babylon60.pipeline import (
+from cortex.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -17,14 +17,14 @@ from babylon60.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from babylon60.pipeline.orchestrator import CortexOrchestrator
-from babylon60.pipeline._orchestrator_exceptions import (
+from cortex.pipeline.orchestrator import CortexOrchestrator
+from cortex.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )
-from babylon60.router.router import AgentRouter, AgentCapability
-from babylon60.context.assembler import ContextAssembler
-from babylon60.delivery.manager import DeliveryManager
+from cortex.router.router import AgentRouter, AgentCapability
+from cortex.context.assembler import ContextAssembler
+from cortex.delivery.manager import DeliveryManager
 
 
 # ── Provider Factory Tests ──
@@ -37,7 +37,7 @@ class TestProviderFactory:
         """Factory returns (None, None) when no API keys are set."""
         import os
 
-        from babylon60.pipeline.provider_factory import build_executor_stack
+        from cortex.pipeline.provider_factory import build_executor_stack
 
         # Ensure no relevant keys are set (save and restore)
         saved = {}
@@ -68,7 +68,7 @@ class TestProviderFactory:
 
     def test_factory_priority_order(self):
         """Provider priority list is correctly ordered."""
-        from babylon60.pipeline.provider_factory import _PROVIDER_PRIORITY
+        from cortex.pipeline.provider_factory import _PROVIDER_PRIORITY
 
         assert _PROVIDER_PRIORITY[0] == "gemini"
         assert "anthropic" in _PROVIDER_PRIORITY
@@ -77,7 +77,7 @@ class TestProviderFactory:
 
     def test_executor_uses_factory(self):
         """AgentExecutor._ensure_stack() calls factory on first use."""
-        from babylon60.pipeline.executor import AgentExecutor
+        from cortex.pipeline.executor import AgentExecutor
 
         executor = AgentExecutor()
         assert executor._initialized is False
@@ -89,7 +89,7 @@ class TestProviderFactory:
 
     def test_executor_accepts_pre_built_provider(self):
         """Executor respects injected provider over factory."""
-        from babylon60.pipeline.executor import AgentExecutor
+        from cortex.pipeline.executor import AgentExecutor
 
         class MockProvider:
             provider_name = "mock"

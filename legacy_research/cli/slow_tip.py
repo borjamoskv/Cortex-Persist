@@ -128,8 +128,8 @@ class SlowOpTipEmitter:
         try:
             from rich.panel import Panel
 
-            from babylon60.cli.common import console
-            from babylon60.engine.tips import TipsEngine
+            from cortex.cli.common import console
+            from cortex.engine.tips import TipsEngine
 
             tips_engine = TipsEngine(
                 None,
@@ -218,7 +218,7 @@ def slow_tips_spinner(
         from rich.spinner import Spinner
         from rich.text import Text
 
-        from babylon60.cli.common import console
+        from cortex.cli.common import console
 
         spin = Spinner(spinner, text=Text(f" {label}", style="noir.violet"))
 

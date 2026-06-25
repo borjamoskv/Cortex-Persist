@@ -6,9 +6,9 @@ import sys
 
 sys.path.insert(0, os.path.abspath('.'))
 
-from babylon60.storage.ledger import EnterpriseAuditLedger
-from babylon60.engine.autodidact_hott_engine import AutodidactHottEngine
-from babylon60.engine.ultramap import UltramapSubstrate
+from cortex.storage.ledger import EnterpriseAuditLedger
+from cortex.engine.autodidact_hott_engine import AutodidactHottEngine
+from cortex.engine.ultramap import UltramapSubstrate
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("EndogenousSiege")

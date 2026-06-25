@@ -15,9 +15,9 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts" / "lab"))
 from stripe_config import StripeBillingConfig
-from babylon60.extensions.billing.models import BillingEvent, FailureType, StripeInvoice
-from babylon60.extensions.billing.gateway import StripeBillingGateway
-from babylon60.extensions.billing.metering import CausalMetering
+from cortex.extensions.billing.models import BillingEvent, FailureType, StripeInvoice
+from cortex.extensions.billing.gateway import StripeBillingGateway
+from cortex.extensions.billing.metering import CausalMetering
 
 
 @pytest.fixture
@@ -91,7 +91,7 @@ def test_gateway_mock_creation():
     assert gateway.is_mock is True
 
     # Check mock operations return structured strings
-    cus = gateway.create_customer("tenant-1", "test@babylon60.com")
+    cus = gateway.create_customer("tenant-1", "test@cortex.com")
     assert cus == "cus_mock_tenant-1"
 
     sub = gateway.create_subscription(cus, "pro")

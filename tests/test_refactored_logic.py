@@ -7,8 +7,8 @@ import asyncio
 import sqlite3
 
 import numpy as np
-from babylon60.core.lineage import LineageVerifier
-from babylon60.memory.memory_archaeology import MemoryArchaeologist
+from cortex.core.lineage import LineageVerifier
+from cortex.memory.memory_archaeology import MemoryArchaeologist
 from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Any

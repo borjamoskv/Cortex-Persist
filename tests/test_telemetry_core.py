@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """
-Tests for babylon60.telemetry.core
+Tests for cortex.telemetry.core
 ────────────────────────────────
 Coverage targets:
   - Span.duration_ms, Span.ok
@@ -18,7 +18,7 @@ from unittest.mock import MagicMock
 import pytest
 
 # Reset global collector before each test to avoid cross-test bleed.
-from babylon60.telemetry.core import (
+from cortex.telemetry.core import (
     Span,
     SpanContext,
     TraceCollector,

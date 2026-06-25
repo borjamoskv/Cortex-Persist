@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import pytest
 
-from babylon60.extensions.shannon.exergy import ExergyReport, compute_exergy_report
-from babylon60.shannon.exergy import (
+from cortex.extensions.shannon.exergy import ExergyReport, compute_exergy_report
+from cortex.shannon.exergy import (
     ActionRisk,
     ExergyInput,
     ThermodynamicWasteError,

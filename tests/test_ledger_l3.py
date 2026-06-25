@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for babylon60.memory.ledger - EventLedgerL3.
+"""Tests for cortex.memory.ledger - EventLedgerL3.
 
 Tests the immutable event sourcing ledger with a real `:memory:` aiosqlite DB.
 Covers: append, replay, count, session retrieval, chain verification.
@@ -14,8 +14,8 @@ import aiosqlite
 
 import pytest
 
-from babylon60.memory.ledger import EventLedgerL3
-from babylon60.memory.models import MemoryEvent
+from cortex.memory.ledger import EventLedgerL3
+from cortex.memory.models import MemoryEvent
 
 
 

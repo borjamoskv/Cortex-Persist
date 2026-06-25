@@ -7,12 +7,12 @@ import tempfile
 import pytest
 import aiosqlite
 
-from babylon60.engine.latticework_store import LatticeworkStore
-from babylon60.engine.latticework_daemon import LatticeworkDaemon
-from babylon60.engine.babylon60 import Babylon60
-from babylon60.ledger.execution_trace import ExecutionTraceLedger
-from babylon60.ledger.causal_graph import CausalGraph
-from babylon60.engine.causal_scheduler import CausalScheduler
+from cortex.engine.latticework_store import LatticeworkStore
+from cortex.engine.latticework_daemon import LatticeworkDaemon
+from cortex.engine.cortex import Cortex
+from cortex.ledger.execution_trace import ExecutionTraceLedger
+from cortex.ledger.causal_graph import CausalGraph
+from cortex.engine.causal_scheduler import CausalScheduler
 
 
 

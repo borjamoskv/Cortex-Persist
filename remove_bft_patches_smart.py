@@ -64,7 +64,7 @@ def clean_bft_patches(filepath):
             elif stripped in patch_lines_set:
                 is_patch_line = True
             # If we hit an import that is NOT in the patch set, we don't delete it!
-            # e.g. `from babylon60.engine.query_mixin import QueryMixin`
+            # e.g. `from cortex.engine.query_mixin import QueryMixin`
             # Check if this line is the end of the patch logic
             if stripped == "_sqlite3_bft_orig.connect = _bft_sqlite_connect" or \
                stripped == "_aiosqlite_bft_orig.connect = _bft_aiosqlite_connect" or \

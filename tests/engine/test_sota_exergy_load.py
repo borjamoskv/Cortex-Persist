@@ -11,11 +11,11 @@ Validates the structural integrity and high-throughput execution of the 5 inject
 
 import time
 import pytest
-from babylon60.engine.data_surgery import DataSurgeon
-from babylon60.extensions.hardware.schgen_router import SchGenRouter
-from babylon60.engine.vision_reasoner import VisAnomReasoner
-from babylon60.engine.video_mla_cache import VideoMLACache
-from babylon60.engine.rim_latent_blocks import ReasoningInMemoryEngine
+from cortex.engine.data_surgery import DataSurgeon
+from cortex.extensions.hardware.schgen_router import SchGenRouter
+from cortex.engine.vision_reasoner import VisAnomReasoner
+from cortex.engine.video_mla_cache import VideoMLACache
+from cortex.engine.rim_latent_blocks import ReasoningInMemoryEngine
 
 
 @pytest.mark.asyncio

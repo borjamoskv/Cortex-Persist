@@ -1,6 +1,6 @@
 import pytest
-from babylon60.engine.causal.solver_gateway import SolverGateway
-from babylon60.engine.immunity.rls_policy import RLSGateway
+from cortex.engine.causal.solver_gateway import SolverGateway
+from cortex.engine.immunity.rls_policy import RLSGateway
 
 def test_solver_gateway_routing():
     # It should route to the Rust Data Plane (or mock if not compiled)

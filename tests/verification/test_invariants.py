@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from babylon60.verification.invariants import InvariantSeverity, SafetyInvariant, SOVEREIGN_INVARIANTS
+from cortex.verification.invariants import InvariantSeverity, SafetyInvariant, SOVEREIGN_INVARIANTS
 
 
 def test_invariant_severity_enum():

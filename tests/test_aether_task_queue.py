@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for babylon60.aether.queue - SQLite-backed task queue.
+"""Tests for cortex.aether.queue - SQLite-backed task queue.
 
 Uses tmp_path for isolated database per test. No network, no LLM.
 """
@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-from babylon60.extensions.aether.models import AgentTask, TaskStatus
-from babylon60.extensions.aether.queue import TaskQueue
+from cortex.extensions.aether.models import AgentTask, TaskStatus
+from cortex.extensions.aether.queue import TaskQueue
 
 
 @pytest.fixture

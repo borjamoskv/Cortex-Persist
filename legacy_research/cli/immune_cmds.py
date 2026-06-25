@@ -3,8 +3,8 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from babylon60.cli.common import cli, get_engine
-from babylon60.extensions.immune.breaker import (
+from cortex.cli.common import cli, get_engine
+from cortex.extensions.immune.breaker import (
     RetrievalState,
     evaluate_circuit_breaker,
     execute_circuit_trip,

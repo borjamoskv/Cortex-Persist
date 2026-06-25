@@ -9,12 +9,12 @@ from typing import Any
 import click
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from babylon60.cli.common import cli
-from babylon60.ledger.public_export import (
+from cortex.cli.common import cli
+from cortex.ledger.public_export import (
     ExportAuthority,
     write_public_ledger_export,
 )
-from babylon60.ledger.public_verifier_utils import _loads_json_strict
+from cortex.ledger.public_verifier_utils import _loads_json_strict
 
 
 @cli.command("export-ledger")

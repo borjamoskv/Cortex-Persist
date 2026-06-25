@@ -8,9 +8,9 @@ import asyncio
 
 import click
 
-from babylon60.audit.frontier import FrontierAuditor
-from babylon60.cli.common import console, get_engine
-from babylon60.cli.trust_cmds import audit
+from cortex.audit.frontier import FrontierAuditor
+from cortex.cli.common import console, get_engine
+from cortex.cli.trust_cmds import audit
 
 
 @audit.command("frontier")

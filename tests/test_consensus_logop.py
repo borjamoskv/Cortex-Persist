@@ -7,7 +7,7 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_logop_consensus_math():
-    from babylon60.consensus.manager import _logit, _sigmoid
+    from cortex.consensus.manager import _logit, _sigmoid
 
     # Test bounds
     assert math.isclose(_logit(0.5), 0.0, abs_tol=1e-5)

@@ -1,14 +1,14 @@
 # [C5-REAL] Exergy-Maximized
 """CORTEX Config - Backward-compatible shim.
 
-Real implementation lives in babylon60.core.config.
-This module re-exports everything so existing `from babylon60.config import X` works.
+Real implementation lives in cortex.core.config.
+This module re-exports everything so existing `from cortex.config import X` works.
 """
 
 from typing import Any
 
-import babylon60.core.config as _core
-from babylon60.core.config import reload as _core_reload
+import cortex.core.config as _core
+from cortex.core.config import reload as _core_reload
 
 
 def reload() -> None:

@@ -17,8 +17,8 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from babylon60.cli.errors import err_execution_failed
-from babylon60.extensions.llm.manager import LLMManager
+from cortex.cli.errors import err_execution_failed
+from cortex.extensions.llm.manager import LLMManager
 
 console = Console()
 

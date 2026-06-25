@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from babylon60.utils.errors import CortexError
-from babylon60.guards.virgo import VirgoValidationError, ContextPoisoningError
+from cortex.utils.errors import CortexError
+from cortex.guards.virgo import VirgoValidationError, ContextPoisoningError
 
 # Mark all tests in this module as slow due to CortexEngine.init_db()
 pytestmark = pytest.mark.slow
@@ -28,13 +28,13 @@ def mock_omega_auditor(monkeypatch):
     async def mock_audit(*args, **kwargs):
         return []
 
-    monkeypatch.setattr("babylon60.guards.omega_auditor.run_omega_audit", mock_audit)
+    monkeypatch.setattr("cortex.guards.omega_auditor.run_omega_audit", mock_audit)
 
 
 @pytest.fixture
 async def engine(tmp_path: Path):
     """Create a CortexEngine with a temp database, close after test."""
-    from babylon60.engine import CortexEngine
+    from cortex.engine import CortexEngine
 
     # Unblock tests from thermodynamic enforcement
     os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"

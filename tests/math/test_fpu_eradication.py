@@ -6,8 +6,8 @@ import ast
 
 import pytest
 
-from babylon60.engine.ast_validator import validate_ast
-from babylon60.math.fpu_interceptor import FPUFirewall, FPUViolationError, no_float
+from cortex.engine.ast_validator import validate_ast
+from cortex.math.fpu_interceptor import FPUFirewall, FPUViolationError, no_float
 
 
 # ─── FPUFirewall Tests ───────────────────────────────────────────

@@ -3,8 +3,8 @@ import json
 
 import pytest
 
-from babylon60.guards.frontier_guard import FrontierModelGuard
-from babylon60.utils.errors import SovereignViolation
+from cortex.guards.frontier_guard import FrontierModelGuard
+from cortex.utils.errors import SovereignViolation
 
 
 @pytest.fixture

@@ -7,9 +7,9 @@ import sys
 sys.path.insert(0, os.path.abspath('.'))
 
 try:
-    from babylon60.audit.ledger import EnterpriseAuditLedger
-    from babylon60.engine.autodidact_hott_engine import AutodidactHottEngine
-    from babylon60.engine.ultramap import UltramapSubstrate
+    from cortex.audit.ledger import EnterpriseAuditLedger
+    from cortex.engine.autodidact_hott_engine import AutodidactHottEngine
+    from cortex.engine.ultramap import UltramapSubstrate
 except ImportError:
     class EnterpriseAuditLedger:
         def __init__(self, log_path):

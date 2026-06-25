@@ -1,5 +1,5 @@
 
-from cortex.math.babylon import Babylon60Vector
+from cortex.math.babylon import CortexVector
 
 
 class AutocrystallizerQuantizationEdge:
@@ -14,14 +14,14 @@ class AutocrystallizerQuantizationEdge:
     def __init__(self, scaling_factor: int = 10000):
         self.scaling_factor = scaling_factor
 
-    def quantize(self, stochastic_embedding: list[float]) -> Babylon60Vector:
+    def quantize(self, stochastic_embedding: list[float]) -> CortexVector:
         """
         Collapses a continuous float embedding into a discrete integer vector.
         """
         discrete_data = [int(round(val * self.scaling_factor)) for val in stochastic_embedding]
-        return Babylon60Vector(discrete_data)
+        return CortexVector(discrete_data)
 
-    def verify_integer_bounds(self, vector: Babylon60Vector) -> bool:
+    def verify_integer_bounds(self, vector: CortexVector) -> bool:
         """
         Verifies that no scalar exceeds limits for Merkle representation.
         """

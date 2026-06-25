@@ -12,9 +12,9 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.tree import Tree
 
-from babylon60.cli.common import DEFAULT_DB, cli
-from babylon60.core.lineage import LineageNode, LineageVerifier
-from babylon60.engine import CortexEngine
+from cortex.cli.common import DEFAULT_DB, cli
+from cortex.core.lineage import LineageNode, LineageVerifier
+from cortex.engine import CortexEngine
 
 console = Console()
 

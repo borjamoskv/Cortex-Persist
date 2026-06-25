@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """
-Tests for babylon60.enrichment.worker (EnrichmentWorker via LedgerStore + EnrichmentQueue)
+Tests for cortex.enrichment.worker (EnrichmentWorker via LedgerStore + EnrichmentQueue)
 ────────────────────────────────────────────────────────────────────────────────────────
 Coverage targets:
   - start / stop lifecycle
@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from babylon60.enrichment.worker import EnrichmentWorker
+from cortex.enrichment.worker import EnrichmentWorker
 
 # ─── Helpers ──────────────────────────────────────────────────────────
 

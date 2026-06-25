@@ -11,7 +11,7 @@ import sqlite3
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from babylon60.compaction.gc import GarbageCollector
+from cortex.compaction.gc import GarbageCollector
 
 
 

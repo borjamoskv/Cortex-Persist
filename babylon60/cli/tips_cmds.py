@@ -1,1 +1,0 @@
-../../legacy_research/cli/tips_cmds.py

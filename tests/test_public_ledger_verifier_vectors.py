@@ -9,7 +9,7 @@ import pytest
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
-from babylon60.utils.canonical import canonical_json, compute_tx_hash
+from cortex.utils.canonical import canonical_json, compute_tx_hash
 
 FIXTURES = Path(__file__).parent / "fixtures" / "ledger_verifier"
 STRICT = FIXTURES / "public_v1_strict"

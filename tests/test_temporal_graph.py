@@ -2,8 +2,8 @@
 import pytest
 import aiosqlite
 
-from babylon60.engine.causality import AsyncCausalGraph
-from babylon60.migrations.mig_temporal_kg import _migration_027_temporal_kg
+from cortex.engine.causality import AsyncCausalGraph
+from cortex.migrations.mig_temporal_kg import _migration_027_temporal_kg
 
 
 

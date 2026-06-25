@@ -1,12 +1,12 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for babylon60.memory.l2_hybrid_search - RRF fusion, FTS sanitizer, result model.
+"""Tests for cortex.memory.l2_hybrid_search - RRF fusion, FTS sanitizer, result model.
 
 All tests exercise pure/static functions - no DB, no sqlite-vec required.
 """
 
 from __future__ import annotations
 
-from babylon60.memory.l2_hybrid_search import (
+from cortex.memory.l2_hybrid_search import (
     L2HybridSearch,
     L2SearchResult,
     _sanitize_fts_query,

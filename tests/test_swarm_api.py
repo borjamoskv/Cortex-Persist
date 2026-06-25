@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from babylon60.api.core import app
-from babylon60.auth.deps import require_auth, require_permission
+from cortex.api.core import app
+from cortex.auth.deps import require_auth, require_permission
 
 # Mock AuthResult
 mock_auth = MagicMock()
@@ -33,7 +33,7 @@ async def client():
 
 
 @pytest.mark.asyncio
-@patch("babylon60.extensions.swarm.manager.isolated_worktree")
+@patch("cortex.extensions.swarm.manager.isolated_worktree")
 async def test_swarm_worktree_lifecycle_api(mock_iso, client):
     # Mock context manager
     mock_ctx = AsyncMock()

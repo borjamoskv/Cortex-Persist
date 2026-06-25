@@ -4,7 +4,7 @@ CORTEX CLI - Sovereign Error Display System v2.0 (i18n-enabled).
 
 Centralized, beautiful, consistent error messages across all CLI commands.
 Every error includes: icon, message, cause, and recovery hint.
-All messages are internationalized via babylon60.i18n (en/es/eu).
+All messages are internationalized via cortex.i18n (en/es/eu).
 """
 
 from __future__ import annotations
@@ -20,8 +20,8 @@ from rich.panel import Panel
 
 # Re-use the shared CLI console so errors appear in the same stream
 # as regular output (important for Click test runner capture).
-from babylon60.cli.common import console
-from babylon60.utils.i18n import get_trans
+from cortex.cli.common import console
+from cortex.utils.i18n import get_trans
 
 __all__ = [
     "CortexErrorStruct",

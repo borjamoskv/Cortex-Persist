@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 from click.testing import CliRunner
-from babylon60.cli import cli
+from cortex.cli import cli
 
 
 @pytest.fixture

@@ -1,1 +1,0 @@
-../../legacy_research/cli/swarm_10k_cmds.py

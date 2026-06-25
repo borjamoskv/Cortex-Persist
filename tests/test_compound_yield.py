@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from babylon60.engine.compound_yield import (
+from cortex.engine.compound_yield import (
 
 
     CompoundProjector,

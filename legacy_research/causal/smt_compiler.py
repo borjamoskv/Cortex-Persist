@@ -35,11 +35,11 @@ class SMTCompiler:
             raise RuntimeError("Rust Causal Compiler module is not available.")
         
         # Load Rust classes
-        self.SceneState = getattr(rust_ext, "SceneState", None)
-        self.EdgeRule = getattr(rust_ext, "EdgeRule", None)
-        self.ContinuityRuleType = getattr(rust_ext, "ContinuityRuleType", None)
-        self.GateStatus = getattr(rust_ext, "GateStatus", None)
-        self.validate_fn = getattr(rust_ext, "validate_scene_transition", None)
+        self.SceneState: Any = getattr(rust_ext, "SceneState", None)
+        self.EdgeRule: Any = getattr(rust_ext, "EdgeRule", None)
+        self.ContinuityRuleType: Any = getattr(rust_ext, "ContinuityRuleType", None)
+        self.GateStatus: Any = getattr(rust_ext, "GateStatus", None)
+        self.validate_fn: Any = getattr(rust_ext, "validate_scene_transition", None)
         
         if not all([self.SceneState, self.EdgeRule, self.validate_fn]):
             raise RuntimeError("Incomplete Rust Causal Compiler bindings.")

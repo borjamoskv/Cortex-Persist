@@ -17,12 +17,12 @@ import traceback
 from datetime import datetime, timezone
 from typing import Any
 
-from babylon60.cli.common import DEFAULT_DB, _detect_agent_source, _run_async, get_engine
-from babylon60.cli.loop_models import LoopSession, PersistenceType, TaskResult, TaskStatus
+from cortex.cli.common import DEFAULT_DB, _detect_agent_source, _run_async, get_engine
+from cortex.cli.loop_models import LoopSession, PersistenceType, TaskResult, TaskStatus
 
 __all__ = ["PERSIST_INTERVAL", "ExecutionLoop", "PersistSupervisor"]
 
-logger = logging.getLogger("babylon60.loop.engine")
+logger = logging.getLogger("cortex.loop.engine")
 
 # Industrial Noir palette - used in render methods
 CYBER_LIME = "#CCFF00"
@@ -160,7 +160,7 @@ class ExecutionLoop:
 
     def _run_keter(self, task: str) -> str:
         """Execute task through KETER Engine phases."""
-        from babylon60.engine.keter import KeterEngine
+        from cortex.engine.keter import KeterEngine
 
         async def _ignite():
             keter = KeterEngine()

@@ -4,8 +4,8 @@ import aiosqlite
 
 import pytest
 
-from babylon60.database.schema import ALL_SCHEMA
-from babylon60.engine import CortexEngine
+from cortex.database.schema import ALL_SCHEMA
+from cortex.engine import CortexEngine
 
 
 
@@ -50,8 +50,8 @@ async def test_store_decoupled(engine):
 @pytest.mark.asyncio
 async def test_worker_processing(engine):
     """Verify that the EnrichmentWorker can process a pending job."""
-    from babylon60.embeddings.provider import NullEmbeddingProvider
-    from babylon60.worker.enrichment import EnrichmentWorker
+    from cortex.embeddings.provider import NullEmbeddingProvider
+    from cortex.worker.enrichment import EnrichmentWorker
 
     # Store a fact
     fact_id = await engine.store(

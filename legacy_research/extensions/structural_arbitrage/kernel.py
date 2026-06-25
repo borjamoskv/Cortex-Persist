@@ -8,7 +8,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.extensions.structural_arbitrage.models import ArbitrageSignal, Babylon60Amount
+from cortex.extensions.structural_arbitrage.models import ArbitrageSignal, CortexAmount
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class ExecutionKernel:
     Role: Persist-Executor.
     """
 
-    def __init__(self, exergy_threshold: Babylon60Amount) -> None:
+    def __init__(self, exergy_threshold: CortexAmount) -> None:
         self.exergy_threshold = exergy_threshold
 
     async def execute_signal(self, signal: ArbitrageSignal) -> ExecutionResult:

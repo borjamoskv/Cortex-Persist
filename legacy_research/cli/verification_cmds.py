@@ -5,8 +5,8 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-from babylon60.cli.common import cli
-from babylon60.verification.verifier import SovereignVerifier
+from cortex.cli.common import cli
+from cortex.verification.verifier import SovereignVerifier
 
 console = Console()
 

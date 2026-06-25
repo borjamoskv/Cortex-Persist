@@ -9,9 +9,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pathlib import Path
 
-from babylon60.engine import CortexEngine
-from babylon60.cache.redis_l1 import RedisL1Cache
-from babylon60.search.models import SearchResult
+from cortex.engine import CortexEngine
+from cortex.cache.redis_l1 import RedisL1Cache
+from cortex.search.models import SearchResult
 
 # Mark tests as slow due to CortexEngine DB initialization
 pytestmark = pytest.mark.slow
@@ -68,7 +68,7 @@ async def engine(tmp_path: Path):
     e = CortexEngine(db_path=db, auto_embed=False)
     await e.init_db()
 
-    from babylon60.engine.causality import AsyncCausalGraph
+    from cortex.engine.causality import AsyncCausalGraph
 
     async with e.session() as conn:
         cg = AsyncCausalGraph(conn)

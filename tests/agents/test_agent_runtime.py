@@ -17,13 +17,13 @@ import uuid
 
 import pytest
 
-from babylon60.agents.base import BaseAgent
-from babylon60.agents.bus import SqliteMessageBus
-from babylon60.agents.manifest import AgentManifest
-from babylon60.agents.message_schema import AgentMessage, MessageKind, new_message
-from babylon60.agents.state import AgentStatus, WorkingMemory
-from babylon60.agents.supervisor import Supervisor
-from babylon60.agents.tools import ToolRegistry
+from cortex.agents.base import BaseAgent
+from cortex.agents.bus import SqliteMessageBus
+from cortex.agents.manifest import AgentManifest
+from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
+from cortex.agents.state import AgentStatus, WorkingMemory
+from cortex.agents.supervisor import Supervisor
+from cortex.agents.tools import ToolRegistry
 
 # ── Test fixtures ────────────────────────────────────────────────
 

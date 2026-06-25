@@ -14,14 +14,14 @@ from click.testing import CliRunner
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
-from babylon60.cli import cli
-from babylon60.ledger.public_export import (
+from cortex.cli import cli
+from cortex.ledger.public_export import (
     ExportAuthority,
     public_key_record,
     write_legacy_ledger_export,
     write_public_ledger_export,
 )
-from babylon60.ledger.public_verifier import verify_export
+from cortex.ledger.public_verifier import verify_export
 
 TENANT_ID = "tenant-acme"
 STREAM_ID = "tenant:acme:ledger:primary"

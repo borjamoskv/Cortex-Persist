@@ -137,7 +137,7 @@ INSTRUCTIONS:
                 logger.warning("🐍 [OUROBOROS-MUTATION] Bypassing deep audit due to missing LLM.")
                 # Trigger Ouroboros Autopoiesis
                 try:
-                    from babylon60.extensions.evolution.ouroboros import OuroborosKernel
+                    from cortex.extensions.evolution.ouroboros import OuroborosKernel
                     import traceback
                     tb = traceback.format_exc()
                     if not tb or tb.strip() == "NoneType: None":

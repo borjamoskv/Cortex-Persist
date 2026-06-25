@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from babylon60.database.writer import SqliteWriteWorker
-from babylon60.utils.result import Err, Ok
+from cortex.database.writer import SqliteWriteWorker
+from cortex.utils.result import Err, Ok
 
 
 

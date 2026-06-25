@@ -5,9 +5,9 @@ import stat
 import pytest
 from unittest.mock import patch, MagicMock
 
-from babylon60.ledger.store import LedgerStore
-from babylon60.ledger.verifier import LedgerVerifier
-from babylon60.crypto.aes import reset_default_encrypter
+from cortex.ledger.store import LedgerStore
+from cortex.ledger.verifier import LedgerVerifier
+from cortex.crypto.aes import reset_default_encrypter
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def test_mldsa_key_permissions_and_encryption(temp_store, tmp_path):
     reset_default_encrypter()
     mock_master_key = b"A" * 32
 
-    with patch("babylon60.crypto.keyring.get_master_key", return_value=mock_master_key):
+    with patch("cortex.crypto.keyring.get_master_key", return_value=mock_master_key):
         # Generate the private key
         pk = verifier._get_mldsa_private_key()
         assert pk is not None
@@ -63,7 +63,7 @@ def test_mldsa_key_legacy_fallback(temp_store, tmp_path):
     reset_default_encrypter()
     mock_master_key = b"B" * 32
 
-    with patch("babylon60.crypto.keyring.get_master_key", return_value=mock_master_key):
+    with patch("cortex.crypto.keyring.get_master_key", return_value=mock_master_key):
         # Load key (should read legacy format and automatically migrate it to encrypted)
         pk = verifier._get_mldsa_private_key()
         assert pk.private_bytes_raw() == legacy_seed
@@ -91,7 +91,7 @@ def test_mldsa_key_keyring_vaulting(temp_store, tmp_path):
     mock_keyring.get_password.return_value = None
 
     with (
-        patch("babylon60.crypto.keyring.keyring", mock_keyring),
+        patch("cortex.crypto.keyring.keyring", mock_keyring),
         patch("os.environ", {"CORTEX_TESTING": ""}),
     ):  # Enable keyring mock usage
         pk = verifier._get_mldsa_private_key()

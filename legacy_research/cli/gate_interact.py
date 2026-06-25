@@ -1,6 +1,6 @@
 import time
 from typing import TYPE_CHECKING, Any
-from babylon60.extensions.gate import ActionStatus, GateNotApproved, GatePolicy
+from cortex.extensions.gate import ActionStatus, GateNotApproved, GatePolicy
 
 # [C5-REAL] Exergy-Maximized
 """
@@ -15,9 +15,9 @@ import sqlite3
 __all__ = ["approve_interactive"]
 
 if TYPE_CHECKING:
-    from babylon60.extensions.gate import SovereignGate
+    from cortex.extensions.gate import SovereignGate
 
-logger = logging.getLogger("babylon60.extensions.gate.interact")
+logger = logging.getLogger("cortex.extensions.gate.interact")
 
 
 def approve_interactive(gate: "SovereignGate", action_id: str) -> bool:

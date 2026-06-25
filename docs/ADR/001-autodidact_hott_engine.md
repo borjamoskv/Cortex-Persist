@@ -2,7 +2,7 @@
 
 **Fecha:** Junio 2026
 **Hash Origen:** `759268c04`
-**Ruta Física:** `babylon60/engine/autodidact_hott_engine.py`
+**Ruta Física:** `cortex/engine/autodidact_hott_engine.py`
 **Autor:** Borja Moskv / MOSKV-1 APEX
 
 ## 1. Contexto (El Problema Físico/Epistémico)

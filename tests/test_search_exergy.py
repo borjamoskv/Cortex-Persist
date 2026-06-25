@@ -5,8 +5,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from babylon60.memory.models import CortexFactModel
-from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
+from cortex.memory.models import CortexFactModel
+from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
 
 @pytest.fixture

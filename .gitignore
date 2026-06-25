@@ -332,10 +332,10 @@ legacy_research/extensions/daemon/*.jsonl
 # Local audit and stress test scripts (Aesthetic & Rule 9 hygiene)
 security_audit_log.jsonl
 stress_audit_log.jsonl
-babylon60/engine/evolution_ledger*.jsonl
+cortex/engine/evolution_ledger*.jsonl
 cortex/nodes/mtk_stress_test.py
 cortex/data/reality_ledger.jsonl
-babylon60/data/reality_ledger.jsonl
+cortex/data/reality_ledger.jsonl
 cortex/nodes/autodidact_exergy.db
 cortex/nodes/moskv1_skills.db
 cortex/nodes/autodidact_exergy.db-journal

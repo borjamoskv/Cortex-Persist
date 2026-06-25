@@ -2,9 +2,9 @@
 # Created by Borja Moskv (borjamoskv)
 import pytest
 import datetime
-from babylon60.policies.mythos_guard import MythosInvariantGuard
-from babylon60.engine.mtk_core import MTKGuard
-from babylon60.types.evidence import ClosurePayload, EvidenceBundle
+from cortex.policies.mythos_guard import MythosInvariantGuard
+from cortex.engine.mtk_core import MTKGuard
+from cortex.types.evidence import ClosurePayload, EvidenceBundle
 
 def test_mythos_invariant_guard_detection():
     guard = MythosInvariantGuard()

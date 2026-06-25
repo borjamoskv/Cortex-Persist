@@ -8,8 +8,8 @@ from pathlib import Path
 import click
 from rich.panel import Panel
 
-from babylon60.cli.common import cli, console
-from babylon60.cli.slow_tip import tip_on_slow
+from cortex.cli.common import cli, console
+from cortex.cli.slow_tip import tip_on_slow
 
 
 @cli.group()
@@ -23,7 +23,7 @@ def swarm():
 @tip_on_slow(threshold=2.0, label="El Enjambre está auditando…", use_spinner=True)
 def swarm_audit(path, level):
     """Deep semantic audit of a file or directory using the swarm."""
-    from babylon60.extensions.mejoralo.swarm import MejoraloSwarm
+    from cortex.extensions.mejoralo.swarm import MejoraloSwarm
 
     p = Path(path)
     files = [p] if p.is_file() else list(p.glob("**/*.py"))
@@ -63,7 +63,7 @@ def swarm_audit(path, level):
 @tip_on_slow(threshold=2.0, label="El Enjambre está refactorizando…", use_spinner=True)
 def swarm_refactor(file, level, issue, dry_run):
     """Refactor a specific file using the full specialist squad."""
-    from babylon60.extensions.mejoralo.swarm import MejoraloSwarm
+    from cortex.extensions.mejoralo.swarm import MejoraloSwarm
 
     p = Path(file)
     swarm_engine = MejoraloSwarm(level=level)
@@ -101,7 +101,7 @@ def swarm_refactor(file, level, issue, dry_run):
 @swarm.command("deploy")
 @click.option("--mode", "-m", default="infinite", help="Scaling mode (infinite, legion, squadron)")
 @click.option("--target", "-t", required=True, help="Mission target or goal")
-@click.option("--db", default="~/.cortex/babylon60.db", help="Database path")
+@click.option("--db", default="~/.cortex/cortex.db", help="Database path")
 def swarm_deploy(mode, target, db):
     """Deploy a Sovereign Swarm for fractal scaling (SCALING-Ω)."""
 
@@ -152,10 +152,10 @@ def swarm_deploy(mode, target, db):
 
 
 @swarm.command("board")
-@click.option("--db", default="~/.cortex/babylon60.db", help="Database path")
+@click.option("--db", default="~/.cortex/cortex.db", help="Database path")
 def swarm_board_cmd(db):
     """Launch the real-time Swarm Kanban TUI."""
-    from babylon60.extensions.ui.swarm_board import SwarmBoard
+    from cortex.extensions.ui.swarm_board import SwarmBoard
 
     board = SwarmBoard(db)
     board.start()
@@ -168,11 +168,11 @@ def swarm_up(db):
     import asyncio
     from uuid import uuid4
 
-    from babylon60.agents.builtins.omega_prime import OmegaPrimeAgent
-    from babylon60.agents.bus import SqliteMessageBus
-    from babylon60.agents.manifest import AgentManifest
-    from babylon60.agents.message_schema import AgentMessage, MessageKind
-    from babylon60.agents.supervisor import Supervisor
+    from cortex.agents.builtins.omega_prime import OmegaPrimeAgent
+    from cortex.agents.bus import SqliteMessageBus
+    from cortex.agents.manifest import AgentManifest
+    from cortex.agents.message_schema import AgentMessage, MessageKind
+    from cortex.agents.supervisor import Supervisor
 
     class CliToolExecutor:
         async def execute(self, tool_name: str, arguments: dict) -> dict:
@@ -251,7 +251,7 @@ def swarm_up(db):
 @click.option("--path", "-p", help="Base path for worktrees")
 def swarm_cleanup(path):
     """Force-remove all ephemeral worktrees and their git metadata."""
-    from babylon60.extensions.swarm.worktree_isolation import cleanup_all_worktrees
+    from cortex.extensions.swarm.worktree_isolation import cleanup_all_worktrees
 
     count = asyncio.run(cleanup_all_worktrees(path))
     if count == 0:
@@ -273,7 +273,7 @@ def swarm_strike(phalanx, target):
     """Deploy CORTEX-SWARM-100 Architecture (20 Sovereign Vessels)"""
     import asyncio
 
-    from babylon60.engine.squadrons import (
+    from cortex.engine.squadrons import (
         AutonomousRouter,
         GoldPhalanx,
         LeadPhalanx,

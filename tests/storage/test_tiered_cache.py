@@ -17,7 +17,7 @@ import pytest
 
 pytest.importorskip("redis")
 import redis.asyncio
-from babylon60.database.cache import _MAX_REDIS_VALUE_BYTES, CacheEvent, TieredCache
+from cortex.database.cache import _MAX_REDIS_VALUE_BYTES, CacheEvent, TieredCache
 
 # ─── L1 Behavior (always active) ─────────────────────────────────────
 

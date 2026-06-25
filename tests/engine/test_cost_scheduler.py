@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """Unit tests for the ExergyCostScheduler."""
 
-from babylon60.engine.cost_scheduler import ExergyCostScheduler
+from cortex.engine.cost_scheduler import ExergyCostScheduler
 
 
 def test_cost_scheduler_fallback():

@@ -5,8 +5,8 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from babylon60.extensions.llm.router import IntentProfile
-from babylon60.extensions.llm.sovereign import SovereignLLM
+from cortex.extensions.llm.router import IntentProfile
+from cortex.extensions.llm.sovereign import SovereignLLM
 
 console = Console()
 

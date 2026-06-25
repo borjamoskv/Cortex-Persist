@@ -1,5 +1,5 @@
 [project]
-name = "babylon-60"
+name = "cortex-persist"
 version = "1.0.0"
 description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
 readme = "README.md"
@@ -134,7 +134,7 @@ quality = [
     "radon>=6.0.1",
 ]
 all = [
-    "babylon-60[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality]",
+    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality]",
 ]
 
 [project.scripts]

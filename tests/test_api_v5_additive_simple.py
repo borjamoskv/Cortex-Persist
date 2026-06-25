@@ -4,9 +4,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from fastapi.testclient import TestClient
 
-from babylon60.api.core import app
-from babylon60.api.deps import get_async_engine
-from babylon60.auth.deps import require_auth, require_permission
+from cortex.api.core import app
+from cortex.api.deps import get_async_engine
+from cortex.auth.deps import require_auth, require_permission
 
 # Mock AuthResult for dependency override
 mock_auth = MagicMock()

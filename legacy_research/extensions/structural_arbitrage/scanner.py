@@ -7,12 +7,12 @@ Identifies structural discrepancies in input graphs without simulation.
 import time
 from typing import Protocol
 
-from cortex.extensions.structural_arbitrage.models import ArbitrageSignal, Babylon60Amount
+from cortex.extensions.structural_arbitrage.models import ArbitrageSignal, CortexAmount
 
 
 class MarketOracle(Protocol):
     """Protocol for fetching deterministic pricing data."""
-    async def get_price(self, asset: str, venue: str) -> Babylon60Amount: ...
+    async def get_price(self, asset: str, venue: str) -> CortexAmount: ...
 
 
 class InefficiencyScanner:

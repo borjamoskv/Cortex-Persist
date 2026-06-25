@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from babylon60.engine.entropy import ThermodynamicContextCompressor
-from babylon60.engine.babylon60 import Babylon60
+from cortex.engine.entropy import ThermodynamicContextCompressor
+from cortex.engine.cortex import Cortex
 
 def test_shannon_entropy_calculation():
     # Test blank string yields 0 entropy
@@ -13,7 +13,7 @@ def test_shannon_entropy_calculation():
     
     # Test Babylon-60 conversion
     e_b60 = ThermodynamicContextCompressor.calculate_shannon_entropy_b60("cortex-persist")
-    assert isinstance(e_b60, Babylon60)
+    assert isinstance(e_b60, Cortex)
     assert e_b60.to_float() == pytest.approx(e_float, abs=1e-4)
 
 def test_thermodynamic_context_compression():
@@ -39,7 +39,7 @@ def test_thermodynamic_context_compression():
     assert "Here is the code:" in compressed
     assert "x = 42" in compressed
     
-    # Check exergy ratio is instance of Babylon60
-    assert isinstance(ratio, Babylon60)
+    # Check exergy ratio is instance of Cortex
+    assert isinstance(ratio, Cortex)
     assert ratio.to_float() < 1.0
     assert ratio.to_float() > 0.0

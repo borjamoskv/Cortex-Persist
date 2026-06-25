@@ -9,7 +9,7 @@ import time
 
 import pytest
 
-from babylon60.engine.legion import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
+from cortex.engine.legion import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
 
 
 class MockAgent(SwarmAgent):

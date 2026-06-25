@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 
-from babylon60.engine.swarm_10k import CenturionSuperv
-from babylon60.extensions.llm._cascade import CascadeManager, IntentProfile
-from babylon60.extensions.signals.sharded_bus import ShardedAsyncSignalBus
+from cortex.engine.swarm_10k import CenturionSuperv
+from cortex.extensions.llm._cascade import CascadeManager, IntentProfile
+from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 
 @pytest.mark.asyncio
@@ -26,7 +26,7 @@ async def test_exergy_calculation_o1(tmp_path):
 
     ex = await node.get_exergy()
     # Density factor = 0.5
-    # Latency factor = 1.0 - (32-16)/32 = 0.5 (Linear decay for Babylon60)
+    # Latency factor = 1.0 - (32-16)/32 = 0.5 (Linear decay for Cortex)
     # Expected exergy = 0.25
     assert 0.24 <= ex <= 0.26
 

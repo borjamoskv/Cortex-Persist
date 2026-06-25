@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from babylon60.database.pool import CortexConnectionPool
+from cortex.database.pool import CortexConnectionPool
 
 
 

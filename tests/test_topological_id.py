@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import time
 
-from babylon60.extensions.axioms.topological_id import SovereignFlake
+from cortex.extensions.axioms.topological_id import SovereignFlake
 
 
 def test_flake_sequence_increment():

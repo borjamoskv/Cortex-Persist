@@ -23,7 +23,7 @@ import click
 from rich.panel import Panel
 from rich.syntax import Syntax
 
-from babylon60.cli.common import cli, console
+from cortex.cli.common import cli, console
 
 __all__ = ["prompt"]
 
@@ -104,7 +104,7 @@ def _count_cli_commands(root: Path) -> int:
 def _count_secret_patterns() -> int:
     """Count patterns in the Privacy Shield classifier."""
     try:
-        from babylon60.storage.classifier import SECRET_PATTERNS
+        from cortex.storage.classifier import SECRET_PATTERNS
 
         return len(SECRET_PATTERNS)
     except ImportError:
@@ -131,7 +131,7 @@ def _git_tag() -> str:
 
 def _generate_live_prompt(project_root: Path) -> str:
     """Build the full system prompt with real-time stats injected."""
-    from babylon60.extensions.agents.system_prompt import SYSTEM_PROMPT
+    from cortex.extensions.agents.system_prompt import SYSTEM_PROMPT
 
     with console.status("[bold cyan]📊 Computing live codebase stats...[/]"):
         loc = _count_python_loc(project_root)
@@ -178,7 +178,7 @@ def prompt() -> None:
 )
 def prompt_show(variant: str) -> None:
     """Print the CORTEX system prompt to stdout."""
-    from babylon60.extensions.agents.system_prompt import (
+    from cortex.extensions.agents.system_prompt import (
         SYSTEM_PROMPT,
         SYSTEM_PROMPT_MEDIUM,
         SYSTEM_PROMPT_SHORT,
@@ -224,7 +224,7 @@ def prompt_generate(variant: str, out: str | None) -> None:
         text = _generate_live_prompt(project_root)
     else:
         # short/medium don't embed stats yet - but show accurate pattern count
-        from babylon60.extensions.agents.system_prompt import (
+        from cortex.extensions.agents.system_prompt import (
             SYSTEM_PROMPT_MEDIUM,
             SYSTEM_PROMPT_SHORT,
         )
@@ -267,7 +267,7 @@ def prompt_copy(variant: str) -> None:
     """Copy the system prompt to the clipboard."""
     import subprocess as sp
 
-    from babylon60.extensions.agents.system_prompt import (
+    from cortex.extensions.agents.system_prompt import (
         SYSTEM_PROMPT,
         SYSTEM_PROMPT_MEDIUM,
         SYSTEM_PROMPT_SHORT,

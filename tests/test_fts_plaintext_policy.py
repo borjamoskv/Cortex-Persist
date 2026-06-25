@@ -12,11 +12,11 @@ import aiosqlite
 
 import pytest
 
-from babylon60.crypto.aes import CortexEncrypter
-from babylon60.database.schema import CREATE_FACTS
-from babylon60.database.schema_extensions import CREATE_FACTS_FTS
-from babylon60.engine.fact_store_core import insert_fact_record
-from babylon60.search.hybrid import hybrid_search
+from cortex.crypto.aes import CortexEncrypter
+from cortex.database.schema import CREATE_FACTS
+from cortex.database.schema_extensions import CREATE_FACTS_FTS
+from cortex.engine.fact_store_core import insert_fact_record
+from cortex.search.hybrid import hybrid_search
 
 
 
@@ -71,9 +71,9 @@ async def _setup_db(conn: aiosqlite.Connection) -> None:
 async def test_fts_indexes_plaintext_not_ciphertext(encrypter, monkeypatch):
     """Verify that FTS search works on encrypted facts because FTS stores plaintext."""
     # 1. Setup Mocking
-    monkeypatch.setattr("babylon60.crypto.get_default_encrypter", lambda: encrypter)
+    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: encrypter)
     # Stub hash and other components to avoid overhead
-    monkeypatch.setattr("babylon60.engine.fact_store_core.compute_fact_hash", lambda x: "hash")
+    monkeypatch.setattr("cortex.engine.fact_store_core.compute_fact_hash", lambda x: "hash")
 
     conn = await aiosqlite.connect(":memory:")
     await _setup_db(conn)

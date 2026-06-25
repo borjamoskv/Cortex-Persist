@@ -3,7 +3,7 @@
 import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from babylon60.pipeline.mcp_outbound import MCPOutboundClient, MCPToolSpec
+from cortex.pipeline.mcp_outbound import MCPOutboundClient, MCPToolSpec
 
 
 @pytest.fixture
@@ -46,8 +46,8 @@ async def test_mcp_outbound_initialization_stdio(mock_session):
     client = MCPOutboundClient(configs)
 
     with (
-        patch("babylon60.pipeline.mcp_outbound.stdio_client", return_value=AsyncMock()) as mock_stdio,
-        patch("babylon60.pipeline.mcp_outbound.ClientSession", return_value=mock_session),
+        patch("cortex.pipeline.mcp_outbound.stdio_client", return_value=AsyncMock()) as mock_stdio,
+        patch("cortex.pipeline.mcp_outbound.ClientSession", return_value=mock_session),
     ):
         # Mocking the async context managers
         mock_stdio.return_value.__aenter__.return_value = (AsyncMock(), AsyncMock())
@@ -128,7 +128,7 @@ async def test_mcp_outbound_connection_failure():
     configs = [{"name": "bad-server", "transport": "stdio", "command": "nonexistent"}]
     client = MCPOutboundClient(configs)
 
-    with patch("babylon60.pipeline.mcp_outbound.stdio_client", side_effect=Exception("Conn failed")):
+    with patch("cortex.pipeline.mcp_outbound.stdio_client", side_effect=Exception("Conn failed")):
         await client.initialize()
         # Should not raise exception but log it and continue
         assert len(client.available_tools) == 0

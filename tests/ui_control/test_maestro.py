@@ -3,8 +3,8 @@ from unittest.mock import AsyncMock, patch, MagicMock
 
 import pytest
 
-from babylon60.extensions.ui_control.maestro import MaestroUI
-from babylon60.extensions.ui_control.models import AppTarget
+from cortex.extensions.ui_control.maestro import MaestroUI
+from cortex.extensions.ui_control.models import AppTarget
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def maestro():
 @pytest.mark.asyncio
 async def test_activate_app_success(maestro):
     with patch(
-        "babylon60.extensions.ui_control.maestro.run_applescript", new_callable=AsyncMock
+        "cortex.extensions.ui_control.maestro.run_applescript", new_callable=AsyncMock
     ) as mock_run:
         mock_run.return_value = ""
         target = AppTarget(name="Safari")
@@ -32,7 +32,7 @@ async def test_activate_app_success(maestro):
 @pytest.mark.asyncio
 async def test_activate_app_failure(maestro):
     with patch(
-        "babylon60.extensions.ui_control.maestro.run_applescript", new_callable=AsyncMock
+        "cortex.extensions.ui_control.maestro.run_applescript", new_callable=AsyncMock
     ) as mock_run:
         mock_run.side_effect = Exception("osascript failed")
         target = AppTarget(name="Safari")
@@ -46,7 +46,7 @@ async def test_activate_app_failure(maestro):
 @pytest.mark.asyncio
 async def test_inject_keystroke_app_not_running(maestro):
     with patch(
-        "babylon60.extensions.ui_control.maestro.is_app_running", new_callable=AsyncMock
+        "cortex.extensions.ui_control.maestro.is_app_running", new_callable=AsyncMock
     ) as mock_is_running:
         mock_is_running.return_value = False
         target = AppTarget(name="NonExistentApp")
@@ -60,12 +60,12 @@ async def test_inject_keystroke_app_not_running(maestro):
 @pytest.mark.asyncio
 async def test_inject_keystroke_success(maestro):
     with patch(
-        "babylon60.extensions.ui_control.maestro.is_app_running", new_callable=AsyncMock
+        "cortex.extensions.ui_control.maestro.is_app_running", new_callable=AsyncMock
     ) as mock_is_running:
         mock_is_running.return_value = True
 
         with patch(
-            "babylon60.extensions.ui_control.maestro.run_applescript", new_callable=AsyncMock
+            "cortex.extensions.ui_control.maestro.run_applescript", new_callable=AsyncMock
         ) as mock_run:
             target = AppTarget(name="Safari")
 
@@ -90,7 +90,7 @@ async def test_click_menu_invalid_path(maestro):
 @pytest.mark.asyncio
 async def test_click_menu_success(maestro):
     with patch(
-        "babylon60.extensions.ui_control.maestro.run_applescript", new_callable=AsyncMock
+        "cortex.extensions.ui_control.maestro.run_applescript", new_callable=AsyncMock
     ) as mock_run:
         target = AppTarget(name="Safari")
         result = await maestro.click_menu_item(target, ["File", "Export as PDF..."])
@@ -102,11 +102,11 @@ async def test_click_menu_success(maestro):
 
 
 def test_screenshot_region_success(maestro):
-    from babylon60.extensions.ui_control.models import InteractionResult
+    from cortex.extensions.ui_control.models import InteractionResult
     from unittest.mock import mock_open
 
     with (
-        patch("babylon60.extensions.ui_control.vision.CG") as mock_cg,
+        patch("cortex.extensions.ui_control.vision.CG") as mock_cg,
         patch.object(maestro.vision, "capture_screen") as mock_capture,
     ):
         mock_capture.return_value = InteractionResult(success=True, output="/fake/path.png")
@@ -125,9 +125,9 @@ def test_screenshot_region_success(maestro):
 
 @pytest.mark.asyncio
 async def test_wait_for_element_by_label_success(maestro):
-    from babylon60.extensions.ui_control.models import AXElement
+    from cortex.extensions.ui_control.models import AXElement
 
-    with patch("babylon60.extensions.ui_control.accessibility.NSWorkspace") as mock_ws:
+    with patch("cortex.extensions.ui_control.accessibility.NSWorkspace") as mock_ws:
         mock_app = MagicMock()
         mock_app.localizedName.return_value = "Safari"
         mock_ws.sharedWorkspace.return_value.frontmostApplication.return_value = mock_app
@@ -144,7 +144,7 @@ async def test_wait_for_element_by_label_success(maestro):
 
 @pytest.mark.asyncio
 async def test_wait_for_element_by_label_timeout(maestro):
-    with patch("babylon60.extensions.ui_control.accessibility.NSWorkspace") as mock_ws:
+    with patch("cortex.extensions.ui_control.accessibility.NSWorkspace") as mock_ws:
         mock_app = MagicMock()
         mock_app.localizedName.return_value = "Safari"
         mock_ws.sharedWorkspace.return_value.frontmostApplication.return_value = mock_app

@@ -20,8 +20,8 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from babylon60.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
-from babylon60.cli.errors import handle_cli_error
+from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
+from cortex.cli.errors import handle_cli_error
 
 
 

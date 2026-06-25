@@ -4,12 +4,12 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from babylon60.extensions.swarm.crystal_synthesis import synthesize_crystals
-from babylon60.utils.result import Ok
+from cortex.extensions.swarm.crystal_synthesis import synthesize_crystals
+from cortex.utils.result import Ok
 
 
 @pytest.mark.asyncio
-@patch("babylon60.extensions.swarm.crystal_synthesis._get_synthesis_router")
+@patch("cortex.extensions.swarm.crystal_synthesis._get_synthesis_router")
 async def test_semantic_crystal_merge_preserves_unique_details(mock_get_router):
     """Verify that synthesizing two highly redundant crystals preserves unique details.
 

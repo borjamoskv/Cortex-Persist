@@ -13,18 +13,18 @@ import asyncio
 import pytest
 import time
 
-from babylon60.engine.autocurative_agent import (
+from cortex.engine.autocurative_agent import (
     AutoCurativeAgent,
     AutoCurativeConfig,
     HealingPhase,
 )
-from babylon60.engine.repair_strategies import (
+from cortex.engine.repair_strategies import (
     REPAIR_REGISTRY,
     RepairResult,
     RepairStatus,
     RepairRegistry,
 )
-from babylon60.engine.circuit_breaker import CircuitBreaker, CircuitState
+from cortex.engine.circuit_breaker import CircuitBreaker, CircuitState
 
 
 # ─── Fixtures ─────────────────────────────────────────────────────
@@ -457,7 +457,7 @@ async def test_full_healing_loop_integration():
     assert health.status == "healthy"
 
     # Verify endocrine impact
-    from babylon60.engine.endocrine import ENDOCRINE, HormoneType
+    from cortex.engine.endocrine import ENDOCRINE, HormoneType
     # Cortisol should have been pulsed (both up and down)
     # Neural growth should have been rewarded
     # These are integration checks - exact values depend on decay

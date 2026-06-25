@@ -13,14 +13,14 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from babylon60.agents.copilot_cache import CacheStats, SuggestionCache
-from babylon60.agents.copilot_context import (
+from cortex.agents.copilot_cache import CacheStats, SuggestionCache
+from cortex.agents.copilot_context import (
     ContextWindow,
     build_context_window,
     estimate_tokens,
     is_inside_string,
 )
-from babylon60.agents.copilot_contracts import (
+from cortex.agents.copilot_contracts import (
     Confidence,
     CopilotContextPayload,
     CursorContext,
@@ -29,8 +29,8 @@ from babylon60.agents.copilot_contracts import (
     SuggestionKind,
     SuggestionProposal,
 )
-from babylon60.agents.copilot_debounce import DebounceController
-from babylon60.agents.copilot_llm_strategy import (
+from cortex.agents.copilot_debounce import DebounceController
+from cortex.agents.copilot_llm_strategy import (
     DeterministicFallbackClient,
     LLMCompletionStrategy,
     LLMResponse,

@@ -123,7 +123,7 @@ class MoskvAegisEngine:
 
     def __init__(self, ledger: EnterpriseAuditLedger) -> None:
         self.ledger = ledger
-        self._conn = ledger._conn
+        self._conn: Any = ledger._conn
         self.modeler = MoskvAegisModeler()
         self.oracle = MoskvVidentiaOracle()
         self.chain_builder = MoskvVidentiaChainBuilder()

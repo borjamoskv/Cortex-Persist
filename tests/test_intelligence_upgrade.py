@@ -24,7 +24,7 @@ class TestInferenceEngine:
 
     def test_inference_rule_dataclass(self):
         """InferenceRule can be instantiated."""
-        from babylon60.engine.inference import InferenceRule
+        from cortex.engine.inference import InferenceRule
 
         rule = InferenceRule(
             name="test",
@@ -37,7 +37,7 @@ class TestInferenceEngine:
 
     def test_inference_engine_instantiation(self):
         """InferenceEngine loads builtin rules."""
-        from babylon60.engine.inference import InferenceEngine
+        from cortex.engine.inference import InferenceEngine
 
         engine = InferenceEngine()
         assert len(engine.rules) > 0
@@ -46,7 +46,7 @@ class TestInferenceEngine:
 
     def test_derivation_dataclass(self):
         """Derivation object has required fields."""
-        from babylon60.engine.inference import Derivation
+        from cortex.engine.inference import Derivation
 
         d = Derivation(
             content="derived fact",
@@ -68,37 +68,37 @@ class TestEmbeddingCosine:
     """Test the cosine similarity helper in contradiction_guard.py."""
 
     def test_cosine_identical_vectors(self):
-        from babylon60.guards.contradiction_guard import _embedding_cosine_similarity
+        from cortex.guards.contradiction_guard import _embedding_cosine_similarity
 
         emb = [1.0, 0.0, 0.0]
         assert abs(_embedding_cosine_similarity(emb, emb) - 1.0) < 1e-6
 
     def test_cosine_orthogonal_vectors(self):
-        from babylon60.guards.contradiction_guard import _embedding_cosine_similarity
+        from cortex.guards.contradiction_guard import _embedding_cosine_similarity
 
         a = [1.0, 0.0, 0.0]
         b = [0.0, 1.0, 0.0]
         assert abs(_embedding_cosine_similarity(a, b)) < 1e-6
 
     def test_cosine_none_input(self):
-        from babylon60.guards.contradiction_guard import _embedding_cosine_similarity
+        from cortex.guards.contradiction_guard import _embedding_cosine_similarity
 
         assert _embedding_cosine_similarity(None, [1.0, 0.0]) == 0.0
         assert _embedding_cosine_similarity([1.0, 0.0], None) == 0.0
         assert _embedding_cosine_similarity(None, None) == 0.0
 
     def test_cosine_empty_vectors(self):
-        from babylon60.guards.contradiction_guard import _embedding_cosine_similarity
+        from cortex.guards.contradiction_guard import _embedding_cosine_similarity
 
         assert _embedding_cosine_similarity([], []) == 0.0
 
     def test_cosine_mismatched_dimensions(self):
-        from babylon60.guards.contradiction_guard import _embedding_cosine_similarity
+        from cortex.guards.contradiction_guard import _embedding_cosine_similarity
 
         assert _embedding_cosine_similarity([1.0, 0.0], [1.0, 0.0, 0.0]) == 0.0
 
     def test_cosine_known_value(self):
-        from babylon60.guards.contradiction_guard import _embedding_cosine_similarity
+        from cortex.guards.contradiction_guard import _embedding_cosine_similarity
 
         a = [3.0, 4.0]
         b = [4.0, 3.0]
@@ -113,7 +113,7 @@ class TestShannonEntropy:
     """Test Shannon entropy computation."""
 
     def test_shannon_report_fields(self):
-        from babylon60.shannon.entropy import ShannonReport
+        from cortex.shannon.entropy import ShannonReport
 
         r = ShannonReport(
             total_facts=100,
@@ -130,7 +130,7 @@ class TestShannonEntropy:
         assert len(r.top_redundant_tokens) == 1
 
     def test_diagnose_health_high_redundancy(self):
-        from babylon60.shannon.entropy import ShannonReport, diagnose_health
+        from cortex.shannon.entropy import ShannonReport, diagnose_health
 
         report = ShannonReport(
             total_facts=100,
@@ -146,7 +146,7 @@ class TestShannonEntropy:
         assert any("redundan" in rec.lower() for rec in diagnosis)
 
     def test_diagnose_health_healthy(self):
-        from babylon60.shannon.entropy import ShannonReport, diagnose_health
+        from cortex.shannon.entropy import ShannonReport, diagnose_health
 
         report = ShannonReport(
             total_facts=1000,
@@ -169,7 +169,7 @@ class TestTemporalDecay:
     """Test _apply_temporal_decay function."""
 
     def _make_result(self, fact_id, score, created_at_iso):
-        from babylon60.search.models import SearchResult
+        from cortex.search.models import SearchResult
 
         return SearchResult(
             fact_id=fact_id,
@@ -187,7 +187,7 @@ class TestTemporalDecay:
         )
 
     def test_recent_facts_score_higher(self):
-        from babylon60.search.hybrid import _apply_temporal_decay
+        from cortex.search.hybrid import _apply_temporal_decay
 
         now = datetime.now(timezone.utc)
         recent = self._make_result(1, 0.5, now.isoformat())
@@ -197,7 +197,7 @@ class TestTemporalDecay:
         assert results[0].fact_id == 1
 
     def test_zero_weight_no_change(self):
-        from babylon60.search.hybrid import _apply_temporal_decay
+        from cortex.search.hybrid import _apply_temporal_decay
 
         now = datetime.now(timezone.utc)
         r = self._make_result(1, 0.5, now.isoformat())
@@ -206,7 +206,7 @@ class TestTemporalDecay:
 
     def test_decay_constant_halflife(self):
         """Verify the decay constant gives ~70 day half-life."""
-        from babylon60.search.hybrid import _DECAY_LAMBDA
+        from cortex.search.hybrid import _DECAY_LAMBDA
 
         half_life = math.log(2) / _DECAY_LAMBDA
         assert 60 < half_life < 80  # Approximately 70 days
@@ -219,13 +219,13 @@ class TestMetastabilityProbe:
     """Test metastability probe dataclass and logic."""
 
     def test_report_fragility_ratio_empty(self):
-        from babylon60.security.probe import MetastabilityReport
+        from cortex.security.probe import MetastabilityReport
 
         r = MetastabilityReport()
         assert r.fragility_ratio == 0.0
 
     def test_report_fragility_ratio_computed(self):
-        from babylon60.security.probe import MetastabilityReport
+        from cortex.security.probe import MetastabilityReport
 
         r = MetastabilityReport(
             total_probed=100,
@@ -234,7 +234,7 @@ class TestMetastabilityProbe:
         assert r.fragility_ratio == 0.25
 
     def test_report_default_lists(self):
-        from babylon60.security.probe import MetastabilityReport
+        from cortex.security.probe import MetastabilityReport
 
         r = MetastabilityReport()
         assert r.metastable_facts == []
@@ -248,7 +248,7 @@ class TestEmbeddingBoostConstant:
     """Verify EMBEDDING_BOOST_WEIGHT is correctly configured."""
 
     def test_boost_weight_range(self):
-        from babylon60.guards.contradiction_guard import EMBEDDING_BOOST_WEIGHT
+        from cortex.guards.contradiction_guard import EMBEDDING_BOOST_WEIGHT
 
         assert 0 < EMBEDDING_BOOST_WEIGHT <= 1.0
         assert EMBEDDING_BOOST_WEIGHT == 0.3

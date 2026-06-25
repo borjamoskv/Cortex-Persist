@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for babylon60.database.tlru_cache - Time-aware LRU Cache.
+"""Tests for cortex.database.tlru_cache - Time-aware LRU Cache.
 
 C5-REAL audit remediation: database/ coverage gap.
 """
@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 import pytest
 
-from babylon60.database.tlru_cache import TLRUCache
+from cortex.database.tlru_cache import TLRUCache
 
 
 # ── Construction ─────────────────────────────────────────────────────────

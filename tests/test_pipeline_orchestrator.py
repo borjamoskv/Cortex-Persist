@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for babylon60.pipeline.orchestrator - Sovereign E2E Pipeline.
+"""Tests for cortex.pipeline.orchestrator - Sovereign E2E Pipeline.
 
 C5-REAL audit remediation: pipeline/ coverage gap.
 Tests the synchronous `run()` path and all 6 stage implementations
@@ -14,7 +14,7 @@ import time
 
 import pytest
 
-from babylon60.pipeline import (
+from cortex.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -24,8 +24,8 @@ from babylon60.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from babylon60.pipeline.orchestrator import CortexOrchestrator
-from babylon60.pipeline._orchestrator_exceptions import (
+from cortex.pipeline.orchestrator import CortexOrchestrator
+from cortex.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )

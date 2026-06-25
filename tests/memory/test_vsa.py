@@ -4,7 +4,7 @@ import shutil
 import tempfile
 import pytest
 from pathlib import Path
-from babylon60.memory.vsa import (
+from cortex.memory.vsa import (
     random_bipolar,
     bind,
     bundle,

@@ -43,7 +43,7 @@ class TestFase1NucleoOperativo:
     # APEX-001: Mutación Autónoma C5-REAL — Git Sentinel
     def test_apex_001_git_sentinel_module_exists(self):
         """DESTROY: Prove git_sentinel.py is a phantom module."""
-        mod = importlib.import_module("babylon60.guards.git_sentinel")
+        mod = importlib.import_module("cortex.guards.git_sentinel")
         # Real API: top-level `main()` function used as commit-msg hook
         assert callable(
             getattr(mod, "main", None)
@@ -57,14 +57,14 @@ class TestFase1NucleoOperativo:
     # APEX-002: Destrucción del Green Theater — Cero Anergía
     def test_apex_002_anti_limerence_guard_exists(self):
         """DESTROY: Prove anti-limerence is just marketing."""
-        mod = importlib.import_module("babylon60.guards.anti_limerence")
+        mod = importlib.import_module("cortex.guards.anti_limerence")
         members = [n for n, _ in inspect.getmembers(mod) if not n.startswith("_")]
         assert len(members) > 0, "APEX-002 DESTROYED: anti_limerence is an empty module"
 
     # APEX-003: Mitosis Celular Inmediata — Swarm Deployment
     def test_apex_003_swarm_engine_exists(self):
         """DESTROY: Prove swarm deployment is vapor."""
-        mod = importlib.import_module("babylon60.engine.swarm_10k")
+        mod = importlib.import_module("cortex.engine.swarm_10k")
         # Real API: SwarmCommander (L0 orchestrator) + NodeMetrics
         assert hasattr(mod, "SwarmCommander") or hasattr(
             mod, "NodeMetrics"
@@ -72,7 +72,7 @@ class TestFase1NucleoOperativo:
 
     def test_apex_003_shared_bus_exists(self):
         """DESTROY: Prove inter-agent messaging bus is a fiction."""
-        mod = importlib.import_module("babylon60.engine.shared_bus")
+        mod = importlib.import_module("cortex.engine.shared_bus")
         # Real API: SovereignSharedBus — zero-copy SharedMemory transport
         assert hasattr(
             mod, "SovereignSharedBus"
@@ -81,7 +81,7 @@ class TestFase1NucleoOperativo:
     # APEX-004: Bucle Adversarial [THINK] — Metacognición Interna
     def test_apex_004_metacognition_module_exists(self):
         """DESTROY: Prove metacognition is just a docstring."""
-        mod = importlib.import_module("babylon60.engine.metacognition")
+        mod = importlib.import_module("cortex.engine.metacognition")
         members = dir(mod)
         has_substance = any(
             not n.startswith("_") and callable(getattr(mod, n, None)) for n in members
@@ -91,13 +91,13 @@ class TestFase1NucleoOperativo:
     # APEX-005: Bloqueo Termodinámico SQLite MTK — Enforcement Físico
     def test_apex_005_mtk_core_exists(self):
         """DESTROY: Prove MTK is a paper construct."""
-        mod = importlib.import_module("babylon60.engine.mtk_core")
+        mod = importlib.import_module("cortex.engine.mtk_core")
         # Real API: MTKGuard with transaction_boundary and ephemeral token minting
         assert hasattr(mod, "MTKGuard"), "APEX-005 DESTROYED: No MTKGuard class"
 
     def test_apex_005_mtk_authorizer_exists(self):
         """DESTROY: Prove the SQLite authorizer hook is fiction."""
-        mod = importlib.import_module("babylon60.engine.mtk_sqlite_authorizer")
+        mod = importlib.import_module("cortex.engine.mtk_sqlite_authorizer")
         has_authorizer = any(
             "authorizer" in n.lower()
             for n in dir(mod)
@@ -118,14 +118,14 @@ class TestFase1NucleoOperativo:
     # APEX-006: Bypass Causal Isomórfico — Erradicación Context Rot
     def test_apex_006_causality_engine_exists(self):
         """DESTROY: Prove causal engine is a phantom."""
-        mod = importlib.import_module("babylon60.engine.causality")
+        mod = importlib.import_module("cortex.engine.causality")
         source = inspect.getsource(mod)
         assert len(source) > 500, "APEX-006 DESTROYED: causality.py is a stub (<500 bytes)"
 
     # APEX-007: Rechazo Estructural Soberano — Honest-Check
     def test_apex_007_store_validation_exists(self):
         """DESTROY: Prove structural rejection is a myth."""
-        mod = importlib.import_module("babylon60.engine.store_validation")
+        mod = importlib.import_module("cortex.engine.store_validation")
         has_validate = any(
             "validat" in n.lower() for n in dir(mod) if not n.startswith("_")
         )
@@ -140,17 +140,17 @@ class TestFase1NucleoOperativo:
         assert len(content) > 50, "APEX-008 DESTROYED: .gitignore is trivially small"
 
     # APEX-009: Causalidad Base-60 Intransigente — BABYLON-60
-    def test_apex_009_babylon60_module_exists(self):
+    def test_apex_009_cortex_module_exists(self):
         """DESTROY: Prove BABYLON-60 is a concept, not code."""
-        mod = importlib.import_module("babylon60.engine.babylon60")
+        mod = importlib.import_module("cortex.engine.cortex")
         has_class_or_func = any(
             callable(getattr(mod, n, None)) for n in dir(mod) if not n.startswith("_")
         )
-        assert has_class_or_func, "APEX-009 DESTROYED: babylon60 has no executable code"
+        assert has_class_or_func, "APEX-009 DESTROYED: cortex has no executable code"
 
-    def test_apex_009_babylon60_conversion(self):
+    def test_apex_009_cortex_conversion(self):
         """DESTROY: Prove Base-60 conversion doesn't actually work."""
-        mod = importlib.import_module("babylon60.engine.babylon60")
+        mod = importlib.import_module("cortex.engine.cortex")
         # Find any conversion function
         convert_funcs = [
             n for n in dir(mod)
@@ -162,12 +162,12 @@ class TestFase1NucleoOperativo:
                 getattr(mod, n) for n in dir(mod)
                 if isinstance(getattr(mod, n, None), type) and not n.startswith("_")
             ]
-            assert len(classes) > 0, "APEX-009 DESTROYED: No classes or converters in babylon60"
+            assert len(classes) > 0, "APEX-009 DESTROYED: No classes or converters in cortex"
 
     # APEX-010: Ruteo Epistémico Multidimensional — Deep Research/UltraThink
     def test_apex_010_cognitive_router_exists(self):
         """DESTROY: Prove cognitive routing is a label, not infrastructure."""
-        mod = importlib.import_module("babylon60.audit.cognitive_router")
+        mod = importlib.import_module("cortex.audit.cognitive_router")
         source = inspect.getsource(mod)
         assert len(source) > 1000, "APEX-010 DESTROYED: cognitive_router is a stub"
 
@@ -185,7 +185,7 @@ class TestFase2MotorCognitivo:
     def test_apex_011_blast_radius_module(self):
         """DESTROY: Prove EDG blast radius calculation is fiction."""
         # blast_radius.py was refactored to contain CHRONOS ROI — EDG logic lives in edg_forensics
-        mod = importlib.import_module("babylon60.engine.edg_forensics")
+        mod = importlib.import_module("cortex.engine.edg_forensics")
         source = inspect.getsource(mod)
         assert "edg" in source.lower() or "forensic" in source.lower() or "graph" in source.lower(), (
             "APEX-011 DESTROYED: edg_forensics.py doesn't contain EDG logic"
@@ -193,7 +193,7 @@ class TestFase2MotorCognitivo:
 
     def test_apex_011_edg_forensics_exists(self):
         """DESTROY: Prove EDG forensics is empty."""
-        mod = importlib.import_module("babylon60.engine.edg_forensics")
+        mod = importlib.import_module("cortex.engine.edg_forensics")
         assert len(inspect.getsource(mod)) > 200, "APEX-011 DESTROYED: edg_forensics is a stub"
 
     # APEX-012: Destrucción de la Ilusión Forense — PPI Index
@@ -201,9 +201,9 @@ class TestFase2MotorCognitivo:
         """DESTROY: Prove forensic infrastructure is a ghost."""
         # At least one forensic module must exist
         forensic_candidates = [
-            "babylon60.engine.ppi_index",
-            "babylon60.engine.forensic_commander",
-            "babylon60.forensics",
+            "cortex.engine.ppi_index",
+            "cortex.engine.forensic_commander",
+            "cortex.forensics",
         ]
         imported = False
         for mod_name in forensic_candidates:
@@ -240,13 +240,13 @@ class TestFase2MotorCognitivo:
     # APEX-014: Kill Criteria Anti-Limerencia — EntropyAnnihilator
     def test_apex_014_entropy_engine_exists(self):
         """DESTROY: Prove EntropyAnnihilator is just a name."""
-        mod = importlib.import_module("babylon60.engine.entropy")
+        mod = importlib.import_module("cortex.engine.entropy")
         source = inspect.getsource(mod)
         assert len(source) > 1000, "APEX-014 DESTROYED: entropy.py is a stub"
 
     def test_apex_014_anti_limerence_has_kill_logic(self):
         """DESTROY: Prove anti-limerence has no kill criteria."""
-        mod = importlib.import_module("babylon60.guards.anti_limerence")
+        mod = importlib.import_module("cortex.guards.anti_limerence")
         source = inspect.getsource(mod)
         has_kill = any(
             kw in source.lower()
@@ -257,13 +257,13 @@ class TestFase2MotorCognitivo:
     # APEX-015: Taint-Tracking Estructural — CORTEX-TAINT
     def test_apex_015_taint_engine_exists(self):
         """DESTROY: Prove taint tracking is vaporware."""
-        mod = importlib.import_module("babylon60.causal.taint_engine")
+        mod = importlib.import_module("cortex.causal.taint_engine")
         source = inspect.getsource(mod)
         assert len(source) > 3000, "APEX-015 DESTROYED: taint_engine is a trivial stub"
 
     def test_apex_015_taint_has_signature_logic(self):
         """DESTROY: Prove taint engine has no actual signature/hash logic."""
-        mod = importlib.import_module("babylon60.causal.taint_engine")
+        mod = importlib.import_module("cortex.causal.taint_engine")
         source = inspect.getsource(mod)
         has_crypto = any(
             kw in source.lower()
@@ -274,26 +274,26 @@ class TestFase2MotorCognitivo:
     # APEX-016: Autopoiesis de Kernel — Bootstrap Watchdog
     def test_apex_016_autopoiesis_module_exists(self):
         """DESTROY: Prove autopoiesis is a philosophical concept, not code."""
-        mod = importlib.import_module("babylon60.engine.autopoiesis")
+        mod = importlib.import_module("cortex.engine.autopoiesis")
         source = inspect.getsource(mod)
         assert len(source) > 1000, "APEX-016 DESTROYED: autopoiesis.py is trivial"
 
     def test_apex_016_watchdog_exists(self):
         """DESTROY: Prove watchdog is not implemented."""
-        mod = importlib.import_module("babylon60.engine.watchdog")
+        mod = importlib.import_module("cortex.engine.watchdog")
         assert len(inspect.getsource(mod)) > 100, "APEX-016 DESTROYED: watchdog.py is empty"
 
     # APEX-017: Formación de Abstracciones JIT — AX-046 Live
     def test_apex_017_sandbox_jit_exists(self):
         """DESTROY: Prove JIT abstraction formation is fiction."""
-        mod = importlib.import_module("babylon60.engine.sandbox_jit")
+        mod = importlib.import_module("cortex.engine.sandbox_jit")
         source = inspect.getsource(mod)
         assert len(source) > 500, "APEX-017 DESTROYED: sandbox_jit is a stub"
 
     # APEX-018: Aislamiento Entrópico del Hardware — Cuarentena macOS
     def test_apex_018_path_guard_exists(self):
         """DESTROY: Prove hardware isolation is a rule, not enforcement."""
-        mod = importlib.import_module("babylon60.guards.path_guard")
+        mod = importlib.import_module("cortex.guards.path_guard")
         # Real API: is_safe_path() and resolve_and_verify() — traversal prevention
         has_guard = hasattr(mod, "is_safe_path") or hasattr(mod, "resolve_and_verify")
         assert has_guard, "APEX-018 DESTROYED: path_guard has no safety enforcement functions"
@@ -307,13 +307,13 @@ class TestFase2MotorCognitivo:
     # APEX-020: Destilación Termodinámica del Contexto — Landauer Compression
     def test_apex_020_shannon_entropy_module(self):
         """DESTROY: Prove Landauer compression is a paper reference."""
-        mod = importlib.import_module("babylon60.shannon.entropy")
+        mod = importlib.import_module("cortex.shannon.entropy")
         source = inspect.getsource(mod)
         assert len(source) > 1000, "APEX-020 DESTROYED: shannon.entropy is trivial"
 
     def test_apex_020_shannon_exergy_module(self):
         """DESTROY: Prove exergy computation is absent."""
-        mod = importlib.import_module("babylon60.shannon.exergy")
+        mod = importlib.import_module("cortex.shannon.exergy")
         assert len(inspect.getsource(mod)) > 500, "APEX-020 DESTROYED: shannon.exergy is trivial"
 
 
@@ -372,7 +372,7 @@ class TestFase3ArsenalOmega:
 
     def test_apex_024_sota_engine_module(self):
         """DESTROY: Prove SOTA vector engine has no backing code."""
-        mod = importlib.import_module("babylon60.engine.sota_vector_engine")
+        mod = importlib.import_module("cortex.engine.sota_vector_engine")
         source = inspect.getsource(mod)
         assert len(source) > 5000, "APEX-024 DESTROYED: sota_vector_engine.py is a stub"
 
@@ -398,14 +398,14 @@ class TestFase3ArsenalOmega:
 
     def test_apex_028_crypto_aes_module(self):
         """DESTROY: Prove AES-GCM encryption is not implemented."""
-        mod = importlib.import_module("babylon60.crypto.aes")
+        mod = importlib.import_module("cortex.crypto.aes")
         source = inspect.getsource(mod)
         has_aes = "aesgcm" in source.lower() or "aes" in source.lower()
         assert has_aes, "APEX-028 DESTROYED: crypto.aes has no AES implementation"
 
     def test_apex_028_keyring_module(self):
         """DESTROY: Prove keyring integration is fiction."""
-        mod = importlib.import_module("babylon60.crypto.keyring")
+        mod = importlib.import_module("cortex.crypto.keyring")
         assert len(inspect.getsource(mod)) > 500, "APEX-028 DESTROYED: keyring module is a stub"
 
     # APEX-029: Control DOM Determinista — Browser-CDP-Automation
@@ -416,13 +416,13 @@ class TestFase3ArsenalOmega:
     # APEX-030: Firewall CI/CD Inflexible — CORTEX Persist
     def test_apex_030_guard_pipeline_exists(self):
         """DESTROY: Prove the CI/CD firewall is just AGENTS.md text."""
-        mod = importlib.import_module("babylon60.engine.guard_pipeline")
+        mod = importlib.import_module("cortex.engine.guard_pipeline")
         source = inspect.getsource(mod)
         assert len(source) > 1000, "APEX-030 DESTROYED: guard_pipeline is trivial"
 
     def test_apex_030_virgo_guard_exists(self):
         """DESTROY: Prove Virgo guard is fiction."""
-        mod = importlib.import_module("babylon60.guards.virgo")
+        mod = importlib.import_module("cortex.guards.virgo")
         source = inspect.getsource(mod)
         assert len(source) > 3000, "APEX-030 DESTROYED: virgo.py is a stub"
 
@@ -439,13 +439,13 @@ class TestFase4RupturaParadigmatica:
     # APEX-031: Bifurcación Adversarial de Sí Mismo — Red Team Endógeno
     def test_apex_031_nemesis_module(self):
         """DESTROY: Prove adversarial self-testing has no implementation."""
-        mod = importlib.import_module("babylon60.engine.nemesis")
+        mod = importlib.import_module("cortex.engine.nemesis")
         source = inspect.getsource(mod)
         assert len(source) > 2000, "APEX-031 DESTROYED: nemesis.py is trivial"
 
     def test_apex_031_nemesis_agent(self):
         """DESTROY: Prove nemesis agent is a ghost."""
-        mod = importlib.import_module("babylon60.engine.nemesis_agent")
+        mod = importlib.import_module("cortex.engine.nemesis_agent")
         assert len(inspect.getsource(mod)) > 1000, "APEX-031 DESTROYED: nemesis_agent is trivial"
 
     def test_apex_031_red_team_extension(self):
@@ -458,7 +458,7 @@ class TestFase4RupturaParadigmatica:
     # APEX-032: Depuración Causal Temporal — Forensic Git Archaeology
     def test_apex_032_git_exergy_nodes(self):
         """DESTROY: Prove forensic git archaeology has no node implementation."""
-        mod = importlib.import_module("babylon60.nodes.git_exergy_nodes")
+        mod = importlib.import_module("cortex.nodes.git_exergy_nodes")
         source = inspect.getsource(mod)
         assert len(source) > 3000, "APEX-032 DESTROYED: git_exergy_nodes is a stub"
 
@@ -470,62 +470,62 @@ class TestFase4RupturaParadigmatica:
     # APEX-033: Predicción de Entropía Futura — Pre-Mortem Computacional
     def test_apex_033_entropy_guard_exists(self):
         """DESTROY: Prove entropy prediction is fiction."""
-        mod = importlib.import_module("babylon60.guards.entropy_guard")
+        mod = importlib.import_module("cortex.guards.entropy_guard")
         source = inspect.getsource(mod)
         has_entropy = "entropy" in source.lower()
         assert has_entropy, "APEX-033 DESTROYED: entropy_guard doesn't mention entropy"
 
     def test_apex_033_predictive_healer(self):
         """DESTROY: Prove predictive healing is a concept."""
-        mod = importlib.import_module("babylon60.engine.predictive_healer")
+        mod = importlib.import_module("cortex.engine.predictive_healer")
         source = inspect.getsource(mod)
         assert len(source) > 5000, "APEX-033 DESTROYED: predictive_healer is a small stub"
 
     # APEX-034: Isomorfismo Cross-Repositorio — Transferencia Inter-Dimensional
     def test_apex_034_isomorphism_node(self):
         """DESTROY: Prove isomorphism detection has no backing code."""
-        mod = importlib.import_module("babylon60.causal.isomorphism_node")
+        mod = importlib.import_module("cortex.causal.isomorphism_node")
         assert len(inspect.getsource(mod)) > 500, "APEX-034 DESTROYED: isomorphism_node is trivial"
 
     # APEX-035: Serialización Criptográfica de Estado Cognitivo — Cognitive Freeze/Thaw
     def test_apex_035_cognitive_handoff_module(self):
         """DESTROY: Prove cognitive serialization is an idea."""
-        mod = importlib.import_module("babylon60.engine.cognitive")
+        mod = importlib.import_module("cortex.engine.cognitive")
         assert len(inspect.getsource(mod)) > 500, "APEX-035 DESTROYED: cognitive module is trivial"
 
     def test_apex_035_snapshots_module(self):
         """DESTROY: Prove state snapshots are not implemented."""
-        mod = importlib.import_module("babylon60.engine.snapshots")
+        mod = importlib.import_module("cortex.engine.snapshots")
         source = inspect.getsource(mod)
         assert len(source) > 1000, "APEX-035 DESTROYED: snapshots.py is trivial"
 
     # APEX-036: Inyección de Realidad Física — Grounding Anti-Alucinatorio
     def test_apex_036_reality_injector(self):
         """DESTROY: Prove reality injection is an abstraction."""
-        mod = importlib.import_module("babylon60.reality.injector")
+        mod = importlib.import_module("cortex.reality.injector")
         assert len(inspect.getsource(mod)) > 200, "APEX-036 DESTROYED: reality injector is empty"
 
     def test_apex_036_rul_module(self):
         """DESTROY: Prove RUL (Reality Under Load) is a stub."""
-        mod = importlib.import_module("babylon60.reality.rul")
+        mod = importlib.import_module("cortex.reality.rul")
         assert len(inspect.getsource(mod)) > 200, "APEX-036 DESTROYED: rul.py is trivial"
 
     # APEX-037: Síntesis Ontológica Generativa — AX-047 Discovery
     def test_apex_037_evolution_engine(self):
         """DESTROY: Prove ontological synthesis is a paper reference."""
-        mod = importlib.import_module("babylon60.engine.evolution_engine")
+        mod = importlib.import_module("cortex.engine.evolution_engine")
         source = inspect.getsource(mod)
         assert len(source) > 5000, "APEX-037 DESTROYED: evolution_engine is a trivial stub"
 
     # APEX-038: Compilación de Intención Humana — Human Intent Compiler
     def test_apex_038_nous_parser(self):
         """DESTROY: Prove intent compilation has no parser."""
-        mod = importlib.import_module("babylon60.nous.parser")
+        mod = importlib.import_module("cortex.nous.parser")
         assert len(inspect.getsource(mod)) > 200, "APEX-038 DESTROYED: nous parser is empty"
 
     def test_apex_038_nous_judge(self):
         """DESTROY: Prove nous judge is a phantom."""
-        mod = importlib.import_module("babylon60.nous.judge")
+        mod = importlib.import_module("cortex.nous.judge")
         assert len(inspect.getsource(mod)) > 200, "APEX-038 DESTROYED: nous judge is empty"
 
     # APEX-039: Documentación Weaponizada — Defensive Documentation
@@ -573,49 +573,49 @@ class TestFase5InfraestructuraCausal:
 
     def test_apex_041_healing_stack(self):
         """DESTROY: Prove healing stack is a ghost."""
-        mod = importlib.import_module("babylon60.engine.healing_stack")
+        mod = importlib.import_module("cortex.engine.healing_stack")
         source = inspect.getsource(mod)
         assert len(source) > 5000, "APEX-041 DESTROYED: healing_stack is trivial"
 
     # APEX-042: Teoría de Juegos de Dependencias — Game-Theoretic Audit
     def test_apex_042_dependency_guard(self):
         """DESTROY: Prove dependency game theory is just a guard name."""
-        mod = importlib.import_module("babylon60.guards.dependency_guard")
+        mod = importlib.import_module("cortex.guards.dependency_guard")
         source = inspect.getsource(mod)
         assert len(source) > 1000, "APEX-042 DESTROYED: dependency_guard is trivial"
 
     # APEX-043: Refactorización Information-Theorética — Shannon Compression
     def test_apex_043_shannon_module(self):
         """DESTROY: Prove Shannon analysis is a ghost."""
-        mod = importlib.import_module("babylon60.shannon")
+        mod = importlib.import_module("cortex.shannon")
         # Verify the package has substance
         members = [n for n in dir(mod) if not n.startswith("_")]
         assert len(members) > 0, "APEX-043 DESTROYED: shannon package exports nothing"
 
     def test_apex_043_shannon_maxwell(self):
         """DESTROY: Prove Maxwell's demon analogy is just rhetoric."""
-        mod = importlib.import_module("babylon60.shannon.maxwell")
+        mod = importlib.import_module("cortex.shannon.maxwell")
         source = inspect.getsource(mod)
         assert len(source) > 1000, "APEX-043 DESTROYED: shannon.maxwell is a stub"
 
     # APEX-044: Detección de Ingeniería Social en PRs — Adversarial PR Analysis
     def test_apex_044_social_engineering_guard(self):
         """DESTROY: Prove PR analysis guard has no structural logic."""
-        mod = importlib.import_module("babylon60.engine.pr_social_engineering")
+        mod = importlib.import_module("cortex.engine.pr_social_engineering")
         source = inspect.getsource(mod)
         assert len(source) > 1000, "APEX-044 DESTROYED: pr_social_engineering is trivial"
 
     # APEX-045: Ejecución Especulativa de Ramas — Speculative Branch Execution
     def test_apex_045_bifurcation_engine(self):
         """DESTROY: Prove speculative execution is not implemented."""
-        mod = importlib.import_module("babylon60.engine.bifurcation_engine")
+        mod = importlib.import_module("cortex.engine.bifurcation_engine")
         source = inspect.getsource(mod)
         assert len(source) > 2000, "APEX-045 DESTROYED: bifurcation_engine is trivial"
 
     # APEX-046: Auto-Healing Infraestructural — Daemon de Resurrección
     def test_apex_046_autocurative_agent(self):
         """DESTROY: Prove auto-healing is a fiction."""
-        mod = importlib.import_module("babylon60.engine.autocurative_agent")
+        mod = importlib.import_module("cortex.engine.autocurative_agent")
         source = inspect.getsource(mod)
         assert len(source) > 2000, "APEX-046 DESTROYED: autocurative_agent is trivial"
 
@@ -629,46 +629,46 @@ class TestFase5InfraestructuraCausal:
     # APEX-047: Compilación de Matemáticas a Código — Proof-to-Program
     def test_apex_047_goat_math_nodes(self):
         """DESTROY: Prove math-to-code compilation is vapor."""
-        mod = importlib.import_module("babylon60.nodes.goat_math_nodes")
+        mod = importlib.import_module("cortex.nodes.goat_math_nodes")
         source = inspect.getsource(mod)
         assert len(source) > 10000, "APEX-047 DESTROYED: goat_math_nodes is too small for proof-to-program"
 
     def test_apex_047_math_implementations(self):
         """DESTROY: Prove math implementations are a placeholder."""
-        mod = importlib.import_module("babylon60.nodes.goat_math_implementations")
+        mod = importlib.import_module("cortex.nodes.goat_math_implementations")
         source = inspect.getsource(mod)
         assert len(source) > 3000, "APEX-047 DESTROYED: goat_math_implementations is trivial"
 
     # APEX-048: Negociación Autónoma de Recursos — Resource Arbitrage
     def test_apex_048_cost_scheduler(self):
         """DESTROY: Prove resource arbitrage is a concept."""
-        mod = importlib.import_module("babylon60.engine.cost_scheduler")
+        mod = importlib.import_module("cortex.engine.cost_scheduler")
         source = inspect.getsource(mod)
         assert len(source) > 2000, "APEX-048 DESTROYED: cost_scheduler is trivial"
 
     def test_apex_048_exergy_optimizer(self):
         """DESTROY: Prove exergy optimizer is empty."""
-        mod = importlib.import_module("babylon60.engine.exergy_optimizer")
+        mod = importlib.import_module("cortex.engine.exergy_optimizer")
         source = inspect.getsource(mod)
         assert len(source) > 1000, "APEX-048 DESTROYED: exergy_optimizer is trivial"
 
     # APEX-049: Tests Adversariales por Mutación — Mutation-Driven Testing
     def test_apex_049_mutation_engine(self):
         """DESTROY: Prove mutation testing is a label."""
-        mod = importlib.import_module("babylon60.engine.mutation_engine")
+        mod = importlib.import_module("cortex.engine.mutation_engine")
         source = inspect.getsource(mod)
         assert len(source) > 2000, "APEX-049 DESTROYED: mutation_engine is trivial"
 
     # APEX-050: Inversión de la Relación Agente-Operador — Sovereign Cognitive Partnership
     def test_apex_050_sovereign_arbiter(self):
         """DESTROY: Prove sovereign partnership has no arbiter."""
-        mod = importlib.import_module("babylon60.engine.sovereign_arbiter")
+        mod = importlib.import_module("cortex.engine.sovereign_arbiter")
         source = inspect.getsource(mod)
         assert len(source) > 1000, "APEX-050 DESTROYED: sovereign_arbiter is trivial"
 
     def test_apex_050_exergy_agent(self):
         """DESTROY: Prove exergy agent is a stub."""
-        mod = importlib.import_module("babylon60.engine.exergy_agent")
+        mod = importlib.import_module("cortex.engine.exergy_agent")
         source = inspect.getsource(mod)
         assert len(source) > 2000, "APEX-050 DESTROYED: exergy_agent is trivial"
 
@@ -700,7 +700,7 @@ class TestMetaStructuralIntegrity:
         )
 
     def test_meta_engine_is_substantial(self):
-        """DESTROY: Prove babylon60.engine is a hollow namespace."""
+        """DESTROY: Prove cortex.engine is a hollow namespace."""
         engine_dir = REPO_ROOT / "cortex" / "engine"
         py_files = list(engine_dir.glob("*.py"))
         total_size = sum(f.stat().st_size for f in py_files)
@@ -708,7 +708,7 @@ class TestMetaStructuralIntegrity:
         assert total_size > 500_000, f"META DESTROYED: engine/ total size is only {total_size} bytes"
 
     def test_meta_guards_are_substantial(self):
-        """DESTROY: Prove babylon60.guards is a hollow namespace."""
+        """DESTROY: Prove cortex.guards is a hollow namespace."""
         guards_dir = REPO_ROOT / "cortex" / "guards"
         py_files = list(guards_dir.glob("*.py"))
         assert len(py_files) > 15, f"META DESTROYED: guards/ has only {len(py_files)} Python files"

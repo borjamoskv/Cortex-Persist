@@ -8,9 +8,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import pytest_asyncio
 
-from babylon60.memory.engrams import CortexSemanticEngram
-from babylon60.memory.manager import CortexMemoryManager
-from babylon60.memory.models import MemoryEvent
+from cortex.memory.engrams import CortexSemanticEngram
+from cortex.memory.manager import CortexMemoryManager
+from cortex.memory.models import MemoryEvent
 
 
 @pytest.fixture
@@ -134,7 +134,7 @@ async def test_process_interaction_with_overflow(manager, mock_l1):
     # The worker might pick it up immediately, so we just wait for queue to process or assert it
     # We will cancel the workers right away to inspect the queue or just wait.
     # Actually, the worker is running. Let's patch compress_and_store to verify it's called.
-    with patch("babylon60.memory._manager_bg.compress_and_store", new_callable=AsyncMock):
+    with patch("cortex.memory._manager_bg.compress_and_store", new_callable=AsyncMock):
         # Give worker a tick to pick it up
         await asyncio.sleep(0.01)
         # The task was added *before* this patch. The worker might have already processed
@@ -154,7 +154,7 @@ async def test_process_interaction_with_overflow_clean():
     )
 
     with patch(
-        "babylon60.memory._manager_bg.compress_and_store", new_callable=AsyncMock
+        "cortex.memory._manager_bg.compress_and_store", new_callable=AsyncMock
     ) as mock_compress:
         await mgr.process_interaction(
             role="user",
@@ -246,7 +246,7 @@ async def test_store_rejection_thalamus(manager, mock_mem0_pipeline):
     manager.thalamus.filter = AsyncMock(return_value=(False, "discard:causal_saturation", None))
 
     # Patch notify_notch_pruning so it doesn't try to use WebSockets
-    with patch("babylon60.routes.notch_ws.notify_notch_pruning", new_callable=AsyncMock):
+    with patch("cortex.routes.notch_ws.notify_notch_pruning", new_callable=AsyncMock):
         result = await manager.store(
             tenant_id="t1",
             content="Saturated fact",
@@ -290,7 +290,7 @@ async def test_store_resonance_deduplication(manager, mock_mem0_pipeline):
 async def test_assemble_context(manager, mock_l1):
     """Test assembling final LLM context from L1 and L2."""
     with patch(
-        "babylon60.memory.memory_retrieval.retrieve_episodic_context", new_callable=AsyncMock
+        "cortex.memory.memory_retrieval.retrieve_episodic_context", new_callable=AsyncMock
     ) as mock_retrieve:
         mock_retrieve.return_value = [{"content": "episodic 1"}]
 

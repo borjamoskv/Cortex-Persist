@@ -16,15 +16,15 @@ import json
 import click
 from rich.table import Table
 
-from babylon60.cli.common import DEFAULT_DB, cli, console
-from babylon60.database.core import connect as db_connect
+from cortex.cli.common import DEFAULT_DB, cli, console
+from cortex.database.core import connect as db_connect
 
 __all__: list[str] = []
 
 
 def _get_signal_bus(db: str):
     """Create a SignalBus instance from a database path."""
-    from babylon60.extensions.signals.bus import SignalBus
+    from cortex.extensions.signals.bus import SignalBus
 
     conn = db_connect(db)
     return SignalBus(conn), conn

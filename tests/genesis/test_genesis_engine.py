@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for babylon60.genesis.engine - GenesisEngine core orchestration.
+"""Tests for cortex.genesis.engine - GenesisEngine core orchestration.
 
 Includes the Ω₀ self-referential test: the engine generates its own spec
 and assembles it in /tmp to verify recursive integrity.
@@ -11,10 +11,10 @@ from pathlib import Path
 
 import pytest
 
-from babylon60.extensions.genesis.assembler import SystemAssembler
-from babylon60.extensions.genesis.engine import GenesisEngine
-from babylon60.extensions.genesis.models import ComponentSpec, SystemSpec
-from babylon60.extensions.genesis.validator import GenesisValidator
+from cortex.extensions.genesis.assembler import SystemAssembler
+from cortex.extensions.genesis.engine import GenesisEngine
+from cortex.extensions.genesis.models import ComponentSpec, SystemSpec
+from cortex.extensions.genesis.validator import GenesisValidator
 
 
 @pytest.fixture

@@ -1,5 +1,5 @@
-from babylon60.guards.epistemic_guard import EpistemicGuard
-from babylon60.types.epistemics import (
+from cortex.guards.epistemic_guard import EpistemicGuard
+from cortex.types.epistemics import (
     ObservationNode,
     InferenceNode,
     ConsensusNode,

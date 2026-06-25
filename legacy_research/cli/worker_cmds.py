@@ -9,7 +9,7 @@ import logging
 
 import click
 
-from babylon60.cli.common import DEFAULT_DB, _run_async, console
+from cortex.cli.common import DEFAULT_DB, _run_async, console
 
 logger = logging.getLogger("cortex")
 
@@ -26,8 +26,8 @@ def start_worker(db: str, poll: float):
     """Start all background workers (Enrichment, Compaction)."""
     import asyncio
 
-    from babylon60.worker.enrichment import EnrichmentWorker
-    from babylon60.worker.telemetry_compaction import TelemetryCompactionWorker
+    from cortex.worker.enrichment import EnrichmentWorker
+    from cortex.worker.telemetry_compaction import TelemetryCompactionWorker
 
     db_path = db or DEFAULT_DB
     enrichment = EnrichmentWorker(db_path=db_path, poll_interval=poll)

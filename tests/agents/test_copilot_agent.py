@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from babylon60.agents.builtins.copilot_agent import (
+from cortex.agents.builtins.copilot_agent import (
     CopilotAgent,
     InlineCompletionStrategy,
     DiagnosticFixStrategy,
@@ -25,7 +25,7 @@ from babylon60.agents.builtins.copilot_agent import (
     SuggestionStrategy,
     create_copilot_agent,
 )
-from babylon60.agents.copilot_contracts import (
+from cortex.agents.copilot_contracts import (
     CodeEdit,
     Confidence,
     CopilotContextPayload,
@@ -38,9 +38,9 @@ from babylon60.agents.copilot_contracts import (
     SuggestionStatus,
     SuggestionVerdict,
 )
-from babylon60.agents.manifest import AgentManifest
-from babylon60.agents.message_schema import AgentMessage, MessageKind, new_message
-from babylon60.agents.state import AgentStatus
+from cortex.agents.manifest import AgentManifest
+from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
+from cortex.agents.state import AgentStatus
 
 
 # ── Fixtures ──────────────────────────────────────────────────────

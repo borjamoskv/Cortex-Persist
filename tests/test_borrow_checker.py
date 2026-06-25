@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-from babylon60.engine.borrow_checker import LogicalBorrowChecker, StateDriftError
+from cortex.engine.borrow_checker import LogicalBorrowChecker, StateDriftError
 
 @pytest.mark.asyncio
 async def test_logical_borrow_checker_prevents_semantic_race():

@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import pytest
 
-from babylon60.engine.reflexion import (
+from cortex.engine.reflexion import (
     DiagnosisStrategy,
     Reflection,
     ReflexionConfig,
@@ -21,7 +21,7 @@ from babylon60.engine.reflexion import (
     ReflexionVerdict,
     TreeRewriter,
 )
-from babylon60.isa.builder import (
+from cortex.isa.builder import (
     dispatch,
     seq,
     par,

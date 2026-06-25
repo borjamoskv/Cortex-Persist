@@ -2,7 +2,7 @@
 
 import click
 
-from babylon60.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 
 
 @cli.command("eval")
@@ -11,7 +11,7 @@ from babylon60.cli.common import DEFAULT_DB, cli, close_engine_sync, console, ge
 @click.option("--top-k", default=5, help="Top K results to consider for recall")
 def eval_cmd(db: str, limit: int, top_k: int) -> None:
     """Run V8 Recall Precision Proxy tests."""
-    from babylon60.memory.evaluator import calculate_recall_precision
+    from cortex.memory.evaluator import calculate_recall_precision
 
     console.print("[bold cyan]🔬 CORTEX v8 Evaluation Engine[/]")
     console.print(f"Running Recall@{top_k} tests across {limit} samples...\n")

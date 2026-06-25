@@ -13,15 +13,15 @@ import asyncio
 import click
 from typing import Any
 
-from babylon60.cli.common import console, get_engine
-from babylon60.extensions.ui_control.maestro import MaestroUI
-from babylon60.extensions.ui_control.models import AppTarget
+from cortex.cli.common import console, get_engine
+from cortex.extensions.ui_control.maestro import MaestroUI
+from cortex.extensions.ui_control.models import AppTarget
 
 
 @click.group(name="maestro")
 def maestro():
     """MAC-Ω: Automatización soberana de escritorio (AppleScript/Native)."""
-    from babylon60.extensions.ui_control.bootstrapper import PermsBootstrapper
+    from cortex.extensions.ui_control.bootstrapper import PermsBootstrapper
 
     PermsBootstrapper.verify_and_prompt_permissions()
 
@@ -101,7 +101,7 @@ def hotkey_cmd(key: str, modifiers: tuple[str, ...], app: str | None):
     """
 
     async def _run():
-        m = MaestroUI(engine=get_engine()  # type: ignore[arg-type])
+        m = MaestroUI(engine=get_engine())  # type: ignore[arg-type]
         target = AppTarget(name=app) if app else None
         res = await m.hotkey(key, *modifiers, target=target)
         if res.success:
@@ -120,7 +120,7 @@ def type_cmd(text: str, app: str | None):
     """Escribe texto en la app activa (clipboard para cadenas largas)."""
 
     async def _run():
-        m = MaestroUI(engine=get_engine()  # type: ignore[arg-type])
+        m = MaestroUI(engine=get_engine())  # type: ignore[arg-type]
         target = AppTarget(name=app) if app else None
         console.print(f"Escribiendo {len(text)} caracteres...")
         res = await m.type_text(text, target=target)
@@ -141,7 +141,7 @@ def type_cmd(text: str, app: str | None):
 @click.option("--button", default="left", help="left / right")
 def click_at_cmd(x: int, y: int, button: str):
     """Click en coordenadas de pantalla."""
-    m = MaestroUI(engine=get_engine()  # type: ignore[arg-type])
+    m = MaestroUI(engine=get_engine())  # type: ignore[arg-type]
     res = m.click(x, y, button)
     if res.success:
         console.print(f"[green]✔ Click en ({x}, {y})[/green]")
@@ -154,7 +154,7 @@ def click_at_cmd(x: int, y: int, button: str):
 @click.argument("y", type=int)
 def double_click_cmd(x: int, y: int):
     """Doble click en coordenadas de pantalla."""
-    m = MaestroUI(engine=get_engine()  # type: ignore[arg-type])
+    m = MaestroUI(engine=get_engine())  # type: ignore[arg-type]
     res = m.double_click(x, y)
     if res.success:
         console.print(f"[green]✔ Doble click en ({x}, {y})[/green]")
@@ -170,7 +170,7 @@ def double_click_cmd(x: int, y: int):
 @click.option("--duration", default=0.5, help="Duración del arrastre en segundos")
 def drag_cmd(from_x: int, from_y: int, to_x: int, to_y: int, duration: float):
     """Drag-and-drop de un punto a otro."""
-    m = MaestroUI(engine=get_engine()  # type: ignore[arg-type])
+    m = MaestroUI(engine=get_engine())  # type: ignore[arg-type]
     res = m.drag(from_x, from_y, to_x, to_y, duration=duration)
     if res.success:
         console.print(f"[green]✔ Drag ({from_x},{from_y}) → ({to_x},{to_y})[/green]")
@@ -182,7 +182,7 @@ def drag_cmd(from_x: int, from_y: int, to_x: int, to_y: int, duration: float):
 @click.argument("clicks", type=int)
 def scroll_cmd(clicks: int):
     """Scroll de rueda. Positivo=arriba, negativo=abajo."""
-    m = MaestroUI(engine=get_engine()  # type: ignore[arg-type])
+    m = MaestroUI(engine=get_engine())  # type: ignore[arg-type]
     res = m.scroll(clicks)
     if res.success:
         console.print(f"[green]✔ Scroll {clicks} líneas[/green]")
@@ -199,7 +199,7 @@ def list_windows_cmd(app_name: str):
     """Lista todas las ventanas de una aplicación."""
 
     async def _run():
-        m = MaestroUI(engine=get_engine()  # type: ignore[arg-type])
+        m = MaestroUI(engine=get_engine())  # type: ignore[arg-type]
         windows = await m.list_windows(app_name)
         if not windows:
             console.print(f"[yellow]⚠ Sin ventanas para '{app_name}'[/yellow]")
@@ -232,7 +232,7 @@ def move_cmd(app_name: str, x: int, y: int):
     """Mueve la ventana principal de una app."""
 
     async def _run():
-        m = MaestroUI(engine=get_engine()  # type: ignore[arg-type])
+        m = MaestroUI(engine=get_engine())  # type: ignore[arg-type]
         await _run_window_op(
             f"Ventana movida a ({x}, {y})", m.move_window(AppTarget(name=app_name), x, y)
         )
@@ -248,7 +248,7 @@ def resize_cmd(app_name: str, width: int, height: int):
     """Redimensiona la ventana principal de una app."""
 
     async def _run():
-        m = MaestroUI(engine=get_engine()  # type: ignore[arg-type])
+        m = MaestroUI(engine=get_engine())  # type: ignore[arg-type]
         await _run_window_op(
             f"Ventana redimensionada a {width}×{height}",
             m.resize_window(AppTarget(name=app_name), width, height),
@@ -263,7 +263,7 @@ def minimize_cmd(app_name: str):
     """Minimiza la ventana principal de una app."""
 
     async def _run():
-        m = MaestroUI(engine=get_engine()  # type: ignore[arg-type])
+        m = MaestroUI(engine=get_engine())  # type: ignore[arg-type]
         await _run_window_op(f"{app_name} minimizado", m.minimize_window(AppTarget(name=app_name)))
 
     asyncio.run(_run())
@@ -275,7 +275,7 @@ def fullscreen_cmd(app_name: str):
     """Alterna pantalla completa para una app."""
 
     async def _run():
-        m = MaestroUI(engine=get_engine()  # type: ignore[arg-type])
+        m = MaestroUI(engine=get_engine())  # type: ignore[arg-type]
         await _run_window_op(
             f"{app_name} pantalla completa alternada", m.fullscreen_window(AppTarget(name=app_name))
         )
@@ -292,7 +292,7 @@ def capture_cmd(output: str | None):
     """Captura de pantalla del display principal."""
 
     async def _run():
-        m = MaestroUI(engine=get_engine()  # type: ignore[arg-type])
+        m = MaestroUI(engine=get_engine())  # type: ignore[arg-type]
         path = await m.screenshot(output)
         if path:
             console.print(f"[green]✔ Captura guardada en: {path}[/green]")
@@ -312,7 +312,7 @@ def run_cmd(instruction: tuple[str, ...]):
     text = " ".join(instruction)
 
     async def _run():
-        from babylon60.extensions.agents.mac_maestro import MacMaestroAgent
+        from cortex.extensions.agents.mac_maestro import MacMaestroAgent
 
         agent = MacMaestroAgent()
         console.print(f"Maestro Ω procesando: '{text}'...")

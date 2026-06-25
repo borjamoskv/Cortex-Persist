@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""Tests for babylon60.consensus.merkle - Merkle Tree Utilities.
+"""Tests for cortex.consensus.merkle - Merkle Tree Utilities.
 
 C5-REAL audit remediation: consensus/ had 0% test coverage.
 """
@@ -7,7 +7,7 @@ C5-REAL audit remediation: consensus/ had 0% test coverage.
 import hashlib
 import pytest
 
-from babylon60.consensus.merkle import compute_merkle_root, verify_merkle_proof, MerkleTree
+from cortex.consensus.merkle import compute_merkle_root, verify_merkle_proof, MerkleTree
 
 
 # ── compute_merkle_root ──────────────────────────────────────────────────

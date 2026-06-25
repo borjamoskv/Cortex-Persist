@@ -3,7 +3,7 @@ import asyncio
 import threading
 import time
 import pytest
-from babylon60.engine import CortexEngine
+from cortex.engine import CortexEngine
 
 
 def test_sync_mixin_concurrent_execution(tmp_path):
@@ -13,7 +13,7 @@ def test_sync_mixin_concurrent_execution(tmp_path):
     """
     from unittest.mock import patch
 
-    with patch("babylon60.database.core.BUSY_TIMEOUT_MS", 100):
+    with patch("cortex.database.core.BUSY_TIMEOUT_MS", 100):
         db_file = tmp_path / "test_concurrency.db"
         engine = CortexEngine(db_path=str(db_file))
         engine.init_db_sync()

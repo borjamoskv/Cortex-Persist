@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 from unittest.mock import patch, mock_open, MagicMock
-from babylon60.verification.frontend_oracle import FrontendOracle
+from cortex.verification.frontend_oracle import FrontendOracle
 
 
 @pytest.fixture
@@ -75,7 +75,7 @@ def test_extract_block_fallback(oracle):
 
 def test_empty_function_name(oracle):
     # Mock re.finditer to return a match with no groups to hit `if not func_name: continue`
-    with patch("babylon60.verification.frontend_oracle.re.compile") as mock_compile:
+    with patch("cortex.verification.frontend_oracle.re.compile") as mock_compile:
         mock_pattern = MagicMock()
         mock_match = MagicMock()
         mock_match.group.return_value = None

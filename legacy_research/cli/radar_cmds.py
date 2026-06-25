@@ -5,9 +5,9 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from babylon60.cli.common import _run_async, console, get_engine
-from babylon60.engine.decalcifier import SovereignDecalcifier
-from babylon60.extensions.songlines.sensor import TopographicSensor
+from cortex.cli.common import _run_async, console, get_engine
+from cortex.engine.decalcifier import SovereignDecalcifier
+from cortex.extensions.songlines.sensor import TopographicSensor
 
 
 @click.group(name="radar")

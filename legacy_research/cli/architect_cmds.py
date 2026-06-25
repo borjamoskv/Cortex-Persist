@@ -22,8 +22,8 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.syntax import Syntax
 
-from babylon60.cli.common import cli, console
-from babylon60.extensions.llm.sovereign import SovereignLLM
+from cortex.cli.common import cli, console
+from cortex.extensions.llm.sovereign import SovereignLLM
 
 __all__ = ["architect"]
 
