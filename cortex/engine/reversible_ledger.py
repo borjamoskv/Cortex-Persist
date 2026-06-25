@@ -30,7 +30,9 @@ class ReversibleLedger:
         """Inyecta conocimiento delegando la memoria al Rust EDG y agregando el delta."""
         fact_id = hashlib.sha256((content + str(time.time())).encode('utf-8')).hexdigest()
         
-        node = cortex_rs.RetrievalNode(fact_id, 1.0)
+        # [C5-REAL] BABYLON-60 Epistemology: f64 erradicado. 
+        # Inyectando overlaps deterministas (ancestry, ledger, witness, temporal)
+        node = cortex_rs.RetrievalNode(fact_id, 60, 10, 30, 0)
         self._graph.add_node(node)
         
         if parent_id:

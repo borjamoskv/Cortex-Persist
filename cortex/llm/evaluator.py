@@ -21,10 +21,11 @@ class SemanticRiskEvaluator:
         
         # 2. Build a baseline dependency graph representing the project's invariants
         # In a real environment, this graph is persisted in SQLite WAL and loaded here.
-        graph.add_node(RetrievalNode("auth.core", 1.0))
-        graph.add_node(RetrievalNode("api.gateway", 0.95))
-        graph.add_node(RetrievalNode("db.schema", 1.0))
-        graph.add_node(RetrievalNode("frontend.ui", 0.9))
+        # [C5-REAL] BABYLON-60 Epistemology: f64 erradicado. 
+        graph.add_node(RetrievalNode("auth.core", 60, 10, 30, 0))
+        graph.add_node(RetrievalNode("api.gateway", 60, 10, 25, 0))
+        graph.add_node(RetrievalNode("db.schema", 60, 10, 30, 0))
+        graph.add_node(RetrievalNode("frontend.ui", 50, 10, 20, 0))
         
         # Define retrieval dependencies
         graph.add_dependency("db.schema", "auth.core")

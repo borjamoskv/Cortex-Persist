@@ -27,6 +27,8 @@ fn cortex_core_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Add Shim bindings
     m.add_function(wrap_pyfunction!(shim::verify_ephemeral_token, m)?)?;
     m.add_function(wrap_pyfunction!(shim::mint_ephemeral_token, m)?)?;
+    m.add_function(wrap_pyfunction!(shim::causal_distance, m)?)?;
+    m.add_function(wrap_pyfunction!(shim::hash_distance_rollup, m)?)?;
     m.add_function(wrap_pyfunction!(shim::ingest_reality_claim, m)?)?;
     m.add_function(wrap_pyfunction!(shim::validate_metric_json, m)?)?;
     m.add_function(wrap_pyfunction!(shim::validate_exergy_mutation, m)?)?;

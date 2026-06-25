@@ -180,6 +180,40 @@ impl RetrievalNode {
     }
 }
 
+pub const MAX_DIVERGENCE: u16 = 1000;
+
+#[pyfunction]
+pub fn causal_distance(ancestry_overlap: u16, ledger_overlap: u16, witness_overlap: u16, temporal_overlap: u16) -> PyResult<u16> {
+    let ancestry_weight: u16 = 60;
+    let witness_weight: u16 = 30;
+    let ledger_weight: u16 = 10;
+    let temporal_weight: u16 = 1;
+
+    let score = ancestry_overlap.saturating_mul(ancestry_weight)
+        .saturating_add(witness_overlap.saturating_mul(witness_weight))
+        .saturating_add(ledger_overlap.saturating_mul(ledger_weight))
+        .saturating_add(temporal_overlap.saturating_mul(temporal_weight));
+
+    let dist = if score > MAX_DIVERGENCE {
+        0
+    } else {
+        MAX_DIVERGENCE - score
+    };
+
+    Ok(dist)
+}
+
+#[pyfunction]
+pub fn hash_distance_rollup(root_hash: u32, distances: Vec<u16>) -> PyResult<u32> {
+    const FNV_PRIME: u32 = 16777619;
+    let mut current_hash = root_hash;
+    for d in distances {
+        current_hash ^= d as u32;
+        current_hash = current_hash.wrapping_mul(FNV_PRIME);
+    }
+    Ok(current_hash)
+}
+
 #[pyclass]
 pub struct RetrievalGraph {
     nodes: HashMap<String, RetrievalNode>,
@@ -206,6 +240,42 @@ impl RetrievalGraph {
     
     pub fn invalidate_node(&mut self, node_id: String) {
         self.nodes.remove(&node_id);
+    }
+    
+    pub fn compute_causal_path(&self, target_id: String, root_hash: u32) -> PyResult<u32> {
+        let mut child_to_parent = HashMap::new();
+        for (parent, children) in &self.dependencies {
+            for child in children {
+                child_to_parent.insert(child.clone(), parent.clone());
+            }
+        }
+
+        let mut current_id = target_id.clone();
+        let mut path_nodes = Vec::new();
+        
+        while let Some(node) = self.nodes.get(&current_id) {
+            path_nodes.push(node.clone());
+            if let Some(parent) = child_to_parent.get(&current_id) {
+                current_id = parent.clone();
+            } else {
+                break; // Root reached
+            }
+        }
+        
+        path_nodes.reverse(); // root -> target
+        
+        let mut distances = Vec::new();
+        for node in path_nodes {
+            let d = causal_distance(
+                node.ancestry_overlap, 
+                node.ledger_overlap, 
+                node.witness_overlap, 
+                node.temporal_overlap
+            )?;
+            distances.push(d);
+        }
+        
+        hash_distance_rollup(root_hash, distances)
     }
 }
 

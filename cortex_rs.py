@@ -28,6 +28,8 @@ from cortex_core_rs import (
     verify_causal_assertion,
     verify_ephemeral_token,
     mint_ephemeral_token,
+    causal_distance,
+    hash_distance_rollup,
 )
 from cortex_core_rs import (
     calculate_entropy_b60 as _calc_entropy_rust,
@@ -55,6 +57,8 @@ __all__ = [
     "verify_causal_assertion",
     "verify_ephemeral_token",
     "mint_ephemeral_token",
+    "causal_distance",
+    "hash_distance_rollup",
     "calculate_entropy_b60",
     "Babylon60",
 ]
