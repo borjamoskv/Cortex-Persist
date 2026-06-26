@@ -12,7 +12,7 @@ logger = logging.getLogger("cortex_extensions.llm.presets")
 
 # Default location for presets
 _ASSET_PATH: Final[str] = str(
-    Path(__file__).parent.parent.parent.parent / "config" / "llm_presets.json"
+    Path(__file__).parent.parent.parent / "config" / "llm_presets.json"
 )
 
 # Global cache for presets to avoid redundant I/O
