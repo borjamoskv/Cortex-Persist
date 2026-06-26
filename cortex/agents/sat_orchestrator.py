@@ -8,8 +8,8 @@ import cortex_core_rs
 from typing import List, Tuple
 
 class SatOrchestrator:
-    def __init__(self):
-        pass
+    def __init__(self, timeout_ms: int = 5000):
+        self.timeout_ms = timeout_ms
 
     def check_graph_colorability(self, edges: List[Tuple[int, int]], nodes: int, k: int) -> dict:
         """
