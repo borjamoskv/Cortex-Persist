@@ -9,6 +9,7 @@ from cortex.guards.prompt_security_guard import PromptExtractionBlockedError, Pr
 from cortex.guards.scrape_guard import SanitizedPayload, ScrapeSanitizerGuard
 from cortex.guards.secret_guard import PlaintextSecretError, SecretGuard
 from cortex.guards.virgo import ContextPoisoningError, VirgoContextGuard, VirgoValidationError
+from cortex.guards.git_context_guard import GitContextGuard, GitContextDriftError
 
 __all__ = [
     "AgentCredentials",
@@ -18,6 +19,8 @@ __all__ = [
     "CapabilityGuard",
     "CausalClosureGuard",
     "ContextPoisoningError",
+    "GitContextGuard",
+    "GitContextDriftError",
     "HealthGuard",
     "PromptExtractionBlockedError",
     "PromptSecurityGuard",
