@@ -92,15 +92,13 @@ async def test_background_tasks_cancellation(manager):
 @pytest.mark.asyncio
 async def test_wait_for_background_timeout(manager):
     """Verify wait_for_background handles timeouts gracefully."""
-    # Mock _bg_queue to simulate a non-empty queue that times out on join
-    mock_queue = MagicMock()
-    mock_queue.empty = MagicMock(return_value=False)
+    # Stop background workers first to prevent queue consumption
+    for worker in manager._bg_workers:
+        worker.cancel()
+    manager._bg_workers.clear()
     
-    async def dummy_join():
-        await asyncio.sleep(1)  # Simulate long-running tasks
-    mock_queue.join = dummy_join
-    
-    manager._bg_queue = mock_queue
+    # Enqueue a mock item into the queue
+    await manager._bg_queue.put(([], "sess", "tenant", "proj"))
     
     with patch("cortex.memory.manager.logger") as mock_logger:
         await manager.wait_for_background(timeout=0.01)

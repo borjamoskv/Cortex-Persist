@@ -82,7 +82,7 @@ async def test_ouroboros_entropy_guard_low_entropy():
     guard = OuroborosEntropyGuard()
     low_entropy_content = "a" * 150  # 150 repeating characters = 0 entropy
     
-    with pytest.raises(ValueError, match="Abnormally low Shannon entropy"):
+    with pytest.raises(ValueError, match="abnormally low Shannon entropy"):
         await guard.check(
             content=low_entropy_content,
             project="test",

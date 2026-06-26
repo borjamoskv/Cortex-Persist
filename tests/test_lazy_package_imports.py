@@ -102,8 +102,8 @@ def test_ledger_origin_signatures_materialize_on_demand() -> None:
 
 
 def test_browser_package_import_is_lazy_without_playwright() -> None:
-    package_name = "cortex_extensions.browser"
-    engine_module = "cortex_extensions.browser.engine"
+    package_name = "cortex.extensions.browser"
+    engine_module = "cortex.extensions.browser.engine"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]
@@ -121,10 +121,10 @@ def test_browser_package_import_is_lazy_without_playwright() -> None:
 
 
 def test_gate_package_import_is_lazy() -> None:
-    package_name = "cortex_extensions.gate"
-    core_module = "cortex_extensions.gate.core"
-    errors_module = "cortex_extensions.gate.errors"
-    enums_module = "cortex_extensions.gate.enums"
+    package_name = "cortex.extensions.gate"
+    core_module = "cortex.extensions.gate.core"
+    errors_module = "cortex.extensions.gate.errors"
+    enums_module = "cortex.extensions.gate.enums"
 
     with _temporarily_reset_modules(package_name, core_module, errors_module, enums_module):
         module = importlib.import_module(package_name)
@@ -137,10 +137,10 @@ def test_gate_package_import_is_lazy() -> None:
 
 
 def test_gate_public_exports_materialize_on_demand() -> None:
-    package_name = "cortex_extensions.gate"
-    core_module = "cortex_extensions.gate.core"
-    errors_module = "cortex_extensions.gate.errors"
-    enums_module = "cortex_extensions.gate.enums"
+    package_name = "cortex.extensions.gate"
+    core_module = "cortex.extensions.gate.core"
+    errors_module = "cortex.extensions.gate.errors"
+    enums_module = "cortex.extensions.gate.enums"
 
     with _temporarily_reset_modules(package_name, core_module, errors_module, enums_module):
         module = importlib.import_module(package_name)
@@ -153,9 +153,9 @@ def test_gate_public_exports_materialize_on_demand() -> None:
 
 
 def test_signals_package_import_is_lazy_without_aiosqlite() -> None:
-    package_name = "cortex_extensions.signals"
-    bus_module = "cortex_extensions.signals.bus"
-    models_module = "cortex_extensions.signals.models"
+    package_name = "cortex.extensions.signals"
+    bus_module = "cortex.extensions.signals.bus"
+    models_module = "cortex.extensions.signals.models"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]
@@ -174,9 +174,9 @@ def test_signals_package_import_is_lazy_without_aiosqlite() -> None:
 
 
 def test_signals_public_exports_materialize_on_demand() -> None:
-    package_name = "cortex_extensions.signals"
-    bus_module = "cortex_extensions.signals.bus"
-    models_module = "cortex_extensions.signals.models"
+    package_name = "cortex.extensions.signals"
+    bus_module = "cortex.extensions.signals.bus"
+    models_module = "cortex.extensions.signals.models"
 
     with _temporarily_reset_modules(package_name, bus_module, models_module):
         module = importlib.import_module(package_name)
@@ -189,9 +189,9 @@ def test_signals_public_exports_materialize_on_demand() -> None:
 
 
 def test_metering_package_import_is_lazy() -> None:
-    package_name = "cortex_extensions.metering"
-    quotas_module = "cortex_extensions.metering.quotas"
-    tracker_module = "cortex_extensions.metering.tracker"
+    package_name = "cortex.extensions.metering"
+    quotas_module = "cortex.extensions.metering.quotas"
+    tracker_module = "cortex.extensions.metering.tracker"
 
     with _temporarily_reset_modules(package_name, quotas_module, tracker_module):
         module = importlib.import_module(package_name)
@@ -203,9 +203,9 @@ def test_metering_package_import_is_lazy() -> None:
 
 
 def test_metering_public_exports_materialize_on_demand() -> None:
-    package_name = "cortex_extensions.metering"
-    quotas_module = "cortex_extensions.metering.quotas"
-    tracker_module = "cortex_extensions.metering.tracker"
+    package_name = "cortex.extensions.metering"
+    quotas_module = "cortex.extensions.metering.quotas"
+    tracker_module = "cortex.extensions.metering.tracker"
 
     with _temporarily_reset_modules(package_name, quotas_module, tracker_module):
         module = importlib.import_module(package_name)
@@ -275,7 +275,7 @@ def test_search_public_exports_materialize_on_demand() -> None:
 def test_gateway_package_import_is_lazy_without_aiosqlite() -> None:
     package_name = "cortex.gateway"
     router_module = "cortex.gateway.router"
-    bus_module = "cortex_extensions.signals.bus"
+    bus_module = "cortex.extensions.signals.bus"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]
@@ -382,9 +382,9 @@ def test_graph_package_import_is_lazy_without_aiosqlite() -> None:
 
 
 def test_sync_package_import_is_lazy_without_crypto_stack() -> None:
-    package_name = "cortex_extensions.sync"
-    common_module = "cortex_extensions.sync.common"
-    write_module = "cortex_extensions.sync.write"
+    package_name = "cortex.extensions.sync"
+    common_module = "cortex.extensions.sync.common"
+    write_module = "cortex.extensions.sync.write"
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):  # type: ignore[no-untyped-def]

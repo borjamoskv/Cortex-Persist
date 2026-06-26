@@ -33,7 +33,7 @@ def get_ast_tokens(code: str) -> list[str]:
 
 def _hash_token(token: str) -> int:
     """Returns a 64-bit integer hash for a token."""
-    h = hashlib.md5(token.encode("utf-8")).digest()
+    h = hashlib.md5(token.encode("utf-8")).digest()  # nosec B324
     return int.from_bytes(h[:8], byteorder="big")
 
 

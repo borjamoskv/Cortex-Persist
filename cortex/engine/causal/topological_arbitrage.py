@@ -16,6 +16,7 @@ Características:
 import logging
 from collections import defaultdict, deque
 from typing import Any
+from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
@@ -39,10 +40,10 @@ class TopologyIndex:
         self.sorted_nodes = []  # Topological sort order
 
         # Heuristic weights for W_h
-        self.alpha = 1.0  # descendants
-        self.beta = 0.5  # fanout
-        self.gamma = 0.3  # betweenness approx (fan-in * fan-out)
-        self.delta = 0.8  # criticality (depth)
+        self.alpha = Decimal("1.0")  # descendants
+        self.beta = Decimal("0.5")  # fanout
+        self.gamma = Decimal("0.3")  # betweenness approx (fan-in * fan-out)
+        self.delta = Decimal("0.8")  # criticality (depth)
 
     async def _fetch_version(self) -> int:
         query = "SELECT value FROM cortex_meta WHERE key = 'hypothesis_graph_version'"
@@ -183,22 +184,22 @@ class TopologyIndex:
 
         # Reverse pass for descendants aggregate impact
         subtree_impact = {
-            u: self.nodes[u]["probability"] * self.nodes[u]["impact"] for u in self.nodes
+            u: Decimal(str(self.nodes[u]["probability"])) * Decimal(str(self.nodes[u]["impact"])) for u in self.nodes
         }
         descendants_count = {u: 0 for u in self.nodes}
 
         for u in reversed(topo_order):
             for v, w, _, conf in self.adj_out[u]:
                 # Transitive aggregation
-                subtree_impact[u] += subtree_impact[v] * w * conf
+                subtree_impact[u] += subtree_impact[v] * Decimal(str(w)) * Decimal(str(conf))
                 descendants_count[u] += descendants_count[v] + 1
 
         # Final computation
         for u in self.nodes:
-            fan_out = len(self.adj_out[u])
-            fan_in = len(self.adj_in[u])
+            fan_out = Decimal(str(len(self.adj_out[u])))
+            fan_in = Decimal(str(len(self.adj_in[u])))
             betweenness_approx = fan_in * fan_out
-            crit = depth[u]
+            crit = Decimal(str(depth[u]))
 
             # W_h = alpha * descendants_impact + beta * fanout + gamma * betweenness + delta * depth
             w_h = (
@@ -210,15 +211,15 @@ class TopologyIndex:
 
             # CBR = (Sum(P_i * Impact_i)) / (Cost * Uncertainty)
             # We use subtree_impact[u] as the numerator (Sum of P_i * Impact_i for this subtree)
-            cost = max(self.nodes[u]["cost"], 0.001)
-            uncertainty = max(self.nodes[u]["svi"], 0.001)
+            cost = max(Decimal(str(self.nodes[u]["cost"])), Decimal("0.001"))
+            uncertainty = max(Decimal(str(self.nodes[u]["svi"])), Decimal("0.001"))
 
             cbr = subtree_impact[u] / (cost * uncertainty)
 
             self.metrics[u] = {
                 "w_h": w_h,
                 "cbr": cbr,
-                "depth": crit,
+                "depth": depth[u],
                 "descendants": descendants_count[u],
                 "subtree_impact": subtree_impact[u],
             }
@@ -235,8 +236,8 @@ class TopologyIndex:
                     {
                         "id": u,
                         "statement": data["statement"],
-                        "cbr": m["cbr"],
-                        "w_h": m["w_h"],
+                        "cbr": float(m["cbr"]),
+                        "w_h": float(m["w_h"]),
                         "cost": data["cost"],
                         "uncertainty": data["svi"],
                     }
@@ -272,7 +273,7 @@ class TopologyIndex:
                 import math
 
                 # Starvation boost: CBR scales logarithmically with age
-                boosted_cbr = cbr * (1.0 + math.log1p(age_seconds / 3600.0))
+                boosted_cbr = cbr * Decimal(str(1.0 + math.log1p(age_seconds / 3600.0)))
                 
                 # Invariants
                 assert age_seconds >= 0.0, "Age cannot be negative"
@@ -282,9 +283,9 @@ class TopologyIndex:
                     {
                         "id": u,
                         "statement": data["statement"],
-                        "cbr": cbr,
-                        "boosted_cbr": boosted_cbr,
-                        "w_h": m["w_h"],
+                        "cbr": float(cbr),
+                        "boosted_cbr": float(boosted_cbr),
+                        "w_h": float(m["w_h"]),
                     }
                 )
 
@@ -350,7 +351,7 @@ class TopologyIndex:
             node_state = {
                 "id": u,
                 "status": data.get("status", "UNKNOWN"),
-                "cbr": m.get("cbr", 0.0),
+                "cbr": float(m.get("cbr", 0.0)),
                 "depth": m.get("depth", 0),
                 "in_degree": len(self.adj_in.get(u, [])),
                 "out_degree": len(self.adj_out.get(u, []))
