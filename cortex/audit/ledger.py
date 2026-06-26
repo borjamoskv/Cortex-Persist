@@ -245,8 +245,8 @@ class EnterpriseAuditLedger:
 
         return {"status": "verified", "blocks": len(batches)}
 
-    async def _batch_worker(self) -> None:
-        """Background worker that flushes the queue periodically using a Merkle Tree."""
+    async def _anchor_worker(self) -> None:
+        """Background worker that pulls unanchored local entries and anchors them to Rekor/TSA asynchronously."""
         import asyncio
         import base64
         import json
@@ -271,102 +271,67 @@ class EnterpriseAuditLedger:
                     await asyncio.sleep(self.batch_window_ms / 1000.0)
                     async with self._lock:
                         async with AsyncFileLock():
-                            if not self._batch_queue:
+                            # Pull-Model: Fetch unanchored records from SQLite
+                            cursor = await self._conn.execute(
+                                "SELECT audit_id, signature, prev_hash FROM security_audit_log WHERE external_anchor IS NULL ORDER BY rowid ASC LIMIT ?",
+                                (self.max_batch_size,)
+                            )
+                            unanchored = await cursor.fetchall()
+                            
+                            if not unanchored:
                                 self._batch_task = None
                                 break
 
-                            batch = self._batch_queue[: self.max_batch_size]
-                            self._batch_queue = self._batch_queue[self.max_batch_size :]
+                            for audit_id, signature, prev_hash in unanchored:
+                                external_anchor = None
+                                try:
+                                    merkle_payload = audit_id + prev_hash
+                                    merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+                                    entry_hash = hashlib.sha256(f"merkle_batch:{merkle_root}:{prev_hash}".encode()).hexdigest()
 
-                            # Compute Merkle Root for the batch
-                            batch_audit_ids = [item["audit_id"] for item, _ in batch]
-                            merkle_payload = "".join(batch_audit_ids) + self._last_hash
-                            merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+                                    pub_pem = self.public_key.public_bytes(
+                                        encoding=serialization.Encoding.PEM,
+                                        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+                                    )
 
-                            # Separate hash from signature: entry_hash represents the batch deterministically
-                            entry_hash_payload = f"merkle_batch:{merkle_root}:{self._last_hash}"
-                            entry_hash = hashlib.sha256(entry_hash_payload.encode()).hexdigest()
+                                    if "PYTEST_CURRENT_TEST" in os.environ or os.environ.get("CORTEX_TEST_ENV"):
+                                        rekor_uuid = None
+                                        rfc_token = None
+                                    else:
+                                        # Asynchronous Rekor logging
+                                        rekor_uuid = await rekor_client.log_entry(entry_hash, signature, pub_pem)  # pyright: ignore[reportArgumentType]
 
-                            # Sign the entry_hash
-                            signature = self.private_key.sign(entry_hash.encode()).hex()
+                                        tsa_signature = None
+                                        if rfc3161ng is not None:
+                                            try:
+                                                tsa_req = rfc3161ng.make_request(merkle_root.encode("utf-8"))
+                                                tsa_resp = await http_client.post(
+                                                    tsa_url,
+                                                    content=tsa_req,
+                                                    headers={"Content-Type": "application/timestamp-query"},
+                                                )
+                                                if tsa_resp.status_code == 200:
+                                                    tsa_signature = base64.b64encode(tsa_resp.content).decode("utf-8")
+                                            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
+                                                logger.warning("TSA stamping failed: %s", exc)
+                                        rfc_token = tsa_signature
 
-                            # -- REKOR & RFC3161 ANCHORING --
-                            external_anchor = None
-                            try:
-                                pub_pem = self.public_key.public_bytes(
-                                    encoding=serialization.Encoding.PEM,
-                                    format=serialization.PublicFormat.SubjectPublicKeyInfo,
-                                )
-
-                                if "PYTEST_CURRENT_TEST" in os.environ or os.environ.get("CORTEX_TEST_ENV"):
-                                    rekor_uuid = None
-                                    rfc_token = None
-                                else:
-                                    # Asynchronous Rekor logging
-                                    rekor_uuid = await rekor_client.log_entry(entry_hash, signature, pub_pem)  # pyright: ignore[reportArgumentType]
-
-                                    tsa_signature = None
-                                    if rfc3161ng is not None:
-                                        try:
-                                            tsa_req = rfc3161ng.make_request(merkle_root.encode("utf-8"))
-                                            tsa_resp = await http_client.post(
-                                                tsa_url,
-                                                content=tsa_req,
-                                                headers={"Content-Type": "application/timestamp-query"},
+                                    if rekor_uuid or rfc_token:
+                                        external_anchor = json.dumps(
+                                            {"rekor_uuid": rekor_uuid, "rfc3161_token": rfc_token}
+                                        )
+                                        
+                                        # Update the row with the external anchor
+                                        with causal_write(self._conn):
+                                            await self._conn.execute(
+                                                "UPDATE security_audit_log SET external_anchor = ? WHERE audit_id = ?",
+                                                (external_anchor, audit_id)
                                             )
-                                            if tsa_resp.status_code == 200:
-                                                tsa_signature = base64.b64encode(tsa_resp.content).decode("utf-8")
-                                        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
-                                            logger.warning("TSA stamping failed: %s", exc)
-                                    rfc_token = tsa_signature
+                                            if not self._conn.in_transaction:
+                                                await self._conn.commit()
+                                except Exception as e:
+                                    logger.error("[AuditLedger] External anchoring failed: %s", e)
 
-                                if rekor_uuid or rfc_token:
-                                    external_anchor = json.dumps(
-                                        {"rekor_uuid": rekor_uuid, "rfc3161_token": rfc_token}
-                                    )
-                            except Exception as e:
-                                logger.error("[AuditLedger] External anchoring failed: %s", e)
-
-                            # Prepare SQLite bulk insert
-                            insert_rows = []
-                            for item, _ in batch:  # pyright: ignore[reportAssignmentType]
-                                insert_rows.append(
-                                    (
-                                        item["audit_id"],
-                                        item["timestamp"],
-                                        item["tenant_id"],
-                                        item["actor_role"],
-                                        item["actor_id"],
-                                        item["action"],
-                                        item["resource"],
-                                        item["status"],
-                                        self._last_hash,
-                                        signature,
-                                        external_anchor,
-                                    )
-                                )
-
-                            try:
-                                with causal_write(self._conn):
-                                    await self._conn.executemany(
-                                        """INSERT INTO security_audit_log
-                                           (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
-                                            resource, status, prev_hash, signature, external_anchor)
-                                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                                        insert_rows,
-                                    )
-                                    await self._conn.commit()
-                                self._last_hash = entry_hash
-
-                                # Resolve futures
-                                for item, fut in batch:
-                                    if not fut.done():
-                                        fut.set_result(item["audit_id"])
-                            except Exception as e:
-                                logger.error("[AuditLedger] Batch insert failed: %s", e)
-                                for _, fut in batch:
-                                    if not fut.done():
-                                        fut.set_exception(e)
         finally:
             await rekor_client.close()
 
@@ -379,7 +344,7 @@ class EnterpriseAuditLedger:
         resource: str,
         status: str = "SUCCESS",
     ) -> str:
-        """Securely logs an action. Uses Micro-Batching under concurrency."""
+        """Securely logs an action synchronously within the SAGA boundary."""
         import asyncio
 
         await self.ensure_table()
@@ -387,26 +352,57 @@ class EnterpriseAuditLedger:
         timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         audit_id = hashlib.sha256(f"{timestamp}{actor_id}{action}".encode()).hexdigest()
 
-        event = {
-            "audit_id": audit_id,
-            "timestamp": timestamp,
-            "tenant_id": tenant_id,
-            "actor_role": actor_role,
-            "actor_id": actor_id,
-            "action": action,
-            "resource": resource,
-            "status": status,
-        }
-
-        fut = asyncio.get_running_loop().create_future()
-
         async with self._lock:
-            self._batch_queue.append((event, fut))  # pyright: ignore[reportArgumentType]
-            if self._batch_task is None:
-                self._batch_task = asyncio.create_task(self._batch_worker())
+            # 1. Fetch the actual last hash from DB to support transparent rollbacks
+            cursor = await self._conn.execute(
+                "SELECT prev_hash, signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
+            )
+            row = await cursor.fetchone()
+            if row:
+                prev_hash_db, sig_db = row[0], row[1]
+                cursor2 = await self._conn.execute(
+                    "SELECT audit_id FROM security_audit_log WHERE signature = ? ORDER BY rowid ASC",
+                    (sig_db,),
+                )
+                rows2 = await cursor2.fetchall()
+                batch_audit_ids = [r[0] for r in rows2]
+                merkle_payload = "".join(batch_audit_ids) + prev_hash_db
+                merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+                current_last_hash = hashlib.sha256(
+                    f"merkle_batch:{merkle_root}:{prev_hash_db}".encode()
+                ).hexdigest()
+            else:
+                current_last_hash = "GENESIS"
 
-        # Wait for the batch to be committed
-        return await fut
+            # 2. Compute the new block
+            merkle_payload_new = audit_id + current_last_hash
+            merkle_root_new = hashlib.sha256(merkle_payload_new.encode()).hexdigest()
+            entry_hash = hashlib.sha256(f"merkle_batch:{merkle_root_new}:{current_last_hash}".encode()).hexdigest()
+            signature = self.private_key.sign(entry_hash.encode()).hex()
+
+            # 3. Insert synchronously inside the existing transaction
+            with causal_write(self._conn):
+                await self._conn.execute(
+                    """INSERT INTO security_audit_log
+                       (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
+                        resource, status, prev_hash, signature, external_anchor)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        audit_id, timestamp, tenant_id, actor_role, actor_id, action,
+                        resource, status, current_last_hash, signature, None
+                    )
+                )
+                # Auto-commit ONLY if we are not inside a larger transaction
+                if not self._conn.in_transaction:
+                    await self._conn.commit()
+
+            self._last_hash = entry_hash
+
+            # Trigger anchor worker if not running
+            if self._batch_task is None:
+                self._batch_task = asyncio.create_task(self._anchor_worker())
+
+        return audit_id
 
     def verify_zk_seal(self, payload: str, signature_hex: str) -> bool:
         """Verifies a cryptographic seal against the Audit Sovereign public key."""

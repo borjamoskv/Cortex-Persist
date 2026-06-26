@@ -1,3 +1,4 @@
+from __future__ import annotations
 # [C5-REAL] Exergy-Maximized
 import pytest
 pytestmark = pytest.mark.integration
@@ -13,7 +14,6 @@ Covers:
 - Query APIs (get_providers_by_tier, get_providers_by_cost)
 """
 
-from __future__ import annotations
 
 import os
 

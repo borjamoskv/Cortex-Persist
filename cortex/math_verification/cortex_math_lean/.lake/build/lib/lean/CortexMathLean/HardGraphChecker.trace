@@ -1,0 +1,32 @@
+{"synthetic": false,
+ "schemaVersion": "2025-09-10",
+ "outputs":
+ {"o": ["326c0933ed54fdbe.olean"],
+  "m": false,
+  "i": "cb3b173b7b2323a5.ilean",
+  "c": "0dea25ef561b5d8c.c"},
+ "log":
+ [{"message":
+   ".> LEAN_PATH=/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean /Users/borjafernandezangulo/.elan/toolchains/leanprover--lean4---v4.31.0/bin/lean /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/CortexMathLean/HardGraphChecker.lean -o /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean/CortexMathLean/HardGraphChecker.olean -i /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean/CortexMathLean/HardGraphChecker.ilean -c /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/HardGraphChecker.c --setup /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/HardGraphChecker.setup.json --json",
+   "level": "trace"}],
+ "inputs":
+ [["CortexMathLean.HardGraphChecker:deps",
+   [["deps",
+     [["cortex_math_lean/CortexMathLean:extraDep",
+       [["@cortex_math_lean:extraDep", "00000000000006bb"]]],
+      ["imports", "00000000000006bb"]]],
+    ["libs",
+     [["import dynlibs", "00000000000006bb"],
+      ["package external libraries", "00000000000006bb"],
+      ["module dynlibs", "00000000000006bb"],
+      ["module plugins", "00000000000006bb"]]]]],
+  ["Lean 4.31.0, commit 68218e876d2a38b1985b8590fff244a83c321783",
+   "fc45ac412f28501c"],
+  ["/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/CortexMathLean/HardGraphChecker.lean",
+   "811720b89dfbfd23"],
+  ["options", "00000000000006bb"],
+  ["isModule: false", "feefd2a0d3a1847e"],
+  ["Module.name: CortexMathLean.HardGraphChecker", "2cdb9dc60e2fec80"],
+  ["Package.id?: (some cortex_math_lean)", "d50b5563f47a48d5"],
+  ["Module.leanArgs: #[]", "00000000000006bb"]],
+ "depHash": "7790d50b4ea54d2e"}

@@ -163,7 +163,7 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
             scores.append(hs.score)
             detector.push(hs.score)
             if i < samples - 1:
-                time.sleep(interval)
+                time.sleep(interval)  # noqa: TID251 # Synchronous CLI loop
     else:
         # DB history mode (instant)
         detector = TrendDetector(window_size=20)

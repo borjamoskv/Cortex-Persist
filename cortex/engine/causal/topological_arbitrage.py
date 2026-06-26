@@ -178,6 +178,8 @@ class TopologyIndex:
                     queue.append(v)
 
         self.sorted_nodes = topo_order
+        # Invariant: the graph is a DAG so topo sort length must equal node count.
+        assert len(self.sorted_nodes) == len(self.nodes), "Topological sort dropped nodes! Cycle detected?"
 
         # Reverse pass for descendants aggregate impact
         subtree_impact = {
@@ -271,6 +273,10 @@ class TopologyIndex:
 
                 # Starvation boost: CBR scales logarithmically with age
                 boosted_cbr = cbr * (1.0 + math.log1p(age_seconds / 3600.0))
+                
+                # Invariants
+                assert age_seconds >= 0.0, "Age cannot be negative"
+                assert boosted_cbr >= cbr, "Boosted CBR must be >= base CBR"
 
                 active.append(
                     {
@@ -326,3 +332,30 @@ class TopologyIndex:
             await self.db.commit()
         except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"Failed to cascade invalidate: {e}")
+
+    def snapshot(self) -> str:
+        """
+        Calculates a deterministic SHA-256 hash of the topological index state.
+        This provides a cryptographic fingerprint of the scheduler's state.
+        """
+        import json
+        import hashlib
+        
+        state_repr = []
+        # Sort nodes lexicographically by ID to ensure determinism
+        for u in sorted(self.nodes.keys()):
+            data = self.nodes[u]
+            m = self.metrics.get(u, {})
+            # Include intrinsic properties
+            node_state = {
+                "id": u,
+                "status": data.get("status", "UNKNOWN"),
+                "cbr": m.get("cbr", 0.0),
+                "depth": m.get("depth", 0),
+                "in_degree": len(self.adj_in.get(u, [])),
+                "out_degree": len(self.adj_out.get(u, []))
+            }
+            state_repr.append(node_state)
+            
+        serialized = json.dumps(state_repr, sort_keys=True)
+        return hashlib.sha256(serialized.encode("utf-8")).hexdigest()

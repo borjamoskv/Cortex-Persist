@@ -216,6 +216,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
 
     async def migrate_key_to_argon2(self, key_id: KeyID, key_hash_argon2: str) -> None:
         from datetime import datetime, timezone
+
         from cortex.database.core import causal_write
 
         conn = await self._get_conn_async()

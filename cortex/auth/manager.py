@@ -77,7 +77,7 @@ class AuthManager:
         self._background_tasks: set[asyncio.Task[Any]] = set()
 
         try:
-            self._dummy_hash = getattr(cortex_rs, "hash_password")("ctx_dummy_key_to_initialize_hashing_parameters")
+            self._dummy_hash = getattr(cortex_rs, "hash_password")("ctx_dummy_key_to_initialize_hashing_parameters")  # noqa: B009
         except Exception:
             self._dummy_hash = "$argon2id$v=19$m=16,t=2,p=1$stub$dummyhash"
 
@@ -112,7 +112,7 @@ class AuthManager:
 
         loop = asyncio.get_running_loop()
         try:
-            hash_fn = getattr(cortex_rs, "hash_password")
+            hash_fn = getattr(cortex_rs, "hash_password")  # noqa: B009
             return await loop.run_in_executor(
                 self._executor, hash_fn, key + AUTH_PEPPER
             )
@@ -292,7 +292,7 @@ class AuthManager:
             try:
                 loop = asyncio.get_running_loop()
                 try:
-                    verify_fn = getattr(cortex_rs, "verify_password")
+                    verify_fn = getattr(cortex_rs, "verify_password")  # noqa: B009
                     if verify_fn is None:
                         raise TypeError("verify_password not found")
                     is_valid = await loop.run_in_executor(

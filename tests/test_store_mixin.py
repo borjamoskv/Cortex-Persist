@@ -254,11 +254,13 @@ class TestTaintIntegration:
 
         from cortex.engine.flow.causality import EDGE_DERIVED_FROM, EDGE_TAINTED_BY
 
+        from cortex.database.core import async_causal_write
         async with engine.session() as conn, conn.cursor() as cur:
-            await cur.execute(
-                "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
-                (child_id, parent_id, EDGE_DERIVED_FROM),
-            )
+            async with async_causal_write(conn):
+                await cur.execute(
+                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
+                    (child_id, parent_id, EDGE_DERIVED_FROM),
+                )
             await conn.commit()
 
         # 3. Invalidate the parent

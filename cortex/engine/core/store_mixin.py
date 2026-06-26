@@ -89,44 +89,58 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 )
 
         if conn:
+            started_tx = False
             if not conn.in_transaction:
                 await conn.execute("BEGIN IMMEDIATE")
-            return await self._store_impl(
-                conn,
-                project=project,
-                content=content,
-                tenant_id=tenant_id,
-                fact_type=fact_type,
-                tags=tags,
-                confidence=confidence,
-                source=source,
-                actor_id=actor_id,
-                meta=meta,
-                valid_from=valid_from,
-                commit=commit,
-                tx_id=tx_id,
-                parent_decision_id=parent_decision_id,
-            )
+                started_tx = True
+            try:
+                return await self._store_impl(
+                    conn,
+                    project=project,
+                    content=content,
+                    tenant_id=tenant_id,
+                    fact_type=fact_type,
+                    tags=tags,
+                    confidence=confidence,
+                    source=source,
+                    actor_id=actor_id,
+                    meta=meta,
+                    valid_from=valid_from,
+                    commit=commit,
+                    tx_id=tx_id,
+                    parent_decision_id=parent_decision_id,
+                )
+            except Exception:
+                if started_tx and conn.in_transaction:
+                    await conn.rollback()
+                raise
 
         async with self.session() as _conn:
+            started_tx = False
             if not _conn.in_transaction:
                 await _conn.execute("BEGIN IMMEDIATE")
-            return await self._store_impl(
-                _conn,
-                project=project,
-                content=content,
-                tenant_id=tenant_id,
-                fact_type=fact_type,
-                tags=tags,
-                confidence=confidence,
-                source=source,
-                actor_id=actor_id,
-                meta=meta,
-                valid_from=valid_from,
-                commit=commit,
-                tx_id=tx_id,
-                parent_decision_id=parent_decision_id,
-            )
+                started_tx = True
+            try:
+                return await self._store_impl(
+                    _conn,
+                    project=project,
+                    content=content,
+                    tenant_id=tenant_id,
+                    fact_type=fact_type,
+                    tags=tags,
+                    confidence=confidence,
+                    source=source,
+                    actor_id=actor_id,
+                    meta=meta,
+                    valid_from=valid_from,
+                    commit=commit,
+                    tx_id=tx_id,
+                    parent_decision_id=parent_decision_id,
+                )
+            except Exception:
+                if started_tx and _conn.in_transaction:
+                    await _conn.rollback()
+                raise
 
     async def _run_store_validation(
         self,

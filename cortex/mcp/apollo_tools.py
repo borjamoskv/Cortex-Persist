@@ -82,7 +82,7 @@ def register_apollo_tools(mcp: FastMCP) -> None:  # pyright: ignore[reportInvali
                     )
 
                 data["page"] += 1
-                time.sleep(1)  # Rate limit respect
+                time.sleep(1)  # noqa: TID251 # Synchronous rate limiting
 
             except Exception as e:
                 logger.error(f"[!] Apollo Extraction Error: {e}")

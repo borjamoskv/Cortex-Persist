@@ -1,3 +1,4 @@
+from __future__ import annotations
 # [C5-REAL] Exergy-Maximized
 import pytest
 pytestmark = pytest.mark.chaos
@@ -19,7 +20,6 @@ Scenarios tested:
   6. FULL_SIEGE - All scenarios in sequence (Ouroboros Loop).
 """
 
-from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
 

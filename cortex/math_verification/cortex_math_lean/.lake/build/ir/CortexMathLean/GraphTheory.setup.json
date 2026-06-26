@@ -1,0 +1,7 @@
+{"plugins": [],
+ "package": "cortex_math_lean",
+ "options": {},
+ "name": "CortexMathLean.GraphTheory",
+ "isModule": false,
+ "importArts": {},
+ "dynlibs": []}

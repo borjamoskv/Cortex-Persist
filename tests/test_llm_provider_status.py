@@ -1,7 +1,7 @@
+from __future__ import annotations
 # [C5-REAL] Exergy-Maximized
 import pytest
 pytestmark = pytest.mark.integration
-from __future__ import annotations
 
 from collections.abc import Callable
 

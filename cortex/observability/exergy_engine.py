@@ -321,7 +321,7 @@ class ExergyEngine:
 
             # 3. "Execute" & Measure Reality (Mock execution for now)
             start_time = time.time()
-            time.sleep(1)  # Fake run
+            time.sleep(1)  # noqa: TID251 # Synchronous fake run delay
             real_runtime = (time.time() - start_time) / 60.0
 
             # 4. Telemetry: Update Geometry
@@ -346,7 +346,7 @@ class ExergyEngine:
                 log.info(f"🧬 Delayed Economic Signals Active: {safe_signals}")
 
             log.info("---")
-            time.sleep(2)
+            time.sleep(2)  # noqa: TID251 # Synchronous simulation delay
 
         log.info("🌌 AEFM Cycle Limit Reached (Safe Stop).")
 

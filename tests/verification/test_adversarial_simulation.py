@@ -1,3 +1,4 @@
+from __future__ import annotations
 # [C5-REAL] Exergy-Maximized
 import pytest
 pytestmark = pytest.mark.chaos
@@ -13,7 +14,6 @@ Simulates agents attempting to break the system via:
 Validates structural determinism, event sourcing replay, and immutability.
 """
 
-from __future__ import annotations
 
 import hashlib
 import os

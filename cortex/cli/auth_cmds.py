@@ -3,7 +3,7 @@
 import click
 from rich.console import Console
 
-from cortex.cli.common import cli, _run_async
+from cortex.cli.common import _run_async, cli
 from cortex.engine import CortexEngine
 from cortex.engine.swarm.auth_gateway import QuorumGateway
 

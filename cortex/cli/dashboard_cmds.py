@@ -365,7 +365,7 @@ def dashboard(db: str, interval: float, once: bool) -> None:
                 while True:
                     data = _run_async(_collect_all(engine))
                     live.update(_build_dashboard(data))
-                    time.sleep(interval)
+                    time.sleep(interval)  # noqa: TID251 # Synchronous CLI loop
             except Exception as exc:
                 import logging
 

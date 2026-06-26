@@ -24,9 +24,11 @@ class LedgerStore:
     @contextmanager
     def tx(self) -> Iterator[sqlite3.Connection]:
         conn = self._connect()
+        from cortex.database.core import causal_write
         try:
-            yield conn
-            conn.commit()
+            with causal_write(conn):
+                yield conn
+                conn.commit()
         except Exception as exc:
             conn.rollback()
             if getattr(exc, "preserve_ledger_error", False):

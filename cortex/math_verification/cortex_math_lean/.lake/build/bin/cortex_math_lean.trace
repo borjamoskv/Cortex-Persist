@@ -1,0 +1,23 @@
+{"synthetic": false,
+ "schemaVersion": "2025-09-10",
+ "outputs": "c19901291e3e6187",
+ "log":
+ [{"message":
+   ".> MACOSX_DEPLOYMENT_TARGET=99.0 /Users/borjafernandezangulo/.elan/toolchains/leanprover--lean4---v4.31.0/bin/clang -o /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/bin/cortex_math_lean @/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/bin/cortex_math_lean.rsp",
+   "level": "trace"}],
+ "inputs":
+ [["linkObjs",
+   [["/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/Main.c.o.export",
+     "eb24cb7744ab8a58"],
+    ["/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/GraphTheory.c.o.export",
+     "46031b912e6f4cb3"],
+    ["/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/HardGraphChecker.c.o.export",
+     "929997f1216f1d80"],
+    ["/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean.c.o.export",
+     "973859e6595ed22c"]]],
+  ["linkLibs", "00000000000006bb"],
+  ["Lean 4.31.0, commit 68218e876d2a38b1985b8590fff244a83c321783",
+   "fc45ac412f28501c"],
+  ["traceArgs: #[]", "00000000000006bb"],
+  ["arm64-apple-darwin24.6.0", "77c16133d139df5a"]],
+ "depHash": "400132191e237bb1"}

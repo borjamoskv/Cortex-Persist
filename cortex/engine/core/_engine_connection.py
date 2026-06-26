@@ -133,7 +133,7 @@ class ConnectionMixin:
 
             # Autorizar migraciones físicamente
             if hasattr(conn._conn, "authorize_causal_writes"):
-                getattr(conn._conn, "authorize_causal_writes")()
+                getattr(conn._conn, "authorize_causal_writes")()  # noqa: B009
             try:
                 await run_migrations_async(conn)
                 for k, v in get_init_meta():
@@ -151,7 +151,7 @@ class ConnectionMixin:
                 if row:
                     import cortex.core.config as config
 
-                    setattr(config, "HKDF_SALT", row[0])
+                    setattr(config, "HKDF_SALT", row[0])  # noqa: B010
                 else:
                     import cortex.core.config as config
 
@@ -163,7 +163,7 @@ class ConnectionMixin:
                     await conn.commit()
             finally:
                 if hasattr(conn._conn, "revoke_causal_writes"):
-                    getattr(conn._conn, "revoke_causal_writes")()
+                    getattr(conn._conn, "revoke_causal_writes")()  # noqa: B009
 
             # Query dynamic salt if present to reload config dynamically
             try:
@@ -174,9 +174,9 @@ class ConnectionMixin:
                     if row:
                         import cortex.core.config as config
 
-                        setattr(config, "HKDF_SALT", row[0])
+                        setattr(config, "HKDF_SALT", row[0])  # noqa: B010
                         if hasattr(config, "_cfg"):
-                            setattr(config._cfg, "HKDF_SALT", row[0])
+                            setattr(config._cfg, "HKDF_SALT", row[0])  # noqa: B010
             except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.warning("Failed to load tenant_isolation_salt: %s", e)
 

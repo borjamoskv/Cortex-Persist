@@ -44,3 +44,10 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-commit, pre-push]
+      - id: typing-baseline
+        name: Pyright Baseline Check
+        entry: python scripts/check_typing.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit, pre-push]

@@ -39,7 +39,9 @@ if TYPE_CHECKING:
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
     from cortex.mac_maestro.executor import MaestroExecutor
 try:
-    from cortex_extensions.health.health_mixin import HealthMixin  # pyright: ignore[reportAssignmentType]
+    from cortex_extensions.health.health_mixin import (
+        HealthMixin,  # pyright: ignore[reportAssignmentType]
+    )
 except ImportError:
 
     class HealthMixin:
