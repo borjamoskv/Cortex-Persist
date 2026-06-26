@@ -35,8 +35,11 @@ A prototype/demo surface originally built for the "Influencer Guard" concept, to
 
 ### Deployment & Lifecycle
 * **Direct Execution:** `python api/server.py`
-* **Lifecycle:** Pending consolidation or removal. It is retained solely for historical reference of the Influencer Guard concept.
-* **Warning:** Do NOT use this module as a reference for new feature development. Do NOT implement fixes here unless they are specific to the legacy demo flow.
+* **Deprecation Schedule:** 
+  * **Status:** Frozen (No new features or bug fixes as of 2026-06-26)
+  * **Target Removal:** Version 1.2.0
+* **Lifecycle:** Pending consolidation. It is retained solely for historical reference of the Influencer Guard concept until v1.2.0.
+* **Warning:** Do NOT use this module as a reference for new feature development.
 
 ---
 

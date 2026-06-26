@@ -95,6 +95,10 @@ app.add_middleware(
 
 logger = logging.getLogger(__name__)
 logger.info("CORS allow_origins=%s", ALLOWED_ORIGINS)
+logger.warning(
+    "🚨 [DEPRECATED] api.server is officially DEPRECATED and frozen. "
+    "It will be removed in version 1.2.0. All new development must target cortex.api.core."
+)
 
 GUARD_DB_PATH = Path("~/.cortex/influencer_guard.db").expanduser()
 SCRAPER_DB_PATH = "influencer_audit_v1.db"
