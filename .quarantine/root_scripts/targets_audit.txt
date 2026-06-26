@@ -1,4 +1,0 @@
-# Archivo objetivo para Batch Loop (Influencer Audit v1)
-# Añadir URLs por línea.
-# Ejemplo de estructura (Reemplazar con targets reales de Vandalismo Económico):
-# https://www.youtube.com/watch?v=XXXXXXXXXXX

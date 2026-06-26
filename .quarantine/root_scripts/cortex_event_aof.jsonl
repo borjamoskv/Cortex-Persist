@@ -1,5 +1,0 @@
-{"hlc": "1780369412148-0", "type": "SWARM_TICK", "agent_id": 0, "payload": {"active_nodes": 1, "global_entropy": 0.1}}
-{"hlc": "1780369412648-0", "type": "SWARM_TICK", "agent_id": 0, "payload": {"active_nodes": 1, "global_entropy": 0.1}}
-{"hlc": "1780465698025-0", "type": "SWARM_TICK", "agent_id": 0, "payload": {"active_nodes": 1, "global_entropy": 0.1}}
-{"hlc": "1780465699031-0", "type": "SWARM_TICK", "agent_id": 0, "payload": {"active_nodes": 1, "global_entropy": 0.1}}
-{"hlc": "1780465700034-0", "type": "SWARM_TICK", "agent_id": 0, "payload": {"active_nodes": 1, "global_entropy": 0.1}}
