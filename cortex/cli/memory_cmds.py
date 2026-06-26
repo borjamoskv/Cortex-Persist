@@ -214,6 +214,9 @@ def store_batch(file_path, db) -> None:
             meta = meta or {}
             _inject_cli_taint(content, meta, source)
 
+            import os
+            actor_id = os.environ.get("CORTEX_ACTOR_ID", "borjamoskv")
+
             fact_id = _run_async(
                 engine.store(
                     project=project,
@@ -224,6 +227,7 @@ def store_batch(file_path, db) -> None:
                     source=source,
                     meta=meta,
                     parent_decision_id=parent_id,
+                    actor_id=actor_id,
                 )
             )
             stored_count += 1

@@ -90,7 +90,10 @@ class CircuitBreaker:
     @staticmethod
     def is_countable_failure(exc: Any) -> bool:
         """Determines if an exception should count towards the circuit breaker threshold."""
-        if isinstance(exc, httpx.NetworkError | httpx.TimeoutException | httpx.RemoteProtocolError):
+        if isinstance(
+            exc,
+            (httpx.NetworkError, httpx.TimeoutException, httpx.RemoteProtocolError, httpx.DecodingError, UnicodeDecodeError),
+        ):
             return True
         if isinstance(exc, httpx.HTTPStatusError):
             status = exc.response.status_code
