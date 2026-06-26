@@ -4,6 +4,7 @@ import time
 import uuid
 import math
 from datetime import datetime, timezone, timedelta
+from unittest.mock import patch
 import pytest
 import aiosqlite
 
@@ -189,55 +190,49 @@ async def test_scheduler_determinism():
     await db.close()
 
 @pytest.mark.asyncio
-async def test_cascade_death_concurrent_drops():
-    """Test that SwarmSignal for an INVALIDATED hypothesis is dropped (VOID)."""
-    db = await setup_test_db()
-    now = datetime.now(timezone.utc).isoformat()
+async def test_cascade_death_concurrent_drops(caplog):
+    """Test that SwarmSignal for an INVALIDATED hypothesis is dropped by SwarmStateStore."""
+    from cortex.engine.swarm.state_store import CausalStateStore
+    import tempfile
+    import logging
     
-    # We create an INVALIDATED task
-    await db.execute(
-        "INSERT INTO system_hypotheses (id, statement, probability, svi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        ("hyp-1234", "Stmt", 1.0, 1.0, 1.0, 1.0, 'INVALIDATED', now)
-    )
-    await db.commit()
-    
-    bus = AsyncSignalBus()
-    
-    signal = SwarmSignal(
-        agent_id="ag-1",
-        target="hyp-1234",
-        status="SUCCESS",
-        payload={"result": "data"},
-        metrics={}
-    )
-    
-    # Let's use a real file DB for this specific test to ensure connection sharing works.
-    import cortex.engine.swarm.legion
-    test_db_path = "/tmp/test_cascade.db"
-    if os.path.exists(test_db_path):
-        os.remove(test_db_path)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        test_db_path = os.path.join(tmpdir, "test_cascade.db")
         
-    db_file = await aiosqlite.connect(test_db_path)
-    await db_file.execute("CREATE TABLE system_hypotheses (id TEXT, status TEXT)")
-    await db_file.execute("INSERT INTO system_hypotheses (id, status) VALUES ('hyp-1234', 'INVALIDATED')")
-    await db_file.commit()
-    
-    # Patch DB_PATH inside the function
-    original_db_path = getattr(cortex.engine.swarm.legion, 'DB_PATH', None)
-    cortex.engine.swarm.legion.DB_PATH = test_db_path
-    import sys
-    sys.modules['cortex.config'].DB_PATH = test_db_path
-    
-    try:
-        await bus.emit(signal)
-    finally:
-        if original_db_path:
-            cortex.engine.swarm.legion.DB_PATH = original_db_path
-            sys.modules['cortex.config'].DB_PATH = original_db_path
-    
-    signals = await bus.get_all()
-    assert len(signals) == 0, "Signal should be dropped if hypothesis is INVALIDATED"
-    
-    await db_file.close()
-    if os.path.exists(test_db_path):
-        os.remove(test_db_path)
+        # Setup DB and insert INVALIDATED hypothesis
+        async with aiosqlite.connect(test_db_path) as db:
+            await db.execute("""
+                CREATE TABLE IF NOT EXISTS system_hypotheses (
+                    id TEXT PRIMARY KEY,
+                    statement TEXT,
+                    probability REAL,
+                    svi REAL,
+                    cost REAL,
+                    impact REAL,
+                    status TEXT,
+                    created_at TEXT
+                )
+            """)
+            now = datetime.now(timezone.utc).isoformat()
+            await db.execute(
+                "INSERT INTO system_hypotheses (id, statement, probability, svi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                ("hyp-1234", "Stmt", 1.0, 1.0, 1.0, 1.0, 'INVALIDATED', now)
+            )
+            await db.commit()
+            
+        store = CausalStateStore(test_db_path)
+        await store.connect()
+        
+        signal = SwarmSignal(
+            agent_id="ag-1",
+            target="hyp-1234",
+            status="SUCCESS",
+            payload={"result": "data"},
+            metrics={}
+        )
+        
+        with caplog.at_level(logging.WARNING):
+            await store.process_signal(signal)
+            
+        assert any("Dropping signal for hyp-1234: Hypothesis is INVALIDATED" in record.message for record in caplog.records)
+        await store.close()
