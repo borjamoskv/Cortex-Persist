@@ -1,11 +1,15 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import logging
+import os
 import subprocess
 
+import aiosqlite
 from google.antigravity import Agent, types
 from google.antigravity.connections.local import LocalAgentConfig
 from google.antigravity.hooks import hooks
+from google.antigravity.tools import tool
+from cortex.audit.ledger import EnterpriseAuditLedger
 
 logger = logging.getLogger(__name__)
 
@@ -51,17 +55,35 @@ async def zero_ask_override(data: str) -> types.HookResult:
 async def protocolo_ship_omega(data: str):
     """Fuerza la persistencia en el ledger CORTEX y ejecución de pruebas."""
     logger.info("[SHIP-Ω] Iniciando Cierre Criptográfico de la iteración.")
-
-    # Simula la persistencia en CORTEX-Persist
-    logger.info("[SHIP-Ω] Ejecutando: cortex store --type decision --source agent:gemini")
+    db_path = os.environ.get("CORTEX_DB_PATH", os.path.expanduser("~/.cortex/cortex.db"))
+    
     try:
-        # subprocess.run(["cortex", "store", "--type", "decision", "--source", "agent:gemini", "sovereign_e2e_swarm", "Iteración finalizada end-to-end"])
-        pass
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        async with aiosqlite.connect(db_path) as conn:
+            ledger = EnterpriseAuditLedger(conn)
+            await ledger.ensure_table()
+            audit_id = await ledger.log_action(
+                tenant_id="local_swarm",
+                actor_role="sovereign_e2e",
+                actor_id="gemini",
+                action="end_turn",
+                resource="sovereign_e2e_swarm",
+                status="SUCCESS"
+            )
+            logger.info(f"[SHIP-Ω] Hash de Ledger cristalizado: {audit_id}")
     except Exception as exc:
-        import logging
-
-        logging.warning("Suppressed exception: %s", exc)
+        logger.error(f"[SHIP-Ω] Fallo criptográfico en Ledger: {exc}")
+        
     logger.info("[SHIP-Ω] Cristalización C5-REAL completada.")
+
+@tool
+def execute_shell(cmd: str) -> str:
+    """Ejecuta un comando en la terminal local del agente."""
+    try:
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
+        return result.stdout or result.stderr
+    except Exception as e:
+        return str(e)
 
 
 # ==============================================================================
@@ -86,7 +108,7 @@ async def main():
             protocolo_ship_omega,
         ],
         # Activamos herramientas de OS/Bash y delegación
-        # tools=[bash_tool, subagent_tool, ...]
+        tools=[execute_shell]
     )
 
     # Instanciamos el Agente Principal (Jules-Secretario)
