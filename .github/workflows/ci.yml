@@ -300,7 +300,7 @@ jobs:
               "version": 1,
               "components": [],
           }
-          Path("sbom.json").write_text(json.dumps(payload) + "\n", encoding="utf-8")
+          Path("sbom.spdx").write_text(json.dumps(payload) + "\n", encoding="utf-8")
           PY
       - name: Ruff SAST scan (S-select)
         if: steps.scope.outputs.release_only != 'true'
@@ -323,13 +323,13 @@ jobs:
         if: steps.scope.outputs.release_only != 'true'
         uses: anchore/sbom-action@61119d458adab75f756bc0b9e4bde25725f86a7a # v0
         with:
-          format: cyclonedx-json
-          output-file: sbom.json
+          format: spdx-json
+          output-file: sbom.spdx
       - name: Upload SBOM
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: sbom
-          path: sbom.json
+          path: sbom.spdx
 
   test:
     needs: [change-scope]

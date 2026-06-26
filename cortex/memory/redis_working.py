@@ -13,7 +13,8 @@ from __future__ import annotations
 import json
 import logging
 import time
-from typing import Final
+from decimal import Decimal
+from typing import Any, Final, cast
 
 import redis
 
@@ -64,16 +65,16 @@ class RedisWorkingMemoryL1:
     def _access_log_key(self) -> str:
         return f"{self._prefix}access_log"
 
-    def _calculate_priority(self, event: MemoryEvent) -> float:
-        score = 1.0
+    def _calculate_priority(self, event: MemoryEvent) -> Decimal:
+        score = Decimal("1.0")
         age_seconds = time.monotonic() - event.timestamp.timestamp()
-        score += max(0.0, 1.0 - (age_seconds / 3600))
+        score += max(Decimal("0.0"), Decimal("1.0") - (Decimal(str(age_seconds)) / Decimal("3600")))
         meta_valence = event.metadata.get("valence", 0.0)
-        score += abs(float(meta_valence)) * 0.5
+        score += abs(Decimal(str(meta_valence))) * Decimal("0.5")
         if event.role == "user":
-            score += 0.5
+            score += Decimal("0.5")
         elif event.role == "system":
-            score += 1.0
+            score += Decimal("1.0")
         return score
 
     def add_event(self, event: MemoryEvent) -> list[MemoryEvent]:
@@ -112,7 +113,7 @@ class RedisWorkingMemoryL1:
         if current_tokens > self._max_tokens:
             # We must fetch the whole buffer to apply priority eviction
             # Note: For strict O(1) we would use simple LPOP, but we keep priority logic for parity.
-            buffer_data = self._redis.lrange(bkey, 0, -1)
+            buffer_data = cast(list[str], self._redis.lrange(bkey, 0, -1))
             buffer = []
             for item in buffer_data:
                 data = json.loads(item)
@@ -123,7 +124,7 @@ class RedisWorkingMemoryL1:
                 buffer.append(MemoryEvent(**data))
 
             while current_tokens > self._max_tokens and buffer:
-                lowest_priority = float("inf")
+                lowest_priority = Decimal("inf")
                 evict_idx = 0
                 for i, evt in enumerate(buffer):
                     p = self._calculate_priority(evt)
@@ -160,7 +161,7 @@ class RedisWorkingMemoryL1:
     def get_context(self, tenant_id: str | None = None) -> list[dict[str, str]]:
         tenant_id = tenant_id or get_tenant_id()
         bkey = self._buffer_key(tenant_id)
-        buffer_data = self._redis.lrange(bkey, 0, -1)
+        buffer_data = cast(list[str], self._redis.lrange(bkey, 0, -1))
         if not buffer_data:
             return []
 
@@ -181,10 +182,10 @@ class RedisWorkingMemoryL1:
             pipe.execute()
         return result
 
-    def get_access_frequency(self, project_id: str, window_seconds: float = 3600.0) -> float:
-        log_data = self._redis.lrange(self._access_log_key(), 0, -1)
+    def get_access_frequency(self, project_id: str, window_seconds: float = 3600.0) -> Decimal:
+        log_data = cast(list[str], self._redis.lrange(self._access_log_key(), 0, -1))
         if not log_data:
-            return 0.0
+            return Decimal("0.0")
 
         cutoff = time.monotonic() - window_seconds
         count = 0
@@ -192,14 +193,14 @@ class RedisWorkingMemoryL1:
             entry = json.loads(item)
             if entry["ts"] > cutoff and entry["pid"] == project_id:
                 count += 1
-        return min(1.0, count / 100.0)
+        return min(Decimal("1.0"), Decimal(count) / Decimal("100.0"))
 
     def clear(self, tenant_id: str | None = None) -> list[MemoryEvent]:
         flushed: list[MemoryEvent] = []
         if tenant_id:
             bkey = self._buffer_key(tenant_id)
             tkey = self._tokens_key(tenant_id)
-            buffer_data = self._redis.lrange(bkey, 0, -1)
+            buffer_data = cast(list[str], self._redis.lrange(bkey, 0, -1))
             for item in buffer_data:
                 data = json.loads(item)
                 import dateutil.parser
@@ -209,9 +210,9 @@ class RedisWorkingMemoryL1:
                 flushed.append(MemoryEvent(**data))
             self._redis.delete(bkey, tkey)
         else:
-            keys = self._redis.keys(f"{self._prefix}buffer:*")
+            keys = cast(list[str], self._redis.keys(f"{self._prefix}buffer:*"))
             for bkey in keys:
-                buffer_data = self._redis.lrange(bkey, 0, -1)
+                buffer_data = cast(list[str], self._redis.lrange(bkey, 0, -1))
                 for item in buffer_data:
                     data = json.loads(item)
                     import dateutil.parser
@@ -227,7 +228,7 @@ class RedisWorkingMemoryL1:
     def current_tokens(self) -> int:
         tenant_id = get_tenant_id()
         tkey = self._tokens_key(tenant_id)
-        return int(self._redis.get(tkey) or 0)
+        return int(cast(Any, self._redis.get(tkey)) or 0)
 
     @property
     def max_tokens(self) -> int:
@@ -238,17 +239,17 @@ class RedisWorkingMemoryL1:
         if self._max_tokens == 0:
             return 0.0
         tkey = self._tokens_key(tenant_id)
-        return int(self._redis.get(tkey) or 0) / self._max_tokens
+        return float(int(cast(Any, self._redis.get(tkey)) or 0) / self._max_tokens)
 
     def __len__(self) -> int:
-        keys = self._redis.keys(f"{self._prefix}buffer:*")
-        return sum(self._redis.llen(k) for k in keys)
+        keys = cast(list[str], self._redis.keys(f"{self._prefix}buffer:*"))
+        return sum(cast(int, self._redis.llen(k)) for k in keys)
 
     def __repr__(self) -> str:
-        keys = self._redis.keys(f"{self._prefix}buffer:*")
-        total_events = sum(self._redis.llen(k) for k in keys)
-        tkeys = self._redis.keys(f"{self._prefix}tokens:*")
-        total_tokens = sum(int(self._redis.get(k) or 0) for k in tkeys)
+        keys = cast(list[str], self._redis.keys(f"{self._prefix}buffer:*"))
+        total_events = sum(cast(int, self._redis.llen(k)) for k in keys)
+        tkeys = cast(list[str], self._redis.keys(f"{self._prefix}tokens:*"))
+        total_tokens = sum(int(cast(Any, self._redis.get(k)) or 0) for k in tkeys)
         return (
             f"RedisWorkingMemoryL1(tenants={len(keys)}, events={total_events}, "
             f"tokens={total_tokens}/{self._max_tokens})"
