@@ -7,6 +7,9 @@ import sqlite3
 import time
 from pathlib import Path
 
+import os
+os.environ["CORTEX_NO_EMBED"] = "1"
+
 import pytest
 
 from cortex.engine.core.cortex_engine import CortexEngine
@@ -25,20 +28,20 @@ def _writer_process_target(db_path: Path, sync_event: multiprocessing.Event, fau
                 sync_event.set()
                 await asyncio.sleep(10)
                 
-            # Monkeypatch the SQLite session execute to intercept writes
-            # We will instead intercept the ledger append as the proxy for "after_sqlite"
-            original_append = engine.ledger_writer.append
+            # Ensure ledger is initialized before monkeypatching
+            await engine._get_or_create_ledger()
+            original_checkpoint = engine._ledger.create_checkpoint_async
             
-            async def _faulty_append(*args, **kwargs):
-                print(f"WORKER: In _faulty_append, fault_point={fault_point}")
+            async def _faulty_checkpoint(*args, **kwargs):
+                print(f"WORKER: In _faulty_checkpoint, fault_point={fault_point}")
                 if fault_point == "after_sqlite_before_ledger":
                     print("WORKER: Setting sync_event (after_sqlite_before_ledger)")
                     sync_event.set()
                     print("WORKER: Waiting for SIGKILL (after_sqlite_before_ledger)")
                     await asyncio.sleep(10) # Wait for SIGKILL
-                return await original_append(*args, **kwargs)
+                return await original_checkpoint(*args, **kwargs)
                 
-            engine.ledger_writer.append = _faulty_append
+            engine._ledger.create_checkpoint_async = _faulty_checkpoint
             
             print("WORKER: Calling engine.facts.store()")
             await engine.facts.store(project="test", content="crash_test_payload", tenant_id="test_tenant", source="test")
