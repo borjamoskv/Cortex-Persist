@@ -92,8 +92,8 @@ async def test_seal_2_rejection():
 @pytest.mark.asyncio
 async def test_seal_2_boundary():
     with patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run:
-        # Exactly 165 errors (threshold)
-        mock_run.return_value = (1, '{"summary": {"errorCount": 165}}')
+        # Exactly 78 errors (threshold)
+        mock_run.return_value = (1, '{"summary": {"errorCount": 78}}')
         passed, _ = await check_seal_2_type_safety()
         assert passed is True
 
@@ -179,7 +179,7 @@ async def test_seal_4_timeout():
 @pytest.mark.asyncio
 async def test_seal_5_happy():
     with (
-        patch("cortex.engine.CortexEngine", autospec=True) as mock_engine,
+        patch("cortex.engine.core.cortex_engine.CortexEngine", autospec=True) as mock_engine,
         patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
     ):
         mock_run.return_value = (0, "Passed")
@@ -190,7 +190,7 @@ async def test_seal_5_happy():
 @pytest.mark.asyncio
 async def test_seal_5_init_rejection():
     with (
-        patch("cortex.engine.CortexEngine", side_effect=RuntimeError("DB Error")),
+        patch("cortex.engine.core.cortex_engine.CortexEngine", side_effect=RuntimeError("DB Error")),
         patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
     ):
         mock_run.return_value = (0, "Passed")
@@ -201,7 +201,7 @@ async def test_seal_5_init_rejection():
 @pytest.mark.asyncio
 async def test_seal_5_guard_rejection():
     with (
-        patch("cortex.engine.CortexEngine", autospec=True) as mock_engine,
+        patch("cortex.engine.core.cortex_engine.CortexEngine", autospec=True) as mock_engine,
         patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
     ):
         mock_run.return_value = (1, "Guard failed")

@@ -404,6 +404,7 @@ class TestVirgoStrictMode:
                 agent_id=agent_a,
                 agent_public_key=public_key_b,
                 logos_signature=signature_b,
+                tenant_id="cortex_test_enterprise",
                 nonce="nonce_mismatched_key",
             )
 

@@ -40,6 +40,9 @@ def test_ouroboros_transcend_pipeline(judge, gatekeeper, km):
     km.generate_and_store_key(agent_id)
     agent_priv = km.get_private_key_b64(agent_id)
     
+    km.revoke_key(judge.judge_id)
+    km.generate_and_store_key(judge.judge_id)
+    
     ast_code = "def autopoiesis(): return 'evolution completed'"
     timestamp = datetime.now(timezone.utc).isoformat()
     payload_hash = hashlib.sha256(ast_code.encode("utf-8")).hexdigest()

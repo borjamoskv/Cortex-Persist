@@ -13,16 +13,14 @@ async def test_strike_density_assignment():
     commander = ForensicCommander(bus_path="cortex.db")
     await commander.initialize_strike()
 
-    # 1. Dispatch the strike (sequential for test stability on Mac)
+    # 1. Dispatch the strike in chunks for test speed
     dispatch_count = 0
     for m in STRIKE_V1.MISSIONS:
+        batch = []
         for _ in range(m.agent_density // 10):
-            # Dispatch individually to avoid asyncio selector saturation
-            await commander.execute_global_dispatch(
-                [{"id": f"{m.name}_{dispatch_count}", "domain": m.target_repo.split("/")[-1]}],
-                parallel=False,
-            )
+            batch.append({"id": f"{m.name}_{dispatch_count}", "domain": m.target_repo.split("/")[-1]})
             dispatch_count += 1
+        await commander.execute_global_dispatch(batch, parallel=False)
 
     # 2. Check density report
     report = await commander.get_density_report()

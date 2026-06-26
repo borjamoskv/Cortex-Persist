@@ -201,14 +201,22 @@ class EmbeddingManager:
                     exergy_score = COALESCE(?, exergy_score)
                 WHERE fact_id = ?
             """
-            await conn.execute(
-                query,
-                (
-                    metadata.get("category"),
-                    metadata.get("yield_score"),
-                    metadata.get("exergy_score"),
-                    fact_id,
-                ),
-            )
-            await conn.commit()
+            from cortex.database.core import causal_write
+            try:
+                with causal_write(conn):
+                    await conn.execute(
+                        query,
+                        (
+                            metadata.get("category"),
+                            metadata.get("yield_score"),
+                            metadata.get("exergy_score"),
+                            fact_id,
+                        ),
+                    )
+                    await conn.commit()
+            except Exception as e:
+                if "no such table: facts_meta" in str(e).lower():
+                    logger.debug("facts_meta table does not exist, skipping metadata update (L2 disabled)")
+                else:
+                    raise
             logger.info("Fact #%d enriched: vector + metadata refined (V2)", fact_id)

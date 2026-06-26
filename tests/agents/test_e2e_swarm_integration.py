@@ -95,8 +95,8 @@ async def setup_db_for_topology(db_path: str):
                             pass
 
         await conn.commit()
-    await pool.close()
-    return CortexConnectionPool(db_path, read_only=False)
+    # DO NOT close pool; in-memory db vanishes if all connections close.
+    return pool
 
 
 class PingPongAgent(BaseAgent):
@@ -218,7 +218,7 @@ async def test_e2e_supervisor_fault_tolerance_under_load():
     # Chaos agents
     chaos_agents = []
     for i in range(3):
-        agent = ChaosAgent(manifest=_make_manifest(f"chaos_{i}"), bus=bus, crash_on_tick=2)
+        agent = ChaosAgent(manifest=_make_manifest(f"chaos_{i}"), bus=bus, crash_on_tick=1)
         chaos_agents.append(agent)
         supervisor.register(agent)
         await supervisor.start_agent(agent.agent_id)

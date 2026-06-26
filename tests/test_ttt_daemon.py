@@ -204,7 +204,8 @@ class TestAutonomousTrainingDaemon:
 class TestLLMProviderLoRARouting:
     @patch("cortex_extensions.llm.provider.load_presets")
     @pytest.mark.asyncio
-    async def test_vllm_routes_to_adapter_when_verified(self, mock_load_presets, mock_home) -> None:
+    async def test_vllm_routes_to_adapter_when_verified(self, mock_load_presets, mock_home, monkeypatch) -> None:
+        monkeypatch.delenv("CORTEX_LLM_MODEL", raising=False)
         mock_presets = {
             "vllm": {
                 "base_url": "http://localhost:8000/v1",

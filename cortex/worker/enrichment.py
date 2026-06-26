@@ -93,9 +93,11 @@ class EnrichmentWorker:
             SET status = 'completed', updated_at = ?
             WHERE id = ?
         """
-        await conn.execute(
-            query, (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), job_id)
-        )
+        from cortex.database.core import causal_write
+        with causal_write(conn):
+            await conn.execute(
+                query, (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), job_id)
+            )
 
     async def _mark_failure(self, conn: aiosqlite.Connection, job_id: int, error: str):
         # Exponential backoff logic
@@ -111,12 +113,14 @@ class EnrichmentWorker:
                 updated_at = ?
             WHERE id = ?
         """
-        await conn.execute(
-            query,
-            (
-                error,
-                next_attempt,
-                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
-                job_id,
-            ),
-        )
+        from cortex.database.core import causal_write
+        with causal_write(conn):
+            await conn.execute(
+                query,
+                (
+                    error,
+                    next_attempt,
+                    datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                    job_id,
+                ),
+            )

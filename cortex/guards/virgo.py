@@ -45,12 +45,7 @@ class VirgoContextGuard:
         self.trust_penalty = trust_penalty
 
     async def _check_agent_validation_signature(
-        self,
-        content: str,
-        project: str,
-        meta: dict[str, Any],
-        agent_id: str | None,
-        conn: aiosqlite.Connection,
+        self, content: str, project: str, meta: dict[str, Any], agent_id: str | None, conn: aiosqlite.Connection, tenant_id: str = "default"
     ) -> None:
         """Verify the cryptographic Logos-Critique validation signature for an agent's fact."""
         logos_signature = meta.get("logos_signature")
@@ -92,7 +87,7 @@ class VirgoContextGuard:
         if is_valid_sig and agent_id and agent_public_key:
             from cortex.crypto.keys import KeyManager
             try:
-                km = KeyManager()
+                km = KeyManager(tenant_id)
                 registered_key = km._metadata.get(agent_id, {}).get("public_key_b64")
                 if registered_key and registered_key != agent_public_key:
                     is_valid_sig = False
@@ -134,26 +129,28 @@ class VirgoContextGuard:
 
             from cortex.utils.canonical import now_iso
 
-            await conn.execute(
-                """
-                INSERT INTO ledger_replay_admissions (
-                    tenant_id, event_id, nonce, request_hash, payload_hash,
-                    ledger_event_id, actor_key_id, action, issued_at, accepted_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    tenant_id,
-                    f"evt_{nonce}",
-                    nonce,
-                    logos_signature or "hash",
-                    logos_signature or "hash",
-                    f"evt_{nonce}",
-                    agent_id or "unknown",
-                    "store",
-                    now_iso(),
-                    now_iso(),
-                ),
-            )
+            from cortex.database.core import causal_write
+            with causal_write(conn):
+                await conn.execute(
+                    """
+                    INSERT INTO ledger_replay_admissions (
+                        tenant_id, event_id, nonce, request_hash, payload_hash,
+                        ledger_event_id, actor_key_id, action, issued_at, accepted_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        tenant_id,
+                        f"evt_{nonce}",
+                        nonce,
+                        logos_signature or "hash",
+                        logos_signature or "hash",
+                        f"evt_{nonce}",
+                        agent_id or "unknown",
+                        "store",
+                        now_iso(),
+                        now_iso(),
+                    ),
+                )
         except aiosqlite.IntegrityError:
             await self._trigger_ledger_rollback(
                 conn,
@@ -213,7 +210,7 @@ class VirgoContextGuard:
             )
 
         # 2. Deterministic Validation Signature Verification
-        await self._check_agent_validation_signature(content, project, meta, agent_id, conn)
+        await self._check_agent_validation_signature(content, project, meta, agent_id, conn, tenant_id=tenant_id)
 
         # 3. Replay Protection: Check if this nonce has already been used
         nonce = meta.get("nonce", "")

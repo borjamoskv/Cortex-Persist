@@ -99,6 +99,7 @@ class CortexConnection(sqlite3.Connection):
                 or table.endswith("_content") 
                 or table.endswith("_docsize") 
                 or table.endswith("_config")
+                or table.endswith("_info")
             ):
                 return sqlite3.SQLITE_OK
 

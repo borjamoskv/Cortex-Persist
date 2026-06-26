@@ -17,21 +17,25 @@ logger = logging.getLogger("cortex.guards.prompt_security")
 
 HAS_TORCH = False
 HAS_SENTENCE_TRANSFORMERS = False
+_ML_INITIALIZED = False
 
-if os.environ.get("CORTEX_NO_EMBED") != "1":
-    try:
-        import torch
+def _init_ml() -> None:
+    global HAS_TORCH, HAS_SENTENCE_TRANSFORMERS, _ML_INITIALIZED
+    if _ML_INITIALIZED:
+        return
+    _ML_INITIALIZED = True
+    if os.environ.get("CORTEX_NO_EMBED") != "1":
+        try:
+            import torch
+            HAS_TORCH = True
+        except ImportError:
+            pass
+        try:
+            import sentence_transformers
+            HAS_SENTENCE_TRANSFORMERS = True
+        except ImportError:
+            pass
 
-        HAS_TORCH = True
-    except ImportError:
-        pass
-
-    try:
-        from sentence_transformers import SentenceTransformer, util
-
-        HAS_SENTENCE_TRANSFORMERS = True
-    except ImportError:
-        pass
 
 
 class PromptExtractionBlockedError(Exception):
@@ -45,9 +49,13 @@ _MODEL_CACHE: dict[str, Any] = {}
 
 def get_sentence_transformer(model_name: str = "all-MiniLM-L6-v2") -> Any:
     global _MODEL_CACHE
+    _init_ml()
     if model_name not in _MODEL_CACHE:
         if HAS_SENTENCE_TRANSFORMERS:
             try:
+                import torch
+                from sentence_transformers import SentenceTransformer
+                
                 if HAS_TORCH:
                     # Optimize CPU inference by restricting PyTorch thread contention
                     torch.set_num_threads(1)
@@ -196,8 +204,10 @@ class PromptSecurityGuard:
 
     def _calculate_semantic_similarity(self, text: str) -> float:
         """Computes cosine embedding similarity or returns Jaccard heuristic fallback."""
+        _init_ml()
         if HAS_SENTENCE_TRANSFORMERS and self.model is not None and self.system_prompt_embedding is not None:
             try:
+                from sentence_transformers import util
                 response_embedding = self.model.encode(text, convert_to_tensor=True)
                 similarity = util.cos_sim(response_embedding, self.system_prompt_embedding)  # pyright: ignore[reportArgumentType]
                 return float(similarity)

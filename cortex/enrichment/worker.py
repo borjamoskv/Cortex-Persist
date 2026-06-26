@@ -162,38 +162,42 @@ class EnrichmentWorker:
                         tenant_id=tenant_id,
                     )
 
-                await conn.execute(
-                    """
-                    UPDATE enrichment_jobs
-                    SET status = 'completed', updated_at = ?
-                    WHERE id = ?
-                    """,
-                    (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), job_id),
-                )
-                await conn.commit()
+                from cortex.database.core import causal_write
+                with causal_write(conn):
+                    await conn.execute(
+                        """
+                        UPDATE enrichment_jobs
+                        SET status = 'completed', updated_at = ?
+                        WHERE id = ?
+                        """,
+                        (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), job_id),
+                    )
+                    await conn.commit()
         except Exception as e:
             async with self.engine.session() as conn:
-                await conn.execute(
-                    """
-                    UPDATE enrichment_jobs
-                    SET status = 'failed',
-                        attempts = attempts + 1,
-                        last_error = ?,
-                        next_attempt_at = ?,
-                        updated_at = ?
-                    WHERE id = ?
-                    """,
-                    (
-                        str(e),
+                from cortex.database.core import causal_write
+                with causal_write(conn):
+                    await conn.execute(
+                        """
+                        UPDATE enrichment_jobs
+                        SET status = 'failed',
+                            attempts = attempts + 1,
+                            last_error = ?,
+                            next_attempt_at = ?,
+                            updated_at = ?
+                        WHERE id = ?
+                        """,
                         (
-                            datetime.fromtimestamp(time.time(), tz=timezone.utc)
-                            + timedelta(minutes=5)
-                        ).isoformat(),
-                        datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
-                        job_id,
-                    ),
-                )
-                await conn.commit()
+                            str(e),
+                            (
+                                datetime.fromtimestamp(time.time(), tz=timezone.utc)
+                                + timedelta(minutes=5)
+                            ).isoformat(),
+                            datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                            job_id,
+                        ),
+                    )
+                    await conn.commit()
             raise
 
     async def _enrich_fact(self, fact_id: str | int, payload: dict[str, Any]):
