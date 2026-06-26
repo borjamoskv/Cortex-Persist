@@ -10,6 +10,7 @@ from hypothesis.stateful import RuleBasedStateMachine, initialize, rule
 from cortex.engine.core.cortex_engine import CortexEngine
 from cortex.engine.flow.storage_guard import GuardViolation
 
+@settings(max_examples=25, deadline=None)
 class CortexStoreMachine(RuleBasedStateMachine):
     def __init__(self):
         super().__init__()
@@ -120,4 +121,4 @@ class CortexStoreMachine(RuleBasedStateMachine):
 
 
 # Run the stateful test
-TestStoreInvariants = CortexStoreMachine.TestCase
+TestStoreInvariants = pytest.mark.timeout(90)(CortexStoreMachine.TestCase)

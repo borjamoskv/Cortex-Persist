@@ -49,6 +49,16 @@ class EntropyDaemon:
         if recovered > 0:
             logger.info(f"[EntropyDaemon] Limpieza exitosa. Espacio recuperado: {recovered:.2f} KB")
 
+        # APEX-008: Ouroboros Immune - scan for recursive logging
+        try:
+            from cortex.engine.causal.ouroboros_immune import OuroborosImmuneSystem
+            immune = OuroborosImmuneSystem()
+            quarantined = immune.scan_and_quarantine()
+            if quarantined:
+                logger.warning(f"[EntropyDaemon] AISLADO: {len(quarantined)} archivos por Ouroboros.")
+        except Exception as e:
+            logger.warning(f"[EntropyDaemon] Falla Ouroboros Immune: {e}")
+
     def start(self):
         if self._running:
             return
