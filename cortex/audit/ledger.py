@@ -82,6 +82,8 @@ class EnterpriseAuditLedger:
         "_batch_task",
         "batch_window_ms",
         "max_batch_size",
+        "_km",
+        "actor_id",
     )
 
     def __init__(self, conn: aiosqlite.Connection) -> None:
@@ -114,7 +116,10 @@ class EnterpriseAuditLedger:
         try:
             self.private_key = ed25519.Ed25519PrivateKey.from_private_bytes(priv_bytes)
         except ValueError:
-            self.private_key = serialization.load_pem_private_key(priv_bytes, password=None)
+            key = serialization.load_pem_private_key(priv_bytes, password=None)
+            if not isinstance(key, ed25519.Ed25519PrivateKey):
+                raise ValueError("[C5-REAL] FATAL: Ledger Identity must be strictly Ed25519.")
+            self.private_key = key
 
         self.public_key = self.private_key.public_key()
 
@@ -269,39 +274,25 @@ class EnterpriseAuditLedger:
                     # -- REKOR & RFC3161 ANCHORING --
                     external_anchor = None
                     try:
-                        import base64
                         import json
-
-                        import httpx
-                        import rfc3161ng
                         from cryptography.hazmat.primitives import serialization
-
                         from cortex.audit.rekor_client import RekorClient
-
+                        from cortex.audit.tsa_client import TSAClient
+                        
                         pub_pem = self.public_key.public_bytes(
                             encoding=serialization.Encoding.PEM,
-                            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+                            format=serialization.PublicFormat.SubjectPublicKeyInfo
                         )
-
+                        
                         # Asynchronous Rekor logging
-                        client = RekorClient()
-                        rekor_uuid = await client.log_entry(entry_hash, signature, pub_pem)
-                        await client.close()
-
-                        # RFC3161 Timestamping (Free TSA)
-                        tsa_url = "http://timestamp.digicert.com"
-                        req = rfc3161ng.make_request(entry_hash.encode("utf-8"), hash_algo="sha256")
-                        async with httpx.AsyncClient() as http_client:
-                            tsa_resp = await http_client.post(
-                                tsa_url,
-                                content=req,
-                                headers={"Content-Type": "application/timestamp-query"},
-                            )
-                        rfc_token = (
-                            base64.b64encode(tsa_resp.content).decode("utf-8")
-                            if tsa_resp.status_code == 200
-                            else None
-                        )
+                        rekor_client = RekorClient()
+                        rekor_uuid = await rekor_client.log_entry(entry_hash, signature, pub_pem)
+                        await rekor_client.close()
+                        
+                        # RFC3161 Timestamping
+                        tsa_client = TSAClient()
+                        rfc_token = await tsa_client.get_timestamp_token(entry_hash)
+                        await tsa_client.close()
 
                         if rekor_uuid or rfc_token:
                             external_anchor = json.dumps(

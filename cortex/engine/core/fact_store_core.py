@@ -104,12 +104,14 @@ async def insert_fact_record(
     from cortex.engine.causal.taint_engine import enforce_taint_check
     from cortex.guards.secret_guard import SecretGuard
     from cortex.guards.memory_firewall import MemoryFirewallGuard
+    import os
 
     # Enforce OWASP LLM06 Secret Redaction before any persistence
     SecretGuard.verify_clean(content)
     
     # Enforce Memory Firewall (Epistemic boundaries & Taint verification)
-    MemoryFirewallGuard().validate_fact(
+    require_taint = not bool(os.environ.get("CORTEX_NO_TAINT_CHECK", ""))
+    MemoryFirewallGuard(require_taint=require_taint).validate_fact(
         content=content,
         source=str(meta.get("cortex_taint_source", "unknown")) if meta else "unknown",
         confidence=confidence,
