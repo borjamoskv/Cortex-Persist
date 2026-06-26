@@ -39,6 +39,10 @@ new_hook = '''class CortexConnection(sqlite3.Connection):
         self.execute("PRAGMA trusted_schema = OFF")
         self.execute("PRAGMA writable_schema = OFF")
         self.execute("PRAGMA cell_size_check = ON")
+        # Antigravity-2 C5-REAL Homeostasis: Prevención de Deadlocks y Corrupción
+        self.execute("PRAGMA journal_mode = WAL")
+        self.execute("PRAGMA busy_timeout = 5000")
+        self.execute("PRAGMA synchronous = NORMAL")
         
         if hasattr(self, "enable_load_extension"):
             self.enable_load_extension(False)
