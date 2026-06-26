@@ -30,7 +30,7 @@ repos:
         exclude: ^CHANGELOG\.md$
       - id: cortex-fast-tests
         name: CORTEX Fast Tests
-        entry: .venv/bin/pytest
+        entry: uv run pytest
         args: [tests/, -m, "not slow", -n, auto, --tb=line, -q, --no-header]
         language: system
         pass_filenames: false
@@ -38,7 +38,7 @@ repos:
         stages: [pre-commit, pre-push]
       - id: moskv-aegis-audit
         name: Moskv-Aegis Adversarial Audit
-        entry: .venv/bin/cortex
+        entry: uv run cortex
         args: [moskv-aegis, audit]
         language: system
         pass_filenames: false
@@ -46,7 +46,7 @@ repos:
         stages: [pre-commit, pre-push]
       - id: typing-baseline
         name: Pyright Baseline Check
-        entry: python scripts/check_typing.py
+        entry: uv run python scripts/check_typing.py
         language: system
         pass_filenames: false
         always_run: true
