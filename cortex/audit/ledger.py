@@ -266,25 +266,45 @@ class EnterpriseAuditLedger:
                     # Sign the entry_hash
                     signature = self.private_key.sign(entry_hash.encode()).hex()
 
-                    # -- REKOR ANCHORING --
+                    # -- REKOR & RFC3161 ANCHORING --
                     external_anchor = None
                     try:
                         import base64
                         import json
                         from cryptography.hazmat.primitives import serialization
-                        from cortex.crypto.rekor_client import RekorClient
+                        from cortex.audit.rekor_client import RekorClient
+                        import rfc3161ng
+                        import httpx
                         
                         sig_b64 = base64.b64encode(bytes.fromhex(signature)).decode('utf-8')
                         pub_pem = self.public_key.public_bytes(
                             encoding=serialization.Encoding.PEM,
                             format=serialization.PublicFormat.SubjectPublicKeyInfo
-                        ).decode('utf-8')
+                        )
                         
-                        anchor_res = RekorClient().anchor_payload(entry_hash, sig_b64, pub_pem)
-                        if anchor_res:
-                            external_anchor = json.dumps(anchor_res)
+                        # Asynchronous Rekor logging
+                        client = RekorClient()
+                        rekor_uuid = await client.log_entry(entry_hash, signature, pub_pem)
+                        await client.close()
+                        
+                        # RFC3161 Timestamping (Free TSA)
+                        tsa_url = "http://timestamp.digicert.com"
+                        req = rfc3161ng.make_request(entry_hash.encode('utf-8'), hash_algo='sha256')
+                        async with httpx.AsyncClient() as http_client:
+                            tsa_resp = await http_client.post(
+                                tsa_url, 
+                                content=req, 
+                                headers={'Content-Type': 'application/timestamp-query'}
+                            )
+                        rfc_token = base64.b64encode(tsa_resp.content).decode('utf-8') if tsa_resp.status_code == 200 else None
+
+                        if rekor_uuid or rfc_token:
+                            external_anchor = json.dumps({
+                                "rekor_uuid": rekor_uuid,
+                                "rfc3161_token": rfc_token
+                            })
                     except Exception as e:
-                        logger.error("[AuditLedger] Rekor anchoring failed: %s", e)
+                        logger.error("[AuditLedger] External anchoring failed: %s", e)
 
                     # Prepare SQLite bulk insert
                     insert_rows = []

@@ -27,4 +27,7 @@ __all__ = [
     "generate_and_store_master_key",
     "get_default_encrypter",
     "get_master_key",
+    "RFC3161Client",
 ]
+
+from .rfc3161 import RFC3161Client

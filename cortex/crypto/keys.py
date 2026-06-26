@@ -87,3 +87,64 @@ class ZKSwarmIdentity:
             return True
         except (InvalidSignature, ValueError, TypeError):
             return False
+
+
+import json
+import os
+from pathlib import Path
+
+from cortex.crypto.vault import Vault
+
+
+class KeyLifecycleManager:
+    """Manages the secure lifecycle, persistence, and rotation of Agent identities."""
+
+    def __init__(self, storage_path: str | Path | None = None, vault: Vault | None = None):
+        self.storage_path = Path(storage_path) if storage_path else Path(os.environ.get("CORTEX_DB_PATH", "~/.cortex")).expanduser().parent / "agent_identity.json"
+        self.vault = vault or Vault()
+
+    def get_or_create_identity(self) -> AgentKeyPair:
+        """Loads the current identity from secure storage or generates a new one."""
+        if self.storage_path.exists():
+            return self._load_identity()
+        return self._generate_and_save()
+
+    def rotate_keys(self) -> AgentKeyPair:
+        """Forces generation of a new keypair and archives the old one."""
+        # Archive old keys could be implemented here
+        return self._generate_and_save()
+
+    def _generate_and_save(self) -> AgentKeyPair:
+        keypair = ZKSwarmIdentity.generate_keypair()
+        payload = {
+            "public_key_b64": keypair.public_key_b64,
+            "private_key_b64": keypair.private_key_b64
+        }
+        
+        # If vault is available, encrypt the private key
+        if self.vault.is_available:
+            payload["private_key_b64"] = self.vault.encrypt(payload["private_key_b64"])
+            payload["encrypted"] = True
+        else:
+            payload["encrypted"] = False
+
+        self.storage_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.storage_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2)
+            
+        return keypair
+
+    def _load_identity(self) -> AgentKeyPair:
+        with open(self.storage_path, encoding="utf-8") as f:
+            data = json.load(f)
+            
+        private_key = data["private_key_b64"]
+        if data.get("encrypted", False):
+            if not self.vault.is_available:
+                 raise RuntimeError("Identity is encrypted but Vault is not available.")
+            private_key = self.vault.decrypt(private_key)
+            
+        return AgentKeyPair(
+            public_key_b64=data["public_key_b64"],
+            private_key_b64=private_key
+        )

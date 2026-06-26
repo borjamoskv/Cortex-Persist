@@ -102,6 +102,10 @@ async def insert_fact_record(
     tags_json = json.dumps(tags or [])
 
     from cortex.engine.causal.taint_engine import enforce_taint_check
+    from cortex.guards.secret_guard import SecretGuard
+
+    # Enforce OWASP LLM06 Secret Redaction before any persistence
+    SecretGuard.verify_clean(content)
 
     # Edge sensor telemetry is authenticated via X-Cortex-Source header, not taint tokens
     if not taint_already_verified and fact_type not in ("telemetry_batch", "mafia_node"):
