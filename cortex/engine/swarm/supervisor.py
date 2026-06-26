@@ -7,6 +7,8 @@ Pipelines: TopologyIndex -> LegionPool -> AsyncSignalBus -> CausalStateStore
 
 import asyncio
 import logging
+import uuid
+import sys
 from typing import Any
 
 import aiosqlite
@@ -35,6 +37,7 @@ class SwarmSupervisor:
 
     def __init__(self, db_path: str = DB_PATH, agent_factory: Any = DummyAgent, concurrency: int = 50, bus_maxsize: int = 1000):
         self.db_path = db_path
+        self.supervisor_id = uuid.uuid4().hex
         self.bus = AsyncSignalBus(maxsize=bus_maxsize)
         self.state_store = CausalStateStore(db_path=db_path)
         self.worker_pool = LegionPool(agent_factory=agent_factory, bus=self.bus, concurrency=concurrency)
@@ -49,16 +52,27 @@ class SwarmSupervisor:
         await self._db.execute("PRAGMA journal_mode=WAL;")
         self._topo = TopologyIndex(self._db)
         
-        # Open Question Resolution: Recover IN_FLIGHT tasks
-        await self.state_store.recover_in_flight_tasks()
+        # SANEDRIN VECTOR 3: Recover ghost state globally
+        # (Assuming single L0 restart sweep, otherwise pass supervisor_id)
+        await self.state_store.recover_in_flight_tasks(lease_id=None)
         
         # Start Worker Pool
         self.worker_pool.start()
         
-        # Start State Store Consumer
+        # Start State Store Consumer with Heartbeat Monitor
         self._running = True
-        self._state_worker_task = asyncio.create_task(self._state_consumer_loop())
-        logger.info("SwarmSupervisor initialized. Pipeline active.")
+        self._state_worker_task = asyncio.create_task(self._heartbeat_monitor())
+        logger.info(f"SwarmSupervisor initialized [Lease: {self.supervisor_id}]. Pipeline active.")
+
+    async def _heartbeat_monitor(self) -> None:
+        """SANEDRIN VECTOR 2: Monitor Consumer Loop to prevent Silent Death"""
+        while self._running:
+            try:
+                await self._state_consumer_loop()
+            except Exception as e:
+                logger.critical(f"HEARTBEAT FAILURE: Consumer loop crashed: {e}. Initiating Controlled Apocalypse.")
+                self._running = False
+                sys.exit(1)
 
     async def _state_consumer_loop(self) -> None:
         """Consumes signals from Event Bus and writes them to the State Store."""
@@ -72,6 +86,7 @@ class SwarmSupervisor:
                 continue
             except Exception as e:
                 logger.error(f"State consumer encountered error: {e}")
+                raise  # Re-raise for Heartbeat
 
     async def dispatch_optimal_hypotheses(self, count: int = 100) -> int:
         """Pulls optimal tasks from TopologyIndex and pushes them to Worker Pool."""
@@ -88,9 +103,10 @@ class SwarmSupervisor:
                 break
                 
             try:
-                # Mark as IN_FLIGHT to prevent double dispatch and allow recovery
+                # SANEDRIN VECTOR 3: Lease lock task using supervisor_id
                 await self._db.execute(
-                    "UPDATE system_hypotheses SET status = 'IN_FLIGHT' WHERE id = ?", (task["id"],)
+                    "UPDATE system_hypotheses SET status = 'IN_FLIGHT', owner_id = ? WHERE id = ?", 
+                    (self.supervisor_id, task["id"])
                 )
                 await self._db.commit()
                 
@@ -105,7 +121,7 @@ class SwarmSupervisor:
                 logger.error(f"Dispatch failed for task {task['id']}: {e}")
                 
         if dispatched > 0:
-            logger.info("Dispatched %d optimal hypotheses.", dispatched)
+            logger.info(f"Dispatched {dispatched} optimal hypotheses.")
             
         return dispatched
 

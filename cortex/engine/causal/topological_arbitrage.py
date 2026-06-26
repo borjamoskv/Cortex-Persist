@@ -51,7 +51,7 @@ class TopologyIndex:
                 row = await cursor.fetchone()
                 if row:
                     return int(row[0])
-        except (ValueError, TypeError, KeyError, OSError, RuntimeError):
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError, Exception):
             pass
         return 0
 

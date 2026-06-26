@@ -35,16 +35,65 @@ def _unique_db() -> str:
 
 async def setup_db_for_topology(db_path: str):
     """Setup schema for topological arbitrage."""
+    from cortex.database.core import causal_write
+    import os
     pool = CortexConnectionPool(db_path, read_only=False)
     await pool.initialize()
     async with pool.acquire() as conn:
+        with causal_write(conn):
+            await conn.execute("CREATE TABLE IF NOT EXISTS cortex_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+            await conn.execute("CREATE TABLE IF NOT EXISTS facts (id INTEGER PRIMARY KEY, content TEXT)")
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS system_hypotheses (
+                    id TEXT PRIMARY KEY,
+                    fact_id INTEGER,
+                    statement TEXT NOT NULL,
+                    probability FLOAT NOT NULL DEFAULT 0.5,
+                    svi FLOAT NOT NULL DEFAULT 1.0,
+                    evi FLOAT NOT NULL DEFAULT 0.0,
+                    cost FLOAT NOT NULL DEFAULT 1.0,
+                    impact FLOAT NOT NULL DEFAULT 1.0,
+                    status TEXT NOT NULL DEFAULT 'ACTIVE',
+                    resolution_reason TEXT,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(fact_id) REFERENCES facts(id) ON DELETE SET NULL
+                )
+            """)
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS hypothesis_edges (
+                    parent_id TEXT NOT NULL,
+                    child_id TEXT NOT NULL,
+                    edge_weight REAL NOT NULL DEFAULT 1.0,
+                    relation_type TEXT NOT NULL DEFAULT 'requires',
+                    confidence REAL NOT NULL DEFAULT 1.0,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY(parent_id, child_id),
+                    FOREIGN KEY(parent_id) REFERENCES system_hypotheses(id) ON DELETE CASCADE,
+                    FOREIGN KEY(child_id) REFERENCES system_hypotheses(id) ON DELETE CASCADE
+                )
+            """)
+        
         for sql in get_all_schema():
             if "USING vec0" in sql:
                 continue
             try:
-                await conn.executescript(sql)
+                with causal_write(conn):
+                    await conn.executescript(sql)
             except Exception as e:
                 pass
+        
+        # Run migrations for topological tables
+        migrations_dir = "cortex/migrations"
+        if os.path.exists(migrations_dir):
+            for filename in sorted(os.listdir(migrations_dir)):
+                if filename.endswith(".sql"):
+                    with open(os.path.join(migrations_dir, filename), "r") as f:
+                        try:
+                            with causal_write(conn):
+                                await conn.executescript(f.read())
+                        except Exception:
+                            pass
+
         await conn.commit()
     await pool.close()
     return CortexConnectionPool(db_path, read_only=False)
@@ -79,7 +128,9 @@ class ChaosAgent(BaseAgent):
         
     async def tick(self) -> None:
         self.tick_count += 1
+        print(f"[{self.agent_id}] ChaosAgent tick {self.tick_count}/{self.crash_on_tick}")
         if self.tick_count >= self.crash_on_tick:
+            print(f"[{self.agent_id}] CRASHING NOW!")
             raise RuntimeError("Induced chaos crash")
 
 
@@ -172,8 +223,8 @@ async def test_e2e_supervisor_fault_tolerance_under_load():
         supervisor.register(agent)
         await supervisor.start_agent(agent.agent_id)
         
-    # Let ticks run
-    await asyncio.sleep(1.0)
+    # Let ticks run (Chaos agents need time to crash twice and wait 1s backoff between errors)
+    await asyncio.sleep(3.0)
     
     # Verify states
     for agent in healthy_agents:

@@ -140,6 +140,12 @@ class KeyManager:
             return True
         return False
 
+    def get_public_key_b64(self, actor_id: str) -> Optional[str]:
+        """Retrieves the public key for the actor."""
+        if actor_id in self._metadata:
+            return self._metadata[actor_id].get("public_key_b64")
+        return None
+
     def is_revoked(self, actor_id: str) -> bool:
         return bool(self._metadata.get(actor_id, {}).get("revoked", False))
 

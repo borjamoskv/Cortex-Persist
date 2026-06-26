@@ -1,0 +1,41 @@
+name: CORTEX-Persist C5-REAL CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  exergy_validation:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Check out repository
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        cache: 'pip'
+
+    - name: 📦 Install CORTEX-Persist
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[all]"
+        pip install ruff pytest pytest-cov
+
+    - name: 🛡️ Entropy Purge (Ruff Linter)
+      run: |
+        ruff check cortex/ tests/ --output-format=github
+
+    - name: ⚖️ Cryptographic Consensus & Gatekeeper Tests
+      run: |
+        # Run the full test suite prioritizing Byzantine and Gatekeeper tests
+        pytest tests/ -v --cov=cortex --cov-report=xml
+
+    - name: ♾️ Ouroboros Pipeline Integrity
+      run: |
+        # Ensure that ouroboros pipeline tests pass without regression
+        pytest tests/test_ouroboros_pipeline.py -v

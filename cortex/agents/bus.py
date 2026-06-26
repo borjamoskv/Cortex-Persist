@@ -15,6 +15,7 @@ import time
 from typing import Any, Protocol
 
 from cortex.agents.message_schema import AgentMessage
+from cortex.database.core import connect_async, causal_write
 
 logger = logging.getLogger("cortex.agents.bus")
 
@@ -45,34 +46,35 @@ class SqliteMessageBus:
     async def _get_conn(self) -> Any:
         """Lazy-init async connection."""
         if self._conn is None:
-            from cortex.database.core import connect_async
-
-            self._conn = await connect_async(self.db_path)
-            await self._conn.execute("""
-                CREATE TABLE IF NOT EXISTS agent_messages (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    recipient TEXT NOT NULL,
-                    payload TEXT NOT NULL,
-                    created_at REAL NOT NULL,
-                    consumed INTEGER DEFAULT 0
-                )
-            """)
-            await self._conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_agent_msg_recipient "
-                "ON agent_messages(recipient, consumed)"
-            )
-            await self._conn.commit()
+            async with self._lock:
+                if self._conn is None:
+                    self._conn = await connect_async(self.db_path)
+                    await self._conn.execute("""
+                        CREATE TABLE IF NOT EXISTS agent_messages (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            recipient TEXT NOT NULL,
+                            payload TEXT NOT NULL,
+                            created_at REAL NOT NULL,
+                            consumed INTEGER DEFAULT 0
+                        )
+                    """)
+                    await self._conn.execute(
+                        "CREATE INDEX IF NOT EXISTS idx_agent_msg_recipient "
+                        "ON agent_messages(recipient, consumed)"
+                    )
+                    await self._conn.commit()
         return self._conn
 
     async def send(self, message: AgentMessage) -> None:
         """Enqueue a message for a specific recipient."""
         conn = await self._get_conn()
         async with self._lock:
-            await conn.execute(
-                "INSERT INTO agent_messages (recipient, payload, created_at) VALUES (?, ?, ?)",
-                (message.recipient, message.to_json(), message.created_at),
-            )
-            await conn.commit()
+            with causal_write(conn):
+                await conn.execute(
+                    "INSERT INTO agent_messages (recipient, payload, created_at) VALUES (?, ?, ?)",
+                    (message.recipient, message.to_json(), message.created_at),
+                )
+                await conn.commit()
         logger.debug(
             "Bus: %s → %s [%s]",
             message.sender,
@@ -103,20 +105,21 @@ class SqliteMessageBus:
         """Fetch and consume one message atomically."""
         row = None
         async with self._lock:
-            # Atomic update with RETURNING clause to prevent multi-process race conditions
-            async with conn.execute(
-                "UPDATE agent_messages SET consumed = 1 "
-                "WHERE id = (SELECT id FROM agent_messages WHERE recipient = ? AND consumed = 0 ORDER BY id ASC LIMIT 1) "
-                "RETURNING id, payload",
-                (agent_id,),
-            ) as cursor:
-                row = await cursor.fetchone()
+            with causal_write(conn):
+                # Atomic update with RETURNING clause to prevent multi-process race conditions
+                async with conn.execute(
+                    "UPDATE agent_messages SET consumed = 1 "
+                    "WHERE id = (SELECT id FROM agent_messages WHERE recipient = ? AND consumed = 0 ORDER BY id ASC LIMIT 1) "
+                    "RETURNING id, payload",
+                    (agent_id,),
+                ) as cursor:
+                    row = await cursor.fetchone()
 
-            if row is None:
-                return None
+                if row is None:
+                    return None
 
-            row_id, raw_payload = row
-            await conn.commit()
+                row_id, raw_payload = row
+                await conn.commit()
 
         try:
             return AgentMessage.from_json(raw_payload)
@@ -130,22 +133,14 @@ class SqliteMessageBus:
         Note: broadcast messages are stored with recipient='*'.
         Agents must explicitly poll for broadcast messages.
         """
-        broadcast_msg = AgentMessage(
-            message_id=message.message_id,
-            sender=message.sender,
-            recipient="*",
-            kind=message.kind,
-            payload=message.payload,
-            created_at=message.created_at,
-            correlation_id=message.correlation_id,
-        )
         conn = await self._get_conn()
         async with self._lock:
-            await conn.execute(
-                "INSERT INTO agent_messages (recipient, payload, created_at) VALUES (?, ?, ?)",
-                ("*", broadcast_msg.to_json(), broadcast_msg.created_at),
-            )
-            await conn.commit()
+            with causal_write(conn):
+                await conn.execute(
+                    "INSERT INTO agent_messages (recipient, payload, created_at) VALUES (?, ?, ?)",
+                    ("*", message.to_json(), message.created_at),
+                )
+                await conn.commit()
 
     async def pending_count(self, agent_id: str) -> int:
         """Count unconsumed messages for an agent."""
@@ -157,17 +152,16 @@ class SqliteMessageBus:
             row = await cursor.fetchone()
             return row[0] if row else 0
 
-    async def purge_consumed(self, older_than_seconds: float = 3600) -> int:
-        """Delete consumed messages older than threshold."""
+    async def purge_consumed(self) -> int:
+        """Remove all consumed messages from the bus."""
         conn = await self._get_conn()
-        cutoff = time.monotonic() - older_than_seconds
+        deleted = 0
         async with self._lock:
-            cursor = await conn.execute(
-                "DELETE FROM agent_messages WHERE consumed = 1 AND created_at < ?",
-                (cutoff,),
-            )
-            await conn.commit()
-            return cursor.rowcount
+            with causal_write(conn):
+                async with conn.execute("DELETE FROM agent_messages WHERE consumed = 1") as cursor:
+                    deleted = cursor.rowcount
+                await conn.commit()
+        return deleted
 
     async def close(self) -> None:
         """Close the bus connection."""
