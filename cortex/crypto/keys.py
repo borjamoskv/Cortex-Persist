@@ -16,7 +16,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, NamedTuple, Optional, cast
 
-import keyring
+try:
+    import keyring
+except ImportError:
+    keyring = None
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
@@ -78,7 +81,10 @@ class KeyManager:
         )
 
         try:
-            keyring.set_password(self.service_name, actor_id, private_bytes.decode("utf-8"))
+            if keyring:
+                keyring.set_password(self.service_name, actor_id, private_bytes.decode("utf-8"))
+            else:
+                raise RuntimeError("keyring module not available")
         except Exception as e:
             logger.warning(f"Keyring set_password failed, falling back to in-memory storage: {e}")
             if self.service_name not in self._fallback_keyring:
@@ -106,7 +112,10 @@ class KeyManager:
 
         if not private_pem:
             try:
-                private_pem = keyring.get_password(self.service_name, actor_id)
+                if keyring:
+                    private_pem = keyring.get_password(self.service_name, actor_id)
+                else:
+                    raise RuntimeError("keyring module not available")
             except Exception as e:
                 logger.warning("Fallo en OS Keyring (get_password) para actor %s: %s", actor_id, e, exc_info=True)
 
@@ -131,7 +140,10 @@ class KeyManager:
             self._metadata[actor_id]["revoked"] = True
             self._save_metadata()
             try:
-                keyring.delete_password(self.service_name, actor_id)
+                if keyring:
+                    keyring.delete_password(self.service_name, actor_id)
+                else:
+                    raise RuntimeError("keyring module not available")
             except Exception as e:
                 logger.warning("Fallo en OS Keyring (delete_password) para actor %s: %s", actor_id, e, exc_info=True)
             if self.service_name in self._fallback_keyring:

@@ -30,11 +30,14 @@ class ExergyCostScheduler:
 
     def _load_policy(self) -> None:
         """Loads routing policy from YAML file."""
-        import yaml
+        try:
+            import yaml
+        except ImportError:
+            yaml = None
 
-        if not self.policy_path.exists():
+        if not self.policy_path.exists() or yaml is None:
             logger.warning(
-                f"[COST-SCHEDULER] Policy path {self.policy_path} not found. Using empty policy."
+                f"[COST-SCHEDULER] Policy path {self.policy_path} not found or yaml unavailable. Using empty policy."
             )
             self.policy = {}
             return

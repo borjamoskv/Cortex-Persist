@@ -12,7 +12,10 @@ import logging
 import time
 from dataclasses import dataclass
 
-import aiohttp
+try:
+    import aiohttp
+except ImportError:
+    aiohttp = None  # type: ignore
 
 logger = logging.getLogger("cortex.evm.topography")
 

@@ -5,16 +5,23 @@ Empuja telemetría hacia el dashboard en verdadero tiempo real usando
 Server-Sent Events (SSE) cada vez que el Manifold emite una señal.
 Latencia cero.
 """
+from __future__ import annotations
 
 import asyncio
 import json
 import logging
 import os
 import weakref
+from typing import Any
 
-from aiohttp import web
-from aiohttp.web_request import Request
-from aiohttp.web_response import StreamResponse
+try:
+    from aiohttp import web
+    from aiohttp.web_request import Request
+    from aiohttp.web_response import StreamResponse
+except ImportError:
+    web = None  # type: ignore
+    Request = Any  # type: ignore
+    StreamResponse = Any  # type: ignore
 
 from cortex.engine.uncategorized.reporter import SovereignReporter
 

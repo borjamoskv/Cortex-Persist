@@ -21,7 +21,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 from cortex.router.contract import (
     CONTRACT_VERSION,
@@ -114,7 +117,18 @@ class ExergyConfigAdapter:
         """
         self._path = path or _DEFAULT_YAML_PATH
         self._strict = strict
-        self._policy = self._load(self._path)
+        
+        try:
+            self._policy = self._load(self._path)
+        except (FileNotFoundError, AdapterSchemaError) as e:
+            logger.warning("[ADAPTER] Policy load failed (%s), falling back to empty rules.", e)
+            self._policy = LoadedPolicy(
+                schema_version="fallback",
+                subsystem="unknown",
+                operator="unknown",
+                routing_rules=(),
+                raw={},
+            )
 
         logger.info(
             "[ADAPTER] Loaded policy v%s from %s (%d rules)",
@@ -143,6 +157,9 @@ class ExergyConfigAdapter:
             FileNotFoundError: YAML file does not exist.
             AdapterSchemaError: Schema version unsupported or structure invalid.
         """
+        if yaml is None:
+            raise AdapterSchemaError("yaml module not available")
+
         if not path.exists():
             raise FileNotFoundError(f"Policy YAML not found: {path}")
 
