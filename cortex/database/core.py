@@ -103,6 +103,7 @@ class CortexConnection(sqlite3.Connection):
                 or table == "health_history"
                 or table == "enrichment_jobs"
                 or table == "quota_bucket"
+                or table == "results"
             ):
                 return sqlite3.SQLITE_OK
 

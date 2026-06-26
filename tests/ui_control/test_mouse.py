@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -15,7 +15,8 @@ def mouse():
 class TestMouseClick:
     """Tests de MouseEngine.click()."""
 
-    def test_click_left(self, mouse):
+    @pytest.mark.asyncio
+    async def test_click_left(self, mouse):
         """Click izquierdo en coordenadas."""
         with patch("cortex_extensions.ui_control.mouse.CG") as mock_cg:
             mock_cg.kCGMouseButtonLeft = 0
@@ -23,10 +24,11 @@ class TestMouseClick:
             mock_cg.kCGEventLeftMouseUp = 2
             mock_cg.kCGHIDEventTap = 0
             mock_cg.CGEventCreateMouseEvent.return_value = MagicMock()
-            result = mouse.click(100, 200)
+            result = await mouse.click(100, 200)
             assert result.success
 
-    def test_click_right(self, mouse):
+    @pytest.mark.asyncio
+    async def test_click_right(self, mouse):
         """Click derecho en coordenadas."""
         with patch("cortex_extensions.ui_control.mouse.CG") as mock_cg:
             mock_cg.kCGMouseButtonRight = 1
@@ -34,20 +36,22 @@ class TestMouseClick:
             mock_cg.kCGEventRightMouseUp = 4
             mock_cg.kCGHIDEventTap = 0
             mock_cg.CGEventCreateMouseEvent.return_value = MagicMock()
-            result = mouse.click(100, 200, button="right")
+            result = await mouse.click(100, 200, button="right")
             assert result.success
 
-    def test_click_without_cg(self, mouse):
+    @pytest.mark.asyncio
+    async def test_click_without_cg(self, mouse):
         """Sin CoreGraphics devuelve error."""
         with patch("cortex_extensions.ui_control.mouse.CG", None):
-            result = mouse.click(0, 0)
+            result = await mouse.click(0, 0)
             assert not result.success
 
 
 class TestMouseDoubleClick:
     """Tests de MouseEngine.double_click()."""
 
-    def test_double_click(self, mouse):
+    @pytest.mark.asyncio
+    async def test_double_click(self, mouse):
         """Doble click nativo con clickCount."""
         with patch("cortex_extensions.ui_control.mouse.CG") as mock_cg:
             mock_cg.kCGMouseButtonLeft = 0
@@ -56,7 +60,7 @@ class TestMouseDoubleClick:
             mock_cg.kCGHIDEventTap = 0
             mock_cg.kCGMouseEventClickState = 1
             mock_cg.CGEventCreateMouseEvent.return_value = MagicMock()
-            result = mouse.double_click(300, 400)
+            result = await mouse.double_click(300, 400)
             assert result.success
             # 4 eventos: down1, up1, down2, up2
             assert mock_cg.CGEventCreateMouseEvent.call_count == 4
@@ -65,7 +69,8 @@ class TestMouseDoubleClick:
 class TestMouseDrag:
     """Tests de MouseEngine.drag()."""
 
-    def test_drag(self, mouse):
+    @pytest.mark.asyncio
+    async def test_drag(self, mouse):
         """Drag-and-drop con interpolación."""
         with patch("cortex_extensions.ui_control.mouse.CG") as mock_cg:
             mock_cg.kCGMouseButtonLeft = 0
@@ -74,18 +79,19 @@ class TestMouseDrag:
             mock_cg.kCGEventLeftMouseDragged = 6
             mock_cg.kCGHIDEventTap = 0
             mock_cg.CGEventCreateMouseEvent.return_value = MagicMock()
-            result = mouse.drag(0, 0, 100, 100, duration=0.01, steps=2)
+            result = await mouse.drag(0, 0, 100, 100, duration=0.01, steps=2)
             assert result.success
             # 1 down + 2 drags + 1 up = 4 eventos
             assert mock_cg.CGEventCreateMouseEvent.call_count == 4
 
-    def test_drag_and_drop(self, mouse):
+    @pytest.mark.asyncio
+    async def test_drag_and_drop(self, mouse):
         """drag_and_drop delega a drag con parámetros convertidos."""
-        with patch.object(mouse, "drag") as mock_drag:
+        with patch.object(mouse, "drag", new_callable=AsyncMock) as mock_drag:
             from cortex_extensions.ui_control.models import InteractionResult
 
             mock_drag.return_value = InteractionResult(success=True)
-            result = mouse.drag_and_drop(10, 20, 30, 40, duration_ms=100)
+            result = await mouse.drag_and_drop(10, 20, 30, 40, duration_ms=100)
             assert result.success
             mock_drag.assert_called_once_with(
                 from_x=10,
@@ -121,12 +127,13 @@ class TestMouseScroll:
 class TestMouseRightClick:
     """Tests de MouseEngine.right_click()."""
 
-    def test_right_click_delegates(self, mouse):
+    @pytest.mark.asyncio
+    async def test_right_click_delegates(self, mouse):
         """right_click delega a click(button='right')."""
-        with patch.object(mouse, "click") as mock_click:
+        with patch.object(mouse, "click", new_callable=AsyncMock) as mock_click:
             from cortex_extensions.ui_control.models import InteractionResult
 
             mock_click.return_value = InteractionResult(success=True)
-            result = mouse.right_click(50, 60)
+            result = await mouse.right_click(50, 60)
             assert result.success
             mock_click.assert_called_once_with(50, 60, button="right")

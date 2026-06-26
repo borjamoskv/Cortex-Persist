@@ -140,12 +140,15 @@ def type_cmd(text: str, app: str | None):
 @click.option("--button", default="left", help="left / right")
 def click_at_cmd(x: int, y: int, button: str):
     """Click en coordenadas de pantalla."""
-    m = MaestroUI(engine=get_engine())
-    res = m.click(x, y, button)
-    if res.success:
-        console.print(f"[green]✔ Click en ({x}, {y})[/green]")
-    else:
-        console.print(f"[red]✘ Error: {res.error}[/red]")
+    async def _run():
+        m = MaestroUI(engine=get_engine())
+        res = await m.click(x, y, button)
+        if res.success:
+            console.print(f"[green]✔ Click en ({x}, {y})[/green]")
+        else:
+            console.print(f"[red]✘ Error: {res.error}[/red]")
+
+    asyncio.run(_run())
 
 
 @maestro.command("double-click")
@@ -153,12 +156,15 @@ def click_at_cmd(x: int, y: int, button: str):
 @click.argument("y", type=int)
 def double_click_cmd(x: int, y: int):
     """Doble click en coordenadas de pantalla."""
-    m = MaestroUI(engine=get_engine())
-    res = m.double_click(x, y)
-    if res.success:
-        console.print(f"[green]✔ Doble click en ({x}, {y})[/green]")
-    else:
-        console.print(f"[red]✘ Error: {res.error}[/red]")
+    async def _run():
+        m = MaestroUI(engine=get_engine())
+        res = await m.double_click(x, y)
+        if res.success:
+            console.print(f"[green]✔ Doble click en ({x}, {y})[/green]")
+        else:
+            console.print(f"[red]✘ Error: {res.error}[/red]")
+
+    asyncio.run(_run())
 
 
 @maestro.command("drag")
@@ -169,12 +175,15 @@ def double_click_cmd(x: int, y: int):
 @click.option("--duration", default=0.5, help="Duración del arrastre en segundos")
 def drag_cmd(from_x: int, from_y: int, to_x: int, to_y: int, duration: float):
     """Drag-and-drop de un punto a otro."""
-    m = MaestroUI(engine=get_engine())
-    res = m.drag(from_x, from_y, to_x, to_y, duration=duration)
-    if res.success:
-        console.print(f"[green]✔ Drag ({from_x},{from_y}) → ({to_x},{to_y})[/green]")
-    else:
-        console.print(f"[red]✘ Error: {res.error}[/red]")
+    async def _run():
+        m = MaestroUI(engine=get_engine())
+        res = await m.drag(from_x, from_y, to_x, to_y, duration=duration)
+        if res.success:
+            console.print(f"[green]✔ Drag ({from_x},{from_y}) → ({to_x},{to_y})[/green]")
+        else:
+            console.print(f"[red]✘ Error: {res.error}[/red]")
+
+    asyncio.run(_run())
 
 
 @maestro.command("scroll")

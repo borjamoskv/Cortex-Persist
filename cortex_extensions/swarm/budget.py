@@ -48,17 +48,19 @@ class SwarmBudgetManager:
 
     def _init_db(self):
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        with db_connect(str(self.db_path)) as conn:
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS mission_budget (
-                    mission_id           TEXT PRIMARY KEY,
-                    total_input_tokens   INTEGER DEFAULT 0,
-                    total_output_tokens  INTEGER DEFAULT 0,
-                    total_cost_usd       REAL DEFAULT 0,
-                    request_count        INTEGER DEFAULT 0,
-                    last_update          REAL
-                )
-            """)
+        from contextlib import closing
+        with closing(db_connect(str(self.db_path))) as conn:
+            with conn:
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS mission_budget (
+                        mission_id           TEXT PRIMARY KEY,
+                        total_input_tokens   INTEGER DEFAULT 0,
+                        total_output_tokens  INTEGER DEFAULT 0,
+                        total_cost_usd       REAL DEFAULT 0,
+                        request_count        INTEGER DEFAULT 0,
+                        last_update          REAL
+                    )
+                """)
 
     def report_usage(self, mission_id: str, provider: str, input_tokens: int, output_tokens: int):
         """Record token usage for a specific mission and provider."""

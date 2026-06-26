@@ -93,7 +93,7 @@ class VirgoContextGuard:
         if is_valid_sig and agent_id and agent_public_key:
             from cortex.crypto.keys import KeyManager
             try:
-                km = KeyManager(tenant_id=tenant_id)
+                km = KeyManager(service_name=tenant_id)
                 registered_key = km._metadata.get(agent_id, {}).get("public_key_b64")
                 if registered_key and registered_key != agent_public_key:
                     is_valid_sig = False

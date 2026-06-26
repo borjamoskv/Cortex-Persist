@@ -37,7 +37,7 @@ class MouseEngine:
         event = CG.CGEventCreateMouseEvent(None, event_type, (point.x, point.y), button)
         CG.CGEventPost(CG.kCGHIDEventTap, event)
 
-    def click(self, x: int, y: int, button: str = "left") -> InteractionResult:
+    async def click(self, x: int, y: int, button: str = "left") -> InteractionResult:
         """Click simple (down + up) en coordenadas específicas."""
         if not CG:
             return InteractionResult(success=False, error="CoreGraphics no disponible")
@@ -53,7 +53,7 @@ class MouseEngine:
 
         return InteractionResult(success=True)
 
-    def double_click(self, x: int, y: int) -> InteractionResult:
+    async def double_click(self, x: int, y: int) -> InteractionResult:
         """Doble click con clickCount=2 nativo (más fiable que dos clicks)."""
         if not CG:
             return InteractionResult(success=False, error="CoreGraphics no disponible")
@@ -83,11 +83,11 @@ class MouseEngine:
 
         return InteractionResult(success=True)
 
-    def right_click(self, x: int, y: int) -> InteractionResult:
+    async def right_click(self, x: int, y: int) -> InteractionResult:
         """Click derecho (menú contextual) en coordenadas específicas."""
-        return self.click(x, y, button="right")
+        return await self.click(x, y, button="right")
 
-    def drag(
+    async def drag(
         self,
         from_x: int,
         from_y: int,
@@ -126,7 +126,7 @@ class MouseEngine:
 
         return InteractionResult(success=True)
 
-    def drag_and_drop(
+    async def drag_and_drop(
         self,
         start_x: int,
         start_y: int,
@@ -137,7 +137,7 @@ class MouseEngine:
         """
         Smooth drag between coordinates (wrapper over drag).
         """
-        return self.drag(
+        return await self.drag(
             from_x=start_x,
             from_y=start_y,
             to_x=end_x,

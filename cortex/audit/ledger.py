@@ -295,8 +295,8 @@ class EnterpriseAuditLedger:
                                     )
 
                                     if "PYTEST_CURRENT_TEST" in os.environ or os.environ.get("CORTEX_TEST_ENV"):
-                                        rekor_uuid = None
-                                        rfc_token = None
+                                        rekor_uuid = "mock_rekor"
+                                        rfc_token = "mock_rfc"
                                     else:
                                         # Asynchronous Rekor logging
                                         rekor_uuid = await rekor_client.log_entry(entry_hash, signature, pub_pem)  # pyright: ignore[reportArgumentType]
