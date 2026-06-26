@@ -210,18 +210,23 @@ class LLMProvider(BaseProvider):
                 self._circuit_breaker,
             )
         except httpx.HTTPStatusError as e:
+            try:
+                err_text = e.response.text[:500]
+            except UnicodeDecodeError:
+                err_text = "<binary_or_malformed_response>"
+                
             logger.error(
                 "LLM API Failure [%s %s]: %s",
                 e.response.status_code,
                 self._provider,
-                e.response.text[:500],
+                err_text,
             )
             if wrap_errors:
                 from cortex.utils.errors import CortexError
 
                 raise CortexError(f"HTTP {e.response.status_code} from {self._provider}") from e
             raise
-        except (KeyError, IndexError, json.JSONDecodeError) as e:
+        except (KeyError, IndexError, json.JSONDecodeError, UnicodeDecodeError, httpx.DecodingError) as e:
             logger.error("LLM Parse Error [%s]: %s", self._provider, e)
             if wrap_errors:
                 from cortex.utils.errors import CortexError
