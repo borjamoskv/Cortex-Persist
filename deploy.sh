@@ -9,6 +9,6 @@ if ! gh auth status &>/dev/null; then
 fi
 
 echo "[MOSKV-1] Forjando repositorio remoto..."
-gh repo create babylon-60 --public --source=. --remote=origin --push || git push -u origin master
+gh repo create babylon-60 --private --source=. --remote=origin --push || git push -u origin master
 
 echo "[MOSKV-1] BABYLON-60 En línea."
