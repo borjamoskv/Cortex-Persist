@@ -72,6 +72,7 @@ async def test_swarm_agent_run():
 
     await queue.put("task1")
     await queue.put("fail")
+    await queue.put(None)
 
     # Run agent until queue is empty
     await agent.run(queue)
