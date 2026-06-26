@@ -400,7 +400,7 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
 
             # Run synchronous stripe call in a thread pool to avoid blocking event loop
             await asyncio.to_thread(
-                stripe.SubscriptionItem.create_usage_record,
+                stripe.SubscriptionItem.create_usage_record,  # type: ignore
                 subscription_item_id,
                 quantity=1,
                 timestamp="now",

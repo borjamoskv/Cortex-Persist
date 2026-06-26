@@ -25,6 +25,6 @@ def run_cortex(tick_delay: float):
 
     try:
         import decimal
-        runtime.run_forever(tick_delay=decimal.Decimal(str(tick_delay)))
+        runtime.run_forever(tick_delay=decimal.Decimal(str(tick_delay)))  # type: ignore
     except KeyboardInterrupt:
         click.echo("\n🛑 Cortex Runtime interrupted by user. Shutting down gracefully.")

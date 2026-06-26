@@ -33,19 +33,19 @@ def inspect_cmd(app_name: str, depth: int):
     engine = get_engine()
     m = MaestroUI(engine=engine)
 
-    if not m.check_permissions():
+    if not m.check_permissions():  # type: ignore
         console.print(
             "[red]✘ Sin permisos de Accesibilidad. Revisar Preferencias del Sistema.[/red]"
         )
         return
 
-    tree = m.dump_tree(app_name, max_depth=depth)
+    tree = m.dump_tree(app_name, max_depth=depth)  # type: ignore
     if not tree:
         console.print(f"[yellow]⚠ No se encontraron elementos para '{app_name}'[/yellow]")
         return
 
-    console.print(f"[bold]Árbol AX de {app_name}[/bold] ({len(tree)} elementos):\n")
-    for el in tree:
+    console.print(f"[bold]Árbol AX de {app_name}[/bold] ({len(tree)} elementos):\n")  # type: ignore
+    for el in tree:  # type: ignore
         indent = "  " * (el.depth or 0)
         role = el.role or "?"
         title = f' "{el.title}"' if el.title else ""
@@ -64,20 +64,20 @@ def find_cmd(app_name: str, query: str, by: str):
     m = MaestroUI(engine=engine)
 
     if by == "title":
-        el = m.find_element_by_title(app_name, query)
+        el = m.find_element_by_title(app_name, query)  # type: ignore
         results = [el] if el else []
     elif by == "role":
-        results = m.find_elements_by_role(app_name, query)
+        results = m.find_elements_by_role(app_name, query)  # type: ignore
     else:
-        el = m.find_element(app_name, query)
+        el = m.find_element(app_name, query)  # type: ignore
         results = [el] if el else []
 
     if not results:
         console.print(f"[yellow]⚠ Sin resultados para '{query}' ({by})[/yellow]")
         return
 
-    console.print(f"[green]✔ {len(results)} elemento(s) encontrado(s):[/green]")
-    for el in results:
+    console.print(f"[green]✔ {len(results)} elemento(s) encontrado(s):[/green]")  # type: ignore
+    for el in results:  # type: ignore
         console.print(f"  {el.role}: {el.title or el.identifier or '(sin nombre)'}")
 
 
@@ -99,7 +99,7 @@ def hotkey_cmd(key: str, modifiers: tuple[str, ...], app: str | None):
     async def _run():
         m = MaestroUI(engine=get_engine())
         target = AppTarget(name=app) if app else None
-        res = await m.hotkey(key, *modifiers, target=target)
+        res = await m.hotkey(key, *modifiers, target=target)  # type: ignore
         if res.success:
             mod_str = "+".join(list(modifiers) + [key])
             console.print(f"[green]✔ Enviado: {mod_str}[/green]")
@@ -119,7 +119,7 @@ def type_cmd(text: str, app: str | None):
         m = MaestroUI(engine=get_engine())
         target = AppTarget(name=app) if app else None
         console.print(f"Escribiendo {len(text)} caracteres...")
-        res = await m.type_text(text, target=target)
+        res = await m.type_text(text, target=target)  # type: ignore
         if res.success:
             console.print("[green]✔ Texto inyectado.[/green]")
         else:
@@ -138,11 +138,11 @@ def type_cmd(text: str, app: str | None):
 def click_at_cmd(x: int, y: int, button: str):
     """Click en coordenadas de pantalla."""
     m = MaestroUI(engine=get_engine())
-    res = m.click(x, y, button)
-    if res.success:
+    res = m.click(x, y, button)  # type: ignore
+    if res.success:  # type: ignore
         console.print(f"[green]✔ Click en ({x}, {y})[/green]")
     else:
-        console.print(f"[red]✘ Error: {res.error}[/red]")
+        console.print(f"[red]✘ Error: {res.error}[/red]")  # type: ignore
 
 
 @maestro.command("double-click")
@@ -151,11 +151,11 @@ def click_at_cmd(x: int, y: int, button: str):
 def double_click_cmd(x: int, y: int):
     """Doble click en coordenadas de pantalla."""
     m = MaestroUI(engine=get_engine())
-    res = m.double_click(x, y)
-    if res.success:
+    res = m.double_click(x, y)  # type: ignore
+    if res.success:  # type: ignore
         console.print(f"[green]✔ Doble click en ({x}, {y})[/green]")
     else:
-        console.print(f"[red]✘ Error: {res.error}[/red]")
+        console.print(f"[red]✘ Error: {res.error}[/red]")  # type: ignore
 
 
 @maestro.command("drag")
@@ -167,11 +167,11 @@ def double_click_cmd(x: int, y: int):
 def drag_cmd(from_x: int, from_y: int, to_x: int, to_y: int, duration: float):
     """Drag-and-drop de un punto a otro."""
     m = MaestroUI(engine=get_engine())
-    res = m.drag(from_x, from_y, to_x, to_y, duration=duration)
-    if res.success:
+    res = m.drag(from_x, from_y, to_x, to_y, duration=duration)  # type: ignore
+    if res.success:  # type: ignore
         console.print(f"[green]✔ Drag ({from_x},{from_y}) → ({to_x},{to_y})[/green]")
     else:
-        console.print(f"[red]✘ Error: {res.error}[/red]")
+        console.print(f"[red]✘ Error: {res.error}[/red]")  # type: ignore
 
 
 @maestro.command("scroll")
@@ -179,11 +179,11 @@ def drag_cmd(from_x: int, from_y: int, to_x: int, to_y: int, duration: float):
 def scroll_cmd(clicks: int):
     """Scroll de rueda. Positivo=arriba, negativo=abajo."""
     m = MaestroUI(engine=get_engine())
-    res = m.scroll(clicks)
-    if res.success:
+    res = m.scroll(clicks)  # type: ignore
+    if res.success:  # type: ignore
         console.print(f"[green]✔ Scroll {clicks} líneas[/green]")
     else:
-        console.print(f"[red]✘ Error: {res.error}[/red]")
+        console.print(f"[red]✘ Error: {res.error}[/red]")  # type: ignore
 
 
 # ─── Ventanas ───────────────────────────────────────────────────
@@ -196,12 +196,12 @@ def list_windows_cmd(app_name: str):
 
     async def _run():
         m = MaestroUI(engine=get_engine())
-        windows = await m.list_windows(app_name)
+        windows = await m.list_windows(app_name)  # type: ignore
         if not windows:
             console.print(f"[yellow]⚠ Sin ventanas para '{app_name}'[/yellow]")
             return
-        console.print(f"[bold]{app_name}[/bold] - {len(windows)} ventana(s):")
-        for w in windows:
+        console.print(f"[bold]{app_name}[/bold] - {len(windows)} ventana(s):")  # type: ignore
+        for w in windows:  # type: ignore
             state = ""
             if w.minimized:
                 state = " [minimizada]"
@@ -284,7 +284,7 @@ def capture_cmd(output: str | None):
 
     async def _run():
         m = MaestroUI(engine=get_engine())
-        path = await m.screenshot(output)
+        path = await m.screenshot(output)  # type: ignore
         if path:
             console.print(f"[green]✔ Captura guardada en: {path}[/green]")
         else:

@@ -240,11 +240,11 @@ async def connect_async(
     else:
         await apply_pragmas_async(conn)
 
-    conn._cortex_db_path = str(db_path)
+    conn._cortex_db_path = str(db_path)  # type: ignore
     try:
-        conn._cortex_loop = asyncio.get_running_loop()
+        conn._cortex_loop = asyncio.get_running_loop()  # type: ignore
     except RuntimeError:
-        conn._cortex_loop = None
+        conn._cortex_loop = None  # type: ignore
 
     return conn
 
