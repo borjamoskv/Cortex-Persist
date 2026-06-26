@@ -280,6 +280,7 @@ The `examples/` directory has ready-to-run scenarios:
 
 - [**SECURITY_TRUST_MODEL.md**](docs/SECURITY_TRUST_MODEL.md) — Cryptographic invariants & guarantees
 - [**CORTEX_PROTOCOL_SPEC.md**](docs/CORTEX_PROTOCOL_SPEC.md) — Normative RFC (Ledger format, Hash, Replay)
+- [**FORMAL_MODEL.md**](docs/FORMAL_MODEL.md) — Formal mathematical invariants & State transitions
 - [**WHEN_CORTEX_FAILS.md**](docs/WHEN_CORTEX_FAILS.md) — Explicit system failure modes & transparency
 - [**AGENTS.md**](AGENTS.md) — Substrate directives for autonomous orchestration
 - [**ROADMAP.md**](ROADMAP.md) — Deployment phases and LEGION-10k scaling
