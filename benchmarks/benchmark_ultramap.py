@@ -1,10 +1,9 @@
 # [C5-REAL] Exergy-Maximized
-import time
-import statistics
-import logging
-import os
-import sys
 import gc
+import os
+import statistics
+import sys
+import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "cortex-core"))
 from ultramap import UltramapSubstrate

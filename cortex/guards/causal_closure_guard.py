@@ -73,8 +73,6 @@ class CausalClosureGuard:
             has_json_array = False
             stripped_c = c.strip()
             if stripped_c.startswith("[") and stripped_c.endswith("]"):
-                import ast
-
                 try:
                     parsed_arr = json.loads(stripped_c)
                     if (
@@ -83,8 +81,9 @@ class CausalClosureGuard:
                         and len(parsed_arr) > 0
                     ):
                         has_json_array = True
-                except (ValueError, TypeError, KeyError, AssertionError):
+                except json.JSONDecodeError:
                     try:
+                        import ast
                         parsed_arr = ast.literal_eval(stripped_c)
                         if (
                             isinstance(parsed_arr, list)
@@ -92,7 +91,7 @@ class CausalClosureGuard:
                             and len(parsed_arr) > 0
                         ):
                             has_json_array = True
-                    except (ValueError, TypeError, KeyError, AssertionError):
+                    except (ValueError, SyntaxError, TypeError):
                         pass
 
             # Use StructuralCertifier to validate formal JSON structure
