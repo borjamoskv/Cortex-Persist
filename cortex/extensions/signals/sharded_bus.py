@@ -17,6 +17,7 @@ from pathlib import Path
 import aiosqlite
 
 from cortex import config
+from cortex.database.core import connect_async
 from cortex.extensions.signals.bus import _CREATE_INDEXES, _CREATE_TABLE, _build_query
 from cortex.extensions.signals.models import Signal, signal_from_row
 from cortex.guards.url_guard import SafeTransport
@@ -58,7 +59,7 @@ class ShardedAsyncSignalBus:
 
         for i in range(self.num_shards):
             db_path = self._base_dir / f"swarm_shard_{i:03d}.db"
-            conn = await aiosqlite.connect(db_path)
+            conn = await connect_async(str(db_path))
             await conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
             await conn.commit()
             self._shards[i] = conn

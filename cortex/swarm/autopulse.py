@@ -6,6 +6,8 @@ import logging
 import os
 import time
 
+import aiosqlite
+
 from cortex.config import DB_PATH
 from cortex.extensions.signals.bus import AsyncSignalBus
 from cortex.swarm.tensor_glial import TensorGlialLegion
@@ -155,9 +157,9 @@ async def _append_state_ledger(agent: str, payload: dict) -> None:
         logger.error("Error writing state file: %s", e)
 
     try:
-        import aiosqlite
+        from cortex.database.core import connect_async_ctx
 
-        async with aiosqlite.connect(DB_PATH) as conn:
+        async with connect_async_ctx(DB_PATH) as conn:
             bus = AsyncSignalBus(conn)
             await bus.emit(
                 "ledger_append",
