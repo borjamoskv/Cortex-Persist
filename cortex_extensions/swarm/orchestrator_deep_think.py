@@ -127,7 +127,7 @@ class DeepThinkOrchestrator:
             agent_id_hv = self.encoder.encode_text(agent_id)
             hv = bind(agent_id_hv, text_hv)
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error("Agent %s failed in deep think: %s", agent_id, e)
             hv = self.encoder.encode_text("error")
             text_response = "Error."

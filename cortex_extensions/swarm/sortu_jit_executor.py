@@ -100,7 +100,7 @@ def _worker(source_code: str, global_ctx: dict, result_dict: dict):
         result_dict["locals"] = list(res.keys())
         result_dict["status"] = "success"
         result_dict["exec_time_ms"] = (time.perf_counter() - t0) * 1000
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         result_dict["status"] = "failed"
         result_dict["error"] = str(e)
 

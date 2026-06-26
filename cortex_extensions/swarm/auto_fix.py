@@ -116,7 +116,7 @@ class AutoFixPipeline:
             result = await self._execute(task)
         except asyncio.CancelledError:
             raise
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             elapsed = (time.monotonic() - t0) * 1000
             logger.error(
                 "☠️ [AUTOFIX] Execution failed for ghost [%s]: %s",
@@ -257,7 +257,7 @@ class AutoFixPipeline:
                 }
         except asyncio.CancelledError:
             raise
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             return {
                 "status": "failed",
                 "branch": branch_name,

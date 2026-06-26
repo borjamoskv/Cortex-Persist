@@ -132,7 +132,9 @@ def _execute_anti_limerence_sync(agent: str, reality_delta: float, anti_limerenc
             if agent in purged:
                 logger.error("Agent %s was purged! Halting execution.", agent)
                 return True
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
+        import logging
+        logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex/swarm/autopulse.py - {e}")
         logger.error("AntiLimerence Execution Failed: %s", e)
     return False
 
@@ -146,7 +148,9 @@ def _write_ledger_sync(agent: str, payload: dict) -> str:
                 state = json.load(f)
                 if state.get("ledgers"):
                     prev_hash = state["ledgers"][-1]["hash"]
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
+            import logging
+            logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex/swarm/autopulse.py - {exc}")
             logger.warning("Suppressed exception: %s", exc)
 
     action = f"SwarmSolve:{agent}"
@@ -299,7 +303,9 @@ async def process_queue() -> None:
                         e,
                     )
                     await asyncio.sleep(30.0)
-                except Exception as e:
+                except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
+                    import logging
+                    logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex/swarm/autopulse.py - {e}")
                     logger.error("Unexpected error processing task: %s", e)
 
             await asyncio.sleep(2.0)

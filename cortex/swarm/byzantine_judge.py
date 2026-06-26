@@ -105,7 +105,7 @@ class ByzantineJudge:
             except (SyntaxError, TypeError, NameError, ValueError, AttributeError) as e:
                 logger.warning(f"Agent {agent_id} SLASHED due to AST execution error: {e}")
                 self.bank.slash(agent_id)  # type: ignore
-            except Exception as e:
+            except (KeyError, OSError, RuntimeError) as e:
                 logger.critical(f"Host System Error evaluating agent {agent_id}: {e}")
                 raise RuntimeError(f"BFT Consensus halted. Host execution degraded: {e}")
 

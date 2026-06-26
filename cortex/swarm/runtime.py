@@ -241,7 +241,7 @@ class SubagentRunner:
                     last_error = f"timeout after {req.timeout_ms}ms"
                 except TimeoutError as e:
                     last_error = f"timeout: {e}"
-                except Exception as e:
+                except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                     last_error = str(e)
 
             span.set_attribute("error", True)

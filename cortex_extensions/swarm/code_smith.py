@@ -390,7 +390,7 @@ class CodeSmith:
                 commit_hash,
             )
 
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             result.error = f"Unhandled exception in phase {result.phase_reached.value}: {exc}"
             logger.error("💥 CodeSmith: %s", result.error)
 
@@ -401,7 +401,7 @@ class CodeSmith:
             # Cleanup sandbox (best-effort)
             try:
                 await self._sandbox.cleanup()
-            except Exception as exc:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
         return result

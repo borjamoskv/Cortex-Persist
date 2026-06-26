@@ -418,7 +418,7 @@ class ConflictResolver:
                 reasoning=f"Architect decision (conf={confidence:.2f}): {reasoning}",
             )
 
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             logger.error("Architect arbitration failed: %s", exc)
             return None
 

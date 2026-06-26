@@ -59,7 +59,7 @@ class PlannerNode:
             try:
                 data = json.loads(target)
                 return data.get("url") or data.get("target") or data.get("query") or target[:200]
-            except Exception as exc:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
         # 3. Artifact header stripping
@@ -180,7 +180,7 @@ class ExecutorNode:
                         result.get("error", estado),
                     )
 
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.error("❌ [EXECUTOR] Fatal: %s → %s", task_id, e)
                 results.append(
                     {

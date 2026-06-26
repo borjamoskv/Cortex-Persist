@@ -74,7 +74,7 @@ async def calculate_resonance(
             if np.linalg.norm(np.array(axiom_emb, dtype=np.float32)) >= 1e-10
         )
         return max_sim
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         logger.error("Resonance calculation failed: %s", e)
         return 0.0
 
@@ -141,7 +141,7 @@ async def get_axiom_embeddings(encoder: Any) -> list[list[float]]:
     for text in AXIOM_TEXTS:
         try:
             embeddings.append(await encoder.encode(text))
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.warning("Failed to encode axiom: %s", e)
     return embeddings
 
@@ -197,7 +197,7 @@ async def scan_all_crystals(
                 try:
                     embedding = np.frombuffer(embedding_data, dtype=np.float32).tolist()
                     resonance = await calculate_resonance(embedding, axiom_embeddings)
-                except Exception as exc:
+                except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
                     logger.warning("Suppressed exception: %s", exc)
 
             vital = measure_crystal_sync(
@@ -212,7 +212,7 @@ async def scan_all_crystals(
             )
             vitals.append(vital)
 
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         logger.error("🌡️ [THERMOMETER] Scan failed: %s", e)
 
     priority_order = {"PURGE": 0, "MERGE": 1, "DECAY": 2, "PROMOTE": 3, "PROTECT": 4, "MAINTAIN": 5}

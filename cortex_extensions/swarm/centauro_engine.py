@@ -12,10 +12,10 @@ import hashlib
 import logging
 from typing import Any, TypedDict, cast
 
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 from pydantic import BaseModel, Field
 
 from cortex.engine.swarm.aleph_omega import AxiomaticLeapEngine
-from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 from cortex_extensions.swarm.byzantine import ByzantineConsensus
 
 __all__ = [
@@ -124,7 +124,9 @@ class VirtualAgent:
                     )
                 # Fallback: unwrap as string if Result type varies
                 return str(result.ok if hasattr(result, "ok") else result)
-            except Exception as exc:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
+                import logging
+                logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {exc}")
                 logger.warning(
                     "VirtualAgent %s: C5-REAL dispatch failed (%s) - "
                     "degrading to C4-SIM for task %s.",
@@ -211,7 +213,9 @@ class CentauroEngine:
         async def _run_agent(a_id: str, a: VirtualAgent) -> tuple[str, str | Exception]:
             try:
                 return (a_id, await a.execute("M-01", mission))
-            except Exception as exc:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
+                import logging
+                logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {exc}")
                 return (a_id, exc)
 
         agent_tasks = [_run_agent(a_id, agent) for a_id, agent in squad.items()]
@@ -298,7 +302,9 @@ class CentauroEngine:
                         "formation": f"{formation}+ALEPH",
                         "reason": f"Paradigm Shift: {leap['paradigm_shift']}",
                     }
-                except Exception as leap_e:
+                except (ValueError, TypeError, KeyError, OSError, RuntimeError) as leap_e:
+                    import logging
+                    logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {leap_e}")
                     logger.error("ALEPH-Ω Leap failed: %s", leap_e)
                     result = {
                         "status": "failure",
@@ -312,7 +318,9 @@ class CentauroEngine:
             mission_future.set_result(result)
             return result
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
+            import logging
+            logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {e}")
             if not mission_future.done():
                 mission_future.set_exception(e)
             raise

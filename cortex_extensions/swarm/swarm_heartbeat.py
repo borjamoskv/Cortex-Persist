@@ -208,7 +208,7 @@ class SwarmHeartbeat:
                 source="swarm_heartbeat",
                 project="CORTEX_SWARM",
             )
-        except Exception:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError):
             logger.debug(
                 "Health signal emission failed for %s",
                 event_type,

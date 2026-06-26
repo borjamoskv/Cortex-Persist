@@ -19,7 +19,7 @@ async def autodidact_ingest(source_code: str, expected_yield_gain: float, metada
     # 1. AST Sandbox Execution
     try:
         sandbox_res = await run_jit_sandbox(source_code, timeout_ms=500)
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         # Purge -> Stigmergic / Cicatricial Tissue handling is 'silent purge' per rules
         logger.warning("🔥 [AUTODIDACT-Ω] PURGED. AST Execution Failed: %s", e)
         return {"action": "PURGE", "reason": "JIT_BREAKER", "details": str(e)}

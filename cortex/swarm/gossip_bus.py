@@ -104,7 +104,7 @@ class GossipBus:
                 host, port_str = peer_info["address"].split(":")
                 try:
                     self.node.transport.sendto(data, (host, int(port_str)))
-                except Exception as e:
+                except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                     logger.debug("Failed to broadcast to %s: %s", peer_id, e)
                     
         logger.debug(f"Broadcasted {signal_type} to Gossip Swarm")
@@ -122,7 +122,7 @@ class GossipBus:
                 await asyncio.sleep(self.sync_interval)
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.exception("[P0] Untracked Exception in GossipBus bridging: %s", e)
                 await asyncio.sleep(5.0)
 

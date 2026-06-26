@@ -60,7 +60,7 @@ class ZeroKnowledgeGatekeeper:
         payload_hash = hashlib.sha256(ast_code.encode("utf-8")).hexdigest()  # type: ignore
         try:
             is_valid = Verifier.verify_signature(judge_pub_key_b64, payload_hash, timestamp, signature_b64)  # type: ignore
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"Gatekeeper crypto failure: {e}")
             is_valid = False
 
@@ -84,6 +84,6 @@ class ZeroKnowledgeGatekeeper:
             # It should be written to the workspace.
             logger.info("Gatekeeper execution successful (Code structurally valid).")
             return True
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"Gatekeeper execution failed post-consensus: {e}")
             return False

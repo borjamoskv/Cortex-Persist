@@ -23,7 +23,7 @@ MMAP_FILE = "market_wave.vsa_mmap"
 def _cleanup_mmap(path: str):
     try:
         os.remove(path)
-    except Exception as exc:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
         logger.warning("Suppressed exception: %s", exc)
 
 
