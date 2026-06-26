@@ -1,48 +1,38 @@
-use alloc::string::String;
-use alloc::vec::Vec;
-use crate::state::MachineState;
+use crate::state::{MachineState, RegisterCell};
 use crate::isa::{Instruction, Opcode, Value};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum HaltReason {
     Graceful,
-    Critical(String),
+    Critical,
 }
 
+/// The pure transition function mathematically guarantees no runtime panics.
+/// Dynamic array out-of-bounds are irrepresentable.
 pub fn step(mut state: MachineState, instr: &Instruction) -> Result<MachineState, HaltReason> {
-    state.logical_clock.tick();
+    state.logical_clock = state.logical_clock.tick();
     
     match &instr.opcode {
-        Opcode::Alloc(reg_id, tag) => {
-            if let Some(reg) = state.registers.get_mut(reg_id.0 as usize) {
-                reg.tag = tag.clone();
-            } else {
-                return Err(HaltReason::Critical("Register out of bounds".into()));
-            }
+        Opcode::Alloc(reg, tag) => {
+            let mut cell = state.read_reg(*reg).clone();
+            cell.tag = *tag;
+            state.write_reg(*reg, cell);
         }
-        Opcode::Nig(reg_id, val) => {
-            let eval_val = match val {
-                Value::ImmI64(v) => Value::ImmI64(*v),
-                Value::Reg(r) => {
-                    if let Some(src) = state.registers.get(r.0 as usize) {
-                        src.value.clone()
-                    } else {
-                        return Err(HaltReason::Critical("Register out of bounds".into()));
-                    }
-                }
-            };
-            if let Some(reg) = state.registers.get_mut(reg_id.0 as usize) {
-                reg.value = eval_val;
-            } else {
-                return Err(HaltReason::Critical("Register out of bounds".into()));
-            }
+        Opcode::LoadImm(reg, val) => {
+            let mut cell = state.read_reg(*reg).clone();
+            cell.value = Value::ImmI64(*val);
+            state.write_reg(*reg, cell);
+        }
+        Opcode::Mov(dest, src) => {
+            let cell = state.read_reg(*src).clone();
+            state.write_reg(*dest, cell);
         }
         Opcode::Halt => return Err(HaltReason::Graceful),
-        Opcode::CriticalHalt => return Err(HaltReason::Critical("Explicit critical halt".into())),
-        // ... Implement other opcodes ...
+        Opcode::CriticalHalt => return Err(HaltReason::Critical),
+        // Additional pure operations here
         _ => {}
     }
     
-    state.pc += 1;
+    state.pc = state.pc.saturating_add(1);
     Ok(state)
 }

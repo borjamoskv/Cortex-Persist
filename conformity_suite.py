@@ -75,6 +75,18 @@ TEST_SUITE = {
         HALT
         """,
         []
+    ),
+    "CRITICAL_HALT": (
+        """
+        FORK "Infinite"
+        EXECUTE "CRITICAL_HALT: SHUTDOWN"
+        HALT
+        MUB "Infinite"
+        EXECUTE "Spam"
+        AFTER R1 "Infinite"
+        HALT
+        """,
+        ["(Emit CRITICAL_HALT: SHUTDOWN"]
     )
 }
 
