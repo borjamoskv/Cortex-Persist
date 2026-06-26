@@ -3,7 +3,14 @@
 import click
 from rich.console import Console
 
-from cortex.cli.common import cli, run_async
+from cortex.cli.common import cli, _run_async
+import functools
+
+def run_async(f):
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        return _run_async(f(*args, **kwargs))
+    return wrapper
 from cortex.engine import CortexEngine
 from cortex.engine.auth_gateway import QuorumGateway
 
@@ -28,13 +35,12 @@ async def submit_vote(req_id: str) -> None:
 
     # 1. Fetch payload to sign
     try:
-        conn = engine.pool.get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
+        conn = await engine._get_conn()
+        async with conn.execute(
             "SELECT state_payload FROM quorum_requests WHERE id = ? AND status = 'PENDING'",
             (req_id,),
-        )
-        row = cursor.fetchone()
+        ) as cursor:
+            row = await cursor.fetchone()
         if not row:
             console.print(f"[bold red]✗ Request {req_id} not found or not PENDING.[/bold red]")
             return
@@ -54,6 +60,9 @@ async def submit_vote(req_id: str) -> None:
     try:
         signature = signer.sign(content=state_payload, fact_hash=req_id)
         pub_key = signer.public_key_b64
+        if not pub_key:
+            console.print("[bold red]✗ No public key found.[/bold red]")
+            return
         console.print(f"[cyan]Signature generated using Ed25519: {signature[:16]}...[/cyan]")
     except Exception as e:
         console.print(f"[bold red]✗ Failed to generate cryptographic signature: {e}[/bold red]")
@@ -91,12 +100,11 @@ async def list_requests() -> None:
     """Lists pending BFT quorum requests."""
     engine = CortexEngine()
     try:
-        conn = engine.pool.get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
+        conn = await engine._get_conn()
+        async with conn.execute(
             "SELECT id, status, hypothesis, signatures_json FROM quorum_requests WHERE status = 'PENDING'"
-        )
-        rows = cursor.fetchall()
+        ) as cursor:
+            rows = await cursor.fetchall()
 
         if not rows:
             console.print("[green]No pending consensus requests.[/green]")

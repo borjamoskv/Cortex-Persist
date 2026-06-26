@@ -68,7 +68,7 @@ def sovereign_mcp() -> None:
     from cortex.memory.vsa import VSAPipelineBridge
 
     try:
-        from cortex_rs import McpSovereignHost
+        from cortex_rs import McpSovereignHost  # pyright: ignore[reportAttributeAccessIssue]
     except ImportError:
         console.print(
             "[yellow]⚠️ Warning: Rust-native McpSovereignHost is not compiled in your current cortex_rs binary.[/yellow]"
