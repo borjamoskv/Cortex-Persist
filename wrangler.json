@@ -3,11 +3,17 @@
   "name": "cortex-landing",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat_v2"],
+  "kv_namespaces": [
+    {
+      "binding": "SESSION",
+      "id": "710b6b8a951e4e8faaabf87b56b20470"
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "cortex-edge-ledger",
-      "database_id": "YOUR_DATABASE_ID_HERE",
+      "database_name": "cortex_persistence",
+      "database_id": "e976aa16-d3f9-41eb-915e-3c9c99ceeed9",
       "migrations_dir": "cortex/migrations/edge"
     }
   ]

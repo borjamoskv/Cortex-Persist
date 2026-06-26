@@ -53,7 +53,7 @@ async def check_seal_1_code_quality() -> GateResult:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_2_type_safety() -> GateResult:
     printer.seal(2, "AX-I Determinismo Estocástico", "Type Check (Pyright)")
-    code, out = await arun_cmd(["pyright", "cortex/", "--outputjson"])
+    code, out = await arun_cmd(["pyright", "cortex/", "--outputjson"], timeout=180.0)
     if code == 127:
         printer.warn("No type checker found (pyright/mypy) - skipping")
         return True, "verified"

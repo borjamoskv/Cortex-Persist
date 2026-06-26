@@ -52,8 +52,35 @@ def _load_command_modules() -> tuple[list[str], dict[str, str]]:
     return loaded, failed
 
 
-LOADED_COMMAND_MODULES, FAILED_COMMAND_MODULES = _load_command_modules()
-cli.loaded_command_modules = tuple(LOADED_COMMAND_MODULES)  # type: ignore[attr-defined]
-cli.failed_command_modules = dict(FAILED_COMMAND_MODULES)  # type: ignore[attr-defined]
+_loaded = False
+LOADED_COMMAND_MODULES: list[str] = []
+FAILED_COMMAND_MODULES: dict[str, str] = {}
+
+
+def _ensure_loaded() -> None:
+    global _loaded, LOADED_COMMAND_MODULES, FAILED_COMMAND_MODULES
+    if not _loaded:
+        _loaded = True
+        loaded, failed = _load_command_modules()
+        LOADED_COMMAND_MODULES.extend(loaded)
+        FAILED_COMMAND_MODULES.update(failed)
+        cli.loaded_command_modules = tuple(LOADED_COMMAND_MODULES)  # type: ignore[attr-defined]
+        cli.failed_command_modules = dict(FAILED_COMMAND_MODULES)  # type: ignore[attr-defined]
+
+
+# Override Click's list_commands and get_command dynamically to defer importing modules.
+original_list_commands = cli.list_commands
+original_get_command = cli.get_command
+
+def lazy_list_commands(ctx: click.Context) -> list[str]:
+    _ensure_loaded()
+    return original_list_commands(ctx)
+
+def lazy_get_command(ctx: click.Context, name: str) -> click.Command | None:
+    _ensure_loaded()
+    return original_get_command(ctx, name)
+
+cli.list_commands = lazy_list_commands
+cli.get_command = lazy_get_command
 
 __all__ = ["FAILED_COMMAND_MODULES", "LOADED_COMMAND_MODULES", "cli"]
