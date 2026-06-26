@@ -102,15 +102,7 @@ class SchemaTrait:
                         s12 INTEGER, s13 INTEGER, s14 INTEGER, s15 INTEGER
                     );
                     """
-                print(f"TEMPORARY DEBUG SQL: {sql!r}", flush=True)
-                print(f"TEMPORARY DEBUG ENCODER: {type(self._encoder).__name__} | DIM: {self._encoder.dimension!r} | DIM TYPE: {type(self._encoder.dimension).__name__}", flush=True)
-                import sqlite3
-                print(f"TEMPORARY DEBUG SQLITE: {sqlite3.sqlite_version}", flush=True)
-                try:
-                    conn.executescript(sql)
-                except Exception as e:
-                    print(f"TEMPORARY DEBUG ERROR: {e}", flush=True)
-                    raise
+                conn.executescript(sql)
 
 
                 for i in range(16):

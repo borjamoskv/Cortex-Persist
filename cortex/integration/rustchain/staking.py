@@ -7,7 +7,8 @@ Handles staking transactions and fail-safe logic when node is offline.
 from __future__ import annotations
 
 import time
-from typing import Any, Dict
+from typing import Any
+
 from cortex.integration.rustchain.client import RustChainClient
 from cortex.integration.rustchain.wallet import RustChainWallet
 
@@ -27,7 +28,7 @@ async def stake_and_acquire(
     client: RustChainClient,
     skill: str,
     amount: int,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Lock RTC stake to acquire a skill.
 
     Fail-safe: performs pre-flight client check. If connection is offline,

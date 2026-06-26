@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import hashlib
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
@@ -62,7 +63,7 @@ class RustChainWallet:
         """Sign raw message bytes."""
         return self._private_key.sign(message)
 
-    def sign_transfer(self, to_address: str, amount: int, fee: int = 0) -> Dict[str, Any]:
+    def sign_transfer(self, to_address: str, amount: int, fee: int = 0) -> dict[str, Any]:
         """Sign a transfer payload."""
         timestamp = int(time.time())
         payload = f"{self._address}:{to_address}:{amount}:{fee}:{timestamp}".encode()

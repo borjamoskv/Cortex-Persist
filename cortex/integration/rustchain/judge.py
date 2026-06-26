@@ -9,8 +9,8 @@ from __future__ import annotations
 import ast
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Tuple
-from cryptography.hazmat.primitives import serialization
+from typing import Any
+
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 
@@ -18,7 +18,7 @@ class Judge(ABC):
     """Abstract base class for all Open Judge implementations."""
 
     @abstractmethod
-    async def judge(self, code: str, config: Dict[str, Any] | None = None) -> Tuple[bool, List[str]]:
+    async def judge(self, code: str, config: dict[str, Any] | None = None) -> tuple[bool, list[str]]:
         """Judge the provided code based on internal rules and config.
 
         Returns:
@@ -30,8 +30,8 @@ class Judge(ABC):
     def sign_verdict(
         private_key_bytes: bytes,
         passed: bool,
-        reasons: List[str],
-    ) -> Dict[str, Any]:
+        reasons: list[str],
+    ) -> dict[str, Any]:
         """Sign a verdict using Ed25519 private key.
 
         Args:
@@ -54,7 +54,7 @@ class Judge(ABC):
         }
 
     @staticmethod
-    def verify_verdict(verdict_packet: Dict[str, Any], public_key_bytes: bytes) -> bool:
+    def verify_verdict(verdict_packet: dict[str, Any], public_key_bytes: bytes) -> bool:
         """Verify an Ed25519 signature on a verdict packet."""
         try:
             passed = verdict_packet["passed"]
@@ -76,12 +76,12 @@ class Judge(ABC):
 class ASTLintJudge(Judge):
     """Static analysis judge checking code syntax and structures using python AST."""
 
-    async def judge(self, code: str, config: Dict[str, Any] | None = None) -> Tuple[bool, List[str]]:
+    async def judge(self, code: str, config: dict[str, Any] | None = None) -> tuple[bool, list[str]]:
         cfg = config or {}
         banned_terms = cfg.get("banned_terms", ["eval", "exec"])
         require_docstrings = cfg.get("require_docstrings", False)
 
-        reasons: List[str] = []
+        reasons: list[str] = []
         try:
             tree = ast.parse(code)
         except SyntaxError as e:
@@ -90,8 +90,8 @@ class ASTLintJudge(Judge):
         class LintVisitor(ast.NodeVisitor):
             def __init__(self) -> None:
                 self.has_bare_except = False
-                self.found_banned: List[str] = []
-                self.missing_docstrings: List[str] = []
+                self.found_banned: list[str] = []
+                self.missing_docstrings: list[str] = []
 
             def visit_Name(self, node: ast.Name) -> None:
                 if node.id in banned_terms:
@@ -139,7 +139,7 @@ class ASTLintJudge(Judge):
 class TestRunnerJudge(Judge):
     """Spawns a pytest subprocess to execute tests against the submitted code."""
 
-    async def judge(self, code: str, config: Dict[str, Any] | None = None) -> Tuple[bool, List[str]]:
+    async def judge(self, code: str, config: dict[str, Any] | None = None) -> tuple[bool, list[str]]:
         import os
         import subprocess
         import sys
@@ -191,13 +191,13 @@ class TestRunnerJudge(Judge):
 class PolicyJudge(Judge):
     """Validates submitted code against policy constraints like line limits and imports."""
 
-    async def judge(self, code: str, config: Dict[str, Any] | None = None) -> Tuple[bool, List[str]]:
+    async def judge(self, code: str, config: dict[str, Any] | None = None) -> tuple[bool, list[str]]:
         cfg = config or {}
         max_lines = cfg.get("max_lines")
         banned_imports = cfg.get("banned_imports", [])
         min_comment_ratio = cfg.get("min_comment_ratio")
 
-        reasons: List[str] = []
+        reasons: list[str] = []
         lines = code.splitlines()
         total_lines = len(lines)
 
@@ -211,7 +211,7 @@ class PolicyJudge(Judge):
 
             class ImportVisitor(ast.NodeVisitor):
                 def __init__(self) -> None:
-                    self.imports: List[str] = []
+                    self.imports: list[str] = []
 
                 def visit_Import(self, node: ast.Import) -> None:
                     for alias in node.names:

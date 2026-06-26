@@ -21,7 +21,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 from cortex.router.contract import (
     CONTRACT_VERSION,
@@ -145,6 +148,9 @@ class ExergyConfigAdapter:
         """
         if not path.exists():
             raise FileNotFoundError(f"Policy YAML not found: {path}")
+
+        if yaml is None:
+            raise ImportError("pyyaml is required to load YAML policies. Run pip install pyyaml.")
 
         with open(path, encoding="utf-8") as f:
             raw = yaml.safe_load(f)

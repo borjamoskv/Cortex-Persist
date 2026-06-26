@@ -17,7 +17,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import yaml
+try:
+    import yaml
+    YAMLError = yaml.YAMLError
+except ImportError:
+    yaml = None
+    class YAMLError(Exception):
+        pass
 
 # ─── Constantes ──────────────────────────────────────────────────────────────
 from cortex.core.paths import SKILLS_DIR as SKILLS_BASE_DIR
@@ -164,7 +170,7 @@ class SkillRegistry:
                 manifest = self._parse_skill_file(skill_file)
                 self._registry[manifest.slug] = manifest
                 discovered += 1
-            except (ValueError, yaml.YAMLError, KeyError):
+            except (ValueError, YAMLError, KeyError):
                 failed += 1
                 # Skills con frontmatter malformado se registran con nombre
                 # derivado del directorio para no perder visibilidad
@@ -201,7 +207,7 @@ class SkillRegistry:
             def _parse_or_fallback() -> tuple[int, int, SkillManifest]:
                 try:
                     return 1, 0, self._parse_skill_file(skill_file)
-                except (ValueError, yaml.YAMLError, KeyError):
+                except (ValueError, YAMLError, KeyError):
                     fallback = SkillManifest(
                         name=skill_dir.name,
                         path=skill_file,
@@ -304,6 +310,8 @@ class SkillRegistry:
                 description="[no frontmatter]",
             )
 
+        if yaml is None:
+            raise ImportError("pyyaml is required to load YAML frontmatter.")
         raw = yaml.safe_load(match.group(1)) or {}
         return self._build_manifest(path, raw)
 

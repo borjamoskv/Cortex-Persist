@@ -7,13 +7,14 @@ Wraps the stake_and_acquire operation for LangChain-based agents.
 from __future__ import annotations
 
 import json
-from typing import Any, Type
-from pydantic import BaseModel, Field
+from typing import Any
+
 from langchain_core.tools import BaseTool
+from pydantic import BaseModel, Field
 
 from cortex.integration.rustchain.client import RustChainClient
-from cortex.integration.rustchain.wallet import RustChainWallet
 from cortex.integration.rustchain.staking import stake_and_acquire
+from cortex.integration.rustchain.wallet import RustChainWallet
 
 
 class StakingInput(BaseModel):
@@ -30,7 +31,7 @@ class RustChainStakingTool(BaseTool):
         "Stake RTC tokens to acquire a self-improvement skill. "
         "Performs pre-flight checks and returns fail-safe errors if the gate is offline."
     )
-    args_schema: Type[BaseModel] = StakingInput
+    args_schema: type[BaseModel] = StakingInput
 
     def __init__(self, wallet: RustChainWallet, client: RustChainClient, **kwargs: Any) -> None:
         super().__init__(**kwargs)
