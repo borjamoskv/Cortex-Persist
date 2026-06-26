@@ -30,17 +30,17 @@ __all__ = [
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "ActionLevel": ("cortex_extensions.gate.enums", "ActionLevel"),
-    "ActionStatus": ("cortex_extensions.gate.enums", "ActionStatus"),
-    "GateError": ("cortex_extensions.gate.errors", "GateError"),
-    "GateExpired": ("cortex_extensions.gate.errors", "GateExpired"),
-    "GateInvalidSignature": ("cortex_extensions.gate.errors", "GateInvalidSignature"),
-    "GateNotApproved": ("cortex_extensions.gate.errors", "GateNotApproved"),
-    "GatePolicy": ("cortex_extensions.gate.enums", "GatePolicy"),
-    "PendingAction": ("cortex_extensions.gate.models", "PendingAction"),
-    "SovereignGate": ("cortex_extensions.gate.core", "SovereignGate"),
-    "get_gate": ("cortex_extensions.gate.core", "get_gate"),
-    "reset_gate": ("cortex_extensions.gate.core", "reset_gate"),
+    "ActionLevel": ("cortex.extensions.gate.enums", "ActionLevel"),
+    "ActionStatus": ("cortex.extensions.gate.enums", "ActionStatus"),
+    "GateError": ("cortex.extensions.gate.errors", "GateError"),
+    "GateExpired": ("cortex.extensions.gate.errors", "GateExpired"),
+    "GateInvalidSignature": ("cortex.extensions.gate.errors", "GateInvalidSignature"),
+    "GateNotApproved": ("cortex.extensions.gate.errors", "GateNotApproved"),
+    "GatePolicy": ("cortex.extensions.gate.enums", "GatePolicy"),
+    "PendingAction": ("cortex.extensions.gate.models", "PendingAction"),
+    "SovereignGate": ("cortex.extensions.gate.core", "SovereignGate"),
+    "get_gate": ("cortex.extensions.gate.core", "get_gate"),
+    "reset_gate": ("cortex.extensions.gate.core", "reset_gate"),
 }
 
 
@@ -51,4 +51,4 @@ def __getattr__(name: str):
         value = getattr(module, attr_name)
         globals()[name] = value
         return value
-    raise AttributeError(f"module 'cortex_extensions.gate' has no attribute {name!r}")
+    raise AttributeError(f"module 'cortex.extensions.gate' has no attribute {name!r}")

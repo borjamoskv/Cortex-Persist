@@ -9,6 +9,11 @@ from cortex.engine.swarm.swarm_10k import SwarmCommander
 from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 
+@pytest.fixture(autouse=True)
+def mock_keyring(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr("cortex.crypto.keys.keyring", None)
+
+
 @pytest.mark.asyncio
 async def test_sharded_signal_bus_initialization(tmp_path: Path):
     """Test that the sharded bus initializes all 16 shards correctly."""
