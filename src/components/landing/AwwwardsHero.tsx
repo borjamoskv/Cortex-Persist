@@ -52,18 +52,18 @@ export default function AwwwardsHero() {
         >
           <div className="hero-copy" style={{ textAlign: 'center', alignItems: 'center', margin: '0 auto', maxWidth: '800px' }}>
             <p className="eyebrow" style={{ marginBottom: '1.5rem', display: 'inline-block', padding: '0.5rem 1rem', background: 'rgba(43, 59, 229, 0.1)', border: '1px solid rgba(43, 59, 229, 0.3)', borderRadius: '999px', color: 'var(--accent-soft)' }}>
-              Developer SaaS / Built for AI Agent Teams
+              Your AI can act. Now make it accountable.
             </p>
-            <h1 style={{ fontSize: 'clamp(3.5rem, 8vw, 6.5rem)', lineHeight: 0.95, marginBottom: '2rem', textWrap: 'balance', fontFamily: '"Orbitron", sans-serif' }}>
-              Know exactly what your <span style={{ color: 'var(--accent-soft)' }}>AI agents</span> did.
+            <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', lineHeight: 1.1, marginBottom: '2rem', textWrap: 'balance', fontFamily: '"Orbitron", sans-serif' }}>
+              Tamper-evident memory and <span style={{ color: 'var(--accent-soft)' }}>decision lineage</span> for AI agents
             </h1>
-            <p className="hero-text" style={{ fontSize: '1.25rem', maxWidth: '640px', margin: '0 auto 2.5rem', color: 'var(--muted)' }}>
-              Track every decision, prove integrity, and replay failures without relying on logs, screenshots, or human memory.
+            <p className="hero-text" style={{ fontSize: '1.25rem', maxWidth: '700px', margin: '0 auto 2.5rem', color: 'var(--muted)' }}>
+              Persistent context, cryptographic audit trails, and governed retrieval for AI systems that need more than a prompt window.
             </p>
             <div className="action-row" style={{ justifyContent: 'center' }}>
-              <a className="button-primary" href="/api-key" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>Start logging events</a>
-              <a className="button-secondary" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>
-                View Documentation
+              <a className="button-primary" href="/#quickstart" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>Get Started</a>
+              <a className="button-secondary" href="/#demo" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>
+                View Demo
               </a>
             </div>
             

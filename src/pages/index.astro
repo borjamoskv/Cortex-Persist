@@ -5,78 +5,83 @@ import PreloadScreen from '../components/landing/PreloadScreen.tsx';
 import TelemetryWidget from '../components/TelemetryWidget.tsx';
 
 const navLinks = [
-	{ href: '#quickstart', label: 'Quickstart' },
+	{ href: '#problem', label: 'The Problem' },
 	{ href: '#features', label: 'Features' },
+	{ href: '#use-cases', label: 'Use Cases' },
 	{ href: '#why-cortex', label: 'Why CORTEX?' },
-	{ href: '#sdks', label: 'SDKs' },
-	{ href: '#pricing', label: 'Pricing' },
-	{ href: '/ultramap', label: 'Ultramap' },
-	{ href: '/vsa', label: 'VSA' },
-	{ href: '/blog', label: 'Blog' },
+	{ href: 'https://github.com/borjamoskv/Cortex-Persist', label: 'GitHub' },
 ];
 
-const heroProofs = [
+const proofCards = [
 	{
-		value: 'Agent Accountability',
-		label: 'Prove exactly what your agent knew when it made a decision.',
+		title: 'Store structured facts',
+		body: 'Capture decisions, errors, discoveries, and operational context as typed memory.',
 	},
 	{
-		value: 'Tamper-Evident',
-		label: 'Hash-chains guarantee the decision record is completely intact.',
+		title: 'Verify with lineage',
+		body: 'Attach tamper-evident history to memory operations and decision flow.',
 	},
 	{
-		value: 'Deterministic Replay',
-		label: 'Reconstruct agent state exactly as it was during the failure.',
+		title: 'Retrieve what matters',
+		body: 'Use hybrid search to recover context without drowning in semantic landfill.',
 	},
 ];
 
 const signalCards = [
 	{
 		index: '01',
-		label: 'Ingest',
-		title: 'Drop in and track',
-		body: 'Send events from any agent or system. We handle the ledger, indexing, and storage.',
+		label: 'Core',
+		title: 'Structured Memory',
+		body: 'Store facts, decisions, discoveries, and errors as typed units with metadata, confidence, and temporal validity.',
 	},
 	{
 		index: '02',
-		label: 'Prove',
-		title: 'Tamper-evident record',
-		body: 'Every decision is cryptographically sealed. Detect silent mutation instantly.',
+		label: 'Trust',
+		title: 'Tamper-Evident Ledger',
+		body: 'Attach cryptographic lineage to memory operations so decision history is not left to interpretation.',
 	},
 	{
 		index: '03',
-		label: 'Replay',
-		title: 'Reconstruct state',
-		body: 'Query the API to rebuild system state and prove exactly what happened when an agent failed.',
+		label: 'Search',
+		title: 'Hybrid Retrieval',
+		body: 'Combine semantic and lexical retrieval for context that is actually reusable in live systems.',
+	},
+	{
+		index: '04',
+		label: 'Lifecycle',
+		title: 'Memory Governance',
+		body: 'Promote, compact, decay, archive, or discard memory instead of turning context into a permanent landfill.',
+	},
+	{
+		index: '05',
+		label: 'Deploy',
+		title: 'Local-First Runtime',
+		body: 'Start with SQLite and sqlite-vec locally. Extend to cloud backends when scale or deployment needs change.',
+	},
+	{
+		index: '06',
+		label: 'Verify',
+		title: 'Audit-Ready History',
+		body: 'Support internal review, compliance workflows, and postmortems with evidence instead of reconstruction theater.',
 	},
 ];
 
-const pricingCards = [
+const useCases = [
 	{
-		name: 'Developer',
-		price: 'Free',
-		body: 'Everything you need to track and verify events in dev environments.',
-		items: ['10,000 events/mo', 'Community support', 'Standard retention', 'REST API & SDKs'],
-		cta: 'Get API Key',
-		href: '/api-key',
+		title: 'AI agents with tools',
+		body: 'Keep reliable context across steps, sessions, and agent boundaries.',
 	},
 	{
-		name: 'Pro',
-		price: 'From $49/mo',
-		tag: 'Recommended',
-		body: 'For production systems requiring scale and reliability.',
-		items: ['1M events/mo', '99.9% SLA', 'Extended retention', 'Priority support'],
-		cta: 'Start Pro Trial',
-		href: '/upgrade',
-		featured: true,
+		title: 'Long-running automation',
+		body: 'Reduce repetition, drift, and memory loss in workflows that operate over time.',
 	},
 	{
-		name: 'Enterprise',
-		price: 'Custom',
-		body: 'For self-hosted or BYOC deployments with advanced compliance needs.',
-		items: ['VPC Peering / BYOC', 'Advanced RBAC', 'Dedicated support', 'Custom integrations'],
-		cta: 'Contact Sales',
-		href: '/sales',
+		title: 'Compliance and audit',
+		body: 'Maintain verifiable operational history for regulated or review-heavy environments.',
+	},
+	{
+		title: 'Decision systems',
+		body: 'Track not only the output, but the lineage behind how a system arrived there.',
 	},
 ];
 
@@ -88,8 +93,8 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 ---
 
 <SiteLayout
-	title="CORTEX Persist | Know exactly what your AI agents did."
-	description="Track every decision, prove integrity, and replay failures without relying on logs, screenshots, or human memory."
+	title="CORTEX Persist | Tamper-evident memory and decision lineage for AI agents."
+	description="Persistent context, cryptographic audit trails, and governed retrieval for AI systems that need more than a prompt window."
 	canonical="https://cortexpersist.com/"
 >
 	<main class="landing-shell">
@@ -117,18 +122,98 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 				<span class="microcopy" style="color: var(--accent-soft); font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; margin-right: 1rem; text-transform: uppercase; letter-spacing: 0.05em; display: none; @media (min-width: 768px) { display: inline-block; }">
 					EDGE: {country}
 				</span>
-				<a class="button-tertiary" href={githubUrl} target="_blank" rel="noreferrer">
+				<a class="button-tertiary" href={docsUrl} target="_blank" rel="noreferrer">
 					Docs
 				</a>
-				<a class="button-primary" href="/api-key">
-					Get API Key
+				<a class="button-primary" href={githubUrl} target="_blank" rel="noreferrer">
+					GitHub
 				</a>
 			</div>
 		</header>
 
 		<AwwwardsHero client:load />
 
+		<section class="section-frame surface" style="padding-top: 2rem; padding-bottom: 2rem;">
+			<div class="fit-layout">
+				{
+					proofCards.map((card) => (
+						<article class="fit-card surface-sunken" style="min-height: auto; padding: 1.5rem;">
+							<h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-base);">{card.title}</h3>
+							<p style="font-size: 0.95rem; color: var(--text-muted); margin: 0;">{card.body}</p>
+						</article>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="section-frame surface" id="problem">
+			<div class="section-heading" style="max-width: 800px; margin: 0 auto;">
+				<p class="section-kicker">The Problem</p>
+				<h2>Most AI systems can generate output. Few can justify their history.</h2>
+				<p>
+					Agents are getting better at acting, calling tools, and producing plausible responses. What they still lack is durable operational memory with evidence.
+				</p>
+				<p style="margin-top: 1rem;">
+					Without that layer, systems drift, repeat work, lose context, and leave weak audit trails. You do not have memory. You have fragments, logs, and optimism.
+				</p>
+			</div>
+		</section>
+
+		<section class="section-frame surface" id="solution" style="background: rgba(43, 59, 229, 0.02); border-top: 1px solid var(--mica-border); border-bottom: 1px solid var(--mica-border);">
+			<div class="section-heading" style="max-width: 800px; margin: 0 auto;">
+				<p class="section-kicker" style="color: var(--accent-soft);">The Solution</p>
+				<h2>CORTEX-Persist adds the missing trust layer</h2>
+				<p>
+					CORTEX-Persist is a local-first memory and verification substrate for AI systems that need to remember, retrieve, and prove what happened.
+				</p>
+				<p style="margin-top: 1rem; color: var(--text-base); font-weight: 500;">
+					It combines structured memory, tamper-evident ledgering, hybrid retrieval, memory lifecycle governance, and audit-ready history. So your stack can do more than continue text. It can preserve operational truth under pressure.
+				</p>
+			</div>
+		</section>
+
+		<section class="section-frame surface" id="demo">
+			<div class="section-heading">
+				<p class="section-kicker">Demo</p>
+				<h2>From event to evidence in under a minute</h2>
+			</div>
+
+			<div class="fit-layout">
+				<article class="fit-card surface-sunken" style="min-height: auto;">
+					<p class="surface-label">1. Store memory</p>
+					<pre class="console-block"><code>cortex store "Vendor X failed compliance check" \
+  --type decision \
+  --project procurement \
+  --confidence C4 \
+  --source agent:reviewer</code></pre>
+				</article>
+
+				<article class="fit-card surface-sunken" style="min-height: auto;">
+					<p class="surface-label">2. Generate lineage</p>
+					<p style="font-size: 0.95rem; color: var(--text-muted);">Each write can be chained into a tamper-evident ledger with transaction ID, timestamp, hash, and previous hash.</p>
+				</article>
+				
+				<article class="fit-card surface-sunken" style="min-height: auto;">
+					<p class="surface-label">3. Retrieve context</p>
+					<pre class="console-block"><code>cortex search "compliance vendor failure"</code></pre>
+				</article>
+				
+				<article class="fit-card surface-sunken" style="min-height: auto;">
+					<p class="surface-label">4. Verify integrity</p>
+					<pre class="console-block"><code>cortex verify-ledger</code></pre>
+					<p style="font-size: 0.95rem; color: var(--text-muted); margin-top: 1rem;"><strong>Result:</strong> persistent memory with searchable context and verifiable history.</p>
+					<div style="margin-top: 1rem;">
+					  <a class="button-tertiary" href={docsUrl} style="padding: 0.5rem 1rem; font-size: 0.9rem;">Read the Docs</a>
+					</div>
+				</article>
+			</div>
+		</section>
+
 		<section class="signal-grid" id="features">
+			<div style="grid-column: 1 / -1; margin-bottom: 2rem;">
+			    <p class="section-kicker">Features</p>
+			    <h2>Built for memory that has to survive contact with reality</h2>
+			</div>
 			{
 				signalCards.map((card) => (
 					<article class="signal-card surface">
@@ -143,139 +228,104 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 			}
 		</section>
 
-		<section class="section-frame surface" id="why-cortex">
+		<section class="section-frame surface" id="use-cases">
 			<div class="section-heading">
-				<p class="section-kicker">The Gap</p>
-				<h2>Why not just use logs?</h2>
-				<p>
-					Traditional observability tells you something happened. CORTEX proves exactly what the agent knew when it made the decision, and guarantees nobody changed the story afterwards.
-				</p>
+				<p class="section-kicker">Use Cases</p>
+				<h2>Where CORTEX-Persist hits hardest</h2>
 			</div>
 
 			<div class="fit-layout">
-				<!-- Traditional Logs -->
-				<article class="fit-card surface-sunken">
-					<p class="surface-label">Traditional Logs (e.g. Datadog, Elastic)</p>
-					<ul class="surface-list">
-						<li style="color: var(--text-muted); text-decoration: line-through;">Mutable text strings that can be altered or deleted.</li>
-						<li style="color: var(--text-muted); text-decoration: line-through;">Fragmented context across different services.</li>
-						<li style="color: var(--text-muted); text-decoration: line-through;">Nearly impossible to replay the exact state.</li>
-						<li style="color: var(--text-muted); text-decoration: line-through;">Weak or non-existent provenance.</li>
-					</ul>
-				</article>
-
-				<!-- CORTEX -->
-				<article class="fit-card surface-sunken" style="border: 1px solid var(--accent);">
-					<p class="surface-label" style="color: var(--accent);">CORTEX Event Ledger</p>
-					<ul class="surface-list">
-						<li><strong>Cryptographically hash-linked</strong> events.</li>
-						<li><strong>Unified</strong> and structured event history.</li>
-						<li><strong>Deterministic state reconstruction</strong> API.</li>
-						<li><strong>Mathematical provenance</strong> you can show to an auditor.</li>
-					</ul>
-				</article>
-			</div>
-		</section>
-
-		<section class="section-frame surface" id="sdks">
-			<div class="section-heading">
-				<p class="section-kicker">Developer SDKs</p>
-				<h2>Integrate CORTEX in 30 seconds.</h2>
-				<p>
-					Production-ready npm packages to inject verifiable event logging directly into your current stack.
-				</p>
-			</div>
-
-			<div class="fit-layout">
-				<!-- Core SDK -->
-				<article class="fit-card surface-sunken" style="min-height: auto;">
-					<p class="surface-label">Core SDK</p>
-					<h3>cortex-persist</h3>
-					<p>The core API client for Node.js and Edge environments.</p>
-					<pre class="console-block"><code>npm install cortex-persist</code></pre>
-					<p class="microcopy" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; margin-top: 1rem; color: var(--accent-soft); line-height: 1.5;">
-						import &#123; CortexClient &#125; from 'cortex-persist';
-						<br/><br/>
-						const cortex = new CortexClient(&#123; apiKey: process.env.CORTEX_API_KEY &#125;);
-						<br/>
-						await cortex.logEvent(&#123; type: 'agent.decision', actor: 'agent-1' &#125;);
-					</p>
-				</article>
-
-				<!-- LangChain Plugin -->
-				<article class="fit-card surface-sunken" style="min-height: auto;">
-					<p class="surface-label">Plugin</p>
-					<h3>cortex-persist-langchain</h3>
-					<p>Official integration to plug CORTEX event tracking directly into your LangChain agents.</p>
-					<pre class="console-block"><code>npm install cortex-persist-langchain</code></pre>
-					<p class="microcopy" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; margin-top: 1rem; color: var(--accent-soft); line-height: 1.5;">
-						import &#123; CortexCallbackHandler &#125; from 'cortex-persist-langchain';
-						<br/><br/>
-						const handler = new CortexCallbackHandler(&#123; apiKey: process.env.CORTEX_API_KEY &#125;);
-					</p>
-				</article>
-			</div>
-		</section>
-
-		<section class="section-frame surface" id="pricing">
-			<div class="section-heading">
-				<p class="section-kicker">Pricing</p>
-				<h2>Clear, transparent pricing.</h2>
-				<p>Start free. Scale as your system grows.</p>
-			</div>
-
-			<div class="pricing-grid">
 				{
-					pricingCards.map((card) => (
-						<article class:list={['pricing-card', 'surface-sunken', card.featured && 'pricing-card-featured']}>
-							<div class="pricing-head">
-								<div class="pricing-head-copy">
-									<h3>{card.name}</h3>
-									<p class="plan-price">{card.price}</p>
-								</div>
-								{card.tag && <span class="plan-tag">{card.tag}</span>}
-							</div>
-							<p>{card.body}</p>
-							<ul class="surface-list">
-								{card.items.map((item) => <li>{item}</li>)}
-							</ul>
-							<a
-								class:list={[card.featured ? 'button-primary' : 'button-secondary', 'pricing-cta']}
-								href={card.href}
-								target={card.href.startsWith('http') ? '_blank' : undefined}
-								rel={card.href.startsWith('http') ? 'noreferrer' : undefined}
-							>
-								{card.cta}
-							</a>
+					useCases.map((uc) => (
+						<article class="fit-card surface-sunken" style="min-height: auto;">
+							<h3 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--text-base);">{uc.title}</h3>
+							<p style="font-size: 0.95rem; color: var(--text-muted); margin: 0;">{uc.body}</p>
 						</article>
 					))
 				}
 			</div>
 		</section>
 
+		<section class="section-frame surface" id="why-cortex">
+			<div class="section-heading">
+				<p class="section-kicker">The Gap</p>
+				<h2>Why not just use a vector database?</h2>
+				<p>
+					Because similarity is not lineage. A vector database can retrieve related text. It does not tell you what was stored, when it changed, how it was derived, or whether the history was tampered with.
+				</p>
+			</div>
+
+			<div class="fit-layout">
+				<!-- Traditional DBs -->
+				<article class="fit-card surface-sunken">
+					<p class="surface-label">Vector Database</p>
+					<ul class="surface-list">
+						<li style="color: var(--text-muted); text-decoration: line-through;">Only retrieves similar chunks.</li>
+						<li style="color: var(--text-muted); text-decoration: line-through;">No concept of temporal validity.</li>
+						<li style="color: var(--text-muted); text-decoration: line-through;">No cryptographic evidence.</li>
+						<li style="color: var(--text-muted); text-decoration: line-through;">Memory without integrity is just plausible storage.</li>
+					</ul>
+				</article>
+
+				<!-- CORTEX -->
+				<article class="fit-card surface-sunken" style="border: 1px solid var(--accent);">
+					<p class="surface-label" style="color: var(--accent);">CORTEX-Persist</p>
+					<ul class="surface-list">
+						<li><strong>Typed memory</strong> and confidence levels.</li>
+						<li><strong>Temporal validity</strong> for time-sensitive facts.</li>
+						<li><strong>Cryptographic lineage</strong> and auditability.</li>
+						<li><strong>Governed lifecycle</strong> to prevent semantic landfill.</li>
+					</ul>
+				</article>
+			</div>
+		</section>
+		
+		<section class="section-frame surface" id="technical" style="background: rgba(43, 59, 229, 0.02); border-top: 1px solid var(--mica-border);">
+			<div class="section-heading">
+				<p class="section-kicker">Technical Credibility</p>
+				<h2>Built for real systems, not benchmark cosplay</h2>
+				<p>
+					This is infrastructure for systems that operate repeatedly, not a one-shot prompt wrapper.
+				</p>
+			</div>
+			
+			<div style="max-width: 800px; margin: 0 auto;">
+			    <ul style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; list-style: none; padding: 0;">
+			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">Python-first architecture</li>
+			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">SQLite and sqlite-vec by default</li>
+			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">Optional cloud extensions</li>
+			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">Encryption at rest</li>
+			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">Async-friendly design</li>
+			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">CLI and API surfaces</li>
+			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">Typed package support</li>
+			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">Memory lifecycle controls</li>
+			    </ul>
+			</div>
+		</section>
+
 		<section class="cta-banner surface">
 			<div>
 				<p class="section-kicker">Get Started</p>
-				<h2>Start logging events today.</h2>
+				<h2>Make your AI stack remember with evidence</h2>
 				<p>
-					Drop in the API key and get instant provenance for your most critical agent workflows.
+					Start with persistent memory. Add lineage when memory starts to matter. Keep both when accountability becomes non-negotiable.
 				</p>
 			</div>
 
 			<div class="cta-actions">
 				<div class="footer-actions" style="margin-top: 0;">
-					<a class="button-primary" href="/api-key">Get API Key</a>
-					<a class="button-secondary" href={docsUrl}>Read the Docs</a>
+					<a class="button-primary" href="#quickstart">Get Started</a>
+					<a class="button-secondary" href={githubUrl}>Explore GitHub</a>
 				</div>
 			</div>
 		</section>
 
 		<footer class="site-footer">
-			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers. <span style="opacity:0.5; margin-left:8px;">| Powered by Cloudflare Edge</span></p>
+			<p class="footer-note">CORTEX Persist / Persistent memory for AI systems that need evidence, not vibes. <span style="opacity:0.5; margin-left:8px;">| Powered by Cloudflare Edge</span></p>
 			<div class="footer-links">
 				<a href={githubUrl} target="_blank" rel="noreferrer">GitHub</a>
 				<a href={docsUrl} target="_blank" rel="noreferrer">Docs</a>
-				<a href="https://agents.archi" target="_blank" rel="noreferrer">Audit Registry</a>
+				<a href="https://agents.archi" target="_blank" rel="noreferrer">Security</a>
 			</div>
 		</footer>
 
