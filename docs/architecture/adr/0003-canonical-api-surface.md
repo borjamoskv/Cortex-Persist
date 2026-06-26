@@ -23,10 +23,10 @@ We establish `cortex.api.core` as the **single canonical API surface** for CORTE
 
 1. **Single Source of Truth:** `cortex.api.core` is the absolute source of truth for the API contract.
 2. **CORS and Configuration:** Environment-based configuration (like `ALLOWED_ORIGINS`) must be routed exclusively through `cortex.core.config` and consumed by the Canonical API.
-3. **Legacy Freeze:** `api.server` is frozen as of 2026-06-26. No new features, routes, middleware, or bug fixes.
-4. **Deprecation Banner:** `api.server` emits a `DeprecationWarning` at import time.
-5. **Removal Target:** `api.server` will be fully removed in **v1.2.0**.
-6. **Consolidation Path:** Any useful components remaining in `api.server` (e.g., WebSocket concepts) must be refactored as modular routers within `cortex.api/` before removal.
+3. **Legacy Purged:** `api.server` has been completely purged from the codebase.
+4. **Complete Removal:** The module and its prototypes are gone.
+5. **Removal Executed:** `api.server` was fully removed in **v1.2.0**.
+6. **Consolidation Path:** Completed. Any useful concepts were migrated to EventSovereigntyRuntime or dropped.
 
 ### Deployment Matrix
 
@@ -34,7 +34,7 @@ We establish `cortex.api.core` as the **single canonical API surface** for CORTE
 |:---|:---|:---|
 | `cortex.api.core` | `uvicorn cortex.api.core:app` | ✅ Canonical |
 | `cortex.api:app` | `uvicorn cortex.api:app` (lazy alias) | ✅ Canonical (alias) |
-| `api.server:app` | `python api/server.py` | 🔴 Deprecated |
+| `api.server:app` | `python api/server.py` | 🔴 Removed in v1.2.0 |
 
 ## Consequences
 
