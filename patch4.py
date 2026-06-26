@@ -1,7 +1,6 @@
-import os
 
 def patch_file(path, replacements):
-    with open(path, 'r') as f:
+    with open(path) as f:
         content = f.read()
     for old, new in replacements:
         content = content.replace(old, new)

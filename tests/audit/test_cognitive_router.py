@@ -252,7 +252,6 @@ class TestCognitiveRouter:
         await router.ensure_table()
 
         # Insert two entries directly with the same prev_hash to trigger database constraint
-        import aiosqlite
 
         from cortex.database.core import causal_write
         with causal_write(router._conn):

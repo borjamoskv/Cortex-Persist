@@ -156,7 +156,7 @@ async def test_concurrent_fuzz_scheduler():
     
     tasks = []
     for i in range(100):
-        tasks.append((f"fuzz-{i}", f"Stmt", 1.0, 1.0, 1.0, 1.0, 'ACTIVE', now))
+        tasks.append((f"fuzz-{i}", "Stmt", 1.0, 1.0, 1.0, 1.0, 'ACTIVE', now))
         
     await db.executemany(
         "INSERT INTO system_hypotheses (id, statement, probability, svi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",

@@ -1,6 +1,6 @@
 import re
 
-with open('cortex/database/core.py', 'r') as f:
+with open('cortex/database/core.py') as f:
     content = f.read()
 
 new_content = re.sub(

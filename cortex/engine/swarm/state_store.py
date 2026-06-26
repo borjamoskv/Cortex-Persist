@@ -6,8 +6,8 @@ Enforces SAGA patterns, Guards validation, and Ledger cryptographic emission.
 """
 
 import asyncio
-import logging
 import json
+import logging
 from datetime import datetime, timezone
 from typing import Any
 
@@ -15,6 +15,7 @@ import aiosqlite
 
 from cortex.config import DB_PATH
 from cortex.guards import CausalClosureGuard, SwarmProposal
+
 # Replace with correct import for Ledger if needed, but the old code emitted SwarmProposal.
 
 logger = logging.getLogger(__name__)

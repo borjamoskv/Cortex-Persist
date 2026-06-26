@@ -1,6 +1,6 @@
 import re
 
-with open("cortex/database/writer.py", "r") as f:
+with open("cortex/database/writer.py") as f:
     code = f.read()
 
 # 1. Imports

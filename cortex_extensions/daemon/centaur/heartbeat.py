@@ -11,10 +11,11 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from cortex.database.core import connect_async_ctx
 from cortex.engine.auth import ByzantineAuthLayer
 from cortex.engine.decalcifier import SovereignDecalcifier
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
+
+from cortex.database.core import connect_async_ctx
 from cortex_extensions.daemon.actuators import PhysicalActuator
 from cortex_extensions.daemon.centaur.queue import EntropicQueue
 from cortex_extensions.swarm.centauro_engine import CentauroEngine, Formation

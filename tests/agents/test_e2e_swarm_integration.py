@@ -87,7 +87,7 @@ async def setup_db_for_topology(db_path: str):
         if os.path.exists(migrations_dir):
             for filename in sorted(os.listdir(migrations_dir)):
                 if filename.endswith(".sql"):
-                    with open(os.path.join(migrations_dir, filename), "r") as f:
+                    with open(os.path.join(migrations_dir, filename)) as f:
                         try:
                             with causal_write(conn):
                                 await conn.executescript(f.read())

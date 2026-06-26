@@ -1,5 +1,4 @@
 import pytest
-import pytest
 pytestmark = pytest.mark.chaos
 import sqlite3
 import aiosqlite

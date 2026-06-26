@@ -1,6 +1,5 @@
-import re
 
-with open("cortex/auth/manager.py", "r") as f:
+with open("cortex/auth/manager.py") as f:
     code = f.read()
 
 # 1. Fix __init__ dummy_hash exception handling

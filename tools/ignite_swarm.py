@@ -13,9 +13,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from cortex.engine import CortexEngine
 from cortex.engine.swarm_10k import SwarmCommander
 from cortex.extensions.swarm.auto_fix import AutoFixPipeline
+
+from cortex.engine import CortexEngine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ignite_swarm")

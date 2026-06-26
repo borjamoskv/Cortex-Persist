@@ -7,8 +7,8 @@ Pipelines: TopologyIndex -> LegionPool -> AsyncSignalBus -> CausalStateStore
 
 import asyncio
 import logging
-import uuid
 import sys
+import uuid
 from typing import Any
 
 import aiosqlite

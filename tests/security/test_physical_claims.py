@@ -32,7 +32,7 @@ async def test_ataque_a_api_bypass(tmp_path):
             
     # El ataque A falla porque la base de datos no permite la escritura
     # Nuestro objetivo a nivel 20 es que esto falle (Frontera Física confirmada)
-    assert success == False, "La frontera física existe, el ataque A ha sido repelido."
+    assert not success, "La frontera física existe, el ataque A ha sido repelido."
 
 async def test_ataque_b_direct_sql(tmp_path):
     """
@@ -63,7 +63,7 @@ async def test_ataque_b_direct_sql(tmp_path):
             else:
                 raise
             
-    assert success == False, "La frontera física existe, el ataque B ha sido repelido por el autorizer."
+    assert not success, "La frontera física existe, el ataque B ha sido repelido por el autorizer."
 
 async def test_ataque_c_wal_injection(tmp_path):
     """

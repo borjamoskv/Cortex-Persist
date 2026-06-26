@@ -338,8 +338,8 @@ class TopologyIndex:
         Calculates a deterministic SHA-256 hash of the topological index state.
         This provides a cryptographic fingerprint of the scheduler's state.
         """
-        import json
         import hashlib
+        import json
         
         state_repr = []
         # Sort nodes lexicographically by ID to ensure determinism

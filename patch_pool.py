@@ -1,6 +1,5 @@
-import re
 
-with open("cortex/database/pool.py", "r") as f:
+with open("cortex/database/pool.py") as f:
     code = f.read()
 
 # 1. Remove threading import if not needed elsewhere

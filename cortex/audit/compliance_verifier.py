@@ -15,8 +15,6 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
-from cortex.crypto.keys import Verifier
-
 logger = logging.getLogger("cortex.audit.verifier")
 
 
@@ -92,7 +90,6 @@ class ComplianceVerifier:
             batches.append((current_prev_hash, current_sig, current_batch))
 
         # Reconstruct chain
-        expected_prev_hash = "0" * 64  # Initial hash in cortex
         verified_batches = 0
         
         for prev_hash, signature, rows in batches:
@@ -108,7 +105,7 @@ class ComplianceVerifier:
             # The signature is hex in the db. We need it in base64 for the Verifier.
             try:
                 sig_bytes = bytes.fromhex(signature)
-                sig_b64 = base64.b64encode(sig_bytes).decode("ascii")
+                base64.b64encode(sig_bytes).decode("ascii")
             except ValueError:
                 return {
                     "status": "CRITICAL_TAMPER_DETECTED", 
@@ -117,8 +114,8 @@ class ComplianceVerifier:
             
             # Verify the signature over the entry_hash directly as ledger.py does
             try:
-                from cryptography.hazmat.primitives import serialization
                 import cryptography.hazmat.primitives.asymmetric.ed25519 as ed25519
+                from cryptography.hazmat.primitives import serialization
                 
                 pub_bytes = base64.b64decode(self.public_key_b64)
                 try:
@@ -127,7 +124,7 @@ class ComplianceVerifier:
                     public_key = serialization.load_ssh_public_key(pub_bytes)
                     
                 public_key.verify(sig_bytes, entry_hash.encode())
-            except Exception as e:
+            except Exception:
                 return {
                     "status": "CRITICAL_TAMPER_DETECTED",
                     "reason": f"Signature mismatch for batch starting at {rows[0]['audit_id']}. Ledger forged."
@@ -136,7 +133,6 @@ class ComplianceVerifier:
             # If expected_prev_hash is "0"*64, it's the genesis batch, so we accept whatever prev_hash it has
             # In a full verification, we'd ensure prev_hash links to the previous batch's computed hash.
             # The next batch's prev_hash should be THIS batch's entry_hash!
-            expected_prev_hash = entry_hash
             verified_batches += 1
 
         return {

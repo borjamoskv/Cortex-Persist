@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-import sys
-import subprocess
 import argparse
-from pathlib import Path
-from collections import defaultdict
+import subprocess
+import sys
+
 
 def main():
     parser = argparse.ArgumentParser(description="Measure test flakiness by running pytest multiple times")

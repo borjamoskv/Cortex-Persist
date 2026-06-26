@@ -8,7 +8,6 @@ from __future__ import annotations
 import asyncio
 import logging
 
-import aiosqlite
 import click
 from rich.panel import Panel
 from rich.table import Table

@@ -4,8 +4,8 @@ Zero-Knowledge Gatekeeper (Fase 7).
 Acts as the ultimate Execution Firewall between Swarm consensus and the Host OS.
 """
 
-import logging
 import hashlib
+import logging
 from typing import Any
 
 from cortex.crypto.keys import KeyManager, Verifier

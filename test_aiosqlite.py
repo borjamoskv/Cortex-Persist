@@ -1,6 +1,7 @@
 import asyncio
-import aiosqlite
 import sqlite3
+
+import aiosqlite
 
 _orig = sqlite3.connect
 

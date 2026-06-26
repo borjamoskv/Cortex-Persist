@@ -1,6 +1,6 @@
 import re
 
-with open("tests/test_integration_engine.py", "r") as f:
+with open("tests/test_integration_engine.py") as f:
     code = f.read()
 
 if "from cortex.database.core import causal_write" not in code:

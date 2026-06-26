@@ -140,7 +140,8 @@ class OuroborosGate:
         import asyncio
         import time
         from datetime import datetime, timezone
-        from cortex.database.core import connect_async_ctx, causal_write
+
+        from cortex.database.core import causal_write, connect_async_ctx
         from cortex.engine.core.fact_store_core import insert_fact_record
 
         async def _async_log():

@@ -1,6 +1,6 @@
 import re
 
-with open("cortex_extensions/gate/ouroboros.py", "r") as f:
+with open("cortex_extensions/gate/ouroboros.py") as f:
     content = f.read()
 
 new_log_scaling = """

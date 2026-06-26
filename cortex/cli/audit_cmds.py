@@ -79,7 +79,7 @@ def verify_bundle_cmd(bundle: str, public_key: str):
     report = verifier.verify()
     
     if report["status"] == "VALID":
-        console.print(f"[bold green]✔ Bundle Cryptographically Verified[/bold green]")
+        console.print("[bold green]✔ Bundle Cryptographically Verified[/bold green]")
         console.print(f"  Records Verified: {report.get('records_verified')}")
         console.print(f"  Batches Verified: {report.get('batches_verified')}")
         console.print(f"  Details: {report.get('details')}")

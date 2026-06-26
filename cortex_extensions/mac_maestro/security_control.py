@@ -9,7 +9,6 @@ import logging
 import plistlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 logger = logging.getLogger("cortex_extensions.mac_maestro.security_control")
 

@@ -3,7 +3,7 @@ import os
 base_dir = "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/audit"
 input_file = os.path.join(base_dir, "cognitive_router.py")
 
-with open(input_file, "r") as f:
+with open(input_file) as f:
     router_code = f.read()
 
 ensure_table_code = """    async def ensure_table(self) -> None:

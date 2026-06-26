@@ -1,5 +1,3 @@
-import sys
-from cortex.engine import CortexEngine
 import cortex.database.core
 
 print(dir(cortex.database.core))

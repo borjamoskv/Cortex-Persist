@@ -12,6 +12,7 @@ logger = logging.getLogger("moskv-daemon")
 
 import typing
 
+
 class EventLoopMixin:
     _shutdown: bool
     _stop_event: asyncio.Event

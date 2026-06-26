@@ -1,5 +1,5 @@
-import re
 import sys
+
 
 def classify_error(message):
     message_lower = message.lower()
@@ -22,7 +22,7 @@ def main():
     log_file = sys.argv[1] if len(sys.argv) > 1 else "tests_output.log"
     
     try:
-        with open(log_file, "r") as f:
+        with open(log_file) as f:
             lines = f.readlines()
     except Exception as e:
         print(f"Error reading {log_file}: {e}")
@@ -49,13 +49,13 @@ def main():
             categories[cat] = []
         categories[cat].append(t)
         
-    print(f"# Pytest Triage Report")
+    print("# Pytest Triage Report")
     print(f"Total Failures Found in Log: {len(failures)}")
     print("\n## Clasificación de Fallos\n")
     
     for cat, items in sorted(categories.items(), key=lambda x: len(x[1]), reverse=True):
         print(f"### {cat}: {len(items)} fallos")
-        for i, item in enumerate(items[:5]): # show top 5
+        for _i, item in enumerate(items[:5]): # show top 5
             msg = item["message"].splitlines()
             err_line = msg[-1].strip() if msg else ""
             print(f"- `{item['nodeid']}`: {err_line}")
