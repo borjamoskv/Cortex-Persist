@@ -74,8 +74,8 @@ async def calculate_resonance(
             if np.linalg.norm(np.array(axiom_emb, dtype=np.float32)) >= 1e-10
         )
         return max_sim
-    except Exception as e:
-        logger.error("Resonance calculation failed: %s", e)
+    except Exception:
+        logger.exception("[P0] Untracked Exception in Resonance calculation")
         return 0.0
 
 
@@ -141,8 +141,8 @@ async def get_axiom_embeddings(encoder: Any) -> list[list[float]]:
     for text in AXIOM_TEXTS:
         try:
             embeddings.append(await encoder.encode(text))
-        except Exception as e:
-            logger.warning("Failed to encode axiom: %s", e)
+        except Exception:
+            logger.exception("[P0] Untracked Exception encoding axiom")
     return embeddings
 
 
@@ -212,8 +212,8 @@ async def scan_all_crystals(
             )
             vitals.append(vital)
 
-    except Exception as e:
-        logger.error("🌡️ [THERMOMETER] Scan failed: %s", e)
+    except Exception:
+        logger.exception("🌡️ [P0] Untracked Exception in Thermometer Scan")
 
     priority_order = {"PURGE": 0, "MERGE": 1, "DECAY": 2, "PROMOTE": 3, "PROTECT": 4, "MAINTAIN": 5}
     vitals.sort(key=lambda v: priority_order.get(v.recommendation, 5))

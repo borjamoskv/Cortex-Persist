@@ -24,6 +24,7 @@ def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_li
 
 from typing import Any
 
+
 class SchemaTrait:
     _conn: Any
     _vector_enabled: bool

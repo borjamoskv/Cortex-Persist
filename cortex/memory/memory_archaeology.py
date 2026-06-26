@@ -11,11 +11,9 @@ from __future__ import annotations
 import logging
 import sqlite3
 from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import aiosqlite
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import numpy as np

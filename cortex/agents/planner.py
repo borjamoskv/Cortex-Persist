@@ -216,8 +216,8 @@ class ExergyPlanner:
                 tool_name=step_def.get("tool_name", f"step_{i}"),
                 arguments=step_def.get("arguments", {}),
                 description=step_def.get("description", f"Step {i}"),
-                exergy_estimate=step_def.get("exergy_estimate", 0.5),
-                entropy_cost=step_def.get("entropy_cost", 0.1),
+                exergy_estimate=Decimal(str(step_def.get("exergy_estimate", 0.5))),
+                entropy_cost=Decimal(str(step_def.get("entropy_cost", 0.1))),
                 retry_budget=step_def.get("retry_budget", 2),
                 depends_on=step_def.get("depends_on", []),
             )

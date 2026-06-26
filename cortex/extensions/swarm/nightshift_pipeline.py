@@ -181,7 +181,7 @@ class ExecutorNode:
                     )
 
             except Exception as e:
-                logger.error("❌ [EXECUTOR] Fatal: %s → %s", task_id, e)
+                logger.exception("❌ [P0] Untracked Exception in EXECUTOR Fatal for %s", task_id)
                 results.append(
                     {
                         "task_id": task_id,

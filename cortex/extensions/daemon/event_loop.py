@@ -1,10 +1,10 @@
-from typing import Any
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import logging
 import signal
 import time
 from datetime import datetime, timezone
+from typing import Any
 
 from cortex.extensions.daemon.models import DEFAULT_INTERVAL
 

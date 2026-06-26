@@ -34,7 +34,7 @@ except ImportError:
         """Raised when system health violates the target SLA grade."""
 
     class HealthMixin:  # type: ignore
-        async def health_score(self) -> float:
+        async def health_score(self, persist: bool = False) -> float:
             return 1.0
 
 

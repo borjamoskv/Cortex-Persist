@@ -22,7 +22,9 @@ _ENTROPY_THRESHOLD = float(os.environ.get("CORTEX_ENTROPY_THRESHOLD", "0.15"))
 def _load_anti_limerence_runtime() -> tuple:
     """Loads anti-limerence and ultramap modules if available."""
     try:
-        from cortex_rs import AntiLimerenceTopology  # pyright: ignore[reportAttributeAccessIssue, reportMissingImports]
+        from cortex_rs import (
+            AntiLimerenceTopology,  # pyright: ignore[reportAttributeAccessIssue, reportMissingImports]
+        )
 
         anti_limerence = AntiLimerenceTopology()
         import sys
@@ -111,8 +113,8 @@ def _execute_anti_limerence(agent: str, reality_delta: float, anti_limerence, um
             if agent in purged:
                 logger.error("Agent %s was purged! Halting execution.", agent)
                 return True
-    except Exception as e:
-        logger.error("AntiLimerence Execution Failed: %s", e)
+    except Exception:
+        logger.exception("[P0] Untracked Exception in AntiLimerence Execution")
     return False
 
 
@@ -220,8 +222,8 @@ async def process_queue() -> None:
                     "Autopulse Circuit Breaker Tripped! Task aborted for %s. Error: %s", agent, e
                 )
                 await asyncio.sleep(30.0)
-            except Exception as e:
-                logger.error("Unexpected error processing task: %s", e)
+            except Exception:
+                logger.exception("[P0] Untracked Exception processing task")
         await asyncio.sleep(2.0)
 
 

@@ -313,6 +313,7 @@ class CentauroEngine:
             return result
 
         except Exception as e:
+            logger.exception("[P0] Untracked Exception in Centauro Engine Mission")
             if not mission_future.done():
                 mission_future.set_exception(e)
             raise

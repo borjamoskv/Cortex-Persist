@@ -387,8 +387,8 @@ class CapatazOrchestrator:
                 prefix_cache_key=slot.cache_key,
             )
             logger.info("[%s] Capataz: KV Cache Preheat successful.", self.mission_id)
-        except Exception as e:
-            logger.warning("[%s] Capataz: KV Cache Preheat failed: %s", self.mission_id, e)
+        except Exception:
+            logger.exception("[%s] [P0] Untracked Exception in KV Cache Preheat", self.mission_id)
 
     async def run_parallel(self, task_definitions: list[dict[str, Any]]) -> list[Any]:
         """Deploy multiple agents in parallel."""

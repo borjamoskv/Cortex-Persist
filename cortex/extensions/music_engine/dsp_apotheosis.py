@@ -1,4 +1,5 @@
 from typing import Any
+
 # [C5-REAL] Exergy-Maximized
 """
 DSP Apotheosis.

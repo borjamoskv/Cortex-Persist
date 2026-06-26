@@ -118,11 +118,7 @@ class AutoFixPipeline:
             raise
         except Exception as e:
             elapsed = (time.monotonic() - t0) * 1000
-            logger.error(
-                "☠️ [AUTOFIX] Execution failed for ghost [%s]: %s",
-                ghost_id,
-                e,
-            )
+            logger.exception("☠️ [AUTOFIX] Execution failed for ghost [%s]: %s", ghost_id, e)
             await self._escalate(ghost_id, classification, str(e), project)
             return FixAttempt(
                 ghost_id=ghost_id,
@@ -258,6 +254,7 @@ class AutoFixPipeline:
         except asyncio.CancelledError:
             raise
         except Exception as e:
+            logger.exception("[P0] Untracked Exception in Autofix execution")
             return {
                 "status": "failed",
                 "branch": branch_name,

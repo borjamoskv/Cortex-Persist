@@ -1,10 +1,12 @@
 # [C5-REAL] Exergy-Maximized
 
+import functools
+
 import click
 from rich.console import Console
 
-from cortex.cli.common import cli, _run_async
-import functools
+from cortex.cli.common import _run_async, cli
+
 
 def run_async(f):
     @functools.wraps(f)

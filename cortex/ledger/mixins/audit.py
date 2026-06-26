@@ -14,7 +14,6 @@ from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1, now_iso
 logger = logging.getLogger("cortex.ledger")
 
 
-from typing import Any
 class LedgerAuditMixin:
     _get_conn_proxy: Any
     async def audit_integrity_async(self, tenant_id: str | None = None) -> dict:

@@ -209,8 +209,8 @@ class SwarmHeartbeat:
                 project="CORTEX_SWARM",
             )
         except Exception:
-            logger.debug(
-                "Health signal emission failed for %s",
+            logger.exception(
+                "[P0] Untracked Exception in Health signal emission for %s",
                 event_type,
             )
 

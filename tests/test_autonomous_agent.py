@@ -134,7 +134,7 @@ class TestPlanner:
         assert len(plan.steps) == 2
         assert plan.objective == "test objective"
         assert plan.steps[0].tool_name == "shell"
-        assert plan.steps[0].exergy_estimate == 0.9
+        assert float(plan.steps[0].exergy_estimate) == 0.9
         assert not plan.is_complete
 
     def test_plan_linear_creates_dependencies(self) -> None:
@@ -205,7 +205,7 @@ class TestPlanner:
         summary = plan.summary()
         assert summary["total_steps"] == 2
         assert summary["completed"] == 1
-        assert summary["exergy_produced"] == 0.8
+        assert float(summary["exergy_produced"]) == 0.8
 
 
 # ── Autonomous Agent Tests ───────────────────────────────────────

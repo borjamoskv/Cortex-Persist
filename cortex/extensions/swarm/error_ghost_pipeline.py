@@ -237,8 +237,8 @@ class ErrorGhostPipeline:
                 meta=meta,
             )
             return fact_id
-        except Exception as e:
-            logger.error("AUTO-GHOST DB persist failed, falling back to FS: %s", e)
+        except Exception:
+            logger.exception("[P0] Untracked Exception in DB persist, falling back to FS")
             self._fallback_fs_persist(project, content, source, meta)
             return None
 
@@ -256,9 +256,9 @@ class ErrorGhostPipeline:
         try:
             fact_id = asyncio.run(self._persist_async(project, content, source, meta))
             self._record_emission(content_hash, source, fact_id)
-        except Exception as e:
+        except Exception:
             # Last resort - never let ghost persistence crash the daemon
-            logger.error("AUTO-GHOST sync persist failed: %s", e)
+            logger.exception("[P0] Untracked Exception in sync persist")
             self._record_emission(content_hash, source, None)
 
     def _fallback_fs_persist(
