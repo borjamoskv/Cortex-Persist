@@ -53,7 +53,7 @@ proposal
   → Ed25519 sovereign seal verification
   → Z3 thermodynamic bound verification (AEON-0)
   → encryption (AES-256-GCM via cortex/crypto/)
-  → ledger/audit recording (SHA-256 hash-chain + AOF binary + ZK-Seal)
+  → ledger/audit recording (SHA-256 hash-chain + AOF binary + Auth-Seal)
   → ZeroCopyRingBuffer O(1) dispatch (mmap, lock-free)
   → persistence (modular cortex-core/persistence/ subpackage)
 ```
@@ -89,7 +89,7 @@ CORTEX aims to provide:
 
 - durable auditability of write behavior via dual-layer ledger (SQLite + AOF binary)
 - cryptographic continuity across facts via SHA-256 hash-chain
-- Ed25519 sovereign sealing (ZK-Seal) for tamper-evidence
+- Ed25519 sovereign sealing (Auth-Seal) for tamper-evidence
 - encrypted storage of sensitive fact content and metadata (AES-256-GCM)
 - tenant-aware data isolation
 - deterministic rejection of structurally invalid inputs
@@ -142,7 +142,7 @@ The guard layer includes 14+ specialized guards:
 | `contradiction_guard.py` | Detects conflicting state insertions |
 | `dependency_guard.py` | Validates upstream dependencies |
 | `exergy_guard.py` | Enforces thermodynamic exergy bounds |
-| `zk_guard.py` | Verifies ZK-Seal authenticity |
+| `zk_guard.py` | Verifies Auth-Seal authenticity |
 | `capability_guard.py` | Capability-based access control |
 | `frontier_guard.py` | Frontier exploration bounds |
 | `health_guard.py` | System health preconditions |
@@ -284,7 +284,7 @@ CORTEX relies on layered control, not a single magic wall.
 ### Policy / Gate Layer
 
 - `TelemetryGate` — admission control for L1 external patches
-- `AEON0Compiler.mutate()` — requires valid ZK-Seal signature before AST mutation
+- `AEON0Compiler.mutate()` — requires valid Auth-Seal signature before AST mutation
 - `OutboxDaemon` — C5-REAL sovereign isolation rejects all unrecognized task types
 
 ### Crypto Layer
@@ -328,11 +328,11 @@ durable system state.
 LLM / tool / swarm proposal
   → guard validation (14+ sovereign guards)
   → schema / type checks (Pydantic v2)
-  → policy gate (TelemetryGate / AEON-0 ZK-Seal)
+  → policy gate (TelemetryGate / AEON-0 Auth-Seal)
   → Z3 thermodynamic bound verification
   → Ed25519 sovereign sealing
   → external verification where required
-  → cryptographic logging (SHA-256 chain + AOF + ZK-Seal)
+  → cryptographic logging (SHA-256 chain + AOF + Auth-Seal)
   → ZeroCopyRingBuffer O(1) dispatch
   → persistence (modular subpackage)
 ```
@@ -363,7 +363,7 @@ It contains:
 `cortex-core/persistence/ledger.py` (`LedgerManager`) implements the C5-REAL
 persistence-layer ledger for the swarm substrate. It provides:
 - SHA-256 hash-chain continuity
-- Ed25519 ZK-Seal per entry
+- Ed25519 Auth-Seal per entry
 - AOF binary append-only file
 - Queue-based single-writer pattern (no locks on hot path)
 - Time-jacking detection
@@ -504,7 +504,7 @@ Critical failure domains include:
 - migrations
 - tenant isolation
 - async transactional correctness (single-writer queue pattern)
-- policy bypass (TelemetryGate, AEON-0 ZK-Seal checks)
+- policy bypass (TelemetryGate, AEON-0 Auth-Seal checks)
 - index consistency
 - external provider misclassification or drift
 - ZeroCopyRingBuffer overflow under sustained load
@@ -557,3 +557,33 @@ It reduces their freedom to contaminate persistent state.
 - [`thermodynamic-enforcement.md`](thermodynamic-enforcement.md)
 - [`IMMUNITY-LAYER.md`](IMMUNITY-LAYER.md)
 - [`RFC_02_CORTEX_SECURITY_SPEC.md`](RFC_02_CORTEX_SECURITY_SPEC.md)
+
+---
+
+## Appendix: CTO "What If" Threat Matrix
+
+This section provides explicit answers to critical infrastructure threat scenarios:
+
+### 1. ¿Qué pasa si el agente miente?
+El sistema no evalúa la verdad semántica (CORTEX no es un oráculo). Sin embargo, exige el `causal_graph` de la mentira. El agente debe aportar pruebas estructurales (nodos previos) de por qué tomó esa decisión. La mentira queda criptográficamente sellada a su identidad. Si el agente "alucina" repetidamente, el `EntropyDriftThresholdExceeded` bloquea su ejecución.
+
+### 2. ¿Qué pasa si el operador modifica el ledger (SQLite o AOF)?
+Cualquier modificación manual (UPDATE/DELETE) altera el hash criptográfico del bloque. Al intentar leer o añadir un nuevo evento, el cálculo de `Hash(Prev_Hash + Payload)` no coincidirá con el `block_hash` almacenado. CORTEX lanzará `MerkleChainMismatchError` y el proceso colapsará intencionadamente (SIGKILL) para evitar operar en estado corrupto.
+
+### 3. ¿Qué pasa si el disco se corrompe?
+Idéntico comportamiento al punto 2. La corrupción de bytes invalidará el hash SHA-256 o la firma Ed25519 (`Ed25519SignatureInvalid`). El sistema se detendrá. Se requiere restaurar desde un backup verificado y/o ejecutar `cortex ledger heal` para bifurcar el ledger desde el último bloque válido.
+
+### 4. ¿Qué pasa si un nodo se compromete?
+Si un atacante roba la clave Ed25519 (`cortex_sovereign.pem`), puede firmar eventos válidos, pero no puede reescribir el historial sin que los validadores externos detecten un "fork" en el hash-chain distribuido. La mitigación exige la rotación de la clave y marcar la clave comprometida en la lista de revocación (CRL). Si roban los datos, el cifrado AES-256-GCM protege los *payloads* sensibles.
+
+### 5. ¿Qué pasa si se intenta reordenar eventos?
+El `seq_id` y el `prev_hash` imponen una topología estrictamente lineal y unidireccional. Cambiar el orden de dos bloques A y B invalida inmediatamente todos los hashes subsiguientes.
+
+### 6. ¿Qué pasa si aparecen bifurcaciones (Forks)?
+CORTEX detecta los forks a través del `MetaArbiter`. Si dos procesos intentan derivar del mismo `prev_hash`, el sistema entra en "Topological Collapse": el árbitro selecciona la rama con mayor *exergy yield* (o por convención de timestamp) como la rama canónica. La rama descartada se clasifica como *Divergente* pero nunca se elimina (se mantiene como evidencia).
+
+### 7. ¿Qué pasa si se eliminan entradas?
+El `MerkleChainMismatchError` detectará que el hash anterior esperado no coincide con el último bloque presente en el disco. La eliminación es detectada en tiempo $O(1)$ en la siguiente validación.
+
+### 8. ¿Qué pasa si falla la sincronización asíncrona?
+En escenarios de altísima carga (OOM o crash del `_signer_loop`), los bloques encolados en la RAM que no llegaron a tocar el disco se pierden. Sin embargo, **la cadena nunca se corrompe**. El sistema simplemente reiniciará desde el último hash válido en el disco. Para tolerancia a fallos extrema (Zero-Data-Loss), se debe activar `sync_flush=True` a costa de sacrificar rendimiento.

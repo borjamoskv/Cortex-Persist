@@ -11,6 +11,7 @@ from typing import Any
 
 try:
     from confluent_kafka import Consumer, Producer
+
     KAFKA_AVAILABLE = True
 except ImportError:
     Consumer = Any
@@ -34,23 +35,34 @@ class DistributedEvolutionLedger(EvolutionLedger):
     produced to a Kafka topic for multi-node consensus.
     """
 
-    def __init__(self, log_path: str | None = None, kafka_brokers: str = "localhost:9092", topic: str = "cortex-evolution-ledger"):
+    def __init__(
+        self,
+        log_path: str | None = None,
+        kafka_brokers: str = "localhost:9092",
+        topic: str = "cortex-evolution-ledger",
+    ):
         super().__init__(log_path=log_path)
         self.topic = topic
         self.kafka_brokers = kafka_brokers
-        self._producer = Producer({
-            "bootstrap.servers": self.kafka_brokers,
-            "client.id": "cortex-node-producer",
-            "acks": "all",
-            "linger.ms": 5,
-        })
-        logger.info(f"DistributedEvolutionLedger connected to {self.kafka_brokers} [topic: {self.topic}]")
+        self._producer = Producer(
+            {
+                "bootstrap.servers": self.kafka_brokers,
+                "client.id": "cortex-node-producer",
+                "acks": "all",
+                "linger.ms": 5,
+            }
+        )
+        logger.info(
+            f"DistributedEvolutionLedger connected to {self.kafka_brokers} [topic: {self.topic}]"
+        )
 
     def _delivery_report(self, err: Any, msg: Any) -> None:
         if err is not None:
             logger.error(f"Redpanda delivery failed: {err}")
         else:
-            logger.debug(f"Redpanda delivered: {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
+            logger.debug(
+                f"Redpanda delivered: {msg.topic()} [{msg.partition()}] at offset {msg.offset()}"
+            )
 
     def record_mutation(
         self,
@@ -62,7 +74,7 @@ class DistributedEvolutionLedger(EvolutionLedger):
         metadata: dict[str, Any] | None = None,
     ) -> MutationRecord:
         """Records mutation locally AND broadcasts to Redpanda."""
-        
+
         # 1. Local append and hash chaining (O(1) latency block)
         record = super().record_mutation(
             agent_idx=agent_idx,
@@ -80,7 +92,7 @@ class DistributedEvolutionLedger(EvolutionLedger):
                 self.topic,
                 key=str(agent_idx).encode("utf-8"),
                 value=payload_line.encode("utf-8"),
-                callback=self._delivery_report
+                callback=self._delivery_report,
             )
             self._producer.poll(0)
         except Exception as e:
@@ -92,15 +104,24 @@ class DistributedEvolutionLedger(EvolutionLedger):
         """Ensure all messages are delivered before shutdown."""
         self._producer.flush(timeout)
 
+
 class LedgerConsumer:
     """Consumes the distributed ledger and reconstructs state on replica nodes."""
-    def __init__(self, kafka_brokers: str = "localhost:9092", topic: str = "cortex-evolution-ledger", group_id: str = "cortex-replica-group"):
+
+    def __init__(
+        self,
+        kafka_brokers: str = "localhost:9092",
+        topic: str = "cortex-evolution-ledger",
+        group_id: str = "cortex-replica-group",
+    ):
         self.topic = topic
-        self._consumer = Consumer({
-            "bootstrap.servers": kafka_brokers,
-            "group.id": group_id,
-            "auto.offset.reset": "earliest",
-        })
+        self._consumer = Consumer(
+            {
+                "bootstrap.servers": kafka_brokers,
+                "group.id": group_id,
+                "auto.offset.reset": "earliest",
+            }
+        )
         self._consumer.subscribe([self.topic])
         logger.info(f"LedgerConsumer subscribed to {topic} at {kafka_brokers}")
 
@@ -113,7 +134,7 @@ class LedgerConsumer:
             if msg.error():
                 logger.error(f"Consumer error: {msg.error()}")
                 continue
-                
+
             try:
                 payload = json.loads(msg.value().decode("utf-8"))
                 record = MutationRecord.from_payload(payload)

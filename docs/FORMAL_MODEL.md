@@ -1,88 +1,89 @@
 # CORTEX-Persist Formal Model
 
-> *"An agent's execution history is not a log — it is a point in a high-dimensional metric space."*
+The execution history of an agent is not a log file.
+It is an append-only, cryptographically verifiable sequence of state transitions.
 
-This document defines the formal mathematical invariants that CORTEX-Persist guarantees. It bridges the gap between software engineering and verifiable evidence, providing the rigorous foundation required for CTOs and auditors to trust the system.
+## 1. State Transition Pipeline
 
-## 1. The State Transition Pipeline
+Let:
+- \( S_t \) be the stochastic proposal emitted by the agent at time \( t \).
+- \( G(S_t) \) be the admission gate function.
+- \( D_t \) be the validated decision after policy evaluation.
+- \( M_t \) be the metadata vector (including `seq_id`, `timestamp`, `node_id`, `schema_version`, and `policy_id`).
+- \( J(\cdot) \) be the canonical JSON serialization.
+- \( P_t = \text{SHA-256}(J(D_t)) \) be the payload hash.
+- \( H_t = \text{SHA-256}(H_{t-1} \parallel P_t \parallel J(M_t)) \) be the block hash.
+- \( \sigma_t = \text{Ed25519\_Sign}(sk, H_t) \) be the block signature (Auth-Seal).
+- \( R_t = (seq\_id, H_t, \sigma_t, D_t, M_t) \) be the immutable ledger row.
 
-The core mechanism of CORTEX is a strictly unidirectional transformation from stochastic probability to deterministic cryptographic proof:
+The exported audit pack is the ordered sequence:
+\( A = [R_1, R_2, \dots, R_n] \)
 
-```text
-Stochastic_State (LLM)
-       ↓
-[ Admission Gates ]
-       ↓
-Validated_Decision
-       ↓
-[ Canonical JSON Serialization ]
-       ↓
-Payload_Hash (SHA-256)
-       ↓
-[ Merkle Chaining: Hash(Prev_Hash + Payload_Hash) ]
-       ↓
-Block_Hash
-       ↓
-[ Ed25519 Signing ]
-       ↓
-ZK_Seal (Signature)
-       ↓
-[ Append to SQLite / AOF Binary ]
-       ↓
-Immutable_Ledger_Row
-       ↓
-[ JSON Export ]
-       ↓
-Verifiable_Audit_Pack
-```
+## 2. Invariants (Axiomatic Guarantees)
 
-## 2. Axiomatic Guarantees
+### Axiom 1 — Causal Admissibility
+An event \( E \) is persisted only if it is derivable from an admissible evidence set \( V \) under the system policy \( \Pi \):
+\[ V \vdash_{\Pi} E \]
 
-CORTEX operates under the following formal invariants:
+### Axiom 2 — Append-Only Continuity
+For every block \( R_t \):
+\[ H_t = \text{SHA-256}(H_{t-1} \parallel P_t \parallel J(M_t)) \]
+Any mutation of historical content mathematically invalidates the chain.
 
-### Axiom 1: Causality (No Magic Leaps)
-Let $E$ be an event proposed by an agent. $E$ is only persisted if there exists a directed path in the Causal Graph from known evidence $V$ to $E$.
-$$ \forall E \in Ledger, \exists V \in Ledger : V \rightarrow E $$
-*Implementation:* `CausalClosureGuard` rejects isolated conclusions.
+### Axiom 3 — Signature Authenticity
+For every block \( R_t \):
+\[ \text{Verify}(pk, H_t, \sigma_t) = \text{True} \]
+If verification fails, the block and all subsequent derivations are rejected.
 
-### Axiom 2: Cryptographic Continuity (Append-Only)
-Let $B_n$ be the $n$-th block in the ledger. Its hash $H_n$ is a strict function of its contents $C_n$ and the previous hash $H_{n-1}$.
-$$ H_n = \text{SHA256}(C_n \parallel H_{n-1}) $$
-*Implementation:* `MerkleChainMismatchError` triggers on any divergence.
+### Axiom 4 — Bounded Structural Drift
+Let \( d(S_{t-1}, S_t) \) be a system-defined metric over state transitions.
+Then:
+\[ d(S_{t-1}, S_t) \le \epsilon \]
+where \( \epsilon \) is the maximum permitted drift (exergy budget) per tick.
 
-### Axiom 3: Sovereign Authenticity
-Let $S_n$ be the signature of block $n$. It must be verifiable by the public key $K_{pub}$ of the sovereign node that executed it.
-$$ \text{Verify}(K_{pub}, H_n, S_n) = \text{True} $$
-*Implementation:* `Ed25519SignatureInvalid` aborts the replay or verification process.
+## 3. Definitions
 
-### Axiom 4: Thermodynamic Bounding (Exergy)
-Let $\Delta S$ be the structural mutation induced by an event, and $E_{max}$ be the maximum allowed energy (exergy budget) per tick.
-$$ \Delta S \le E_{max} $$
-*Implementation:* `EntropyDriftThresholdExceeded` triggers if an agent loops or hallucinates uncontrollably.
+- **canonical_json (\( J \))**: A strict byte-level serialization of a JSON object mapping (RFC 8785). No extraneous whitespace, keys sorted lexicographically, encoded in UTF-8.
+- **policy (\( \Pi \))**: The sum of all active `Guards` (e.g., Contradiction, Exergy, Dependency) that determine if a state transition is allowed.
+- **admissible evidence (\( V \))**: A set of block hashes previously committed to the ledger that the agent cites to justify its current decision.
+- **state metric (\( d \))**: The geometric distance function mapping two execution vectors in the execution manifold. Used to calculate Entropy Drift.
+- **metadata vector (\( M_t \))**: Contains the environmental and topological facts of the execution: `seq_id`, ISO `timestamp`, `node_id`, `schema_version`, and `policy_id`.
+- **fork resolution**: In the event two proposals derive from \( H_{t-1} \), the `MetaArbiter` performs a topological collapse selecting the branch with the lowest \( d \). The other is marked divergent.
+- **tamper response**: Any verification failure results in an immediate `SAGA-Abort` or process `SIGKILL`.
 
-## 3. The Verification Replay
+## 4. Deterministic Verification
 
-To independently verify an Audit Pack, any external script (even one not using CORTEX) can perform the following $O(N)$ deterministic replay:
+This \( O(N) \) algorithm independently verifies an Audit Pack. The input `pack` MUST be pre-ordered by `seq_id`.
 
 ```python
+import hashlib
+import ed25519  # abstract standard lib
+
+def sha256(data: bytes) -> bytes:
+    return hashlib.sha256(data).digest()
+
+def canonical_json(data: dict) -> bytes:
+    import json
+    return json.dumps(data, separators=(',', ':'), sort_keys=True).encode('utf-8')
+
 def verify_audit_pack(pack: list, public_key: bytes) -> bool:
-    prev_hash = "0" * 64
-    for block in sorted(pack, key=lambda x: x.seq_id):
-        # 1. Recompute Payload Hash
+    # pack must already be ordered by seq_id
+    prev_hash = b"\x00" * 32
+
+    for block in pack:
         payload_hash = sha256(canonical_json(block.data))
-        
-        # 2. Recompute Block Hash
-        expected_hash = sha256(payload_hash + prev_hash)
-        if block.block_hash != expected_hash:
-            return False # Chain broken
-            
-        # 3. Verify Signature
-        if not ed25519_verify(public_key, expected_hash, block.signature):
-            return False # Forged block
-            
+        metadata_bytes = canonical_json(block.meta)
+
+        # Exact concatenation order
+        expected_hash = sha256(prev_hash + payload_hash + metadata_bytes)
+
+        if bytes.fromhex(block.block_hash) != expected_hash:
+            return False # Chain continuity broken
+
+        if not ed25519.verify(public_key, expected_hash, bytes.fromhex(block.signature)):
+            return False # Auth-Seal invalid
+
         prev_hash = expected_hash
-        
+
     return True
 ```
-
-Because this algorithm is deterministic and relies on standard cryptographic primitives (SHA-256, Ed25519), CORTEX execution lineage is universally verifiable.

@@ -4,7 +4,7 @@ Synthetic Text Detection.
 
 Based on probabilistic calculation of perplexity (token predictability) and burstiness
 (variance in sentence length/structure).
-Highly susceptible to entropy injection and Adversarial Prompting. 
+Highly susceptible to entropy injection and Adversarial Prompting.
 DO NOT USE AS CRYPTOGRAPHIC PROOF in zero-trust environments.
 """
 
@@ -19,7 +19,7 @@ class SyntheticTextDetector:
         """Calculate token predictability. Lower perplexity = more likely synthetic."""
         tokens = text.lower().split()
         if not tokens:
-            return float('inf')
+            return float("inf")
 
         log_prob_sum = 0.0
         for t in tokens:
@@ -31,13 +31,13 @@ class SyntheticTextDetector:
 
     def calculate_burstiness(self, text: str) -> float:
         """Variance in sentence length."""
-        sentences = [s.strip() for s in text.split('.') if s.strip()]
+        sentences = [s.strip() for s in text.split(".") if s.strip()]
         if not sentences:
             return 0.0
-            
+
         lengths = [len(s.split()) for s in sentences]
         mean_length = sum(lengths) / len(lengths)
-        
+
         variance = sum((length - mean_length) ** 2 for length in lengths) / len(lengths)
         return variance
 
@@ -54,5 +54,5 @@ class SyntheticTextDetector:
             "is_synthetic_guess": is_synthetic,
             "perplexity": perplexity,
             "burstiness": burstiness,
-            "warning": "Highly susceptible to adversarial prompting. Not a cryptographic proof."
+            "warning": "Highly susceptible to adversarial prompting. Not a cryptographic proof.",
         }

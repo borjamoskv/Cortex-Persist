@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """CORTEX Cognitive Arbiter.
 
-Resolves inter-layer contradictions using weighted evidence fusion 
+Resolves inter-layer contradictions using weighted evidence fusion
 across the cognitive substrates (L1, L2, L3, L4).
 
 Reality Level: C5-REAL
@@ -36,6 +36,7 @@ DEFAULT_WEIGHTS: Final[dict[str, float]] = {
 CONFLICT_THRESHOLD: Final[float] = 0.40
 CONFIDENCE_FLOOR: Final[float] = 0.25
 LEDGER_VETO_ACTIVE: Final[bool] = True
+
 
 class MetaArbiter:
     """Cross-layer cognitive arbiter."""

@@ -8,6 +8,7 @@ import unicodedata
 
 logger = logging.getLogger("cortex.guards.homoglyph_guard")
 
+
 class AntiHomoglyphVisitor(ast.NodeVisitor):
     def __init__(self) -> None:
         self.homoglyphs_found: list[tuple[str, str, str, int]] = []
@@ -19,9 +20,19 @@ class AntiHomoglyphVisitor(ast.NodeVisitor):
                     char_name = unicodedata.name(char)
                     if any(
                         script in char_name
-                        for script in ["CYRILLIC", "GREEK", "ARMENIAN", "HEBREW", "ARABIC", "SYRIAC", "THAANA"]
+                        for script in [
+                            "CYRILLIC",
+                            "GREEK",
+                            "ARMENIAN",
+                            "HEBREW",
+                            "ARABIC",
+                            "SYRIAC",
+                            "THAANA",
+                        ]
                     ):
-                        self.homoglyphs_found.append((name, char, char_name, getattr(node, "lineno", 0)))
+                        self.homoglyphs_found.append(
+                            (name, char, char_name, getattr(node, "lineno", 0))
+                        )
                 except ValueError:
                     pass
 
@@ -58,7 +69,7 @@ class AntiHomoglyphGuard:
         try:
             tree = ast.parse(source_code)
         except SyntaxError:
-            # Si no es parseable como Python, lo dejamos pasar o dejamos 
+            # Si no es parseable como Python, lo dejamos pasar o dejamos
             # que falle en otros escáneres, esto solo escanea AST válido.
             return True
 
@@ -67,7 +78,10 @@ class AntiHomoglyphGuard:
 
         if visitor.homoglyphs_found:
             msg = "Anti-Homoglyph Guard Triggered: " + ", ".join(
-                [f"'{name}' contains '{char}' ({char_name}) at line {line}" for name, char, char_name, line in visitor.homoglyphs_found]
+                [
+                    f"'{name}' contains '{char}' ({char_name}) at line {line}"
+                    for name, char, char_name, line in visitor.homoglyphs_found
+                ]
             )
             if self.block_mode:
                 logger.error(f"☢️ [SAGA-1] Rejection: {msg}")

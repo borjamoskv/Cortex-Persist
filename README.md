@@ -56,6 +56,22 @@ CORTEX-PERSIST is the missing substrate layer:
 pip install cortex-persist
 ```
 
+**The Minimal API:**
+```python
+from cortex import CortexEngine
+
+engine = CortexEngine()
+
+# 1. Observe (Hash + Seal)
+engine.observe("decision", {"action": "buy", "confidence": 0.99})
+
+# 2. Export cryptographic proof
+proof = engine.seal()
+
+# 3. Independent verification
+proof.verify() # True
+```
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/marketing/cortex_demo.gif">
   <source media="(prefers-color-scheme: light)" srcset="assets/marketing/cortex_demo_light.gif">

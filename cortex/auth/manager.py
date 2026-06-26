@@ -108,13 +108,13 @@ class AuthManager:
         loop = asyncio.get_running_loop()
         try:
             return await loop.run_in_executor(
-                self._executor,
-                cortex_rs.hash_password,
-                key + AUTH_PEPPER
+                self._executor, cortex_rs.hash_password, key + AUTH_PEPPER
             )
         except AttributeError:
             logger.warning("cortex_rs.hash_password missing. Falling back to stub.")
-            return f"$argon2id$v=19$m=16,t=2,p=1$stub${self.hash_key_legacy_sha256(key + AUTH_PEPPER)}"
+            return (
+                f"$argon2id$v=19$m=16,t=2,p=1$stub${self.hash_key_legacy_sha256(key + AUTH_PEPPER)}"
+            )
 
     async def close(self) -> None:
         """Close the backend connections."""
@@ -280,12 +280,12 @@ class AuthManager:
                                 self._executor,
                                 getattr(cortex_rs, "verify_password", None),
                                 raw_key + AUTH_PEPPER,
-                                cand["key_hash_argon2"]
+                                cand["key_hash_argon2"],
                             )
                         except TypeError:
                             # if getattr returned None
                             stub_hash = f"$argon2id$v=19$m=16,t=2,p=1$stub${self.hash_key_legacy_sha256(raw_key + AUTH_PEPPER)}"
-                            is_valid = (stub_hash == cand["key_hash_argon2"])
+                            is_valid = stub_hash == cand["key_hash_argon2"]
                         if is_valid:
                             row = cand
                             break

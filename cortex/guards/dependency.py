@@ -24,13 +24,12 @@ class ScaffoldingGuard:
 
         # Extract dependencies (sub-primitives)
         dependencies = node_data.get("dependencies", [])
-        
+
         # Sort dependencies by cyclomatic complexity to offer the easiest first
         orthogonal_path = sorted(
-            dependencies,
-            key=lambda dep_id: self.edg.get(dep_id, {}).get("complexity", 999)
+            dependencies, key=lambda dep_id: self.edg.get(dep_id, {}).get("complexity", 999)
         )
-        
+
         return orthogonal_path
 
     def scaffold_next_step(self, student_id: str, current_failure_path: list[str]) -> str:

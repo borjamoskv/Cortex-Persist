@@ -28,9 +28,18 @@ from cortex.audit.cognitive_debugger import RoutingReplayDebugger
 from cortex.audit.cognitive_simulator import AdversarialPromptSimulator
 from cortex.audit.ledger import EnterpriseAuditLedger
 
-__all__ = ["CognitiveRouter", "RoutingDecision", "SafetyClassifier", "RoutingReplayDebugger", "AdversarialPromptSimulator", "cosine_similarity"]
+__all__ = [
+    "CognitiveRouter",
+    "RoutingDecision",
+    "SafetyClassifier",
+    "RoutingReplayDebugger",
+    "AdversarialPromptSimulator",
+    "cosine_similarity",
+]
 
 logger = logging.getLogger("cortex.audit.cognitive_router")
+
+
 @dataclass
 class RoutingDecision:
     routing_id: str
@@ -113,6 +122,7 @@ class CognitiveRouter:
     async def ensure_table(self) -> None:
         """Ensures log table existence and migrates old schemas to support unique constraints."""
         from cortex.audit.cognitive_db import ensure_table_for_router
+
         await ensure_table_for_router(self)
 
     async def route(self, prompt: str, user_tier: str) -> RoutingDecision:
@@ -227,5 +237,3 @@ class CognitiveRouter:
             return True
         except Exception:
             return False
-
-

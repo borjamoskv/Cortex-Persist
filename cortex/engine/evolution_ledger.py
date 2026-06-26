@@ -145,6 +145,7 @@ class ReplayVerificationError(Exception):
 
 class ReplayMode(Enum):
     """Modes for replaying the ledger."""
+
     STRICT = "strict"
     BEST_EFFORT = "best_effort"
 
@@ -167,7 +168,7 @@ def _compute_mutation_hash(
     hash_version: int = 2,
 ) -> str:
     """Compute SHA-256 hash for a mutation record deterministically.
-    
+
     Format v1: v1\x00{prev}\x00{seq}\x00{agent}\x00{ts}\x00{vector_bytes_hex}\x00{source}
     Format v2: v2\x00{prev}\x00{seq}\x00{agent}\x00{ts_hex}\x00{vector_bytes_hex}\x00{source}
     """
@@ -180,8 +181,7 @@ def _compute_mutation_hash(
     elif hash_version == 2:
         ts_hex = struct.pack("!d", timestamp).hex()
         h_input = (
-            f"v2\x00{prev_hash}\x00{sequence}\x00{agent_idx}\x00"
-            f"{ts_hex}\x00{vec_hex}\x00{source}"
+            f"v2\x00{prev_hash}\x00{sequence}\x00{agent_idx}\x00{ts_hex}\x00{vec_hex}\x00{source}"
         )
     else:
         raise ValueError(f"Unsupported hash version: {hash_version}")
@@ -325,7 +325,7 @@ class EvolutionLedger:
                 self._sequence -= 1  # rollback sequence
                 logger.error("Evolution ledger write failed: %s", e)
                 raise
-            
+
             self._last_write_latency_ms = (time.perf_counter() - start_write) * 1000.0
             self._head_hash = new_hash
             self._record_count += 1
@@ -342,7 +342,7 @@ class EvolutionLedger:
 
     def replay(self, mode: ReplayMode = ReplayMode.STRICT) -> Iterator[MutationRecord]:
         """Replay the entire ledger.
-        
+
         - STRICT: Raises ReplayVerificationError if chain is broken.
         - BEST_EFFORT: Yields records ignoring hashes/gaps and continues.
         """
@@ -363,7 +363,9 @@ class EvolutionLedger:
                     record = MutationRecord.from_payload(payload)
                 except (json.JSONDecodeError, KeyError, TypeError) as e:
                     if mode == ReplayMode.STRICT:
-                        raise ReplayVerificationError(f"Line {line_num}: corrupt record: {e}") from e
+                        raise ReplayVerificationError(
+                            f"Line {line_num}: corrupt record: {e}"
+                        ) from e
                     else:
                         logger.warning(f"Line {line_num}: skipping corrupt record ({e})")
                         continue
@@ -394,7 +396,7 @@ class EvolutionLedger:
                             f"Line {line_num}: hash mismatch "
                             f"(computed {recomputed[:12]}…, stored {record.hash[:12]}…)"
                         )
-                        
+
                 expected_prev = record.hash
                 expected_seq = record.sequence
 
@@ -428,7 +430,7 @@ class EvolutionLedger:
 
     def fork_agent_trajectory(self, agent_idx: int, max_sequence: int) -> list[MutationRecord]:
         """Extract a deterministic fork for an agent up to a specific sequence.
-        
+
         Useful for rolling back an agent to a previous known state and spawning a sandboxed variant.
         """
         trajectory = []

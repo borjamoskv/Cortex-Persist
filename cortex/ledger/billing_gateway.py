@@ -5,6 +5,7 @@ Billing Schema Integrity Gateway.
 Immutable ledger proxy for all Stripe billing webhooks.
 Ensures zero state mutations occur imperatively inside HTTP routes.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -84,13 +85,13 @@ class BillingIntegrityGateway:
                     await self._handle_event(action, payload)
                     await conn.execute(
                         "UPDATE ledger_events SET semantic_status = 'applied' WHERE event_id = ?",
-                        (event_id,)
+                        (event_id,),
                     )
                 except Exception as e:
                     logger.exception("Failed to process billing event %s", event_id)
                     await conn.execute(
                         "UPDATE ledger_events SET semantic_status = 'error', semantic_error = ? WHERE event_id = ?",
-                        (str(e), event_id)
+                        (str(e), event_id),
                     )
             await conn.commit()
 
@@ -101,9 +102,9 @@ class BillingIntegrityGateway:
 
         if action == "checkout.session.completed":
             session = payload["data"]["object"]
-            customer_email = session.get("customer_email") or session.get("customer_details", {}).get(
-                "email", "unknown"
-            )
+            customer_email = session.get("customer_email") or session.get(
+                "customer_details", {}
+            ).get("email", "unknown")
             plan = session.get("metadata", {}).get("plan", "pro")
 
             if api_state.auth_manager:
@@ -116,13 +117,16 @@ class BillingIntegrityGateway:
                     permissions=plan_cfg["permissions"],
                     rate_limit=plan_cfg["rate_limit"],
                 )
-                logger.info("Ledger applied: provisioned key for %s (Plan: %s)", customer_email, plan)
+                logger.info(
+                    "Ledger applied: provisioned key for %s (Plan: %s)", customer_email, plan
+                )
 
         elif action == "customer.subscription.deleted":
             subscription = payload["data"]["object"]
             customer_id = subscription.get("customer", "")
 
             from cortex.routes.stripe import _get_stripe
+
             stripe_obj = _get_stripe()
             customer = stripe_obj.Customer.retrieve(customer_id)
             email = customer.get("email", "")
@@ -137,6 +141,7 @@ class BillingIntegrityGateway:
 
 # Global singleton
 _billing_gateway = BillingIntegrityGateway()
+
 
 def get_billing_gateway() -> BillingIntegrityGateway:
     return _billing_gateway

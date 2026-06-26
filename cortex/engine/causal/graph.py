@@ -22,6 +22,7 @@ except ImportError:
 
 logger = logging.getLogger("cortex.engine.causal.graph")
 
+
 class CausalGraph:
     def __init__(self) -> None:
         self._events: dict[str, LedgerEvent] = {}
@@ -136,7 +137,6 @@ class AsyncCausalGraph:
         parent_hash: str | None = None,
     ) -> None:
         await self.ensure_table(commit=False)
-
 
         if not fact_hash:
             try:
@@ -277,6 +277,7 @@ class AsyncCausalGraph:
         floor_to_c1: bool = True,
     ) -> TaintReport:
         from cortex.engine.causal.taint_propagation import TaintPropagator
+
         propagator = TaintPropagator(self.conn)
         return await propagator.propagate_taint(fact_id, tenant_id, floor_to_c1)
 

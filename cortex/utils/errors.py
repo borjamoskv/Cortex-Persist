@@ -120,4 +120,3 @@ class SovereignViolation(CortexError):
 
 class DecryptionPolicyError(CortexError, ValueError):
     """Raised when decryption fails due to a policy violation (e.g., strict mode)."""
-

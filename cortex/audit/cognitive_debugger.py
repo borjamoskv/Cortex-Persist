@@ -13,6 +13,7 @@ from cortex.audit.cognitive_classifier import cosine_similarity
 if TYPE_CHECKING:
     from cortex.audit.cognitive_router import CognitiveRouter
 
+
 class RoutingReplayDebugger:
     """Deterministic trace debugger explaining why a model decision was made for auditing."""
 
@@ -148,4 +149,3 @@ class RoutingReplayDebugger:
                 "policy": routing_policy_ver,
             },
         }
-

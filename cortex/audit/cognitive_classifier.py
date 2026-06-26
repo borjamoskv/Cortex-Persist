@@ -12,6 +12,7 @@ from typing import Any
 
 logger = logging.getLogger("cortex.audit.cognitive_classifier")
 
+
 def cosine_similarity(v1: list[float], v2: list[float]) -> float:
     """Computes cosine similarity between two vector embeddings."""
     dot_product = sum(a * b for a, b in zip(v1, v2, strict=True))
@@ -181,4 +182,3 @@ class SafetyClassifier:
                 logger.error("Semantic classification failed; falling back: %s", e)
 
         return sorted(list(matched_categories))
-

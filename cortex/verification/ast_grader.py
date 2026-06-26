@@ -2,7 +2,7 @@
 """
 Deterministic AST Grader.
 
-Automated grading bypassing probabilistic LLMs. 
+Automated grading bypassing probabilistic LLMs.
 Uses Python AST parsing to enforce algorithmic constraints and structural correctness.
 Output is binary: Approved or Apoptosis.
 """
@@ -41,27 +41,28 @@ class ASTGrader(ast.NodeVisitor):
         try:
             tree = ast.parse(code)
             self.visit(tree)
-            
+
             missing = self.required_functions - self.found_functions
             if missing:
                 self._add_violation(f"Missing required functions: {missing}")
-                
+
             return self._is_approved
         except SyntaxError as e:
             self._add_violation(f"Syntax Error: {e}")
             return False
 
+
 def evaluate_submission(code: str, requirements: dict[str, typing.Any]) -> dict[str, typing.Any]:
     """Entry point for deterministic grading."""
     grader = ASTGrader(
         required_functions=requirements.get("required_functions", []),
-        forbidden_functions=requirements.get("forbidden_functions", [])
+        forbidden_functions=requirements.get("forbidden_functions", []),
     )
-    
+
     approved = grader.evaluate(code)
-    
+
     return {
         "status": "Approved" if approved else "Apoptosis",
         "violations": grader.violations,
-        "epistemic_level": "C5-REAL"
+        "epistemic_level": "C5-REAL",
     }

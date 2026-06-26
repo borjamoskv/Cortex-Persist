@@ -127,7 +127,6 @@ class CausalClosureGuard:
             logger.warning("[%s] Empty proposal submitted.", proposal.agent_id)
             return False
 
-
         if not self._contains_structural_condensation(proposal.content):
             logger.error(
                 "[%s] 🛑 [P0] Causal Closure Failure! "

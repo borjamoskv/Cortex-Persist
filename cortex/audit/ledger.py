@@ -146,33 +146,49 @@ class EnterpriseAuditLedger:
                     self._last_hash = "GENESIS"
                 self._ready = True
 
+    async def close(self) -> None:
+        if self._batch_task is not None:
+            self._batch_task.cancel()
+            try:
+                await self._batch_task
+            except asyncio.CancelledError:
+                pass
+            self._batch_task = None
+
     async def verify_chain(self) -> dict[str, Any]:
         """Perform a full verification of the cryptographic chain.
         Returns {'status': 'verified'} if pristine, or {'status': 'tampered', 'corrupted_audit_id': id} if broken.
         """
         import hashlib
-        from cryptography.exceptions import InvalidSignature
+
+
         await self.ensure_table()
-        
-        async with self._conn.execute("SELECT rowid, audit_id, timestamp, actor_id, action, prev_hash, signature FROM security_audit_log ORDER BY rowid ASC") as cursor:
+
+        async with self._conn.execute(
+            "SELECT rowid, audit_id, timestamp, actor_id, action, prev_hash, signature FROM security_audit_log ORDER BY rowid ASC"
+        ) as cursor:
             rows = await cursor.fetchall()
-            
+
         if not rows:
             return {"status": "verified", "blocks": 0}
-            
+
         # Group by batch (same prev_hash and signature)
         batches = []
         current_batch = []
         current_prev_hash = rows[0][5]
         current_sig = rows[0][6]
-        
+
         for row in rows:
             # row: 0=rowid, 1=audit_id, 2=timestamp, 3=actor_id, 4=action, 5=prev_hash, 6=signature
             # Validate individual audit_id to detect row-level tampering
             expected_audit_id = hashlib.sha256(f"{row[2]}{row[3]}{row[4]}".encode()).hexdigest()
             if expected_audit_id != row[1]:
-                return {"status": "tampered", "corrupted_audit_id": row[1], "reason": "row_hash_mismatch"}
-                
+                return {
+                    "status": "tampered",
+                    "corrupted_audit_id": row[1],
+                    "reason": "row_hash_mismatch",
+                }
+
             if row[5] == current_prev_hash and row[6] == current_sig:
                 current_batch.append(row)
             else:
@@ -180,31 +196,39 @@ class EnterpriseAuditLedger:
                 current_prev_hash = row[5]
                 current_sig = row[6]
                 current_batch = [row]
-        
+
         if current_batch:
             batches.append((current_prev_hash, current_sig, current_batch))
-            
+
         # Verify Merkle chain and signatures
         expected_prev_hash = "GENESIS"
-        
+
         for prev_hash, signature, batch_rows in batches:
             if prev_hash != expected_prev_hash:
-                return {"status": "tampered", "corrupted_audit_id": batch_rows[0][1], "reason": "chain_broken"}
-                
+                return {
+                    "status": "tampered",
+                    "corrupted_audit_id": batch_rows[0][1],
+                    "reason": "chain_broken",
+                }
+
             batch_audit_ids = [r[1] for r in batch_rows]
             merkle_payload = "".join(batch_audit_ids) + prev_hash
             merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
-            
+
             entry_hash_payload = f"merkle_batch:{merkle_root}:{prev_hash}"
             entry_hash = hashlib.sha256(entry_hash_payload.encode()).hexdigest()
-            
+
             try:
                 self.public_key.verify(bytes.fromhex(signature), entry_hash.encode())
             except Exception:
-                return {"status": "tampered", "corrupted_audit_id": batch_rows[0][1], "reason": "invalid_signature"}
-                
+                return {
+                    "status": "tampered",
+                    "corrupted_audit_id": batch_rows[0][1],
+                    "reason": "invalid_signature",
+                }
+
             expected_prev_hash = entry_hash
-            
+
         return {"status": "verified", "blocks": len(batches)}
 
     async def _batch_worker(self) -> None:

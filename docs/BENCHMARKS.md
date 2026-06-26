@@ -26,7 +26,7 @@ pytest benchmarks/test_ledger_crypto.py --benchmark-only
 | **Agent Observation Insert** | Async WAL, Batching=50ms | ~390,000 | 2.5 µs |
 | **Merkle Seal Generation** | `hashlib.sha256` | ~120,000 | 8.3 µs |
 | **Ed25519 Signature** | `cryptography` lib | ~45,000 | 22.0 µs |
-| **Full ZK-Seal Audit** | 100,000 events | N/A | < 1.5 s |
+| **Full Auth-Seal Audit** | 100,000 events | N/A | < 1.5 s |
 
 ## The "Python Paradox" Mitigation
 

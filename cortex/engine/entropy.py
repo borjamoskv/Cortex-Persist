@@ -88,6 +88,8 @@ class EntropyAnnihilator:
         sinks = [path for path, entropy in self.scan_ecosystem() if entropy > threshold]
 
         if confidence > 0.95 and sinks:
-            raise RuntimeError("[SAGA-1] Evidence required. Confidence > Evidence is an epistemic violation. Auto-purge rejected.")
+            raise RuntimeError(
+                "[SAGA-1] Evidence required. Confidence > Evidence is an epistemic violation. Auto-purge rejected."
+            )
 
         return sinks

@@ -10,14 +10,24 @@ from typing import Any, Literal, Optional, Protocol
 
 try:
     from opentelemetry import trace
+
     tracer = trace.get_tracer(__name__)
 except ImportError:
+
     class DummySpan:
-        def set_attribute(self, *args, **kwargs): pass
-        def __enter__(self): return self
-        def __exit__(self, *args): pass
+        def set_attribute(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
     class DummyTracer:
-        def start_as_current_span(self, *args, **kwargs): return DummySpan()
+        def start_as_current_span(self, *args, **kwargs):
+            return DummySpan()
+
     tracer = DummyTracer()
 
 TaskKind = Literal["reason", "retrieve", "plan", "execute", "audit", "summarize", "memory"]
@@ -40,7 +50,7 @@ class AgentCapability:
             "tags": sorted(self.tags),
             "priority": self.priority,
             "max_concurrent": self.max_concurrent,
-            "meta": dict(sorted(self.meta.items()))
+            "meta": dict(sorted(self.meta.items())),
         }
         payload = json.dumps(cap_dict, sort_keys=True).encode()
         self.agent_id = hashlib.sha256(payload).hexdigest()[:16]
@@ -123,8 +133,9 @@ class SubagentRunner:
         self._handlers: dict[str, AgentHandler] = {}
         self._locks: dict[str, asyncio.Semaphore] = {}
         self.audit_callback = audit_callback
-        
+
         from cortex.swarm.router import SwarmRouter
+
         self.router = SwarmRouter(registry)
 
     def register_handler(self, name: str, handler: AgentHandler, max_concurrent: int = 1) -> None:
@@ -138,10 +149,10 @@ class SubagentRunner:
             req_dict = {
                 "task": req.prompt or req.kind,
                 "context": {
-                    "task_id": req.task_id, 
-                    "kind": req.kind, 
+                    "task_id": req.task_id,
+                    "kind": req.kind,
                     "require_capability": req.require_capability,
-                }
+                },
             }
             decision = self.router.route(req_dict)
             selected_agents = decision.get("selected_agents", [])
@@ -166,13 +177,15 @@ class SubagentRunner:
             span.set_attribute("swarm.kind", req.kind)
 
             if self.audit_callback:
-                await self.audit_callback({
-                    "task_id": req.task_id,
-                    "target_agent": target,
-                    "kind": req.kind,
-                    "action": "SWARM_DISPATCH",
-                    "status": "PENDING"
-                })
+                await self.audit_callback(
+                    {
+                        "task_id": req.task_id,
+                        "target_agent": target,
+                        "kind": req.kind,
+                        "action": "SWARM_DISPATCH",
+                        "status": "PENDING",
+                    }
+                )
 
             handler = self._handlers.get(target)
             if handler is None:
@@ -180,12 +193,14 @@ class SubagentRunner:
                 span.set_attribute("error", True)
                 span.set_attribute("swarm.error", err_msg)
                 if self.audit_callback:
-                    await self.audit_callback({
-                        "task_id": req.task_id,
-                        "target_agent": target,
-                        "action": "SWARM_DISPATCH",
-                        "status": "ERROR"
-                    })
+                    await self.audit_callback(
+                        {
+                            "task_id": req.task_id,
+                            "target_agent": target,
+                            "action": "SWARM_DISPATCH",
+                            "status": "ERROR",
+                        }
+                    )
                 return SubagentResponse(
                     task_id=req.task_id,
                     ok=False,
@@ -200,16 +215,20 @@ class SubagentRunner:
                 t0 = time.monotonic()
                 try:
                     async with lock:
-                        output = await asyncio.wait_for(handler.run(req), timeout=req.timeout_ms / 1000)
-                    
+                        output = await asyncio.wait_for(
+                            handler.run(req), timeout=req.timeout_ms / 1000
+                        )
+
                     if self.audit_callback:
-                        await self.audit_callback({
-                            "task_id": req.task_id,
-                            "target_agent": target,
-                            "action": "SWARM_DISPATCH",
-                            "status": "SUCCESS"
-                        })
-                        
+                        await self.audit_callback(
+                            {
+                                "task_id": req.task_id,
+                                "target_agent": target,
+                                "action": "SWARM_DISPATCH",
+                                "status": "SUCCESS",
+                            }
+                        )
+
                     return SubagentResponse(
                         task_id=req.task_id,
                         ok=True,
@@ -224,16 +243,18 @@ class SubagentRunner:
                     last_error = f"timeout: {e}"
                 except Exception as e:
                     last_error = str(e)
-            
+
             span.set_attribute("error", True)
             span.set_attribute("swarm.error", last_error or "unknown error")
             if self.audit_callback:
-                await self.audit_callback({
-                    "task_id": req.task_id,
-                    "target_agent": target,
-                    "action": "SWARM_DISPATCH",
-                    "status": "ERROR"
-                })
+                await self.audit_callback(
+                    {
+                        "task_id": req.task_id,
+                        "target_agent": target,
+                        "action": "SWARM_DISPATCH",
+                        "status": "ERROR",
+                    }
+                )
 
             return SubagentResponse(
                 task_id=req.task_id,

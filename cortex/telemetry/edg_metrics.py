@@ -22,7 +22,9 @@ class EDGTelemetryAggregator:
         self.tenant_id = tenant_id
         self._history: list[dict[str, Any]] = []
 
-    def record_effort(self, node_id: str, resolution_time_ms: int, cyclomatic_complexity: int, error_rate: float) -> str:
+    def record_effort(
+        self, node_id: str, resolution_time_ms: int, cyclomatic_complexity: int, error_rate: float
+    ) -> str:
         """
         Record a cognitive effort event.
         Calculates thermodynamic cost: (resolution_time_ms * error_rate) / complexity
@@ -30,10 +32,12 @@ class EDGTelemetryAggregator:
         # Exergy penalty calculation
         # If complexity is high, higher resolution time is expected.
         # If error rate is high, energy was lost to entropy (Anergy).
-        
+
         effective_complexity = max(1, cyclomatic_complexity)
-        thermodynamic_cost = (resolution_time_ms / 1000.0) * (1.0 + error_rate) / effective_complexity
-        
+        thermodynamic_cost = (
+            (resolution_time_ms / 1000.0) * (1.0 + error_rate) / effective_complexity
+        )
+
         event = {
             "node_id": node_id,
             "tenant_id": self.tenant_id,
@@ -41,18 +45,18 @@ class EDGTelemetryAggregator:
             "complexity": cyclomatic_complexity,
             "error_rate": error_rate,
             "thermodynamic_cost": thermodynamic_cost,
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
-        
+
         self._history.append(event)
-        
+
         # Track in Prometheus registry
         metrics.observe(
             "cortex_edg_cognitive_effort_cost",
             thermodynamic_cost,
-            labels={"tenant_id": self.tenant_id, "node_id": node_id}
+            labels={"tenant_id": self.tenant_id, "node_id": node_id},
         )
-        
+
         return self._generate_ledger_hash(event)
 
     def _generate_ledger_hash(self, event: dict[str, Any]) -> str:

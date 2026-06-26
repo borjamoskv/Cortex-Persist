@@ -15,7 +15,9 @@ class SatGeneticSwarm:
         self.timeout_ms = timeout_ms
         self.mutation_rate = 0.2
         # Población: lista de listas de tuplas (aristas)
-        self.population: list[list[tuple[int, int]]] = [self._random_graph() for _ in range(self.pop_size)]
+        self.population: list[list[tuple[int, int]]] = [
+            self._random_graph() for _ in range(self.pop_size)
+        ]
 
     def _random_graph(self) -> list[tuple[int, int]]:
         edges = []
@@ -34,46 +36,49 @@ class SatGeneticSwarm:
         # penalizando grafos vacíos o grafos completos triviales.
         edge_count = len(graph)
         max_edges = (self.graph_size * (self.graph_size - 1)) // 2
-        
+
         # Penalizamos si está demasiado cerca del grafo completo (trivialmente Unsat rápido para cliques grandes)
         if edge_count > max_edges * 0.8:
             return float(edge_count) * 0.5
-            
-        return float(edge_count) + random.uniform(0, 5) # Ruido estocástico para diversificación
+
+        return float(edge_count) + random.uniform(0, 5)  # Ruido estocástico para diversificación
 
     def evolve(self, generations: int = 5) -> dict:
         for _gen in range(generations):
             # Sort by fitness
             scored = [(self.fitness(g), g) for g in self.population]
             scored.sort(key=lambda x: x[0], reverse=True)
-            
+
             # Select top 50%
-            survivors = [g for _, g in scored[:self.pop_size // 2]]
-            
+            survivors = [g for _, g in scored[: self.pop_size // 2]]
+
             # Crossover and mutate
             new_population = list(survivors)
             while len(new_population) < self.pop_size:
                 parent1 = random.choice(survivors)
                 parent2 = random.choice(survivors)
-                
+
                 # Crossover
                 split = len(parent1) // 2
                 child = parent1[:split] + [e for e in parent2 if e not in parent1[:split]]
-                
+
                 # Mutation
                 if random.random() < self.mutation_rate:
-                    u, v = random.randint(0, self.graph_size - 1), random.randint(0, self.graph_size - 1)
+                    u, v = (
+                        random.randint(0, self.graph_size - 1),
+                        random.randint(0, self.graph_size - 1),
+                    )
                     if u != v:
                         edge = (min(u, v), max(u, v))
                         if edge in child:
                             child.remove(edge)
                         else:
                             child.append(edge)
-                            
+
                 new_population.append(child)
-                
+
             self.population = new_population
 
         # Return best graph of the final generation
         best_graph = max(self.population, key=self.fitness)
-        return {'best_genome': best_graph, 'max_fitness': self.fitness(best_graph)}
+        return {"best_genome": best_graph, "max_fitness": self.fitness(best_graph)}

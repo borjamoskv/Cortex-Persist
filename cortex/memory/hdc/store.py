@@ -80,7 +80,7 @@ class HDCVectorStoreL2:
             )
             # runtime-policy: wait up to 5s for WAL write-lock contention (Axiom Ω6)
             self._conn.execute("PRAGMA busy_timeout=5000")
-            
+
             if sqlite_vec is not None:
                 try:
                     self._conn.enable_load_extension(True)
@@ -92,9 +92,11 @@ class HDCVectorStoreL2:
                     )
                     self._vec_loaded = False
             else:
-                logger.warning("sqlite_vec module not installed. Falling back to pure python/numpy similarity.")
+                logger.warning(
+                    "sqlite_vec module not installed. Falling back to pure python/numpy similarity."
+                )
                 self._vec_loaded = False
-            
+
             self._conn.row_factory = sqlite3.Row
 
             # Register Sovereign Functions
@@ -252,7 +254,7 @@ class HDCVectorStoreL2:
         toxic_hvs = self._fetch_toxic_hvs(conn, inhibit_ids)
 
         cursor = conn.cursor()
-        
+
         if self._vec_loaded:
             cursor.execute(
                 """
@@ -296,16 +298,16 @@ class HDCVectorStoreL2:
                     cos_sim = 0.0
                 else:
                     cos_sim = np.dot(q_emb, db_emb) / (q_norm * db_norm)
-                
+
                 final_score = ((1.0 + cos_sim) / 2.0) * r["base_score"]
-                
+
                 # Create a dict-like row with final_score
                 row_dict = dict(r)
                 row_dict["final_score"] = final_score
                 rows_with_score.append(row_dict)
-                
+
             rows_with_score.sort(key=lambda x: x["final_score"], reverse=True)
-            rows = rows_with_score[:limit * 2]
+            rows = rows_with_score[: limit * 2]
 
         final_facts = []
 

@@ -13,6 +13,7 @@ async def test_ledger_tamper_evident_corruption_detection():
     
     # 2. Initialize Ledger and write valid transactions
     async with connect_async_ctx(db_path) as conn:
+        conn._conn.authorize_causal_writes()
         ledger = EnterpriseAuditLedger(conn)
         await ledger.ensure_table()
         
@@ -23,10 +24,10 @@ async def test_ledger_tamper_evident_corruption_detection():
         # Force flush and close
         await asyncio.sleep(0.1)
         await ledger.close()
-
     
     # 3. Verify clean state
     async with connect_async_ctx(db_path) as conn2:
+        conn2._conn.authorize_causal_writes()
         ledger_verify = EnterpriseAuditLedger(conn2)
         await ledger_verify.ensure_table()
         verify_result = await ledger_verify.verify_chain()
@@ -37,6 +38,7 @@ async def test_ledger_tamper_evident_corruption_detection():
     # 4. Inyección de Corrupción (Mutilación Física en Caliente)
     # Atacante interno modifica la base de datos saltándose el Ledger
     conn_sync = connect(db_path)
+    conn_sync.authorize_causal_writes()
     cursor = conn_sync.cursor()
     
     # Cambiamos "CREATE" por "EXFILTRATE" para simular un ataque
@@ -46,6 +48,7 @@ async def test_ledger_tamper_evident_corruption_detection():
     
     # 5. Comprobar Tolerancia Bizantina
     async with connect_async_ctx(db_path) as conn3:
+        conn3._conn.authorize_causal_writes()
         ledger_tampered = EnterpriseAuditLedger(conn3)
         await ledger_tampered.ensure_table()
         tampered_result = await ledger_tampered.verify_chain()

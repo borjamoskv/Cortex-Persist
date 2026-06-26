@@ -2,6 +2,7 @@
 """
 COGNITIVE-DB: Database migration and schema ensure logic.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -11,6 +12,7 @@ from typing import Any
 from cortex.audit.cognitive_config import _CREATE_ROUTER_LOG_SQL
 
 logger = logging.getLogger("cortex.audit.cognitive_db")
+
 
 async def ensure_table_for_router(router: Any) -> None:
     """Ensures log table existence and migrates old schemas to support unique constraints."""

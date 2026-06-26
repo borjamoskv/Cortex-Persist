@@ -71,16 +71,14 @@ def calculate_exergy(inp: ExergyInput, threshold_min_work: float) -> ExergyResul
     total_penalty = min(0.99, reversibility_penalty + limerence_penalty)
     # Base impact from signal and causal gap
     impact = (signal_gain * (1.0 + inp.utility_delta)) + (inp.causal_gap * 0.1)
-    
+
     # State mutation bonus (rewarding deterministic state changes)
     mutation_bonus = 1.5 if inp.touched_persistent_state else 1.0
 
     # Thermodynamically aligned Exergy formula: Impact discounted by entropy/risk
     exergy_score = (impact * mutation_bonus) * (1.0 - total_penalty)
 
-    waste_ratio = (
-        0.0 if signal_gain == 0 else max(0.0, total_penalty / max(signal_gain, 1e-9))
-    )
+    waste_ratio = 0.0 if signal_gain == 0 else max(0.0, total_penalty / max(signal_gain, 1e-9))
 
     return ExergyResult(
         score=exergy_score,

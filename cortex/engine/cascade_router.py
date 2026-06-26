@@ -65,6 +65,7 @@ class CascadeRouter:
         self, engine: str, prompt: str, files: list[str] | None, task_id: str | None
     ) -> str:
         import asyncio
+
         max_retries = 3
         base_delay = 2
 
@@ -86,7 +87,9 @@ class CascadeRouter:
                         cmd = ["ollama", "run", "llama3:8b", prompt]
                     else:
                         raise ValueError(f"Unknown engine: {engine}")
-                    logger.info(f"🚀 [ROUTER] Local-Inference-OMEGA Active. Dispatching to local {engine} equivalent (Attempt {attempt}/{max_retries})...")
+                    logger.info(
+                        f"🚀 [ROUTER] Local-Inference-OMEGA Active. Dispatching to local {engine} equivalent (Attempt {attempt}/{max_retries})..."
+                    )
                 else:
                     # Standard API/CLI execution via npx
                     if engine == "gemini":
@@ -101,7 +104,9 @@ class CascadeRouter:
                         cmd = ["npx", "-y", "@google/gemini-cli", prompt]
                     else:
                         raise ValueError(f"Unknown engine: {engine}")
-                    logger.info(f"🚀 [ROUTER] Standard CLI Active. Dispatching to {engine} via npx (Attempt {attempt}/{max_retries})...")
+                    logger.info(
+                        f"🚀 [ROUTER] Standard CLI Active. Dispatching to {engine} via npx (Attempt {attempt}/{max_retries})..."
+                    )
 
                 # Selectively pass API keys from parent environment
                 child_env = {
@@ -119,27 +124,31 @@ class CascadeRouter:
                 )
 
                 try:
-                    stdout_bytes, stderr_bytes = await asyncio.wait_for(process.communicate(), timeout=300)
+                    stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                        process.communicate(), timeout=300
+                    )
                 except asyncio.TimeoutError:
                     process.kill()
                     await process.communicate()
                     logger.error(f"⏱️ [ROUTER] {engine} execution timed out (300s).")
                     if attempt < max_retries:
-                        delay = base_delay ** attempt
+                        delay = base_delay**attempt
                         logger.info(f"⏳ [ROUTER] Retrying in {delay} seconds...")
                         await asyncio.sleep(delay)
                         continue
                     return f"Error: {engine} timed out."
 
-                stdout = stdout_bytes.decode('utf-8').strip()
-                stderr = stderr_bytes.decode('utf-8').strip()
+                stdout = stdout_bytes.decode("utf-8").strip()
+                stderr = stderr_bytes.decode("utf-8").strip()
 
-                output_content = stdout if process.returncode == 0 else f"ERROR:\n{stderr}\n{stdout}"
+                output_content = (
+                    stdout if process.returncode == 0 else f"ERROR:\n{stderr}\n{stdout}"
+                )
 
                 if process.returncode != 0:
                     logger.error(f"❌ [ROUTER] {engine} failed. STDERR: {stderr}")
                     if attempt < max_retries:
-                        delay = base_delay ** attempt
+                        delay = base_delay**attempt
                         logger.info(f"⏳ [ROUTER] Retrying in {delay} seconds...")
                         await asyncio.sleep(delay)
                         continue
@@ -147,7 +156,9 @@ class CascadeRouter:
                 # Log to DB for BM25 indexing (done only on success or exhaustion of retries)
                 if task_id:
                     try:
-                        db_path = Path(os.environ.get("CORTEX_DB_PATH", "~/.cortex/cortex.db")).expanduser()
+                        db_path = Path(
+                            os.environ.get("CORTEX_DB_PATH", "~/.cortex/cortex.db")
+                        ).expanduser()
                         if db_path.exists():
                             conn = sqlite3.connect(db_path)
                             digest = hashlib.sha256(output_content.encode("utf-8")).hexdigest()[:16]
@@ -164,13 +175,17 @@ class CascadeRouter:
                             # Opcional: Actualizar la tarea original
                             try:
                                 status = "completed" if process.returncode == 0 else "failed"
-                                conn.execute("UPDATE tasks SET status=? WHERE id=?", (status, task_id))
+                                conn.execute(
+                                    "UPDATE tasks SET status=? WHERE id=?", (status, task_id)
+                                )
                             except sqlite3.OperationalError:
                                 pass  # Ignorar si la tabla tasks no tiene esa estructura
                             conn.commit()
                             conn.close()
                     except Exception as db_e:
-                        logger.error(f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}")
+                        logger.error(
+                            f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}"
+                        )
 
                 if process.returncode != 0:
                     return f"Error ({engine}): {stderr}"
@@ -183,7 +198,7 @@ class CascadeRouter:
             except Exception as e:
                 logger.error(f"🔥 [ROUTER] Subprocess execution exception: {e}")
                 if attempt < max_retries:
-                    delay = base_delay ** attempt
+                    delay = base_delay**attempt
                     logger.info(f"⏳ [ROUTER] Retrying in {delay} seconds due to exception...")
                     await asyncio.sleep(delay)
                     continue
@@ -192,10 +207,11 @@ class CascadeRouter:
 
 if __name__ == "__main__":
     import asyncio
+
     # Test stub
     logging.basicConfig(level=logging.INFO)
     router = CascadeRouter()
-    
+
     async def run_tests():
         logger.info(
             "Test Routing (Architecture): %s",
@@ -203,5 +219,5 @@ if __name__ == "__main__":
         )
         logger.info("Test Routing (Refactor): %s", router._select_engine("refactor", ["f1"]))
         logger.info("Test Routing (Snippet): %s", router._select_engine("snippet", []))
-        
+
     asyncio.run(run_tests())

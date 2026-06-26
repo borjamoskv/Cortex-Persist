@@ -23,6 +23,8 @@ class SwarmEvent:
     selected_agent: str
     routing_payload: dict
     version: str = "v2"
+    quorum_agents: list[str] | None = None
+    entropy_score: float | None = None
 
     def to_record(self):
         input_hash = sha256(self.input)
@@ -34,6 +36,8 @@ class SwarmEvent:
             "selected_agent": self.selected_agent,
             "task": self.task,
             "version": self.version,
+            "quorum_agents": self.quorum_agents,
+            "entropy_score": self.entropy_score,
         }
 
         ts = datetime.now(timezone.utc).isoformat()
@@ -43,6 +47,8 @@ class SwarmEvent:
             "event_id": event_id,
             "timestamp": ts,
             **base,
-            "routing_payload": json.dumps(self.routing_payload, sort_keys=True, default=default_serializer),
+            "routing_payload": json.dumps(
+                self.routing_payload, sort_keys=True, default=default_serializer
+            ),
             "deterministic_signature": sha256({**base, "routing": self.routing_payload}),
         }

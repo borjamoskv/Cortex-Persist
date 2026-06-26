@@ -7,6 +7,7 @@ Design invariants for deterministic replay:
 - register() is idempotent: same agent_id + capabilities = same state
 - no mutable global state outside the instance
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -25,6 +26,7 @@ class AgentSpec:
     frozen=True ensures the spec is hashable and cannot be mutated
     after registration — critical for deterministic replay.
     """
+
     agent_id: str
     capabilities: frozenset[str]
 
@@ -120,16 +122,14 @@ class AgentRegistry:
         for agent in self.all():
             if any(cap in task_lower for cap in agent.capabilities):
                 candidates.append(agent)
-        
+
         if not candidates:
             return self.all()
         return candidates
 
     def to_dict(self) -> dict[str, Any]:
         """Stable serialization of registry state (for checksum / replay)."""
-        return {
-            "agents": [spec.to_dict() for spec in self.all()]
-        }
+        return {"agents": [spec.to_dict() for spec in self.all()]}
 
     def __len__(self) -> int:
         return len(self._agents)

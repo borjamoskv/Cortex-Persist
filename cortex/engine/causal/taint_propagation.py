@@ -156,6 +156,7 @@ class TaintPropagator:
         self, raw_meta: str, tenant_id: str, enc: Any
     ) -> tuple[dict[str, Any], bool, bool]:
         import json
+
         if not raw_meta:
             return {}, False, False
 
@@ -279,6 +280,7 @@ class TaintPropagator:
         tenant_id: str,
     ) -> None:
         import json
+
         fact_updates: list[tuple[Any, ...]] = []
         enc = get_default_encrypter()
 

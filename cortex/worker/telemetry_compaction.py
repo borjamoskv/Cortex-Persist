@@ -105,7 +105,7 @@ class TelemetryCompactionWorker:
 
             # Store summary using unified pipeline
             from cortex.engine.fact_store_core import insert_fact_record
-            
+
             await insert_fact_record(
                 conn=conn,
                 tenant_id="default",
@@ -117,7 +117,7 @@ class TelemetryCompactionWorker:
                 ts=None,
                 source="telemetry-compactor",
                 meta=json.loads(summary_meta),
-                tx_id=None
+                tx_id=None,
             )
 
         # Mark raw facts as compacted so we don't process them again

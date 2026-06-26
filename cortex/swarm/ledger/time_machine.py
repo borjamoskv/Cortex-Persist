@@ -14,11 +14,12 @@ class ForkResult:
     Carries the registry snapshot at the divergence point
     and full metadata for auditability.
     """
+
     origin_event_id: str
     origin_timestamp: str
     origin_task: str
     origin_selected_agent: str
-    registry_snapshot: dict      # deep copy of registry state at fork point
+    registry_snapshot: dict  # deep copy of registry state at fork point
     events_before_fork: list[dict]  # full history up to and including fork point
 
 
@@ -78,10 +79,7 @@ class SwarmTimeMachine:
         # Collect all events up to and including this fork point
         all_events = self.ledger.all_events()
         pivot_id = event["id"] if "id" in event else None
-        events_before = [
-            e for e in all_events
-            if pivot_id is None or e.get("id", 0) <= pivot_id
-        ]
+        events_before = [e for e in all_events if pivot_id is None or e.get("id", 0) <= pivot_id]
 
         return ForkResult(
             origin_event_id=event_id,
@@ -110,7 +108,8 @@ class SwarmTimeMachine:
             "agent_b": fork_b.origin_selected_agent,
             "registry_hash_a": fork_a.registry_snapshot["registry_hash"],
             "registry_hash_b": fork_b.registry_snapshot["registry_hash"],
-            "hashes_match": fork_a.registry_snapshot["registry_hash"] == fork_b.registry_snapshot["registry_hash"],
+            "hashes_match": fork_a.registry_snapshot["registry_hash"]
+            == fork_b.registry_snapshot["registry_hash"],
             "events_before_a": len(fork_a.events_before_fork),
             "events_before_b": len(fork_b.events_before_fork),
         }
