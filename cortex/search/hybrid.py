@@ -47,10 +47,11 @@ def _apply_temporal_decay(results: list[SearchResult], recency_weight: float) ->
     Final score = rrf_score * (1 - w) + recency_factor * w
     """
     now = datetime.now(timezone.utc)
+    from typing import cast
     for r in results:
         try:
             if isinstance(r.created_at, datetime):
-                dt = r.created_at
+                dt = cast(datetime, r.created_at)
             else:
                 # Parse created_at (ISO format from SQLite)
                 dt = datetime.fromisoformat(str(r.created_at).replace("Z", "+00:00"))

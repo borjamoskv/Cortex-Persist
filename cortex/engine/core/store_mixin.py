@@ -266,7 +266,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             conn,
             project,
             "store",
-            {"fact_type": fact_type, "content_hash": content_hash},
+            {"fact_type": fact_type, "content_hash": content_hash, "actor_id": actor_id or "system"},
             tenant_id=tenant_id,  # pyright: ignore
         )
 
