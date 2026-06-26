@@ -196,7 +196,7 @@ async def check_seal_5_ledger() -> GateResult:
         await engine.init_db()
         await engine.close()
         printer.success("Ledger schema initialized successfully.")
-    except (ValueError, TypeError, KeyError, AssertionError) as e:
+    except (ValueError, TypeError, KeyError, AssertionError, RuntimeError) as e:
         printer.fail(f"Ledger initialization threw error: {e}")
         passed = False
 

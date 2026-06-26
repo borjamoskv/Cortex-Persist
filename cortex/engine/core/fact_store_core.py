@@ -110,7 +110,7 @@ async def insert_fact_record(
     SecretGuard.verify_clean(content)
     
     # Enforce Memory Firewall (Epistemic boundaries & Taint verification)
-    require_taint = not bool(os.environ.get("CORTEX_NO_TAINT_CHECK", ""))
+    require_taint = not bool(os.environ.get("CORTEX_NO_TAINT_ENFORCE", ""))
     MemoryFirewallGuard(require_taint=require_taint).validate_fact(
         content=content,
         source=str(meta.get("cortex_taint_source", "unknown")) if meta else "unknown",

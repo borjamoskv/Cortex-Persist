@@ -190,7 +190,7 @@ async def test_seal_5_happy():
 @pytest.mark.asyncio
 async def test_seal_5_init_rejection():
     with (
-        patch("cortex.engine.CortexEngine", side_effect=Exception("DB Error")),
+        patch("cortex.engine.CortexEngine", side_effect=RuntimeError("DB Error")),
         patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
     ):
         mock_run.return_value = (0, "Passed")

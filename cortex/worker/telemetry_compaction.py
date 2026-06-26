@@ -124,7 +124,7 @@ class TelemetryCompactionWorker:
         # Mark raw facts as compacted so we don't process them again
         if ids_to_mark:
             placeholders = ",".join(["?"] * len(ids_to_mark))
-            update_query = f"""
+            update_query = f"""  # noqa: S608
                 UPDATE facts
                 SET tags = json_insert(tags, '$[#]', 'compacted')
                 WHERE id IN ({placeholders})

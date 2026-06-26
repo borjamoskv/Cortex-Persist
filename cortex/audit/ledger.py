@@ -247,100 +247,116 @@ class EnterpriseAuditLedger:
     async def _batch_worker(self) -> None:
         """Background worker that flushes the queue periodically using a Merkle Tree."""
         import asyncio
+        import base64
+        import json
+        import httpx
+        import rfc3161ng
+        from cryptography.hazmat.primitives import serialization
+        from cortex.audit.rekor_client import RekorClient
 
-        while True:
-            await asyncio.sleep(self.batch_window_ms / 1000.0)
-            async with self._lock:
-                async with AsyncFileLock():
-                    if not self._batch_queue:
-                        self._batch_task = None
-                        break
+        # C5-REAL Exergy Optimization: Instantiate external clients once outside the loop.
+        rekor_client = RekorClient()
+        tsa_url = "http://timestamp.digicert.com"
 
-                    batch = self._batch_queue[: self.max_batch_size]
-                    self._batch_queue = self._batch_queue[self.max_batch_size :]
+        try:
+            async with httpx.AsyncClient(timeout=httpx.Timeout(5.0)) as http_client:
+                while True:
+                    await asyncio.sleep(self.batch_window_ms / 1000.0)
+                    async with self._lock:
+                        async with AsyncFileLock():
+                            if not self._batch_queue:
+                                self._batch_task = None
+                                break
 
-                    # Compute Merkle Root for the batch
-                    batch_audit_ids = [item["audit_id"] for item, _ in batch]
-                    merkle_payload = "".join(batch_audit_ids) + self._last_hash
-                    merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+                            batch = self._batch_queue[: self.max_batch_size]
+                            self._batch_queue = self._batch_queue[self.max_batch_size :]
 
-                    # Separate hash from signature: entry_hash represents the batch deterministically
-                    entry_hash_payload = f"merkle_batch:{merkle_root}:{self._last_hash}"
-                    entry_hash = hashlib.sha256(entry_hash_payload.encode()).hexdigest()
+                            # Compute Merkle Root for the batch
+                            batch_audit_ids = [item["audit_id"] for item, _ in batch]
+                            merkle_payload = "".join(batch_audit_ids) + self._last_hash
+                            merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
 
-                    # Sign the entry_hash
-                    signature = self.private_key.sign(entry_hash.encode()).hex()
+                            # Separate hash from signature: entry_hash represents the batch deterministically
+                            entry_hash_payload = f"merkle_batch:{merkle_root}:{self._last_hash}"
+                            entry_hash = hashlib.sha256(entry_hash_payload.encode()).hexdigest()
 
-                    # -- REKOR & RFC3161 ANCHORING --
-                    external_anchor = None
-                    try:
-                        import json
-                        from cryptography.hazmat.primitives import serialization
-                        from cortex.audit.rekor_client import RekorClient
-                        from cortex.audit.tsa_client import TSAClient
-                        
-                        pub_pem = self.public_key.public_bytes(
-                            encoding=serialization.Encoding.PEM,
-                            format=serialization.PublicFormat.SubjectPublicKeyInfo
-                        )
-                        
-                        # Asynchronous Rekor logging
-                        rekor_client = RekorClient()
-                        rekor_uuid = await rekor_client.log_entry(entry_hash, signature, pub_pem)
-                        await rekor_client.close()
-                        
-                        # RFC3161 Timestamping
-                        tsa_client = TSAClient()
-                        rfc_token = await tsa_client.get_timestamp_token(entry_hash)
-                        await tsa_client.close()
+                            # Sign the entry_hash
+                            signature = self.private_key.sign(entry_hash.encode()).hex()
 
-                        if rekor_uuid or rfc_token:
-                            external_anchor = json.dumps(
-                                {"rekor_uuid": rekor_uuid, "rfc3161_token": rfc_token}
-                            )
-                    except Exception as e:
-                        logger.error("[AuditLedger] External anchoring failed: %s", e)
+                            # -- REKOR & RFC3161 ANCHORING --
+                            external_anchor = None
+                            try:
+                                sig_b64 = base64.b64encode(bytes.fromhex(signature)).decode("utf-8")
+                                pub_pem = self.public_key.public_bytes(
+                                    encoding=serialization.Encoding.PEM,
+                                    format=serialization.PublicFormat.SubjectPublicKeyInfo,
+                                )
 
-                    # Prepare SQLite bulk insert
-                    insert_rows = []
-                    for item, _ in batch:
-                        insert_rows.append(
-                            (
-                                item["audit_id"],
-                                item["timestamp"],
-                                item["tenant_id"],
-                                item["actor_role"],
-                                item["actor_id"],
-                                item["action"],
-                                item["resource"],
-                                item["status"],
-                                self._last_hash,
-                                signature,
-                                external_anchor,
-                            )
-                        )
+                                # Asynchronous Rekor logging
+                                rekor_uuid = await rekor_client.log_entry(entry_hash, signature, pub_pem)
 
-                    try:
-                        with causal_write(self._conn):
-                            await self._conn.executemany(
-                                """INSERT INTO security_audit_log
-                                   (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
-                                    resource, status, prev_hash, signature, external_anchor)
-                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                                insert_rows,
-                            )
-                            await self._conn.commit()
-                        self._last_hash = entry_hash
+                                # RFC3161 Timestamping (Free TSA)
+                                req = rfc3161ng.make_request(entry_hash.encode("utf-8"), hash_algo="sha256")
+                                tsa_resp = await http_client.post(
+                                    tsa_url,
+                                    content=req,
+                                    headers={"Content-Type": "application/timestamp-query"},
+                                )
+                                rfc_token = (
+                                    base64.b64encode(tsa_resp.content).decode("utf-8")
+                                    if tsa_resp.status_code == 200
+                                    else None
+                                )
 
-                        # Resolve futures
-                        for item, fut in batch:
-                            if not fut.done():
-                                fut.set_result(item["audit_id"])
-                    except Exception as e:
-                        logger.error("[AuditLedger] Batch insert failed: %s", e)
-                        for _, fut in batch:
-                            if not fut.done():
-                                fut.set_exception(e)
+                                if rekor_uuid or rfc_token:
+                                    external_anchor = json.dumps(
+                                        {"rekor_uuid": rekor_uuid, "rfc3161_token": rfc_token}
+                                    )
+                            except Exception as e:
+                                logger.error("[AuditLedger] External anchoring failed: %s", e)
+
+                            # Prepare SQLite bulk insert
+                            insert_rows = []
+                            for item, _ in batch:
+                                insert_rows.append(
+                                    (
+                                        item["audit_id"],
+                                        item["timestamp"],
+                                        item["tenant_id"],
+                                        item["actor_role"],
+                                        item["actor_id"],
+                                        item["action"],
+                                        item["resource"],
+                                        item["status"],
+                                        self._last_hash,
+                                        signature,
+                                        external_anchor,
+                                    )
+                                )
+
+                            try:
+                                with causal_write(self._conn):
+                                    await self._conn.executemany(
+                                        """INSERT INTO security_audit_log
+                                           (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
+                                            resource, status, prev_hash, signature, external_anchor)
+                                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                        insert_rows,
+                                    )
+                                    await self._conn.commit()
+                                self._last_hash = entry_hash
+
+                                # Resolve futures
+                                for item, fut in batch:
+                                    if not fut.done():
+                                        fut.set_result(item["audit_id"])
+                            except Exception as e:
+                                logger.error("[AuditLedger] Batch insert failed: %s", e)
+                                for _, fut in batch:
+                                    if not fut.done():
+                                        fut.set_exception(e)
+        finally:
+            await rekor_client.close()
 
     async def log_action(
         self,
