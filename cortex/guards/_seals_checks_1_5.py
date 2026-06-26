@@ -64,12 +64,12 @@ async def check_seal_2_type_safety() -> GateResult:
             if start_idx != -1:
                 data = json.loads(out[start_idx:])
                 ecount = data.get("summary", {}).get("errorCount", 999)
-                if ecount <= 165:
+                if ecount <= 78:
                     printer.success(
-                        f"Type checks passed (within baseline threshold: {ecount}/165)."
+                        f"Type checks passed (within baseline threshold: {ecount}/78)."
                     )
                     return True, "verified"
-                printer.fail(f"Type checking failed (threshold: {ecount}/165).")
+                printer.fail(f"Type checking failed (threshold: {ecount}/78).")
                 printer.print(out[:2000], style="dim")
                 return False, "verified"
         except (ValueError, TypeError, KeyError, AssertionError) as exc:

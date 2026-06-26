@@ -18,15 +18,30 @@ Este documento define la trayectoria de madurez operativa y estructural de **COR
 
 ---
 
-## CICLO 1 — Higiene
-*Objetivo: Eliminar la deuda técnica al 100%.*
-- [ ] `ruff`: 0 errores
-- [ ] `mypy` / `pyright`: 0 errores
-- [ ] `pytest`: 100% pass
-- [ ] `cargo test`: 100% pass
-- [ ] `cargo clippy`: clean
-- [ ] `cargo fmt`: clean
-*Resultado: Cero warnings en las métricas base.*
+## CICLO 1 — Higiene (Estrategia de Cristalización Continua)
+*Objetivo: Eliminar la deuda técnica al 100% de manera trazable, verificable y sin enmascaramiento (Cero `pyright: ignore` injustificados).*
+
+La estrategia se divide en 4 fases para garantizar que el aseguramiento del código crezca estructuralmente sin bloquear el desarrollo:
+
+### Fase 1 — Congelar la línea base
+- [x] Establecer baseline actual: `78 errores` en Pyright.
+- [x] Configurar CI (Quality Gates) para bloquear cualquier PR que supere los 78 errores.
+*Resultado: Ningún código nuevo puede introducir deuda adicional.*
+
+### Fase 2 — Clasificación
+- [ ] Catalogar y priorizar el backlog de 78 errores (ej. P1 para `None dereference`, P2 para `Any` typing, P3 para Generics/Overloads).
+
+### Fase 3 — Corrección por Dominio
+- [ ] Semana 1: `crypto/`, `auth/`
+- [ ] Semana 2: `ledger/`, `audit/`
+- [ ] Semana 3: `engine/`
+- [ ] Semana 4: `cli/`
+
+### Fase 4 — Endurecimiento Progresivo del CI
+- [ ] Reducir el umbral del CI de forma paulatina: `78` → `60` → `40` → `20` → `0`.
+- [x] Mantener validaciones holísticas estrictas: `ruff check`, `ruff format`, `pytest`, `bandit`, y `pip-audit`.
+
+*Resultado final: Cero errores verificables y 100% de cumplimiento en las métricas base.*
 
 ---
 
