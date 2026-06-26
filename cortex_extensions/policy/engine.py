@@ -25,7 +25,7 @@ from cortex_extensions.policy.models import (
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
-    from cortex.engine.uncategorized.models import Fact
+    from cortex.engine.cognitive.models import Fact
 
 logger = logging.getLogger("cortex_extensions.policy")
 

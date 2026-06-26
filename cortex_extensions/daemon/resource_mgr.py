@@ -165,7 +165,7 @@ class ResourceMgrMixin:
             try:
                 from cortex.engine.causal.anomaly_bridge import AnomalyBridge
                 from cortex.engine.swarm.auth_gateway import AuthGateway  # type: ignore
-                from cortex.engine.uncategorized.event_sovereignty import EventSovereigntyRuntime
+                from cortex.engine.temporal.event_sovereignty import EventSovereigntyRuntime
 
                 auth_gw = AuthGateway(self._shared_engine)  # type: ignore
                 # ensure table is created, though we should probably run this asynchronously,

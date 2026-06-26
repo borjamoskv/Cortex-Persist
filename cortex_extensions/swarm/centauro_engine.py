@@ -12,9 +12,9 @@ import hashlib
 import logging
 from typing import Any, TypedDict, cast
 
-from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 from pydantic import BaseModel, Field
 
+from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.swarm.aleph_omega import AxiomaticLeapEngine
 from cortex_extensions.swarm.byzantine import ByzantineConsensus
 

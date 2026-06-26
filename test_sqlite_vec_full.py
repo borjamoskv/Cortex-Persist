@@ -1,4 +1,5 @@
 import sqlite3
+
 import sqlite_vec
 
 conn = sqlite3.connect(':memory:')

@@ -19,7 +19,9 @@ def budget_manager(temp_db_path):
 
 
 def test_init_db(temp_db_path):
+    print("DEBUG: entering test_init_db")
     manager = SwarmBudgetManager(db_path=temp_db_path)
+    print("DEBUG: instantiated manager")
     assert Path(temp_db_path).exists()
 
     # Check schema

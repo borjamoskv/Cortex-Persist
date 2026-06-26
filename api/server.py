@@ -8,16 +8,16 @@ from pathlib import Path
 from typing import Any
 
 import aiosqlite
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-
-from cortex import __version__
 from cortex.engine.bifurcation_engine import ExergyBifurcationEngine
 from cortex.engine.causal_scheduler import CausalScheduler
 from cortex.engine.entropy_daemon import EntropyDaemon
 from cortex.engine.exergy_daemon import ExergyDaemon
 from cortex.engine.rollback_engine import CausalRollbackEngine
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+from cortex import __version__
 from cortex.ledger.causal_graph import CausalGraph
 from cortex.ledger.execution_trace import ExecutionTraceLedger
 

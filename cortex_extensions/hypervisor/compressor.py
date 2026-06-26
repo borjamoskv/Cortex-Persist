@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from cortex_extensions.hypervisor.models import HealthReport, Memory, Receipt
 
 if TYPE_CHECKING:
-    from cortex.engine.uncategorized.models import Fact
+    from cortex.engine.cognitive.models import Fact
     from cortex.search import SearchResult
 
 __all__ = ["ComplexityCompressor"]
