@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CORTEX Bounty Policy",
+  "description": "Schema for machine-readable bug bounty program rules and scope.",
+  "type": "object",
+  "properties": {
+    "program_id": { "type": "string" },
+    "platform": {
+      "type": "string",
+      "enum": ["hackerone", "bugcrowd", "immunefi", "independent"]
+    },
+    "version": { "type": "string" },
+    "safety_guards": {
+      "type": "object",
+      "properties": {
+        "max_requests_per_second": { "type": "integer", "default": 2 },
+        "user_agent_required": { "type": "string" },
+        "allow_automated_scanning": { "type": "boolean", "default": false },
+        "require_human_signoff_for_STRIKE": { "type": "boolean", "default": true }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "in_scope": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "target": { "type": "string" },
+              "type": { "type": "string", "enum": ["domain", "wildcard", "ip", "repo", "contract"] },
+              "notes": { "type": "string" }
+            },
+            "required": ["target", "type"]
+          }
+        },
+        "out_of_scope": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "blocking_patterns": {
+      "type": "array",
+      "description": "Regex patterns or keywords that trigger an immediate hard-stop if detected in automated flows.",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["program_id", "platform", "scope"]
+}

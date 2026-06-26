@@ -1,0 +1,37 @@
+[
+  {
+    "id": "STRIKE-FIREDANCER-1776005763",
+    "target": "Firedancer",
+    "amount": 1000000,
+    "status": "SUBMITTED",
+    "timestamp": "2026-04-12T16:56:03.593878",
+    "verdict": "C5-REAL"
+  },
+  {
+    "id": "STRIKE-LZ-STELLAR-2026-001",
+    "project": "LayerZero",
+    "vulnerability": "LZ-STELLAR-001",
+    "severity": "High",
+    "projected_yield": 25000.0,
+    "status": "SUBMITTED",
+    "timestamp": "2026-04-12T22:15:00Z"
+  },
+  {
+    "id": "STRIKE-STARGATE-V2-FIN",
+    "project": "Stargate",
+    "vulnerability": "MULTI-VULN-V2",
+    "severity": "Critical/High",
+    "projected_yield": 1000000.0,
+    "status": "READY_FOR_SUBMISSION",
+    "timestamp": "2026-04-13T17:55:00Z"
+  },
+  {
+    "id": "STRIKE-LZ-STELLAR-H01",
+    "project": "LayerZero",
+    "vulnerability": "LZ-STELLAR-H01",
+    "severity": "High",
+    "projected_yield": 100000.0,
+    "status": "READY_FOR_SUBMISSION",
+    "timestamp": "2026-04-13T17:55:00Z"
+  }
+]

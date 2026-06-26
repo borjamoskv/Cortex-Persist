@@ -1,0 +1,90 @@
+# ∴ CORTEX-PERSIST Configuration (Omega Edition)
+# Runtime: C5-Dynamic | Aesthetic: Industrial Noir 2026
+
+database:
+  path: "data/cortex_persist.db"
+  journal_mode: "WAL"
+  busy_timeout_ms: 5000
+
+policies:
+  dir: "data/policies"
+  enforce_compliance: true
+  default_hitl_mode: "cli"
+
+scanner:
+  max_threads: 20
+  sources:
+    - name: "github-bounty-solidity"
+      url: "https://api.github.com/search/issues?q=label:bounty+state:open+language:solidity&sort=updated&order=desc"
+    - name: "github-bounty-rust"
+      url: "https://api.github.com/search/issues?q=label:bounty+state:open+language:rust&sort=updated&order=desc"
+    - name: "github-bounty-typescript"
+      url: "https://api.github.com/search/issues?q=label:bounty+state:open+language:typescript&sort=updated&order=desc"
+    - name: "github-audit-solidity"
+      url: "https://api.github.com/search/issues?q=label:audit+state:open+language:solidity&sort=updated&order=desc"
+    - name: "github-security-web3"
+      url: "https://api.github.com/search/issues?q=label:security+state:open+web3&sort=updated&order=desc"
+    - name: "github-bounty-move"
+      url: "https://api.github.com/search/issues?q=label:bounty+state:open+language:move&sort=updated&order=desc"
+    - name: "github-bounty-cairo"
+      url: "https://api.github.com/search/issues?q=label:bounty+state:open+language:cairo&sort=updated&order=desc"
+  exergy_threshold: 1.5
+  user_agent: "CORTEX-Swarm-Prime/2.0"
+
+yield_monitor:
+  wallet: "0x5db4EbDFAe77c2a979630E06Df67198e848716D0"
+  networks:
+    - name: "ethereum"
+      rpc_url: "https://cloudflare-eth.com"
+      symbol: "ETH"
+    - name: "cronos"
+      rpc_url: "https://evm.cronos.org"
+      symbol: "CRO"
+  poll_interval_seconds: 3600
+  targets:
+    - type: "realized"
+      threshold: 0.1
+    - type: "projected"
+      status: "submission_ready"
+      multiplier: 0.9
+    - type: "projected"
+      status: "submitted"
+      multiplier: 0.8
+    - type: "projected"
+      status: "audited"
+      multiplier: 0.4
+    - type: "projected"
+      status: "found"
+      multiplier: 0.1
+
+aesthetic:
+  primary: "#2B3BE5"
+  background: "#0A0A0A"
+  accent: "#00FF88"
+  warn: "#FF3B30"
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  env: "production"
+  api_key: null # Runtime secret only: export CORTEX_API_KEY before serving authenticated routes.
+
+middleware:
+  token_reducer:
+    enabled: true
+    profile: "normal"
+
+models:
+  primary:
+    name: "gemini-3-flash"
+    type: "frontier"
+    provider: "google"
+    exergy_rank: 0.98
+  sovereign:
+    name: "gemma-3-27b"
+    type: "local"
+    provider: "ollama" # Assuming local inference substrate
+    endpoint: "http://localhost:11434/v1"
+    exergy_rank: 0.70
+  routing:
+    complexity_threshold: 0.75 # Tasks > 0.75 use Gemini

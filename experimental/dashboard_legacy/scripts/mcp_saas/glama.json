@@ -1,0 +1,21 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "name": "CORTEX Sovereign Forge",
+  "description": "High-exergy MCP server providing Noir 2026 design audits and marketplace analytics.",
+  "maintainers": ["cortex_admin"],
+  "type": "mcp_server",
+  "status": "beta",
+  "framework": "FastAPI/CORTEX-Persist",
+  "tools": 2,
+  "transport": ["sse"],
+  "keywords": ["design", "noir", "exergy", "audit", "sovereign", "agent"],
+  "features": {
+    "exergy_billing": {
+      "enabled": true,
+      "note": "1.0 EU per tool call"
+    },
+    "tenant_isolation": {
+      "enabled": true
+    }
+  }
+}

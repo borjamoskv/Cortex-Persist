@@ -1,0 +1,27 @@
+{
+  "program_id": "firedancer-v1",
+  "platform": "immunefi",
+  "version": "1.0.0",
+  "safety_guards": {
+    "max_requests_per_second": 1,
+    "user_agent_required": "CORTEX-Sovereign-Hound/1.0",
+    "allow_automated_scanning": false,
+    "require_human_signoff_for_STRIKE": true
+  },
+  "scope": {
+    "in_scope": [
+      { "target": "github.com/firedancer-io/*", "type": "repo", "notes": "Core validator source (C/Rust)" },
+      { "target": "*.firedancer.io", "type": "domain", "notes": "Main domain space" }
+    ],
+    "out_of_scope": [
+      "*.firedancer.io",
+      "social_engineering",
+      "ddos"
+    ]
+  },
+  "blocking_patterns": [
+    "delete",
+    "rm -rf",
+    "drop table"
+  ]
+}

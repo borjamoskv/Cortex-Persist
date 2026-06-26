@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>∴ CORTEX — PAYOUT DASHBOARD</title>
+    <style>
+        :root {
+            --bg: #0A0A0A;
+            --primary: #2B3BE5;
+            --accent: #00FF88;
+            --warn: #FF3B30;
+            --dim: #5A5A5A;
+            --text: #ffffff;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        header {
+            width: 100%;
+            padding: 2rem;
+            border-bottom: 1px solid var(--dim);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -0.05em;
+        }
+        .exergy-stat {
+            color: var(--accent);
+            font-family: monospace;
+        }
+        main {
+            width: 100%;
+            max-width: 1200px;
+            padding: 2rem;
+        }
+        .strike-card {
+            background: #111;
+            border: 1px solid var(--dim);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .strike-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(43, 59, 229, 0.2);
+        }
+        .strike-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .p0-tag {
+            background: var(--warn);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+        .strike-title {
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .strike-meta {
+            color: var(--dim);
+            font-family: monospace;
+            margin-bottom: 1.5rem;
+        }
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .btn {
+            padding: 1rem;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--dim); color: var(--text); }
+        .btn-primary:hover { filter: brightness(1.2); }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+        .form-ready {
+            margin-top: 1rem;
+            display: none;
+            background: #000;
+            padding: 1rem;
+            border: 1px dashed var(--accent);
+        }
+        .form-ready.active { display: block; }
+        pre {
+            background: #000;
+            padding: 1rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">∴ CORTEX / PAYOUTS</div>
+        <div class="exergy-stat">DAEMON: ACTIVE | TOTAL_PROJECTED: $1,053,200 | SWARM: 73 TARGETS</div>
+    </header>
+
+    <main id="dashboard">
+        <!-- P0 STRIKE: FIREDANCER -->
+        <div class="strike-card">
+            <span class="p0-tag">CRITICAL P0</span>
+            <div class="strike-header">
+                <div>
+                    <h2 class="strike-title">Firedancer V1 Audit Competition</h2>
+                    <div class="strike-meta">ID: STRIKE_1M_FIREDANCER_FPGADIV | YIELD: $1,000,000</div>
+                </div>
+                <div class="exergy-stat">EXERGY: 10.0 (CERTIFIED)</div>
+            </div>
+            <p>Verification complete. Divergence detected in <code>waltz/</code> networking stack vs native Solana-Agave consensus logic during heavy XDP ingress.</p>
+            
+            <div class="action-grid">
+                <button class="btn btn-primary" onclick="window.open('https://bugs.immunefi.com/dashboard/new-submission?utm_source=immunefi')">Open Immunefi Submission</button>
+                <button class="btn btn-outline" onclick="toggleDetails('firedancer-details')">View Submission Payload</button>
+            </div>
+
+            <div id="firedancer-details" class="form-ready">
+                <h3>[COPY_FIELDS]</h3>
+                <strong>TITLE:</strong>
+                <pre>Consensus Divergence in Waltz Networking Stack vs Agave Runtime</pre>
+                <strong>BUG REPORT:</strong>
+                <pre>The Firedancer v1.0 networking stack (implemented in C) diverges from the foundation Rust-based Agave runtime during high-ingress XDP packet processing under specific MTU conditions. This leads to a partition where Firedancer nodes and Agave nodes disagree on the cluster state, potentially halting Solana mainnet-beta.</pre>
+                <strong>PROOF OF CONCEPT (NATIVE C):</strong>
+                <pre>[See file:///Users/borjafernandezangulo/10_PROJECTS/scouts/firedancer/STRIKE_PACKAGE_1M/wiredancer_divergence_STRIKE.c]</pre>
+            </div>
+        </div>
+
+        <!-- TRIAGED AUXILIARY STRIKES -->
+        <div id="aux-strikes">
+            <!-- Dynamically populated by SDK/API -->
+             <p class="exergy-stat">∴ POLLING BACKGROUND DAEMON FOR SWARM PAYOUTS...</p>
+        </div>
+    </main>
+
+    <script>
+        function toggleDetails(id) {
+            document.getElementById(id).classList.toggle('active');
+        }
+
+        // Logic to fetch strikes from api.py
+        async function fetchStrikes() {
+            try {
+                const resp = await fetch('http://localhost:8000/api/strikes?limit=10');
+                const strikes = await resp.json();
+                const container = document.getElementById('aux-strikes');
+                
+                if (strikes.length > 0) {
+                    container.innerHTML = '<h3>∴ SWARM PAYOUTS (VERIFIED)</h3>';
+                    strikes.forEach(s => {
+                        container.innerHTML += `
+                            <div class="strike-card" style="border-left: 4px solid var(--accent)">
+                                <div class="strike-header">
+                                    <div>
+                                        <h3 style="margin:0">${s.title}</h3>
+                                        <div class="strike-meta">EXERGY: ${s.exergy} ETH | SOURCE: ${s.source}</div>
+                                    </div>
+                                    <button class="btn btn-outline" style="padding:0.5rem" onclick="window.open('${s.url}')">Go to Target</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (e) {
+                console.warn("Daemon API not reachable yet. Retrying...");
+            }
+        }
+
+        setInterval(fetchStrikes, 5000);
+        fetchStrikes();
+    </script>
+</body>
+</html>

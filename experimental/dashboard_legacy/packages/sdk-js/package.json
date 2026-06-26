@@ -1,0 +1,29 @@
+{
+  "name": "@cortex/persist-sdk",
+  "version": "0.1.0",
+  "description": "Sovereign SDK for Cortex-Persist Ledger",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
+    "lint": "tsc"
+  },
+  "keywords": [
+    "cortex",
+    "persist",
+    "ledger",
+    "ai",
+    "sovereign"
+  ],
+  "author": "borjamoskv",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}

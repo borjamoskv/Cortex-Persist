@@ -1,0 +1,50 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.24;
+
+import "forge-std/Test.sol";
+
+/**
+ * ∴ CORTEX-AUTODIDACT STRIKE: Access Control Bypass
+ * Target: {{ target_name }}
+ * Generated: {{ timestamp }}
+ * Hypothesis: {{ hypothesis }}
+ */
+
+contract AccessControlSTRIKE is Test {
+    // {{ target_contract_code }}
+
+    address public owner;
+    address public attacker;
+
+    function setUp() public {
+        owner = makeAddr("owner");
+        attacker = makeAddr("attacker");
+        // {{ setup_code }}
+    }
+
+    /// @notice Proves unauthorized caller can invoke privileged function
+    function testExploit_AccessControlBypass() public {
+        // Verify attacker is NOT the owner/admin
+        assertTrue(attacker != owner, "Precondition: attacker != owner");
+
+        // Attempt privileged operation as attacker
+        vm.startPrank(attacker);
+
+        // {{ exploit_code }}
+        // Expected: This should revert but doesn't due to missing access control
+
+        vm.stopPrank();
+
+        // Verify unauthorized state change occurred
+        // {{ assertion_code }}
+
+        emit log_string("EXPLOIT: Unprivileged caller executed admin function");
+    }
+
+    /// @notice Verifies legitimate admin access still works (sanity check)
+    function testSanity_OwnerCanCall() public {
+        vm.startPrank(owner);
+        // {{ owner_call_code }}
+        vm.stopPrank();
+    }
+}

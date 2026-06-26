@@ -1,0 +1,3 @@
+# Example-only genesis. Store live sovereign tokens outside the repo and
+# point CORTEX_MCP_TOKENS_FILE at that runtime-managed YAML file.
+{}

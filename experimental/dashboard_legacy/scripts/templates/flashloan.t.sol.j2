@@ -1,0 +1,77 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.24;
+
+import "forge-std/Test.sol";
+
+/**
+ * ∴ CORTEX-AUTODIDACT STRIKE: Flash Loan Attack
+ * Target: {{ target_name }}
+ * Generated: {{ timestamp }}
+ * Hypothesis: {{ hypothesis }}
+ */
+
+interface IERC20 {
+    function balanceOf(address) external view returns (uint256);
+    function transfer(address, uint256) external returns (bool);
+    function approve(address, uint256) external returns (bool);
+}
+
+interface IFlashLoanProvider {
+    function flashLoan(address, uint256) external;
+}
+
+contract FlashLoanAttacker {
+    address public target;
+    address public token;
+    uint256 public borrowAmount;
+
+    constructor(address _target, address _token) {
+        target = _target;
+        token = _token;
+    }
+
+    function executeAttack(uint256 _borrowAmount) external {
+        borrowAmount = _borrowAmount;
+        // {{ flash_loan_initiation_code }}
+    }
+
+    // Callback from flash loan provider
+    function {{ callback_function }}(
+        address _token,
+        uint256 _amount,
+        uint256 _fee,
+        bytes calldata _data
+    ) external {
+        // {{ exploit_logic }}
+
+        // Repay flash loan
+        uint256 repayAmount = _amount + _fee;
+        IERC20(_token).transfer(msg.sender, repayAmount);
+    }
+}
+
+contract FlashLoanSTRIKE is Test {
+    // {{ target_contract_code }}
+
+    FlashLoanAttacker public attacker;
+
+    function setUp() public {
+        // {{ setup_code }}
+    }
+
+    /// @notice Proves flash loan attack drains target protocol
+    function testExploit_FlashLoan() public {
+        uint256 targetBalBefore = {{ balance_check_before }};
+
+        // {{ attack_execution }}
+
+        uint256 targetBalAfter = {{ balance_check_after }};
+        uint256 attackerProfit = {{ profit_check }};
+
+        assertLt(targetBalAfter, targetBalBefore, "EXPLOIT: Flash loan drain confirmed");
+        assertGt(attackerProfit, 0, "EXPLOIT: Attacker profited");
+
+        emit log_named_uint("Target loss", targetBalBefore - targetBalAfter);
+        emit log_named_uint("Attacker profit", attackerProfit);
+    }
+}

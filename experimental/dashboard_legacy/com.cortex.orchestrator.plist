@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.cortex.orchestrator</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/python3</string>
+        <string>/Users/borjafernandezangulo/10_PROJECTS/Cortex-Persist/scripts/orchestrator.py</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>WorkingDirectory</key>
+    <string>/Users/borjafernandezangulo/10_PROJECTS/Cortex-Persist</string>
+    <key>StandardOutPath</key>
+    <string>/Users/borjafernandezangulo/10_PROJECTS/Cortex-Persist/data/orchestrator_stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/borjafernandezangulo/10_PROJECTS/Cortex-Persist/data/orchestrator_stderr.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>CORTEX_ENV</key>
+        <string>production</string>
+        <key>PYTHONPATH</key>
+        <string>/Users/borjafernandezangulo/10_PROJECTS/Cortex-Persist/scripts</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+</dict>
+</plist>
