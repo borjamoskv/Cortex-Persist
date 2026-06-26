@@ -74,8 +74,9 @@ class SovereignVectorStoreL2(SchemaTrait, ReadTrait, WriteTrait):
         half_life_days: int = 7,
     ) -> None:
         self._encoder = encoder
-        self._db_path = Path(db_path).expanduser()
-        self._db_path.parent.mkdir(parents=True, exist_ok=True)
+        db_path_obj = Path(db_path).expanduser()
+        self._db_path = str(db_path_obj)
+        db_path_obj.parent.mkdir(parents=True, exist_ok=True)
         self._conn: sqlite3.Connection | None = None
         self._lock = asyncio.Lock()
         self._ready = False

@@ -107,7 +107,7 @@ class TieredCache(Generic[T]):
             import json
 
             return json.loads(raw_val)
-        except (json.JSONDecodeError, OSError, ValueError):
+        except Exception:
             logger.exception("Redis get failed for key %s", key)
             return None
 
@@ -128,7 +128,7 @@ class TieredCache(Generic[T]):
                 )
                 return
             await client.set(redis_key, serialized, ex=int(ttl))
-        except (OSError, ValueError):
+        except Exception:
             logger.exception("Redis set failed for key %s", key)
 
     async def set(self, key: str, value: T, ttl: float | None = None):

@@ -326,3 +326,4 @@ cortex/swarm/staged_legion_2m.py
 cli-init.db
 cortex_hypothesis_*.db*
 ultramap.bin
+site/
