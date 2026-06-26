@@ -43,16 +43,18 @@ class LedgerAuditMixin:
 
             # Finalize audit record
             status = "ok" if not violations else "violation"
-            await conn.execute(
-                "INSERT INTO integrity_checks (check_type, status, details, started_at, completed_at) VALUES (?, ?, ?, ?, ?)",
-                (
-                    "full" if tenant_id is None else "tenant",
-                    status,
-                    json.dumps(violations),
-                    started_at,
-                    now_iso(),
-                ),
-            )
+            from cortex.database.core import causal_write
+            with causal_write(conn):
+                await conn.execute(
+                    "INSERT INTO integrity_checks (check_type, status, details, started_at, completed_at) VALUES (?, ?, ?, ?, ?)",
+                    (
+                        "full" if tenant_id is None else "tenant",
+                        status,
+                        json.dumps(violations),
+                        started_at,
+                        now_iso(),
+                    ),
+                )
             await conn.commit()
         return {"valid": not violations, "violations": violations, "tx_count": tx_count}
 

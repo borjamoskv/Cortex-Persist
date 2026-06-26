@@ -151,19 +151,19 @@ class ConnectionMixin:
                 if row:
                     import cortex.core.config as config
 
-                    config.HKDF_SALT = row[0]
+                    setattr(config, "HKDF_SALT", row[0])
                 else:
                     import cortex.core.config as config
 
                     # Store the default config salt in the DB if not present
                     await conn.execute(
                         "INSERT INTO cortex_meta (key, value) VALUES ('tenant_isolation_salt', ?)",
-                        (config.HKDF_SALT,),
+                        (getattr(config, "HKDF_SALT", ""),),
                     )
                     await conn.commit()
             finally:
                 if hasattr(conn._conn, "revoke_causal_writes"):
-                    conn._conn.revoke_causal_writes()
+                    getattr(conn._conn, "revoke_causal_writes")()
 
             # Query dynamic salt if present to reload config dynamically
             try:
@@ -174,8 +174,9 @@ class ConnectionMixin:
                     if row:
                         import cortex.core.config as config
 
-                        config.HKDF_SALT = row[0]
-                        config._cfg.HKDF_SALT = row[0]
+                        setattr(config, "HKDF_SALT", row[0])
+                        if hasattr(config, "_cfg"):
+                            setattr(config._cfg, "HKDF_SALT", row[0])
             except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.warning("Failed to load tenant_isolation_salt: %s", e)
 

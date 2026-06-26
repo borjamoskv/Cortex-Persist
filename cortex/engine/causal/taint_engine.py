@@ -97,6 +97,7 @@ async def _query_agent_key_async(conn, agent_id: str) -> str | None:
 
 
 def _check_and_register_nonce_sync(conn, nonce: str) -> bool:
+    from cortex.database.core import causal_write
     conn.execute("""
         CREATE TABLE IF NOT EXISTS taint_nonces (
             nonce TEXT PRIMARY KEY,
@@ -104,22 +105,25 @@ def _check_and_register_nonce_sync(conn, nonce: str) -> bool:
         )
     """)
     cursor = conn.cursor()
-    cursor.execute(
-        "INSERT OR IGNORE INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time())
-    )
+    with causal_write(conn):
+        cursor.execute(
+            "INSERT OR IGNORE INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time())
+        )
     return cursor.rowcount > 0
 
 
 async def _check_and_register_nonce_async(conn, nonce: str) -> bool:
+    from cortex.database.core import causal_write
     await conn.execute("""
         CREATE TABLE IF NOT EXISTS taint_nonces (
             nonce TEXT PRIMARY KEY,
             timestamp REAL
         )
     """)
-    cursor = await conn.execute(
-        "INSERT OR IGNORE INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time())
-    )
+    with causal_write(conn):
+        cursor = await conn.execute(
+            "INSERT OR IGNORE INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time())
+        )
     return cursor.rowcount > 0
 
 
