@@ -25,9 +25,9 @@ from cortex.engine.supervisor import (
     SupervisorConfig,
     AgentStatus,
 )
-from cortex.engine._autocurative_config import AutoCurativeConfig
+from cortex.engine.evo._autocurative_config import AutoCurativeConfig
 from cortex.engine.self_optimizer import OptimizerConfig
-from cortex.engine.predictive_healer import Prediction, PredictionType
+from cortex.engine.uncategorized.predictive_healer import Prediction, PredictionType
 
 
 # ─── Fixtures ─────────────────────────────────────────────────────

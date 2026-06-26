@@ -67,7 +67,8 @@ class SwarmRouter:
                         candidates.append({"agent_id": str(a)})
             registry_snapshot = self._frozen_snapshot()
 
-        selected = _dispatch(candidates, request)
+        entropy_score = _evaluate_entropy(request)
+        selected = _dispatch(candidates, request, entropy_score)
 
         # Serialize capabilities to sorted list for JSON stability
         for k, v in selected.items():
@@ -90,6 +91,8 @@ class SwarmRouter:
                 registry_state=registry_snapshot,
                 selected_agent=selected_agent,
                 routing_payload=selected,
+                quorum_agents=selected.get("quorum_agents"),
+                entropy_score=entropy_score,
             )
         )
 
@@ -121,19 +124,55 @@ class SwarmRouter:
 # ------------------------------------------------------------------
 
 
-def _dispatch(candidates: list[dict], request: dict) -> dict:
-    """Pure selection: first candidate after deterministic sort."""
+def _evaluate_entropy(request: dict) -> float:
+    """
+    Thermodynamic evaluation of task complexity.
+    Returns a score between 0.0 and 1.0.
+    """
+    task = request.get("task", "")
+    score = 0.1
+    # Simple structural heuristic for high entropy
+    if len(task) > 100:
+        score += 0.3
+    if any(k in task.lower() for k in ["refactor", "research", "architecture", "consensus", "byzantine", "deep"]):
+        score += 0.4
+    if request.get("force_quorum", False):
+        score = 1.0
+    return min(1.0, score)
+
+
+def _dispatch(candidates: list[dict], request: dict, entropy_score: float) -> dict:
+    """Pure selection: assigns to Quorum if high entropy, else single agent."""
     if not candidates:
         raise ValueError(f"No candidates for task: {request.get('task', '')}")
 
     selected_agents = sorted([c.get("agent_id") for c in candidates if "agent_id" in c])
 
-    payload = {
-        "agent_id": candidates[0].get("agent_id", "unknown"),
-        "selected_agents": selected_agents,
-    }
-    payload.update(candidates[0])
-    return payload
+    if entropy_score >= 0.5 and len(candidates) >= 3:
+        # ZK-Swarm Consensus: dispatch to Quorum (N=3)
+        quorum = candidates[:3]
+        quorum_ids = [c.get("agent_id", "unknown") for c in quorum]
+        payload = {
+            "agent_id": "quorum_consensus",
+            "quorum_agents": quorum_ids,
+            "selected_agents": selected_agents,
+            "entropy_score": entropy_score,
+        }
+        # Merge traits from the first candidate as a baseline representation
+        for k, v in quorum[0].items():
+            if k not in payload:
+                payload[k] = v
+        return payload
+    else:
+        # Linear Execution: dispatch to N=1
+        payload = {
+            "agent_id": candidates[0].get("agent_id", "unknown"),
+            "quorum_agents": None,
+            "selected_agents": selected_agents,
+            "entropy_score": entropy_score,
+        }
+        payload.update(candidates[0])
+        return payload
 
 
 def _deep_sorted(obj):

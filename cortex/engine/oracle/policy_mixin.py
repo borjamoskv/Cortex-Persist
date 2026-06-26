@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.engine.forgetting_models import EvictionVerdict, OracleReport, PolicyRecommendation
+from cortex.engine.uncategorized.forgetting_models import EvictionVerdict, OracleReport, PolicyRecommendation
 
 logger = logging.getLogger("cortex.oracle.policy")
 

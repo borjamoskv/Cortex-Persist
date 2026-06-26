@@ -27,7 +27,7 @@ def pathogen_cmds():
 @click.option("--polarity", "-p", default="high", help="Polarity level (high, medium, low)")
 def craft(ghost: str, polarity: str):
     """Craft a polarizing Moltbook thesis from a Ghost (O(1) Outsource)."""
-    from cortex.engine.pathogen import PathogenEngine
+    from cortex.engine.evo.pathogen import PathogenEngine
 
     engine = get_engine()
     pathogen_engine = PathogenEngine(engine)
@@ -73,7 +73,7 @@ def craft(ghost: str, polarity: str):
 @click.option("--url", "-u", required=True, help="Moltbook post URL to monitor")
 def monitor(url: str):
     """Monitor a deployed pathogen post to extract the winning algorithm."""
-    from cortex.engine.pathogen import PathogenEngine
+    from cortex.engine.evo.pathogen import PathogenEngine
 
     pathogen_engine = PathogenEngine(None)
 

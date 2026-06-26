@@ -11,7 +11,7 @@ import logging
 import sqlite3
 from typing import TYPE_CHECKING, Any
 
-from cortex.engine.forgetting_models import EvictionVerdict
+from cortex.engine.uncategorized.forgetting_models import EvictionVerdict
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine as AsyncCortexEngine

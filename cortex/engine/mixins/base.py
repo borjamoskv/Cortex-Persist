@@ -71,7 +71,7 @@ class EngineMixinBase:
 
         Security: Strictly validates that the row belongs to the requested tenant.
         """
-        from cortex.engine.models import row_to_fact
+        from cortex.engine.uncategorized.models import row_to_fact
 
         # RLS Verification: row[1] is always tenant_id in canonical FACT_COLUMNS
         row_tuple = tuple(row)

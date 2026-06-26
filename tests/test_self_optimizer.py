@@ -13,7 +13,7 @@ import asyncio
 import pytest
 import time
 
-from cortex.engine.performance_tracker import (
+from cortex.engine.uncategorized.performance_tracker import (
     PerformanceTracker,
     SubsystemMetrics,
     StrategyEffectiveness,

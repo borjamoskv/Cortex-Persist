@@ -3,7 +3,7 @@
 
 Creates the append-only, hash-chained entity_events table
 that serves as the cryptographic source of truth for all
-fact state mutations. See cortex.engine.mutation_engine.
+fact state mutations. See cortex.engine.core.mutation_engine.
 """
 
 import sqlite3

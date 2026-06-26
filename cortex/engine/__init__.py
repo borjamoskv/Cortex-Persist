@@ -1,272 +1,150 @@
-# [C5-REAL] Exergy-Maximized
-"""CORTEX Engine - Package init.
+# CORTEX ENGINE FACADE
+# Auto-generated to maintain compatibility after structural mitosis.
 
-Reality Level: C5-REAL
-"""
-
-from __future__ import annotations
-
-import asyncio
-import logging
-import threading
-from pathlib import Path
-from typing import TYPE_CHECKING, Any
-
-import aiosqlite
-
-from cortex.config import DEFAULT_DB_PATH
-from cortex.engine._engine_connection import ConnectionMixin
-from cortex.engine._engine_delegates import DelegatesMixin
-from cortex.engine.agent_mixin import AgentMixin
-from cortex.engine.durability import PersistenceSupervisor
-from cortex.engine.memory_mixin import MemoryMixin
-from cortex.engine.mixins.components import ComponentsMixin
-from cortex.engine.mixins.optimization import OptimizationMixin
-from cortex.engine.query_mixin import QueryMixin
-from cortex.engine.search_mixin import SearchMixin
-from cortex.engine.store_mixin import StoreMixin
-from cortex.engine.sync_mixin import SyncMixin
-from cortex.engine.transaction_mixin import TransactionMixin
-
-if TYPE_CHECKING:
-    from cortex.consensus.manager import ConsensusManager
-    from cortex.embeddings import LocalEmbedder
-    from cortex.embeddings.manager import EmbeddingManager
-    from cortex.engine.auth import ByzantineAuthLayer
-    from cortex.engine.lock import SovereignLock
-    from cortex.engine.trust_registry import TrustRegistry
-    from cortex.facts.manager import FactManager
-    from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
-    from cortex.mac_maestro.executor import MaestroExecutor
-try:
-    from cortex_extensions.health.health_mixin import HealthMixin
-except ImportError:
-
-    class HealthMixin:
-        async def health_check(self, *args, **kwargs):
-            """Document health_check"""
-            return {"status": "unhealthy", "reason": "No Health extension"}
-
-        async def health_report(self, *args, **kwargs):
-            """Document health_report"""
-            return {"status": "unhealthy", "reason": "No Health extension"}
-
-
-logger = logging.getLogger("cortex.engine.guards")
-MAX_TAGS_PER_FACT = 20
-
-
-class CortexEngine(
-    ConnectionMixin,
-    DelegatesMixin,
-    SearchMixin,
-    StoreMixin,
-    QueryMixin,
-    MemoryMixin,
-    TransactionMixin,
-    OptimizationMixin,
-    HealthMixin,
-    SyncMixin,
-    AgentMixin,
-    ComponentsMixin,
-):
-    """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
-
-    def __init__(
-        self, db_path: str | Path | Any = DEFAULT_DB_PATH, auto_embed: bool = True, pool: Any = None
-    ):
-        self._skills_verified: set[str] = set()
-        if not isinstance(db_path, str | Path) and (not hasattr(db_path, "acquire")):
-            raise TypeError(
-                f"CortexEngine: db_path must be str, Path, or a pool object (with .acquire()), got {type(db_path).__name__!r}. Did you swap pool and db_path arguments?"
-            )
-        if hasattr(db_path, "acquire") and (not isinstance(db_path, str | Path)):
-            self._pool = db_path
-            self._db_path = Path(str(auto_embed)).expanduser()
-            self._auto_embed = True
-        else:
-            self._db_path = Path(str(db_path)).expanduser()
-            self._auto_embed = auto_embed
-            self._pool = pool
-        self._db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._conn: aiosqlite.Connection | None = None
-        self._thread_init_lock = threading.Lock()
-        self._vec_available = False
-        self._schema_ready = False
-        self._ledger = None
-        self._embedder: LocalEmbedder | None = None
-        self._memory_manager = None
-        self._memory_l1 = None
-        self._memory_l3 = None
-        self._memory_ready = False
-        self._persistence = PersistenceSupervisor(self)
-        self._system_state = "ACTIVE"
-        self._facts: FactManager | None = None
-        self._embeddings: EmbeddingManager | None = None
-        self._consensus: ConsensusManager | None = None
-        self._lock_sovereign: SovereignLock | None = None
-        self._ledger_store: LedgerStore | None = None
-        self._enrichment_queue: EnrichmentQueue | None = None
-        self._ledger_writer: LedgerWriter | None = None
-        self._mac_maestro: MaestroExecutor | None = None
-        self._auth: ByzantineAuthLayer | None = None
-        self._trust_registry: TrustRegistry | None = None
-        self._guard_pipeline = self._register_default_guards()
-        self._buffer_task = None
-        self._post_commit_tasks: set[asyncio.Task[Any]] = set()
-        self._pending_graph_jobs: dict[int, list[dict[str, Any]]] = {}
-
-    @property
-    def system_state(self) -> str:
-        """Get the current system state."""
-        return self._system_state
-
-    def set_system_state(self, state: str) -> None:
-        """Lock or unlock the sovereign engine (e.g., from EpistemicCircuitBreaker)"""
-        self._system_state = state
-        logger.warning("🛡️ [SOVEREIGN-STATE] CORTEX Engine state changed to: %s", state)
-
-    def _synthesize_skill(self, skill_name: str) -> None:
-        """JIT skill synthesis (Axiom Ω₄)."""
-        if skill_name in self._skills_verified:
-            return
-        SKILL_MAP = {
-            "search": SearchMixin,
-            "store": StoreMixin,
-            "query": QueryMixin,
-            "memory": MemoryMixin,
-            "tx": TransactionMixin,
-            "optimization": OptimizationMixin,
-            "health": HealthMixin,
-        }
-        if skill_name in SKILL_MAP:
-            SKILL_MAP[skill_name].__init__(self)
-            self._skills_verified.add(skill_name)
-            logger.debug("🛡️ [SORTU-JIT] Skill '%s' synthesized.", skill_name)
-
-    @staticmethod
-    def _audit_log(
-        action: str, fact_type: str = "", project: str = "", tenant_id: str = "default"
-    ) -> None:
-        """Append-only audit log for CLI/SDK access to CORTEX memory."""
-        audit_logger = logging.getLogger("cortex.audit")
-        audit_logger.info(
-            "AUDIT: action=%s fact_type=%s project=%s tenant=%s",
-            action,
-            fact_type,
-            project,
-            tenant_id,
-        )
-
-    def _get_embedder(self) -> LocalEmbedder:
-        """Protocol requirement for SearchMixin."""
-        if self._embedder is None:
-            from cortex.embeddings import LocalEmbedder
-
-            self._embedder = LocalEmbedder()
-        return self._embedder
-
-    async def start(self) -> None:
-        """Ignite the sovereign engine and its optimization layers."""
-        await self.start_optimizer()
-        await self._persistence.start()
-        logger.info("🚀 [CORTEX] Sovereign Engine ignited (Ω₀-Ω₆).")
-
-    async def close(self):
-        """Shutdown the engine, optimizer, and database connections."""
-        self._closing = True
-        await self.stop_optimizer()
-        await self._drain_tasks()
-
-        self._memory_l1 = None
-        self._memory_l3 = None
-        self._memory_ready = False
-        if self._persistence:
-            await self._persistence.stop()
-
-        await self._close_connections()
-
-        self.mac_maestro = None
-        self.ledger_writer = None
-        self.enrichment_queue = None
-        self.ledger_store = None
-        self._ledger = None
-
-    async def _drain_tasks(self):
-        if self._post_commit_tasks:
-            try:
-                await asyncio.wait_for(
-                    asyncio.gather(*self._post_commit_tasks, return_exceptions=True), timeout=5.0
-                )
-            except (asyncio.TimeoutError, asyncio.CancelledError, RuntimeError, ValueError):
-                logger.debug("Post-commit task drain timed out - forcing close")
-            self._post_commit_tasks.clear()
-        if self._memory_manager:
-            try:
-                await asyncio.wait_for(self._memory_manager.wait_for_background(), timeout=5.0)
-            except (asyncio.TimeoutError, asyncio.CancelledError, RuntimeError, ValueError):
-                logger.debug("Memory manager background drain timed out - forcing close")
-            self._memory_manager = None
-
-    async def _close_connections(self):
-        if hasattr(self, "_sync_conns"):
-            for conn in self._sync_conns:
-                try:
-                    conn.close()
-                except Exception:
-                    pass
-            self._sync_conns.clear()
-
-        if not hasattr(self, "_conns_by_loop"):
-            return
-        conns = list(self._conns_by_loop.values())
-        try:
-            current_loop = asyncio.get_running_loop()
-        except RuntimeError:
-            current_loop = None
-        for conn in conns:
-            conn_loop = getattr(conn, "_cortex_loop", current_loop)
-            if conn_loop is None or conn_loop.is_closed():
-                self._stop_dead_connection(conn)
-                continue
-            if conn_loop is current_loop:
-                try:
-                    await conn.close()
-                except (RuntimeError, ValueError, AttributeError):
-                    pass
-            else:
-                try:
-                    asyncio.run_coroutine_threadsafe(conn.close(), conn_loop)
-                except (RuntimeError, ValueError, AttributeError):
-                    pass
-        self._conns_by_loop.clear()
-
-    def _stop_dead_connection(self, conn):
-        if hasattr(conn, "_tx"):
-            try:
-                from aiosqlite.core import _STOP_RUNNING_SENTINEL
-
-                def close_and_stop(c=conn):
-                    if getattr(c, "_connection", None) is not None:
-                        try:
-                            c._connection.close()
-                        except (RuntimeError, ValueError, AttributeError):
-                            pass
-                        c._connection = None
-                    return _STOP_RUNNING_SENTINEL
-
-                conn._tx.put_nowait((None, close_and_stop))
-            except (RuntimeError, ValueError, AttributeError):
-                if hasattr(conn, "stop"):
-                    conn.stop()
-        elif hasattr(conn, "stop"):
-            conn.stop()
-
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, *args) -> None:
-        await self.close()
-
-
-AsyncCortexEngine = CortexEngine
+from .core import _engine_delegates
+from .core import runtime_kernel
+from .core import snapshots
+from .core import bifurcation_engine
+from .core import mutation_engine
+from .core import store_validators
+from .core import memory_mixin
+from .core import _engine_connection
+from .core import evolution_ledger
+from .core import fact_store_core
+from .core import tuning_store
+from .core import store_mutation
+from .core import tips
+from .core import physics
+from .core import distributed_ledger
+from .core import engine
+from .core import rollback_engine
+from .core import evolution_engine
+from .core import context_cache
+from .core import store_quarantine_mixin
+from .core import ultrathink_physics
+from .core import store_validation
+from .core import embedding_engine
+from .core import store_mixin
+from .swarm import swarm_10k
+from .swarm import auth
+from .swarm import test_autopoietic_agent
+from .swarm import auth_gateway
+from .swarm import omega_daemon
+from .swarm import legion
+from .swarm import entropy_daemon
+from .swarm import squadrons
+from .swarm import agent_mixin
+from .swarm import autopoietic_agent
+from .swarm import enrichment_worker
+from .swarm import nemesis_agent
+from .swarm import legion_vectors
+from .swarm import autocurative_agent
+from .swarm import legion_vectors_plan
+from .swarm import exergy_agent
+from .swarm import trust_registry
+from .swarm import phoenix_omega
+from .swarm import exergy_daemon
+from .swarm import aleph_omega
+from .flow import bridge_guard
+from .flow import encb_router
+from .flow import saga_protocol
+from .flow import arbiter_bridge
+from .flow import checkpoint
+from .flow import causality_models
+from .flow import causality
+from .flow import cascade_router
+from .flow import consensus
+from .flow import guard_adapters
+from .flow import causal_scheduler
+from .flow import lock
+from .flow import rim_latent_blocks
+from .flow import execution_ledger
+from .flow import storage_guard
+from .flow import guard_integration_patch
+from .flow import guard_pipeline
+from .meta import meta_arbiter
+from .meta import meta_arbiter_kernel
+from .meta import cognitive_arbiter
+from .meta import meta_arbiter_types
+from .meta import forgetting_oracle
+from .meta import metadata_engine
+from .meta import psychology
+from .meta import vision_reasoner
+from .meta import sovereign_arbiter
+from .meta import metabolism
+from .meta import _autopoietic_oracle
+from .meta import right_brain
+from .meta import cognitive
+from .meta import nemesis
+from .meta import metacognition
+from .evo import _genome_mutator
+from .evo import _autocurative_state
+from .evo import autopoiesis
+from .evo import healing_stack
+from .evo import _mutation_projectors
+from .evo import _autocurative_helper
+from .evo import repair_strategies
+from .evo import _genome_types
+from .evo import growth
+from .evo import pathogen
+from .evo import evolution_types
+from .evo import _autopoietic_helper
+from .evo import reaper
+from .evo import _autocurative_config
+from .evo import evolution_metrics
+from .evo import evaporator
+from .evo import _genome_tree_helper
+from .evo import genome
+from .evo import decalcifier
+from .evo import _autopoietic_state
+from .uncategorized import predictive_healer
+from .uncategorized import sandbox_jit
+from .uncategorized import forensic_strike_config
+from .uncategorized import manifestation
+from .uncategorized import compound_yield
+from .uncategorized import apotheosis
+from .uncategorized import models
+from .uncategorized import reflex
+from .uncategorized import semantic_hash
+from .uncategorized import data_surgery
+from .uncategorized import privacy_mixin
+from .uncategorized import shared_bus
+from .uncategorized import query_mixin
+from .uncategorized import search_mixin
+from .uncategorized import reporter
+from .uncategorized import keter
+from .uncategorized import sync_mixin
+from .uncategorized import endocrine
+from .uncategorized import exergy_optimizer
+from .uncategorized import chronos_roi
+from .uncategorized import event_sovereignty
+from .uncategorized import ghost_mixin
+from .uncategorized import conscious_recurrence
+from .uncategorized import durability
+from .uncategorized import apotheosis_audits_mixin
+from .uncategorized import substack_sidecar
+from .uncategorized import video_mla_cache
+from .uncategorized import circuit_breaker
+from .uncategorized import capabilities
+from .uncategorized import zero_prompting
+from .uncategorized import slashing
+from .uncategorized import persist_executor
+from .uncategorized import rem_cycle
+from .uncategorized import crystallizer
+from .uncategorized import enrichment_queue
+from .uncategorized import anomaly_hunter
+from .uncategorized import transaction_mixin
+from .uncategorized import inference
+from .uncategorized import forgetting_models
+from .uncategorized import reflexion
+from .uncategorized import heartbeat
+from .uncategorized import watcher
+from .uncategorized import performance_tracker
+from .uncategorized import cost_scheduler
+from .uncategorized import credibility_stack
+from .uncategorized import reporterd
+from .uncategorized import forensic_commander
+from .uncategorized import entropy
+from .uncategorized import history
+from .uncategorized import synthesis
+from .uncategorized import genesis

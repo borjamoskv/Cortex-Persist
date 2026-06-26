@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from cortex.engine.synthesis import CortexAutoSynthesisEngine
+from cortex.engine.uncategorized.synthesis import CortexAutoSynthesisEngine
 
 
 class DummyLLMManager:

@@ -273,7 +273,7 @@ def swarm_strike(phalanx, target):
     """Deploy CORTEX-SWARM-100 Architecture (20 Sovereign Vessels)"""
     import asyncio
 
-    from cortex.engine.squadrons import (
+    from cortex.engine.swarm.squadrons import (
         AutonomousRouter,
         GoldPhalanx,
         LeadPhalanx,

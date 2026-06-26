@@ -104,7 +104,7 @@ class TelemetryCompactionWorker:
             )
 
             # Store summary using unified pipeline
-            from cortex.engine.fact_store_core import insert_fact_record
+            from cortex.engine.core.fact_store_core import insert_fact_record
 
             await insert_fact_record(
                 conn=conn,

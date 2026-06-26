@@ -7,7 +7,7 @@ import sqlite3
 
 import pytest
 
-from cortex.engine.causality import (
+from cortex.engine.flow.causality import (
     CONFIDENCE_LEVELS,
     EDGE_DERIVED_FROM,
     TaintReport,
@@ -100,7 +100,7 @@ async def test_propagate_taint_single_child() -> None:
     conn = await aiosqlite.connect(":memory:")
     await conn.execute("PRAGMA journal_mode=WAL")
 
-    from cortex.engine.causality import AsyncCausalGraph
+    from cortex.engine.flow.causality import AsyncCausalGraph
 
     graph = AsyncCausalGraph(conn)
     await graph.ensure_table()
@@ -166,7 +166,7 @@ async def test_propagate_taint_chain() -> None:
     import aiosqlite
 
     conn = await aiosqlite.connect(":memory:")
-    graph_mod = __import__("cortex.engine.causality", fromlist=["AsyncCausalGraph"])
+    graph_mod = __import__("cortex.engine.flow.causality", fromlist=["AsyncCausalGraph"])
     graph = graph_mod.AsyncCausalGraph(conn)
     await graph.ensure_table()
     await conn.execute(
@@ -216,7 +216,7 @@ async def test_propagate_taint_no_descendants() -> None:
     import aiosqlite
 
     conn = await aiosqlite.connect(":memory:")
-    graph_mod = __import__("cortex.engine.causality", fromlist=["AsyncCausalGraph"])
+    graph_mod = __import__("cortex.engine.flow.causality", fromlist=["AsyncCausalGraph"])
     graph = graph_mod.AsyncCausalGraph(conn)
     await graph.ensure_table()
     await conn.execute(
@@ -255,7 +255,7 @@ async def test_propagate_taint_cyclic_graph() -> None:
     import aiosqlite
 
     conn = await aiosqlite.connect(":memory:")
-    graph_mod = __import__("cortex.engine.causality", fromlist=["AsyncCausalGraph"])
+    graph_mod = __import__("cortex.engine.flow.causality", fromlist=["AsyncCausalGraph"])
     graph = graph_mod.AsyncCausalGraph(conn)
     await graph.ensure_table()
     await conn.execute(

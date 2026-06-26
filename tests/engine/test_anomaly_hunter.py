@@ -4,8 +4,8 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from cortex.engine.anomaly_hunter import AnomalyHunterEngine
-from cortex.engine.models import Fact
+from cortex.engine.uncategorized.anomaly_hunter import AnomalyHunterEngine
+from cortex.engine.uncategorized.models import Fact
 
 
 @pytest.fixture

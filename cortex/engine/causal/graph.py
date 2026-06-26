@@ -9,7 +9,7 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.engine.causality_models import (
+from cortex.engine.flow.causality_models import (
     EpistemicStatus,
     LedgerEvent,
     TaintReport,

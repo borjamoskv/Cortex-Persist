@@ -4,7 +4,7 @@ import asyncio
 import pytest
 
 from cortex.engine import CortexEngine
-from cortex.engine.lock import SovereignLock
+from cortex.engine.flow.lock import SovereignLock
 from cortex_extensions.swarm.manager import CapatazOrchestrator
 
 

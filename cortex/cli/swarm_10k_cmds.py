@@ -9,7 +9,7 @@ import click
 from rich.panel import Panel
 
 from cortex.cli.common import cli, console
-from cortex.engine.swarm_10k import SwarmCommander
+from cortex.engine.swarm.swarm_10k import SwarmCommander
 
 
 @cli.group()
@@ -81,7 +81,7 @@ def swarm_10k_status(db_path):
         commander = SwarmCommander(bus_path=p)
         await commander.initialize()
 
-        from cortex.engine.shared_bus import SovereignSharedBus
+        from cortex.engine.uncategorized.shared_bus import SovereignSharedBus
 
         if isinstance(commander.bus, SovereignSharedBus):
             metrics = commander.bus.metrics

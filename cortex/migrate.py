@@ -146,7 +146,8 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
         try:
             engine.store_many_sync(facts_to_store)
             stats["facts_imported"] += len(facts_to_store)
-        except Exception as e:
+        except sqlite3.Error as e:
+            logger.exception("System facts import failed")
             stats["errors"].append(f"System facts import failed: {e}")
 
     # Sessions
@@ -243,7 +244,8 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
         try:
             engine.store_many_sync(facts_to_store)
             stats["facts_imported"] += len(facts_to_store)
-        except Exception as e:
+        except sqlite3.Error as e:
+            logger.exception("Project '%s' facts import failed", project)
             stats["errors"].append(f"Project '{project}' facts import failed: {e}")
 
 
@@ -286,7 +288,8 @@ def _migrate_mistakes(engine: CortexEngine, path: Path, stats: dict) -> None:
         try:
             engine.store_many_sync(facts_to_store)
             stats["errors_imported"] += len(facts_to_store)
-        except Exception as e:
+        except sqlite3.Error as e:
+            logger.exception("Mistakes import failed")
             stats["errors"].append(f"Mistakes import failed: {e}")
 
 
@@ -332,5 +335,6 @@ def _migrate_bridges(engine: CortexEngine, path: Path, stats: dict) -> None:
         try:
             engine.store_many_sync(facts_to_store)
             stats["bridges_imported"] += len(facts_to_store)
-        except Exception as e:
+        except sqlite3.Error as e:
+            logger.exception("Bridges import failed")
             stats["errors"].append(f"Bridges import failed: {e}")

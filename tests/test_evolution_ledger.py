@@ -19,7 +19,7 @@ import time
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from cortex.engine.evolution_ledger import (
+from cortex.engine.core.evolution_ledger import (
     ControlVector,
     EvolutionLedger,
     MutationRecord,
@@ -277,7 +277,7 @@ def test_checkpoint_merkle():
 
 def test_checkpoint_manager():
     """Test generating and verifying checkpoints via CheckpointManager."""
-    from cortex.engine.checkpoint import CheckpointManager
+    from cortex.engine.flow.checkpoint import CheckpointManager
 
     with tempfile.TemporaryDirectory() as tmpdir:
         log_path = os.path.join(tmpdir, "test_checkpoints.jsonl")

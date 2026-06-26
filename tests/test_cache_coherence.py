@@ -68,7 +68,7 @@ async def engine(tmp_path: Path):
     e = CortexEngine(db_path=db, auto_embed=False)
     await e.init_db()
 
-    from cortex.engine.causality import AsyncCausalGraph
+    from cortex.engine.flow.causality import AsyncCausalGraph
 
     async with e.session() as conn:
         cg = AsyncCausalGraph(conn)

@@ -24,10 +24,10 @@ import inspect
 import aiosqlite
 import pytest
 
-from cortex.engine.fact_store_core import insert_fact_record
+from cortex.engine.core.fact_store_core import insert_fact_record
 from cortex.engine.mixins.base import FACT_COLUMNS
-from cortex.engine.models import Fact
-from cortex.engine.query_mixin import QueryMixin
+from cortex.engine.uncategorized.models import Fact
+from cortex.engine.uncategorized.query_mixin import QueryMixin
 
 
 class TestDataModel:
@@ -80,7 +80,7 @@ class TestDataModel:
         assert "parent_decision_id" in sig.parameters
 
     def test_store_mixin_signature(self):
-        from cortex.engine.store_mixin import StoreMixin
+        from cortex.engine.core.store_mixin import StoreMixin
 
         sig = inspect.signature(StoreMixin.store)
         assert "parent_decision_id" in sig.parameters

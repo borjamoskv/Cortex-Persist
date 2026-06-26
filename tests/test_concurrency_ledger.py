@@ -21,7 +21,7 @@ async def engine(tmp_path: Path):
     await e.init_db()
 
     # Ensure causal_edges exists
-    from cortex.engine.causality import AsyncCausalGraph
+    from cortex.engine.flow.causality import AsyncCausalGraph
 
     async with e.session() as conn:
         cg = AsyncCausalGraph(conn)

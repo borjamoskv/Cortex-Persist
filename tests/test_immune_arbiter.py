@@ -11,7 +11,7 @@ os.environ.setdefault("CORTEX_TESTING", "1")
 
 import pytest
 
-from cortex.engine.forgetting_models import PolicyRecommendation
+from cortex.engine.uncategorized.forgetting_models import PolicyRecommendation
 from cortex_extensions.immune.arbiter import (
     ImmuneArbiter,
     Verdict,

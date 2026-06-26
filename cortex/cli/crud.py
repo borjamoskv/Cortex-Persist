@@ -44,7 +44,7 @@ def delete(fact_id, reason, tenant_id, db) -> None:
                 err_fact_not_found(fact_id)
                 return
 
-            from cortex.engine.models import Fact
+            from cortex.engine.uncategorized.models import Fact
 
             fact = cast(Fact, fact)
 
@@ -161,7 +161,7 @@ def edit(fact_id, new_content, tenant_id, db) -> None:
                 err_fact_not_found(fact_id)
                 return
 
-            from cortex.engine.models import Fact
+            from cortex.engine.uncategorized.models import Fact
 
             fact = cast(Fact, fact)
 

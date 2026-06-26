@@ -110,7 +110,7 @@ async def check_seal_3_security() -> GateResult:
     _EXCLUDE = frozenset(["legion_vectors.py", "legion.py"])
 
     try:
-        from cortex.engine.legion_vectors import EntropyDemon, Intruder
+        from cortex.engine.swarm.legion_vectors import EntropyDemon, Intruder
     except ImportError:
         printer.warn("Cobbler skipped: legion_vectors not importable.")
         return passed, "verified"

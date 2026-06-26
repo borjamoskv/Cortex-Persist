@@ -116,7 +116,7 @@ def snapshot_create(name, db):
     """Create a new physical snapshot."""
 
     async def _snapshot_create_async():
-        from cortex.engine.snapshots import SnapshotManager
+        from cortex.engine.core.snapshots import SnapshotManager
 
         engine = get_engine(db)
         try:
@@ -154,7 +154,7 @@ def snapshot_list(db):
     async def _snapshot_list_async():
         import sqlite3
 
-        from cortex.engine.snapshots import SnapshotManager
+        from cortex.engine.core.snapshots import SnapshotManager
 
         try:
             sm = SnapshotManager(db_path=db)

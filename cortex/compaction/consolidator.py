@@ -160,7 +160,7 @@ class BeliefConsolidator:
         Simple single-pass clustering: O(N²) but N is bounded
         by _MAX_EVENTS_PER_CYCLE (200). GPU-accelerated embedding.
         """
-        from cortex.engine.semantic_hash import (
+        from cortex.engine.uncategorized.semantic_hash import (
             batch_fingerprint,
             cosine_similarity,
         )

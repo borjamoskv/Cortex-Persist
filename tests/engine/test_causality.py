@@ -2,7 +2,7 @@
 import pytest
 import aiosqlite
 import json
-from cortex.engine.causality import (
+from cortex.engine.flow.causality import (
     CausalGraph,
     LedgerEvent,
     EpistemicStatus,

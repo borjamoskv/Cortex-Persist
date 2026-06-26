@@ -15,9 +15,9 @@ if TYPE_CHECKING:
 
     from cortex.consensus.manager import ConsensusManager
     from cortex.embeddings.manager import EmbeddingManager
-    from cortex.engine.auth import ByzantineAuthLayer
-    from cortex.engine.guard_pipeline import GuardPipeline
-    from cortex.engine.lock import SovereignLock
+    from cortex.engine.swarm.auth import ByzantineAuthLayer
+    from cortex.engine.flow.guard_pipeline import GuardPipeline
+    from cortex.engine.flow.lock import SovereignLock
     from cortex.facts.manager import FactManager
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
     from cortex.mac_maestro.executor import MaestroExecutor
@@ -79,7 +79,7 @@ class ComponentsMixin:
     @property
     def lock_sovereign(self) -> SovereignLock:
         if self._lock_sovereign is None:
-            from cortex.engine.lock import SovereignLock
+            from cortex.engine.flow.lock import SovereignLock
 
             self._lock_sovereign = SovereignLock(self)
         return self._lock_sovereign
@@ -91,7 +91,7 @@ class ComponentsMixin:
     @property
     def auth(self) -> ByzantineAuthLayer:
         if self._auth is None:
-            from cortex.engine.auth import ByzantineAuthLayer
+            from cortex.engine.swarm.auth import ByzantineAuthLayer
 
             self._auth = ByzantineAuthLayer()
         return self._auth
@@ -150,43 +150,43 @@ class ComponentsMixin:
 
     def _register_default_guards(self) -> GuardPipeline:
         """Build the GuardPipeline with all available guard adapters."""
-        from cortex.engine.guard_pipeline import GuardPipeline
+        from cortex.engine.flow.guard_pipeline import GuardPipeline
 
         pipeline = GuardPipeline()
         db_path = str(self._db_path)
 
         def _health():
-            from cortex.engine.guard_adapters import HealthGuardAdapter
+            from cortex.engine.flow.guard_adapters import HealthGuardAdapter
 
             return HealthGuardAdapter(self)
 
         def _contradiction():
-            from cortex.engine.guard_adapters import ContradictionGuardAdapter
+            from cortex.engine.flow.guard_adapters import ContradictionGuardAdapter
 
             return ContradictionGuardAdapter(db_path)
 
         def _verifier():
-            from cortex.engine.guard_adapters import VerifierGuardAdapter
+            from cortex.engine.flow.guard_adapters import VerifierGuardAdapter
 
             return VerifierGuardAdapter()
 
         def _zk():
-            from cortex.engine.guard_adapters import ZKGuardAdapter
+            from cortex.engine.flow.guard_adapters import ZKGuardAdapter
 
             return ZKGuardAdapter()
 
         def _virgo():
-            from cortex.engine.guard_adapters import VirgoGuardAdapter
+            from cortex.engine.flow.guard_adapters import VirgoGuardAdapter
 
             return VirgoGuardAdapter(self)  # type: ignore
 
         def _omega():
-            from cortex.engine.guard_adapters import OmegaGuardAdapter
+            from cortex.engine.flow.guard_adapters import OmegaGuardAdapter
 
             return OmegaGuardAdapter()
 
         def _arch():
-            from cortex.engine.guard_adapters import ArchaeologyGuardAdapter
+            from cortex.engine.flow.guard_adapters import ArchaeologyGuardAdapter
 
             return ArchaeologyGuardAdapter()
 
@@ -199,17 +199,17 @@ class ComponentsMixin:
         self._try_add(pipeline, "ArchaeologyGuardAdapter", _arch, is_hook=False)
 
         def _ledger():
-            from cortex.engine.guard_adapters import LedgerCheckpointHook
+            from cortex.engine.flow.guard_adapters import LedgerCheckpointHook
 
             return LedgerCheckpointHook(self)  # type: ignore
 
         def _signal():
-            from cortex.engine.guard_adapters import SignalEmitHook
+            from cortex.engine.flow.guard_adapters import SignalEmitHook
 
             return SignalEmitHook()
 
         def _epistemic():
-            from cortex.engine.guard_adapters import EpistemicBreakerHook
+            from cortex.engine.flow.guard_adapters import EpistemicBreakerHook
 
             return EpistemicBreakerHook()
 
