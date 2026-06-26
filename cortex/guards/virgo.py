@@ -80,12 +80,7 @@ class VirgoContextGuard:
                 content=content, public_key_b64=agent_public_key, signature_b64=logos_signature
             )
 
-        # B. Fallback to Deterministic HMAC/Hash binding
-        if not is_valid_sig:
-            # Expected deterministic hash: sha256(content + str(nonce) + project)
-            expected_hash = hashlib.sha256(f"{content}{nonce}{project}".encode()).hexdigest()
-            if logos_signature == expected_hash:
-                is_valid_sig = True
+
 
         if not is_valid_sig:
             self._apply_trust_penalty(agent_id, taint_severity=0.8)

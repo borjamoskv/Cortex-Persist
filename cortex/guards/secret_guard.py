@@ -21,14 +21,15 @@ class PlaintextSecretError(Exception):
 class SecretGuard:
     """OWASP LLM06: Sensitive Information Disclosure Guard."""
 
-    # High-confidence deterministic patterns
     SECRET_PATTERNS = [
         re.compile(r"AKIA[0-9A-Z]{16}"),  # AWS Access Key
         re.compile(r"sk-[a-zA-Z0-9]{48}"),  # OpenAI API Key
         re.compile(r"sk_(?:live|test)_[0-9a-zA-Z]{24,}"),  # Stripe API Key
         re.compile(r"ghp_[0-9a-zA-Z]{36}"),  # GitHub PAT
         re.compile(r"xox[baprs]-[0-9a-zA-Z]{10,}"),  # Slack Token
-        re.compile(r"-----BEGIN (?:RSA|OPENSSH|DSA|EC|PGP) PRIVATE KEY-----"),  # Private Keys
+        re.compile(r"-----BEGIN (?:[A-Z0-9]+\s+)?PRIVATE KEY-----"),  # Private Keys (RSA, OpenSSH, PKCS#8 etc.)
+        re.compile(r"AIzaSy[A-Za-z0-9_-]{33}"),  # Gemini API Key
+        re.compile(r"sk-ant-[a-zA-Z0-9_-]{40,}"),  # Anthropic API Key
     ]
 
     @classmethod
