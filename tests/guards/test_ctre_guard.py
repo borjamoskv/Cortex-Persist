@@ -2,8 +2,8 @@
 import pytest
 from unittest.mock import MagicMock
 from cortex.guards.ctre_guard import CTREGuard, CTRECollisionError, HAS_RUST_CTRE
-from cortex.engine.store_validation import run_store_validation_logic
-from cortex.engine.store_mixin import StoreMixin
+from cortex.engine.core.store_validation import run_store_validation_logic
+from cortex.engine.core.store_mixin import StoreMixin
 
 
 def test_ctre_collision_error_properties() -> None:
@@ -47,7 +47,7 @@ async def test_store_validation_runs_ctre() -> None:
 
     # run_store_validation_logic will process the metadata. We mock all subsequent validation
     # calls to avoid running other checks that require database connections.
-    import cortex.engine.store_validation as sv
+    import cortex.engine.core.store_validation as sv
     import sys
 
     # Save original functions to restore later

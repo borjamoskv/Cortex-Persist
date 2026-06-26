@@ -6,12 +6,12 @@ import logging
 import time
 from typing import Any
 
-from cortex.engine.autocurative_agent import AutoCurativeAgent
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.performance_tracker import PerformanceTracker
-from cortex.engine.predictive_healer import PredictiveHealer
+from cortex.engine.swarm.autocurative_agent import AutoCurativeAgent
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.uncategorized.performance_tracker import PerformanceTracker
+from cortex.engine.uncategorized.predictive_healer import PredictiveHealer
 from cortex.engine.self_optimizer import SelfOptimizer
-from cortex.engine.tuning_store import TuningStore
+from cortex.engine.core.tuning_store import TuningStore
 
 from .daemon import SupervisorDaemon
 from .types import AgentInfo, AgentStatus, SupervisorConfig

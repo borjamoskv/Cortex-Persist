@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from cortex.engine import CortexEngine
-from cortex.engine.causality import EDGE_DERIVED_FROM, AsyncCausalGraph
+from cortex.engine.flow.causality import EDGE_DERIVED_FROM, AsyncCausalGraph
 
 
 @pytest.fixture

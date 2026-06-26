@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 
-from cortex.engine.forensic_commander import ForensicCommander
-from cortex.engine.forensic_strike_config import STRIKE_V1
+from cortex.engine.uncategorized.forensic_commander import ForensicCommander
+from cortex.engine.uncategorized.forensic_strike_config import STRIKE_V1
 
 
 @pytest.mark.asyncio

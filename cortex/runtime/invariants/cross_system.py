@@ -19,7 +19,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.engine.evolution_ledger import EvolutionLedger, MutationRecord
+from cortex.engine.core.evolution_ledger import EvolutionLedger, MutationRecord
 from cortex.shannon.env.trace import EpisodeTrace
 from cortex.shannon.verification.cross_verifier import CrossVerifier
 

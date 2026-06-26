@@ -24,10 +24,10 @@ import inspect
 import aiosqlite
 import pytest
 
-from cortex.engine.fact_store_core import insert_fact_record
+from cortex.engine.core.fact_store_core import insert_fact_record
 from cortex.engine.mixins.base import FACT_COLUMNS
-from cortex.engine.models import Fact
-from cortex.engine.query_mixin import QueryMixin
+from cortex.engine.uncategorized.models import Fact
+from cortex.engine.uncategorized.query_mixin import QueryMixin
 
 
 @pytest.fixture

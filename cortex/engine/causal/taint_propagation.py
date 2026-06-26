@@ -11,7 +11,7 @@ from typing import Any
 import aiosqlite
 
 from cortex.crypto import get_default_encrypter
-from cortex.engine.causality_models import (
+from cortex.engine.flow.causality_models import (
     EDGE_TAINTED_BY,
     Confidence,
     TaintReport,

@@ -6,8 +6,8 @@ import logging
 import time
 from typing import Any
 
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.predictive_healer import Prediction
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.uncategorized.predictive_healer import Prediction
 
 from .types import AgentStatus
 

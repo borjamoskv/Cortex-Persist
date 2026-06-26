@@ -24,7 +24,7 @@ class TestInferenceEngine:
 
     def test_inference_rule_dataclass(self):
         """InferenceRule can be instantiated."""
-        from cortex.engine.inference import InferenceRule
+        from cortex.engine.uncategorized.inference import InferenceRule
 
         rule = InferenceRule(
             name="test",
@@ -37,7 +37,7 @@ class TestInferenceEngine:
 
     def test_inference_engine_instantiation(self):
         """InferenceEngine loads builtin rules."""
-        from cortex.engine.inference import InferenceEngine
+        from cortex.engine.uncategorized.inference import InferenceEngine
 
         engine = InferenceEngine()
         assert len(engine.rules) > 0
@@ -46,7 +46,7 @@ class TestInferenceEngine:
 
     def test_derivation_dataclass(self):
         """Derivation object has required fields."""
-        from cortex.engine.inference import Derivation
+        from cortex.engine.uncategorized.inference import Derivation
 
         d = Derivation(
             content="derived fact",

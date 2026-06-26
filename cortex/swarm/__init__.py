@@ -3,14 +3,14 @@
 import asyncio
 import threading
 
-from cortex.swarm.autopulse import process_queue
+from cortex.swarm.autopulse import autopulse
 
 
 def start_swarm_daemon():
     """Start the Swarm Autopoiesis engine in a background thread."""
 
     def run():
-        asyncio.run(process_queue())
+        asyncio.run(autopulse())
 
     thread = threading.Thread(target=run, daemon=True)
     thread.start()

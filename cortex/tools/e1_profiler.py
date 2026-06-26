@@ -29,7 +29,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
-from cortex.engine.meta_arbiter import MetaArbiterKernel, TrajectoryScore
+from cortex.engine.meta.meta_arbiter import MetaArbiterKernel, TrajectoryScore
 from cortex.tools.trace_adapter import ExecutionTrace
 from cortex.tools.trace_builder import TraceBuilder
 

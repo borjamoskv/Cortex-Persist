@@ -90,8 +90,8 @@ class TieredCache(Generic[T]):
 
             self._redis_client = aioredis.from_url(redis_url, decode_responses=True)
             return self._redis_client
-        except Exception as exc:
-            logger.warning("Failed to initialize Redis client for cache %s: %s", self.name, exc)
+        except (ImportError, OSError, ValueError) as exc:
+            logger.exception("Failed to initialize Redis client for cache %s", self.name)
             return None
 
     async def _redis_get(self, key: str) -> T | None:
@@ -107,8 +107,8 @@ class TieredCache(Generic[T]):
             import json
 
             return json.loads(raw_val)
-        except Exception as exc:
-            logger.warning("Redis get failed for key %s: %s", key, exc)
+        except (json.JSONDecodeError, OSError, ValueError) as exc:
+            logger.exception("Redis get failed for key %s", key)
             return None
 
     async def _redis_set(self, key: str, value: T, ttl: float):
@@ -128,8 +128,8 @@ class TieredCache(Generic[T]):
                 )
                 return
             await client.set(redis_key, serialized, ex=int(ttl))
-        except Exception as exc:
-            logger.warning("Redis set failed for key %s: %s", key, exc)
+        except (OSError, ValueError) as exc:
+            logger.exception("Redis set failed for key %s", key)
 
     async def set(self, key: str, value: T, ttl: float | None = None):
         """Set value in cache."""
@@ -169,8 +169,8 @@ class TieredCache(Generic[T]):
                         await client.delete(*keys)
                     if cursor == 0:
                         break
-            except Exception as exc:
-                logger.warning("Redis invalidate failed for pattern %s: %s", pattern, exc)
+            except (OSError, ValueError) as exc:
+                logger.exception("Redis invalidate failed for pattern %s", pattern)
 
         await self._notify(CacheEvent.INVALIDATE, pattern)
 
@@ -190,8 +190,8 @@ class TieredCache(Generic[T]):
                         await client.delete(*keys)
                     if cursor == 0:
                         break
-            except Exception as exc:
-                logger.warning("Redis clear failed: %s", exc)
+            except (OSError, ValueError) as exc:
+                logger.exception("Redis clear failed")
 
         await self._notify(CacheEvent.CLEAR, "all")
 
@@ -206,5 +206,5 @@ class TieredCache(Generic[T]):
         for queue in self._subscribers:
             try:
                 queue.put_nowait((event, key))
-            except Exception as exc:
-                logger.warning("Suppressed exception: %s", exc)
+            except asyncio.QueueFull:
+                logger.warning("Cache subscriber queue full, dropping event")

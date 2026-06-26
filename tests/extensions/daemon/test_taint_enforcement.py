@@ -26,7 +26,7 @@ from cortex.engine.causal.verification_oracle import (
     verify_c5_state_machine,
     InvariantViolationError,
 )
-from cortex.engine.fact_store_core import insert_fact_record
+from cortex.engine.core.fact_store_core import insert_fact_record
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.models import MemoryEvent, CortexFactModel
 from cortex.memory.hdc.store import HDCVectorStoreL2
@@ -307,7 +307,7 @@ async def test_store_mixin_guard_runtime_error_fails_closed(monkeypatch, tmp_pat
 
 
 def test_storage_guard_rejects_missing_source():
-    from cortex.engine.storage_guard import GuardViolation, StorageGuard
+    from cortex.engine.flow.storage_guard import GuardViolation, StorageGuard
 
     with pytest.raises(GuardViolation, match="SOURCE_REQUIRED"):
         StorageGuard.validate(

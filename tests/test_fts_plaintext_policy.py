@@ -13,7 +13,7 @@ import pytest
 from cortex.crypto.aes import CortexEncrypter
 from cortex.database.schema import CREATE_FACTS
 from cortex.database.schema_extensions import CREATE_FACTS_FTS
-from cortex.engine.fact_store_core import insert_fact_record
+from cortex.engine.core.fact_store_core import insert_fact_record
 from cortex.search.hybrid import hybrid_search
 
 # Fixed key for testing
@@ -69,7 +69,7 @@ async def test_fts_indexes_plaintext_not_ciphertext(encrypter, monkeypatch):
     # 1. Setup Mocking
     monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: encrypter)
     # Stub hash and other components to avoid overhead
-    monkeypatch.setattr("cortex.engine.fact_store_core.compute_fact_hash", lambda x: "hash")
+    monkeypatch.setattr("cortex.engine.core.fact_store_core.compute_fact_hash", lambda x: "hash")
 
     conn = await aiosqlite.connect(":memory:")
     await _setup_db(conn)

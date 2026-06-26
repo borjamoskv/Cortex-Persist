@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from cortex.engine._autocurative_config import AutoCurativeConfig
+from cortex.engine.evo._autocurative_config import AutoCurativeConfig
 from cortex.engine.self_optimizer import OptimizerConfig
 
 

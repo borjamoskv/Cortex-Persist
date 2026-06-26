@@ -59,7 +59,7 @@ async def test_dynamic_salt_resolution(tmp_path):
     conn.close()
 
     # Create ConnectionMixin context to run _ensure_schema_ready
-    from cortex.engine._engine_connection import ConnectionMixin
+    from cortex.engine.core._engine_connection import ConnectionMixin
 
     class DummyEngine(ConnectionMixin):
         def __init__(self, db_path):

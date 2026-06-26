@@ -89,7 +89,7 @@ def compound(project: str | None, persist: bool) -> None:
     """Detect compound causal chains and report exponential Ω₁₁ yield."""
     from rich.table import Table
 
-    from cortex.engine.compound_yield import CompoundYieldTracker
+    from cortex.engine.uncategorized.compound_yield import CompoundYieldTracker
 
     try:
         tracker = CompoundYieldTracker(db_path=str(DEFAULT_DB_PATH))
@@ -125,7 +125,8 @@ def compound(project: str | None, persist: bool) -> None:
         )
 
         if persist:
-            fact_id = tracker.persist_report(report, project=project or "system")
+            import asyncio
+            fact_id = asyncio.run(tracker.persist_report(report, project=project or "system"))
             if fact_id:
                 console.print(f"[green]✔ Report persisted as Fact #{fact_id}[/green]")
 
@@ -142,7 +143,7 @@ def projection(years: int, base_hours: float, rate: float) -> None:
     """Project Linear vs Compound CHRONOS-1 yield over a decade."""
     from rich.table import Table
 
-    from cortex.engine.compound_yield import CompoundProjector
+    from cortex.engine.uncategorized.compound_yield import CompoundProjector
 
     try:
         report = CompoundProjector.project(

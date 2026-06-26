@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from cortex.engine import shared_bus as shared_bus_module
-from cortex.engine.swarm_10k import SwarmCommander
+from cortex.engine.uncategorized.shared_bus import shared_bus as shared_bus_module
+from cortex.engine.swarm.swarm_10k import SwarmCommander
 from cortex_extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 

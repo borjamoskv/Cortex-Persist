@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from cortex.engine.cascade_router import CascadeRouter
+from cortex.engine.flow.cascade_router import CascadeRouter
 
 def test_select_engine():
     router = CascadeRouter()
@@ -25,7 +25,7 @@ def test_fallback_response():
 
 from unittest.mock import patch
 
-@patch("cortex.engine.cascade_router.asyncio.create_subprocess_exec")
+@patch("cortex.engine.flow.cascade_router.asyncio.create_subprocess_exec")
 def test_route_task_fallback(mock_create_exec):
     import asyncio
     mock_create_exec.side_effect = FileNotFoundError()

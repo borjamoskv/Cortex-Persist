@@ -3,9 +3,9 @@ import os
 import ast
 from unittest.mock import AsyncMock, MagicMock
 
-from cortex.engine.entropy import EntropyAnnihilator
+from cortex.engine.uncategorized.entropy import EntropyAnnihilator
 from cortex.guards.causal_closure_guard import CausalClosureGuard, SwarmProposal
-from cortex.engine.crystallizer import AutoCrystallizer
+from cortex.engine.uncategorized.crystallizer import AutoCrystallizer
 
 # [Level 20: Physical Claims Audit]
 # Destructive tests to measure Causal Surface Area

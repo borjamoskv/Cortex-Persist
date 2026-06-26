@@ -6,7 +6,7 @@ Uses the SandboxJIT and Exergy economics to reach consensus on proposed code mut
 import logging
 from typing import Any
 
-from cortex.engine.sandbox_jit import JITSandboxViolation, SandboxJIT
+from cortex.engine.uncategorized.sandbox_jit import JITSandboxViolation, SandboxJIT
 from cortex.swarm.exergy import ExergyBank
 
 logger = logging.getLogger(__name__)

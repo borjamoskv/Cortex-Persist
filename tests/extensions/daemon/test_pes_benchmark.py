@@ -8,8 +8,8 @@ import numpy as np
 from unittest.mock import AsyncMock, MagicMock
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from cortex.engine.event_sovereignty import EventSovereigntyRuntime
-from cortex.engine.auth_gateway import QuorumGateway
+from cortex.engine.uncategorized.event_sovereignty import EventSovereigntyRuntime
+from cortex.engine.swarm.auth_gateway import QuorumGateway
 from cortex.engine.causal.anomaly_bridge import AnomalyBridge
 from cortex_extensions.security.signatures import Ed25519Signer
 

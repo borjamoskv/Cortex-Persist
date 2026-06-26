@@ -6,19 +6,29 @@ import sqlite3
 from .models import SwarmEvent
 
 
+from cortex.database.core import CortexConnection
+
 class SwarmLedger:
     def __init__(self, path: str | None = None):
         if path is None:
             path = os.getenv("CORTEX_SWARM_DB_PATH", "cortex_swarm.db")
-        self.conn = sqlite3.connect(path, timeout=10, check_same_thread=False)
+        self.conn = sqlite3.connect(path, timeout=10, check_same_thread=False, factory=CortexConnection)
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA journal_mode=WAL;")
         self.conn.execute("PRAGMA synchronous=NORMAL;")
         self._init()
 
     def _init(self):
-        with open("cortex/swarm/ledger/schema.sql") as f:
-            self.conn.executescript(f.read())
+        import os
+        schema_path = os.path.join(os.path.dirname(__file__), "schema.sql")
+        with open(schema_path) as f:
+            if hasattr(self.conn, "authorize_causal_writes"):
+                self.conn.authorize_causal_writes()
+            try:
+                self.conn.executescript(f.read())
+            finally:
+                if hasattr(self.conn, "revoke_causal_writes"):
+                    self.conn.revoke_causal_writes()
 
     # ------------------------------------------------------------------
     # Write
@@ -26,27 +36,34 @@ class SwarmLedger:
 
     def append(self, event: SwarmEvent) -> str:
         r = event.to_record()
-        self.conn.execute(
-            """
-            INSERT INTO swarm_events (
-                event_id, timestamp, input_hash, registry_hash,
-                task, selected_agent, routing_payload,
-                deterministic_signature, version
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-            (
-                r["event_id"],
-                r["timestamp"],
-                r["input_hash"],
-                r["registry_hash"],
-                r["task"],
-                r["selected_agent"],
-                r["routing_payload"],
-                r["deterministic_signature"],
-                r["version"],
-            ),
-        )
-        self.conn.commit()
+        
+        if hasattr(self.conn, "authorize_causal_writes"):
+            self.conn.authorize_causal_writes()
+        try:
+            self.conn.execute(
+                """
+                INSERT INTO swarm_events (
+                    event_id, timestamp, input_hash, registry_hash,
+                    task, selected_agent, routing_payload,
+                    deterministic_signature, version
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+                (
+                    r["event_id"],
+                    r["timestamp"],
+                    r["input_hash"],
+                    r["registry_hash"],
+                    r["task"],
+                    r["selected_agent"],
+                    r["routing_payload"],
+                    r["deterministic_signature"],
+                    r["version"],
+                ),
+            )
+            self.conn.commit()
+        finally:
+            if hasattr(self.conn, "revoke_causal_writes"):
+                self.conn.revoke_causal_writes()
         return r["event_id"]
 
     # ------------------------------------------------------------------

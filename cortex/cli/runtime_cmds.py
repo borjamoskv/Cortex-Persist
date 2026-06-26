@@ -4,7 +4,7 @@ import logging
 import click
 
 from cortex.cli.common import cli
-from cortex.engine.runtime_kernel import CortexRuntime
+from cortex.engine.core.runtime_kernel import CortexRuntime
 
 logger = logging.getLogger(__name__)
 

@@ -1,12 +1,12 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
-import hashlib
 import json
 import logging
 import os
 import time
 
 from cortex.config import DB_PATH
+from cortex.crypto.provider import HashProvider
 from cortex.swarm.tensor_glial import TensorGlialLegion
 from cortex_extensions.signals.bus import AsyncSignalBus
 
@@ -17,19 +17,38 @@ STATE_FILE = "/tmp/cortex_state.json"
 _ENTROPY_THRESHOLD = float(os.environ.get("CORTEX_ENTROPY_THRESHOLD", "0.15"))
 
 
+class TensorProvider:
+    """Lazy Singleton Provider for the TensorGlialLegion mmap."""
+    
+    _tensor: TensorGlialLegion | None = None
+    _lock = asyncio.Lock()
+
+    @classmethod
+    async def get(cls) -> TensorGlialLegion:
+        if cls._tensor is None:
+            async with cls._lock:
+                if cls._tensor is None:
+                    cls._tensor = await asyncio.to_thread(cls._init_tensor)
+        return cls._tensor
+
+    @staticmethod
+    def _init_tensor() -> TensorGlialLegion:
+        """CPU/Disk intensive initialization."""
+        legion = TensorGlialLegion(
+            num_agents=10000, d_dim=10000, file_path="/tmp/tensor_legion.vsa_mmap"
+        )
+        legion.apply_fading_memory(lambda_decay=0.01)
+        return legion
+
+
 def _load_anti_limerence_runtime() -> tuple:
     """Loads anti-limerence and ultramap modules if available."""
     try:
         from cortex_rs import AntiLimerenceTopology
-
         anti_limerence = AntiLimerenceTopology()
         import sys
-
-        sys.path.append(
-            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core"))
-        )
+        sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core")))
         from ultramap import UltramapSubstrate
-
         umap = UltramapSubstrate(capacity=10000)
         logger.info("C5-REAL: Anti-Limerence Runtime & Ultramap Endocrinology Engaged")
         return anti_limerence, umap
@@ -38,11 +57,8 @@ def _load_anti_limerence_runtime() -> tuple:
         return None, None
 
 
-def _consume_next_task() -> tuple[str, dict] | None:
-    """Reads the next pending task from the swarm queue file and updates it.
-
-    Returns a tuple of (agent, payload) or None if no task is available.
-    """
+def _consume_next_task_sync() -> tuple[str, dict] | None:
+    """Synchronous file I/O and JSON parsing for reading next task. Must be wrapped in to_thread."""
     if not os.path.exists(SWARM_QUEUE_FILE):
         return None
     try:
@@ -63,10 +79,14 @@ def _consume_next_task() -> tuple[str, dict] | None:
         return None
 
 
+async def _consume_next_task() -> tuple[str, dict] | None:
+    """Reads and parses the next pending task asynchronously without blocking the event loop."""
+    return await asyncio.to_thread(_consume_next_task_sync)
+
+
 def _trigger_umap_hormones(agent: str, umap) -> None:
     """Triggers hormonal stress response in adjacent agents."""
-    agent_hash = int(hashlib.sha256(agent.encode()).hexdigest()[:16], 16)
-    # Retain exact statement from original code
+    agent_hash = int(HashProvider.sha256(agent)[:16], 16)
     agent_hash % umap.capacity
     x = agent_hash % 1000 / 10.0
     y = (agent_hash >> 4) % 1000 / 10.0
@@ -81,18 +101,11 @@ def _trigger_umap_hormones(agent: str, umap) -> None:
         serotonin=0.0,
         adrenaline=0.6,
     )
-    logger.warning(
-        "🌊 CORTISOL SHOCKWAVE: %s agentes adyacentes estresados por la aniquilación de %s",
-        affected,
-        agent,
-    )
+    logger.warning("🌊 CORTISOL SHOCKWAVE: %s agentes adyacentes estresados por la aniquilación de %s", affected, agent)
 
 
-def _execute_anti_limerence(agent: str, reality_delta: float, anti_limerence, umap) -> bool:
-    """Inculcates belief and processes the kill switch for limerent agents.
-
-    Returns True if the agent itself was purged and execution should halt.
-    """
+def _execute_anti_limerence_sync(agent: str, reality_delta: float, anti_limerence, umap) -> bool:
+    """Synchronous logic for incubating belief and processing kill switch."""
     if not anti_limerence:
         return False
     try:
@@ -100,10 +113,7 @@ def _execute_anti_limerence(agent: str, reality_delta: float, anti_limerence, um
         anti_limerence.inject_friction(agent, reality_delta)
         purged = anti_limerence.execute_kill_switch()
         if purged:
-            logger.error(
-                "OUROBOROS KILL-SWITCH: The following agents suffered Epistemic Limerence and were annihilated: %s",
-                purged,
-            )
+            logger.error("OUROBOROS KILL-SWITCH: The following agents suffered Epistemic Limerence and were annihilated: %s", purged)
             if umap:
                 _trigger_umap_hormones(agent, umap)
             if agent in purged:
@@ -114,8 +124,8 @@ def _execute_anti_limerence(agent: str, reality_delta: float, anti_limerence, um
     return False
 
 
-async def _append_state_ledger(agent: str, payload: dict) -> None:
-    """Appends task resolution to the state file and emits a ledger signal."""
+def _write_ledger_sync(agent: str, payload: dict) -> str:
+    """Synchronous file I/O for appending to the state ledger. Returns block_hash."""
     prev_hash = "GENESIS_BLOCK"
     if os.path.exists(STATE_FILE):
         try:
@@ -125,12 +135,15 @@ async def _append_state_ledger(agent: str, payload: dict) -> None:
                     prev_hash = state["ledgers"][-1]["hash"]
         except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
+            
     action = f"SwarmSolve:{agent}"
     vector_id = payload.get("vector_id", "swarm_task_auto")
     yield_amount = 1.0
     timestamp = time.monotonic()
+    
     block_payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
-    block_hash = hashlib.sha256(block_payload.encode()).hexdigest()
+    block_hash = HashProvider.sha256(block_payload)
+    
     if not os.path.exists(STATE_FILE):
         state = {"ledgers": []}
     else:
@@ -139,24 +152,33 @@ async def _append_state_ledger(agent: str, payload: dict) -> None:
                 state = json.load(f)
         except (OSError, json.JSONDecodeError, KeyError, ValueError):
             state = {"ledgers": []}
-    state["ledgers"].append(
-        {
-            "timestamp": timestamp,
-            "action": action,
-            "vector_id": vector_id,
-            "yield_amount": yield_amount,
-            "hash": block_hash,
-        }
-    )
+            
+    state["ledgers"].append({
+        "timestamp": timestamp,
+        "action": action,
+        "vector_id": vector_id,
+        "yield_amount": yield_amount,
+        "hash": block_hash,
+    })
     try:
         with open(STATE_FILE, "w") as f:
             json.dump(state, f, indent=2)
     except OSError as e:
         logger.error("Error writing state file: %s", e)
+        
+    return block_hash
 
+
+async def _append_state_ledger(agent: str, payload: dict) -> None:
+    """Appends task resolution asynchronously to state file and emits signal."""
+    block_hash = await asyncio.to_thread(_write_ledger_sync, agent, payload)
+    
+    action = f"SwarmSolve:{agent}"
+    vector_id = payload.get("vector_id", "swarm_task_auto")
+    yield_amount = 1.0
+    
     try:
         import aiosqlite
-
         async with aiosqlite.connect(DB_PATH) as conn:
             bus = AsyncSignalBus(conn)
             await bus.emit(
@@ -173,27 +195,39 @@ async def _append_state_ledger(agent: str, payload: dict) -> None:
         logger.error("Autopulse Signal Error: %s", e)
 
 
-async def _process_single_task(agent: str, payload: dict, anti_limerence, umap) -> None:
-    """Executes a single task from the queue, including VSA operations and validation."""
-    logger.info("Autopoiesis: Processing task for %s...", agent)
-    legion = TensorGlialLegion(
-        num_agents=10000, d_dim=10000, file_path="/tmp/tensor_legion.vsa_mmap"
-    )
-    legion.apply_fading_memory(lambda_decay=0.01)
+def _process_tensor_sync(legion: TensorGlialLegion, agent: str, payload: dict) -> float:
+    """CPU-heavy synchronous tensor operations. Returns reality_delta."""
     legion.batch_write_action([0], [f"Process: {payload}"])
     slashed = legion.epistemic_slash_and_respawn(bottom_percentile=10, elite_percentile=90)
     if slashed > 0:
-        logger.info(
-            "OMEGA-X: Apoptosis activated. %s dead nodes respawned from elite VSA topologies.",
-            slashed,
-        )
+        logger.info("OMEGA-X: Apoptosis activated. %s dead nodes respawned from elite VSA topologies.", slashed)
+        
     try:
         _audit_entropy_spike(legion, agent)
-        reality_delta = 0.5
+        return 0.5
     except EntropySpikeException:
-        reality_delta = -1.0
+        return -1.0
 
-    purged = _execute_anti_limerence(agent, reality_delta, anti_limerence, umap)
+
+async def _process_single_task(agent: str, payload: dict, anti_limerence, umap) -> None:
+    """Executes a single task from the queue, including VSA operations and validation."""
+    logger.info("Autopoiesis: Processing task for %s...", agent)
+    
+    # 1. Lazy Tensor Singleton Init
+    t0 = time.monotonic()
+    legion = await TensorProvider.get()
+    t_init = (time.monotonic() - t0) * 1000.0
+    
+    if t_init > 5.0:
+        logger.info("Telemetry | Tensor Init Time: %.2f ms", t_init)
+    else:
+        logger.debug("Telemetry | Tensor Warm Time: %.2f ms", t_init)
+
+    # 2. Process Tensor heavily in separate thread
+    reality_delta = await asyncio.to_thread(_process_tensor_sync, legion, agent, payload)
+
+    # 3. Process Limerence
+    purged = await asyncio.to_thread(_execute_anti_limerence_sync, agent, reality_delta, anti_limerence, umap)
     if purged:
         return
 
@@ -207,20 +241,35 @@ async def process_queue() -> None:
     """Background loop to consume and execute pending swarm tasks."""
     logger.info("Autopulse Engine: Ignited. Watching swarm queue...")
     anti_limerence, umap = _load_anti_limerence_runtime()
-    while True:
-        task_data = _consume_next_task()
-        if task_data:
-            agent, payload = task_data
-            try:
-                await _process_single_task(agent, payload, anti_limerence, umap)
-            except EntropySpikeException as e:
-                logger.error(
-                    "Autopulse Circuit Breaker Tripped! Task aborted for %s. Error: %s", agent, e
-                )
-                await asyncio.sleep(30.0)
-            except Exception as e:
-                logger.error("Unexpected error processing task: %s", e)
-        await asyncio.sleep(2.0)
+    
+    last_pulse = time.monotonic()
+    
+    try:
+        while True:
+            current_time = time.monotonic()
+            loop_lag = (current_time - last_pulse) * 1000.0
+            
+            # 2s is the sleep interval, overhead shouldn't push it beyond 3s typically
+            if loop_lag > 3000.0:
+                logger.warning("Telemetry | High Loop Lag detected: %.1f ms", loop_lag)
+                
+            task_data = await _consume_next_task()
+            if task_data:
+                agent, payload = task_data
+                try:
+                    await _process_single_task(agent, payload, anti_limerence, umap)
+                except EntropySpikeException as e:
+                    logger.error("Autopulse Circuit Breaker Tripped! Task aborted for %s. Error: %s", agent, e)
+                    await asyncio.sleep(30.0)
+                except Exception as e:
+                    logger.error("Unexpected error processing task: %s", e)
+            
+            await asyncio.sleep(2.0)
+            last_pulse = time.monotonic()
+            
+    except asyncio.CancelledError:
+        logger.info("Autopulse Engine: Cancelled signal received. Shutting down cleanly.")
+        raise
 
 
 class EntropySpikeException(Exception):
@@ -228,13 +277,7 @@ class EntropySpikeException(Exception):
 
 
 def _audit_entropy_spike(legion: TensorGlialLegion, agent_name: str) -> None:
-    """AUDITOR-Ω Circuit Breaker: Monitor yield entropy spikes per Axiom Ω₃.
-
-    Computes the yield_ratio dispersion across the legion. If the coefficient
-    of variation (std/mean) exceeds _ENTROPY_THRESHOLD, emits a P1 alert and
-    raises an EntropySpikeException to trip the Circuit Breaker and prevent
-    ledger pollution.
-    """
+    """AUDITOR-Ω Circuit Breaker: Monitor yield entropy spikes per Axiom Ω₃."""
     import numpy as np
 
     yield_ratio = legion.yield_tensor / (legion.token_burn_tensor + 1e-05)
@@ -251,11 +294,12 @@ def _audit_entropy_spike(legion: TensorGlialLegion, agent_name: str) -> None:
             _ENTROPY_THRESHOLD,
             legion.global_sha256_audit()[:16],
         )
-        raise EntropySpikeException(
-            f"Entropy Circuit Breaker tripped for agent {agent_name} (cv={cv:.4f})"
-        )
+        raise EntropySpikeException(f"Entropy Circuit Breaker tripped for agent {agent_name} (cv={cv:.4f})")
     logger.debug("[AUDITOR-Ω] entropy OK - agent=%s cv=%.4f", agent_name, cv)
 
 
 if __name__ == "__main__":
-    asyncio.run(process_queue())
+    try:
+        asyncio.run(process_queue())
+    except KeyboardInterrupt:
+        logger.info("Autopulse terminated by user.")

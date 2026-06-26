@@ -5,7 +5,7 @@ CORTEX Nexus v8.1 - The Einstein-Rosen Bridge (Production Grade).
 Legacy shim for backward compatibility. Use `cortex.nexus` directly.
 """
 
-from cortex.engine.swarm_10k import SwarmCommander
+from cortex.engine.swarm.swarm_10k import SwarmCommander
 from cortex_extensions.nexus import (
     DomainOrigin,
     IntentType,

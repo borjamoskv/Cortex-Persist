@@ -11,7 +11,7 @@ from starlette.requests import Request
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.engine.storage_guard import GuardViolation
+from cortex.engine.flow.storage_guard import GuardViolation
 from cortex.types.models import (
     FactResponse,
     StoreRequest,

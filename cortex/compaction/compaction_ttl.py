@@ -64,7 +64,7 @@ async def commit_ttl_mutations(
     now: datetime,
 ) -> None:
     """Commit deprecation or tombstone mutations for expired facts."""
-    from cortex.engine.mutation_engine import MUTATION_ENGINE
+    from cortex.engine.core.mutation_engine import MUTATION_ENGINE
 
     ts = now.isoformat()
     tombstone_set = {fid for fid, _ in tombstonable_ids}

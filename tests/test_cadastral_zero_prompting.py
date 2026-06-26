@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.engine.evolution_metrics import CortexMetrics
-from cortex.engine.evolution_types import (
+from cortex.engine.evo.evolution_metrics import CortexMetrics
+from cortex.engine.evo.evolution_types import (
     DomainMetrics,
     Mutation,
     SovereignAgent,
     SubAgent,
 )
-from cortex.engine.zero_prompting import (
+from cortex.engine.uncategorized.zero_prompting import (
     ResolutionReport,
     ZeroPromptingEvolutionStrategy,
 )

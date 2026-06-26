@@ -12,7 +12,7 @@ import pytest
 
 from cortex.shannon.env.trace import EpisodeTrace, StepTrace
 from cortex.runtime.invariants.cross_system import CrossSystemInvariantCompiler
-from cortex.engine.evolution_ledger import ControlVector, MutationRecord, EvolutionLedger
+from cortex.engine.core.evolution_ledger import ControlVector, MutationRecord, EvolutionLedger
 
 
 @pytest.fixture

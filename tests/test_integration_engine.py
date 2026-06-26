@@ -139,7 +139,7 @@ async def test_taint_propagation_crypto_safety(engine):
         await conn.commit()
 
     # 3. Propagate taint from fact 500
-    from cortex.engine.causality import AsyncCausalGraph
+    from cortex.engine.flow.causality import AsyncCausalGraph
 
     async with engine.session() as conn:
         graph = AsyncCausalGraph(conn)

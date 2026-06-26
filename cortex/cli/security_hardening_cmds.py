@@ -49,7 +49,7 @@ def unquarantine(fact_id: int, db: str) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def reap_ghosts(ttl_days: int, db: str) -> None:
     """Reap expired ghosts (DB + Songlines)."""
-    from cortex.engine.reaper import GhostReaper
+    from cortex.engine.evo.reaper import GhostReaper
 
     engine = get_engine(db)
     reaper = GhostReaper(ttl_days=ttl_days)
@@ -79,7 +79,7 @@ def reap_ghosts(ttl_days: int, db: str) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def bridge_audit(db: str) -> None:
     """Audit active bridges for quarantine contamination."""
-    from cortex.engine.bridge_guard import BridgeGuard
+    from cortex.engine.flow.bridge_guard import BridgeGuard
 
     engine = get_engine(db)
     try:

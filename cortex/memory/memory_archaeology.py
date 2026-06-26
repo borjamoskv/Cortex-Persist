@@ -240,7 +240,7 @@ class MemoryArchaeologist:
         primary_parent_id: str | None,
         l2_conn: sqlite3.Connection,
     ) -> None:
-        from cortex.engine.mutation_engine import MUTATION_ENGINE
+        from cortex.engine.core.mutation_engine import MUTATION_ENGINE
 
         old_ids = [str(f["id"]) for f in cluster_facts]
         ts = datetime.now(timezone.utc).isoformat()

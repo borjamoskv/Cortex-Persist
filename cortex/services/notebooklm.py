@@ -10,7 +10,7 @@ from typing import Any
 
 from cortex.database.core import connect as db_connect
 from cortex.engine import CortexEngine
-from cortex.engine.models import Fact
+from cortex.engine.uncategorized.models import Fact
 
 logger = logging.getLogger("cortex.services.notebooklm")
 
