@@ -15,6 +15,22 @@ os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 import pytest
+import sqlite3
+
+_raw_sqlite3_connect = sqlite3.connect
+
+def _test_safe_sqlite3_connect(*args, **kwargs):
+    """Enforce WAL and busy_timeout in tests to prevent flaky lock errors."""
+    conn = _raw_sqlite3_connect(*args, **kwargs)
+    try:
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=5000")
+        conn.execute("PRAGMA synchronous=NORMAL")
+    except sqlite3.Error:
+        pass
+    return conn
+
+sqlite3.connect = _test_safe_sqlite3_connect
 
 # ── Repo-local import resolution ──────────────────────────────────────────────
 # Several legacy tests import modules that live outside the installed package

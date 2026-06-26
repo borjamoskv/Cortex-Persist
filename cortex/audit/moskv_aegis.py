@@ -242,5 +242,6 @@ class MoskvAegisEngine:
 
             public_key.verify(bytes.fromhex(entry["signature"]), entry_hash.encode("utf-8"))
             return True
-        except Exception:
+        except Exception as e:
+            logger.warning("Aegis verification failed: %s", e)
             return False

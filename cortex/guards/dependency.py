@@ -32,7 +32,7 @@ class ScaffoldingGuard:
 
         return orthogonal_path
 
-    def scaffold_next_step(self, student_id: str, current_failure_path: list[str]) -> str:
+    def scaffold_next_step(self, student_id: str, current_failure_path: list[str]) -> str | None:
         """Returns the immediate next node to attempt in the orthogonal path."""
         if not current_failure_path:
             return None

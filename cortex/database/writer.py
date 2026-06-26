@@ -127,7 +127,7 @@ class SqliteWriteWorker:
 
         conn = connect_writer(self._db_path)
         if hasattr(conn, "authorize_causal_writes"):
-            conn.authorize_causal_writes()  # pyright: ignore[reportAttributeAccessIssue] # Dynamically verified via hasattr
+            conn.authorize_causal_writes()  # pyright: ignore[reportAttributeAccessIssue] # Dynamically verified via hasattr  # pyright: ignore[reportAttributeAccessIssue] # Dynamically verified via hasattr
         # Manual transaction control (autocommit mode)
         conn.isolation_level = None
         # Performance pragmas are applied centrally by connect_writer()

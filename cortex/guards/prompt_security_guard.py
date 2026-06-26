@@ -199,7 +199,7 @@ class PromptSecurityGuard:
         if HAS_SENTENCE_TRANSFORMERS and self.model is not None:
             try:
                 response_embedding = self.model.encode(text, convert_to_tensor=True)
-                similarity = util.cos_sim(response_embedding, self.system_prompt_embedding)
+                similarity = util.cos_sim(response_embedding, self.system_prompt_embedding)  # pyright: ignore[reportArgumentType]
                 return float(similarity)
             except (ValueError, TypeError, KeyError, AssertionError) as e:
                 logger.error(f"[PROMPT_SECURITY] Error calculating cosine similarity: {e}")

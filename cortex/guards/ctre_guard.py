@@ -54,7 +54,7 @@ class CTREGuard:
         if HAS_RUST_CTRE and hasattr(cortex_rs, "ctre_atomic_commit"):
             # Ejecución C5-REAL vía FFI
             try:
-                success, epsilon_us = cortex_rs.ctre_atomic_commit(
+                success, epsilon_us = getattr(cortex_rs, "ctre_atomic_commit")(
                     expected_hash, target_x, target_y, current_hash
                 )
                 if not success:

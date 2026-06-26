@@ -77,7 +77,7 @@ class AuthManager:
         self._background_tasks: set[asyncio.Task[Any]] = set()
 
         try:
-            self._dummy_hash = cortex_rs.hash_password("ctx_dummy_key_to_initialize_hashing_parameters")
+            self._dummy_hash = getattr(cortex_rs, "hash_password")("ctx_dummy_key_to_initialize_hashing_parameters")
         except Exception:
             self._dummy_hash = "$argon2id$v=19$m=16,t=2,p=1$stub$dummyhash"
 
@@ -292,7 +292,7 @@ class AuthManager:
             try:
                 loop = asyncio.get_running_loop()
                 try:
-                    verify_fn = getattr(cortex_rs, "verify_password", None)
+                    verify_fn = getattr(cortex_rs, "verify_password")
                     if verify_fn is None:
                         raise TypeError("verify_password not found")
                     is_valid = await loop.run_in_executor(
@@ -305,8 +305,8 @@ class AuthManager:
                     # if getattr returned None
                     stub_hash = f"$argon2id$v=19$m=16,t=2,p=1$stub${self.hash_key_legacy_sha256(raw_key + AUTH_PEPPER)}"
                     is_valid = stub_hash == target_hash
-            except Exception:
-                pass
+            except Exception as e:
+                logger.exception("Cryptographic backend failure during token verification: %s", e)
 
             if is_valid and has_candidate:
                 row = candidates[0]

@@ -67,7 +67,7 @@ class HealthGuard(HealthMixin):
 
         sla = custom_sla or self.DEFAULT_SLA
         try:
-            score = await self.health_score(persist=False)
+            score = await self.health_score(persist=False)  # pyright: ignore[reportCallIssue]
         except TypeError:
             score = await self.health_score()
 

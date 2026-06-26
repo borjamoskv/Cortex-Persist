@@ -99,8 +99,8 @@ class CognitiveRouter:
         if isinstance(sensitivity, str):
             try:
                 sensitivity = json.loads(sensitivity)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Failed to parse sensitivity: %s", e)
         if not isinstance(sensitivity, list):
             sensitivity = []
 
@@ -235,5 +235,6 @@ class CognitiveRouter:
 
             public_key.verify(bytes.fromhex(entry["signature"]), entry_hash.encode("utf-8"))
             return True
-        except Exception:
+        except Exception as e:
+            logger.warning("Cognitive router verify failed: %s", e)
             return False

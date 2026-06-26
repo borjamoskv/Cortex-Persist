@@ -306,7 +306,8 @@ class SwarmCommander:
         from cortex.engine.causal.topological_arbitrage import TopologyIndex
 
         async with aiosqlite.connect(DB_PATH) as db:
-            topo = await TopologyIndex.create(db)
+            topo = TopologyIndex(db)
+            await topo.sync()
             optimal_tasks = []
             in_flight = set()
 

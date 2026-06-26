@@ -96,8 +96,9 @@ class PostgresConnectionAdapter:
             conn = self._get_active_conn()
             if hasattr(conn, "is_in_transaction"):
                 return conn.is_in_transaction()
-        except Exception:
-            pass
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning("postgres in_transaction check failed: %s", e)
         return self._in_transaction
 
     async def __aenter__(self) -> PostgresConnectionAdapter:

@@ -71,7 +71,8 @@ async def test_cbr_ordering_strict():
     )
     await db.commit()
     
-    topo = await TopologyIndex.create(db)
+    topo = TopologyIndex(db)
+    await topo.sync()
     
     # Get optimal task
     in_flight = set()
@@ -80,6 +81,7 @@ async def test_cbr_ordering_strict():
     in_flight.add(t1["id"])
     
     t2 = topo.get_next_optimal_task(in_flight)
+    in_flight.add(t2["id"])
     t3 = topo.get_next_optimal_task(in_flight)
     
     # Tie breaking: descending sort by UUID because reverse=True applies to the tuple (CBR, ID)
@@ -110,7 +112,8 @@ async def test_starvation_decay_bounds():
     )
     await db.commit()
     
-    topo = await TopologyIndex.create(db)
+    topo = TopologyIndex(db)
+    await topo.sync()
     t1 = topo.get_next_optimal_task(set())
     
     assert t1["id"] == id_old, "Old task with boosted CBR should overtake new task"
@@ -135,7 +138,8 @@ async def test_topology_extraction_scaling():
     await db.commit()
     
     start_build = time.perf_counter()
-    topo = await TopologyIndex.create(db)
+    topo = TopologyIndex(db)
+    await topo.sync()
     end_build = time.perf_counter()
     
     start_extract = time.perf_counter()
@@ -163,7 +167,8 @@ async def test_scheduler_determinism():
     )
     await db.commit()
     
-    topo = await TopologyIndex.create(db)
+    topo = TopologyIndex(db)
+    await topo.sync()
     
     def extract_all():
         in_flight = set()

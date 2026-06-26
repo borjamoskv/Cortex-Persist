@@ -97,8 +97,8 @@ Git Diff:
                     print(
                         f"[MoskvVidentiaOracle] Raw text was: {raw_response_text}", file=sys.stderr
                     )
-                except Exception:
-                    pass
+                except Exception as inner_e:
+                    print(f"[MoskvVidentiaOracle] Failed to print raw text: {inner_e}", file=sys.stderr)
                 # Fallback to simulated heuristics
 
         attacks = []

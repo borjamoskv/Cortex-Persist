@@ -107,8 +107,8 @@ class KeyManager:
         if not private_pem:
             try:
                 private_pem = keyring.get_password(self.service_name, actor_id)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Fallo en OS Keyring (get_password) para actor %s: %s", actor_id, e, exc_info=True)
 
         if not private_pem:
             return None
@@ -132,8 +132,8 @@ class KeyManager:
             self._save_metadata()
             try:
                 keyring.delete_password(self.service_name, actor_id)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Fallo en OS Keyring (delete_password) para actor %s: %s", actor_id, e, exc_info=True)
             if self.service_name in self._fallback_keyring:
                 self._fallback_keyring[self.service_name].pop(actor_id, None)
             logger.info(f"Revoked key for actor: {actor_id}")
@@ -267,7 +267,7 @@ class ZKSwarmIdentity:
         priv = km.get_private_key_b64(actor_id)
         if priv is None:
             raise RuntimeError(f"Failed to retrieve generated key for {actor_id}")
-        return AgentKeyPair(public_key_b64=pub, private_key_b64=priv)
+        return AgentKeyPair(public_key_b64=pub, private_key_b64=priv or "")
 
     @staticmethod
     def sign_payload(content: str, private_key_b64: str) -> str:

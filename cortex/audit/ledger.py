@@ -134,8 +134,9 @@ class EnterpriseAuditLedger:
 
                 try:
                     await self._conn.execute("ALTER TABLE security_audit_log ADD COLUMN external_anchor TEXT")
-                except Exception:
-                    pass
+                except Exception as e:
+                    if "duplicate column name" not in str(e).lower():
+                        raise e
 
                 await self._conn.commit()
                 cursor = await self._conn.execute(
@@ -252,7 +253,7 @@ class EnterpriseAuditLedger:
 
         import httpx
         try:
-            import rfc3161ng  # pyright: ignore[reportMissingImports] # Opt-in secure dependency
+            import rfc3161ng  # pyright: ignore[reportMissingImports] # Opt-in  # pyright: ignore[reportMissingImports] # Opt-in secure dependency
         except ImportError:
             rfc3161ng = None
             logger.warning("rfc3161ng is not installed. TSA signatures will be disabled. Run pip install cortex-persist[secure]")
@@ -302,7 +303,7 @@ class EnterpriseAuditLedger:
                                     rfc_token = None
                                 else:
                                     # Asynchronous Rekor logging
-                                    rekor_uuid = await rekor_client.log_entry(entry_hash, signature, pub_pem)
+                                    rekor_uuid = await rekor_client.log_entry(entry_hash, signature, pub_pem)  # pyright: ignore[reportArgumentType]
 
                                     tsa_signature = None
                                     if rfc3161ng is not None:
@@ -328,7 +329,7 @@ class EnterpriseAuditLedger:
 
                             # Prepare SQLite bulk insert
                             insert_rows = []
-                            for item, _ in batch:
+                            for item, _ in batch:  # pyright: ignore[reportAssignmentType]
                                 insert_rows.append(
                                     (
                                         item["audit_id"],
@@ -400,7 +401,7 @@ class EnterpriseAuditLedger:
         fut = asyncio.get_running_loop().create_future()
 
         async with self._lock:
-            self._batch_queue.append((event, fut))
+            self._batch_queue.append((event, fut))  # pyright: ignore[reportArgumentType]
             if self._batch_task is None:
                 self._batch_task = asyncio.create_task(self._batch_worker())
 
