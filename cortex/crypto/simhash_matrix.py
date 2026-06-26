@@ -12,7 +12,7 @@ import hashlib
 
 
 class ASTTokenizer(ast.NodeVisitor):
-    def __init__(self):
+    def __init__(self) -> None:
         self.tokens: list[str] = []
 
     def generic_visit(self, node: ast.AST) -> None:
@@ -62,7 +62,10 @@ def hamming_distance(hash1: int, hash2: int) -> int:
     return bin(x).count("1")
 
 
-def detect_plagiarism(code1: str, code2: str, threshold: int = 5) -> dict:
+from typing import Any
+
+
+def detect_plagiarism(code1: str, code2: str, threshold: int = 5) -> dict[str, Any]:
     """
     Evaluates if code1 and code2 are structural plagiarisms.
     Threshold defaults to 5 bits of Hamming distance.

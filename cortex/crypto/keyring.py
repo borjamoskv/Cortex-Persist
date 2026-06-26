@@ -7,6 +7,7 @@ Never stores the CORTEX_MASTER_KEY in plain text .env unless forced (e.g., CI/CD
 from __future__ import annotations
 
 import base64
+import binascii
 import logging
 import os
 
@@ -56,7 +57,7 @@ def get_master_key() -> bytes | None:
                 )
                 return None
             return raw
-        except (ValueError, base64.binascii.Error):  # pyright: ignore[reportAttributeAccessIssue]
+        except (ValueError, binascii.Error):  # pyright: ignore[reportAttributeAccessIssue]
             logger.error("Master key is not valid base64.")
             return None
 

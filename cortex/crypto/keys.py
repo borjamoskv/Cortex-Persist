@@ -14,7 +14,7 @@ import logging
 import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import NamedTuple, Optional
+from typing import Any, NamedTuple, Optional, cast
 
 import keyring
 from cryptography.exceptions import InvalidSignature
@@ -50,13 +50,13 @@ class KeyManager:
         )
         self._metadata = self._load_metadata()
 
-    def _load_metadata(self) -> dict:
+    def _load_metadata(self) -> dict[str, Any]:
         if self.db_path.exists():
             with open(self.db_path, encoding="utf-8") as f:
-                return json.load(f)
+                return cast(dict[str, Any], json.load(f))
         return {}
 
-    def _save_metadata(self):
+    def _save_metadata(self) -> None:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.db_path, "w", encoding="utf-8") as f:
             json.dump(self._metadata, f, indent=2)
@@ -141,7 +141,7 @@ class KeyManager:
         return False
 
     def is_revoked(self, actor_id: str) -> bool:
-        return self._metadata.get(actor_id, {}).get("revoked", False)
+        return bool(self._metadata.get(actor_id, {}).get("revoked", False))
 
     def is_expired(self, actor_id: str) -> bool:
         expires_at_str = self._metadata.get(actor_id, {}).get("expires_at")
@@ -169,9 +169,10 @@ class Signer:
         try:
             priv_key = ed25519.Ed25519PrivateKey.from_private_bytes(priv_bytes)
         except ValueError:
-            priv_key = serialization.load_pem_private_key(priv_bytes, password=None)
-            if not isinstance(priv_key, ed25519.Ed25519PrivateKey):
+            loaded_key = serialization.load_pem_private_key(priv_bytes, password=None)
+            if not isinstance(loaded_key, ed25519.Ed25519PrivateKey):
                 raise ValueError("Key must be an Ed25519PrivateKey")
+            priv_key = loaded_key
 
         message = f"{payload_hash}:{timestamp}".encode()
         sig_bytes = priv_key.sign(message)
@@ -184,7 +185,10 @@ class Signer:
         try:
             priv_key = ed25519.Ed25519PrivateKey.from_private_bytes(priv_bytes)
         except ValueError:
-            pass
+            loaded_key = serialization.load_pem_private_key(priv_bytes, password=None)
+            if not isinstance(loaded_key, ed25519.Ed25519PrivateKey):
+                raise ValueError("Key must be an Ed25519PrivateKey")
+            priv_key = loaded_key
         content_hash = hashlib.sha256(content.encode("utf-8")).digest()
         sig_bytes = priv_key.sign(content_hash)
         return base64.b64encode(sig_bytes).decode("utf-8")
@@ -202,9 +206,10 @@ class Verifier:
             try:
                 public_key = ed25519.Ed25519PublicKey.from_public_bytes(pub_bytes)
             except ValueError:
-                public_key = serialization.load_ssh_public_key(pub_bytes)
-                if not isinstance(public_key, ed25519.Ed25519PublicKey):
+                loaded_key = serialization.load_ssh_public_key(pub_bytes)
+                if not isinstance(loaded_key, ed25519.Ed25519PublicKey):
                     return False
+                public_key = loaded_key
 
             signature = base64.b64decode(signature_b64)
             if len(signature) != 64:
@@ -234,9 +239,10 @@ class Verifier:
             try:
                 public_key = ed25519.Ed25519PublicKey.from_public_bytes(pub_bytes)
             except ValueError:
-                public_key = serialization.load_ssh_public_key(pub_bytes)
-                if not isinstance(public_key, ed25519.Ed25519PublicKey):
+                loaded_key = serialization.load_ssh_public_key(pub_bytes)
+                if not isinstance(loaded_key, ed25519.Ed25519PublicKey):
                     return False
+                public_key = loaded_key
 
             signature = base64.b64decode(signature_b64)
             if len(signature) != 64:

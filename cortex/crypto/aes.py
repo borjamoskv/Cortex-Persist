@@ -7,6 +7,7 @@ Application-level encryption for L3 Ledgers.
 from __future__ import annotations
 
 import base64
+import binascii
 import json
 import logging
 import os
@@ -74,7 +75,8 @@ class CortexEncrypter:
             salt=self.hkdf_salt,
             info=tenant_id.encode("utf-8"),
         )
-        tenant_key = hkdf.derive(self._master_key)  # type: ignore[reportArgumentType]
+        assert self._master_key is not None
+        tenant_key = hkdf.derive(self._master_key)
         self._tenant_keys[tenant_id] = tenant_key
         return tenant_key
 
@@ -131,7 +133,7 @@ class CortexEncrypter:
             raise ValueError(
                 f"Decryption failed for tenant '{tenant_id}'. Possible cross-tenant access attempt or corrupted data."
             ) from e
-        except (ValueError, TypeError, base64.binascii.Error) as e:  # type: ignore[reportAttributeAccessIssue]
+        except (ValueError, TypeError, binascii.Error) as e:
             raise ValueError(f"AES-GCM Decryption Failed (Data tampered?): {e}") from e
 
     def encrypt_json(self, data: dict[str, Any] | None, tenant_id: str = "default") -> str | None:
@@ -148,7 +150,8 @@ class CortexEncrypter:
         if not plain:
             return None
         try:
-            return json.loads(plain)
+            from typing import cast
+            return cast(dict[str, Any], json.loads(plain))
         except json.JSONDecodeError:
             logger.warning("decrypt_json: invalid JSON after decryption, returning empty dict")
             return {}

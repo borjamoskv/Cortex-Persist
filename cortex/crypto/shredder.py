@@ -108,8 +108,8 @@ class CryptoShredder:
             );
         """
         try:
-            await self._conn.execute(sql)  # type: ignore[reportAttributeAccessIssue]
-            await self._conn.commit()  # type: ignore[reportAttributeAccessIssue]
+            await __import__("typing").cast(__import__("typing").Any, self._conn).execute(sql)
+            await __import__("typing").cast(__import__("typing").Any, self._conn).commit()
         except (sqlite3.Error, OSError) as e:
             logger.warning("Async schema creation skipped: %s", e)
 
@@ -125,7 +125,7 @@ class CryptoShredder:
 
     async def is_shredded_async(self, fact_id: int, tenant_id: str = "default") -> bool:
         """Check if a fact's key has been shredded (async)."""
-        cursor = await self._conn.execute(  # type: ignore[reportAttributeAccessIssue]
+        cursor = await __import__("typing").cast(__import__("typing").Any, self._conn).execute(
             "SELECT 1 FROM shredded_keys WHERE fact_id = ? AND tenant_id = ?",
             (fact_id, tenant_id),
         )
@@ -143,7 +143,7 @@ class CryptoShredder:
 
     async def get_shredded_fact_ids_async(self, tenant_id: str = "default") -> set[int]:
         """Return all shredded fact IDs for a tenant (async)."""
-        cursor = await self._conn.execute(  # type: ignore[reportAttributeAccessIssue]
+        cursor = await __import__("typing").cast(__import__("typing").Any, self._conn).execute(
             "SELECT fact_id FROM shredded_keys WHERE tenant_id = ?",
             (tenant_id,),
         )
@@ -240,7 +240,7 @@ class CryptoShredder:
 
         try:
             ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-            await self._conn.execute(  # type: ignore[reportAttributeAccessIssue]
+            await __import__("typing").cast(__import__("typing").Any, self._conn).execute(
                 "INSERT INTO shredded_keys "
                 "(fact_id, tenant_id, reason, shredded_by, shredded_at) "
                 "VALUES (?, ?, ?, ?, ?)",
@@ -249,7 +249,7 @@ class CryptoShredder:
 
             self._invalidate_fact_key(fact_id, tenant_id)
 
-            await self._conn.commit()  # type: ignore[reportAttributeAccessIssue]
+            await __import__("typing").cast(__import__("typing").Any, self._conn).commit()
             logger.info(
                 "Crypto-shredded fact #%d (tenant=%s, reason=%s)",
                 fact_id,
@@ -291,7 +291,7 @@ class CryptoShredder:
 
         GDPR use case: user requests erasure of all their data.
         """
-        cursor = await self._conn.execute(  # type: ignore[reportAttributeAccessIssue]
+        cursor = await __import__("typing").cast(__import__("typing").Any, self._conn).execute(
             "SELECT id FROM facts WHERE source = ? AND tenant_id = ?",
             (source, tenant_id),
         )
@@ -308,7 +308,7 @@ class CryptoShredder:
         shredded_by: str | None = None,
     ) -> ShredBatchResult:
         """Shred all facts in a project."""
-        cursor = await self._conn.execute(  # type: ignore[reportAttributeAccessIssue]
+        cursor = await __import__("typing").cast(__import__("typing").Any, self._conn).execute(
             "SELECT id FROM facts WHERE project = ? AND tenant_id = ?",
             (project, tenant_id),
         )
@@ -355,10 +355,9 @@ class CryptoShredder:
             # but we mark this fact_id as shredded so the decrypt
             # path can check before attempting HKDF derivation.
             cache_key = f"{tenant_id}:fact:{fact_id}"
-            if hasattr(enc, "_shredded_facts"):
-                enc._shredded_facts.add(cache_key)  # type: ignore[reportAttributeAccessIssue]
-            else:
-                enc._shredded_facts = {cache_key}  # type: ignore[reportAttributeAccessIssue]
+            if not hasattr(enc, "_shredded_facts"):
+                enc._shredded_facts = set()
+            __import__("typing").cast(set, enc._shredded_facts).add(cache_key)
         except (ImportError, RuntimeError) as e:
             logger.debug("Key invalidation skipped: %s", e)
 

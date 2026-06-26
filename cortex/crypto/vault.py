@@ -13,15 +13,19 @@ __all__ = ["Vault"]
 
 try:
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    _HAS_AESGCM = True
 except ImportError:
-    AESGCM = None
+    _HAS_AESGCM = False
+    AESGCM = None  # type: ignore
 
 
 class Vault:
     """Secure Vault for storing sensitive facts."""
 
-    def __init__(self, key: bytes | None = None):
-        if not AESGCM:
+    _key: bytes | None
+
+    def __init__(self, key: bytes | None = None) -> None:
+        if not _HAS_AESGCM:
             self._key = None
             return
 
@@ -51,7 +55,8 @@ class Vault:
         if not self.is_available:
             raise RuntimeError("Encryption not available (missing key or library)")
 
-        aesgcm = AESGCM(self._key)  # type: ignore[reportOptionalCall,reportArgumentType]
+        assert self._key is not None
+        aesgcm = AESGCM(self._key)
         nonce = os.urandom(12)
         ciphertext = aesgcm.encrypt(nonce, data.encode("utf-8"), None)
 
@@ -68,7 +73,8 @@ class Vault:
             nonce = raw[:12]
             ciphertext = raw[12:]
 
-            aesgcm = AESGCM(self._key)  # type: ignore[reportOptionalCall,reportArgumentType]
+            assert self._key is not None
+            aesgcm = AESGCM(self._key)
             plaintext = aesgcm.decrypt(nonce, ciphertext, None)
             return plaintext.decode("utf-8")
         except (OSError, ValueError) as e:
@@ -77,7 +83,7 @@ class Vault:
     @staticmethod
     def generate_key() -> str:
         """Generate a new secure key (base64 encoded)."""
-        if not AESGCM:
+        if not _HAS_AESGCM:
             raise ImportError("cryptography library not installed")
         key = AESGCM.generate_key(bit_length=256)
         return base64.b64encode(key).decode("utf-8")
