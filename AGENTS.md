@@ -353,6 +353,7 @@ INVARIANT: Never assume prior session state. Always verify from Git DAG (AX-041)
 | Operations | [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | Runtime and maintenance |
 | SDK Surface | [`docs/SDK-SURFACE.md`](docs/SDK-SURFACE.md) | Public API surface documentation |
 | Developer Guide | [`docs/developer-guide.md`](docs/developer-guide.md) | Development workflow and patterns |
+| APEX Primitives | [`cortex/agents/primitives/APEX_INDEX.md`](cortex/agents/primitives/APEX_INDEX.md) | 100 Sovereign APEX Primitives Registry |
 
 ### Nested AGENTS.md
 
