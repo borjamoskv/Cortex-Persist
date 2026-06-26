@@ -63,7 +63,7 @@ class UltramapSubstrate:
                 f.write(b"\x00" * self.tensor_size)
 
         if HAS_RUST:
-            self._rs = cortex_rs.UltramapSubstrate(self.bin_path, self.capacity)
+            self._rs = cortex_rs.UltramapSubstrate(self.bin_path, self.capacity)  # type: ignore
             self._buffer = None
             self._mmap = None
             self._f = None
@@ -109,10 +109,10 @@ class UltramapSubstrate:
                 mmap_obj.close()
             if f_obj:
                 f_obj.close()
-        except Exception as e:
+        except (OSError, ValueError, TypeError, RuntimeError) as e:
             try:
                 logger.debug("Error in ultramap _safe_close: %s", e)
-            except Exception:
+            except (OSError, ValueError, TypeError, RuntimeError):
                 import logging
 
                 logging.getLogger(__name__).error(
@@ -124,7 +124,7 @@ class UltramapSubstrate:
             try:
                 self._checkpoint_manager.generate_index()
                 logger.info("EVO-LEDGER Checkpoints synced on shutdown.")
-            except Exception as e:
+            except (OSError, ValueError, TypeError, RuntimeError) as e:
                 logger.warning(f"EVO-LEDGER Checkpoint sync failed: {e}")
             self._checkpoint_manager = None
 

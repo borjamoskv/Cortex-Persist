@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
 
     ledger = ExecutionTraceLedger(CORTEX_DB_PATH)
     graph = CausalGraph(CORTEX_DB_PATH)
-    rollback = CausalRollbackEngine(CORTEX_DB_PATH, ledger, None)
+    rollback = CausalRollbackEngine(CORTEX_DB_PATH, ledger, None)  # type: ignore
     scheduler = CausalScheduler(graph, rollback, ledger)
     bifurcation = ExergyBifurcationEngine(ledger, scheduler)
 
@@ -74,8 +74,8 @@ async def lifespan(app: FastAPI):
         )
         await conn.commit()
 
-    exergy_daemon = ExergyDaemon(bifurcation, scan_interval=60.0)
-    entropy_daemon = EntropyDaemon(CORTEX_DB_PATH, scan_interval=3600.0)
+    exergy_daemon = ExergyDaemon(bifurcation, scan_interval=60.0)  # type: ignore
+    entropy_daemon = EntropyDaemon(CORTEX_DB_PATH, scan_interval=3600.0)  # type: ignore
 
     exergy_daemon.start()
     entropy_daemon.start()

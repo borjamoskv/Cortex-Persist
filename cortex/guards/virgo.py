@@ -134,27 +134,29 @@ class VirgoContextGuard:
                     )
 
             from cortex.utils.canonical import now_iso
+            from cortex.database.core import causal_write
 
-            await conn.execute(
-                """
-                INSERT INTO ledger_replay_admissions (
-                    tenant_id, event_id, nonce, request_hash, payload_hash,
-                    ledger_event_id, actor_key_id, action, issued_at, accepted_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    tenant_id,
-                    f"evt_{nonce}",
-                    nonce,
-                    logos_signature or "hash",
-                    logos_signature or "hash",
-                    f"evt_{nonce}",
-                    agent_id or "unknown",
-                    "store",
-                    now_iso(),
-                    now_iso(),
-                ),
-            )
+            with causal_write(conn):
+                await conn.execute(
+                    """
+                    INSERT INTO ledger_replay_admissions (
+                        tenant_id, event_id, nonce, request_hash, payload_hash,
+                        ledger_event_id, actor_key_id, action, issued_at, accepted_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        tenant_id,
+                        f"evt_{nonce}",
+                        nonce,
+                        logos_signature or "hash",
+                        logos_signature or "hash",
+                        f"evt_{nonce}",
+                        agent_id or "unknown",
+                        "store",
+                        now_iso(),
+                        now_iso(),
+                    ),
+                )
         except aiosqlite.IntegrityError:
             await self._trigger_ledger_rollback(
                 conn,

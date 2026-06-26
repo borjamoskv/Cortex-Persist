@@ -241,7 +241,7 @@ async def run_encb(
                         await conn.executescript(stmt)
                     await conn.commit()
 
-                modality_engine = AsyncCortexEngine(modality_pool, modality_db_path)
+                modality_engine = AsyncCortexEngine(modality_pool, modality_db_path)  # type: ignore
             except Exception as exc:
                 console.print(
                     f"[red]⚠️  Failed to init engine for modality {modality.value}: {exc}[/]"
@@ -383,7 +383,7 @@ async def run_encb(
 
     # ── Cleanup ────────────────────────────────────────────────────────
     if pool is not None:
-        await pool.close()
+        await pool.close()  # type: ignore
 
     return results
 

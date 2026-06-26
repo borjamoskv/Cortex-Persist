@@ -8,7 +8,6 @@ import logging
 import zipfile
 from pathlib import Path
 
-import aiosqlite
 import click
 from rich.console import Console
 

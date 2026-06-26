@@ -51,6 +51,7 @@ async def test_ledger_tamper_evident_corruption_detection():
         conn3._conn.authorize_causal_writes()
         ledger_tampered = EnterpriseAuditLedger(conn3)
         await ledger_tampered.ensure_table()
+        
         tampered_result = await ledger_tampered.verify_chain()
         
         # El sistema debe detectar la ruptura de la cadena Merkle o la falsificación de la firma

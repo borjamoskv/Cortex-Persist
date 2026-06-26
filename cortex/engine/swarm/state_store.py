@@ -14,7 +14,7 @@ from typing import Any
 import aiosqlite
 
 from cortex.config import DB_PATH
-from cortex.database.core import connect_async, causal_write
+from cortex.database.core import causal_write, connect_async
 from cortex.guards import CausalClosureGuard, SwarmProposal
 
 # Replace with correct import for Ledger if needed, but the old code emitted SwarmProposal.

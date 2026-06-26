@@ -322,12 +322,13 @@ class EnterpriseAuditLedger:
                                         )
                                         
                                         # Update the row with the external anchor
+                                        in_tx_before = self._conn.in_transaction
                                         with causal_write(self._conn):
                                             await self._conn.execute(
                                                 "UPDATE security_audit_log SET external_anchor = ? WHERE audit_id = ?",
                                                 (external_anchor, audit_id)
                                             )
-                                            if not self._conn.in_transaction:
+                                            if not in_tx_before:
                                                 await self._conn.commit()
                                 except Exception as e:
                                     logger.error("[AuditLedger] External anchoring failed: %s", e)
@@ -351,6 +352,8 @@ class EnterpriseAuditLedger:
 
         timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         audit_id = hashlib.sha256(f"{timestamp}{actor_id}{action}".encode()).hexdigest()
+
+        in_tx_before = self._conn.in_transaction
 
         async with self._lock:
             # 1. Fetch the actual last hash from DB to support transparent rollbacks
@@ -393,7 +396,7 @@ class EnterpriseAuditLedger:
                     )
                 )
                 # Auto-commit ONLY if we are not inside a larger transaction
-                if not self._conn.in_transaction:
+                if not in_tx_before:
                     await self._conn.commit()
 
             self._last_hash = entry_hash
