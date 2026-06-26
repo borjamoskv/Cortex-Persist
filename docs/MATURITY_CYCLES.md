@@ -159,6 +159,104 @@ Este documento define la trayectoria de madurez operativa y estructural de **COR
 
 ---
 
+## CICLO 13 — Verificación formal de invariantes
+*Objetivo: Comprobación automatizada de las propiedades inquebrantables del sistema.*
+- [ ] Ninguna escritura entra en el ledger sin autorización.
+- [ ] Todo evento tiene un identificador único.
+- [ ] Toda referencia apunta a un objeto existente.
+- [ ] El estado tras una recuperación es consistente.
+- [ ] Una operación rechazada no deja efectos parciales.
+*Resultado: Pruebas automatizadas o herramientas de verificación formal validan estos invariantes.*
+
+---
+
+## CICLO 14 — Pruebas de resiliencia
+*Objetivo: Evaluación del comportamiento bajo condiciones adversas extremas.*
+- [ ] Interrupción abrupta durante escrituras críticas.
+- [ ] Reinicio inesperado del proceso principal.
+- [ ] Corrupción controlada de archivos en entornos de prueba.
+- [ ] Pruebas de agotamiento de recursos (CPU, RAM, descriptores de archivo).
+- [ ] Fallos y latencias inyectadas en operaciones de E/S.
+*Resultado: El sistema supera escenarios de estrés con comportamientos deterministas y recuperables.*
+
+---
+
+## CICLO 15 — Rendimiento con presupuestos
+*Objetivo: Definición y cumplimiento de límites de rendimiento en el proceso de CI.*
+- [ ] Tiempo de inicio ≤ presupuesto.
+- [ ] Escrituras por segundo ≥ objetivo.
+- [ ] Latencia p95 ≤ presupuesto.
+- [ ] Consumo de memoria máximo establecido.
+- [ ] Tamaño del binario compilado bajo control.
+*Resultado: Cualquier regresión de rendimiento fuera de presupuesto rompe el build (CI Failure).*
+
+---
+
+## CICLO 16 — Compatibilidad
+*Objetivo: Validación estricta en una matriz multidimensional de entornos.*
+- [ ] Versiones soportadas de Python.
+- [ ] Versiones de Rust y toolchains.
+- [ ] Arquitecturas objetivo (x86_64, ARM64/Apple Silicon).
+- [ ] Versiones de dependencias core (ej. SQLite).
+*Resultado: Tests verdes en todos los nodos de la matriz antes de cada release.*
+
+---
+
+## CICLO 17 — Documentación verificable
+*Objetivo: Documentación viva y evaluable algorítmicamente.*
+- [ ] Fragmentos de código en la documentación que compilan/ejecutan en CI (Doc-tests).
+- [ ] Ejemplos interactivos probados automáticamente.
+- [ ] Linter de enlaces para evitar enlaces rotos o desactualizados.
+- [ ] Autogeneración de diagramas a partir del código base (Mermaid, PlantUML).
+*Resultado: La documentación nunca puede estar desfasada del estado del código.*
+
+---
+
+## CICLO 18 — Métricas de calidad
+*Objetivo: Telemetría objetiva sobre la salud de la ingeniería.*
+- [ ] Tiempo medio para corregir incidencias (MTTR).
+- [ ] Frecuencia de despliegues (Deployment Frequency).
+- [ ] Tiempo de recuperación tras fallos.
+- [ ] Cobertura de pruebas (Line, Branch, Mutation).
+- [ ] Edad media y criticidad de las dependencias.
+*Resultado: Cuadros de mando (dashboards) que informan tendencias históricas para prevenir degradación técnica.*
+
+---
+
+## CICLO 19 — Gestión del riesgo
+*Objetivo: Inventario estructurado y priorización causal de vulnerabilidades/defectos.*
+- [ ] Modelado de amenazas registrado y actualizado.
+- [ ] Evaluación de impacto y probabilidad para cada hallazgo.
+- [ ] Listado de mitigaciones existentes vs riesgo residual.
+- [ ] Asignación de responsabilidad y fechas límite (SLAs).
+*Resultado: La deuda de seguridad se trata como operaciones matemáticas trazables y cuantificables.*
+
+---
+
+## CICLO 20 — Revisión periódica
+*Objetivo: El sistema como entidad orgánica auditable en tiempo continuo.*
+- [ ] Revisiones cíclicas de dependencias.
+- [ ] Auditorías a la configuración del pipeline CI.
+- [ ] Validación de cumplimiento en las políticas de firma de código.
+- [ ] Simulacros de recuperación desde copias de seguridad.
+*Resultado: La seguridad es una rutina asimilada en el flujo continuo, erradicando las "auditorías sorpresa".*
+
+---
+
+### Del "proyecto" al "sistema"
+Una evolución vital es pasar de evaluar únicamente el repositorio de código a evaluar todo el ecosistema:
+- Código fuente.
+- Dependencias.
+- Infraestructura de compilación.
+- Proceso de publicación.
+- Artefactos generados.
+- Documentación.
+- Operación y mantenimiento.
+
+> **"Cuando cada una de esas piezas produce evidencia verificable y automatizada, la confianza en el sistema deja de depender de afirmaciones y pasa a sustentarse en pruebas reproducibles. Ese es un criterio más robusto que perseguir una puntuación '10/10' aislada, porque permite demostrar el nivel de calidad de forma continua."**
+
+---
+
 ## Matriz de Madurez CORTEX-Persist (10/10)
 
 | Dominio       | Criterio para 10/10                                                 |
