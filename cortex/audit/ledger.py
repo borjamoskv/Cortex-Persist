@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS security_audit_log (
     resource TEXT NOT NULL,
     status TEXT NOT NULL,
     prev_hash TEXT NOT NULL,
-    signature TEXT NOT NULL
+    signature TEXT NOT NULL,
+    external_anchor TEXT
 );
 """
 
@@ -123,6 +124,13 @@ class EnterpriseAuditLedger:
                 if self._ready:
                     return
                 await self._conn.execute(_CREATE_AUDIT_SQL)
+                
+                import sqlite3
+                try:
+                    await self._conn.execute("ALTER TABLE security_audit_log ADD COLUMN external_anchor TEXT")
+                except sqlite3.OperationalError:
+                    pass
+                    
                 await self._conn.commit()
                 cursor = await self._conn.execute(
                     "SELECT prev_hash, signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
@@ -258,6 +266,26 @@ class EnterpriseAuditLedger:
                     # Sign the entry_hash
                     signature = self.private_key.sign(entry_hash.encode()).hex()
 
+                    # -- REKOR ANCHORING --
+                    external_anchor = None
+                    try:
+                        import base64
+                        import json
+                        from cryptography.hazmat.primitives import serialization
+                        from cortex.crypto.rekor_client import RekorClient
+                        
+                        sig_b64 = base64.b64encode(bytes.fromhex(signature)).decode('utf-8')
+                        pub_pem = self.public_key.public_bytes(
+                            encoding=serialization.Encoding.PEM,
+                            format=serialization.PublicFormat.SubjectPublicKeyInfo
+                        ).decode('utf-8')
+                        
+                        anchor_res = RekorClient().anchor_payload(entry_hash, sig_b64, pub_pem)
+                        if anchor_res:
+                            external_anchor = json.dumps(anchor_res)
+                    except Exception as e:
+                        logger.error("[AuditLedger] Rekor anchoring failed: %s", e)
+
                     # Prepare SQLite bulk insert
                     insert_rows = []
                     for item, _ in batch:
@@ -273,6 +301,7 @@ class EnterpriseAuditLedger:
                                 item["status"],
                                 self._last_hash,
                                 signature,
+                                external_anchor,
                             )
                         )
 
@@ -280,8 +309,8 @@ class EnterpriseAuditLedger:
                         await self._conn.executemany(
                             """INSERT INTO security_audit_log
                                (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
-                                resource, status, prev_hash, signature)
-                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                resource, status, prev_hash, signature, external_anchor)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                             insert_rows,
                         )
                         await self._conn.commit()

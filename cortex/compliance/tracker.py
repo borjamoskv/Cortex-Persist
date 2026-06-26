@@ -272,6 +272,56 @@ class ComplianceTracker:
 
         return report
 
+    # ─── 4. Compliance Templates (EU AI Act DPIA / Risk) ──────────
+
+    def generate_risk_register_template(self, project: str | None = None) -> dict[str, Any]:
+        """Generate an EU AI Act Risk Register template.
+        Addresses EU AI Act Article 9 (Risk Management System).
+        """
+        proj = project or self._default_project
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        return {
+            "project": proj,
+            "document_type": "EU_AI_ACT_RISK_REGISTER",
+            "generated_at": now,
+            "status": "DRAFT",
+            "risks": [
+                {
+                    "risk_id": f"RSK-{proj}-001",
+                    "category": "Data Governance (Art 10)",
+                    "description": "Risk of processing unverified training data.",
+                    "mitigation": "CORTEX Cryptographic Fact Verification.",
+                    "residual_risk": "Low"
+                },
+                {
+                    "risk_id": f"RSK-{proj}-002",
+                    "category": "Human Oversight (Art 14)",
+                    "description": "Agent taking autonomous actions without human override.",
+                    "mitigation": "CORTEX Ledger Sovereign Pauses & Rollbacks.",
+                    "residual_risk": "Low"
+                }
+            ]
+        }
+
+    def generate_dpia_template(self, project: str | None = None) -> dict[str, Any]:
+        """Generate a Data Protection & AI Impact Assessment template.
+        Addresses GDPR Art 35 & EU AI Act Fundamental Rights Impact Assessment.
+        """
+        proj = project or self._default_project
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        return {
+            "project": proj,
+            "document_type": "EU_AI_ACT_DPIA",
+            "generated_at": now,
+            "status": "DRAFT",
+            "assessment": {
+                "purpose": "Autonomous decision making via LLMs.",
+                "data_minimization": "CORTEX Thermodynamic Context Compression purges PII.",
+                "transparency": "Merkle Hash Chain guarantees traceability.",
+                "security": "AES-256-GCM Envelope Encryption."
+            }
+        }
+
     # ─── Internal helpers ─────────────────────────────────────────
 
     async def _gather_facts_summary(self, project: str) -> dict[str, Any]:

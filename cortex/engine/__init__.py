@@ -1,6 +1,8 @@
 # CORTEX ENGINE FACADE
 # Auto-generated to maintain compatibility after structural mitosis.
 
+from .core.cortex_engine import CortexEngine, AsyncCortexEngine
+
 from .core import _engine_delegates
 from .core import runtime_kernel
 from .core import snapshots

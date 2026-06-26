@@ -3,8 +3,8 @@ import pytest
 import asyncio
 import json
 from pathlib import Path
-from cortex.engine.core.engine import engine
-from cortex.engine.flow.execution_ledger import execution_ledger as ledger
+from cortex.engine.core import engine
+from cortex.engine.flow import execution_ledger as ledger
 
 
 @pytest.mark.asyncio

@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from cortex.engine.core.store_validation import store_validation as sv
+from cortex.engine.core import store_validation as sv
 
 
 @pytest.mark.asyncio
