@@ -37,7 +37,7 @@ async def check_gate_11_cobbler() -> GateResult:
                     and node.func.id == "print"
                 ):
                     v.append(f"print-call:{node.lineno}")
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, AssertionError) as exc:
             import logging
 
             logging.warning("Suppressed exception: %s", exc)

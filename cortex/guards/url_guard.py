@@ -67,7 +67,7 @@ def is_safe_url(url: str, allow_private: bool = False) -> bool:
             return False
 
         return True
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, AssertionError) as e:
         logger.error("URLGuard: Validation error for %s: %s", url, e)
         return False
 

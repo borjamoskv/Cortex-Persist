@@ -235,5 +235,5 @@ class ComponentsMixin:
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: {name} failed: {e}") from e
             logger.debug("%s unavailable: %s", name, e)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             raise RuntimeError(f"FAIL-CLOSED: {name} failed: {e}") from e

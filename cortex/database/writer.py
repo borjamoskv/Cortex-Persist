@@ -126,6 +126,8 @@ class SqliteWriteWorker:
         from cortex.database.core import connect_writer
 
         conn = connect_writer(self._db_path)
+        if hasattr(conn, "authorize_causal_writes"):
+            conn.authorize_causal_writes()
         # Manual transaction control (autocommit mode)
         conn.isolation_level = None
         # Performance pragmas are applied centrally by connect_writer()

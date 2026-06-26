@@ -72,7 +72,7 @@ async def check_seal_2_type_safety() -> GateResult:
                 printer.fail(f"Type checking failed (threshold: {ecount}/165).")
                 printer.print(out[:2000], style="dim")
                 return False, "verified"
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, AssertionError) as exc:
             import logging
 
             logging.warning("Suppressed exception: %s", exc)
@@ -196,7 +196,7 @@ async def check_seal_5_ledger() -> GateResult:
         await engine.init_db()
         await engine.close()
         printer.success("Ledger schema initialized successfully.")
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, AssertionError) as e:
         printer.fail(f"Ledger initialization threw error: {e}")
         passed = False
 

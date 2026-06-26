@@ -116,7 +116,7 @@ class FitnessOracle:
             score = -0.1  # Penalty for timeout
             metadata["timeout"] = True
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             latency_ms = (time.perf_counter_ns() - start_ns) / 1e6
             success = False
             error_rate = 1.0

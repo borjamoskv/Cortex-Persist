@@ -136,7 +136,7 @@ class ExergyAgentAdapter(SwarmAgent):
 
         try:
             findings, action = await self.specialist.optimize(target, context)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error("Exergy maximization failed: %s", e)
             findings = [f"[CRITICAL FAILURE] {e}"]
             action = "ERROR"

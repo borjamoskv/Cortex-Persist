@@ -49,7 +49,7 @@ async def run(intent: dict, domain: str = "") -> dict:
             result = {"status": "hitl_pending", "row_id": row_id}
         else:
             raise ValueError(f"Unknown backend type: {backend.name}")
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         outcome = "failure"
         error_type = type(e).__name__
         raise

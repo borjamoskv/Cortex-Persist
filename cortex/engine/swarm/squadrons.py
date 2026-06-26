@@ -44,7 +44,7 @@ class MultiSpecialistAgent(SwarmAgent):
         if path.exists() and path.is_file():
             try:
                 content = path.read_text(encoding="utf-8")
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.debug("Failed to read %s: %s", target, e)
 
         # Iterate through assigned specialists

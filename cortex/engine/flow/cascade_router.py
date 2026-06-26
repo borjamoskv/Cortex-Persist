@@ -29,7 +29,7 @@ class CascadeRouter:
 
             cb = CircuitBreaker(f"cascade_router_{engine}")
             cb._on_failure()
-        except Exception as cb_err:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as cb_err:
             logger.debug(f"Could not update circuit breaker: {cb_err}")
         return f"Error: CLI tool '{engine}' not found in PATH. Subprocess execution failed."
 
@@ -182,7 +182,7 @@ class CascadeRouter:
                                 pass  # Ignorar si la tabla tasks no tiene esa estructura
                             conn.commit()
                             conn.close()
-                    except Exception as db_e:
+                    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as db_e:
                         logger.error(
                             f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}"
                         )
@@ -195,7 +195,7 @@ class CascadeRouter:
             except FileNotFoundError:
                 logger.error("🔌 [ROUTER] CLI no encontrado en PATH. Activando fallback...")
                 return self.fallback_response(engine, prompt)
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.error(f"🔥 [ROUTER] Subprocess execution exception: {e}")
                 if attempt < max_retries:
                     delay = base_delay**attempt

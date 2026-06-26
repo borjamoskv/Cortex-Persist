@@ -50,7 +50,7 @@ class TopologyIndex:
                 row = await cursor.fetchone()
                 if row:
                     return int(row[0])
-        except Exception:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError):
             pass
         return 0
 
@@ -258,5 +258,5 @@ class TopologyIndex:
             # Force cache rebuild next cycle
             await self.db.execute("UPDATE cortex_meta SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'hypothesis_graph_version'")
             await self.db.commit()
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"Failed to cascade invalidate: {e}")

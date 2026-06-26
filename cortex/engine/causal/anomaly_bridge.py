@@ -64,6 +64,6 @@ class AnomalyBridge:
                 )
                 return True
             return False
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error("[AnomalyBridge] Error detecting anomaly: %s", e)
             return False

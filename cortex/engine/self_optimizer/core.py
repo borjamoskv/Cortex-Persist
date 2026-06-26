@@ -168,7 +168,7 @@ class SelfOptimizer:
         while self._is_running:
             try:
                 await self.optimize()
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.error("[OPTIMIZER] cycle error: %s", e)
             await asyncio.sleep(self.config.optimization_interval_s)
 

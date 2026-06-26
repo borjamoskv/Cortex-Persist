@@ -70,10 +70,10 @@ async def _apply_semantic_dedup(
                     await conn.execute(
                         "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP WHERE id=?", (fid,)
                     )
-                except Exception as e:
+                except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                     logger.debug("Skipping last_accessed update for fact %s: %s", fid, e)
             return fid
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         logger.debug("Semantic dedup skipped: %s", e)
     return None
 
@@ -190,7 +190,7 @@ def _validate_dependencies():
         from cortex.engine.flow.storage_guard import StorageGuard  # noqa
         from cortex.guards.thermodynamic import AgentMode, should_enter_decorative_mode  # noqa
         from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy  # noqa
-    except Exception as exc:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
         raise RuntimeError(f"FAIL-CLOSED: dependencies unavailable: {exc}") from exc
 
 

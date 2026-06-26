@@ -157,7 +157,7 @@ class CompoundYieldTracker:
             # Check if chronos explicit report exists in meta
             if "hours_saved" in meta:
                 return float(meta["hours_saved"])
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             logger.warning("Suppressed exception: %s", exc)
 
         # If no explicit hours, assign a default baseline value of 0.5 hours
@@ -307,6 +307,6 @@ class CompoundYieldTracker:
                 logger.info("CHRONOS Compound report persisted securely as Fact #%s", fact_id)
                 return fact_id
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.warning("CHRONOS Compound persistence failed (degraded mode): %s", e)
             return None

@@ -156,7 +156,7 @@ class MetaArbiterKernel:
             return state.height
         try:
             return hash(state)
-        except Exception:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError):
             return repr(state)
 
     # ------------------------------------------------------------------

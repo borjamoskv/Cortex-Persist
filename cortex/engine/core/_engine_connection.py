@@ -58,7 +58,7 @@ class ConnectionMixin:
                 await conn.execute("BEGIN")
                 yield conn
                 await conn.commit()
-            except Exception:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError):
                 await conn.rollback()
                 raise
 
@@ -98,7 +98,7 @@ class ConnectionMixin:
                 ):
                     try:
                         await conn.close()
-                    except Exception as exc:
+                    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
                         logger.warning("Suppressed exception: %s", exc)
                     self._conns_by_loop.pop(current_loop, None)
                     conn = None
@@ -177,13 +177,13 @@ class ConnectionMixin:
 
                         config.HKDF_SALT = row[0]
                         config._cfg.HKDF_SALT = row[0]
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.warning("Failed to load tenant_isolation_salt: %s", e)
 
             # Ensure we do not leave a read transaction open on the connection
             try:
                 await conn.commit()
-            except Exception:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError):
                 pass
 
             if self._ledger is None:
@@ -221,7 +221,7 @@ class ConnectionMixin:
             conn.enable_load_extension(True)
             conn.load_extension(sqlite_vec.loadable_path())
             conn.enable_load_extension(False)
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             logger.warning("Suppressed exception: %s", exc)
         if not hasattr(self, "_sync_conns"):
             self._sync_conns = []

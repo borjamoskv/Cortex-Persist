@@ -43,7 +43,7 @@ async def arun_cmd(cmd: list[str], timeout: float = 60.0) -> tuple[int, str]:
             try:
                 proc.kill()
                 await asyncio.wait_for(proc.wait(), timeout=5.0)
-            except Exception as exc:
+            except (ValueError, TypeError, KeyError, AssertionError) as exc:
                 import logging
 
                 logging.warning("Suppressed exception: %s", exc)

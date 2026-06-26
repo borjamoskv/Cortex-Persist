@@ -37,6 +37,18 @@ jobs:
       - run: python scripts/release_preflight.py
       - run: python -m twine check dist/*
 
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0.15.11
+        with:
+          format: spdx-json
+          output-file: dist/sbom.spdx.json
+
+      - name: Attest SBOM
+        uses: actions/attest-sbom@v1
+        with:
+          subject-path: 'dist/*.whl'
+          sbom-path: 'dist/sbom.spdx.json'
+
       - name: Generate build provenance
         uses: actions/attest-build-provenance@v1
         with:

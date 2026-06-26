@@ -266,7 +266,7 @@ class VirgoContextGuard:
                         agent_id,
                         taint_severity,
                     )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, AssertionError) as e:
             logger.error("Failed to register trust penalty for agent '%s': %s", agent_id, e)
 
     async def _trigger_ledger_rollback(
@@ -291,7 +291,7 @@ class VirgoContextGuard:
             logger.debug(
                 "⚠️ [VIRGO-ROLLBACK] Rollback inactive or no-op on database connection: %s", db_err
             )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, AssertionError) as e:
             logger.warning("⚠️ [VIRGO-ROLLBACK] Rollback call completed with exception: %s", e)
 
         raise error_class(f"Logos-Critique (Virgo ♍) Rejected: {reason}")

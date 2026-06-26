@@ -115,7 +115,7 @@ class CheckpointManager:
                     out_f.write(json.dumps(cp.to_payload()) + "\n")
                     out_f.flush()
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"Failed to generate index: {e}")
 
     def iter_checkpoints(self) -> Iterator[Checkpoint]:

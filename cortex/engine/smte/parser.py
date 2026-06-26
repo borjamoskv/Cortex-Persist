@@ -64,7 +64,7 @@ class AgentASTParser:
             try:
                 compile(self.tree, filename=self.filepath, mode="exec")
                 return True
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.error(f"Mutation failed compilation check: {e}")
                 return False
         return False

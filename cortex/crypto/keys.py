@@ -195,7 +195,12 @@ class Verifier:
         """Legacy compatibility."""
         try:
             pub_bytes = base64.b64decode(public_key_b64)
-            public_key = ed25519.Ed25519PublicKey.from_public_bytes(pub_bytes)
+            try:
+                public_key = ed25519.Ed25519PublicKey.from_public_bytes(pub_bytes)
+            except ValueError:
+                public_key = serialization.load_ssh_public_key(pub_bytes)
+                if not isinstance(public_key, ed25519.Ed25519PublicKey):
+                    return False
             signature = base64.b64decode(signature_b64)
             content_hash = hashlib.sha256(content.encode("utf-8")).digest()
             public_key.verify(signature, content_hash)

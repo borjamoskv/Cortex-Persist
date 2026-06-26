@@ -412,7 +412,7 @@ class ReflexionEngine:
                     final_tree=current_tree,
                 )
 
-            except Exception as error:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as error:
                 exec_ms = (time.perf_counter_ns() - exec_start) / 1e6
 
                 # ─── REFLECT ──────────────────────────────────
@@ -446,7 +446,7 @@ class ReflexionEngine:
                 if on_reflection is not None:
                     try:
                         await on_reflection(reflection)
-                    except Exception as cb_err:
+                    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as cb_err:
                         logger.debug("[REFLEXION] on_reflection callback error: %s", cb_err)
 
                 # ─── REWRITE ──────────────────────────────────
@@ -532,7 +532,7 @@ class ReflexionEngine:
                 # Solved after reflection: moderate reward + cortisol recovery
                 ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.01)
                 ENDOCRINE.pulse(HormoneType.CORTISOL, -0.02)
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             logger.warning("Suppressed exception: %s", exc)
 
     # Endocrine system not available

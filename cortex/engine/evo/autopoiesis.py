@@ -144,6 +144,6 @@ class AutopoiesisEngine:
             self._pending_targets = getattr(self, "_pending_targets", [])
             self._pending_targets.append(target)
             return {"status": "queued", "target": target}
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             logger.exception(f"[AutopoiesisEngine] mutate() failed: {exc}")
             return {"status": "error", "error": str(exc)}

@@ -54,7 +54,7 @@ class CausalClosureGuard:
                             inner_contents.extend(str(v) for v in p.values() if isinstance(v, str))
                         elif isinstance(p, str):
                             inner_contents.append(p)
-        except Exception:
+        except (ValueError, TypeError, KeyError, AssertionError):
             pass
 
         for c in inner_contents:
@@ -83,7 +83,7 @@ class CausalClosureGuard:
                         and len(parsed_arr) > 0
                     ):
                         has_json_array = True
-                except Exception:
+                except (ValueError, TypeError, KeyError, AssertionError):
                     try:
                         parsed_arr = ast.literal_eval(stripped_c)
                         if (
@@ -92,7 +92,7 @@ class CausalClosureGuard:
                             and len(parsed_arr) > 0
                         ):
                             has_json_array = True
-                    except Exception:
+                    except (ValueError, TypeError, KeyError, AssertionError):
                         pass
 
             # Use StructuralCertifier to validate formal JSON structure

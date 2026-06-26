@@ -66,7 +66,7 @@ class SovereignTLRUCache:
         if key in self.cache:
             try:
                 self.order.remove(key)
-            except Exception as exc:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
                 logger.warning("Suppressed exception: %s", exc)
         elif len(self.cache) >= self.capacity:
             if self.order:
@@ -82,7 +82,7 @@ class SovereignTLRUCache:
         self.cache.pop(key, None)
         try:
             self.order.remove(key)
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             logger.warning("Suppressed exception: %s", exc)
         self._generate_proof(key, value, reason)
 
@@ -106,7 +106,7 @@ class SovereignTLRUCache:
             }
             try:
                 self.on_evict(key, value, audit)
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.error("SovereignTLRUCache: Eviction hook failed: %s", e)
 
     def prove_forgetting(self) -> dict[str, Any]:
@@ -155,7 +155,7 @@ class OptimizationMixin:
         try:
             async with self.session() as conn:  # type: ignore
                 await self._log_transaction(conn, "SYSTEM", "CACHE_EVICTION", detail)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error("Failed to anchor cache eviction: %s", e)
 
     async def start_optimizer(self):
@@ -177,7 +177,7 @@ class OptimizationMixin:
             try:
                 for p in OptimizationMixin._executor._processes.values():
                     p.terminate()
-            except Exception as exc:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
                 logger.warning("Suppressed exception: %s", exc)
             OptimizationMixin._executor.shutdown(wait=False, cancel_futures=True)
             OptimizationMixin._executor = None
@@ -218,10 +218,10 @@ class OptimizationMixin:
                             future.set_result(Ok(cursor.lastrowid))
                         else:
                             future.set_result(Ok(cursor.rowcount))
-                    except Exception as e:
+                    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                         future.set_result(Err(str(e)))
                 await conn.commit()
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 await conn.rollback()
                 for future, _, _ in batch:
                     if not future.done():

@@ -17,6 +17,7 @@ import aiosqlite
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
+from cortex.database.core import causal_write
 
 logger = logging.getLogger("cortex.audit.ledger")
 
@@ -97,26 +98,22 @@ class EnterpriseAuditLedger:
         self.batch_window_ms = int(os.environ.get("CORTEX_LEDGER_BATCH_MS", "50"))
         self.max_batch_size = int(os.environ.get("CORTEX_LEDGER_MAX_BATCH", "500"))
 
-        # C5-REAL Sovereign Ed25519 Keypair (Audit ZK-Seal Substrate)
-        key_path = os.environ.get("CORTEX_AUDIT_SOVEREIGN_KEY_PATH")
-        if not key_path:
-            key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audit_sovereign.pem")
+        # C5-REAL Sovereign Ed25519 Keypair (Enterprise Key Management)
+        from cortex.crypto.keys import KeyManager
+        self._km = KeyManager(service_name="cortex_ledger_enterprise")
+        self.actor_id = "ledger_master"
+        
+        priv_b64 = self._km.get_private_key_b64(self.actor_id)
+        if not priv_b64:
+            pub_b64 = self._km.generate_and_store_key(self.actor_id)
+            priv_b64 = self._km.get_private_key_b64(self.actor_id)
+        
+        priv_bytes = __import__("base64").b64decode(priv_b64)
+        try:
+            self.private_key = ed25519.Ed25519PrivateKey.from_private_bytes(priv_bytes)
+        except ValueError:
+            self.private_key = serialization.load_pem_private_key(priv_bytes, password=None)
             
-        if os.path.exists(key_path):
-            with open(key_path, "rb") as key_file:
-                pk = serialization.load_pem_private_key(key_file.read(), password=None)
-            assert isinstance(pk, ed25519.Ed25519PrivateKey)
-            self.private_key = pk
-        else:
-            self.private_key = ed25519.Ed25519PrivateKey.generate()
-            with open(key_path, "wb") as key_file:
-                key_file.write(
-                    self.private_key.private_bytes(
-                        encoding=serialization.Encoding.PEM,
-                        format=serialization.PrivateFormat.PKCS8,
-                        encryption_algorithm=serialization.NoEncryption(),
-                    )
-                )
         self.public_key = self.private_key.public_key()
 
     async def ensure_table(self) -> None:
@@ -329,14 +326,15 @@ class EnterpriseAuditLedger:
                         )
 
                     try:
-                        await self._conn.executemany(
-                            """INSERT INTO security_audit_log
-                               (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
-                                resource, status, prev_hash, signature, external_anchor)
-                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                            insert_rows,
-                        )
-                        await self._conn.commit()
+                        with causal_write(self._conn):
+                            await self._conn.executemany(
+                                """INSERT INTO security_audit_log
+                                   (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
+                                    resource, status, prev_hash, signature, external_anchor)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                insert_rows,
+                            )
+                            await self._conn.commit()
                         self._last_hash = entry_hash
 
                         # Resolve futures

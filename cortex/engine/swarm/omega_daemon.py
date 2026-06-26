@@ -56,7 +56,7 @@ class ExergyGuard:
                     pages_free = int(line.split(":")[1].strip().rstrip("."))
                     break
             return pages_free * 16384 / (1024 * 1024)  # MB
-        except Exception:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError):
             return 0.0
 
     def get_ram_pressure(self) -> str:
@@ -67,7 +67,7 @@ class ExergyGuard:
                 if "RAM pressure" in line:
                     return line.split(":")[1].strip()
             return "unknown"
-        except Exception:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError):
             return "unknown"
 
     def check(self) -> dict:
@@ -91,7 +91,7 @@ class ExergyGuard:
             after = self.check_ram_free_mb()
             reclaimed = after - before
             return reclaimed, "OK"
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             return 0.0, f"ERR: {e}"
 
 
@@ -174,7 +174,7 @@ class EntropySensor:
                     if match:
                         return (float(match.group(1)) + float(match.group(2))) / 100.0
             return 0.0
-        except Exception:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError):
             return 0.0
 
     def check_swap_mb(self) -> float:
@@ -189,7 +189,7 @@ class EntropySensor:
                     if match:
                         return float(match.group(1))
             return 0.0
-        except Exception:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError):
             return 0.0
 
     def sense(self) -> dict:

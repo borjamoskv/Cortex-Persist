@@ -58,7 +58,7 @@ class SagaOrchestrator:
             logger.info("Saga execution completed successfully. Transaction committed.")
             return ctx
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(
                 f"Saga execution failed at {len(completed_steps) + 1}. Triggering Rollback. Error: {e}"
             )
@@ -66,7 +66,7 @@ class SagaOrchestrator:
             for step in reversed(completed_steps):
                 try:
                     await step.compensate(ctx)
-                except Exception as comp_e:
+                except (ValueError, TypeError, KeyError, OSError, RuntimeError) as comp_e:
                     logger.critical(
                         f"FATAL: Saga compensation failed for {step.name}. State corrupted. Error: {comp_e}"
                     )

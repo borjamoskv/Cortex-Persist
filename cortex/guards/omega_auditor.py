@@ -117,7 +117,7 @@ INSTRUCTIONS:
 
         try:
             response = await self._llm.invoke(prompt)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, AssertionError) as e:
             logger.warning(
                 "OmegaAuditor: Primary LLM failed (%s). Attempting API-Provider-OMEGA fallback.", e
             )
@@ -126,7 +126,7 @@ INSTRUCTIONS:
                 try:
                     response = await fallback_llm.invoke(prompt)
                     break
-                except Exception as fb_e:
+                except (ValueError, TypeError, KeyError, AssertionError) as fb_e:
                     logger.error(
                         "OmegaAuditor: Fallback LLM (%s) failed: %s",
                         fallback_llm.provider_name,
@@ -148,7 +148,7 @@ INSTRUCTIONS:
             try:
                 data = json.loads(json_match.group(0))
                 return [OmegaConflict(**c) for c in data]
-            except Exception as parse_e:
+            except (ValueError, TypeError, KeyError, AssertionError) as parse_e:
                 logger.error("OmegaAuditor: Failed to parse JSON: %s", parse_e)
                 return []
 

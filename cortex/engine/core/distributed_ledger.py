@@ -95,7 +95,7 @@ class DistributedEvolutionLedger(EvolutionLedger):
                 callback=self._delivery_report,
             )
             self._producer.poll(0)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"Failed to produce mutation to Redpanda: {e}")
 
         return record
@@ -139,7 +139,7 @@ class LedgerConsumer:
                 payload = json.loads(msg.value().decode("utf-8"))
                 record = MutationRecord.from_payload(payload)
                 yield record
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.error(f"Corrupt message received over network: {e}")
 
     def close(self):

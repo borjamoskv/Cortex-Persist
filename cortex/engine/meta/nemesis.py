@@ -69,7 +69,7 @@ class NemesisProtocol:
                     # Escape backslashes if they were doubled in md
                     pattern = pattern.replace("\\\\", "\\")
                     dynamic_rules.append((pattern, reason.strip()))
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             logger.warning("Suppressed exception: %s", exc)
         return dynamic_rules
 
@@ -166,7 +166,7 @@ class NemesisProtocol:
                     source="nemesis-protocol",
                     project="system",
                 )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.debug("Failed to emit nemesis signal: %s", e)
 
     def assimilate(cls, vector: str, reason: str, db_path: str | None = None) -> bool:  # pyright: ignore[reportSelfClsParameterName]
@@ -196,7 +196,7 @@ class NemesisProtocol:
                         source="nemesis-protocol",
                         project="system",
                     )
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.debug("Failed to emit assimilation signal: %s", e)
 
         return True

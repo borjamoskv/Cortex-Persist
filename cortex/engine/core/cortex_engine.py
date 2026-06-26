@@ -213,7 +213,7 @@ class CortexEngine(
             for conn in self._sync_conns:
                 try:
                     conn.close()
-                except Exception:
+                except (ValueError, TypeError, KeyError, OSError, RuntimeError):
                     pass
             self._sync_conns.clear()
 

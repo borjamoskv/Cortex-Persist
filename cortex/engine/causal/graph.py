@@ -163,7 +163,7 @@ class AsyncCausalGraph:
                 self.atms.add_node(fact_hash)
                 if parent_hash:
                     self.atms.add_dependency(fact_hash, parent_hash)
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 raise RuntimeError(
                     f"ATMS Graph rejected edge {parent_hash} -> {fact_hash}: {e}"
                 ) from e

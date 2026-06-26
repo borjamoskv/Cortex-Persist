@@ -29,7 +29,7 @@ def canonicalize_content(content: str | bytes | memoryview) -> bytes:
         if isinstance(data, dict | list):
             # Sort keys for deterministic hashing, minimal whitespaces
             return json.dumps(data, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    except Exception:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError):
         pass
 
     # Fast path for non-JSON or invalid JSON
@@ -82,7 +82,7 @@ def _query_agent_key_sync(conn, agent_id: str) -> str | None:
         cursor.execute("SELECT public_key FROM agents WHERE id = ? AND is_active = 1", (agent_id,))
         row = cursor.fetchone()
         return row[0] if row else None
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         logger.error("[TaintEngine] Failed to query agent key sync: %s", e)
         return None
 
@@ -94,7 +94,7 @@ async def _query_agent_key_async(conn, agent_id: str) -> str | None:
         )
         row = await cursor.fetchone()
         return row[0] if row else None
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         logger.error("[TaintEngine] Failed to query agent key async: %s", e)
         return None
 
@@ -270,7 +270,7 @@ class C5NativeSocketIngestor:
             # The heavy lifting and validation happens in C
             valid_payload = cortex_native.read_socket_direct(self.fd, max_size)
             return valid_payload
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"[TaintEngine] SAGA-1 Native Rejection: {e}")
             self.sock.close()
             raise TaintValidationError(f"Native Guard rejected payload: {e}")
@@ -324,7 +324,7 @@ class MHCAntigenRouter:
                     pattern = item["pattern"]
                     self.register_t_cell(agent_id, pattern)
             logger.info(f"[MHC] Loaded dynamic antigens from {self.dynamic_antigens_path}")
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"[MHC] Failed to load dynamic antigens: {e}")
 
     def _save_dynamic_antigens(self):
@@ -337,7 +337,7 @@ class MHCAntigenRouter:
             with open(self.dynamic_antigens_path, "w", encoding="utf-8") as f:
                 json.dump({"promoted_antigens": promoted_list}, f, indent=2)
             logger.info(f"[MHC] Successfully persisted antigens to {self.dynamic_antigens_path}")
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"[MHC] Failed to persist dynamic antigens: {e}")
 
     def register_t_cell(self, agent_id: str, antigen_regex: str):

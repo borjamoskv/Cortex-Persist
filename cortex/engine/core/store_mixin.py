@@ -12,6 +12,7 @@ import logging
 from typing import Any, ClassVar
 
 import aiosqlite
+from cortex.database.core import causal_write
 
 from cortex.crypto import get_default_encrypter
 from cortex.engine.uncategorized.capabilities import CapabilityRegistry
@@ -198,26 +199,27 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         if dedupe_id is not None:
             return dedupe_id
 
-        tx_id = await self._resolve_tx_id(tx_id, conn, project, content, fact_type, tenant_id)
-        fact_id = await insert_fact_record(
-            conn,
-            tenant_id,
-            project,
-            content,
-            fact_type,
-            tags,
-            confidence,
-            valid_from,
-            source,
-            meta,
-            tx_id,
-            parent_decision_id=parent_decision_id,
-            taint_already_verified=True,
-        )
+        with causal_write(conn):
+            tx_id = await self._resolve_tx_id(tx_id, conn, project, content, fact_type, tenant_id)
+            fact_id = await insert_fact_record(
+                conn,
+                tenant_id,
+                project,
+                content,
+                fact_type,
+                tags,
+                confidence,
+                valid_from,
+                source,
+                meta,
+                tx_id,
+                parent_decision_id=parent_decision_id,
+                taint_already_verified=True,
+            )
 
-        await self._run_post_store_tasks(
-            conn, fact_id, project, content, fact_type, tags, source, tenant_id
-        )
+            await self._run_post_store_tasks(
+                conn, fact_id, project, content, fact_type, tags, source, tenant_id
+            )
 
         self._invalidate_l1_cache(tenant_id)
 
@@ -313,7 +315,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     source=source,
                     db_path=db_path,
                 )
-            except Exception as _ph_err:  # noqa: BLE001
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as _ph_err:  # noqa: BLE001
                 logger.debug("[AX-II] GuardPipeline post-hooks skipped: %s", _ph_err)
 
     async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:
@@ -435,7 +437,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             cache = RedisL1Cache.singleton()
             if cache.available:
                 cache.flush_namespace(f"search:{tenant_id}")
-        except Exception as exc:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             logger.debug("[L1 Cache] Invalidation failed: %s", exc)
 
     async def _deprecate_impl(

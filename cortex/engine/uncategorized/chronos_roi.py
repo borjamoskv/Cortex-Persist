@@ -186,7 +186,7 @@ class ChronosROI:
                         row = cursor.fetchone()
                         if row and row[0] is not None:
                             actual_tokens = int(row[0])
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.warning("Dynamic token query failed: %s", e)
 
         # Fallback logic

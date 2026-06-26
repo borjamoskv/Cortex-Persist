@@ -66,7 +66,7 @@ class CTREGuard:
                         f"[CTRE] COMMIT SUCCESS: Isomorfismo estructural verificado en {epsilon_us}µs"
                     )
                 return success, epsilon_us
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, AssertionError) as e:
                 logger.error(f"[CTRE] FFI Error en validación atómica: {e}")
                 # Fallback on error
                 return CTREGuard._python_fallback(expected_hash, current_hash)

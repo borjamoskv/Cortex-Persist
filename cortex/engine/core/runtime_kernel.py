@@ -125,7 +125,7 @@ class CortexRuntime:
         # To simulate a cold start that picks up from crash automatically:
         try:
             self.state = self.recovery_mgr.recover(RuntimeError("Cold Boot / Crash Recovery"))
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.warning(f"Failed to recover state: {e}. Starting fresh.")
             self.state = CortexState()
 
@@ -183,7 +183,7 @@ class CortexRuntime:
                 )
                 await asyncio.sleep(tick_delay)
 
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 # In a normal crash, process dies. Here we catch internally to simulate rapid self-healing supervisor.
                 self.state = self.recovery_mgr.recover(e)
                 # Dampen entropy to break crash loop

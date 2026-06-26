@@ -163,9 +163,9 @@ class ResourceMgrMixin:
         self.sovereignty_runtime = None
         if self._event_bus:
             try:
-                from cortex.engine.auth_gateway import AuthGateway
+                from cortex.engine.swarm.auth_gateway import AuthGateway
                 from cortex.engine.causal.anomaly_bridge import AnomalyBridge
-                from cortex.engine.event_sovereignty import EventSovereigntyRuntime
+                from cortex.engine.uncategorized.event_sovereignty import EventSovereigntyRuntime
 
                 auth_gw = AuthGateway(self._shared_engine)
                 # ensure table is created, though we should probably run this asynchronously,

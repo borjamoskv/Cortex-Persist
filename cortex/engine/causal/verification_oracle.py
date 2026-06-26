@@ -25,7 +25,7 @@ async def verify_ledger_continuity(conn) -> bool:
             )
             return False
         return True
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         logger.error("[VerificationOracle] Failed to run ledger continuity check: %s", e)
         return False
 
@@ -73,7 +73,7 @@ async def verify_causal_dag(conn) -> bool:
             return False
 
         return True
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         logger.error("[VerificationOracle] Failed to run causal DAG check: %s", e)
         return False
 
@@ -110,7 +110,7 @@ async def verify_approved_auth_signatures(conn) -> bool:
                 canonical_msg = f"{content_digest}:{req_id}".encode()
 
                 pub_key.verify(sig_bytes, canonical_msg)
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.error(
                     "[VerificationOracle] Inv-4 Failure: Approved request %s signature verification failed: %s",
                     req_id,
@@ -118,7 +118,7 @@ async def verify_approved_auth_signatures(conn) -> bool:
                 )
                 return False
         return True
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         logger.error("[VerificationOracle] Failed to check auth signatures: %s", e)
         return False
 
@@ -142,7 +142,7 @@ async def verify_nonce_uniqueness(conn) -> bool:
             )
             return False
         return True
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         logger.error("[VerificationOracle] Failed to check nonces: %s", e)
         return False
 

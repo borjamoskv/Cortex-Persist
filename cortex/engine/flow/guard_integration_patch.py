@@ -33,7 +33,7 @@ async def enforce_store_guards(
             InjectionGuardWrapper,
             enforce_guard_pipeline,
         )
-    except Exception as exc:
+    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
         raise RuntimeError(f"FAIL-CLOSED: security guard runtime unavailable: {exc}") from exc
 
     context = {

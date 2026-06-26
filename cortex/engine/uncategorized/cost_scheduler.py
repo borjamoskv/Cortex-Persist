@@ -43,7 +43,7 @@ class ExergyCostScheduler:
             with open(self.policy_path, encoding="utf-8") as f:
                 self.policy = yaml.safe_load(f) or {}
             logger.info(f"[COST-SCHEDULER] Loaded policy from {self.policy_path}")
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"[COST-SCHEDULER] Failed to load policy: {e}")
             self.policy = {}
 

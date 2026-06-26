@@ -100,7 +100,7 @@ class SwarmAgent(ABC):
             try:
                 signal = await self.execute(target)
                 await self.bus.emit(signal)
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 await self.bus.emit(
                     SwarmSignal(
                         agent_id=self.agent_id,
@@ -210,7 +210,7 @@ class Squadron(ABC):
                 ledger_payload["global_proof_hash"] = verdict.global_proof_hash
                 ledger_payload["shannon_cortex_hash"] = verdict.shannon_cortex_hash
                 ledger_payload["substrate_hash"] = verdict.substrate_hash
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             if "Cross-System Invariance Violation" in str(e):
                 logger.error(
                     "[Crystallization] 🛑 Cross-System Invariance Divergence detected: %s", e
@@ -285,7 +285,7 @@ _EPIGENETIC_RULES = [
             "def safe_execute(func, *args):\n"
             "    try:\n"
             "        return func(*args)\n"
-            "    except Exception as e:  # noqa: BLE001\n"
+            "    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:  # noqa: BLE001\n"
             "        return str(e)"
         ),
     ),

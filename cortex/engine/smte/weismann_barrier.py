@@ -61,7 +61,7 @@ def enforce_weismann_barrier(target_kernel_file: str, mutator_callback) -> bool:
                 logger.error(f"[WEISMANN] Mutant failed compilation!\n{result.stderr}")
                 return False
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"[WEISMANN] Gauntlet execution error: {e}")
             return False
 
@@ -73,6 +73,6 @@ def enforce_weismann_barrier(target_kernel_file: str, mutator_callback) -> bool:
                 f"[WEISMANN] SUCCESS: Kernel overwritten with superior mutation -> {original_path}"
             )
             return True
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"[WEISMANN] Hot-Swap failed: {e}")
             return False

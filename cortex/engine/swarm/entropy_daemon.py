@@ -30,7 +30,7 @@ class EntropyDaemon:
                 await self._hygiene_sweep()
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.error(f"[EntropyDaemon] Falla durante higiene: {e}")
 
     async def _hygiene_sweep(self):
@@ -62,6 +62,6 @@ class EntropyDaemon:
             self._task.cancel()
             try:
                 await self._task
-            except Exception as exc:
+            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
                 logger.warning("Suppressed exception: %s", exc)
             logger.info("[EntropyDaemon] Terminado.")

@@ -115,7 +115,7 @@ class InjectTimeoutGuard:
                 message=f"Timeout guard ({timeout_ms}ms) injected into dispatch tree",
                 side_effects=["dispatch_tree_modified"],
             )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             latency = (time.perf_counter_ns() - start) / 1e6
             return RepairResult(
                 status=RepairStatus.FAILED,
@@ -155,7 +155,7 @@ class ForceGcAndReduceBatch:
                 message=f"GC forced. Batch: {current_batch} → {new_batch}",
                 side_effects=["gc_collected", "batch_size_reduced"],
             )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             latency = (time.perf_counter_ns() - start) / 1e6
             return RepairResult(
                 status=RepairStatus.FAILED,
@@ -186,7 +186,7 @@ class ResetPoolAndRetry:
                 for conn in conns:
                     try:
                         await conn.close()
-                    except Exception as exc:
+                    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
                         logger.warning("Suppressed exception: %s", exc)
                 engine._conns_by_loop.clear()
                 engine._schema_ready = False
@@ -201,7 +201,7 @@ class ResetPoolAndRetry:
                 side_effects=["connection_pool_reset", "schema_invalidated"],
                 rollback_available=False,
             )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             latency = (time.perf_counter_ns() - start) / 1e6
             return RepairResult(
                 status=RepairStatus.FAILED,
@@ -245,7 +245,7 @@ class ExponentialBackoff:
                 message=f"Backoff configured: {delay_s:.2f}s delay before retry",
                 side_effects=["backoff_state_set"],
             )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             latency = (time.perf_counter_ns() - start) / 1e6
             return RepairResult(
                 status=RepairStatus.FAILED,
@@ -293,7 +293,7 @@ class ProbeAndResetBreaker:
                 message="Circuit breaker moved to HALF_OPEN for probe",
                 side_effects=["circuit_breaker_probed"],
             )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             latency = (time.perf_counter_ns() - start) / 1e6
             return RepairResult(
                 status=RepairStatus.FAILED,
@@ -333,7 +333,7 @@ class RestartHeartbeatEmitter:
                 message=f"Heartbeat stopped. Restart scheduled ({restart_delay}ms)",
                 side_effects=["heartbeat_stopped", "restart_scheduled"],
             )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             latency = (time.perf_counter_ns() - start) / 1e6
             return RepairResult(
                 status=RepairStatus.FAILED,
@@ -379,7 +379,7 @@ class TriggerConsolidation:
                 latency_ms=latency,
                 message="No SleepOrchestrator available - skipped",
             )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             latency = (time.perf_counter_ns() - start) / 1e6
             return RepairResult(
                 status=RepairStatus.FAILED,
@@ -417,7 +417,7 @@ class SnapshotAndRollback:
                 side_effects=["checkpoint_created"],
                 rollback_available=True,
             )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             latency = (time.perf_counter_ns() - start) / 1e6
             return RepairResult(
                 status=RepairStatus.FAILED,
@@ -489,7 +489,7 @@ class ReserializeWithValidation:
                 message="Payload re-serialized with validation",
                 side_effects=["payload_cleaned"],
             )
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             latency = (time.perf_counter_ns() - start) / 1e6
             return RepairResult(
                 status=RepairStatus.FAILED,
@@ -558,7 +558,7 @@ class RepairRegistry:
 
         try:
             return await strategy.execute(target, parameters, context)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.exception("[REPAIR] Strategy %s crashed: %s", strategy_name, e)
             return RepairResult(
                 status=RepairStatus.FAILED,
