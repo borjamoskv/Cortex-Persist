@@ -95,8 +95,8 @@ async def setup_db_for_topology(db_path: str):
                             pass
 
         await conn.commit()
-    await pool.close()
-    return CortexConnectionPool(db_path, read_only=False)
+    # Do not close the pool! Shared memory databases are destroyed when the last connection closes.
+    return pool
 
 
 class PingPongAgent(BaseAgent):
