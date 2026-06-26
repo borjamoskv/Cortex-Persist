@@ -11,6 +11,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 
 from cortex.engine import CortexEngine
+from cortex.integration.rustchain.mcp_tool import register_rustchain_tools
 from cortex.ledger import ImmutableLedger
 from cortex.mcp.apollo_tools import register_apollo_tools
 from cortex.mcp.core_tools import (
@@ -25,7 +26,6 @@ from cortex.mcp.mega_tools import register_mega_tools
 from cortex.mcp.music_tools import register_music_tools
 from cortex.mcp.singularity_tools import register_singularity_tools
 from cortex.mcp.trust_tools import register_trust_tools
-from cortex.integration.rustchain.mcp_tool import register_rustchain_tools
 from cortex.mcp.utils import (
     AsyncConnectionPool,
     MCPMetrics,

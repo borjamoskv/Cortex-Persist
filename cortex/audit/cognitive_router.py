@@ -20,7 +20,10 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 from cortex.audit.cognitive_classifier import SafetyClassifier, cosine_similarity
 from cortex.audit.cognitive_config import DEFAULT_ROUTING_POLICY
@@ -82,6 +85,8 @@ class CognitiveRouter:
         cls, ledger: EnterpriseAuditLedger, yaml_str: str, **kwargs: Any
     ) -> CognitiveRouter:
         """Loads CognitiveRouter instance from a declarative YAML policy DSL."""
+        if yaml is None:
+            raise ImportError("pyyaml is required to load YAML policies. Run pip install pyyaml.")
         policy = yaml.safe_load(yaml_str)
         return cls(ledger, routing_policy=policy, **kwargs)
 

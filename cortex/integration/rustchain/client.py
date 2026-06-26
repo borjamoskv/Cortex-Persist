@@ -8,7 +8,8 @@ fail-safe fallback and test mock mode.
 from __future__ import annotations
 
 import hashlib
-from typing import Any, Dict, Optional
+from typing import Any, Optional
+
 import httpx
 
 
@@ -30,7 +31,7 @@ class RustChainClient:
             await self._client.aclose()
             self._client = None
 
-    async def health(self) -> Dict[str, Any]:
+    async def health(self) -> dict[str, Any]:
         """Check the status of the node."""
         if self.mock_mode:
             return {"healthy": True, "epoch": 42, "version": "1.0.0"}
@@ -41,7 +42,7 @@ class RustChainClient:
         except Exception as e:
             return {"healthy": False, "error": str(e)}
 
-    async def get_balance(self, address: str) -> Dict[str, Any]:
+    async def get_balance(self, address: str) -> dict[str, Any]:
         """Get balance for a wallet address."""
         if self.mock_mode:
             return {"address": address, "balance": 1000000, "nonce": 0}
@@ -59,7 +60,7 @@ class RustChainClient:
         skill: str,
         signature: str,
         timestamp: int,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Submit a staking transaction to lock RTC and acquire a skill."""
         if self.mock_mode:
             tx_hash = hashlib.sha256(f"{from_address}:{amount}:{skill}:{timestamp}".encode()).hexdigest()
