@@ -986,8 +986,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiofiles", marker = "extra == 'daemon'" },
-    { name = "aiohttp", marker = "extra == 'daemon'" },
-    { name = "aiohttp", marker = "extra == 'mcp'" },
+    { name = "aiohttp", marker = "extra == 'daemon'", specifier = ">=3.9.5" },
+    { name = "aiohttp", marker = "extra == 'mcp'", specifier = ">=3.9.5" },
     { name = "aiosqlite", specifier = ">=0.20.0" },
     { name = "arq", marker = "extra == 'daemon'" },
     { name = "asyncpg", marker = "extra == 'cloud'", specifier = ">=0.29" },
@@ -1016,7 +1016,7 @@ requires-dist = [
     { name = "optimum", extras = ["onnxruntime"], marker = "extra == 'embeddings'", specifier = ">=1.17,<2.0.0" },
     { name = "pandas", marker = "extra == 'trends'", specifier = ">=2.0" },
     { name = "prometheus-client", marker = "extra == 'daemon'", specifier = ">=0.20.0" },
-    { name = "pydantic", specifier = ">=2.0" },
+    { name = "pydantic", specifier = ">=2.7.0" },
     { name = "pyobjc-core", marker = "sys_platform == 'darwin' and extra == 'platform'" },
     { name = "pyobjc-framework-cocoa", marker = "sys_platform == 'darwin' and extra == 'platform'" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },

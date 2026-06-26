@@ -4,21 +4,48 @@ Sovereign Component: SAT Orchestrator Agent
 CORTEX-TAINT: taint:moskv1:adversarial_sat:gen2:0x9f32
 """
 
-import cortex_core_rs
 from typing import List, Tuple
+import time
+import z3
 
 class SatOrchestrator:
     def __init__(self, timeout_ms: int = 5000):
         self.timeout_ms = timeout_ms
 
-    def check_graph_colorability(self, edges: List[Tuple[int, int]], nodes: int, k: int) -> dict:
+    def verify_k_colorability(self, nodes: int, k: int, edges: List[Tuple[int, int]]) -> dict:
         """
-        Llama al motor Z3 de Rust para comprobar si el grafo es K-colorable.
+        Llama al motor Z3 de Python (fallback ante la destrucción de cortex_core_rs)
+        para comprobar si el grafo es K-colorable.
         """
-        # Convertimos la lista de tuplas a la matriz de adyacencia o formato esperado por Rust
-        # La firma de solve_k_colorability es: solve_k_colorability(nodes, edges, k) -> dict
-        # edges = [(u, v), ...]
+        start_time = time.time()
         
-        # Invocamos la función compilada en PyO3
-        result = cortex_core_rs.solve_k_colorability(nodes, edges, k)
-        return result
+        solver = z3.Solver()
+        # Set timeout
+        z3.set_param('timeout', self.timeout_ms)
+        
+        # Variables for node colors
+        color_vars = [z3.Int(f'c_{i}') for i in range(nodes)]
+        
+        # Domain constraints
+        for c in color_vars:
+            solver.add(c >= 0, c < k)
+            
+        # Edge constraints
+        for u, v in edges:
+            solver.add(color_vars[u] != color_vars[v])
+            
+        status = solver.check()
+        elapsed_s = time.time() - start_time
+        
+        if status == z3.sat:
+            verdict = "Sat"
+        elif status == z3.unsat:
+            verdict = "Unsat"
+        else:
+            verdict = "Timeout"
+            
+        return {
+            "verdict": verdict,
+            "elapsed_s": elapsed_s,
+            "edges_count": len(edges)
+        }

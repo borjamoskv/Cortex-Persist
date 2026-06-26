@@ -1,10 +1,10 @@
 # C5-REAL
+import hashlib
+import logging
+import sqlite3
 import sys
 import uuid
-import sqlite3
-import hashlib
 from datetime import datetime, timezone
-import logging
 
 from cortex.math.riemann_sieve import get_riemann_zero
 from cortex.nodes.riemann_hypothesis_nodes import RiemannZeroNode
@@ -19,7 +19,7 @@ def generate_taint(n_index: int, t_fixed: str) -> str:
     agent_id = "OUROBOROS-SIEVE"
     session_id = "C5-RESURRECTION"
     timestamp = datetime.now(timezone.utc).isoformat()
-    raw = f"{agent_id}:{session_id}:{n_index}:{t_fixed}".encode('utf-8')
+    raw = f"{agent_id}:{session_id}:{n_index}:{t_fixed}".encode()
     sha3 = hashlib.sha3_256(raw).hexdigest()
     return f"taint:{agent_id}:{session_id}:{timestamp}:{sha3}"
 
