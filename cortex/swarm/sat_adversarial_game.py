@@ -1,8 +1,8 @@
 import logging
-import random
-from typing import Dict, Any, List
-from cortex.swarm.sat_genetic_swarm import SatGeneticSwarm
+from typing import Any
+
 from cortex.agents.sat_orchestrator import SatOrchestrator
+from cortex.swarm.sat_genetic_swarm import SatGeneticSwarm
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ class SatAdversarialGame:
         # Usamos el enjambre de la fase 1 para generar el "Champion"
         self.swarm = SatGeneticSwarm(population_size=10, n=n, k=k, timeout_ms=timeout_ms)
         
-    def play_round(self, evolutions: int = 5) -> Dict[str, Any]:
+    def play_round(self, evolutions: int = 5) -> dict[str, Any]:
         """Juega una ronda adversarial: Enjambre Genético vs Z3 K-Color."""
         logger.info(f"--- BATALLA ADVERSARIAL: Enjambre vs Z3 (K={self.k}) ---")
         
@@ -40,7 +40,7 @@ class SatAdversarialGame:
         logger.info(f"Veredicto Z3: {verdict} (Tiempo: {elapsed:.4f}s) | Aristas: {edges}")
         
         # Auditoría Causal
-        winner = "GENERADOR (Enjambre)" if verdict == "Sat" else "DESTRUCTOR (Z3 Rust)"
+        winner = "GENERADOR (Enjambre)" if verdict == "Sat" else "DESTRUCTOR (Z3 Python Fallback)"
         if verdict == "Timeout":
             winner = "EMPATE (Límite Computacional Alcanzado)"
             

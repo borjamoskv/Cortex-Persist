@@ -1,6 +1,8 @@
 # C5-REAL
 import hashlib
+
 from pydantic import BaseModel, Field
+
 
 class RiemannZeroNode(BaseModel):
     """
@@ -17,6 +19,6 @@ class RiemannZeroNode(BaseModel):
     taint_signature: str = Field(..., description="Sello Ouroboros BFT Taint (SAGA-2) para evitar Apoptosis celular.")
 
     def compute_hash(self) -> str:
-        payload = f"{self.id}|{self.n_index}|{self.imaginary_part_scaled}|{self.real_part_scaled}|{self.taint_signature}".encode('utf-8')
+        payload = f"{self.id}|{self.n_index}|{self.imaginary_part_scaled}|{self.real_part_scaled}|{self.taint_signature}".encode()
         return hashlib.sha256(payload).hexdigest()[:16]
 

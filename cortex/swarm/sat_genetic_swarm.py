@@ -7,13 +7,16 @@ CORTEX-TAINT: taint:moskv1:adversarial_sat:gen2:0x9f32
 import random
 from typing import List, Tuple
 
+
 class SatGeneticSwarm:
-    def __init__(self, pop_size: int = 10, graph_size: int = 10, mutation_rate: float = 0.2):
-        self.pop_size = pop_size
-        self.graph_size = graph_size
-        self.mutation_rate = mutation_rate
+    def __init__(self, population_size: int = 10, n: int = 10, k: int = 3, timeout_ms: int = 5000):
+        self.pop_size = population_size
+        self.graph_size = n
+        self.k = k
+        self.timeout_ms = timeout_ms
+        self.mutation_rate = 0.2
         # Población: lista de listas de tuplas (aristas)
-        self.population: List[List[Tuple[int, int]]] = [self._random_graph() for _ in range(pop_size)]
+        self.population: List[List[Tuple[int, int]]] = [self._random_graph() for _ in range(self.pop_size)]
 
     def _random_graph(self) -> List[Tuple[int, int]]:
         edges = []
@@ -39,7 +42,7 @@ class SatGeneticSwarm:
             
         return float(edge_count) + random.uniform(0, 5) # Ruido estocástico para diversificación
 
-    def evolve(self, generations: int = 5) -> List[Tuple[int, int]]:
+    def evolve(self, generations: int = 5) -> dict:
         for gen in range(generations):
             # Sort by fitness
             scored = [(self.fitness(g), g) for g in self.population]
@@ -74,4 +77,4 @@ class SatGeneticSwarm:
 
         # Return best graph of the final generation
         best_graph = max(self.population, key=self.fitness)
-        return best_graph
+        return {'best_genome': best_graph, 'max_fitness': self.fitness(best_graph)}
