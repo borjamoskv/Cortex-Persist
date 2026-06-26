@@ -169,7 +169,7 @@ class TieredCache(Generic[T]):
                         await client.delete(*keys)
                     if cursor == 0:
                         break
-            except (OSError, ValueError):
+            except Exception:
                 logger.exception("Redis invalidate failed for pattern %s", pattern)
 
         await self._notify(CacheEvent.INVALIDATE, pattern)
@@ -190,7 +190,7 @@ class TieredCache(Generic[T]):
                         await client.delete(*keys)
                     if cursor == 0:
                         break
-            except (OSError, ValueError):
+            except Exception:
                 logger.exception("Redis clear failed")
 
         await self._notify(CacheEvent.CLEAR, "all")

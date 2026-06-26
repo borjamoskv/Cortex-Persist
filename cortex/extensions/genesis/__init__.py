@@ -20,10 +20,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
-    from cortex.extensions.genesis.engine import GenesisEngine
-    from cortex.extensions.genesis.templates import SystemTemplate, TemplateRegistry
     from cortex.extensions.genesis.assembler import SystemAssembler
+    from cortex.extensions.genesis.engine import GenesisEngine
+    from cortex.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
+    from cortex.extensions.genesis.templates import SystemTemplate, TemplateRegistry
     from cortex.extensions.genesis.validator import GenesisValidator
 
 __all__ = [

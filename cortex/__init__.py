@@ -6,10 +6,11 @@ Local-first memory infrastructure with vector search, temporal facts,
 and cryptographic vaults. Zero network dependencies.
 """
 
-import sys
 import importlib
 import importlib.abc
 import importlib.util
+import sys
+
 
 class AliasLoader(importlib.abc.Loader):
     def __init__(self, target_module):
