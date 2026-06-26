@@ -5,6 +5,7 @@ import mmap
 import os
 import struct
 import weakref
+from typing import Any
 
 logger = logging.getLogger("cortex.ultramap")
 
@@ -292,7 +293,7 @@ class UltramapSubstrate:
     def _emit_ledger_event(
         self,
         agent_idx: int,
-        vector_before: ControlVector | None,  # type: ignore[name-defined]
+        vector_before: Any,
         queue_depth: float,
         error_rate: float,
         causal_entropy: float,
