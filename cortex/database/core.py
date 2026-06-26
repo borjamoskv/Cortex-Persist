@@ -105,6 +105,7 @@ class CortexConnection(sqlite3.Connection):
                 or table == "enrichment_jobs"
                 or table == "quota_bucket"
                 or table == "results"
+                or table == "signals"
             ):
                 return sqlite3.SQLITE_OK
 
@@ -366,6 +367,7 @@ async def connect_async(
         read_only: If True, enforce query_only=1.
         uri: If True, allow URI filename parsing.
     """
+    db_path = str(db_path)
     is_uri = uri or db_path.startswith("file:")
     try:
         conn = await aiosqlite.connect(db_path, timeout=5.0, uri=is_uri, factory=CortexConnection)
