@@ -11,7 +11,6 @@ import logging
 import sqlite3
 import zipfile
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger("cortex.audit.bundler")
 

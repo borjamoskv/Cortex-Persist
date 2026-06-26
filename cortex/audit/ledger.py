@@ -249,9 +249,11 @@ class EnterpriseAuditLedger:
         import asyncio
         import base64
         import json
+
         import httpx
         import rfc3161ng
         from cryptography.hazmat.primitives import serialization
+
         from cortex.audit.rekor_client import RekorClient
 
         # C5-REAL Exergy Optimization: Instantiate external clients once outside the loop.
@@ -286,7 +288,6 @@ class EnterpriseAuditLedger:
                             # -- REKOR & RFC3161 ANCHORING --
                             external_anchor = None
                             try:
-                                sig_b64 = base64.b64encode(bytes.fromhex(signature)).decode("utf-8")
                                 pub_pem = self.public_key.public_bytes(
                                     encoding=serialization.Encoding.PEM,
                                     format=serialization.PublicFormat.SubjectPublicKeyInfo,

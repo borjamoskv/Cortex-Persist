@@ -101,10 +101,11 @@ async def insert_fact_record(
     ts = ts or now_iso()
     tags_json = json.dumps(tags or [])
 
-    from cortex.engine.causal.taint_engine import enforce_taint_check
-    from cortex.guards.secret_guard import SecretGuard
-    from cortex.guards.memory_firewall import MemoryFirewallGuard
     import os
+
+    from cortex.engine.causal.taint_engine import enforce_taint_check
+    from cortex.guards.memory_firewall import MemoryFirewallGuard
+    from cortex.guards.secret_guard import SecretGuard
 
     # Enforce OWASP LLM06 Secret Redaction before any persistence
     SecretGuard.verify_clean(content)

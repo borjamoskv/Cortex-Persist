@@ -61,7 +61,7 @@ def export_cmd(format: str, out: str):
     success = bundler.export_bundle(out)
     
     if success:
-        console.print(f"[bold green]✔ Compliance bundle exported successfully.[/bold green]")
+        console.print("[bold green]✔ Compliance bundle exported successfully.[/bold green]")
     else:
-        console.print(f"[bold red]❌ Failed to export compliance bundle. Check logs for details.[/bold red]")
+        console.print("[bold red]❌ Failed to export compliance bundle. Check logs for details.[/bold red]")
 
