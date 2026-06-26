@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
+import logging
 import os
 import random
 import time
@@ -80,14 +81,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS para permitir peticiones desde cortexpersist.com (o localhost para dev)
+# CORS — origins controlados por env var (default: producción)
+_cors_raw = os.getenv("CORTEX_CORS_ORIGINS", "https://cortexpersist.com")
+ALLOWED_ORIGINS: list[str] = [o.strip() for o in _cors_raw.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Reemplazar con dominios específicos en C5-REAL prod
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Cortex-Tenant"],
 )
+
+logger = logging.getLogger(__name__)
+logger.info("CORS allow_origins=%s", ALLOWED_ORIGINS)
 
 GUARD_DB_PATH = Path("~/.cortex/influencer_guard.db").expanduser()
 SCRAPER_DB_PATH = "influencer_audit_v1.db"
@@ -200,4 +207,4 @@ async def websocket_telemetry(websocket: WebSocket):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("api.server:app", host="0.0.0.0", port=8000, reload=False)
