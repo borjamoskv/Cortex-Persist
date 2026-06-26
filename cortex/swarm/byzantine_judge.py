@@ -3,13 +3,13 @@
 Uses the SandboxJIT and Exergy economics to reach consensus on proposed code mutations.
 """
 
-import logging
 import hashlib
+import logging
 from typing import Any
 
+from cortex.crypto.keys import KeyManager, Signer, Verifier
 from cortex.engine.uncategorized.sandbox_jit import JITSandboxViolation, SandboxJIT
 from cortex.swarm.exergy import ExergyBank
-from cortex.crypto.keys import KeyManager, Verifier, Signer
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,8 @@ class ByzantineJudge:
             payload_hash = hashlib.sha256(code.encode("utf-8")).hexdigest()
             try:
                 is_valid = Verifier.verify_signature(pub_key_b64, payload_hash, timestamp, signature_b64)
-            except Exception as e:
+            except (ValueError, TypeError) as e:
+                logger.warning(f"[SECURITY] Signature validation failed structurally: {e}")
                 is_valid = False
                 
             if not is_valid:
@@ -101,9 +102,12 @@ class ByzantineJudge:
             except JITSandboxViolation as e:
                 logger.warning(f"Agent {agent_id} SLASHED due to Sandbox Violation: {e}")
                 self.bank.slash(agent_id)
-            except Exception as e:
-                logger.error(f"Agent {agent_id} SLASHED due to Unknown Error: {e}")
+            except (SyntaxError, TypeError, NameError, ValueError, AttributeError) as e:
+                logger.warning(f"Agent {agent_id} SLASHED due to AST execution error: {e}")
                 self.bank.slash(agent_id)
+            except Exception as e:
+                logger.critical(f"Host System Error evaluating agent {agent_id}: {e}")
+                raise RuntimeError(f"BFT Consensus halted. Host execution degraded: {e}")
 
         if winning_agent:
             logger.info(f"🏆 Consensus reached. Winner: {winning_agent}")
