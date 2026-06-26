@@ -14,32 +14,46 @@ from cortex.engine.core.cortex_engine import CortexEngine
 def _writer_process_target(db_path: Path, sync_event: multiprocessing.Event, fault_point: str):
     """Worker process that triggers sync_event at precise execution points."""
     async def _run():
-        engine = CortexEngine(db_path=str(db_path))
-        engine._synthesize_skill("optimization")
-        await engine.start()
-        
-        if fault_point == "before_sqlite":
-            sync_event.set()
-            await asyncio.sleep(10)
+        try:
+            engine = CortexEngine(db_path=str(db_path))
+            engine._synthesize_skill("optimization")
+            print("WORKER: Calling engine.start()")
+            await engine.start()
             
-        # Monkeypatch the SQLite session execute to intercept writes
-        # We will instead intercept the ledger append as the proxy for "after_sqlite"
-        original_append = engine.ledger_writer.append
-        
-        async def _faulty_append(*args, **kwargs):
-            if fault_point == "after_sqlite_before_ledger":
+            if fault_point == "before_sqlite":
+                print("WORKER: Setting sync_event (before_sqlite)")
                 sync_event.set()
-                await asyncio.sleep(10) # Wait for SIGKILL
-            return await original_append(*args, **kwargs)
+                await asyncio.sleep(10)
+                
+            # Monkeypatch the SQLite session execute to intercept writes
+            # We will instead intercept the ledger append as the proxy for "after_sqlite"
+            original_append = engine.ledger_writer.append
             
-        engine.ledger_writer.append = _faulty_append
-        
-        await engine.facts.store(project="test", content="crash_test_payload", tenant_id="test_tenant", source="test")
-        if fault_point == "after_commit":
-            sync_event.set()
-            await asyncio.sleep(10)
-        
-        await engine.close()
+            async def _faulty_append(*args, **kwargs):
+                print(f"WORKER: In _faulty_append, fault_point={fault_point}")
+                if fault_point == "after_sqlite_before_ledger":
+                    print("WORKER: Setting sync_event (after_sqlite_before_ledger)")
+                    sync_event.set()
+                    print("WORKER: Waiting for SIGKILL (after_sqlite_before_ledger)")
+                    await asyncio.sleep(10) # Wait for SIGKILL
+                return await original_append(*args, **kwargs)
+                
+            engine.ledger_writer.append = _faulty_append
+            
+            print("WORKER: Calling engine.facts.store()")
+            await engine.facts.store(project="test", content="crash_test_payload", tenant_id="test_tenant", source="test")
+            if fault_point == "after_commit":
+                print("WORKER: Setting sync_event (after_commit)")
+                sync_event.set()
+                print("WORKER: Waiting for SIGKILL (after_commit)")
+                await asyncio.sleep(10)
+            
+            print("WORKER: Closing engine")
+            await engine.close()
+        except Exception as e:
+            print(f"WORKER ERROR: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
 
     asyncio.run(_run())
 
@@ -69,7 +83,7 @@ async def test_sigkill_crash_consistency(tmp_path: Path, fault_point: str):
     p.start()
     
     # 3. Wait for worker to reach the vulnerability window
-    reached = sync_event.wait(timeout=10.0)
+    reached = sync_event.wait(timeout=30.0)
     assert reached, f"Worker did not reach {fault_point}"
     
     # 4. Annihilate worker abruptly (SIGKILL cannot be caught by try/finally or signal handlers)

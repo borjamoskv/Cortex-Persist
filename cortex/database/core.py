@@ -102,6 +102,7 @@ class CortexConnection(sqlite3.Connection):
                 or table.endswith("_config")
                 or table == "health_history"
                 or table == "enrichment_jobs"
+                or table == "quota_bucket"
             ):
                 return sqlite3.SQLITE_OK
 
@@ -164,18 +165,18 @@ def causal_write(conn: Any) -> Any:
     
     # Only try to mutate the connection if it's a CortexConnection that supports dynamic attributes
     if is_cortex_conn:
-        if getattr(conn, "_causal_write_auth_count", 0) == 0:
+        if getattr(underlying, "_causal_write_auth_count", 0) == 0:
             underlying.authorize_causal_writes()
-        conn._causal_write_auth_count = getattr(conn, "_causal_write_auth_count", 0) + 1
+        underlying._causal_write_auth_count = getattr(underlying, "_causal_write_auth_count", 0) + 1
 
     try:
         yield conn
     finally:
         if is_cortex_conn:
-            conn._causal_write_auth_count -= 1
-            if conn._causal_write_auth_count <= 0:
+            underlying._causal_write_auth_count -= 1
+            if underlying._causal_write_auth_count <= 0:
                 underlying.revoke_causal_writes()
-                conn._causal_write_auth_count = 0
+                underlying._causal_write_auth_count = 0
 
 
 __all__ = [

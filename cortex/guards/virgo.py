@@ -51,6 +51,7 @@ class VirgoContextGuard:
         meta: dict[str, Any],
         agent_id: str | None,
         conn: aiosqlite.Connection,
+        tenant_id: str = "cortex_default",
     ) -> None:
         """Verify the cryptographic Logos-Critique validation signature for an agent's fact."""
         logos_signature = meta.get("logos_signature")
@@ -92,7 +93,7 @@ class VirgoContextGuard:
         if is_valid_sig and agent_id and agent_public_key:
             from cortex.crypto.keys import KeyManager
             try:
-                km = KeyManager()
+                km = KeyManager(tenant_id=tenant_id)
                 registered_key = km._metadata.get(agent_id, {}).get("public_key_b64")
                 if registered_key and registered_key != agent_public_key:
                     is_valid_sig = False
@@ -213,7 +214,7 @@ class VirgoContextGuard:
             )
 
         # 2. Deterministic Validation Signature Verification
-        await self._check_agent_validation_signature(content, project, meta, agent_id, conn)
+        await self._check_agent_validation_signature(content, project, meta, agent_id, conn, tenant_id)
 
         # 3. Replay Protection: Check if this nonce has already been used
         nonce = meta.get("nonce", "")

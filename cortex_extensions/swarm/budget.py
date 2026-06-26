@@ -70,22 +70,25 @@ class SwarmBudgetManager:
 
         now = time.monotonic()
         try:
+            from cortex.database.core import causal_write
             with db_connect(str(self.db_path)) as conn:
-                conn.execute(
-                    """
-                    INSERT INTO mission_budget
-                    (mission_id, total_input_tokens, total_output_tokens,
-                     total_cost_usd, request_count, last_update)
-                    VALUES (?, ?, ?, ?, 1, ?)
-                    ON CONFLICT(mission_id) DO UPDATE SET
-                        total_input_tokens = total_input_tokens + excluded.total_input_tokens,
-                        total_output_tokens = total_output_tokens + excluded.total_output_tokens,
-                        total_cost_usd = total_cost_usd + excluded.total_cost_usd,
-                        request_count = request_count + 1,
-                        last_update = excluded.last_update
-                """,
-                    (mission_id, input_tokens, output_tokens, cost, now),
-                )
+                with causal_write(conn):
+                    conn.execute(
+                        """
+                        INSERT INTO mission_budget
+                        (mission_id, total_input_tokens, total_output_tokens,
+                         total_cost_usd, request_count, last_update)
+                        VALUES (?, ?, ?, ?, 1, ?)
+                        ON CONFLICT(mission_id) DO UPDATE SET
+                            total_input_tokens = total_input_tokens + excluded.total_input_tokens,
+                            total_output_tokens = total_output_tokens + excluded.total_output_tokens,
+                            total_cost_usd = total_cost_usd + excluded.total_cost_usd,
+                            request_count = request_count + 1,
+                            last_update = excluded.last_update
+                    """,
+                        (mission_id, input_tokens, output_tokens, cost, now),
+                    )
+                    conn.commit()
                 logger.debug(
                     "Budget: %d tokens ($%.4f) reported for mission %s",
                     input_tokens + output_tokens,

@@ -249,14 +249,16 @@ async def test_store_mixin_taint_rejection_precedes_transaction(agent_keys, tmp_
     db_path = tmp_path / "store_taint.db"
     engine = CortexEngine(db_path=str(db_path), auto_embed=False)
     await engine.init_db()
+    from cortex.database.core import causal_write
     try:
         async with engine.session() as conn:
-            await conn.execute(
-                "INSERT INTO agents (id, name, agent_type, reputation_score, public_key, tenant_id) "
-                "VALUES (?, ?, ?, 1.0, ?, 'default')",
-                ("agent_1", "TestAgent", "ai", pub),
-            )
-            await conn.commit()
+            with causal_write(conn):
+                await conn.execute(
+                    "INSERT INTO agents (id, name, agent_type, reputation_score, public_key, tenant_id) "
+                    "VALUES (?, ?, ?, 1.0, ?, 'default')",
+                    ("agent_1", "TestAgent", "ai", pub),
+                )
+                await conn.commit()
 
         with pytest.raises(TaintValidationError):
             await engine.store(

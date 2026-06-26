@@ -405,6 +405,7 @@ class TestVirgoStrictMode:
                 agent_public_key=public_key_b,
                 logos_signature=signature_b,
                 nonce="nonce_mismatched_key",
+                tenant_id="cortex_test_enterprise",
             )
 
     async def test_virgo_strict_rejects_tenant_mismatch(self, engine):
