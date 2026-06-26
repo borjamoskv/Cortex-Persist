@@ -92,7 +92,7 @@ class MutantServer:
 
         except asyncio.TimeoutError:
             pass  # Client took too long
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.debug(f"MutantServer connection error: {e}")
         finally:
             writer.close()

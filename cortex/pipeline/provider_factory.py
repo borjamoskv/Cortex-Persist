@@ -105,7 +105,7 @@ def _try_build_provider(name: str) -> Any | None:
 
         return LLMProvider(provider=name)
 
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.debug("[FACTORY] Provider '%s' unavailable: %s", name, e)
         return None
 
@@ -131,7 +131,7 @@ def _check_local_provider(name: str, preset: dict[str, Any]) -> bool:
         result = sock.connect_ex((host, port))
         sock.close()
         return result == 0
-    except (ValueError, TypeError, OSError, RuntimeError):
+    except Exception:
         return False
 
 
@@ -155,6 +155,6 @@ def _build_router(providers: list[Any]) -> Any | None:
         )
         return router
 
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.warning("[FACTORY] Router construction failed: %s", e)
         return None

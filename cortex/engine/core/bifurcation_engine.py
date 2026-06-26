@@ -4,6 +4,8 @@ import logging
 import uuid
 from typing import Any
 
+import aiosqlite
+
 logger = logging.getLogger(__name__)
 
 

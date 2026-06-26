@@ -80,7 +80,7 @@ class RekorClient:
                         }
         except urllib.error.HTTPError as e:
             logger.error("HTTPError anchoring to Rekor: %s - %s", e.code, e.read().decode("utf-8"))
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to anchor to Rekor: %s", e)
 
         return None

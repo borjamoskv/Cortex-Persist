@@ -78,7 +78,7 @@ class KnowledgeItemHandler(FileSystemEventHandler):
                     asyncio.run(_async_save())
 
                 logger.info("👁️ [KNOWLEDGE] Synced Tensor for KI [%s] into SQLite-Vec", ki_name)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to sync KI %s: %s", ki_name, e)
 
     def on_modified(self, event):
@@ -109,6 +109,6 @@ def start_knowledge_daemon():
 
         logger.info("🚀 [KNOWLEDGE WATCHER] Active on %s", KNOWLEDGE_DIR)
         return observer
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("Cannot start Knowledge Watcher: %s", e)
         return None

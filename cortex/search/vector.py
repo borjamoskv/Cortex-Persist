@@ -79,7 +79,7 @@ async def semantic_search(
                 raise TypeError(
                     f"PostgreSQL connection object has no fetch or acquire method: {type(conn)}"
                 )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("PostgreSQL pgvector search failed: %s", e)
             return []
 
@@ -255,7 +255,7 @@ def semantic_search_sync(
         if content and str(content).startswith(enc.PREFIX):
             try:
                 content = enc.decrypt_str(content, tenant_id=tenant_id)
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
         score = 1.0 - (row[7] if row[7] else 0.0)

@@ -128,7 +128,7 @@ class RunnerMixin:
             result.stages = list(self._traces)
             result.completed_at = time.monotonic()
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             result.status = PipelineStatus.FAILED
             result.error = str(e)
             result.stages = list(self._traces)
@@ -167,7 +167,7 @@ class RunnerMixin:
                 result = await asyncio.to_thread(fn)
         except (BudgetExhaustedError, PipelineCancelledError):
             raise
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             error_msg = str(e)
             raise
         finally:
@@ -236,7 +236,7 @@ class RunnerMixin:
             result.stages = list(self._traces)
             result.completed_at = time.monotonic()
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             result.status = PipelineStatus.FAILED
             result.error = str(e)
             result.stages = list(self._traces)
@@ -314,7 +314,7 @@ class RunnerMixin:
             result.stages = list(self._traces)
             result.completed_at = time.monotonic()
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             result.status = PipelineStatus.FAILED
             result.error = str(e)
             result.stages = list(self._traces)
@@ -351,7 +351,7 @@ class RunnerMixin:
                         nonlocal res_val, exc_val
                         try:
                             res_val = asyncio.run(result)  # pyright: ignore[reportArgumentType]
-                        except (ValueError, TypeError, OSError, RuntimeError) as ex:
+                        except Exception as ex:
                             exc_val = ex
 
                     t = threading.Thread(target=_worker)
@@ -364,7 +364,7 @@ class RunnerMixin:
                     result = asyncio.run(result)
         except (BudgetExhaustedError, PipelineCancelledError):
             raise
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             error_msg = str(e)
             raise
 

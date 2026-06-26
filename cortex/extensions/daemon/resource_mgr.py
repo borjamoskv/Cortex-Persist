@@ -88,7 +88,7 @@ class ResourceMgrMixin:
                     poll_interval=float(file_config.get("heartbeat_interval", 30.0)),
                 )
                 logger.info("❤️  HeartbeatDaemon (Continuous Autopoiesis) ENABLED")
-            except (ValueError, TypeError, OSError, RuntimeError) as e:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init HeartbeatDaemon: %s", e)
 
         self.frontier_daemon = None
@@ -105,7 +105,7 @@ class ResourceMgrMixin:
                     allow_commits=file_config.get("frontier_allow_commits", True),
                 )
                 logger.info("🚀 Frontier Daemon (Evolution Engine) ENABLED")
-            except (ValueError, TypeError, OSError, RuntimeError) as e:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init Frontier Daemon: %s", e)
 
         self.zero_prompting_daemon = None
@@ -119,7 +119,7 @@ class ResourceMgrMixin:
                     ),
                 )
                 logger.info("🧠 Zero-Prompting Evolution Daemon (Axioma Ω₇) ENABLED")
-            except (ValueError, TypeError, OSError, RuntimeError) as e:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init Zero-Prompting Daemon: %s", e)
 
         self.epistemic_breaker_daemon = None
@@ -135,7 +135,7 @@ class ResourceMgrMixin:
                     ),
                 )
                 logger.info("🛡️ Sovereign Epistemic Circuit Breaker (Axioma Ω₂, Ω₃) ENABLED")
-            except (ValueError, TypeError, OSError, RuntimeError) as e:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init Epistemic Breaker Daemon: %s", e)
 
     def _init_sovereign_subsystems(self, file_config: dict) -> None:
@@ -146,7 +146,7 @@ class ResourceMgrMixin:
             try:
                 self.hot_state = HotStateDB()
                 logger.info("🔥 HotStateDB (SQLite KV) ENABLED")
-            except (ValueError, TypeError, OSError, RuntimeError) as e:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init HotStateDB: %s", e)
 
         # 2. Event Bus (reuse existing or create)
@@ -156,7 +156,7 @@ class ResourceMgrMixin:
 
             self._event_bus = DistributedEventBus()
             logger.info("📡 DistributedEventBus ENABLED")
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
 
         # 2.5 Event Sovereignty Runtime (Hito 34)
@@ -176,17 +176,8 @@ class ResourceMgrMixin:
                     event_bus=self._event_bus, anomaly_bridge=anomaly_br, auth_gateway=auth_gw
                 )
                 logger.info("👑 EventSovereigntyRuntime ENABLED")
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning("Failed to init EventSovereigntyRuntime: %s", e)
-
-        # 2.7 Ultramap Substrate (Galaxy Brain)
-        self.ultramap = None
-        try:
-            from cortex.engine.ultramap.ultramap import UltramapSubstrate
-            self.ultramap = UltramapSubstrate(capacity=100)
-            logger.info("🌌 UltramapSubstrate ENABLED (Galaxy Brain)")
-        except Exception as e:
-            logger.warning("Failed to init UltramapSubstrate: %s", e)
 
         # 3. Scheduler — cron/interval task execution
         self.scheduler = None
@@ -197,10 +188,9 @@ class ResourceMgrMixin:
                     hot_state=self.hot_state,
                     tick_interval=float(file_config.get("scheduler_tick_interval", 5.0)),
                     engine=self._shared_engine,  # type: ignore
-                    ultramap=self.ultramap,
                 )
                 logger.info("⏱️  SovereignScheduler ENABLED")
-            except (ValueError, TypeError, OSError, RuntimeError) as e:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init SovereignScheduler: %s", e)
 
         # 4. Watchdog Hub — unified filesystem monitor
@@ -222,7 +212,7 @@ class ResourceMgrMixin:
                     hot_state=self.hot_state,
                 )
                 logger.info("👁️  WatchdogHub ENABLED (%d paths)", len(watch_paths))
-            except (ValueError, TypeError, OSError, RuntimeError) as e:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init WatchdogHub: %s", e)
 
         # 5. Human Callback API — REST + WebSocket sidecar
@@ -238,7 +228,7 @@ class ResourceMgrMixin:
                 logger.info(
                     "🌐 Human Callback API ENABLED (port %s)", file_config.get("api_port", 8741)
                 )
-            except (ValueError, TypeError, OSError, RuntimeError) as e:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init HumanCallbackAPI: %s", e)
 
     def _init_persistence_checkers(self, file_config: dict) -> None:
@@ -262,7 +252,7 @@ class ResourceMgrMixin:
                     zenon_threshold=float(file_config.get("zenon_threshold", 1.0)),
                 )
                 logger.info("🌌 Entropic Wake Daemon (VOID DAEMON) ENABLED")
-            except (ValueError, TypeError, OSError, RuntimeError) as e:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init Entropic Wake Daemon: %s", e)
         # Time Tracker
         try:

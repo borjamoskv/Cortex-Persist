@@ -195,5 +195,5 @@ def init_background_agents(daemon: Any, file_config: dict[str, Any]) -> None:
             daemon.aether_monitor = AetherMonitor(daemon._aether_daemon)
             daemon.auto_immune_monitor = AutoImmuneMonitor(queue=aether_queue)
             logger.info("🤖 Aether autonomous agent ENABLED")
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Failed to init Aether daemon: %s", exc)

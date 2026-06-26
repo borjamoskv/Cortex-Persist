@@ -122,7 +122,7 @@ async def _stream_labyrinth_proxy(request: Request, payload: dict) -> AsyncGener
                         delta = chunk_data.get("choices", [{}])[0].get("delta", {})
                         if "content" in delta:
                             full_content += delta["content"]
-                    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+                    except Exception as exc:
                         logger.warning("Suppressed exception: %s", exc)
 
                 # Apply the Labyrinth Filter

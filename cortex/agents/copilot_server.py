@@ -159,7 +159,7 @@ class CopilotServer:
         try:
             async for raw_message in websocket:
                 await self._handle_message(session, raw_message)
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Client %s error: %s", session.session_id, exc)
         finally:
             del self._sessions[session.session_id]
@@ -213,7 +213,7 @@ class CopilotServer:
         """Process context → generate suggestions → send back."""
         try:
             context = CopilotContextPayload(**payload)
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             await self._send_error(session, f"Invalid context: {exc}")
             return
 
@@ -250,7 +250,7 @@ class CopilotServer:
         """Process human verdict on a suggestion."""
         try:
             verdict = SuggestionVerdict(**payload)
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             await self._send_error(session, f"Invalid verdict: {exc}")
             return
 
@@ -286,7 +286,7 @@ class CopilotServer:
         try:
             await session.websocket.send(json.dumps(data))
             session.messages_sent += 1
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Send to %s failed: %s", session.session_id, exc)
 
 

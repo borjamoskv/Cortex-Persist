@@ -63,7 +63,7 @@ class WindowEngine:
             if not output:
                 return []
             return self._parse_window_list(output, app_name)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning("Failed to list windows for %s: %s", app_name, e)
             return []
 
@@ -132,7 +132,7 @@ class WindowEngine:
                 width=int(size[0].strip()),
                 height=int(size[1].strip()),
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning("Failed to get frontmost window: %s", e)
             return None
 
@@ -150,7 +150,7 @@ class WindowEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return InteractionResult(success=False, error=str(e))
 
     async def resize(self, target: AppTarget, width: int, height: int) -> InteractionResult:
@@ -167,7 +167,7 @@ class WindowEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return InteractionResult(success=False, error=str(e))
 
     async def minimize(self, target: AppTarget) -> InteractionResult:
@@ -184,7 +184,7 @@ class WindowEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return InteractionResult(success=False, error=str(e))
 
     async def restore(self, target: AppTarget) -> InteractionResult:
@@ -200,7 +200,7 @@ class WindowEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return InteractionResult(success=False, error=str(e))
 
     async def fullscreen(self, target: AppTarget) -> InteractionResult:
@@ -218,7 +218,7 @@ class WindowEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return InteractionResult(success=False, error=str(e))
 
     async def close_window(self, target: AppTarget) -> InteractionResult:
@@ -233,5 +233,5 @@ class WindowEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return InteractionResult(success=False, error=str(e))

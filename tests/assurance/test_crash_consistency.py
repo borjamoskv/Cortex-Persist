@@ -25,19 +25,20 @@ def _writer_process_target(db_path: Path, sync_event: multiprocessing.Event, fau
                 sync_event.set()
                 await asyncio.sleep(10)
                 
-            original_log_tx = engine._log_transaction
+            # Monkeypatch the SQLite session execute to intercept writes
+            # We will instead intercept the ledger append as the proxy for "after_sqlite"
+            original_append = engine.ledger_writer.append
             
-            async def _faulty_log_tx(*args, **kwargs):
-                print(f"WORKER: In _faulty_log_tx, fault_point={fault_point}")
+            async def _faulty_append(*args, **kwargs):
+                print(f"WORKER: In _faulty_append, fault_point={fault_point}")
                 if fault_point == "after_sqlite_before_ledger":
-                    # Rename the semantic concept here to during_transaction
                     print("WORKER: Setting sync_event (after_sqlite_before_ledger)")
                     sync_event.set()
                     print("WORKER: Waiting for SIGKILL (after_sqlite_before_ledger)")
                     await asyncio.sleep(10) # Wait for SIGKILL
-                return await original_log_tx(*args, **kwargs)
+                return await original_append(*args, **kwargs)
                 
-            engine._log_transaction = _faulty_log_tx
+            engine.ledger_writer.append = _faulty_append
             
             print("WORKER: Calling engine.facts.store()")
             await engine.facts.store(project="test", content="crash_test_payload", tenant_id="test_tenant", source="test")

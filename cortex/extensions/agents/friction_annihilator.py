@@ -93,7 +93,7 @@ class FrictionAnnihilatorAgent:
 
             return {"status": "success", "file": target_file}
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error(f"FrictionAnnihilator: Failed to annihilate friction: {e}")
             return {"status": "failed", "reason": str(e)}
 

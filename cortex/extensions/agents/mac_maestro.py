@@ -73,7 +73,7 @@ class MacMaestroAgent:
             stdout = await self.maestro.run_applescript(script_code, require_success=True)
             success = True
             stderr = ""
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             success = False
             stdout = ""
             stderr = str(e)
@@ -89,21 +89,21 @@ class MacMaestroAgent:
     def _parse_json_response(self, text: str) -> dict[str, Any] | None:
         try:
             return json.loads(text)
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
 
         match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
         if match:
             try:
                 return json.loads(match.group(1))
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
         match = re.search(r"(\{.*\})", text, re.DOTALL)
         if match:
             try:
                 return json.loads(match.group(1))
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
         return None

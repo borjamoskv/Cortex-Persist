@@ -73,7 +73,7 @@ class BCI_Daemon:
 
         except asyncio.IncompleteReadError:
             print("[BCI] ❌ Byte buffer terminated unexpectedly.")
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             print(f"[BCI] ❌ Error processing intent: {e}")
             writer.write(b"\x00")
         finally:
@@ -131,14 +131,14 @@ class BCI_Transmitter:
                 return True
             return False
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             print(f"[BCI-CLIENT] Failed to inject intent: {e}")
             return False
         finally:
             try:
                 writer.close()
                 await writer.wait_closed()
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 import logging
 
                 logging.warning("Suppressed exception: %s", exc)

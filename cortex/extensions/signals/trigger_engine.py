@@ -274,7 +274,7 @@ class TriggerEngine:
             try:
                 if not trigger.predicate(signal):
                     continue
-            except (ValueError, TypeError, OSError, RuntimeError):
+            except Exception:
                 logger.debug(
                     "Predicate failed for trigger %s on signal %s",
                     trigger.id,
@@ -358,7 +358,7 @@ class TriggerEngine:
             try:
                 await self._dispatch_single(action, trigger, signal)
                 dispatched += 1
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error(
                     "Action dispatch failed for trigger %s, action %s: %s",
                     trigger.id,

@@ -101,7 +101,7 @@ class ExergyEngine:
                 with open(META_PARAMS_LOG, encoding="utf-8") as f:
                     data = json.load(f)
                     return MetaParams(**data)
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 import logging
 
                 logging.getLogger(__name__).warning("Suppressed exception: %s", exc)

@@ -38,7 +38,7 @@ async def play_ping(state):
             stderr=subprocess.PIPE,
         )
         await proc.wait()
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         logger.warning("Suppressed exception: %s", exc)
 
 

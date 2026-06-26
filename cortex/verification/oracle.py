@@ -107,6 +107,6 @@ class VerificationOracle:
 
             logger.error("Ledger audit failed: engine does not expose a verification interface")
             return False
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Ledger audit failed: %s", e)
             return False

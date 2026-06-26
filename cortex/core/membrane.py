@@ -169,7 +169,7 @@ class Z3Guard:
             try:
                 core = self.solver.unsat_core()
                 unsat_core = [str(c) for c in core]
-            except (ValueError, TypeError, OSError, RuntimeError):
+            except Exception:
                 unsat_core = ["unknown_core"]
 
             return {

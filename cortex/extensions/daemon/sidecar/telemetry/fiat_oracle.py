@@ -117,7 +117,7 @@ class FiatOracle:
                 logger.error("❌ [FIAT_ORACLE] Payload corrupto en %s", tx_file.name)
                 try:
                     await asyncio.to_thread(tx_file.unlink)
-                except (ValueError, TypeError, OSError, RuntimeError) as exc:
+                except Exception as exc:
                     logger.warning("Suppressed exception: %s", exc)
             except (OSError, ValueError, CortexError, KeyError) as e:
                 logger.error("⚠️ [FIAT_ORACLE] Falla procesando %s: %s", tx_file.name, e)

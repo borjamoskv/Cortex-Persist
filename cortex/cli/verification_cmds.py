@@ -48,7 +48,7 @@ def verify_files_cmd(files: tuple[str, ...]) -> None:
                     [f"- [{v['id']}] {v['message']}" for v in result.violations]
                 )
                 table.add_row(file_path, "[red]FAILED[/]", violations_str)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             all_valid = False
             table.add_row(file_path, "[red]CRASHED[/]", f"Error de lectura/procesamiento: {str(e)}")
 

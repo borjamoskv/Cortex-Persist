@@ -82,7 +82,7 @@ class C6BlackoutAudit:
 
             if history_valid and single_truth:
                 return 1.0
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             import logging
 
             logging.warning("Suppressed exception: %s", exc)

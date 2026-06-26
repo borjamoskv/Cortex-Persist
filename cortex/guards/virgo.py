@@ -98,7 +98,7 @@ class VirgoContextGuard:
                 if registered_key and registered_key != agent_public_key:
                     is_valid_sig = False
                     logger.error(f"Agent key mismatch: key passed {agent_public_key[:16]}... does not match registered key {registered_key[:16]}...")
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.debug(f"Could not load KeyManager metadata for agent key verification: {e}")
 
 

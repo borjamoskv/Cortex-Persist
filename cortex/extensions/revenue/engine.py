@@ -175,7 +175,7 @@ class RevenueEngine:
                     opportunity.title,
                     result.error,
                 )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             opportunity.status = OpportunityStatus.FAILED
             result = ExecutionResult(
                 opportunity_id=opportunity.id,
@@ -302,7 +302,7 @@ class RevenueEngine:
                 )
         except ImportError:
             logger.debug("CORTEX engine not available, skipping persistence.")
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning("Failed to persist opportunities: %s", e)
 
     async def _persist_result(self, result: ExecutionResult) -> None:
@@ -326,5 +326,5 @@ class RevenueEngine:
             )
         except ImportError:
             logger.debug("CORTEX engine not available, skipping persistence.")
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning("Failed to persist result: %s", e)

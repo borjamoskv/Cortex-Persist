@@ -70,7 +70,7 @@ class LedgerWriter:
             tsr = self.rfc3161_client.request_timestamp(event_hash)
             if tsr:
                 logger.info("Successfully received RFC3161 timestamp for hash %s", event_hash)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Async anchoring failed: %s", e)
 
     def append(self, event: LedgerEvent) -> str:

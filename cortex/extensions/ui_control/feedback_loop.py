@@ -91,7 +91,7 @@ class UIFeedbackLoop:
                     }
                 )
             return parsed
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Error performing native Apple Vision OCR: %s", e)
             return []
 
@@ -142,7 +142,7 @@ class UIFeedbackLoop:
             # Step 1 & 2: Observe and parse
             try:
                 state = await self.observe_state()
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("[FeedbackLoop] Perception step failed: %s", e)
                 return InteractionResult(success=False, error=f"Perception failed: {e}")
 
@@ -200,7 +200,7 @@ class UIFeedbackLoop:
                                 action_name,
                                 res.error,
                             )
-                    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+                    except Exception as exc:
                         logger.error(
                             "[FeedbackLoop] Exception executing action %s: %s", action_name, exc
                         )

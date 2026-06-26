@@ -35,7 +35,7 @@ async def _run_lens(
                 intent=IntentProfile.REASONING,
             )
             return name, result.content
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return name, f"[ERROR] Lens '{name}' failed: {type(e).__name__}: {e}"
 
 

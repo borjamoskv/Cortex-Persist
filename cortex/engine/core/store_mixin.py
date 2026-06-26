@@ -110,7 +110,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     tx_id=tx_id,
                     parent_decision_id=parent_decision_id,
                 )
-            except (ValueError, TypeError, OSError, RuntimeError):
+            except Exception:
                 if started_tx and conn.in_transaction:
                     await conn.rollback()
                 raise
@@ -137,7 +137,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     tx_id=tx_id,
                     parent_decision_id=parent_decision_id,
                 )
-            except (ValueError, TypeError, OSError, RuntimeError):
+            except Exception:
                 if started_tx and _conn.in_transaction:
                     await _conn.rollback()
                 raise

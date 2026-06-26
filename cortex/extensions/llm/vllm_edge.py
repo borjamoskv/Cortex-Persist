@@ -75,7 +75,7 @@ class NativeVLLMProvider(BaseProvider):
                     reg = json.load(f)
                     if reg.get("status") == "verified":
                         verified_adapter_path = reg.get("adapter_path")
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
         enable_lora = (
@@ -155,7 +155,7 @@ class NativeVLLMProvider(BaseProvider):
                                 lora_int_id=1,
                                 lora_path=adapter_path,
                             )
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("Failed to load verified adapter for completion: %s", e)
 
         kwargs = {}
@@ -206,7 +206,7 @@ class NativeVLLMProvider(BaseProvider):
                 parent_cache_id=parent_cache_id,
                 layer_depth_ratio=1.0,  # Capa KV profunda a 1-bit QJL
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Fallo al interceptar KV Cache de vLLM (TurboQuant): %s", e)
 
     async def invoke(self, prompt: CortexPrompt) -> str:
@@ -265,7 +265,7 @@ class NativeVLLMProvider(BaseProvider):
                                 lora_int_id=1,
                                 lora_path=adapter_path,
                             )
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("Failed to load verified adapter for stream: %s", e)
 
         kwargs = {}

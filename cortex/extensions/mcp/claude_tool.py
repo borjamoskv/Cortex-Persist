@@ -40,7 +40,7 @@ def run_claude_query(prompt: str, model: str = "claude-3-opus-20240229") -> str:
             return json.dumps(
                 {"status": "C5-REAL", "model": data.get("model", model), "response": text}
             )
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         import logging
 
         logging.warning("Suppressed exception: %s", e)
@@ -65,8 +65,8 @@ def run_claude_query(prompt: str, model: str = "claude-3-opus-20240229") -> str:
         try:
             err_body = e.read().decode("utf-8")
             err_msg = f"HTTP Error {e.code}: {err_body}"
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             err_msg = f"HTTP Error {e.code}"
         return json.dumps({"status": "error", "message": err_msg})
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         return json.dumps({"status": "error", "message": f"Urllib request failed: {e}"})

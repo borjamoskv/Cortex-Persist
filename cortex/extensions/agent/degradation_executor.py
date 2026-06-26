@@ -94,7 +94,7 @@ def sovereign_execute(
                                 f"Suggested model: {e.suggested_alt}"
                             )
                         return result
-                    except (ValueError, TypeError, OSError, RuntimeError) as inner_exc:
+                    except Exception as inner_exc:
                         raise AgentDegradedError(
                             cause=inner_exc,
                             component=e.component,
@@ -115,7 +115,7 @@ def sovereign_execute(
                 await _persist_to_cortex(cortex_engine, project, e)
                 raise
 
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 upgraded = AgentDegradedError(
                     cause=e,
                     component=fn.__name__,
@@ -164,7 +164,7 @@ async def _persist_to_cortex(
             source="agent:degradation_protocol",
             metadata={"component": report.component, "level": report.level.value},
         )
-    except (ValueError, TypeError, OSError, RuntimeError) as persist_exc:
+    except Exception as persist_exc:
         logger.debug(
             "sovereign_execute: Failed to persist degradation report to CORTEX: %s",
             persist_exc,

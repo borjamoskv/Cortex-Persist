@@ -103,7 +103,7 @@ def sovereign_ignite_cmd(env: str) -> None:
             if ctx.power.power >= 1300:
                 console.print("[bold green]🏆 ESTADO SOBERANO VALIDADO[/]")
 
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         console.print(f"[bold red]Error de Ignición:[/] {e}")
         raise click.Abort() from e
 

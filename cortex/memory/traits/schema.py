@@ -158,10 +158,10 @@ class SchemaTrait:
                     conn.execute(alter_query)  # nosec B608
             conn.commit()
             self._conn = conn
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             try:
                 conn.close()
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
             raise
 
@@ -172,7 +172,7 @@ class SchemaTrait:
 
                 self._hybrid = L2HybridSearch(self)  # pyright: ignore[reportArgumentType]
                 self._hybrid.ensure_fts_table()
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning("L2HybridSearch init failed (FTS5 unavailable): %s", e)
                 self._hybrid = None
 
@@ -190,7 +190,7 @@ class SchemaTrait:
                 from cortex.memory.pii_sanitizer import get_pii_sanitizer
 
                 self._sanitizer = get_pii_sanitizer()
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
         return self._sanitizer
 

@@ -77,7 +77,7 @@ def _verify_single_checkpoint(
                 continue
             try:
                 reg_pub_bytes = _b64url_decode(reg_pub_b64)
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.debug("Failed to decode public key in key record %s: %s", reg_pub_b64, e)  # pyright: ignore[reportUndefinedVariable]
                 continue
             if reg_pub_bytes == cp_pubkey_bytes:
@@ -104,7 +104,7 @@ def _verify_single_checkpoint(
             if not valid_from <= created_at <= valid_until:
                 verifier.errors.append(f"checkpoint_key_outside_validity:{index}")
                 return False
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             verifier.errors.append(f"checkpoint_validity_parse_error:{index}:{e}")
             return False
 
@@ -135,7 +135,7 @@ def _verify_single_checkpoint(
     except InvalidSignature:
         verifier.errors.append(f"checkpoint_signature_invalid:{index}")
         return False
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         verifier.errors.append(f"checkpoint_verification_error:{index}:{e}")
         return False
 

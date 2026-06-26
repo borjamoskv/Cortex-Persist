@@ -26,5 +26,5 @@ class VerificationOracle:
             state = self.rescan_fn()
             ok = self.matcher_fn(state)
             return OracleVerdict(verified=ok, reason=None if ok else "state_not_changed")
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             return OracleVerdict(verified=False, reason=str(exc))

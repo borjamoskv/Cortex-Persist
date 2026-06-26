@@ -21,7 +21,7 @@ try:
         # On macOS, libc.dylib exists but does NOT contain malloc_trim or mallinfo2.
         _libc_name = "libc.so.6" if os.uname().sysname != "Darwin" else "libc.dylib"
         _libc = ctypes.CDLL(_libc_name, use_errno=True)
-except (ValueError, TypeError, OSError, RuntimeError):
+except Exception:
     _libc = None
 
 # Symbols availability
@@ -33,7 +33,7 @@ if _libc:
         _libc.malloc_trim.argtypes = [ctypes.c_size_t]
         _libc.malloc_trim.restype = ctypes.c_int
         HAS_MALLOC_TRIM = True
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         import logging
 
         logging.warning("Suppressed exception: %s", exc)
@@ -57,7 +57,7 @@ if _libc:
         _libc.mallinfo2.argtypes = []
         _libc.mallinfo2.restype = _MallInfo2Struct
         HAS_MALLINFO2 = True
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         import logging
 
         logging.warning("Suppressed exception: %s", exc)
@@ -82,7 +82,7 @@ def malloc_trim(pad: int = 0) -> int:
     try:
         res = _libc.malloc_trim(pad)  # type: ignore[reportOptionalMemberAccess]
         return res
-    except (ValueError, TypeError, OSError, RuntimeError):
+    except Exception:
         return 0
 
 
@@ -120,7 +120,7 @@ class MallInfo2:
                 fordblks=raw.fordblks,
                 keepcost=raw.keepcost,
             )
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             return MallInfo2()
 
 

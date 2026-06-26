@@ -98,7 +98,7 @@ class DemiurgeCompiler:
                 # ephemeral skill generation (autopoiesis) within a controlled sandbox.
                 # All inputs are validated via ASTSandbox whitelist before execution.
                 exec(code_obj, sandbox_globals)  # nosec B102
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 await self._record_ghost(intent, generated_code, f"Compilation Error: {e}", 0.15)
                 return {
                     "status": "FAILED",
@@ -148,7 +148,7 @@ class DemiurgeCompiler:
                     "code": generated_code,
                 }
 
-            except (ValueError, TypeError, OSError, RuntimeError) as run_err:
+            except Exception as run_err:
                 await self._record_ghost(intent, generated_code, str(run_err), 0.2)
                 return {
                     "status": "FAILED",
@@ -157,7 +157,7 @@ class DemiurgeCompiler:
                     "code": generated_code,
                 }
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.debug("Ghost recorded: %s", intent[:30])
             return {"status": "ERROR", "reason": str(e)}
 

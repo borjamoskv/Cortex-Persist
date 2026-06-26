@@ -79,7 +79,7 @@ async def _collect_recent(engine, limit: int = 8) -> list[dict]:
                 }
                 for r in results
             ]
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         import logging
 
         logging.warning("Suppressed exception: %s", exc)
@@ -366,7 +366,7 @@ def dashboard(db: str, interval: float, once: bool) -> None:
                     data = _run_async(_collect_all(engine))
                     live.update(_build_dashboard(data))
                     time.sleep(interval)  # noqa: TID251 # Synchronous CLI loop
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 import logging
 
                 logging.warning("Suppressed exception: %s", exc)

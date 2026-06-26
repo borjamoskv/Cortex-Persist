@@ -43,13 +43,13 @@ class IssueReader:
         # Try API First
         try:
             return cls._read_via_api(owner, repo, issue_number, github_token)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning(f"GitHub API failed for {issue_url}: {e}. Falling back to HTML...")
 
         # Try HTML Fallback
         try:
             return cls._read_via_html(issue_url)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error(
                 f"HTML Parsing failed for {issue_url}: {e}. Mac Maestro fallback not yet implemented."
             )

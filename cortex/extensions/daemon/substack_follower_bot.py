@@ -77,14 +77,14 @@ async def run_automata():
                             logger.info(
                                 f" -> Nodo {i + 1} ignorado (Botón oculto o deshabilitado)."
                             )
-                    except (ValueError, TypeError, OSError, RuntimeError) as e:
+                    except Exception as e:
                         logger.error(f"Fricción al sincronizar nodo {i + 1}: {e}")
 
             logger.info("Auditoría de pantalla completada.")
             # Desconectarse limpiamente
             await browser.close()
 
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error(f"Fallo crítico en el Automata CDP: {e}")
         logger.info("¿Has iniciado Google Chrome con el puerto abierto en la terminal?")
 

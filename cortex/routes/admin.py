@@ -484,7 +484,7 @@ async def execute_credibility_strike(
             "metrics": evidence["metrics"],
             "message": "Credibility strike executed successfully",
         }
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         logger.error("Credibility strike failed for project=%s: %s", project, exc)
         raise HTTPException(
             status_code=500,

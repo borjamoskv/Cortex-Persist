@@ -41,7 +41,7 @@ class SecurityControl:
             )
             stdout, stderr = await proc.communicate()
             return proc.returncode or 0, stdout.decode().strip(), stderr.decode().strip()
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return -1, "", str(e)
 
     async def audit_gatekeeper(self) -> SecurityState:
@@ -84,7 +84,7 @@ class SecurityControl:
                 data = plistlib.load(f)
             version = data.get("Version", "Unknown")
             return SecurityState("XProtect", f"v{version}", True, f"Version: {version}")
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return SecurityState("XProtect", "Error parsing", False, str(e))
 
     async def audit_ports(self) -> SecurityState:

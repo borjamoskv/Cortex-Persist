@@ -275,7 +275,7 @@ def main() -> None:
                     ]
                 )
         print(f"Results written to {csv_path}")
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         print(f"CSV export failed: {e}")
 
 

@@ -26,7 +26,7 @@ async def radar_de_entropia_inicio():
             )
         else:
             print("[AUTÓNOMO v2] Homeostasis confirmada. Procediendo.")
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         print(f"[AUTÓNOMO v2] Falla en radar: {e}")
 
 
@@ -54,7 +54,7 @@ async def protocolo_ship_omega(data: str):
     try:
         # subprocess.run(["cortex", "store", "--type", "decision", "--source", "agent:gemini", "sovereign_e2e_swarm", "Iteración finalizada end-to-end"])
         pass
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         import logging
 
         logging.warning("Suppressed exception: %s", exc)

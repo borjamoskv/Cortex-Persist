@@ -212,7 +212,7 @@ def purge_omega() -> None:
             check=False,
         )
         console.print("  [green]✓[/] Dead variables and unused imports purged.")
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         console.print(f"  [yellow]⚠[/] Ruff fix failed: {e}")
 
     # 2. Cache Annihilation
@@ -250,7 +250,7 @@ def purge_omega() -> None:
                                 total_bytes += subitem.stat().st_size
                                 total_files += 1
                         shutil.rmtree(item)
-                except (ValueError, TypeError, OSError, RuntimeError):
+                except Exception:
                     pass
 
     freed_mb = total_bytes / (1024 * 1024)

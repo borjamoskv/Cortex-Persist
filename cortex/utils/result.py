@@ -122,7 +122,7 @@ def safe(fn: Callable[..., T]) -> Callable[..., Result[T, str]]:
     def wrapper(*args: Any, **kwargs: Any) -> Result[T, str]:
         try:
             return Ok(fn(*args, **kwargs))
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
             return Err(f"{type(exc).__name__}: {exc}\n{''.join(tb[-3:])}")
 
@@ -137,7 +137,7 @@ def safe_async(fn: Callable[..., Any]) -> Callable[..., Any]:
     async def wrapper(*args: Any, **kwargs: Any) -> Result[T, str]:
         try:
             return Ok(await fn(*args, **kwargs))
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
             return Err(f"{type(exc).__name__}: {exc}\n{''.join(tb[-3:])}")
 

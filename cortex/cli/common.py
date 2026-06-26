@@ -48,7 +48,7 @@ def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
         from cortex.engine import CortexEngine
 
         return CortexEngine(db_path=db)
-    except (ValueError, TypeError, OSError, RuntimeError) as err:
+    except Exception as err:
         detail = f"{type(err).__name__}: {err}"
         filename = getattr(err, "filename", None)
         if filename:
@@ -104,7 +104,7 @@ def _show_tip(engine=None) -> None:
                 padding=(0, 2),
             )
         )
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         import logging
 
         logging.warning("Suppressed exception: %s", exc)

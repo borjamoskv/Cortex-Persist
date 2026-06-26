@@ -355,7 +355,7 @@ class AlertHandlerMixin:
                 )
             else:
                 logger.error("🦾 [ACTUATOR] Ouroboros absorb script not found at %s", runner_script)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.exception("🦾 [ACTUATOR] Failed to dispatch Ouroboros Absorb: %s", e)
 
     def _flush_timer(self) -> None:
@@ -366,5 +366,5 @@ class AlertHandlerMixin:
             entries = self.tracker.flush()  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
             if entries > 0:
                 logger.info("TimeTracker: Consolidado %d entradas de tiempo.", entries)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
             logger.error("TimeTracker flush error: %s", e)

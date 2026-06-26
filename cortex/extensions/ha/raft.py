@@ -138,7 +138,7 @@ class RaftNode:
                 task.cancel()
                 try:
                     await task
-                except (ValueError, TypeError, OSError, RuntimeError) as exc:
+                except Exception as exc:
                     logger.warning("Suppressed exception: %s", exc)
         # Expected - do NOT re-raise during shutdown
         self._election_task = None
@@ -325,7 +325,7 @@ class RaftNode:
                 granted = task.result()
                 if granted:
                     votes_received += 1
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.debug("Vote request failed: %s", exc)
 
         # If term changed while we were voting (split-brain / higher term), abort
@@ -433,7 +433,7 @@ class RaftNode:
                 self._heartbeat_task.cancel()
                 try:
                     await self._heartbeat_task
-                except (ValueError, TypeError, OSError, RuntimeError) as exc:
+                except Exception as exc:
                     logger.warning("Suppressed exception: %s", exc)
 
             self.role = NodeRole.LEADER

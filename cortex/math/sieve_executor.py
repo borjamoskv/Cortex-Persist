@@ -66,7 +66,7 @@ def execute_sieve_batch(start_n: int, count: int):
             logger.info(f"Inyectado [N={n}] -> MILLENNIUM-RIEMANN-{n:06d} | Hash: {node.hash} | Taint: {node.taint_signature[:20]}...")
         
         conn.commit()
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         conn.rollback()
         logger.error(f"Apoptosis de Lote: {e}")
         sys.exit(1)

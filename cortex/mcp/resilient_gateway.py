@@ -225,7 +225,7 @@ class ResilientFetcher:
                 errors.append(f"{provider.name}: TIMEOUT ({timeout}s)")
                 logger.warning("⏱️ [GATEWAY] %s timed out on %s", provider.name, url[:80])
 
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 provider.circuit_breaker.record_failure()
                 error_msg = f"{provider.name}: {type(e).__name__}: {e}"
                 errors.append(error_msg)

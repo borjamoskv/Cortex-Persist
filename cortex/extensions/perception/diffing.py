@@ -55,7 +55,7 @@ class DiffManager:
                 content = p.read_text(encoding="utf-8", errors="replace")
 
             new_lines = content.splitlines()
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.debug("Failed to read file for diffing: %s (%s)", path, e)
             return None
 

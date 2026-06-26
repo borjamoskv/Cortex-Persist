@@ -45,5 +45,5 @@ def surf(url: str, objective: str, headless: bool, provider: str, model: str):
         console.print("[bold green]BROWSER-Ω Execution Complete.[/bold green]")
     except KeyboardInterrupt:
         console.print("[bold yellow]BROWSER-Ω Execution Aborted.[/bold yellow]")
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         console.print(f"[bold red]BROWSER-Ω Error:[/bold red] {e}")

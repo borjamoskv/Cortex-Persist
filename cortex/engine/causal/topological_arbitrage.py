@@ -266,7 +266,7 @@ class TopologyIndex:
                         )
                     )
                     age_seconds = max(1.0, now - dt.timestamp())
-                except (ValueError, TypeError, OSError, RuntimeError) as e:
+                except Exception as e:
                     import logging
                     logging.getLogger(__name__).warning("Failed to parse created_at for starvation boost: %s", e)
 

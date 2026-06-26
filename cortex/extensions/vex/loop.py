@@ -177,7 +177,7 @@ class VEXRunner:
             output = ""
             error = f"Timeout after {step.timeout_seconds}s"
 
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             elapsed_ms = int((time.monotonic() - t0) * 1000)
             success = False
             output = ""
@@ -226,7 +226,7 @@ class VEXRunner:
                 ),
             )
             await conn.commit()
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.error("Failed to record plan transaction: %s", exc)
 
     async def _record_step_transaction(
@@ -273,7 +273,7 @@ class VEXRunner:
             await conn.commit()
             return tx_hash
 
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.error("Failed to record step transaction: %s", exc)
             return None
 
@@ -284,7 +284,7 @@ class VEXRunner:
                 cp = await self._engine._ledger.create_checkpoint_async()  # pyright: ignore[reportGeneralTypeIssues]
                 if cp:
                     return str(cp)
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.debug("Merkle checkpoint skipped: %s", exc)
         return None
 
@@ -313,7 +313,7 @@ class VEXRunner:
                 meta={"tx_hash": tx_hash, "step_id": step.step_id},
             )
             return fact_id
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.error("Failed to persist step fact: %s", exc)
             return None
 
@@ -339,7 +339,7 @@ class VEXRunner:
                     "plan_hash": receipt.plan_hash,
                 },
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.error("Failed to persist receipt: %s", exc)
 
     # ─── Tether Integration ───────────────────────────────────────

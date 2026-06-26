@@ -274,7 +274,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
                     "ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS hash_algo TEXT NOT NULL DEFAULT 'sha256'"
                 )
                 await conn.execute("ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS migrated_at TEXT")
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.debug("AlloyDB columns already exist or error: %s", e)
 
     async def get_key_by_hash(self, key_hash: str) -> KeyData | None:
@@ -410,7 +410,7 @@ class TursoAuthBackend(BaseAuthBackend):
                 "ALTER TABLE api_keys ADD COLUMN hash_algo TEXT NOT NULL DEFAULT 'sha256'"
             )
             await client.execute("ALTER TABLE api_keys ADD COLUMN migrated_at TEXT")
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             pass  # Columns already exist
 
     async def get_key_by_hash(self, key_hash: str) -> KeyData | None:
@@ -475,7 +475,7 @@ class TursoAuthBackend(BaseAuthBackend):
                 "UPDATE api_keys SET last_used = ? WHERE id = ?",
                 [datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), key_id],
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.debug("Could not update last_used in Turso: %s", e)
 
     async def close(self) -> None:
@@ -504,5 +504,5 @@ class TursoAuthBackend(BaseAuthBackend):
                     key_id,
                 ],
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.debug("Could not migrate key in Turso: %s", e)

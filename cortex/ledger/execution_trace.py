@@ -88,7 +88,7 @@ class ExecutionTraceLedger:
                 # Trigger thermodynamic feedback loop en background fire-and-forget
                 asyncio.create_task(self._feedback_kernel.apply_feedback(tenant_id=tenant_id))
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to record execution trace %s: %s", trace_id, e)
             raise
 

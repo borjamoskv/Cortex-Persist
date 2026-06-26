@@ -219,7 +219,7 @@ class FactManager:
                 commit,
                 tx_id,
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             import logging
             log = logging.getLogger(__name__)
             log.error(f"EXCEPTION IN _store_delegate: {type(e).__name__} - started_tx={started_tx}, in_transaction={conn.in_transaction}")

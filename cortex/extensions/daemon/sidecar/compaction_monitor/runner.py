@@ -54,7 +54,7 @@ async def compaction_job(ctx: Any = None) -> None:
         LOGGER.info("MallInfo2 after trim: %s", info_after)
         # Call external compaction service (placeholder)
         await circuit_breaker.call_external_compact()  # type: ignore[reportAttributeAccessIssue]
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         LOGGER.exception("Compaction job failed: %s", exc)
 
 

@@ -91,7 +91,7 @@ def register_genesis_tools(
         try:
             engine = GenesisEngine()  # type: ignore[type-error]
             result = engine.create(spec)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Genesis create failed: %s", e)
             return f"❌ Genesis failed: {e}"
 

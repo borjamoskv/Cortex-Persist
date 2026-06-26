@@ -37,7 +37,7 @@ class EnrichmentWorker:
         while self._running:
             try:
                 await self._process_batch()
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("Worker batch failed: %s", e)
             await asyncio.sleep(self.poll_interval)
 
@@ -83,7 +83,7 @@ class EnrichmentWorker:
             await self._mark_success(conn, job_id)
             logger.info("Enriched fact %d (job %d)", fact_id, job_id)
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to process job %d: %s", job_id, e)
             await self._mark_failure(conn, job_id, str(e))
 

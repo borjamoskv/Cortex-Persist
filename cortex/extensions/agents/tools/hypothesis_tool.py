@@ -162,7 +162,7 @@ class HypothesisEngineTool:
                 f"domain={domain}, method={method}). "
                 f"The swarm verifies, the ledger remembers."
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Hypothesis engine failure: %s", e)
             return f"❌ HYPOTHESIS ENGINE FAILURE: {e}"
 

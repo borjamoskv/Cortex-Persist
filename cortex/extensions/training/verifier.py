@@ -62,7 +62,7 @@ class AdapterVerifier:
         try:
             with open(config_file, encoding="utf-8") as f:
                 config_data = json.load(f)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return {
                 "success": False,
                 "error": f"Failed to parse 'adapter_config.json': {e}",

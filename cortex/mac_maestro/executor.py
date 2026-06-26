@@ -108,7 +108,7 @@ class MaestroExecutor:
                         error_msg = resp_body.get("error", "Unknown Daemon Error")
             except urllib.error.HTTPError as e:
                 error_msg = f"HTTP_ERROR: {e.code} - {e.reason}"
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 error_msg = f"SYS_ERROR: {e}"
 
             latency_ms = int((time.perf_counter() - start_time) * 1000)

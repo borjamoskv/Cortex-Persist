@@ -120,7 +120,7 @@ def detach_federated_dbs(
             continue
         try:
             conn.execute(f"DETACH DATABASE {alias}")
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
 
 
@@ -135,7 +135,7 @@ async def detach_federated_dbs_async(
             continue
         try:
             await conn.execute(f"DETACH DATABASE {alias}")
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
 
 

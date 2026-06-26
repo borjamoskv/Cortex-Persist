@@ -29,7 +29,7 @@ class ChaosLayerV2:
             victim = random.choice(snapshots)
             try:
                 victim.unlink()
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 import logging
 
                 logging.warning("Suppressed exception: %s", exc)

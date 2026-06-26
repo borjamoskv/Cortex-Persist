@@ -42,7 +42,7 @@ class CortexLedgerCallback(AsyncCallbackHandler):
         # Serialize return_values efficiently to avoid deserialization bottlenecks
         try:
             return_str = json.dumps(finish.return_values)
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             return_str = str(finish.return_values)
 
         payload = {"log": finish.log, "type": "finish"}

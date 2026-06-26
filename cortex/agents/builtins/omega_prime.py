@@ -113,7 +113,7 @@ class OmegaPrimeAgent(BaseAgent):
 
             await self._request_handoff(message, task, reason="unsupported_plan_mode")
 
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             await self._fail_task(
                 message,
                 task,
@@ -152,7 +152,7 @@ class OmegaPrimeAgent(BaseAgent):
                 error="Verification rejected tool result",
                 retryable=False,
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             await self._fail_task(
                 original_message,
                 task,

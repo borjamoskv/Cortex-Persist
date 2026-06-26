@@ -60,7 +60,7 @@ async def _check_isothermal_redundancy(text: str) -> tuple[bool, float, str]:
             similitud = getattr(nearest[0], "_recall_score", 0.0)
             if similitud > 0.94:
                 return True, similitud, nearest[0].content
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.warning("Isothermal L2 check bypassed/failed: %s", e)
 
     # Simulated fallback rule (Demonstration)
@@ -259,7 +259,7 @@ async def messages_endpoint(request: Request):
                             yield (
                                 f"event: content_block_delta\ndata: {json.dumps(event_data)}\n\n"
                             )
-                    except (ValueError, TypeError, OSError, RuntimeError):
+                    except Exception:
                         continue
 
                 yield 'event: message_stop\ndata: {"type": "message_stop"}\n\n'

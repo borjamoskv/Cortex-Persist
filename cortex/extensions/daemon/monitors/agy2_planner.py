@@ -59,7 +59,7 @@ class AGY2PlannerMonitor:
                             self._last_mtime[str(plan_file)] = plan_file.stat().st_mtime
                 except OSError:
                     continue
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("AGY2PlannerMonitor error: %s", e)
 
     async def run_loop(self) -> None:
@@ -68,7 +68,7 @@ class AGY2PlannerMonitor:
         while True:
             try:
                 await self.check_async()
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("AGY2PlannerMonitor loop error: %s", e)
 
             try:
@@ -142,6 +142,6 @@ class AGY2PlannerMonitor:
             logger.info("Successfully injected CORTEX context into AGY2 implementation plan.")
             return True
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to inject context: %s", e)
             return False

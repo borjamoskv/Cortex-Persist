@@ -57,7 +57,7 @@ def get_sentence_transformer(model_name: str = "all-MiniLM-L6-v2") -> Any:
                 logger.info(
                     f"[PROMPT_SECURITY] Loaded SentenceTransformer model '{model_name}'. Threading optimized."
                 )
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning(
                     f"[PROMPT_SECURITY] Failed to load SentenceTransformer: {e}. Falling back to syntactic overlap."
                 )
@@ -94,7 +94,7 @@ def try_decode_obfuscation(text: str) -> str:
             # Check if decoded looks like readable ASCII text
             if decoded and all(32 <= ord(c) < 127 or c in "\n\r\t" for c in decoded):
                 decoded_parts.append(decoded)
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             pass
 
     # 2. Check for base64 sequences (minimum 12 chars, valid base64 alphabet)
@@ -109,7 +109,7 @@ def try_decode_obfuscation(text: str) -> str:
             )
             if decoded and all(32 <= ord(c) < 127 or c in "\n\r\t" for c in decoded):
                 decoded_parts.append(decoded)
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             pass
 
     return " ".join(decoded_parts)
@@ -181,7 +181,7 @@ class PromptSecurityGuard:
                 self.system_prompt_embedding = self.model.encode(
                     system_prompt, convert_to_tensor=True
                 )
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning(
                     f"[PROMPT_SECURITY] Failed to encode system prompt: {e}. Disabling model."
                 )
@@ -201,7 +201,7 @@ class PromptSecurityGuard:
                 response_embedding = self.model.encode(text, convert_to_tensor=True)
                 similarity = util.cos_sim(response_embedding, self.system_prompt_embedding)  # pyright: ignore[reportArgumentType]
                 return float(similarity)
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error(f"[PROMPT_SECURITY] Error calculating cosine similarity: {e}")
 
         # Fallback syntactic-derived similarity

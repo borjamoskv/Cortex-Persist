@@ -105,7 +105,7 @@ class MeteringMiddleware(BaseHTTPMiddleware):
                 status_code=response.status_code,
                 tokens_used=tokens,
             )
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             logger.exception("Failed to record usage for tenant %s", tenant_id)
 
         # ── Inject Usage Headers ──

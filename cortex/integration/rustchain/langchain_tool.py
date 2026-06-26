@@ -55,5 +55,5 @@ class RustChainStakingTool(BaseTool):
         try:
             result = await stake_and_acquire(self._wallet, self._client, skill, amount)
             return json.dumps(result, indent=2)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return json.dumps({"status": "failed", "error": str(e)}, indent=2)

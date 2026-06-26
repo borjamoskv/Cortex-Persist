@@ -43,7 +43,7 @@ def _db(path: Path, exclusive: bool = False) -> Generator[sqlite3.Connection, No
             conn.execute("BEGIN EXCLUSIVE")
         yield conn
         conn.commit()
-    except (ValueError, TypeError, OSError, RuntimeError):
+    except Exception:
         conn.rollback()
         raise
     finally:
@@ -309,5 +309,5 @@ class SovereignQuotaManager:
         try:
             with _db(self.db_path) as conn:
                 conn.execute("UPDATE quota_bucket SET timeouts = timeouts + 1 WHERE id = 1")
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)

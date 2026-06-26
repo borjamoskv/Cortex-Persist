@@ -77,7 +77,7 @@ async def ensure_table_for_router(router: Any) -> None:
                         await router._conn.execute(query)
                         await router._conn.execute("DROP TABLE _cognitive_router_log_old")
                         await router._conn.commit()
-                except (ValueError, TypeError, OSError, RuntimeError) as e:
+                except Exception as e:
                     logger.error("Failed to migrate cognitive_router_log table: %s", e)
                     raise
         else:

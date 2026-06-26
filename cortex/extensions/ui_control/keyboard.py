@@ -67,7 +67,7 @@ class KeyboardEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return InteractionResult(success=False, error=str(e))
 
     async def hotkey(
@@ -144,7 +144,7 @@ class KeyboardEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return InteractionResult(success=False, error=str(e))
 
     async def _type_via_clipboard(
@@ -173,7 +173,7 @@ class KeyboardEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return InteractionResult(success=False, error=str(e))
 
     async def press_special(
@@ -209,5 +209,5 @@ class KeyboardEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return InteractionResult(success=False, error=str(e))

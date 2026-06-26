@@ -122,7 +122,7 @@ def from_yaml(path: str) -> None:
     try:
         with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         console.print(f"[bold red]Failed to parse YAML:[/] {e}")
         sys.exit(1)
 

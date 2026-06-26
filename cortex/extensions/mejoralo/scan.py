@@ -134,7 +134,7 @@ def _analyze_python_complexity(content: str, rel: str) -> list[str]:
         tree = ast.parse(content)
         McCabeVisitor(rel, findings).visit(tree)
         NestingVisitor(rel, findings).visit(tree)
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         logger.warning("Suppressed exception: %s", exc)
     return findings
 

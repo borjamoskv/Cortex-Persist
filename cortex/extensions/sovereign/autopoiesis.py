@@ -87,5 +87,5 @@ class Autopoiesis:
         try:
             script_path.unlink()
             logger.info("Tool recycled: %s", script_path.name)
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)

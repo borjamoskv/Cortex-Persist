@@ -148,7 +148,7 @@ class SlowOpTipEmitter:
                     padding=(0, 2),
                 )
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             import logging
 
             logging.warning("Suppressed exception: %s", exc)

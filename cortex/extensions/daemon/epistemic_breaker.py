@@ -50,7 +50,7 @@ class EpistemicBreakerDaemon:
         """
         try:
             s = await self.engine.stats()
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             logger.debug("_measure_entropy: engine.stats() unavailable, returning 0")
             return 0.0
 
@@ -98,7 +98,7 @@ class EpistemicBreakerDaemon:
                 confidence="C5",
                 source="agent:epistemic-breaker",
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to record breaker trip: %s", e)
 
         logger.info(
@@ -125,7 +125,7 @@ class EpistemicBreakerDaemon:
                 confidence="C5",
                 source="agent:epistemic-breaker",
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to record breaker wakeup: %s", e)
 
     async def run(self):
@@ -153,7 +153,7 @@ class EpistemicBreakerDaemon:
                 else:
                     logger.debug("Epistemic load nominal: %.3f", entropy)
 
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("Error in Epistemic Breaker loop: %s", e)
 
             # Wait for next scan, adjust if circuit is currently open

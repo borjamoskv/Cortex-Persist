@@ -179,7 +179,7 @@ class P0VulnerabilityExtractor:
                 report.high_count,
                 target_file,
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("P0 extraction failed for %s: %s", target_file, e)
             report.status = f"failed: {e}"
 
@@ -382,7 +382,7 @@ class P0VulnerabilityExtractor:
                                 function_name=obj.get("function_name", ""),
                             )
                         )
-                    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+                    except Exception as exc:
                         logger.warning("Suppressed exception: %s", exc)
                     start = -1
 

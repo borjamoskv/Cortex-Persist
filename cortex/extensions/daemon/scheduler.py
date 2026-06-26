@@ -108,7 +108,6 @@ class SovereignScheduler:
         hot_state: Any | None = None,
         tick_interval: float = 5.0,
         engine: Any | None = None,
-        ultramap: Any | None = None,
     ) -> None:
         if db_path is None:
             db_path = Path.home() / ".cortex" / "scheduler.db"
@@ -118,7 +117,6 @@ class SovereignScheduler:
         self._hot_state = hot_state
         self._tick_interval = tick_interval
         self.engine = engine
-        self.ultramap = ultramap
         self._running = False
         self._stop_event = asyncio.Event()
         self._tasks: dict[str, TaskFactory] = {}
@@ -134,7 +132,7 @@ class SovereignScheduler:
         try:
             yield conn
             conn.commit()
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             conn.rollback()
             raise
         finally:
@@ -248,35 +246,18 @@ class SovereignScheduler:
         while self._running:
             try:
                 await self._tick()
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("Scheduler tick error: %s", e)
 
             try:
-                timeout = self._tick_interval
-                if self.ultramap is not None:
-                    try:
-                        joules = self.ultramap.calculate_exergy_distance(0, "MASTER_TARGET")
-                        if joules > 50.0:
-                            # High Exergy (Gradient > 50J): Accel execution, collapse time
-                            timeout = 1.0
-                        else:
-                            # Low Exergy (Entropy Death Risk): Decelerate execution
-                            timeout = self._tick_interval * 2.0
-                    except Exception:
-                        pass
-                
                 await asyncio.wait_for(
                     self._stop_event.wait(),
-                    timeout=timeout,
+                    timeout=self._tick_interval,
                 )
                 break  # stop_event was set
-            except asyncio.TimeoutError:
-                pass  # normal tick timeout
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
-                if isinstance(exc, TimeoutError):
-                    pass
-                else:
-                    logger.warning("Suppressed exception: %s", exc)
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
+        # normal tick timeout
 
         logger.info("SovereignScheduler stopped")
 
@@ -321,7 +302,7 @@ class SovereignScheduler:
                         source="daemon:scheduler",
                         actor_id="scheduler"
                     )
-                except (ValueError, TypeError, OSError, RuntimeError) as e:
+                except Exception as e:
                     logger.debug("Scheduler failed to log trigger to Ledger: %s", e)
             
             try:
@@ -329,7 +310,7 @@ class SovereignScheduler:
             except asyncio.TimeoutError:
                 error = "Timeout (300s)"
                 logger.warning("Task %s timed out", entry.name)
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 error = str(e)
                 logger.error("Task %s failed: %s", entry.name, e)
 
@@ -365,7 +346,7 @@ class SovereignScheduler:
                             "source": "scheduler",
                         },
                     )
-                except (ValueError, TypeError, OSError, RuntimeError) as e:
+                except Exception as e:
                     logger.debug(
                         "Scheduler event bus publish failed: %s", e, exc_info=True
                     )  # bus errors must not kill scheduler
@@ -381,7 +362,7 @@ class SovereignScheduler:
                             "ok": not error,
                         },
                     )
-                except (ValueError, TypeError, OSError, RuntimeError) as e:
+                except Exception as e:
                     logger.debug("Scheduler hot state set failed: %s", e, exc_info=True)
 
             level = "✅" if not error else "❌"

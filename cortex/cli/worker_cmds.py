@@ -46,5 +46,5 @@ def start_worker(db: str, poll: float):
         console.print("\n[warning]Stopping workers...[/]")
         _run_async(enrichment.stop())
         _run_async(compaction.stop())
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         console.print(f"[danger]Worker crashed:[/] {e}")

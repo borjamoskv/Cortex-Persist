@@ -68,7 +68,7 @@ class EnrichmentWorker:
                 else:
                     await asyncio.sleep(poll_interval)
                     poll_interval = min(5.0, poll_interval + 0.5)  # Backoff
-            except (ValueError, TypeError, OSError, RuntimeError):
+            except Exception:
                 logger.exception("Error in EnrichmentWorker loop")
                 await asyncio.sleep(5)
 
@@ -134,7 +134,7 @@ class EnrichmentWorker:
             self.queue.mark_done(job_id, event_id)  # type: ignore[reportOptionalMemberAccess]
             logger.info("Enrichment completed for event %s", event_id)
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to process job %s: %s", job_id, e)
             self.queue.mark_failed(job_id, event_id, str(e), attempts)  # type: ignore[reportOptionalMemberAccess]
 
@@ -171,7 +171,7 @@ class EnrichmentWorker:
                     (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), job_id),
                 )
                 await conn.commit()
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             async with self.engine.session() as conn:
                 await conn.execute(
                     """
@@ -217,6 +217,6 @@ class EnrichmentWorker:
             await self.engine.embeddings.enrich_fact(
                 fact_id=int(fact_id), content=content, project=project, tenant_id=tenant_id
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning("Semantic enrichment for fact %s failure: %s", fact_id, e)
             raise

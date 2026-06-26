@@ -67,5 +67,5 @@ class IMessageAdapter(BaseAdapter):
                 logger.debug("iMessage sent to %s: %s", self.target, event.title)
             else:
                 logger.error("iMessage failed (rc=%s): %s", proc.returncode, stderr.decode())
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.error("iMessage internal error: %s", exc)

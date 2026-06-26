@@ -81,6 +81,6 @@ class EvaluationMonitor:
             )
             return alerts
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("EvaluationMonitor error: %s", e)
             return []

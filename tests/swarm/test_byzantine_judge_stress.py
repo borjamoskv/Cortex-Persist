@@ -33,8 +33,6 @@ async def test_byzantine_judge_concurrent_stress(clean_km):
       - Sandbox violations (slashed).
       - AST runtime execution errors (slashed).
     """
-    clean_km.revoke_key("byzantine_judge_root")
-    clean_km.generate_and_store_key("byzantine_judge_root")
     judge = ByzantineJudge(km=clean_km)
     
     # 1. Setup 50 agents

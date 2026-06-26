@@ -83,7 +83,7 @@ class HealthLoop:
                 "metrics": [{"name": m.name, "value": m.value} for m in metrics],
             }
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning("Health tick failed: %s", e)
             return None
 
@@ -137,7 +137,7 @@ class HealthLoop:
         if self._notify_fn:
             try:
                 self._notify_fn(title, body)
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.debug("Notification failed: %s", e)
             return
         try:
@@ -148,7 +148,7 @@ class HealthLoop:
                 check=False,
                 capture_output=True,
             )
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             logger.debug("macOS notifications unavailable")
 
     def persist_snapshot(
@@ -167,5 +167,5 @@ class HealthLoop:
                 meta=data,
                 confidence="C5",
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.debug("Health persist failed: %s", e)

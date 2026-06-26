@@ -82,7 +82,17 @@ class CausalClosureGuard:
                     ):
                         has_json_array = True
                 except json.JSONDecodeError:
-                    pass
+                    try:
+                        import ast
+                        parsed_arr = ast.literal_eval(stripped_c)
+                        if (
+                            isinstance(parsed_arr, list)
+                            and all(isinstance(x, dict) for x in parsed_arr)
+                            and len(parsed_arr) > 0
+                        ):
+                            has_json_array = True
+                    except (ValueError, SyntaxError, TypeError):
+                        pass
 
             # Use StructuralCertifier to validate formal JSON structure
             grade = StructuralCertifier.certify_structure(c)

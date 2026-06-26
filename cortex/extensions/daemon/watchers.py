@@ -162,7 +162,7 @@ class _UnifiedHandler(FileSystemEventHandler):
                     payload,
                     ttl_s=3600,
                 )
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.debug("UnifiedHandler hot state increment/set failed: %s", e, exc_info=True)
 
         # Publish to event bus (thread-safe via run_coroutine_threadsafe)
@@ -172,7 +172,7 @@ class _UnifiedHandler(FileSystemEventHandler):
                     self._event_bus.publish(topic, payload),
                     self._loop,
                 )
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.debug("UnifiedHandler event bus publish failed: %s", e, exc_info=True)
 
 

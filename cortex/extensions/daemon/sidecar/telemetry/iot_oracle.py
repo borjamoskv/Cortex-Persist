@@ -48,7 +48,7 @@ class IoTOracle:
         while self._running:
             try:
                 await self._process_telemetry()
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("IOT ORACLE SENSOR FAILURE: %s", e)
             await asyncio.sleep(self.poll_interval)
 
@@ -115,5 +115,5 @@ class IoTOracle:
                     },
                 )
             logger.info("🧠 [IOT ORACLE] Entanglement Collapsed: %s -> %s", friction_type, severity)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("IOT Oracle Injection failed: %s", e)

@@ -131,7 +131,7 @@ async def resilient_call(
                     attempt,
                 )
                 return result
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             latency = time.monotonic() - start_time
             last_exc = e
 

@@ -39,10 +39,6 @@ def test_ouroboros_transcend_pipeline(judge, gatekeeper, km):
     km.revoke_key(agent_id)
     km.generate_and_store_key(agent_id)
     agent_priv = km.get_private_key_b64(agent_id)
-
-    # Setup judge keys fresh
-    km.revoke_key("byzantine_judge_root")
-    km.generate_and_store_key("byzantine_judge_root")
     
     ast_code = "def autopoiesis(): return 'evolution completed'"
     timestamp = datetime.now(timezone.utc).isoformat()

@@ -96,7 +96,7 @@ class PostgresConnectionAdapter:
             conn = self._get_active_conn()
             if hasattr(conn, "is_in_transaction"):
                 return bool(conn.is_in_transaction())
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             pass
         return self._in_transaction
 
@@ -201,7 +201,7 @@ class PostgresConnectionAdapter:
             else:
                 rows = await conn.fetch(pg_sql, *pg_params)
                 return PostgresCursorAdapter(rows)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error(
                 "Postgres execution error: %s | SQL: %s | Params: %s", e, pg_sql, pg_params
             )
@@ -215,7 +215,7 @@ class PostgresConnectionAdapter:
         conn = self._get_active_conn()
         try:
             await conn.executemany(pg_sql, params_list)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Postgres executemany error: %s | SQL: %s", e, pg_sql)
             raise
 
@@ -230,7 +230,7 @@ class PostgresConnectionAdapter:
                     translated = self.translate_sqlite_to_pg(stmt)
                     pg_sql, _ = self._translate_params(translated, ())
                     await conn.execute(pg_sql)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Postgres executescript error: %s", e)
             raise
 

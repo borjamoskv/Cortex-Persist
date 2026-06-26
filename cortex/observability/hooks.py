@@ -27,7 +27,7 @@ def _extract_skill_info(data) -> dict:
             server_name = data.arguments.get("ServerName", data.name.replace("mcp_", ""))
             return {"skill": f"MCP_{server_name.upper()}", "source": "mcp"}
 
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         import logging
 
         logging.warning("Suppressed exception: %s", exc)

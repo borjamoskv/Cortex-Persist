@@ -124,7 +124,7 @@ class EventLoopMixin:
         for sig in (signal.SIGTERM, signal.SIGINT):
             try:
                 loop.add_signal_handler(sig, self._signal_shutdown)
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
         logger.info("🚀 MOSKV-1 Sovereign Daemon starting (interval=%ds)", interval)
         if self.hot_state is not None:
@@ -240,7 +240,7 @@ class EventLoopMixin:
         )
         try:
             await asyncio.gather(*tasks, return_exceptions=True)
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
         finally:
             await self._sovereign_shutdown()
@@ -256,7 +256,7 @@ class EventLoopMixin:
                 if self.hot_state is not None:
                     self.hot_state.increment("cycle_count")
 
-            except (ValueError, TypeError, OSError, RuntimeError) as e:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.error("Check loop error: %s", e)
 
             # Async sleep instead of threading.Event.wait

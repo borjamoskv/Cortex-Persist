@@ -141,7 +141,7 @@ def atomic_write(path: Path, content: str) -> None:
         # Limpiar temp si falla el replace
         try:
             os.unlink(tmp_path)
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
         raise
 

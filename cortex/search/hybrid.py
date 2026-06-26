@@ -321,5 +321,5 @@ async def _bm25_feedback_loop(
             "[BM25-FEEDBACK] Reinforcing %d results for query: '%s'", len(results), query[:30]
         )
         # Placeholder: Implement actual FTS5 or tracking table update
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("[BM25-FEEDBACK] Failed: %s", e)

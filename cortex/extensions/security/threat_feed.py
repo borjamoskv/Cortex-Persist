@@ -170,7 +170,7 @@ class ThreatFeedEngine:
             ts = data.get("last_update")
             if ts:
                 return datetime.fromisoformat(ts)
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
         return None
 

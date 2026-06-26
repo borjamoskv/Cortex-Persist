@@ -57,7 +57,7 @@ class ComplianceVerifier:
                 
                 return self._verify_chain(export_data)
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error(f"[ComplianceVerifier] Error during verification: {e}")
             return {"status": "ERROR", "reason": str(e)}
 
@@ -124,7 +124,7 @@ class ComplianceVerifier:
                     public_key = serialization.load_ssh_public_key(pub_bytes)
                     
                 public_key.verify(sig_bytes, entry_hash.encode())  # type: ignore
-            except (ValueError, TypeError, OSError, RuntimeError):
+            except Exception:
                 return {
                     "status": "CRITICAL_TAMPER_DETECTED",
                     "reason": f"Signature mismatch for batch starting at {rows[0]['audit_id']}. Ledger forged."

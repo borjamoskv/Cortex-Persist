@@ -92,7 +92,7 @@ class HotStateDB:
         try:
             yield conn
             conn.commit()
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             conn.rollback()
             raise
         finally:

@@ -21,7 +21,7 @@ def build_health_probes(
             cursor = conn.cursor()
             cursor.execute("SELECT 1")
             return "healthy", True, {"detail": "Database responsive"}
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return "unhealthy", False, {"detail": str(e)}
 
     def probe_schema() -> tuple[str, bool, dict[str, Any]]:

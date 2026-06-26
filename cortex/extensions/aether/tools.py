@@ -217,7 +217,7 @@ class AgentToolkit:
             return output or "(no output)"
         except subprocess.TimeoutExpired:
             return f"[ERROR] Command timed out after {timeout}s"
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return f"[ERROR] bash failed: {e}"
 
     # ── Git tools ─────────────────────────────────────────────────────
@@ -264,7 +264,7 @@ class AgentToolkit:
             related = [r.get("Text", "") for r in data.get("RelatedTopics", [])[:3]]
             result = abstract or " | ".join(related) or "(no result)"
             return result[:2000]
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return f"[ERROR] web_search failed: {e}"
 
     def autodidact_ingest(self, target_url: str, intent: str = "Aprender") -> str:
@@ -292,7 +292,7 @@ class AgentToolkit:
 
             result = _run_async()
             return f"AUTODIDACT-Ω Result: {result}"
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return f"[ERROR] Autodidact failed: {e}"
 
     # ── Dispatch ──────────────────────────────────────────────────────
@@ -349,6 +349,6 @@ class AgentToolkit:
             return f"[ERROR] Unknown tool: {tool_name}"
         try:
             return fn(args)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.exception("Tool dispatch error [%s]", tool_name)
             return f"[ERROR] {tool_name} raised: {e}"

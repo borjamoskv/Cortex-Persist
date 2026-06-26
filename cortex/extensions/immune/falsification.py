@@ -111,7 +111,7 @@ class EvolutionaryFalsifier:
                 target_func(**mutant)
                 # In a real Red Team environment, we also validate if the result
                 # matches the structural boundaries (tether.md), not just if it didn't raise.
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 failures += 1
                 self._capture_autopsy(target_func.__name__, mutant, e)
 

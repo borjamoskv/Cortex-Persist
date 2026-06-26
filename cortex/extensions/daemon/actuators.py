@@ -50,7 +50,7 @@ class PhysicalActuator:
                 "stdout": "",
                 "stderr": "Execution timed out.",
             }
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.exception("🦾 [PHYSICAL PARITY] Terminal execution failed.")
             return {"status": "exception", "returncode": -2, "stdout": "", "stderr": str(e)}
 
@@ -69,7 +69,7 @@ class PhysicalActuator:
 
             await asyncio.to_thread(_write)
             return True
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to write physical file at %s: %s", path, e)
             return False
 
@@ -86,6 +86,6 @@ class PhysicalActuator:
                     return f.read()
 
             return await asyncio.to_thread(_read)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to read physical file at %s: %s", path, e)
             return None

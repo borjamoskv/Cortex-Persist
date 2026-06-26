@@ -237,7 +237,7 @@ class BeliefEngine:
             self._cache[cache_key] = beliefs
             return beliefs[: self._max_context]
 
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Failed to load belief context: %s", exc)
             return []
 

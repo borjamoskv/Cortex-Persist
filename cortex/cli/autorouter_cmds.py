@@ -262,7 +262,7 @@ def logs():
     console.print(f"[dim]Mostrando logs de: {LOG_PATH} (Ctrl+C para salir)[/]")
     try:
         subprocess.run(tail_file_command(str(LOG_PATH)))
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         import logging
 
         logging.warning("Suppressed exception: %s", exc)

@@ -131,7 +131,7 @@ def compound(project: str | None, persist: bool) -> None:
             if fact_id:
                 console.print(f"[green]✔ Report persisted as Fact #{fact_id}[/green]")
 
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
         raise click.Abort() from e
 
@@ -183,6 +183,6 @@ def projection(years: int, base_hours: float, rate: float) -> None:
             Panel(summary, title="[bold magenta]10-Year Event Horizon[/bold magenta]", expand=False)
         )
 
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
         raise click.Abort() from e

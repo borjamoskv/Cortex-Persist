@@ -280,7 +280,7 @@ async def compact_session(
     # ─── AXIOM L4: Unified Temporal Decay ──────────────────────────────
     try:
         await conn.create_function("cortex_decay", 4, _cortex_decay)
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         logger.warning("Suppressed exception: %s", exc)
     # Already registered or unsupported
 

@@ -114,5 +114,5 @@ class AestheticAuditor:
                     return Ok("Aesthetic Check Passed.")
                 return Err(evaluation)
             return Err(f"QA Router Error: {res.error}")  # pyright: ignore[reportAttributeAccessIssue]
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return Err(f"Vision API Error: {e}")

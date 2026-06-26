@@ -308,7 +308,7 @@ def verify():
     except AssertionError as e:
         console.print(f"[bold red]✗ Invariant violation: {e}[/bold red]")
         sys.exit(1)
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         console.print(f"[bold red]Error running invariants: {e}[/bold red]")
         sys.exit(1)
 

@@ -76,7 +76,7 @@ class MemoryQualityEvaluator:
 
             # Add to stale cleared if we decide to prune here (for now just reporting)
             logger.debug("Stale memory ratio for [%s/%s]: %s", tenant_id, project_id, ratio)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to calculate stale memory ratio: %s", e)
 
     async def _detect_contradictions(self, tenant_id: str, project_id: str) -> None:

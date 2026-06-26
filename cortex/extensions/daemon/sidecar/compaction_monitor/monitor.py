@@ -125,7 +125,7 @@ def _collect_snapshot() -> MemorySnapshot:
             rss, vms = mi.rss, mi.vms
             vm = _p.virtual_memory()
             sys_avail, sys_total = vm.available, vm.total
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
 
     if _IS_LINUX:
@@ -137,7 +137,7 @@ def _collect_snapshot() -> MemorySnapshot:
 
             info = get_mallinfo2()
             arena, free_b = info.arena, info.fordblks
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
 
     return MemorySnapshot(
@@ -162,7 +162,7 @@ def _do_malloc_trim() -> bool:
 
         malloc_trim(0)
         return True
-    except (ValueError, TypeError, OSError, RuntimeError):
+    except Exception:
         return False
 
 
@@ -245,7 +245,7 @@ class MemoryPressureMonitor:
             try:
                 # Give it a moment to finish cleanup
                 await asyncio.wait_for(self._task, timeout=1.0)
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
         self._executor.shutdown(wait=False, cancel_futures=True)
@@ -265,12 +265,12 @@ class MemoryPressureMonitor:
                     await self._tick()
                 except asyncio.CancelledError:
                     raise
-                except (ValueError, TypeError, OSError, RuntimeError) as e:
+                except Exception as e:
                     logger.error("Sample loop crashed: %s", e)
             except asyncio.CancelledError:
                 self._running = False
                 raise  # Re-raise to allow task to be cleanly cancelled
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.exception("MemoryPressureSidecar tick error: %s", exc)
             try:
                 await asyncio.sleep(self.interval)

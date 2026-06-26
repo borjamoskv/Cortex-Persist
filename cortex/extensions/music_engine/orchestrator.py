@@ -260,7 +260,7 @@ class GRAMMYOrchestrator:
         except (json.JSONDecodeError, ValueError, KeyError) as e:
             logger.error("Error en evaluación GRI vía LLM: %s", e)
             return NEUTRAL_GRI_SCORE  # Fallback neutral
-        except (TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Unexpected error in evaluation GRI: %s", e)
             return NEUTRAL_GRI_SCORE
 
@@ -338,7 +338,7 @@ class GRAMMYOrchestrator:
             lufs = self.dsp_engine.calculate_lufs(lufs_in, sr)
             track.metadata["lufs_integrated"] = lufs
             logger.info("DSP mastering complete. LUFS: %.2f", lufs)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("DSP mastering failed: %s", e)
 
         track.gri_score = 0.45

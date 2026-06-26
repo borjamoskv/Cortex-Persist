@@ -52,7 +52,7 @@ class EmbeddingManager:
 
             try:
                 from cortex.embeddings.api_embedder import APIEmbedder
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 raise RuntimeError(f"API embeddings unavailable: {exc}") from exc
 
             self._embedder = APIEmbedder(

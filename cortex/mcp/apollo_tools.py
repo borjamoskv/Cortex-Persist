@@ -84,14 +84,14 @@ def register_apollo_tools(mcp: FastMCP) -> None:  # pyright: ignore[reportInvali
                 data["page"] += 1
                 time.sleep(1)  # noqa: TID251 # Synchronous rate limiting
 
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error(f"[!] Apollo Extraction Error: {e}")
                 return f"❌ Apollo Extraction Error: {e}"
 
         try:
             with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(extracted_leads, f, indent=2, ensure_ascii=False)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return f"❌ Failed to write JSON output: {e}"
 
         return f"✅ C5-REAL Lead Extraction complete. Extracted {len(extracted_leads)} leads to {output_path}"

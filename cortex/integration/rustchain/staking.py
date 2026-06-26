@@ -39,7 +39,7 @@ async def stake_and_acquire(
         health = await client.health()
         if not health.get("healthy", False):
             raise GateUnavailableError("RustChain gate is unhealthy or offline")
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         if isinstance(e, GateUnavailableError):
             raise
         raise GateUnavailableError(f"RustChain health check failed: {e}")
@@ -62,7 +62,7 @@ async def stake_and_acquire(
         if receipt.get("status") != "success":
             raise StakingError(f"Staking transaction rejected: {receipt.get('error', 'unknown error')}")
         return receipt
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         if isinstance(e, StakingError):
             raise
         raise StakingError(f"Failed to submit staking transaction: {e}")

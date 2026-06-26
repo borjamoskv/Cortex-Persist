@@ -68,7 +68,7 @@ class PulseRegistry:
                     with self._lock:
                         for signal in signals:
                             self._process_signal(signal)
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("[PULSE] Pulse scan failed: %s", e)
             await asyncio.sleep(interval)
 

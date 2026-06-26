@@ -190,7 +190,7 @@ def _sanitize_dsn(dsn: str) -> str:
             if ":" in pre_at:
                 user_part = pre_at.rsplit(":", 1)[0]
                 return f"{user_part}:***@{post_at}"
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             import logging
 
             logging.warning("Suppressed exception: %s", exc)
@@ -215,5 +215,5 @@ async def _check_pg_health(dsn: str, grid: Table) -> None:
             "[bold #CCFF00]\u2713 Connected[/]" if healthy else "[bold red]\u2717 Unreachable[/]"
         )
         grid.add_row("Health", status)
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         grid.add_row("Health", f"[bold red]\u2717 Error: {exc}[/]")

@@ -47,7 +47,7 @@ class AsyncCascadeRouter:
                 )
                 logger.info("[CASCADE] Route successful on attempt %d", attempt + 1)
                 return decision
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 attempt += 1
                 if attempt > self.max_retries:
                     logger.error(

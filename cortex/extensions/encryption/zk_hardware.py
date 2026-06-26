@@ -80,7 +80,7 @@ class ZeroKnowledgeShield:
             ciphertext = raw_payload[NONCE_SIZE:]
             plaintext = self._cipher.decrypt(nonce, ciphertext, None)
             return plaintext.decode("utf-8")
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error(
                 "Zero-Knowledge decryption failed. Cryptographic integrity breach or missing hardware key."
             )

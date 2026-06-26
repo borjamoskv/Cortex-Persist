@@ -22,7 +22,7 @@ class CausalRollbackEngine:
             try:
                 with open(self.graph_path) as f:
                     return json.load(f)
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error(f"Failed to load causal graph: {e}")
         return {"nodes": [], "edges": []}
 

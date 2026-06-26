@@ -300,10 +300,12 @@ class SwarmCommander:
 
     async def dispatch_optimal_hypotheses(self, count: int = 100) -> None:
         """Pulls optimal tasks from TopologyIndex based on CBR and dispatches them."""
+        import aiosqlite
 
         from cortex.config import DB_PATH
-        from cortex.database.core import connect_async
         from cortex.engine.causal.topological_arbitrage import TopologyIndex
+
+        from cortex.database.core import connect_async
         async with await connect_async(DB_PATH) as db:
             topo = TopologyIndex(db)
             await topo.sync()

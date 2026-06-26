@@ -220,7 +220,7 @@ class DistributedSovereignCache:
                 exc, source="distributed_cache:get", project="CORTEX_SYSTEM"
             )
             return None
-        except RuntimeError as exc:
+        except Exception as exc:
             logger.warning("⚡ [REDIS MISS UNEXPECTED] get(%s): %s", key, exc)
             self._is_available = False
             ErrorGhostPipeline().capture_sync(
@@ -251,7 +251,7 @@ class DistributedSovereignCache:
                 exc, source="distributed_cache:put", project="CORTEX_SYSTEM"
             )
             return False
-        except RuntimeError as exc:
+        except Exception as exc:
             logger.error("🚨 [HYDRA PUT UNEXPECTED] %s: %s", key, exc)
             self._is_available = False
             ErrorGhostPipeline().capture_sync(
@@ -289,7 +289,7 @@ class DistributedSovereignCache:
         except (ValueError, TypeError, OSError) as exc:
             logger.error("🚨 [HYDRA ADVANCE FAIL] %s", exc)
             return {"error": str(exc), "event": f"{event_type}_DEGRADED"}
-        except RuntimeError as exc:
+        except Exception as exc:
             logger.error("🚨 [HYDRA ADVANCE UNEXPECTED] %s", exc)
             ErrorGhostPipeline().capture_sync(
                 exc, source="distributed_cache:advance", project="CORTEX_SYSTEM"
@@ -356,7 +356,7 @@ class DistributedSovereignCache:
             raise
         except (ValueError, TypeError, OSError) as exc:
             logger.error("🚨 [HANDOFF FAIL] %s", exc)
-        except RuntimeError as exc:
+        except Exception as exc:
             logger.exception("🚨 [HANDOFF UNEXPECTED] %s", exc)
             ErrorGhostPipeline().capture_sync(
                 exc, source="distributed_cache:handoff", project="CORTEX_SYSTEM"
@@ -394,7 +394,7 @@ class DistributedSovereignCache:
             except (ValueError, TypeError, OSError) as exc:
                 logger.error("🚨 [CONSUMER RECOVERABLE CRASH] %s", exc)
                 await asyncio.sleep(5)
-            except RuntimeError as exc:
+            except Exception as exc:
                 logger.error("🚨 [CONSUMER UNEXPECTED CRASH] %s", exc)
                 ErrorGhostPipeline().capture_sync(
                     exc,
@@ -430,7 +430,7 @@ class DistributedSovereignCache:
                     except (ValueError, TypeError, OSError) as e:
                         logger.error("🚨 [CALLBACK FAIL] %s", e)
                         await asyncio.sleep(1)  # Backoff
-                    except RuntimeError as e:
+                    except Exception as e:
                         logger.error("🚨 [CALLBACK UNEXPECTED] %s", e)
                         ErrorGhostPipeline().capture_sync(
                             e,
@@ -448,7 +448,7 @@ class DistributedSovereignCache:
             return {"tip": tip, "count": count, "status": "HYDRA_VALIDATED"}
         except (ValueError, TypeError, OSError):
             return {"status": "UNAVAILABLE"}
-        except RuntimeError as e:
+        except Exception as e:
             ErrorGhostPipeline().capture_sync(
                 e, source="distributed_cache:prove", project="CORTEX_SYSTEM"
             )

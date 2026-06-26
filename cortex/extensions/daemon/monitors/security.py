@@ -149,7 +149,7 @@ class SecurityMonitor:
                 "INSERT INTO threat_intel (ip_address, reason, confidence) VALUES (?, ?, ?)",
                 (alert.ip_address, alert.summary, alert.confidence),
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
 
     def check(self) -> list[SecurityAlert]:

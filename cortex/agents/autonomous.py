@@ -329,7 +329,7 @@ class AutonomousAgent(BaseAgent):
                 step.mark_failed(f"Permission denied: {exc}")
                 logger.error("[%s] Step %s PERMISSION DENIED: %s", self.agent_id, step.step_id, exc)
 
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 error_msg = f"{type(exc).__name__}: {exc}"
                 step.mark_failed(error_msg)
                 logger.warning(
@@ -452,7 +452,7 @@ def _safe_serialize(obj: Any) -> Any:
         return [_safe_serialize(v) for v in obj]
     try:
         return str(obj)[:500]
-    except (ValueError, TypeError, OSError, RuntimeError):
+    except Exception:
         return "<unserializable>"
 
 

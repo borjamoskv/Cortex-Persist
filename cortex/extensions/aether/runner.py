@@ -79,7 +79,7 @@ class AetherAgent:
             plan = await self._planner.plan(task.description, toolkit)
             queue.update(task.id, plan=plan.to_prompt_str())
             logger.info("📋 Plan: %s - %d steps", plan.summary, len(plan.steps))
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return await self._fail(task, queue, f"Planner error: {e}")
 
         # ── 1.5 Ω₆ Siege-Verification (Pathogen Matching) ─────────────
@@ -112,7 +112,7 @@ class AetherAgent:
                     )
 
                 execute_result = await self._executor.execute(plan, instruction, toolkit)
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 return await self._fail(task, queue, f"Executor error: {e}")
 
             # ── 3. Critique ───────────────────────────────────────────
@@ -120,7 +120,7 @@ class AetherAgent:
             logger.info("🔍 Critiquing...")
             try:
                 critique = await self._critic.critique(task.description, toolkit)
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning("Critic failed (%s) - skipping", e)
                 break
 
@@ -151,7 +151,7 @@ class AetherAgent:
                 None, self._tester.run, toolkit
             )
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning("Tester failed (%s) - ignoring", e)
             test_result = None
 
@@ -269,5 +269,5 @@ class AetherAgent:
                 stderr=asyncio.subprocess.PIPE,
             )
             await asyncio.wait_for(proc.communicate(), timeout=5.0)
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)

@@ -229,7 +229,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
                 setattr(status, attr, results)
             alert_fn(results)
             self._failure_counts.pop(monitor_name, None)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             status.errors.append(f"{monitor_name} error: {e}")
             logger.exception("%s failed", monitor_name)
             count = self._failure_counts.get(monitor_name, 0) + 1

@@ -119,7 +119,7 @@ def _seal_a11y(p: Path, stack: str) -> ShipSeal:
             content = hf.read_text(errors="replace").lower()
             if "<img" in content and 'alt="' not in content:
                 a11y_findings.append(f"{hf.name}: missing alt tags")
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
 
     return ShipSeal(

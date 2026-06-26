@@ -17,9 +17,6 @@ class MockSandboxJIT:
 @pytest.fixture
 def judge(monkeypatch, km):
     monkeypatch.setattr("cortex.swarm.byzantine_judge.SandboxJIT", MockSandboxJIT)
-    # Reset judge keys
-    km.revoke_key("byzantine_judge_root")
-    km.generate_and_store_key("byzantine_judge_root")
     # Give the judge a clean DB context for exergy
     j = ByzantineJudge(km=km)
     yield j

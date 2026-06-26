@@ -332,7 +332,7 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
                     (project, project),
                 )
                 tx_stats = await cursor.fetchone()
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.debug("Failed to query transaction stats: %s", e)
                 tx_stats = (0, "N/A", "N/A")
 

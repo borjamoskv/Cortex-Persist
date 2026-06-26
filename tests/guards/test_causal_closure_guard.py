@@ -87,7 +87,14 @@ def test_causal_closure_guard_robust_json_array(closure_guard: CausalClosureGuar
     )
     assert closure_guard.verify_closure(proposal_json)
 
-    # 2. (Removed) Single quotes Python literal dict array is no longer supported per C5-REAL strict structural checks.
+    # 2. Single quotes Python literal dict array (fails json.loads, passes ast.literal_eval)
+    proposal_python = SwarmProposal(
+        agent_id="test",
+        mission_statement="test",
+        content="[{'key': 'value', 'nested': {'ok': True}}]",
+        token_cost=5000,
+    )
+    assert closure_guard.verify_closure(proposal_python)
 
     # 3. Non-dict list should fail
     proposal_invalid = SwarmProposal(

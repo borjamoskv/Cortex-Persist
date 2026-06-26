@@ -107,7 +107,7 @@ class ImmuneMembrane:
                 meta=meta,
             )
             logger.info("TriageReport autonomously persisted to Ledger.")
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to autonomously persist TriageReport: %s", e)
 
     def _triage(self, results: list[FilterResult]) -> TriageReport:

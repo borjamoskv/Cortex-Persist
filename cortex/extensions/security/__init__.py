@@ -11,7 +11,7 @@ __all__: list[str] = []
 
 try:
     from .abac import ABACEvaluator, Policy
-except (ValueError, TypeError, OSError, RuntimeError):
+except Exception:
     ABACEvaluator = None  # type: ignore[assignment]
     Policy = None  # type: ignore[assignment]
 else:
@@ -19,14 +19,14 @@ else:
 
 try:
     from .anomaly_detector import AnomalyDetector
-except (ValueError, TypeError, OSError, RuntimeError):
+except Exception:
     AnomalyDetector = None  # type: ignore[assignment]
 else:
     __all__.append("AnomalyDetector")
 
 try:
     from .honeypot import HONEY_POT, HoneypotManager
-except (ValueError, TypeError, OSError, RuntimeError):
+except Exception:
     HONEY_POT = None  # type: ignore[assignment]
     HoneypotManager = None  # type: ignore[assignment]
 else:
@@ -34,21 +34,21 @@ else:
 
 try:
     from .injection_guard import InjectionGuard
-except (ValueError, TypeError, OSError, RuntimeError):
+except Exception:
     InjectionGuard = None  # type: ignore[assignment]
 else:
     __all__.append("InjectionGuard")
 
 try:
     from .integrity_audit import IntegrityAuditor
-except (ValueError, TypeError, OSError, RuntimeError):
+except Exception:
     IntegrityAuditor = None  # type: ignore[assignment]
 else:
     __all__.append("IntegrityAuditor")
 
 try:
     from .security_sync import SIGNAL, SecurityVisualSync
-except (ValueError, TypeError, OSError, RuntimeError):
+except Exception:
     SIGNAL = None  # type: ignore[assignment]
     SecurityVisualSync = None  # type: ignore[assignment]
 else:
@@ -56,7 +56,7 @@ else:
 
 try:
     from .signatures import Ed25519Signer, get_default_signer
-except (ValueError, TypeError, OSError, RuntimeError):
+except Exception:
     Ed25519Signer = None  # type: ignore[assignment]
     get_default_signer = None  # type: ignore[assignment]
 else:
@@ -64,7 +64,7 @@ else:
 
 try:
     from .tenant import get_tenant_id, tenant_id_var
-except (ValueError, TypeError, OSError, RuntimeError):
+except Exception:
     get_tenant_id = None  # type: ignore[assignment]
     tenant_id_var = None  # type: ignore[assignment]
 else:
@@ -72,7 +72,7 @@ else:
 
 try:
     from .threat_feed import ThreatFeedEngine
-except (ValueError, TypeError, OSError, RuntimeError):
+except Exception:
     ThreatFeedEngine = None  # type: ignore[assignment]
 else:
     __all__.append("ThreatFeedEngine")

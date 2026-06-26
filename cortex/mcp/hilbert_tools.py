@@ -110,6 +110,6 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
 
             return f"❌ Unknown attack mode: {attack}"
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Hilbert-Omega error: %s", e)
             return f"❌ Hilbert-Omega error: {e}"

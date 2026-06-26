@@ -187,7 +187,7 @@ class OuroborosOmega:
                         p0_report.critical_count,
                         p0_report.high_count,
                     )
-                except (ValueError, TypeError, OSError, RuntimeError) as e:
+                except Exception as e:
                     logger.warning("Phase 1.5 [P0 Scan] Failed: %s", e)
 
             tree = ast.parse(self.original_source)
@@ -222,7 +222,7 @@ class OuroborosOmega:
             try:
                 ast.parse(mutated_source)  # Syntax
                 compile(mutated_source, filename="<ast>", mode="exec")  # Bytecode
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("Phase 5 [Verification] Failed syntax/bytecode: %s", e)
                 return {"status": "ROLLED_BACK", "reason": str(e)}
 
@@ -271,7 +271,7 @@ class OuroborosOmega:
                     )
                 except ImportError as e:
                     logger.warning("Could not dispatch remote mutation: %s", e)
-                except (ValueError, TypeError, OSError, RuntimeError) as e:
+                except Exception as e:
                     logger.error("Terminal State 4 dispatch failed: %s", e)
 
             # COMMIT
@@ -292,7 +292,7 @@ class OuroborosOmega:
                 result["p0_report"] = p0_report.to_dict()
             return result
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.exception("Apoptosis: Unhandled exception during cycle.")
             return {"status": "ROLLED_BACK", "reason": str(e)}
 

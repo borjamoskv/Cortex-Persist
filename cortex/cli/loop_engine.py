@@ -82,7 +82,7 @@ class PersistSupervisor:
         while not self._stop.wait(timeout=self._interval):
             try:
                 self._flush(source="supervisor")
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("PersistSupervisor: flush error (non-fatal): %s", exc)
 
 
@@ -143,7 +143,7 @@ class ExecutionLoop:
             result.output = "Task cancelled by user"
             result.duration_ms = (time.monotonic() - t0) * 1000
 
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             elapsed = (time.monotonic() - t0) * 1000
             result.status = TaskStatus.FAILED
             result.output = str(exc)
@@ -181,7 +181,7 @@ class ExecutionLoop:
                 parts.append(f"Quality: {payload['score_130_100']}/100")
             parts.append(f"Status: {payload.get('status', 'unknown')}")
             return " │ ".join(parts)
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("KETER execution failed, storing as knowledge: %s", exc)
             return f"Task registered: {task}"
 

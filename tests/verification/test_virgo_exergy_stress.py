@@ -51,8 +51,6 @@ async def test_virgo_guard_concurrency(temp_db):
     Bombards VirgoContextGuard check method concurrently with valid and invalid signatures/nonces.
     Checks replay attack prevention under extreme concurrent race conditions.
     """
-    import os
-    os.environ["CORTEX_VIRGO_MODE"] = "TEST"
     guard = VirgoContextGuard()
 
     # Pre-generate valid expected signatures (HMAC/Hash fallback)

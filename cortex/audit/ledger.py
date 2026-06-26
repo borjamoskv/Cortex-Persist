@@ -134,7 +134,7 @@ class EnterpriseAuditLedger:
 
                 try:
                     await self._conn.execute("ALTER TABLE security_audit_log ADD COLUMN external_anchor TEXT")
-                except (ValueError, TypeError, OSError, RuntimeError) as e:
+                except Exception as e:
                     if "duplicate column name" not in str(e).lower():
                         raise e
 
@@ -329,7 +329,7 @@ class EnterpriseAuditLedger:
                                             )
                                             if not self._conn.in_transaction:
                                                 await self._conn.commit()
-                                except (ValueError, TypeError, OSError, RuntimeError) as e:
+                                except Exception as e:
                                     logger.error("[AuditLedger] External anchoring failed: %s", e)
 
         finally:

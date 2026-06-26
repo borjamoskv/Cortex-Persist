@@ -136,7 +136,7 @@ async def _execute_run(
     try:
         result = await bridge.run(request)
         return json.dumps(_result_to_dict(result), indent=2, default=str)
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("[MCP] Pipeline execution failed: %s", e)
         return json.dumps({"error": str(e), "status": "failed", "mission_id": request.mission_id})
 
@@ -172,7 +172,7 @@ async def _execute_run_async(
     try:
         result = await bridge.run_async(request)
         return json.dumps(_result_to_dict(result), indent=2, default=str)
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("[MCP] Async pipeline failed: %s", e)
         return json.dumps({"error": str(e), "status": "failed", "mission_id": request.mission_id})
 
@@ -202,7 +202,7 @@ async def _execute_cancel(ctx: _MCPContext | None, mission_id: str) -> str:
                 "note": "Bridge does not support cancellation yet",
             }
         )
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("[MCP] Cancel failed: %s", e)
         return json.dumps({"error": str(e), "status": "failed"})
 

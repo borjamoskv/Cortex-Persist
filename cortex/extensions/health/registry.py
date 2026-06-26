@@ -59,7 +59,7 @@ class CollectorRegistry:
                     object.__setattr__(snap, "remediation", getattr(collector, "remediation", ""))
 
                 results.append(snap)
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 latency = (time.perf_counter() - t0) * 1000.0
                 logger.warning(
                     "Collector %s failed: %s",

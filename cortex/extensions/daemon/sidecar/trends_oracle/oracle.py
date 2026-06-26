@@ -83,7 +83,7 @@ class TrendsOracle:
                 if tasks:
                     await asyncio.gather(*tasks)
 
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("❌ [TRENDS_ORACLE] Loop Error: %s", e)
 
             # Wait before the next check. A fast loop checking intervals.
@@ -115,7 +115,7 @@ class TrendsOracle:
                     self._poll_daily_sync()
                     last_daily = now
 
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("❌ [TRENDS_ORACLE] (Thread) Error: %s", e)
 
             await asyncio.sleep(15.0)
@@ -155,7 +155,7 @@ class TrendsOracle:
                                     alerts.append(alert)
                                 self._mark_cached(cache_key, now)
 
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning(
                     "⚠️ [TRENDS_ORACLE] Realtime query failed for '%s': %s", target_geo, e
                 )
@@ -185,7 +185,7 @@ class TrendsOracle:
                             if alert:
                                 alerts.append(alert)
                             self._mark_cached(cache_key, now)
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning("⚠️ [TRENDS_ORACLE] Daily query failed for '%s': %s", target_geo, e)
 
         if alerts:
@@ -257,7 +257,7 @@ class TrendsOracle:
                     fact_type="trend",
                     meta=meta,
                 )
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("⚙️ [TRENDS_ORACLE] DB lock o error almacenando fact: %s", e)
                 # We still emit the alert even if storage failed
 

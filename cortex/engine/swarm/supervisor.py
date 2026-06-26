@@ -71,7 +71,7 @@ class SwarmSupervisor:
         while self._running:
             try:
                 await self._state_consumer_loop()
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.critical(f"HEARTBEAT FAILURE: Consumer loop crashed: {e}. Initiating Controlled Apocalypse.")
                 self._running = False
                 sys.exit(1)
@@ -88,7 +88,7 @@ class SwarmSupervisor:
                 continue
             except asyncio.CancelledError:
                 break
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error(f"State consumer encountered error: {e}")
                 raise  # Re-raise for Heartbeat
 
@@ -121,7 +121,7 @@ class SwarmSupervisor:
             except asyncio.QueueFull:
                 logger.warning("Thermodynamic Pause: Worker Queue is full. Backpressure applied.")
                 break
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error(f"Dispatch failed for task {task['id']}: {e}")
                 
         if dispatched > 0:

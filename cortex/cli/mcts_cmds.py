@@ -55,7 +55,7 @@ def evolve(file: str, simulations: int, prompt: str) -> None:
                 f"\n[bold green]👑 MUTACIÓN CON ÉXITO - MCTS COLAPSADO: checkout a `{best_branch}`[/bold green]"
             )
 
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         console.print(f"[red]Singularity Error:[/red] {e}")
         raise click.Abort() from e
 

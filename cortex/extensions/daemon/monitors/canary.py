@@ -50,7 +50,7 @@ class CanaryMonitor:
             try:
                 st = path.stat()
                 self._last_stats[path] = max(st.st_atime, st.st_mtime)
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
     async def check_async(self) -> list[SecurityAlert]:

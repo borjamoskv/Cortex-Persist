@@ -37,7 +37,7 @@ def submit_vote(req_id: str) -> None:
                 console.print(f"[bold red]✗ Request {req_id} not found or not PENDING.[/bold red]")
                 return
             state_payload = row[0]
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             console.print(f"[bold red]✗ Failed to read request: {e}[/bold red]")
             return
 
@@ -56,7 +56,7 @@ def submit_vote(req_id: str) -> None:
                 console.print("[bold red]✗ Invalid public key from signer.[/bold red]")
                 return
             console.print(f"[cyan]Signature generated using Ed25519: {signature[:16]}...[/cyan]")
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             console.print(f"[bold red]✗ Failed to generate cryptographic signature: {e}[/bold red]")
             return
 
@@ -112,7 +112,7 @@ def list_requests() -> None:
                 console.print(
                     f"[bold cyan]{row[0]}[/bold cyan] | [yellow]{row[1]}[/yellow] | Votes: {len(sigs)} | {row[2]}"
                 )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             console.print(f"[bold red]Failed to fetch requests: {e}[/bold red]")
 
     _run_async(_run())

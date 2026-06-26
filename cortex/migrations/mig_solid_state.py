@@ -26,7 +26,7 @@ def _migration_021_solid_state(conn: sqlite3.Connection) -> None:
                 schema_version  TEXT NOT NULL DEFAULT '1'
             )
         """)
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         import logging
 
         logging.warning("Suppressed exception: %s", exc)

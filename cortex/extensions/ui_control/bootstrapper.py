@@ -51,7 +51,7 @@ class PermsBootstrapper:
             options = {ApplicationServices.kAXTrustedCheckOptionPrompt: True}  # type: ignore
             trusted = ApplicationServices.AXIsProcessTrustedWithOptions(options)  # type: ignore
             status["accessibility"] = bool(trusted)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Error checking accessibility permissions: %s", e)
 
         # 2. Check & Prompt Screen Recording (macOS Catalina 10.15+)
@@ -72,7 +72,7 @@ class PermsBootstrapper:
                     Quartz.kCGWindowImageDefault,  # type: ignore
                 )
                 status["screen_recording"] = img is not None
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Error checking screen recording permissions: %s", e)
 
         logger.info(

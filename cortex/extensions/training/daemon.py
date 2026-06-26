@@ -59,7 +59,7 @@ class AutonomousTrainingDaemon:
                 ) as cursor:
                     rows = await cursor.fetchall()
                     return [row[0] for row in rows if row[0]]
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to query distinct session IDs: %s", e)
         return []
 
@@ -71,7 +71,7 @@ class AutonomousTrainingDaemon:
             with open(self.consolidated_sessions_file, encoding="utf-8") as f:
                 data = json.load(f)
                 return set(data)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to load consolidated sessions: %s", e)
             return set()
 
@@ -80,7 +80,7 @@ class AutonomousTrainingDaemon:
         try:
             with open(self.consolidated_sessions_file, "w", encoding="utf-8") as f:
                 json.dump(list(sessions), f, indent=2)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to save consolidated sessions: %s", e)
 
     def register_verified_adapter(self, adapter_path: Path, metrics: dict[str, Any]) -> None:
@@ -96,7 +96,7 @@ class AutonomousTrainingDaemon:
             with open(self.verified_adapter_file, "w", encoding="utf-8") as f:
                 json.dump(registry_data, f, indent=2)
             logger.info("🎉 Registered verified adapter at %s", adapter_path)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to register verified adapter: %s", e)
 
     async def run_cycle(self) -> dict[str, Any]:
@@ -170,7 +170,7 @@ class AutonomousTrainingDaemon:
                 "processed_sessions": 0,
             }
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Exception during training cycle: %s", e)
             return {"status": "error", "error": str(e), "processed_sessions": 0}
 
@@ -193,7 +193,7 @@ class AutonomousTrainingDaemon:
                 await self._task
             except asyncio.CancelledError:
                 pass
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
         logger.info("🛑 Autonomous Training Daemon stopped.")
 
@@ -202,6 +202,6 @@ class AutonomousTrainingDaemon:
         while self.is_running:
             try:
                 await self.run_cycle()
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("Error in daemon loop: %s", e)
             await asyncio.sleep(self.interval_seconds)

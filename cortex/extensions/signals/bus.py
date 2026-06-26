@@ -103,7 +103,7 @@ class AsyncSignalBus:
 
         try:
             self._conn._signals_ready = True  # type: ignore
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
         self._ready = True
 
@@ -132,7 +132,7 @@ class AsyncSignalBus:
             await self._conn.commit()
             self.session_emitted += 1
             return cursor.lastrowid or 0
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             self.session_errors += 1
             raise
 
@@ -331,7 +331,7 @@ class SignalBus:
 
         try:
             self._conn._signals_ready = True  # type: ignore
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
         self._ready = True
 
@@ -368,7 +368,7 @@ class SignalBus:
             )
             self.session_emitted += 1
             return signal_id or 0
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             self.session_errors += 1
             raise
 

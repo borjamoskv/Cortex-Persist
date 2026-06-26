@@ -36,7 +36,7 @@ def _db(path: Path, exclusive: bool = False) -> Generator[sqlite3.Connection, No
             conn.execute("BEGIN EXCLUSIVE")
         yield conn
         conn.commit()
-    except (ValueError, TypeError, OSError, RuntimeError):
+    except Exception:
         conn.rollback()
         raise
     finally:
@@ -113,7 +113,7 @@ class ResultCache:
                 if row:
                     logger.debug("LLM Cache [HIT] -> %s...", h[:8])
                     return row[0]
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
         return None
 

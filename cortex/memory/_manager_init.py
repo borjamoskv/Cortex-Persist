@@ -15,7 +15,7 @@ def init_dynamic_space(l2: Any, manager: Any) -> Any | None:
         return DynamicSemanticSpace(l2, manager=manager)
     except ImportError:
         return None
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         logger.warning("Dynamic semantic space unavailable: %s", exc)
         return None
 
@@ -27,7 +27,7 @@ def init_hologram(l2: Any) -> Any | None:
         from cortex.memory.hologram import HolographicMemory
 
         return HolographicMemory(l2)
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         logger.warning("Holographic memory unavailable: %s", exc)
         return None
 
@@ -37,7 +37,7 @@ def init_metamemory() -> Any | None:
         from cortex.memory.metamemory import MetamemoryMonitor
 
         return MetamemoryMonitor()
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         logger.warning("Metamemory monitor unavailable: %s", exc)
         return None
 
@@ -51,7 +51,7 @@ def init_resonance_gate(l2: Any, endocrine: Any) -> Any | None:
         from cortex.extensions.songlines.sensor import TopographicSensor
 
         sensor = TopographicSensor()
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         logger.warning("Topographic sensor unavailable for resonance gate: %s", exc)
 
     try:
@@ -62,6 +62,6 @@ def init_resonance_gate(l2: Any, endocrine: Any) -> Any | None:
             songline_sensor=sensor,
             endocrine=endocrine,
         )
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         logger.warning("Resonance gate unavailable during startup: %s", exc)
         return None

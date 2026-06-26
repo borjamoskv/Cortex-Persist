@@ -184,7 +184,7 @@ async def compute_corpus_entropy(
     try:
         async with conn.execute(query, params) as cursor:
             rows = await cursor.fetchall()
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.warning("Corpus entropy query failed: %s", e)
         return ShannonReport(
             total_facts=0,

@@ -58,7 +58,7 @@ class StripeBillingGateway:
                 metadata={"tenant_id": tenant_id},
             )
             return customer.id
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to create Stripe customer for %s: %s", tenant_id, e)
             raise
 
@@ -83,7 +83,7 @@ class StripeBillingGateway:
                 items=[{"price": price_id}],
             )
             return subscription.id
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to create Stripe subscription for customer %s on plan %s: %s", customer_id, plan, e)
             raise
 
@@ -105,7 +105,7 @@ class StripeBillingGateway:
                 timestamp="now",
                 action="increment",
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to report usage for Stripe subscription item %s: %s", subscription_item_id, e)
             raise
 
@@ -126,7 +126,7 @@ class StripeBillingGateway:
                 data = json.loads(payload.decode("utf-8"))
                 logger.info("[BILLING][MOCK] Parsed mock webhook event type %s", data.get("type"))
                 return data
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("Failed to decode mock webhook payload: %s", e)
                 return {"type": "unknown", "data": {}}
 
@@ -135,7 +135,7 @@ class StripeBillingGateway:
                 payload, signature, self.config.webhook_secret
             )
             return event
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Webhook verification failed: %s", e)
             raise ValueError(f"Invalid webhook signature: {e}") from e
 

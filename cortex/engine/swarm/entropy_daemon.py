@@ -3,6 +3,8 @@ import asyncio
 import logging
 import os
 
+import aiosqlite
+
 logger = logging.getLogger(__name__)
 
 

@@ -39,7 +39,7 @@ class RustChainClient:
             client = await self.get_client()
             res = await client.get("/health")
             return res.json()
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return {"healthy": False, "error": str(e)}
 
     async def get_balance(self, address: str) -> dict[str, Any]:
@@ -50,7 +50,7 @@ class RustChainClient:
             client = await self.get_client()
             res = await client.get(f"/wallet/balance?address={address}")
             return res.json()
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             raise ConnectionError(f"RustChain node connection failed: {e}")
 
     async def stake_rtc(
@@ -93,5 +93,5 @@ class RustChainClient:
             )
             res.raise_for_status()
             return res.json()
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             raise ConnectionError(f"RustChain staking failed: {e}")

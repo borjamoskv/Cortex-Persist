@@ -50,7 +50,7 @@ def check_dependencies() -> dict:
         # This is a heuristic, real check depends on how it's loaded
         deps["sqlite3_version"] = sqlite3.sqlite_version
         conn.close()
-    except (ValueError, TypeError, OSError, RuntimeError):
+    except Exception:
         deps["sqlite3"] = "error"
 
     return deps
@@ -68,7 +68,7 @@ def check_database(db_path: str) -> dict:
         res = conn.execute("SELECT count(*) FROM facts").fetchone()
         conn.close()
         return {"status": "healthy", "facts": res[0], "path": str(path)}
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         return {"status": "corrupt", "error": str(e), "path": str(path)}
 
 

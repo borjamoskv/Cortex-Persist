@@ -80,7 +80,7 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
     except subprocess.TimeoutExpired:
         logger.error("Axiom 3 Verification Timed out after 5 minutes.")
         return False
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("Axiom 3 Verification OSAScript failed: %s", e)
         return False
 
@@ -166,7 +166,7 @@ def create_aether_server(
             return await asyncio.to_thread(_read)
         except UnicodeDecodeError:
             return f"❌ File {filepath} is binary or not UTF-8."
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return f"❌ Error reading file: {e}"
 
     @mcp.tool()
@@ -259,7 +259,7 @@ def create_aether_server(
                 res += f"STDERR:\n{err_output}\n"
 
             return res
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return f"❌ Subprocess error: {e}"
 
     return mcp

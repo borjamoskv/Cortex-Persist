@@ -34,7 +34,7 @@ async def request_job_quote(
     try:
         quote = await marketplace.quote_job(req)
         return quote
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("Failed to generate TaaS quote: %s", e)
         raise HTTPException(status_code=500, detail="Failed to generate quote") from e
 
@@ -51,7 +51,7 @@ async def execute_job(
         return result
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("Failed to execute TaaS job: %s", e)
         raise HTTPException(status_code=500, detail="Execution failed") from e
 
@@ -67,6 +67,6 @@ async def verify_job_proof(
     try:
         is_valid = await marketplace.verify_proof(job_id, proof)
         return {"job_id": job_id, "verified": is_valid}
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("Failed to verify TaaS proof: %s", e)
         raise HTTPException(status_code=500, detail="Verification failed") from e

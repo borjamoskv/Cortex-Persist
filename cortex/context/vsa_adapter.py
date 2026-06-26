@@ -101,7 +101,7 @@ class VSAContextAdapter:
             )
             return self._mem
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning("[VSA] SwarmMemory init failed: %s", e)
             self._available = False
             return None
@@ -135,7 +135,7 @@ class VSAContextAdapter:
                 for i, (sim, text, tags, ts) in enumerate(results)
                 if sim > 0.1  # Noise floor
             ]
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning("[VSA] Query failed: %s", e)
             return []
 
@@ -156,7 +156,7 @@ class VSAContextAdapter:
         try:
             mem.record_action(content, tags=tags)
             return True
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning("[VSA] Ingest failed: %s", e)
             return False
 
@@ -174,7 +174,7 @@ class VSAContextAdapter:
             report = mem.consolidate()
             report["persisted"] = True
             return report
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning("[VSA] Consolidation failed: %s", e)
             return {"error": str(e), "persisted": False}
 
@@ -188,7 +188,7 @@ class VSAContextAdapter:
             report = mem.diagnostics()
             report["available"] = True
             return report
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return {"available": True, "error": str(e)}
 
     @property

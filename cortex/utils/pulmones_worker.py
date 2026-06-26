@@ -80,7 +80,7 @@ class PulmonesWorker:
             self._remove_task(task_id)
             logger.info("✅ Tarea %s recuperada exitosamente.", task_id)
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("❌ Fallo crónico en tarea %s: %s", task_id, str(e))
             self._penalize_task(task_id, task["retries"])
 
@@ -98,7 +98,7 @@ class PulmonesWorker:
                     await asyncio.gather(*(self._execute_task(t) for t in tasks))
                 else:
                     logger.debug("O₂ levels optimal. No tasks pending.")
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.critical("💀 [WORKER] Fallo sistémico en el bucle principal: %s", str(e))
 
             await asyncio.sleep(poll_interval)

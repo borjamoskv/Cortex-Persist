@@ -46,7 +46,7 @@ class ReactorState:
         self.entropy_count = 0
         self.logs = []
         self.healed_snippets = [
-            "except (ValueError, TypeError, OSError, RuntimeError):  # noqa: BLE001 -> except OSError:",
+            "except Exception:  # noqa: BLE001 -> except OSError:",
             "time.sleep(1) -> await asyncio.sleep(1)",
             "import web3 -> [INTERCEPTED]",
             "Complex branch (depth 12) -> Refactored",
@@ -125,7 +125,7 @@ def run_reactor():
 if __name__ == "__main__":
     try:
         run_reactor()
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         import logging
 
         logging.warning("Suppressed exception: %s", exc)

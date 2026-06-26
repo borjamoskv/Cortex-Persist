@@ -250,5 +250,5 @@ def _persist_to_cortex(result) -> None:
             )
         )
         console.print("[dim green]💎 Persisted to CORTEX Ledger[/dim green]")
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         console.print(f"[dim red]⚠️ CORTEX persist failed: {e}[/dim red]")

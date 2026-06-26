@@ -45,7 +45,7 @@ async def text_search(
                 conn, query, tenant_id, project, fact_type, tags, limit, as_of, confidence
             )
             return _rows_to_results(rows, is_fts=False)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Postgres text search failed: %s", e)
             return []
 

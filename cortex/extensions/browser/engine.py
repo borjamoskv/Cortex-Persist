@@ -79,7 +79,7 @@ class BrowserEngine:
             LOG.info("BROWSER: Navigating to %s", url)
             await self._page.goto(url, wait_until="networkidle")
             return True
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             LOG.error("BROWSER: Navigation failed: %s", e)
             raise RuntimeError(f"BROWSER: Navigation to {url} failed: {e}") from e
 
@@ -191,7 +191,7 @@ class BrowserEngine:
             await self._page.click(selector, timeout=5000)
             await self._page.wait_for_load_state("networkidle")
             return True
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             LOG.error("BROWSER: Failed to click element %s: %s", cortex_id, e)
             raise RuntimeError(f"BROWSER: Click operation failed on node {cortex_id}: {e}") from e
 
@@ -203,7 +203,7 @@ class BrowserEngine:
             selector = f"[data-cortex-id='{cortex_id}']"
             await self._page.fill(selector, text, timeout=5000)
             return True
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             LOG.error("BROWSER: Failed to type in element %s: %s", cortex_id, e)
             raise RuntimeError(f"BROWSER: Type operation failed on node {cortex_id}: {e}") from e
 
@@ -214,6 +214,6 @@ class BrowserEngine:
         try:
             text = await self._page.evaluate("() => document.body.innerText")
             return text
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             LOG.error("BROWSER: Failed to extract page content: %s", e)
             raise RuntimeError(f"BROWSER: Page content extraction failed: {e}") from e

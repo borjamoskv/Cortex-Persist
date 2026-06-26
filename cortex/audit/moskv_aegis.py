@@ -87,7 +87,7 @@ class MoskvAegisModeler:
                                     "description": description,
                                     "source": "AGENTS.md",
                                 }
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Error parsing AGENTS.md: %s. Using default ruleset.", e)
             return self.get_default_ruleset()
 
@@ -245,6 +245,6 @@ class MoskvAegisEngine:
 
             public_key.verify(bytes.fromhex(entry["signature"]), entry_hash.encode("utf-8"))
             return True
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.warning("Aegis verification failed: %s", e)
             return False

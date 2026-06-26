@@ -121,7 +121,7 @@ def _duration_ms(start_iso: str, end_iso: str) -> int | None:
                 continue
         if start_dt and end_dt:
             return max(0, int((end_dt - start_dt).total_seconds() * 1000))
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         logger.warning("Suppressed exception: %s", exc)
     return None
 
@@ -215,7 +215,7 @@ def _load_workflow_metadata() -> dict[str, int]:
                     content = fh.read()
                 match = re.search("expected_duration_min:\\s*(\\d+)", content)
                 workflow_meta[name] = int(match.group(1)) if match else 15
-            except (ValueError, TypeError, OSError, RuntimeError):
+            except Exception:
                 workflow_meta[name] = 15
     return workflow_meta
 
@@ -309,7 +309,7 @@ def _parse_single_transcript(t: str, workflow_meta: dict[str, int]) -> dict[str,
     try:
         with open(t, encoding="utf-8") as fh:
             lines = [json.loads(line) for line in fh if line.strip()]
-    except (ValueError, TypeError, OSError, RuntimeError):
+    except Exception:
         return None
     if not lines:
         return None
@@ -530,7 +530,7 @@ def ingest_all_transcripts(log_path: str = LOG_FILE):
             n = process_transcript(t, telemetry)
             total_events += n
             processed += 1
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.info(f"  ERROR processing {t}: {e}")
     logger.info(f"Processed {processed}/{len(transcripts)} transcripts → {total_events} events")
     run_cronos_analysis(sorted_transcripts)

@@ -556,7 +556,7 @@ class DreamEngine:
                             name, reason=f"dream: {insight.description[:60]}", factor=1 + delta
                         )
                     applied = True
-                except (ValueError, TypeError, OSError, RuntimeError) as exc:
+                except Exception as exc:
                     logger.warning("Suppressed exception: %s", exc)
         return applied
 

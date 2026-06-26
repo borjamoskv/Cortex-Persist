@@ -77,7 +77,7 @@ class TenantRouter:
             try:
                 await old_conn.close()
                 logger.debug("Evicted backend connection for tenant: %s", old_tenant)
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning("Error closing evicted tenant %s: %s", old_tenant, e)
 
         return backend

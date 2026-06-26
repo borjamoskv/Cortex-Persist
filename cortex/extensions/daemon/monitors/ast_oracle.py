@@ -51,10 +51,10 @@ class ASTOracleMonitor(IntervalProjectMonitor[ASTAlert]):
                         entropy_score=total_entropy,
                         message=f"AST Drift Detected: {error_count} errors, {warning_count} warnings.",
                     )
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("ASTOracle failed to scan %s: %s", project, e)
 
         return None

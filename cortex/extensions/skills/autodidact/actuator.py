@@ -99,7 +99,7 @@ async def daemon_ingesta_soberana(
         # Si execute_cognitive_synthesis retornó un ID de memo existente (redundancia)
         return {"estado": "REDUNDANTE", "memo_id": memo_id}
 
-    except (ValueError, TypeError, OSError, RuntimeError) as e:  # noqa: BLE001 - synthesis pipeline failure must return error state
+    except Exception as e:  # noqa: BLE001 - synthesis pipeline failure must return error state
         logger.error("❌ Fallo crítico en síntesis: %s", e)
         return {"estado": "FALLO", "error": str(e)}
 

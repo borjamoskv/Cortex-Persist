@@ -79,7 +79,7 @@ def verify_fact(fact_id: int, db: str) -> None:
         checkpoint = _check_merkle(conn, tx_id)
 
         _render_verification_certificate(fact, tx, chain_valid, chain_msg, checkpoint)
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         handle_cli_error(e, db_path=db, context="verifying fact")
     finally:
         if conn:
@@ -190,7 +190,7 @@ def compliance_report(db: str) -> None:
         console.print(
             Panel(f"{verdict}\n\nCompliance Score: [bold]{score}/5[/bold]", title="Verdict")
         )
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         handle_cli_error(e, db_path=db, context="generating compliance report")
     finally:
         if conn:
@@ -235,7 +235,7 @@ def audit_cognitive(tenant: str, db: str) -> None:
 
     try:
         _run_async(_run_audit())
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         from cortex.cli.errors import handle_cli_error
 
         handle_cli_error(e, db_path=db, context="cognitive audit")
@@ -254,7 +254,7 @@ def _audit_trail(project: str, limit: int, db: str) -> None:
         table = _get_audit_trail(conn, project, limit)
         if table:
             console.print(table)
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         handle_cli_error(e, db_path=db, context="generating audit trail")
     finally:
         if conn:
@@ -303,7 +303,7 @@ def siege(db: str) -> None:
             key = os.environ.get("CORTEX_VAULT_KEY")
             if key:
                 engine.vault = Vault(key.encode("utf-8"))  # pyright: ignore[reportAttributeAccessIssue]
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             import logging
 
             logging.warning("Suppressed exception: %s", exc)
@@ -355,5 +355,5 @@ def siege(db: str) -> None:
 
         console.print(Panel(verdict, title="Final Verdict", style=color))
 
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         handle_cli_error(e, db_path=db, context="Compliance Siege execution")

@@ -33,7 +33,7 @@ class BCIMaestroBridge:
             if isinstance(payload, bytes):
                 payload = payload.decode("utf-8")
             args = json.loads(payload) if payload else {}
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error(f"[BCI-Bridge] Invalid JSON payload: {e}")
             return {"success": False, "error": f"Invalid JSON payload: {e}"}
 
@@ -74,7 +74,7 @@ class BCIMaestroBridge:
 
             logger.info(f"[BCI-Bridge] Execution result of {instruction}: {result}")
             return result
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error(f"[BCI-Bridge] Error executing {instruction}: {e}")
             return {"success": False, "error": str(e)}
 

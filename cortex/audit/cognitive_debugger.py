@@ -88,7 +88,7 @@ class RoutingReplayDebugger:
                                     "details": f"Similarity ({sim:.4f}) matched anchor '{anchor_text}' >= threshold ({self.router.classifier.semantic_threshold}).",
                                 }
                             )
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 detection_traces.append({"error": f"Semantic trace exception: {e}"})
 
         # 2. Trace declarative rules mapping

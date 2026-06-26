@@ -111,7 +111,7 @@ async def store_fact(
         raise HTTPException(status_code=400, detail=str(e)) from None
     except HTTPException:
         raise
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.exception("Failed to store fact: %s", e)
         raise HTTPException(
             status_code=500, detail="Internal server error while storing fact"
@@ -293,7 +293,7 @@ async def get_fact_history(
         return response
     except HTTPException:
         raise
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("Failed to fetch fact history: %s", e)
         raise HTTPException(status_code=500, detail="Failed to fetch history") from e
 
@@ -312,7 +312,7 @@ async def propagate_taint(
             "affected_count": report.affected_count,
             "changes": report.confidence_changes,
         }
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("Taint propagation failed: %s", e)
         raise HTTPException(status_code=500, detail="Taint propagation failed") from None
 

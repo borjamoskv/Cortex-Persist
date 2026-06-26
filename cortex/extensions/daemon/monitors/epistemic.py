@@ -117,7 +117,7 @@ class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
             # Update state
             self._last_mean_confidence = stats.mean_retrieval_confidence
 
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Failed to evaluate epistemic certainty: %s", e)
 
         # Sort by priority

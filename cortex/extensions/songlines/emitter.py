@@ -56,7 +56,7 @@ class ResonanceEmitter:
                 os.setxattr(str(target_file), attr_name, encoded_payload)  # type: ignore[reportAttributeAccessIssue]
                 logger.info("Embedded ghost %s on %s (os.setxattr)", ghost_id, target_file.name)
                 return
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
         # Primary Fallback: /usr/bin/xattr CLI (macOS)
@@ -71,7 +71,7 @@ class ResonanceEmitter:
             )
             logger.info("Embedded ghost %s on %s (xattr cli)", ghost_id, target_file.name)
             return
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
 
         # Final Fallback: .songlines manifest
@@ -85,7 +85,7 @@ class ResonanceEmitter:
             try:
                 with open(songline_file) as f:
                     data = json.load(f)
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
         file_key = target_file.name

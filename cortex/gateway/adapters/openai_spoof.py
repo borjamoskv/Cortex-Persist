@@ -94,7 +94,7 @@ async def openai_chat_completions(
                     import json
 
                     yield f"data: {json.dumps(data)}\n\n"
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("Spoof Stream Error: %s", e)
                 yield 'data: {"error": "Internal streaming error"}\n\n'
 
@@ -145,6 +145,6 @@ async def openai_chat_completions(
             ],
             "system_fingerprint": "cortex-sovereign-v5",
         }
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("Spoof Completion Error: %s", e)
         raise HTTPException(status_code=500, detail="Internal server error") from e

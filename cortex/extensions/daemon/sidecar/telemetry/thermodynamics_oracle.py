@@ -40,7 +40,7 @@ class ThermodynamicsOracle:
             import psutil
 
             self._psutil = psutil
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             import logging
 
             logging.warning("Suppressed exception: %s", exc)
@@ -59,7 +59,7 @@ class ThermodynamicsOracle:
             except asyncio.CancelledError:
                 self._running = False
                 break
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 # Log thermal noise error but don't choke the event loop
                 logger.error("[THERMODYNAMIC NOISE] %s", e)
             await asyncio.sleep(self.poll_interval)
@@ -84,7 +84,7 @@ class ThermodynamicsOracle:
                 disk_io = self._psutil.disk_io_counters()
                 if disk_io and hasattr(disk_io, "busy_time"):
                     disk_busy_ms = disk_io.busy_time or 0.0  # type: ignore[reportAttributeAccessIssue]
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 import logging
 
                 logging.warning("Suppressed exception: %s", exc)

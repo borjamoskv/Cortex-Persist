@@ -107,7 +107,7 @@ async def probe_metastability(
     try:
         async with conn.execute(query, params) as cursor:
             rows = list(await cursor.fetchall())
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.warning("Metastability probe query failed: %s", e)
         return report
 
@@ -125,7 +125,7 @@ async def probe_metastability(
             ) as cursor:
                 edge_row = await cursor.fetchone()
                 upstream_edges = edge_row[0] if edge_row else 0
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.debug("Failed to count causal edges for fact %s: %s", fact_id, e)
             upstream_edges = 0
 
@@ -203,7 +203,7 @@ async def probe_untested_assumptions(
                 }
             )
 
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.warning("Untested assumptions probe failed: %s", e)
 
     return results

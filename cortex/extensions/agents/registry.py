@@ -150,7 +150,7 @@ class AgentCatalogEntry:
                 resolved = resolve_model(self.provider, self.intent)
                 if resolved:
                     return resolved
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
         return self.model
 

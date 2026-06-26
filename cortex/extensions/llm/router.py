@@ -136,7 +136,7 @@ class CortexLLMRouter:
             result = await self._execute_resilient_impl(prompt)
             future.set_result(result)
             return result
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             if not future.done():
                 future.set_exception(exc)
             raise
@@ -170,7 +170,7 @@ class CortexLLMRouter:
                                 hp,
                             )
                             break
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
         if not provider_hint or self._primary.provider_name == provider_hint:
@@ -317,7 +317,7 @@ class CortexLLMRouter:
                 )
                 self._evicted.add(provider.provider_name)
             return Err(str(exc))
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             if "HTTP 401" in str(exc) or "401" in str(exc) or "invalid_api_key" in str(exc):
                 logger.error(
                     "🚫 [EVICTION] Provider %s hit 401 Unauthorized. Evicting...",

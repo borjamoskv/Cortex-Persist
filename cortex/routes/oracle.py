@@ -152,7 +152,7 @@ async def audit_target(
                 "depth": req.depth,
             },
         )
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.warning("Failed to persist Oracle audit to ledger: %s", e)
 
     return OracleResponse(

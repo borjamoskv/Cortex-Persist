@@ -63,7 +63,7 @@ def _parse_tx_detail(raw: str | dict | None) -> str:
         d = json.loads(raw) if isinstance(raw, str) else raw
         if isinstance(d, dict):
             return f" - {d.get('content', '')[:80]}"
-    except (ValueError, TypeError, OSError, RuntimeError) as exc:
+    except Exception as exc:
         logger.warning("Suppressed exception: %s", exc)
     return ""
 
@@ -285,7 +285,7 @@ class ContextCollector:
                             _walk(p, current_depth + 1, max_depth)
                         elif p.is_file() and p.suffix == ".py":
                             py_files.append(p)
-                except (ValueError, TypeError, OSError, RuntimeError) as exc:
+                except Exception as exc:
                     logger.warning("Suppressed exception: %s", exc)
 
             max_d = 2 if self.workspace_dir == Path.home() else 4

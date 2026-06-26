@@ -92,13 +92,13 @@ Git Diff:
 
                     if isinstance(attacks, list):
                         return attacks
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.error("[MoskvVidentiaOracle] LLM Call Failed: %s", e)
                 try:
                     logger.error(
                         "[MoskvVidentiaOracle] Raw text was: %s", raw_response_text
                     )
-                except (ValueError, TypeError, OSError, RuntimeError) as inner_e:
+                except Exception as inner_e:
                     logger.error("[MoskvVidentiaOracle] Failed to log raw text: %s", inner_e)
                 # Fallback to simulated heuristics
 

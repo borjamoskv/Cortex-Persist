@@ -60,7 +60,7 @@ async def dry_run_guard(
         raise HTTPException(
             status_code=400, detail={"valid": False, "rule": e.rule, "error": e.detail}
         ) from e
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("Guard dry-run failed: %s", e)
         raise HTTPException(status_code=500, detail="Internal guard error") from e
 
@@ -112,6 +112,6 @@ async def get_compliance_status(
             compliance_level="Sovereign-Alpha",
             article_12_status="LOGGED_AND_VERIFIED",
         )
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         logger.error("Compliance report generation failed: %s", e)
         raise HTTPException(status_code=500, detail="Failed to generate compliance report") from e

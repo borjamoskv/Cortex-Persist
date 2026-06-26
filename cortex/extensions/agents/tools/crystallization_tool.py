@@ -86,7 +86,7 @@ class CrystallizationTool:
                 f"(project={project}, confidence={confidence}). "
                 f"The swarm verifies, the ledger remembers."
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Crystallization failure: %s", e)
             return f"❌ CRYSTALLIZATION FAILURE: {e}"
 

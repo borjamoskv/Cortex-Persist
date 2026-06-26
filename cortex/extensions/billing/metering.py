@@ -169,7 +169,7 @@ class CausalMetering:
             if r["meta"]:
                 try:
                     meta = json.loads(r["meta"])
-                except (ValueError, TypeError, OSError, RuntimeError):
+                except Exception:
                     pass
 
             events.append(

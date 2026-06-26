@@ -52,7 +52,7 @@ class HeuristicGenesisAgent(BinaryAgent):
                 if decoded.startswith(b"CORTEX_GENESIS_FLAG_"):
                     self.flag = decoded.decode()
                     return self.flag
-        except (ValueError, TypeError, OSError, RuntimeError):
+        except Exception:
             pass
         return None
 

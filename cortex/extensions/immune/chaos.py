@@ -102,7 +102,7 @@ async def async_interceptor(
                 res = "!!CORRUPTED_STRING_BY_CHAOS_GATE!!"  # type: ignore[assignment]
 
         return res  # type: ignore[type-error]
-    except (ValueError, TypeError, OSError, RuntimeError) as e:
+    except Exception as e:
         # Re-check gate state
         gate.check()
         raise e

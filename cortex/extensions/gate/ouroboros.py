@@ -126,7 +126,7 @@ class OuroborosGate:
                         self.conn.execute(
                             f"DELETE FROM {table} WHERE fact_id IN ({placeholders})", chunk
                         )
-                    except (ValueError, TypeError, OSError, RuntimeError) as e:
+                    except Exception as e:
                         logger.debug(f"Skipping table {table} during pruning: {e}")
 
             self.conn.execute("DELETE FROM facts WHERE project = ?", (target_project,))
@@ -173,7 +173,7 @@ class OuroborosGate:
                             tx_id=None
                         )
                         await aconn.commit()
-            except (ValueError, TypeError, OSError, RuntimeError) as e:
+            except Exception as e:
                 import logging
                 logging.getLogger("ouroboros").error("Failed to async log scaling event: %s", e)
 

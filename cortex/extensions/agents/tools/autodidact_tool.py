@@ -55,7 +55,7 @@ class AutodidactIngestionTool:
                 f"Protocolo AUTODIDACT ejecutado sobre '{target}' con intent '{intent}'. "
                 f"El conocimiento ha sido/será destilado y sembrado en cortex.db (vía PULMONES si hubo fallo de red)."
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error("Falla crítica en herramienta Autodidact: %s", e)
             return f"❌ ERROR DE INGESTA COGNITIVA: {e!s}."
 

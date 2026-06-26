@@ -197,7 +197,7 @@ def _register_embed_tool(mcp, ctx: _MCPContext) -> None:
                 f"  Task: {task_type}\n"
                 f"  Preview: [{', '.join(preview)}, ...]"
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             ctx.metrics.record_error()
             logger.error("Embedding failed: %s", e)
             return f"❌ Embedding failed: {e}"
@@ -230,5 +230,5 @@ def _register_embed_status_tool(mcp, ctx: _MCPContext) -> None:
                 dim = cfg.get("native_dimension", "?")
                 lines.append(f"  {marker}{mm}{mrl} {name}: dim={dim}")
             return "\n".join(lines)
-        except (ValueError, TypeError, OSError, RuntimeError) as e:
+        except Exception as e:
             return f"❌ Error loading embed status: {e}"

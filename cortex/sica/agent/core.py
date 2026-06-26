@@ -148,7 +148,7 @@ class SICAAgent(BaseAgent):
                 agent_id=self.agent_id,
                 directory=self._persist_dir,
             )
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             logger.error("[%s] Failed to persist genome: %s", self.agent_id, exc)
 
         logger.info(
@@ -189,7 +189,7 @@ class SICAAgent(BaseAgent):
                     agent_id=self.agent_id,
                     directory=self._persist_dir,
                 )
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 logger.error("[%s] Auto-save failed: %s", self.agent_id, exc)
 
     # ── Core SICA Loop ───────────────────────────────────────────
@@ -246,7 +246,7 @@ class SICAAgent(BaseAgent):
         try:
             result = await self._run_object_level(task_input, objective)
             outcome = StepOutcome.SUCCESS
-        except (ValueError, TypeError, OSError, RuntimeError) as exc:
+        except Exception as exc:
             self._object_level.record_step(
                 action="task_execution", outcome=StepOutcome.FAILURE, error=repr(exc)
             )
@@ -373,7 +373,7 @@ class SICAAgent(BaseAgent):
                     tool_used=tool_name,
                     output_summary=f"Tool '{tool_name}' not available",
                 )
-            except (ValueError, TypeError, OSError, RuntimeError) as exc:
+            except Exception as exc:
                 duration = (time.monotonic() - start) * 1000
                 self._object_level.record_step(
                     action=f"use_tool:{tool_name}",
