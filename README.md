@@ -7,180 +7,255 @@
   </picture>
 </div>
 
-<h1 align="center">CORTEX-PERSIST</h1>
+<h1 align="center">█ CORTEX-PERSIST</h1>
 
 <p align="center">
   <strong>Tamper-evident memory and decision lineage for AI agents.</strong><br>
-  <em>Cryptographic proof of what your agent knew, decided, and did — sealed in an append-only execution ledger.</em>
+  <em>Cryptographic proof of what your agent knew, decided, and did — in an append-only, hash-sealed execution manifold.</em>
 </p>
 
 <p align="center">
   <a href="https://github.com/borjamoskv/cortex-persist/stargazers"><img src="https://img.shields.io/github/stars/borjamoskv/cortex-persist?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="GitHub Stars"></a>
   <a href="https://pypi.org/project/cortex-persist/"><img src="https://img.shields.io/pypi/v/cortex-persist.svg?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="PyPI"></a>
-  <a href="https://github.com/borjamoskv/cortex-persist/actions"><img src="https://img.shields.io/github/actions/workflow/status/borjamoskv/cortex-persist/ci.yml?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="CI"></a>
+  <a href="https://pypi.org/project/cortex-persist/"><img src="https://img.shields.io/pypi/dm/cortex-persist?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="PyPI Downloads"></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10%2B-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="Python"></a>
+  <a href="https://github.com/borjamoskv/cortex-persist/actions"><img src="https://img.shields.io/github/actions/workflow/status/borjamoskv/cortex-persist/ci.yml?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="CI"></a>
   <a href="https://github.com/borjamoskv/cortex-persist/actions/workflows/bench.yml"><img src="https://img.shields.io/github/actions/workflow/status/borjamoskv/cortex-persist/bench.yml?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5&label=Criterion%20Bench" alt="Criterion Bench"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="License"></a>
   <a href="docs/mcp.md"><img src="https://img.shields.io/badge/MCP-compatible-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="MCP Compatible"></a>
 </p>
 
 <p align="center">
-  <a href="#why-it-exists">Why it exists</a> ·
-  <a href="#what-you-get">What you get</a> ·
-  <a href="#quick-start">Quick start</a> ·
-  <a href="#how-it-works">How it works</a> ·
-  <a href="#compare">Compare</a> ·
-  <a href="#installation">Installation</a> ·
-  <a href="#mcp">MCP</a> ·
-  <a href="docs/api.md">API docs</a>
+  <a href="#-the-problem">The Problem</a> ·
+  <a href="#-quick-start-90-seconds">Quick Start</a> ·
+  <a href="#-architecture-execution-as-a-metric-space">Architecture</a> ·
+  <a href="#-comparison">Comparison</a> ·
+  <a href="#-installation--deployment">Installation</a> ·
+  <a href="#-mcp-integration">MCP</a> ·
+  <a href="docs/api.md">API Docs</a>
 </p>
 
 ---
 
-## Why it exists
-
-Most agent frameworks answer: **what should the agent do next?**
-
-CORTEX-PERSIST answers something stricter: **can you prove what the agent did, and that the proof has not been altered?**
-
-- LangGraph gives you checkpoints. CORTEX gives you cryptographic proof those checkpoints are intact.
-- Mem0 gives you semantic memory. CORTEX gives you a hash-chain ledger of memory access and mutation.
-- Traditional logs give you text. CORTEX gives you verifiable execution lineage.
-
-> If a decision changes state, affects a user, or moves money, a log is not enough. You need a proof.
+```
+LangGraph   →  orchestrates graph state
+Mem0        →  retrieves semantic memory
+CORTEX      →  proves what your agent actually did, mathematically
+```
 
 ---
 
-## What you get
+## ▀▄ THE PROBLEM
 
-- Append-only execution sealing.
-- Hash-chain provenance for observations and mutations.
-- Deterministic replay of past execution states.
-- Divergence detection across runs.
-- Native MCP integration.
-- Python + Rust runtime for high-throughput agent infrastructure.
+Every AI agent framework answers *"what should the agent do next?"*
+
+None of them answer *"can you **prove** what the agent did, and that it hasn't been altered?"*
+
+CORTEX-PERSIST is the missing **substrate layer**:
+
+- **LangGraph** gives you checkpoints. CORTEX gives you **cryptographic proof those checkpoints haven't been tampered with.**
+- **Mem0** gives you semantic memory. CORTEX gives you **a hash-chain ledger of every memory access and mutation.**
+- **Traditional logs** give you text. CORTEX gives you **a metric space of execution trajectories where divergence is measurable.**
+
+> If your agent made a decision that cost money, changed state, or affected a user — you need more than a log. You need a proof.
 
 ---
 
-## Quick start
+## ▀▄ QUICK START (90 SECONDS)
 
 ```bash
 pip install cortex-persist
 ```
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/marketing/cortex_demo.gif">
+  <source media="(prefers-color-scheme: light)" srcset="assets/marketing/cortex_demo_light.gif">
+  <img alt="CORTEX-Persist Terminal Execution" src="assets/marketing/cortex_demo.gif" width="100%">
+</picture>
+
 ```python
 from cortex import CortexEngine
 
 engine = CortexEngine()
+
+# Every observation is sealed into an append-only hash-chain
 engine.observe("user_query", "What is the capital of France?")
 engine.observe("agent_response", "Paris")
 
+# Cryptographic proof of what happened
 proof = engine.seal()
-print(proof.hash)
-print(proof.verify())
+print(proof.hash)      # SHA-256 of the full execution trace
+print(proof.verify())  # True — tamper-evident by construction
 ```
 
-Expected result:
+Or use the **magic decorator** — zero-friction drop-in for any existing agent:
 
-- `proof.hash` returns a SHA-256 digest for the sealed execution trace.
-- `proof.verify()` returns `True` when the trace has not been tampered with.
+```python
+from cortex.magic import sovereign_persist
+
+@sovereign_persist(strict=True)
+async def my_agent(prompt: str):
+    response = await llm.generate(prompt)
+    return response
+    # CORTEX intercepts, seals, and commits cryptographically. Zero boilerplate.
+```
 
 ---
 
-## How it works
+## ▀▄ THE EPISTEMIC CONTAINMENT SHIELD
 
-CORTEX-PERSIST treats agent execution as a point in a metric space, not just a log file.
+Generative AI output is fundamentally **probabilistic conjecture**. Traditional logs blindly trust stochastic output.
 
-Two runs of the same agent can be:
+CORTEX-PERSIST intercepts that output, enforces a deterministic shield via **Z3 SMT Guards**, and commits the resulting state to a cryptographically bound Ledger. Every fact your agent asserts becomes a verifiable, tamper-evident object.
 
-- **Equivalent** — same equivalence class in the execution manifold.
-- **Divergent** — measurable drift above threshold, triggering alert, reroute, or stabilization.
+| Capability | Traditional RAG / Logs | CORTEX-PERSIST |
+| :--- | :--- | :--- |
+| **Trust Model** | Trust the process | **Verify the evidence (C5-REAL)** |
+| **Mutation** | Silent CRUD / overwritable | **Append-only + SHA-256 Merkle seals** |
+| **Agent Liability** | Ambiguous reconstruction | **Mathematically defensible lineage** |
+| **Verification** | Manual log diving | **O(1) portable JSON audit packs** |
 
-This lets you inspect questions that ordinary logs do not answer well:
+---
+
+## ▀▄ ARCHITECTURE: EXECUTION AS A METRIC SPACE
+
+CORTEX-PERSIST introduces a concept absent from every other framework:
+
+> **An agent's execution history is not a log — it is a point in a high-dimensional metric space.**
+
+Two runs of the same agent are either:
+- **Equivalent** — same equivalence class in the execution manifold
+- **Divergent** — measurable distance > threshold → alert, reroute, or stabilize
+
+This unlocks questions no other tool can answer:
 
 | Question | LangGraph | Mem0 | CORTEX-PERSIST |
 | :--- | :---: | :---: | :---: |
 | Did this run diverge from the canonical run? | ❌ | ❌ | ✅ `DivergenceMap` |
 | Can I replay this execution deterministically? | Partial | ❌ | ✅ `ReplayEngine` |
 | Is this memory state cryptographically intact? | ❌ | ❌ | ✅ Hash-chain |
-| Which branch has the lowest entropy drift? | ❌ | ❌ | ✅ `MetaArbiter` |
-| O(1) tamper detection on large traces? | ❌ | ❌ | ✅ Merkle seals |
+| Which execution branch has lowest entropy drift? | ❌ | ❌ | ✅ `MetaArbiter` |
+| O(1) tamper detection on 1M+ events? | ❌ | ❌ | ✅ Merkle seals |
 | Native MCP server? | ❌ | ❌ | ✅ |
-| High-throughput Rust core? | ❌ | ❌ | ✅ Rust-FFI |
+| ~390k agents/sec throughput? | ❌ | ❌ | ✅ Rust-FFI core |
 
 ---
 
-## Core primitives
+## ▀▄ CORE PRIMITIVES
 
-| Primitive | Purpose |
+| Primitive | Role |
 | :--- | :--- |
-| `CortexEngine` | Append-only ledger for observations and state transitions. |
-| `DivergenceMap` | Measures distance between execution trajectories. |
-| `ReplayEngine` | Reconstructs past execution deterministically. |
-| `MetaArbiter` | Selects the canonical branch under conflict. |
-| `ExecutionControl` | Emits `stabilize`, `reroute`, or `halt` signals. |
-| `StateDistance` | Computes distance over execution state vectors. |
-| `EntropyDrift` | Tracks divergence over time windows. |
+| `CortexEngine` | The sovereign ledger. Every observation sealed. |
+| `DivergenceMap` | Geometric distance between execution trajectories. |
+| `ReplayEngine` | Deterministic reconstruction of any past execution. |
+| `MetaArbiter` | Topological collapse operator: picks the canonical branch. |
+| `ExecutionControl` | `stabilize` / `reroute` / `halt` signals based on entropy drift. |
+| `StateDistance` | Metric function over execution state vectors. |
+| `EntropyDrift` | Rate of divergence over sliding time windows. |
 
 ---
 
-## Compare
+## ▀▄ ARCHITECTURE DATA FLOW
 
-CORTEX is orthogonal to LangGraph and Mem0. It sits beneath them as a verification substrate.
+```mermaid
+graph TD
+    classDef default fill:#0A0A0A,stroke:#2B3BE5,stroke-width:1px,color:#F0F0F0;
+    classDef highlight fill:#2B3BE5,stroke:#CCFF00,stroke-width:1.5px,color:#FFFFFF;
+    classDef guard fill:#1A1A1A,stroke:#FF0055,stroke-width:1px,color:#F0F0F0;
+    classDef mcp fill:#0A0A2A,stroke:#00FFCC,stroke-width:1.5px,color:#F0F0F0;
+
+    subgraph Stochastic Space
+        LLM[Agent Stochastic Output]:::default
+        LG["LangGraph / any orchestrator"]:::default
+        MCP[MCP Client]:::mcp
+    end
+
+    subgraph CORTEX Layer [CORTEX-Persist Substrate]
+        direction TB
+        G1[Admission Gate / Z3 SMT Guards]:::guard
+        DM[DivergenceMap]:::default
+        MA[MetaArbiter]:::default
+        RE[ReplayEngine]:::default
+        Hash[SHA-256 Block Sealing]:::default
+        Merkle[Merkle Provenance Chain]:::default
+    end
+
+    subgraph Trust Substrate
+        Ledger[(Append-Only AOF Ledger)]:::highlight
+        Proof[Verifiable Audit Pack JSON]:::default
+    end
+
+    LLM --> G1
+    LG  --> G1
+    MCP --> G1
+    G1  --> DM
+    DM  --> MA
+    MA  --> RE
+    RE  --> Hash
+    Hash --> Merkle
+    Merkle --> Ledger
+    Ledger --> Proof
+```
+
+---
+
+## ▀▄ COMPARISON
+
+CORTEX is **orthogonal** to LangGraph and Mem0, not competitive. It sits beneath them as a verification substrate.
 
 | Dimension | LangGraph | Mem0 | CORTEX-PERSIST |
 | :--- | :--- | :--- | :--- |
-| Persistence unit | Conversation thread state | Extracted semantic facts | Execution trace + hash-chain |
-| Source of truth | Last checkpoint | Relevance-ranked memories | Cryptographic Merkle ledger |
-| Divergence detection | None | None | `DivergenceMap` + `EntropyDrift` |
-| Deterministic replay | Partial | None | Full — CI-verified |
-| Multi-run topology | None | None | Equivalence classes + fork map |
-| Conflict arbitration | None | None | `MetaArbiter` |
-| Execution control | Graph transitions | None | `ControlSignal`: stabilize / reroute |
-| Throughput | Python-bound | Python-bound | Rust-FFI core |
-| Tamper evidence | None | None | SHA-256 + Merkle seals |
+| **Persistence unit** | Conversation thread state | Extracted semantic facts | Execution trace + hash-chain |
+| **Source of truth** | Last checkpoint | Relevance-ranked memories | Cryptographic Merkle ledger |
+| **Divergence detection** | None | None | `DivergenceMap` + `EntropyDrift` |
+| **Deterministic replay** | Partial | None | Full — CI-verified |
+| **Multi-run topology** | None | None | Equivalence classes + fork map |
+| **Conflict arbitration** | None | None | `MetaArbiter` — topological collapse |
+| **Execution control** | Graph node transitions | None | `ControlSignal`: stabilize / reroute |
+| **Throughput** | Python-bound | Python-bound | ~390k agents/sec (Rust-FFI) |
+| **Tamper evidence** | None | None | SHA-256 + ZK-STARK seals |
 
 [See integration guide →](docs/langgraph_integration.md)
 
 ---
 
-## Installation
+## ▀▄ INSTALLATION & DEPLOYMENT
 
-Requirements: Python 3.10+. Zero external daemons required.
+**Requirements:** Python 3.10+. Zero external daemons required.
 
 ```bash
 pip install cortex-persist
 ```
 
-Optional extras:
+**Optional modules:**
 
 ```bash
-pip install "cortex-persist[embeddings]"
-pip install "cortex-persist[knowledge]"
-pip install "cortex-persist[api,mcp,daemon]"
-pip install "cortex-persist[cloud]"
-pip install "cortex-persist[secure]"
-pip install "cortex-persist[acceleration]"
+pip install "cortex-persist[embeddings]"      # Local semantic embeddings
+pip install "cortex-persist[knowledge]"       # Chroma-backed knowledge sync
+pip install "cortex-persist[api,mcp,daemon]"  # MCP server + REST API
+pip install "cortex-persist[cloud]"           # PostgreSQL + Redis + Qdrant scaling
+pip install "cortex-persist[secure]"          # OS keyring credentials vault
+pip install "cortex-persist[acceleration]"    # Rust-FFI core (~390k agents/sec)
 ```
 
 ---
 
-## Secure credential backend
+## ▀▄ SECURE CREDENTIAL BACKEND
 
 The `[secure]` extra installs `keyring` for encrypted storage of the master encryption key in the host OS vault.
 
 ```python
 from cortex.crypto.keyring import get_master_key
-print(get_master_key())
+print(get_master_key())  # → None if keyring is not installed (graceful degradation)
 ```
 
-If `keyring` is not installed, `get_master_key()` returns `None` instead of raising `ModuleNotFoundError`. Minimal installations still work.
+When `keyring` is absent, the system degrades gracefully — no `ModuleNotFoundError`, just `None`. Minimal installations work without the secure backend.
 
 ---
 
-## MCP
+## ▀▄ MCP INTEGRATION
 
-CORTEX-PERSIST exposes a native MCP server for orchestrators like Claude Desktop, Perplexity, or custom agents.
+CORTEX-PERSIST exposes a **native MCP server**. Drop it into any MCP-compatible orchestrator (Claude Desktop, custom agents, Perplexity):
 
 ```bash
 cortex mcp serve --port 8765
@@ -199,32 +274,34 @@ cortex mcp serve --port 8765
 
 ---
 
-## Real-world examples
+## ▀▄ REAL-WORLD EXAMPLES
+
+The `examples/` directory contains ready-to-run scenarios:
 
 | Example | What it demonstrates |
 | :--- | :--- |
-| [Canonical Loop](examples/demo_canonical.py) | Full C5-REAL execution and tamper detection. |
-| [Pricing Agent](examples/demo_pricing_agent.py) | Cryptographic audit trail for AI pricing decisions. |
-| [Support Escalation](examples/demo_support_approval.py) | Proof of AI decision lineage. |
-| [MCP Memory](examples/demo_mcp_memory.py) | Sealed tool calls through MCP. |
-| [LangGraph Integration](examples/demo_langgraph.py) | CORTEX as a verification substrate under LangGraph. |
+| [Canonical Loop](examples/demo_canonical.py) | Full C5-REAL execution + tamper detection |
+| [Pricing Agent](examples/demo_pricing_agent.py) | Cryptographic audit trail for AI pricing decisions |
+| [Support Escalation](examples/demo_support_approval.py) | Mathematical proof of AI decision lineage |
+| [MCP Memory](examples/demo_mcp_memory.py) | Perplexity / Claude via MCP with sealed tool calls |
+| [LangGraph Integration](examples/demo_langgraph.py) | CORTEX as verification substrate under LangGraph |
 
 ---
 
-## Documentation
+## ▀▄ DOCUMENTATION
 
 | Resource | Description |
 | :--- | :--- |
-| [SECURITY_TRUST_MODEL.md](docs/SECURITY_TRUST_MODEL.md) | Cryptographic invariants and guarantees. |
-| [AGENTS.md](AGENTS.md) | Autonomous orchestration directives. |
-| [ROADMAP.md](ROADMAP.md) | Deployment phases and scaling path. |
-| [API Reference](docs/api.md) | SDK primitives and REST endpoints. |
-| [MCP Integration](docs/mcp.md) | MCP setup and tool catalog. |
-| [LangGraph Integration](docs/langgraph_integration.md) | How CORTEX sits under LangGraph. |
+| [SECURITY_TRUST_MODEL.md](docs/SECURITY_TRUST_MODEL.md) | Cryptographic invariants & guarantees |
+| [AGENTS.md](AGENTS.md) | Substrate directives for autonomous orchestration |
+| [ROADMAP.md](ROADMAP.md) | Deployment phases and LEGION-10k scaling |
+| [API Reference](docs/api.md) | SDK primitives and REST endpoints |
+| [MCP Integration](docs/mcp.md) | MCP server setup and tool catalog |
+| [LangGraph Integration](docs/langgraph_integration.md) | How CORTEX sits under LangGraph |
 
 ---
 
-```yaml
+```
 AESTHETIC:    INDUSTRIAL NOIR 2026 (#0A0A0A / #2B3BE5)
 EPISTEMOLOGY: C5-REAL — Cryptographically Verified Reality
 CORE TENET:   Generative output is conjecture. Evidence is absolute.
