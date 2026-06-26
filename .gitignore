@@ -327,3 +327,5 @@ cli-init.db
 cortex_hypothesis_*.db*
 ultramap.bin
 site/
+
+experimental/dashboard_legacy/stems/
