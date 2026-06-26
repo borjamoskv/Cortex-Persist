@@ -289,3 +289,33 @@ class CortexAutoSynthesisEngine:
             "p95_latency_ms": self._compute_p95(),
             "swarm_active": self._commander is not None,
         }
+
+class BayesianKnowledgeTracer:
+    """
+    [C5-REAL] Bayesian Knowledge Tracing (BKT) Engine.
+    Estimates the probability of student mastery over latent skills using 
+    Hidden Markov Models. Tracks sequential correct/incorrect answers.
+    """
+    def __init__(self, p_init: float = 0.5, p_transit: float = 0.1, p_slip: float = 0.1, p_guess: float = 0.2):
+        self.p_init = p_init
+        self.p_transit = p_transit
+        self.p_slip = p_slip
+        self.p_guess = p_guess
+        self.mastery_matrix: dict[str, dict[str, float]] = {}
+
+    def update_mastery(self, student_id: str, skill_id: str, is_correct: bool) -> float:
+        """Update and return the new mastery probability based on the observation."""
+        if student_id not in self.mastery_matrix:
+            self.mastery_matrix[student_id] = {}
+        
+        current_p = self.mastery_matrix[student_id].get(skill_id, self.p_init)
+
+        if is_correct:
+            p_obs = (current_p * (1 - self.p_slip)) / (current_p * (1 - self.p_slip) + (1 - current_p) * self.p_guess)
+        else:
+            p_obs = (current_p * self.p_slip) / (current_p * self.p_slip + (1 - current_p) * (1 - self.p_guess))
+
+        next_p = p_obs + (1 - p_obs) * self.p_transit
+        
+        self.mastery_matrix[student_id][skill_id] = next_p
+        return next_p
