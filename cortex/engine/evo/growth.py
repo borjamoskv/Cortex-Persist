@@ -122,7 +122,7 @@ class NeuralGrowthEngine:
                 # Se sincroniza con la "conciencia colectiva".
                 logger.info("🧬 [GROWTH] Morphic Resonance detected: %s", content[:50])
                 meta_dict = {"origin": "synaptic_promotion", "axiom": "Ω₈"}
-                conn._conn.authorize_causal_writes()
+                conn._conn.authorize_causal_writes()  # type: ignore
                 await insert_fact_record(
                     conn=conn,
                     tenant_id="system",

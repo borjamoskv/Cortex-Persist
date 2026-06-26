@@ -12,7 +12,7 @@ import typing
 
 
 class ASTGrader(ast.NodeVisitor):
-    def __init__(self, required_functions: list[str] = None, forbidden_functions: list[str] = None):
+    def __init__(self, required_functions: list[str] = None, forbidden_functions: list[str] = None):  # type: ignore
         self.required_functions = set(required_functions or [])
         self.forbidden_functions = set(forbidden_functions or [])
         self.found_functions = set()

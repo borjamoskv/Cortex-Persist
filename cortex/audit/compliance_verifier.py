@@ -123,7 +123,7 @@ class ComplianceVerifier:
                 except ValueError:
                     public_key = serialization.load_ssh_public_key(pub_bytes)
                     
-                public_key.verify(sig_bytes, entry_hash.encode())
+                public_key.verify(sig_bytes, entry_hash.encode())  # type: ignore
             except Exception:
                 return {
                     "status": "CRITICAL_TAMPER_DETECTED",

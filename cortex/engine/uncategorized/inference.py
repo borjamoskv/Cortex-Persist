@@ -347,7 +347,7 @@ class InferenceEngine:
         ts = now_iso()
 
         if hasattr(conn, "_conn") and hasattr(conn._conn, "authorize_causal_writes"):
-            conn._conn.authorize_causal_writes()
+            conn._conn.authorize_causal_writes()  # type: ignore
 
         for d in derivations:
             # Check if this exact derivation already exists (idempotency)

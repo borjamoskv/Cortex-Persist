@@ -53,7 +53,7 @@ async def get_epistemic_dependency_graph(request: Request) -> dict[str, Any]:
 
                 # Causal edges: link each node to the previous one to simulate a curriculum chain
                 if i > 0:
-                    prev_resource = rows[i - 1][0]
+                    prev_resource = rows[i - 1][0]  # type: ignore
                     prev_parts = prev_resource.split(":", 1)
                     prev_id = prev_parts[0].strip() if len(prev_parts) > 1 else f"NODE-{i - 1}"
                     edges.append(

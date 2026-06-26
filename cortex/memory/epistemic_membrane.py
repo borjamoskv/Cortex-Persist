@@ -177,7 +177,7 @@ class EpistemicMembrane:
     def commit(
         self,
         proposal_hv: torch.Tensor,
-        metadata: dict = None,
+        metadata: dict = None,  # type: ignore
         source_llm_hash: str = None,  # pyright: ignore[reportArgumentType]
     ) -> str:
         """

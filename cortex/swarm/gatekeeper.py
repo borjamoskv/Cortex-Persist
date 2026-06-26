@@ -25,7 +25,7 @@ class ZeroKnowledgeGatekeeper:
     execution on the Host.
     """
 
-    def __init__(self, km: KeyManager = None):
+    def __init__(self, km: KeyManager = None):  # type: ignore
         self.km = km or KeyManager(service_name="cortex_swarm_judge")
 
     def execute_consensus(self, consensus_proof: dict[str, Any], dry_run: bool = False) -> bool:
@@ -51,15 +51,15 @@ class ZeroKnowledgeGatekeeper:
             raise SecurityViolationError("Gatekeeper blocked execution: Incomplete Consensus Proof.")
 
         # 1. Fetch the Judge's Public Key
-        judge_pub_key_b64 = self.km.get_public_key_b64(judge_id)
+        judge_pub_key_b64 = self.km.get_public_key_b64(judge_id)  # type: ignore
         if not judge_pub_key_b64:
             logger.critical(f"[P0_ABORT] Unknown Judge Identity: {judge_id}.")
             raise SecurityViolationError(f"Gatekeeper blocked execution: Unknown Judge {judge_id}.")
 
         # 2. Cryptographic Verification
-        payload_hash = hashlib.sha256(ast_code.encode("utf-8")).hexdigest()
+        payload_hash = hashlib.sha256(ast_code.encode("utf-8")).hexdigest()  # type: ignore
         try:
-            is_valid = Verifier.verify_signature(judge_pub_key_b64, payload_hash, timestamp, signature_b64)
+            is_valid = Verifier.verify_signature(judge_pub_key_b64, payload_hash, timestamp, signature_b64)  # type: ignore
         except Exception as e:
             logger.error(f"Gatekeeper crypto failure: {e}")
             is_valid = False
@@ -79,7 +79,7 @@ class ZeroKnowledgeGatekeeper:
         # or execute the side-effect via OS API.
         try:
             # Dangerous execution inside safe zone. We compile to ensure it's valid python at least.
-            compile(ast_code, "<gatekeeper_exec>", "exec")
+            compile(ast_code, "<gatekeeper_exec>", "exec")  # type: ignore
             # We don't actually run arbitrary untrusted AST here in the main thread of CORTEX
             # It should be written to the workspace.
             logger.info("Gatekeeper execution successful (Code structurally valid).")

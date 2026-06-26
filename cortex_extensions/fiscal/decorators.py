@@ -69,7 +69,7 @@ def seal_decision(fact_type: str, client_id_kwarg: str = "client_id"):
                 async def _persist_fact():
                     # We inject this directly into the semantic or ledger core.
                     # For demonstration, we simply log the semantic payload.
-                    await engine.add_fact(fact_type, fact.to_dict())
+                    await engine.add_fact(fact_type, fact.to_dict())  # type: ignore
 
                 sovereign_run(_persist_fact())
                 logger.info(f"[CORTEX] Sealed decision {fact_type} for client {client_id}")

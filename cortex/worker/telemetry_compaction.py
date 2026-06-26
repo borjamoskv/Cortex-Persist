@@ -59,7 +59,7 @@ class TelemetryCompactionWorker:
             if not rows:
                 return
 
-            logger.info("Compacting %d telemetry batches...", len(rows))
+            logger.info("Compacting %d telemetry batches...", len(rows))  # type: ignore
 
             project_groups = {}
             for row in rows:

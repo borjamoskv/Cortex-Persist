@@ -356,8 +356,8 @@ class CryptoShredder:
             # path can check before attempting HKDF derivation.
             cache_key = f"{tenant_id}:fact:{fact_id}"
             if not hasattr(enc, "_shredded_facts"):
-                enc._shredded_facts = set()
-            __import__("typing").cast(set, enc._shredded_facts).add(cache_key)
+                enc._shredded_facts = set()  # type: ignore
+            __import__("typing").cast(set, enc._shredded_facts).add(cache_key)  # type: ignore
         except (ImportError, RuntimeError) as e:
             logger.debug("Key invalidation skipped: %s", e)
 

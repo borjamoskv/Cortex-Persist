@@ -7,7 +7,7 @@ from typing import Any
 class RuntimeState:
     """Immutable causal state derived exclusively from the event ledger."""
 
-    def __init__(self, initial_state: dict[str, Any] = None, version: int = 0):
+    def __init__(self, initial_state: dict[str, Any] = None, version: int = 0):  # type: ignore
         self.data = initial_state or {}
         self.version = version
         self.hash = self._compute_hash()

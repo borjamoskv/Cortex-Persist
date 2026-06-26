@@ -61,7 +61,7 @@ class MemoryArchaeologist:
 
         condensed, tombstoned = await self._synthesize_and_update(
             project,
-            tenant_id,
+            tenant_id,  # type: ignore
             clusters,
             facts,
             simulate,  # pyright: ignore[reportArgumentType]
@@ -142,7 +142,7 @@ class MemoryArchaeologist:
     def _build_clusters(
         self,
         facts: list[dict[str, Any]],
-        vecs_matrix: np.ndarray,
+        vecs_matrix: np.ndarray,  # type: ignore
         threshold: float,  # pyright: ignore[reportInvalidTypeForm]
     ) -> list[list[int]]:
         # O(N^2) dot product for cosine similarity is unavoidable here without approximate KNN.

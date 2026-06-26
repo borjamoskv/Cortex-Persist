@@ -48,8 +48,8 @@ class PermsBootstrapper:
         # 1. Check & Prompt Accessibility
         try:
             # AXIsProcessTrustedWithOptions prompts the user if not trusted
-            options = {ApplicationServices.kAXTrustedCheckOptionPrompt: True}
-            trusted = ApplicationServices.AXIsProcessTrustedWithOptions(options)
+            options = {ApplicationServices.kAXTrustedCheckOptionPrompt: True}  # type: ignore
+            trusted = ApplicationServices.AXIsProcessTrustedWithOptions(options)  # type: ignore
             status["accessibility"] = bool(trusted)
         except Exception as e:
             logger.error("Error checking accessibility permissions: %s", e)
@@ -57,19 +57,19 @@ class PermsBootstrapper:
         # 2. Check & Prompt Screen Recording (macOS Catalina 10.15+)
         try:
             if hasattr(Quartz, "CGPreflightScreenCaptureAccess"):
-                has_rec = Quartz.CGPreflightScreenCaptureAccess()
+                has_rec = Quartz.CGPreflightScreenCaptureAccess()  # type: ignore
                 status["screen_recording"] = bool(has_rec)
                 if not has_rec:
                     logger.info("Screen Recording permission missing. Requesting access...")
-                    Quartz.CGRequestScreenCaptureAccess()
+                    Quartz.CGRequestScreenCaptureAccess()  # type: ignore
             else:
                 # Fallback: check if we can capture a 1x1 region on main display
-                rect = Quartz.CGRectMake(0, 0, 1, 1)
-                img = Quartz.CGWindowListCreateImage(
+                rect = Quartz.CGRectMake(0, 0, 1, 1)  # type: ignore
+                img = Quartz.CGWindowListCreateImage(  # type: ignore
                     rect,
-                    Quartz.kCGWindowListOptionOnScreenOnly,
-                    Quartz.kCGNullWindowID,
-                    Quartz.kCGWindowImageDefault,
+                    Quartz.kCGWindowListOptionOnScreenOnly,  # type: ignore
+                    Quartz.kCGNullWindowID,  # type: ignore
+                    Quartz.kCGWindowImageDefault,  # type: ignore
                 )
                 status["screen_recording"] = img is not None
         except Exception as e:

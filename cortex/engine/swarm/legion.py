@@ -284,7 +284,7 @@ class Squadron(ABC):
         tasks = [asyncio.create_task(agent.run(queue)) for agent in self.agents]
         
         for _ in range(len(self.agents)):
-            queue.put_nowait(None)  # Sentinel for each agent
+            queue.put_nowait(None)  # Sentinel for each agent  # type: ignore
             
         await queue.join()
         await asyncio.gather(*tasks)

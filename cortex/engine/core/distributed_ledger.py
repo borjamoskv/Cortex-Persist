@@ -44,7 +44,7 @@ class DistributedEvolutionLedger(EvolutionLedger):
         super().__init__(log_path=log_path)
         self.topic = topic
         self.kafka_brokers = kafka_brokers
-        self._producer = Producer(
+        self._producer = Producer(  # type: ignore
             {
                 "bootstrap.servers": self.kafka_brokers,
                 "client.id": "cortex-node-producer",
@@ -115,7 +115,7 @@ class LedgerConsumer:
         group_id: str = "cortex-replica-group",
     ):
         self.topic = topic
-        self._consumer = Consumer(
+        self._consumer = Consumer(  # type: ignore
             {
                 "bootstrap.servers": kafka_brokers,
                 "group.id": group_id,

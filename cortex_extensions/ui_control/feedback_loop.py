@@ -21,7 +21,7 @@ from cortex_extensions.ui_control.models import AppTarget, InteractionResult
 
 try:
     import Vision
-    from Cocoa import NSURL
+    from Cocoa import NSURL  # type: ignore
 except ImportError:
     Vision = None
     NSURL = None
@@ -105,7 +105,7 @@ class UIFeedbackLoop:
         self.last_screenshot_path = cap_res.output
 
         # 2. Extract OCR
-        ocr_res = self.perform_native_ocr(self.last_screenshot_path)
+        ocr_res = self.perform_native_ocr(self.last_screenshot_path)  # type: ignore
         self.last_ocr_results = ocr_res
 
         # 3. Compile textual state

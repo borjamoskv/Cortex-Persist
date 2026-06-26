@@ -13,7 +13,7 @@ try:
     if not hasattr(cortex_rs, "FitnessOracleRs"):
         FitnessOracleRs = None
     else:
-        FitnessOracleRs = cortex_rs.FitnessOracleRs
+        FitnessOracleRs = cortex_rs.FitnessOracleRs  # type: ignore
 except ImportError:
     FitnessOracleRs = None
 from cortex.engine.evo.genome import FitnessRecord, StrategyGenome

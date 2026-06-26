@@ -192,7 +192,7 @@ class ByzantineZeroCopyBus:
         # Late import to prevent circular dependency
         import cortex_rs
 
-        self.ring = cortex_rs.ZeroCopyRingBuffer(self.bin_path, capacity)
+        self.ring = cortex_rs.ZeroCopyRingBuffer(self.bin_path, capacity)  # type: ignore
         resolved_secret = secret or os.environ.get("CORTEX_BUS_SECRET") or os.urandom(32).hex()
         self.secret = resolved_secret.encode("utf-8")
         self._lock = asyncio.Lock()

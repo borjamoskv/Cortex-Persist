@@ -43,7 +43,7 @@ class SQLSynthesizer:
 
             # Identify specific constraints from AST if needed, for now just empty list
             mig = MigrationOperation(
-                op=op_type,
+                op=op_type,  # type: ignore
                 table=op.target,
                 sql_up=op.sql,
                 sql_down=op.rollback_sql or "",

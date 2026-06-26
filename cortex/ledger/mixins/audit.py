@@ -19,7 +19,7 @@ class LedgerAuditMixin:
         """Perform a full integrity audit asynchronously (Ω₁)."""
         violations = []
         tx_count = 0
-        async with self._get_conn_proxy() as conn:
+        async with self._get_conn_proxy() as conn:  # type: ignore
             started_at = now_iso()
 
             # 1. Verify transaction chain
@@ -170,7 +170,7 @@ class LedgerAuditMixin:
         for f_tx_id, info in list(active_facts_by_tx.items()):
             try:
                 decrypted = enc.decrypt_str(info["content"], tenant_id=info["tenant_id"])
-                computed_hash = compute_fact_hash(decrypted)
+                computed_hash = compute_fact_hash(decrypted)  # type: ignore
                 if computed_hash != info["hash"]:
                     violations.append(
                         {

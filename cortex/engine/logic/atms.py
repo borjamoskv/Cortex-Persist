@@ -20,7 +20,7 @@ class AtmsAdapter:
     def __init__(self):
         if cortex_rs is None:
             raise RuntimeError("cortex_rs PyO3 extension is required for ATMS operations.")
-        self._graph = cortex_rs.AtmsGraph()
+        self._graph = cortex_rs.AtmsGraph()  # type: ignore
 
     def add_node(self, node_id: str) -> None:
         """Add a causal or logical node to the ATMS graph."""

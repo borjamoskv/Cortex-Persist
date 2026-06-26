@@ -26,7 +26,7 @@ class AGY2PlannerMonitor:
         self.brain_dir = Path(brain_dir).expanduser()
         self._last_mtime: dict[str, float] = {}
 
-    async def check_async(self) -> list[WorkflowAlert]:
+    async def check_async(self) -> list[WorkflowAlert]:  # type: ignore
         """Async check for modified implementation_plan.md files."""
         alerts: list[WorkflowAlert] = []
         if not self.engine:

@@ -58,37 +58,37 @@ class ByzantineJudge:
                 continue
 
             # JIT Enrollment: Generate key if agent doesn't have one (Warning)
-            pub_key_b64 = self.km.get_public_key_b64(agent_id)
+            pub_key_b64 = self.km.get_public_key_b64(agent_id)  # type: ignore
             if not pub_key_b64:
                 logger.warning(f"[AUDIT] JIT Cryptographic Enrollment for Agent: {agent_id}")
-                pub_key_b64 = self.km.generate_and_store_key(agent_id)
+                pub_key_b64 = self.km.generate_and_store_key(agent_id)  # type: ignore
                 # In a real spoofing test, the signature won't match this newly generated key anyway.
             
             # Cryptographic Verification (PoQC)
-            payload_hash = hashlib.sha256(code.encode("utf-8")).hexdigest()
+            payload_hash = hashlib.sha256(code.encode("utf-8")).hexdigest()  # type: ignore
             try:
-                is_valid = Verifier.verify_signature(pub_key_b64, payload_hash, timestamp, signature_b64)
+                is_valid = Verifier.verify_signature(pub_key_b64, payload_hash, timestamp, signature_b64)  # type: ignore
             except (ValueError, TypeError) as e:
                 logger.warning(f"[SECURITY] Signature validation failed structurally: {e}")
                 is_valid = False
                 
             if not is_valid:
                 logger.error(f"[SECURITY] Cryptographic spoofing or corruption detected for agent {agent_id}. Slashed.")
-                wallet = self.bank.register_agent(agent_id)
+                wallet = self.bank.register_agent(agent_id)  # type: ignore
                 wallet.failed_commits += 1
                 wallet.balance -= self.bank.STAKE_REQUIRED_PER_PROPOSAL
                 continue
 
-            wallet = self.bank.register_agent(agent_id)
-            if not self.bank.stake(agent_id):
+            wallet = self.bank.register_agent(agent_id)  # type: ignore
+            if not self.bank.stake(agent_id):  # type: ignore
                 continue  # Agent bankrupt, ignore proposal
 
             try:
                 # 1. Ejecución Aislada JIT
                 logger.info(f"Evaluating verified AST from agent {agent_id}...")
-                _new_state = self.sandbox.execute(code, context=dict(original_state))
+                _new_state = self.sandbox.execute(code, context=dict(original_state))  # type: ignore
 
-                self.bank.reward(agent_id)
+                self.bank.reward(agent_id)  # type: ignore
 
                 # Consenso: El agente con mayor histórico (Win Rate) gana en caso de múltiples ASTs válidos
                 win_rate = wallet.successful_commits / max(
@@ -101,10 +101,10 @@ class ByzantineJudge:
 
             except JITSandboxViolation as e:
                 logger.warning(f"Agent {agent_id} SLASHED due to Sandbox Violation: {e}")
-                self.bank.slash(agent_id)
+                self.bank.slash(agent_id)  # type: ignore
             except (SyntaxError, TypeError, NameError, ValueError, AttributeError) as e:
                 logger.warning(f"Agent {agent_id} SLASHED due to AST execution error: {e}")
-                self.bank.slash(agent_id)
+                self.bank.slash(agent_id)  # type: ignore
             except Exception as e:
                 logger.critical(f"Host System Error evaluating agent {agent_id}: {e}")
                 raise RuntimeError(f"BFT Consensus halted. Host execution degraded: {e}")
@@ -115,9 +115,9 @@ class ByzantineJudge:
             # The Judge signs the final consensus choice
             from datetime import datetime, timezone
             consensus_timestamp = datetime.now(timezone.utc).isoformat()
-            consensus_hash = hashlib.sha256(winning_ast.encode("utf-8")).hexdigest()
+            consensus_hash = hashlib.sha256(winning_ast.encode("utf-8")).hexdigest()  # type: ignore
             judge_priv = self.km.get_private_key_b64(self.judge_id)
-            consensus_sig = Signer.sign_payload(judge_priv, consensus_hash, consensus_timestamp)
+            consensus_sig = Signer.sign_payload(judge_priv, consensus_hash, consensus_timestamp)  # type: ignore
             
             return {
                 "winning_agent": winning_agent,

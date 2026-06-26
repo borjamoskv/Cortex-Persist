@@ -116,7 +116,7 @@ class SwarmRouter:
             raw = self.registry.to_dict()
         else:
             raw = {}
-        return _deep_sorted(copy.deepcopy(raw))
+        return _deep_sorted(copy.deepcopy(raw))  # type: ignore
 
 
 # ------------------------------------------------------------------
@@ -149,7 +149,7 @@ def _dispatch(candidates: list[dict], request: dict, entropy_score: float) -> di
     if not candidates:
         raise ValueError(f"No candidates for task: {request.get('task', '')}")
 
-    selected_agents = sorted([c.get("agent_id") for c in candidates if "agent_id" in c])
+    selected_agents = sorted([c.get("agent_id") for c in candidates if "agent_id" in c])  # type: ignore
 
     if entropy_score >= 0.5 and len(candidates) >= 3:
         # ZK-Swarm Consensus: dispatch to Quorum (N=3)

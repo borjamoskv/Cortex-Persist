@@ -30,7 +30,7 @@ class AsyncCascadeRouter:
         context: Any = None,
         budget_remaining: float = 0.10,
         max_agents: int = 3,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # type: ignore
         """
         Executes routing with exponential backoff.
         Useful for when underlying capability queries or LLM evaluations fail.

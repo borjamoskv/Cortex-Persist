@@ -102,7 +102,7 @@ class AsyncSignalBus:
             await self._conn.commit()
 
         try:
-            self._conn._signals_ready = True
+            self._conn._signals_ready = True  # type: ignore
         except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
         self._ready = True
@@ -330,7 +330,7 @@ class SignalBus:
             self._conn.commit()
 
         try:
-            self._conn._signals_ready = True
+            self._conn._signals_ready = True  # type: ignore
         except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
         self._ready = True

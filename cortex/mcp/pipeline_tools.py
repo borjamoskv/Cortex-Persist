@@ -186,7 +186,7 @@ async def _execute_cancel(ctx: _MCPContext | None, mission_id: str) -> str:
 
     try:
         if hasattr(bridge, "cancel"):
-            cancelled = await bridge.cancel(mission_id.strip())
+            cancelled = await bridge.cancel(mission_id.strip())  # type: ignore
             return json.dumps(
                 {
                     "mission_id": mission_id.strip(),
@@ -239,7 +239,7 @@ def _get_status() -> str:
         from cortex_extensions.swarm.budget import get_budget_manager
 
         bm = get_budget_manager()
-        budget_info = bm.get_remaining_budget()
+        budget_info = bm.get_remaining_budget()  # type: ignore
         status["budget"] = {
             "remaining_usd": budget_info.get("remaining", 0),
             "total_spent_usd": budget_info.get("spent", 0),

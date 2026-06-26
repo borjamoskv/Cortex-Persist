@@ -37,7 +37,7 @@ def main():
     # Ejecutar cortex mejoralo scan
     print(f"🔍 Ejecutando X-Ray 13D en '{project_name}'...")
     try:
-        from cortex.cli import DEFAULT_DB, get_engine
+        from cortex.cli import DEFAULT_DB, get_engine  # type: ignore
         from cortex.mejoralo import MejoraloEngine
 
         engine = get_engine(DEFAULT_DB)

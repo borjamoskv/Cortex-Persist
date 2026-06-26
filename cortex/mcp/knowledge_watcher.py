@@ -83,11 +83,11 @@ class KnowledgeItemHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         if not event.is_directory:
-            self._sync_file(event.src_path)
+            self._sync_file(event.src_path)  # type: ignore
 
     def on_created(self, event):
         if not event.is_directory:
-            self._sync_file(event.src_path)
+            self._sync_file(event.src_path)  # type: ignore
 
 
 def start_knowledge_daemon():

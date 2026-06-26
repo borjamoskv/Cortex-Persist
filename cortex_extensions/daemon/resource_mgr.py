@@ -95,7 +95,7 @@ class ResourceMgrMixin:
         if _FRONTIER_AVAILABLE:
             try:
                 self.frontier_daemon = FrontierDaemon(
-                    engine=self._shared_engine,
+                    engine=self._shared_engine,  # type: ignore
                     metabolism_interval_hours=int(
                         file_config.get("frontier_metabolism_interval_hours", 12)
                     ),
@@ -112,7 +112,7 @@ class ResourceMgrMixin:
         if _ZERO_PROMPTING_AVAILABLE:
             try:
                 self.zero_prompting_daemon = ZeroPromptingDaemon(
-                    engine=self._shared_engine,
+                    engine=self._shared_engine,  # type: ignore
                     workspace_root=Path(file_config.get("watch_path", str(CORTEX_DIR))),
                     cycle_interval_hours=float(
                         file_config.get("zero_prompting_interval_hours", 24.0)
@@ -126,7 +126,7 @@ class ResourceMgrMixin:
         if _EPISTEMIC_BREAKER_AVAILABLE:
             try:
                 self.epistemic_breaker_daemon = EpistemicBreakerDaemon(
-                    engine=self._shared_engine,
+                    engine=self._shared_engine,  # type: ignore
                     check_interval_seconds=int(
                         file_config.get("epistemic_breaker_interval_seconds", 300)
                     ),
@@ -164,10 +164,10 @@ class ResourceMgrMixin:
         if self._event_bus:
             try:
                 from cortex.engine.causal.anomaly_bridge import AnomalyBridge
-                from cortex.engine.swarm.auth_gateway import AuthGateway
+                from cortex.engine.swarm.auth_gateway import AuthGateway  # type: ignore
                 from cortex.engine.uncategorized.event_sovereignty import EventSovereigntyRuntime
 
-                auth_gw = AuthGateway(self._shared_engine)
+                auth_gw = AuthGateway(self._shared_engine)  # type: ignore
                 # ensure table is created, though we should probably run this asynchronously,
                 # but it's safe to run create table in init or async start.
                 anomaly_br = AnomalyBridge()
@@ -239,14 +239,14 @@ class ResourceMgrMixin:
         )
         self.cloud_sync_monitor = CloudSyncMonitor(
             interval_seconds=file_config.get("cloud_sync_interval", 15),
-            engine=self._shared_engine,
+            engine=self._shared_engine,  # type: ignore
         )
 
         self.entropic_wake_daemon = None
         if _ENTROPIC_WAKE_AVAILABLE:
             try:
                 self.entropic_wake_daemon = EntropicWakeDaemon(
-                    engine=self._shared_engine,
+                    engine=self._shared_engine,  # type: ignore
                     check_interval_hours=int(file_config.get("entropic_wake_interval_hours", 4)),
                     zenon_threshold=float(file_config.get("zenon_threshold", 1.0)),
                 )

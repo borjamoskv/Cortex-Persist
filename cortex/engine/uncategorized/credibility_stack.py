@@ -170,7 +170,7 @@ class LedgerCredibilityStack:
 
         signature = signer.sign(merkle_root, merkle_root)
         replay_validated = signer.verify(merkle_root, merkle_root, signature)
-        return signature, replay_validated
+        return signature, replay_validated  # type: ignore
 
     def _construct_merkle_root(self, leaves: list[str]) -> str:
         """Compute Merkle Root via pairwise hashing."""

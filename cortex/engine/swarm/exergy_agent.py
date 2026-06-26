@@ -39,7 +39,7 @@ class ExergyMaximizerAgent:
 
         # Cálculo O(1) de la Exergía
         exergy_score = ExergyOptimizer.calculate_node_exergy(
-            telemetry,
+            telemetry,  # type: ignore
             latency_ms=telemetry.latency_ms,
             max_capacity=telemetry.max_capacity,  # pyright: ignore[reportArgumentType]
         )

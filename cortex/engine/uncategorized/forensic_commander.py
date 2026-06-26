@@ -11,7 +11,7 @@ class ForensicCommander(SwarmCommander):
     """Sovereign Auditor: Executes multi-protocol DeFi forensics."""
 
     def __init__(self, bus_path: str = "cortex.db", strike_id: str = STRIKE_V1.STRIKE_ID):
-        super().__init__(db_path=bus_path)
+        super().__init__(db_path=bus_path)  # type: ignore
         self.strike_id = strike_id
         self.missions: dict[str, MissionProfile] = {m.name: m for m in STRIKE_V1.MISSIONS}
 

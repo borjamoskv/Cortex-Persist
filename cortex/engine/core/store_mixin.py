@@ -210,7 +210,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     "expected_hash": e.expected_hash,
                     "current_hash": e.current_hash,
                 },
-                tenant_id=tenant_id,
+                tenant_id=tenant_id,  # type: ignore
             )
             # Propagate to the agent so it knows it must retry the perception loop
             raise

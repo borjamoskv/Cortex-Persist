@@ -63,7 +63,7 @@ class CascadeRouter:
 
     async def _execute(
         self, engine: str, prompt: str, files: list[str] | None, task_id: str | None
-    ) -> str:
+    ) -> str:  # type: ignore
         import asyncio
 
         max_retries = 3

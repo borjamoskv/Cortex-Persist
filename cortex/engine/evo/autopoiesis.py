@@ -138,8 +138,8 @@ class AutopoiesisEngine:
         logger.info(f"[AutopoiesisEngine] mutate() triggered — target={target!r}")
         try:
             # Delegate to the internal compiler if available
-            if hasattr(self, "_compiler") and self._compiler:
-                return self._compiler.run_cycle(target=target)
+            if hasattr(self, "_compiler") and self._compiler:  # type: ignore
+                return self._compiler.run_cycle(target=target)  # type: ignore
             # Fallback: mark target for next observe_and_mutate pass
             self._pending_targets = getattr(self, "_pending_targets", [])
             self._pending_targets.append(target)

@@ -89,7 +89,7 @@ class SchemaTrait:
                 conn.executescript(
                     f"""
                     CREATE VIRTUAL TABLE IF NOT EXISTS vec_facts USING vec0(
-                        embedding int8[{self._encoder.dimension}]
+                        embedding int8[{self._encoder.dimension}]  # type: ignore
                     );
                     CREATE TABLE IF NOT EXISTS vec_void (
                         rowid INTEGER PRIMARY KEY,

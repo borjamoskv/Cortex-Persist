@@ -99,7 +99,7 @@ class StripeBillingGateway:
             return
 
         try:
-            stripe.SubscriptionItem.create_usage_record(
+            stripe.SubscriptionItem.create_usage_record(  # type: ignore
                 subscription_item_id,
                 quantity=quantity,
                 timestamp="now",

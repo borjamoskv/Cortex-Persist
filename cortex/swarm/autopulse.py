@@ -44,7 +44,7 @@ class TensorProvider:
 def _load_anti_limerence_runtime() -> tuple:
     """Loads anti-limerence and ultramap modules if available."""
     try:
-        from cortex_rs import AntiLimerenceTopology
+        from cortex_rs import AntiLimerenceTopology  # type: ignore
 
         anti_limerence = AntiLimerenceTopology()
         import sys

@@ -84,7 +84,7 @@ async def time_today(
             by_project=summary.by_project,
             entries=summary.entries,
             heartbeats=summary.heartbeats,
-            top_entities=[[e, c] for e, c in summary.top_entities],
+            top_entities=[[e, c] for e, c in summary.top_entities],  # type: ignore
         )
     except sqlite3.Error as e:
         logger.error("Time summary failed: %s", e)
@@ -124,7 +124,7 @@ async def time_report(
             by_project=summary.by_project,
             entries=summary.entries,
             heartbeats=summary.heartbeats,
-            top_entities=[[e, c] for e, c in summary.top_entities],
+            top_entities=[[e, c] for e, c in summary.top_entities],  # type: ignore
         )
     except sqlite3.Error as e:
         logger.error("Time report failed: %s", e)

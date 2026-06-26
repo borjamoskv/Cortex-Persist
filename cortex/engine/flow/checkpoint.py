@@ -91,7 +91,7 @@ class CheckpointManager:
                             sequence_start=chunk_start_seq,
                             sequence_end=record.sequence,
                             record_count=self.chunk_size,
-                            merkle_root=tree.root_hash,
+                            merkle_root=tree.root_hash,  # type: ignore
                             head_hash=last_hash,
                             timestamp=record.timestamp,
                         )
@@ -108,7 +108,7 @@ class CheckpointManager:
                         sequence_start=chunk_start_seq,
                         sequence_end=record.sequence,
                         record_count=len(current_chunk_hashes),
-                        merkle_root=tree.root_hash,
+                        merkle_root=tree.root_hash,  # type: ignore
                         head_hash=last_hash,
                         timestamp=record.timestamp,
                     )

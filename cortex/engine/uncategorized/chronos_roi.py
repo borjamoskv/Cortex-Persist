@@ -229,7 +229,7 @@ class ChronosROI:
 
         try:
             async with connect_async_ctx(db_path) as conn:
-                conn._conn.authorize_causal_writes()
+                conn._conn.authorize_causal_writes()  # type: ignore
                 ts = now_iso()
                 content = report.summary()
                 meta_dict = {"chronos": report.to_dict(), "internal_engine": "chronos_roi"}

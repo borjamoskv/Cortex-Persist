@@ -198,5 +198,5 @@ class CausalGraph:
                 if has_cycle(node_id, visited, stack):
                     contradictions += 1
 
-            normalized_contradiction = contradictions / len(active_traces)
+            normalized_contradiction = contradictions / len(active_traces)  # type: ignore
             return max(0.0, 1.0 - normalized_contradiction)

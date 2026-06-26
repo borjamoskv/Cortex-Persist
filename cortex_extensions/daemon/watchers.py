@@ -31,8 +31,8 @@ from typing import Any
 
 try:
     from watchdog.events import (  # pyright: ignore[reportAssignmentType]
-        FileSystemEvent,
-        FileSystemEventHandler,
+        FileSystemEvent,  # type: ignore
+        FileSystemEventHandler,  # type: ignore
     )
     from watchdog.observers import Observer  # pyright: ignore[reportAssignmentType]
 

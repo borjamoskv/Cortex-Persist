@@ -141,7 +141,7 @@ class CausalStateStore:
                 params.append(lease_id)
                 
             async with self._db.execute(query, params) as cur:
-                count = (await cur.fetchone())[0]
+                count = (await cur.fetchone())[0]  # type: ignore
                 
             if count > 0:
                 logger.info(f"Recovering {count} IN_FLIGHT tasks to ACTIVE status.")

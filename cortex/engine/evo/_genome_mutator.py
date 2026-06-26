@@ -342,4 +342,4 @@ class GenomeMutator:
             then_branch=dispatch(f"retry_{target_name}", {"reason": "causal_patch"}),
             else_branch=dispatch(f"fallback_{target_name}", {"reason": "causal_patch_fallback"}),
         )
-        genome.dispatch_tree = replace_target(tree, target_name, fallback)
+        genome.dispatch_tree = replace_target(tree, target_name, fallback)  # type: ignore

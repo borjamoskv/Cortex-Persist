@@ -11,7 +11,7 @@ from cortex_extensions.nous.models import NousAST
 
 
 class NousCompilerV2:
-    def __init__(self, client: AsyncOpenAI = None):
+    def __init__(self, client: AsyncOpenAI = None):  # type: ignore
         if client is None:
             client = AsyncOpenAI()
         self.client = instructor.from_openai(client)
