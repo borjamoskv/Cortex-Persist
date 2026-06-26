@@ -18,16 +18,18 @@ def test_empty_content_returns_false(closure_guard: CausalClosureGuard) -> None:
     assert not closure_guard.verify_closure(proposal)
 
 
-def test_low_token_cost_bypasses_strict_checks(closure_guard: CausalClosureGuard) -> None:
-    """If the operation was cheap, it shouldn't be strictly penalized for missing structure."""
+def test_low_token_cost_does_not_bypass_strict_checks(closure_guard: CausalClosureGuard) -> None:
+    """If the operation lacks structure, it is strictly penalized regardless of token cost."""
     proposal = SwarmProposal(
         agent_id="test",
         mission_statement="test",
         content="This is just some narrative text without code.",
         token_cost=500,  # Below 1000
     )
-    # Should pass because it's cheap
-    assert closure_guard.verify_closure(proposal)
+    # Should fail because it lacks structure (Anergia Bypass was removed)
+    import pytest
+    with pytest.raises(RuntimeError, match="Proposal lacks structural artifacts"):
+        closure_guard.verify_closure(proposal)
 
 
 def test_high_token_cost_with_code_block_passes(closure_guard: CausalClosureGuard) -> None:

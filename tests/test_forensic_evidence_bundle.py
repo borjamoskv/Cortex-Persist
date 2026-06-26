@@ -7,6 +7,7 @@ import sqlite3
 import aiosqlite
 import pytest
 
+from cortex.database.core import _original_sqlite3_connect
 from cortex.forensics.evidence_bundle import (
     EVIDENCE_COMMIT_ACTION,
     build_evidence_manifest,
@@ -114,7 +115,7 @@ def test_commit_manifest_is_idempotent_raw_free_and_tenant_bound(tmp_path) -> No
     assert second["tx_id"] == first["tx_id"]
     assert second["tx_hash"] == first["tx_hash"]
 
-    conn = sqlite3.connect(db_path)
+    conn = _original_sqlite3_connect(db_path)
     conn.row_factory = sqlite3.Row
     row = conn.execute(
         "SELECT tenant_id, action, detail, prev_hash, hash, timestamp FROM transactions"
@@ -194,7 +195,7 @@ def test_verify_commit_detects_missing_and_tampered_commit(tmp_path) -> None:
     commit_result = commit_evidence_manifest(db_path, manifest, _artifacts())
     assert commit_result["committed"] is True
 
-    conn = sqlite3.connect(db_path)
+    conn = _original_sqlite3_connect(db_path)
     conn.row_factory = sqlite3.Row
     row = conn.execute("SELECT id, detail FROM transactions").fetchone()
     detail = json.loads(row["detail"])
@@ -219,7 +220,7 @@ def test_repeated_commit_fails_closed_if_existing_commit_is_corrupted(tmp_path) 
     commit_result = commit_evidence_manifest(db_path, manifest, _artifacts())
     assert commit_result["committed"] is True
 
-    conn = sqlite3.connect(db_path)
+    conn = _original_sqlite3_connect(db_path)
     conn.execute("UPDATE transactions SET prev_hash = 'CORRUPTED'")
     conn.commit()
     conn.close()
@@ -231,7 +232,7 @@ def test_repeated_commit_fails_closed_if_existing_commit_is_corrupted(tmp_path) 
     assert repeated["already_committed"] is True
     violation_types = {violation["type"] for violation in repeated["violations"]}
     assert "CHAIN_BREAK" in violation_types
-    conn = sqlite3.connect(db_path)
+    conn = _original_sqlite3_connect(db_path)
     tx_count = conn.execute(
         "SELECT COUNT(*) FROM transactions WHERE action = ?",
         (EVIDENCE_COMMIT_ACTION,),
@@ -246,7 +247,7 @@ def test_verify_commit_checks_global_merkle_checkpoints(tmp_path) -> None:
     commit_result = commit_evidence_manifest(db_path, manifest, _artifacts())
     assert commit_result["committed"] is True
 
-    conn = sqlite3.connect(db_path)
+    conn = _original_sqlite3_connect(db_path)
     conn.execute(
         "INSERT INTO merkle_roots (tenant_id, root_hash, tx_start_id, tx_end_id, tx_count) "
         "VALUES ('__global__', 'bad-root', 1, 1, 1)"
@@ -262,7 +263,7 @@ def test_verify_commit_checks_global_merkle_checkpoints(tmp_path) -> None:
 
 async def test_ledger_audit_accepts_legacy_chain_and_tenant_bound_chain(tmp_path) -> None:
     db_path = str(tmp_path / "ledger.db")
-    conn = sqlite3.connect(db_path)
+    conn = _original_sqlite3_connect(db_path)
     ledger = SovereignLedger(conn)
     _insert_legacy_tx(conn, project="legacy-1", detail={"x": 1})
     ledger.record_transaction("tenant", "store", {"x": 2}, tenant_id="tenant-a")
@@ -285,7 +286,7 @@ async def test_ledger_audit_accepts_legacy_chain_and_tenant_bound_chain(tmp_path
 
 def test_record_transaction_without_tenant_uses_default_tenant_bound_hash(tmp_path) -> None:
     db_path = str(tmp_path / "ledger.db")
-    conn = sqlite3.connect(db_path)
+    conn = _original_sqlite3_connect(db_path)
     SovereignLedger(conn).record_transaction("default-project", "store", {"x": 1})
     conn.row_factory = sqlite3.Row
     row = conn.execute(
@@ -313,7 +314,7 @@ def test_record_transaction_without_tenant_uses_default_tenant_bound_hash(tmp_pa
 
 async def test_ledger_audit_detects_tenant_transplant(tmp_path) -> None:
     db_path = str(tmp_path / "ledger.db")
-    conn = sqlite3.connect(db_path)
+    conn = _original_sqlite3_connect(db_path)
     SovereignLedger(conn).record_transaction("tenant", "store", {"x": 1}, tenant_id="tenant-a")
     conn.execute("UPDATE transactions SET tenant_id = 'tenant-b'")
     conn.commit()
