@@ -12,7 +12,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-from cortex.extensions.sync.github_bridge import GitHubCortexBridge, _github_key
+from cortex_extensions.sync.github_bridge import GitHubCortexBridge, _github_key
 
 pytestmark = pytest.mark.slow
 

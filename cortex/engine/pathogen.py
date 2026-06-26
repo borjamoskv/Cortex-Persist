@@ -15,9 +15,9 @@ from datetime import datetime, timezone
 from typing import Any
 
 from cortex.cli.common import console
-from cortex.extensions.agents.llm import get_ai_client
-from cortex.extensions.moltbook.client import MoltbookClient
 from cortex.utils.errors import CortexError
+from cortex_extensions.agents.llm import get_ai_client
+from cortex_extensions.moltbook.client import MoltbookClient
 
 logger = logging.getLogger("cortex.engine.pathogen")
 

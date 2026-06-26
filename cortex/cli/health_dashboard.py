@@ -15,7 +15,7 @@ from cortex.cli.common import DEFAULT_DB, console  # type: ignore[reportAttribut
 
 
 def _render_grade_panel(hs, path: str) -> None:
-    from cortex.extensions.health.models import Grade
+    from cortex_extensions.health.models import Grade
 
     grade_colors = {
         Grade.SOVEREIGN: "bright_green",
@@ -147,8 +147,8 @@ def _render_warnings(hs, metrics) -> None:
 @click.option("--db", "db_path", default=None, help="DB path override.")
 def dashboard(db_path: str | None) -> None:
     """Rich interactive live dashboard for CORTEX Health."""
-    from cortex.extensions.health.collector import HealthCollector
-    from cortex.extensions.health.scorer import HealthScorer
+    from cortex_extensions.health.collector import HealthCollector
+    from cortex_extensions.health.scorer import HealthScorer
 
     path = db_path or str(DEFAULT_DB)
     collector = HealthCollector(db_path=path)

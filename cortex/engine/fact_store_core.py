@@ -31,7 +31,7 @@ async def _prepare_fact_content(
 ) -> tuple[str, str, str | None, str | None]:
     """Encrypted content and cryptographic signatures."""
     from cortex.crypto import get_default_encrypter
-    from cortex.extensions.security.signatures import get_default_signer
+    from cortex_extensions.security.signatures import get_default_signer
 
     f_hash = compute_fact_hash(content)
     enc = get_default_encrypter()

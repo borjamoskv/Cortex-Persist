@@ -129,7 +129,7 @@ def _register_handoff_tool(mcp, ctx: _MCPContext) -> None:
         async with ctx.pool.acquire() as conn:
             engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
             engine._conn = conn
-            from cortex.extensions.agents.handoff import generate_handoff
+            from cortex_extensions.agents.handoff import generate_handoff
 
             handoff = await generate_handoff(engine)
         lines = [

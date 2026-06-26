@@ -30,14 +30,14 @@ from cortex.api.middleware import (
 )
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
-from cortex.extensions.llm.quota import QuotaRejectedError
-from cortex.extensions.metering.middleware import MeteringMiddleware
-from cortex.extensions.swarm.manager import get_swarm_manager
-from cortex.extensions.timing import TimingTracker
 from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 from cortex.routes import api_router
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from cortex_extensions.llm.quota import QuotaRejectedError
+from cortex_extensions.metering.middleware import MeteringMiddleware
+from cortex_extensions.swarm.manager import get_swarm_manager
+from cortex_extensions.timing import TimingTracker
 
 __all__ = [
     "ContentSizeLimitMiddleware",
@@ -129,7 +129,7 @@ async def lifespan(app: FastAPI):
     api_state.tracker = tracker
 
     # 6. Notification Bus - wire adapters from config
-    from cortex.extensions.notifications.setup import setup_notifications
+    from cortex_extensions.notifications.setup import setup_notifications
 
     notification_bus = setup_notifications(config)
     api_state.notification_bus = notification_bus  # type: ignore[reportAttributeAccessIssue]
@@ -324,7 +324,7 @@ async def health_check(request: Request) -> dict:
     health_score = 0.0
     health_grade = "F"
     try:
-        from cortex.extensions.health import HealthCollector, HealthScorer
+        from cortex_extensions.health import HealthCollector, HealthScorer
 
         db_path = ""
         engine = getattr(request.app.state, "engine", None)

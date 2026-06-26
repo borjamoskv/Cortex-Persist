@@ -9,7 +9,7 @@ import aiosqlite
 
 from cortex.engine.mixins.base import EngineMixinBase
 
-logger = logging.getLogger("cortex.extensions.agent")
+logger = logging.getLogger("cortex_extensions.agent")
 
 __all__ = ["AgentMixin"]
 
@@ -61,7 +61,7 @@ class AgentMixin(EngineMixinBase):
             try:
                 import random
 
-                from cortex.extensions.moltbook.client import MoltbookClient
+                from cortex_extensions.moltbook.client import MoltbookClient
 
                 enetipos = [
                     "8w7 (The Sovereign Challenger)",

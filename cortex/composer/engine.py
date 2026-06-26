@@ -11,8 +11,8 @@ import re
 
 from cortex.composer.manifesto import COMPOSER_MANIFESTO
 from cortex.composer.vision_qa import AestheticAuditor
-from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 from cortex.utils.result import Err, Ok, Result
+from cortex_extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 
 logger = logging.getLogger("cortex.composer.engine")
 

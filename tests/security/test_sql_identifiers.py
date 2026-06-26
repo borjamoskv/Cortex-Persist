@@ -71,7 +71,7 @@ def test_schema_trait_get_domain_tables_rejection():
 
 
 def test_task_queue_update_rejection(tmp_path):
-    from cortex.extensions.aether.queue import TaskQueue
+    from cortex_extensions.aether.queue import TaskQueue
 
     db_file = tmp_path / "aether.db"
     queue = TaskQueue(db_file)

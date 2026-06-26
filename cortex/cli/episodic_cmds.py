@@ -88,7 +88,7 @@ async def _record_async(
     tags: str,
     db: str,
 ) -> None:
-    from cortex.extensions.episodic.main import EpisodicMemory
+    from cortex_extensions.episodic.main import EpisodicMemory
 
     engine = get_engine(db)
     await engine.init_db()
@@ -154,7 +154,7 @@ async def _recall_async(
     as_json: bool,
     db: str,
 ) -> None:
-    from cortex.extensions.episodic.main import EpisodicMemory
+    from cortex_extensions.episodic.main import EpisodicMemory
 
     engine = get_engine(db)
     await engine.init_db()
@@ -237,7 +237,7 @@ async def _patterns_async(
     as_json: bool,
     db: str,
 ) -> None:
-    from cortex.extensions.episodic.main import EpisodicMemory
+    from cortex_extensions.episodic.main import EpisodicMemory
 
     engine = get_engine(db)
     await engine.init_db()
@@ -307,7 +307,7 @@ async def _boot_async(
     as_json: bool,
     db: str,
 ) -> None:
-    from cortex.extensions.episodic.boot import generate_session_boot
+    from cortex_extensions.episodic.boot import generate_session_boot
 
     engine = get_engine(db)
     await engine.init_db()

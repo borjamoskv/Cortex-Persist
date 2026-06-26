@@ -25,7 +25,7 @@ async def enforce_store_guards(
         return
 
     try:
-        from cortex.extensions.security.guard_runtime import (
+        from cortex_extensions.security.guard_runtime import (
             AnomalyGuardWrapper,
             BridgeConflictGuard,
             ContradictionSignalGuard,

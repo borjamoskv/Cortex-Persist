@@ -149,7 +149,7 @@ async def test_check_gate_13_latency_happy():
     mock_telemetry = MagicMock()
     mock_telemetry.stats.return_value = {"ollama": {"avg_latency_ms": 150}}
 
-    with patch("cortex.extensions.llm._telemetry.CascadeTelemetry", return_value=mock_telemetry):
+    with patch("cortex_extensions.llm._telemetry.CascadeTelemetry", return_value=mock_telemetry):
         passed, status = await check_gate_13_latency()
         assert passed is True
         assert status == "verified"
@@ -160,7 +160,7 @@ async def test_check_gate_13_latency_slow_warn():
     mock_telemetry = MagicMock()
     mock_telemetry.stats.return_value = {"ollama": {"avg_latency_ms": 500}}
 
-    with patch("cortex.extensions.llm._telemetry.CascadeTelemetry", return_value=mock_telemetry):
+    with patch("cortex_extensions.llm._telemetry.CascadeTelemetry", return_value=mock_telemetry):
         passed, status = await check_gate_13_latency()
         assert passed is True
         assert status == "verified"

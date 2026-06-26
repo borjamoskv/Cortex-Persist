@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from cortex.extensions.genesis.models import ComponentSpec
-from cortex.extensions.genesis.templates import TemplateRegistry
+from cortex_extensions.genesis.models import ComponentSpec
+from cortex_extensions.genesis.templates import TemplateRegistry
 
 
 class TestTemplateRegistry:

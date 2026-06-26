@@ -10,8 +10,8 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.signals.bus import SignalBus
     from cortex.gateway.router import GatewayIntent, GatewayRequest, GatewayResponse, GatewayRouter
+    from cortex_extensions.signals.bus import SignalBus
 
 __all__ = [
     "GatewayIntent",
@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "SignalBus": ("cortex.extensions.signals.bus", "SignalBus"),
+    "SignalBus": ("cortex_extensions.signals.bus", "SignalBus"),
     "GatewayIntent": ("cortex.gateway.router", "GatewayIntent"),
     "GatewayRequest": ("cortex.gateway.router", "GatewayRequest"),
     "GatewayResponse": ("cortex.gateway.router", "GatewayResponse"),

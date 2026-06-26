@@ -48,7 +48,7 @@ def init_resonance_gate(l2: Any, endocrine: Any) -> Any | None:
 
     sensor = None
     try:
-        from cortex.extensions.songlines.sensor import TopographicSensor
+        from cortex_extensions.songlines.sensor import TopographicSensor
 
         sensor = TopographicSensor()
     except Exception as exc:

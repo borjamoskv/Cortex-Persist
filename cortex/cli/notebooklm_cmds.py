@@ -283,8 +283,8 @@ def ingest_cmd(drive_path: str | None) -> None:
     import json
 
     from cortex.cli.common import get_engine
-    from cortex.extensions.llm.router import IntentProfile
-    from cortex.extensions.llm.sovereign import SovereignLLM
+    from cortex_extensions.llm.router import IntentProfile
+    from cortex_extensions.llm.sovereign import SovereignLLM
 
     if drive_path:
         target = Path(drive_path)

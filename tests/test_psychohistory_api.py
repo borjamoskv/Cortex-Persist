@@ -8,7 +8,7 @@ from cortex.api.core import app
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.auth.deps import require_auth
-from cortex.extensions.swarm.psychohistory import AGENT_BIASES
+from cortex_extensions.swarm.psychohistory import AGENT_BIASES
 from cortex.utils.result import Ok
 
 # Mock Auth

@@ -13,8 +13,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 try:
-    from cortex.extensions.llm.provider import LLMProvider
-    from cortex.extensions.llm.router import CortexPrompt, IntentProfile
+    from cortex_extensions.llm.provider import LLMProvider
+    from cortex_extensions.llm.router import CortexPrompt, IntentProfile
 except ImportError:
     LLMProvider = None  # type: ignore
     CortexPrompt = None  # type: ignore

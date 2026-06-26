@@ -2,6 +2,7 @@ import json
 import os
 import sys
 
+
 def generate_lean_checker(graph_json_path: str, output_lean_path: str):
     """
     Lee un grafo desde JSON y genera un comprobador de colorabilidad en Lean 4
@@ -11,7 +12,7 @@ def generate_lean_checker(graph_json_path: str, output_lean_path: str):
         print(f"Error: {graph_json_path} no encontrado.")
         sys.exit(1)
         
-    with open(graph_json_path, 'r') as f:
+    with open(graph_json_path) as f:
         data = json.load(f)
         
     n = data['n']

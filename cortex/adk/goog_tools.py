@@ -14,7 +14,7 @@ from typing import Any
 
 from cortex.cli.notebooklm_data import _detect_cloud_sync
 
-logger = logging.getLogger("cortex.extensions.adk.goog_tools")
+logger = logging.getLogger("cortex_extensions.adk.goog_tools")
 
 
 def goog_quota() -> dict[str, Any]:

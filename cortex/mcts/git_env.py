@@ -13,7 +13,7 @@ import shlex
 import time
 from pathlib import Path
 
-from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
+from cortex_extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 
 logger = logging.getLogger("cortex.mcts.git_env")
 

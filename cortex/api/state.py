@@ -8,7 +8,7 @@ from typing import Any
 
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
-from cortex.extensions.timing import TimingTracker
+from cortex_extensions.timing import TimingTracker
 
 # Globals initialized at startup in api.py lifespan
 engine: CortexEngine | None = None

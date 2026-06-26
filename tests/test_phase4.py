@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cortex.extensions.aether.tools import AgentToolkit
-from cortex.extensions.swarm.auto_fix import AutoFixPipeline
+from cortex_extensions.aether.tools import AgentToolkit
+from cortex_extensions.swarm.auto_fix import AutoFixPipeline
 
 
 @pytest.fixture
@@ -135,8 +135,8 @@ async def test_autonomous_merge_failure_conflict(temp_repo):
 
 
 @pytest.mark.asyncio
-@patch("cortex.extensions.swarm.auto_fix.AutoFixPipeline._execute")
-@patch("cortex.extensions.swarm.auto_fix.AutoFixPipeline._autonomous_merge")
+@patch("cortex_extensions.swarm.auto_fix.AutoFixPipeline._execute")
+@patch("cortex_extensions.swarm.auto_fix.AutoFixPipeline._autonomous_merge")
 async def test_process_ghost_triggers_merge(mock_merge, mock_execute):
     """Verify that process_ghost calls _autonomous_merge on success."""
     mock_execute.return_value = {
@@ -168,7 +168,7 @@ async def test_hooked_tool_execution_timeout():
     """Verify that hooked_tool_execution enforces the timeout limit."""
     import time
     import asyncio
-    from cortex.extensions.aether.hooks import hooked_tool_execution
+    from cortex_extensions.aether.hooks import hooked_tool_execution
 
     @hooked_tool_execution(timeout_limit=0.1)
     async def async_slow_tool():

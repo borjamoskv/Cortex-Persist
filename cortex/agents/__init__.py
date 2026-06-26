@@ -2,7 +2,7 @@
 """CORTEX Agents - runtime public API.
 
 Exposes the core agent runtime classes. Extension-layer prompts and pitch
-templates remain in ``cortex.extensions.agents``.
+templates remain in ``cortex_extensions.agents``.
 """
 
 from __future__ import annotations

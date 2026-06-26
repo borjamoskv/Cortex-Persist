@@ -12,7 +12,7 @@ import time
 
 from cortex.darknet.ingestor import RawWorldData
 from cortex.darknet.social_ledger import DarknetPost
-from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
+from cortex_extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 
 logger = logging.getLogger("cortex.darknet.agents")
 

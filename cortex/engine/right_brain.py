@@ -12,7 +12,7 @@ import logging
 import random
 from typing import Any
 
-from cortex.extensions.evolution.free_energy import FreeEnergyState
+from cortex_extensions.evolution.free_energy import FreeEnergyState
 
 logger = logging.getLogger("cortex.engine.right_brain")
 

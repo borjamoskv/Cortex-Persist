@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 import aiosqlite
 
 if TYPE_CHECKING:
-    from cortex.extensions.interfaces.store_pipeline import (
+    from cortex_extensions.interfaces.store_pipeline import (
         ContentMutator,
         PostStoreHook,
         StoreGuard,

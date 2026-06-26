@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 
 if TYPE_CHECKING:
-    from cortex.extensions.signals.bus import SignalBus
+    from cortex_extensions.signals.bus import SignalBus
 
 logger = logging.getLogger(__name__)
 

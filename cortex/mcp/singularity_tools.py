@@ -9,7 +9,7 @@ import time
 
 from cortex.config import DB_PATH
 from cortex.database.core import connect
-from cortex.extensions.signals.bus import SignalBus
+from cortex_extensions.signals.bus import SignalBus
 
 # Sovereign Memory & Execution Imports
 _CORTEX_CORE = os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core")

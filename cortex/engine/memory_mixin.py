@@ -75,7 +75,7 @@ class MemoryMixin(EngineMixinBase):
 
     def _init_signal_bus(self):
         try:
-            from cortex.extensions.signals.bus import SignalBus
+            from cortex_extensions.signals.bus import SignalBus
 
             sync_conn = self._get_sync_conn()
             bus = SignalBus(sync_conn)

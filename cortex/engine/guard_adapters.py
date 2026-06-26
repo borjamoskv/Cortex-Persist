@@ -305,8 +305,8 @@ class SignalEmitHook:
         source: str | None = None,
         db_path: str | None = None,
     ) -> None:
-        from cortex.extensions.signals.bus import AsyncSignalBus
-        from cortex.extensions.signals.fact_hook import _compact_threshold
+        from cortex_extensions.signals.bus import AsyncSignalBus
+        from cortex_extensions.signals.fact_hook import _compact_threshold
 
         bus = AsyncSignalBus(conn)
         payload = {
@@ -375,7 +375,7 @@ class EpistemicBreakerHook:
         source: str | None = None,
         db_path: str | None = None,
     ) -> None:
-        from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
+        from cortex_extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
 
         await EpistemicBreakerDaemon.evaluate(  # type: ignore[reportAttributeAccessIssue]
             conn,

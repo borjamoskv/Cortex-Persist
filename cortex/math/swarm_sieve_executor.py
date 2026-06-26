@@ -5,7 +5,6 @@ import logging
 import sqlite3
 import sys
 import uuid
-import time
 from datetime import datetime, timezone
 
 from cortex.math.riemann_sieve import get_riemann_zero

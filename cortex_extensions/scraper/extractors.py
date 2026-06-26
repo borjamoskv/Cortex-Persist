@@ -1,0 +1,316 @@
+# [C5-REAL] Exergy-Maximized
+"""SCRAPER-Ω - Multi-strategy extraction backends.
+
+Each extractor implements the same interface: async extract(url) -> (title, content).
+The ScraperEngine orchestrates fallback cascades between them.
+"""
+
+import logging
+import re
+from html.parser import HTMLParser
+
+import httpx
+
+LOG = logging.getLogger("cortex_extensions.scraper.extractors")
+_BLOCK_TAGS = frozenset(
+    {
+        "p",
+        "div",
+        "section",
+        "article",
+        "main",
+        "header",
+        "footer",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "li",
+        "tr",
+        "blockquote",
+        "pre",
+    }
+)
+_HEADING_MAP = {
+    "h1": "# ",
+    "h2": "## ",
+    "h3": "### ",
+    "h4": "#### ",
+    "h5": "##### ",
+    "h6": "###### ",
+}
+_SKIP_TAGS = frozenset({"script", "style", "noscript", "svg", "iframe", "nav", "footer"})
+
+
+class _HtmlToMarkdown(HTMLParser):
+    """Lightweight HTML-to-Markdown converter using stdlib only."""
+
+    def __init__(self):
+        super().__init__()
+        self._output: list[str] = []
+        self._skip_depth = 0
+        self._tag_stack: list[str] = []
+        self._title = ""
+        self._in_title = False
+
+        self._start_handlers = {
+            "title": self._start_title,
+            "br": lambda attrs: self._output.append("\n"),
+            "a": self._start_a,
+            "li": lambda attrs: self._output.append("\n- "),
+            "strong": lambda attrs: self._output.append("**"),
+            "b": lambda attrs: self._output.append("**"),
+            "em": lambda attrs: self._output.append("*"),
+            "i": lambda attrs: self._output.append("*"),
+            "code": lambda attrs: self._output.append("`"),
+        }
+
+        self._end_handlers = {
+            "title": self._end_title,
+            "a": self._end_a,
+            "strong": lambda: self._output.append("**"),
+            "b": lambda: self._output.append("**"),
+            "em": lambda: self._output.append("*"),
+            "i": lambda: self._output.append("*"),
+            "code": lambda: self._output.append("`"),
+        }
+
+    def _start_title(self, attrs):
+        self._in_title = True
+
+    def _start_a(self, attrs):
+        href = dict(attrs).get("href", "")
+        self._output.append("[")
+        self._tag_stack.append(f"__a_href:{href}")
+
+    def _end_title(self):
+        self._in_title = False
+
+    def _end_a(self):
+        href = ""
+        while self._tag_stack and self._tag_stack[-1].startswith("__a_href:"):
+            href = self._tag_stack.pop().split(":", 1)[1]
+        self._output.append(f"]({href})")
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        """Handle the start of an HTML tag, tracking depth and mapping to Markdown format."""
+        tag = tag.lower()
+        if tag in _SKIP_TAGS:
+            self._skip_depth += 1
+            return
+        if self._skip_depth:
+            return
+
+        self._tag_stack.append(tag)
+
+        if handler := self._start_handlers.get(tag):
+            handler(attrs)
+        elif tag in _HEADING_MAP:
+            self._output.append("\n\n" + _HEADING_MAP[tag])
+        elif tag in _BLOCK_TAGS:
+            self._output.append("\n\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        """Handle the end of an HTML tag, emitting markdown closures where necessary."""
+        tag = tag.lower()
+        if tag in _SKIP_TAGS:
+            self._skip_depth = max(0, self._skip_depth - 1)
+            return
+        if self._skip_depth:
+            return
+
+        if handler := self._end_handlers.get(tag):
+            handler()
+        elif tag in _BLOCK_TAGS:
+            self._output.append("\n")
+
+        if self._tag_stack and self._tag_stack[-1] == tag:
+            self._tag_stack.pop()
+
+    def handle_data(self, data: str) -> None:
+        """Extract and append textual data, capturing the <title> block if active."""
+        if self._skip_depth:
+            return
+        if self._in_title:
+            self._title = data.strip()
+        self._output.append(data)
+
+    def get_result(self) -> tuple[str, str]:
+        """Returns (title, markdown_content)."""
+        raw = "".join(self._output)
+        cleaned = re.sub("\\n{3,}", "\n\n", raw).strip()
+        return (self._title, cleaned)
+
+
+def html_to_markdown(html: str) -> tuple[str, str]:
+    """Convert HTML to (title, markdown) using stdlib parser."""
+    parser = _HtmlToMarkdown()
+    parser.feed(html)
+    return parser.get_result()
+
+
+class BaseExtractor:
+    """Base extractor interface."""
+
+    async def extract(self, url: str, timeout: float = 15.0) -> tuple[str, str]:
+        """Extract content from URL. Returns (title, markdown_content).
+
+        Raises:
+            ExtractionError: If extraction fails.
+        """
+        raise NotImplementedError
+
+
+class ExtractionError(Exception):
+    """Raised when an extraction strategy fails."""
+
+
+class HttpExtractor(BaseExtractor):
+    """Direct HTTP extraction with HTML-to-Markdown conversion.
+
+    Fastest strategy. Works for static HTML pages.
+    Fails on JS-rendered SPAs and sites with aggressive anti-bot.
+    """
+
+    async def extract(self, url: str, timeout: float = 15.0) -> tuple[str, str]:
+        """Extract markdown from URL using standard HTTP GET requests."""
+        LOG.info("🔵 [HTTP_FAST] Extracting: %s", url)
+        try:
+            async with httpx.AsyncClient(
+                timeout=timeout,
+                follow_redirects=True,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+                    "Accept": "text/html,application/xhtml+xml",
+                    "Accept-Language": "en-US,en;q=0.9",
+                },
+            ) as client:
+                response = await client.get(url)
+                response.raise_for_status()
+                content_type = response.headers.get("content-type", "")
+                if "text/html" not in content_type and "application/xhtml" not in content_type:
+                    raise ExtractionError(f"Non-HTML content type: {content_type}")
+                title, markdown = html_to_markdown(response.text)
+                if not markdown or len(markdown) < 50:
+                    raise ExtractionError("Extracted content too short - likely JS-rendered SPA")
+                return (title, markdown)
+        except httpx.HTTPStatusError as e:
+            raise ExtractionError(f"HTTP {e.response.status_code} for {url}") from e
+        except httpx.RequestError as e:
+            raise ExtractionError(f"Network error for {url}: {e}") from e
+
+
+class JinaExtractor(BaseExtractor):
+    """Jina Reader API - converts any URL to clean markdown.
+
+    No API key required for basic usage. Handles JS rendering server-side.
+    """
+
+    JINA_ENDPOINT = "https://r.jina.ai"
+
+    async def extract(self, url: str, timeout: float = 15.0) -> tuple[str, str]:
+        """Extract markdown from URL using Jina Reader API for server-side JS rendering."""
+        LOG.info("🟡 [JINA] Extracting: %s", url)
+        import os
+
+        target = f"{self.JINA_ENDPOINT}/{url}"
+        headers: dict[str, str] = {"Accept": "text/markdown"}
+        api_key = os.environ.get("JINA_API_KEY")
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
+        try:
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                response = await client.get(target, headers=headers)
+                response.raise_for_status()
+                content = response.text.strip()
+                if not content or len(content) < 30:
+                    raise ExtractionError("Jina returned empty or minimal content")
+                title = ""
+                for line in content.split("\n"):
+                    if line.startswith("# "):
+                        title = line[2:].strip()
+                        break
+                return (title, content)
+        except httpx.HTTPStatusError as e:
+            raise ExtractionError(f"Jina HTTP {e.response.status_code}") from e
+        except httpx.RequestError as e:
+            raise ExtractionError(f"Jina network error: {e}") from e
+
+
+class PlaywrightExtractor(BaseExtractor):
+    """Playwright-based extraction - full browser rendering.
+
+    Heaviest strategy. Use as last resort for heavily JS-rendered SPAs.
+    Leverages cortex.browser.BrowserEngine.
+    """
+
+    async def extract(self, url: str, timeout: float = 30.0) -> tuple[str, str]:
+        """Extract markdown from URL using an automated headless Playwright instance."""
+        LOG.info("🔴 [PLAYWRIGHT] Extracting: %s", url)
+        try:
+            from cortex_extensions.browser.engine import BrowserEngine
+
+            engine = BrowserEngine(headless=True)
+            await engine.start()
+            try:
+                await engine.goto(url)
+                content = await engine.get_page_content()
+                title = await engine._page.title() if engine._page else ""
+                if not content or len(content) < 30:
+                    raise ExtractionError("Playwright extracted empty content")
+                return (title, content)
+            finally:
+                await engine.stop()
+        except ImportError as e:
+            raise ExtractionError(
+                "Playwright not installed. Run: pip install playwright && playwright install"
+            ) from e
+        except RuntimeError as e:
+            raise ExtractionError(f"Playwright engine error: {e}") from e
+
+
+async def check_robots_txt(url: str, timeout: float = 5.0) -> bool:
+    """Check if a URL is allowed by robots.txt.
+
+    Returns True if scraping is allowed, False if blocked.
+    On error (no robots.txt, network failure), defaults to allowed.
+    """
+    from urllib.parse import urlparse
+
+    parsed = urlparse(url)
+    robots_url = f"{parsed.scheme}://{parsed.netloc}/robots.txt"
+    path = parsed.path or "/"
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            response = await client.get(robots_url)
+            if response.status_code != 200:
+                return True
+            lines = response.text.split("\n")
+            applies = False
+            for line in lines:
+                line = line.strip().lower()
+                if line.startswith("user-agent:"):
+                    agent = line.split(":", 1)[1].strip()
+                    applies = agent == "*"
+                elif applies and line.startswith("disallow:"):
+                    disallowed = line.split(":", 1)[1].strip()
+                    if disallowed and path.startswith(disallowed):
+                        LOG.warning(
+                            "🚫 [ROBOTS] Path %s blocked by robots.txt rule: Disallow: %s",
+                            path,
+                            disallowed,
+                        )
+                        return False
+            return True
+    except (httpx.RequestError, OSError):
+        return True
+
+
+EXTRACTORS: dict[str, BaseExtractor] = {
+    "http_fast": HttpExtractor(),
+    "jina": JinaExtractor(),
+    "playwright": PlaywrightExtractor(),
+}
+CASCADE_ORDER = ["http_fast", "jina", "playwright"]

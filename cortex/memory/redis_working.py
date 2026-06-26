@@ -21,7 +21,7 @@ from cortex.memory.guardrails import SessionGuardrail
 from cortex.memory.models import MemoryEvent
 
 try:
-    from cortex.extensions.security.tenant import get_tenant_id
+    from cortex_extensions.security.tenant import get_tenant_id
 except ImportError:
 
     def get_tenant_id() -> str:

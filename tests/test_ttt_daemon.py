@@ -9,10 +9,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.vllm_edge import NativeVLLMProvider
-from cortex.extensions.training.daemon import AutonomousTrainingDaemon
-from cortex.extensions.training.verifier import AdapterVerifier
+from cortex_extensions.llm.provider import LLMProvider
+from cortex_extensions.llm.vllm_edge import NativeVLLMProvider
+from cortex_extensions.training.daemon import AutonomousTrainingDaemon
+from cortex_extensions.training.verifier import AdapterVerifier
 
 
 @pytest.fixture
@@ -100,7 +100,7 @@ class TestAutonomousTrainingDaemon:
 
     @pytest.mark.asyncio
     @patch(
-        "cortex.extensions.training.ttt_engine.TTTEngine.run_nocturnal_consolidation",
+        "cortex_extensions.training.ttt_engine.TTTEngine.run_nocturnal_consolidation",
         new_callable=AsyncMock,
     )
     async def test_run_cycle_success(self, mock_consolidate, mock_home) -> None:
@@ -154,7 +154,7 @@ class TestAutonomousTrainingDaemon:
 
     @pytest.mark.asyncio
     @patch(
-        "cortex.extensions.training.ttt_engine.TTTEngine.run_nocturnal_consolidation",
+        "cortex_extensions.training.ttt_engine.TTTEngine.run_nocturnal_consolidation",
         new_callable=AsyncMock,
     )
     async def test_run_cycle_skipped(self, mock_consolidate, mock_home) -> None:
@@ -200,7 +200,7 @@ class TestAutonomousTrainingDaemon:
 
 
 class TestLLMProviderLoRARouting:
-    @patch("cortex.extensions.llm.provider.load_presets")
+    @patch("cortex_extensions.llm.provider.load_presets")
     @pytest.mark.asyncio
     async def test_vllm_routes_to_adapter_when_verified(self, mock_load_presets, mock_home) -> None:
         mock_presets = {
@@ -216,7 +216,7 @@ class TestLLMProviderLoRARouting:
 
         # 1. Without verified adapter registry
         provider = LLMProvider(provider="vllm")
-        from cortex.extensions.llm._models import IntentProfile
+        from cortex_extensions.llm._models import IntentProfile
 
         resolved_model = provider._resolve_model(IntentProfile.GENERAL)
         assert resolved_model == "local-model"

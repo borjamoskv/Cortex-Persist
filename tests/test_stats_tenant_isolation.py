@@ -3,7 +3,7 @@
 import pytest
 
 from cortex.engine import CortexEngine
-from cortex.extensions.security.tenant import tenant_id_var
+from cortex_extensions.security.tenant import tenant_id_var
 
 
 @pytest.fixture

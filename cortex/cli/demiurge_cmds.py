@@ -11,7 +11,7 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 
 from cortex.cli.common import _run_async, cli, console
-from cortex.extensions.evolution.demiurge import DemiurgeCompiler
+from cortex_extensions.evolution.demiurge import DemiurgeCompiler
 
 
 @cli.group(name="demiurge")

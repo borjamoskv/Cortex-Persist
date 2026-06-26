@@ -24,10 +24,10 @@ from pydantic import BaseModel, Field
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.extensions.llm._presets import list_providers, provider_inventory
-from cortex.extensions.llm.manager import LLMManager
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import IntentProfile
+from cortex_extensions.llm._presets import list_providers, provider_inventory
+from cortex_extensions.llm.manager import LLMManager
+from cortex_extensions.llm.provider import LLMProvider
+from cortex_extensions.llm.router import IntentProfile
 
 __all__ = [
     "CORTEX_SYSTEM_PROMPT",

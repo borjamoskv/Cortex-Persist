@@ -34,7 +34,7 @@ def sync(token: str | None, owner: str, repo: str | None, db: str) -> None:
     engine = get_engine(db)
 
     async def _async_sync():
-        from cortex.extensions.sync.github_bridge import GitHubCortexBridge
+        from cortex_extensions.sync.github_bridge import GitHubCortexBridge
 
         try:
             await engine.init_db()

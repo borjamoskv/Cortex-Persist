@@ -11,7 +11,7 @@ from cortex.database.core import connect as db_connect
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 
 try:
-    from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+    from cortex_extensions.signals.bus import AsyncSignalBus, SignalBus
 except ImportError:
     AsyncSignalBus = None  # type: ignore[assignment]
     SignalBus = None  # type: ignore[assignment]

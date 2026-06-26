@@ -136,7 +136,7 @@ async def test_parent_decision_id_creates_causal_edge(
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "cortex_extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 
@@ -203,7 +203,7 @@ async def test_auto_resolved_parent_creates_edge(
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "cortex_extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 
@@ -271,7 +271,7 @@ async def test_parent_decision_id_cross_tenant_rejected(
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "cortex_extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 
@@ -334,7 +334,7 @@ async def test_no_duplicate_edge_when_causal_parent_exists(
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "cortex_extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 
@@ -402,7 +402,7 @@ async def test_causal_write_fails_closed_when_edge_recording_fails(
         can_sign = False
 
     monkeypatch.setattr(
-        "cortex.extensions.security.signatures.get_default_signer",
+        "cortex_extensions.security.signatures.get_default_signer",
         lambda: FakeSigner(),
     )
 

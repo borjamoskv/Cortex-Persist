@@ -6,7 +6,7 @@ Legacy shim for backward compatibility. Use `cortex.nexus` directly.
 """
 
 from cortex.engine.swarm_10k import SwarmCommander
-from cortex.extensions.nexus import (
+from cortex_extensions.nexus import (
     DomainOrigin,
     IntentType,
     NexusWorldModel,

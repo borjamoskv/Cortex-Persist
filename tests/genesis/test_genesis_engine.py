@@ -11,10 +11,10 @@ from pathlib import Path
 
 import pytest
 
-from cortex.extensions.genesis.assembler import SystemAssembler
-from cortex.extensions.genesis.engine import GenesisEngine
-from cortex.extensions.genesis.models import ComponentSpec, SystemSpec
-from cortex.extensions.genesis.validator import GenesisValidator
+from cortex_extensions.genesis.assembler import SystemAssembler
+from cortex_extensions.genesis.engine import GenesisEngine
+from cortex_extensions.genesis.models import ComponentSpec, SystemSpec
+from cortex_extensions.genesis.validator import GenesisValidator
 
 
 @pytest.fixture

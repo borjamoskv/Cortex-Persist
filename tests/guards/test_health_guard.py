@@ -2,7 +2,7 @@
 
 import pytest
 
-from cortex.extensions.health.models import Grade, HealthScore, HealthSLA, HealthSLAViolation
+from cortex_extensions.health.models import Grade, HealthScore, HealthSLA, HealthSLAViolation
 from cortex.guards.health_guard import HealthGuard
 
 

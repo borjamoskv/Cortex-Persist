@@ -166,7 +166,7 @@ class DelegatesMixin:
 
     async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""
-        from cortex.extensions.shannon.report import EntropyReport
+        from cortex_extensions.shannon.report import EntropyReport
 
         return await EntropyReport.analyze(self, project)  # pyright: ignore[reportArgumentType]
 
@@ -176,13 +176,13 @@ class DelegatesMixin:
         top_domains: int = 15,
     ):
         """Cognitive Fingerprint - extract behavioral patterns from the Ledger."""
-        from cortex.extensions.fingerprint.extractor import FingerprintExtractor
+        from cortex_extensions.fingerprint.extractor import FingerprintExtractor
 
         return await FingerprintExtractor.extract(self, project, top_domains)  # pyright: ignore[reportArgumentType]
 
     async def immortality_index(self, project: str | None = None) -> dict:
         """Immortality Index (ι) - cognitive crystallization metric."""
-        from cortex.extensions.shannon.immortality import ImmortalityIndex
+        from cortex_extensions.shannon.immortality import ImmortalityIndex
 
         return await ImmortalityIndex.compute(self, project)  # pyright: ignore[reportArgumentType]
 
@@ -192,13 +192,13 @@ class DelegatesMixin:
         tenant_id: str = "default",
     ) -> list:
         """Bellman Policy Engine - prioritized action queue."""
-        from cortex.extensions.policy import PolicyEngine
+        from cortex_extensions.policy import PolicyEngine
 
         policy = PolicyEngine(self)  # pyright: ignore[reportArgumentType]
         return await policy.evaluate(project=project, tenant_id=tenant_id)
 
     def export_snapshot(self, out_path: str | Path) -> str:
-        from cortex.extensions.sync.snapshot import export_snapshot
+        from cortex_extensions.sync.snapshot import export_snapshot
 
         return export_snapshot(self, out_path)  # type: ignore[reportArgumentType,reportReturnType]
 

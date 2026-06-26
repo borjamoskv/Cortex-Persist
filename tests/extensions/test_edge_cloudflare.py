@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from cortex.extensions.edge_cloudflare.edge_bridge import CloudflareEdgeBridge
+from cortex_extensions.edge_cloudflare.edge_bridge import CloudflareEdgeBridge
 
 @pytest.mark.asyncio
 async def test_cloudflare_edge_bridge_sync():
