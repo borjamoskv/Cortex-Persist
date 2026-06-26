@@ -1,0 +1,4382 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Trust Infrastructure for Autonomous AI — cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.">
+      
+      
+      
+        <link rel="canonical" href="https://cortexpersist.com/SECURITY_TRUST_MODEL/">
+      
+      
+        <link rel="prev" href="../cross_platform_guide/">
+      
+      
+        <link rel="next" href="../CONTRIBUTING/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/main/src/assets/logo-white.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Security Trust Model - CORTEX Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../stylesheets/industrial_noir.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="lime">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#security_trust_modelmd-cortex-persist" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="https://cortexpersist.com" title="CORTEX Documentation" class="md-header__button md-logo" aria-label="CORTEX Documentation" data-md-component="logo">
+      
+  <img src="https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/main/src/assets/logo-white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            CORTEX Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Security Trust Model
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="lime"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/borjamoskv/Cortex-Persist" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    borjamoskv/Cortex-Persist
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../competitors/" class="md-tabs__link">
+          
+  
+  
+  Evaluation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../personas/builder/" class="md-tabs__link">
+          
+  
+  
+  By Role
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../product-surface/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../architecture/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../developer-guide/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Compliance & Security
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../course/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../SINTETOLOGÍA AGÉNTICA.md" class="md-tabs__link">
+          
+  
+  
+  Project
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="https://cortexpersist.com" title="CORTEX Documentation" class="md-nav__button md-logo" aria-label="CORTEX Documentation" data-md-component="logo">
+      
+  <img src="https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/main/src/assets/logo-white.svg" alt="logo">
+
+    </a>
+    CORTEX Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/borjamoskv/Cortex-Persist" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    borjamoskv/Cortex-Persist
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../competitors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Comparisons vs. Vector DBs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integration_stacks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How it fits your stack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../audit_pack_anatomy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Audit Pack Anatomy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    By Role
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    By Role
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/builder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Builder (Hello World)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/security_lead/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Lead
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/compliance_buyer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance & Buyers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/architect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Systems Architect
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../product-surface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Public Product Surface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture-crystallization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Crystallization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../skills/SKILL-TAXONOMY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Taxonomy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CORTEX-CAPABILITIES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capabilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SDK-SURFACE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SDK Surface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TRUST-SEMANTICS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trust Semantics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../EVENT-MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ERROR-CODE-REGISTRY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error Code Registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operating-axioms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operating Axioms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../knowledge-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../peano-soberano.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Peano Soberano (7 Axioms)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Classes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sdks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SDKs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_platform_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cross-Platform
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance & Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compliance & Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Trust Model
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Trust Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#purpose-the-doctrinal-formula" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Purpose: The Doctrinal Formula
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Posture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trust-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trust Boundary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architectural-overview-legion-10k-design-target" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architectural Overview (LEGION-10k Design Target)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#guarantees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guarantees
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Guarantees">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-cryptographic-traceability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Cryptographic Traceability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-sovereign-ed25519-sealing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Sovereign Ed25519 Sealing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-encrypted-at-rest-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Encrypted At-Rest Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-auditable-write-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Auditable Write Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-deterministic-structural-rejection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Deterministic Structural Rejection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-tenant-aware-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Tenant-Aware Isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-failure-locality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Failure Locality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-lock-free-o1-hot-path-zero-gil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Lock-Free O(1) Hot Path (Zero-GIL)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-guarantees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-Guarantees
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trust-surface-threat-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trust-Surface Threat Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Trust-Surface Threat Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prompt-instruction-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt / Instruction Injection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contradictory-state-insertion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contradictory State Insertion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependency-contamination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependency Contamination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#silent-schema-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Silent Schema Drift
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ledger-integrity-break" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ledger Integrity Break
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replay-duplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replay / Duplication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-tenant-leakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Tenant Leakage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#async-safety-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Async Safety Failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unbounded-ast-mutation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unbounded AST Mutation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exergy-exhaustion-exa-lisp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exergy Exhaustion (EXA-LISP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#time-jacking-attack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Time-Jacking Attack
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ring-buffer-overflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ring Buffer Overflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defense-in-depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defense in Depth
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Defense in Depth">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#guards-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guards Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-gate-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy / Gate Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crypto-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Crypto Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ledger-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ledger Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audit-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-membrane" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Membrane
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ledger-integrity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ledger Integrity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ledger Integrity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#canonical-ledger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canonical Ledger
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sovereign-ledger-cortex-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sovereign Ledger (cortex-core)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#required-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-implementation-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current Implementation Contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#practical-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#encryption-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Encryption Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Encryption Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#operational-meaning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operational Meaning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#practical-rule-encryption" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical Rule (Encryption)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sovereign-swarm-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sovereign Swarm Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sovereign Swarm Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zerocopyringbuffer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ZeroCopyRingBuffer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outboxdaemon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OutboxDaemon
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ultramap-topology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UltraMap Topology
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tenant-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tenant Isolation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tenant Isolation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expectation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expectation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audit-trails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit Trails
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compliance-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compliance Posture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#failure-domains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure Domains
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-review-checklist-for-trust-surfaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Release Review Checklist for Trust Surfaces
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#guiding-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guiding Rule
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documents
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deep Change Protocols
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../OPERATIONS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AXIOMS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Axioms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../axiom-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Axiom Registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    EU AI Act Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sovereign-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sovereign Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../course/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Suite
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/langchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory for LangChain Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/consensus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Agent Consensus
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/temporal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Time-Travel Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/daemon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Site Monitoring Daemon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SINTETOLOGÍA AGÉNTICA.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sintetología Agéntica
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sovereign_agent_manifesto.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sovereign Agent Manifesto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vibe_coding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sovereign Vibe-Coding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#purpose-the-doctrinal-formula" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Purpose: The Doctrinal Formula
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Posture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trust-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trust Boundary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architectural-overview-legion-10k-design-target" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architectural Overview (LEGION-10k Design Target)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#guarantees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guarantees
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Guarantees">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-cryptographic-traceability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Cryptographic Traceability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-sovereign-ed25519-sealing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Sovereign Ed25519 Sealing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-encrypted-at-rest-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Encrypted At-Rest Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-auditable-write-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Auditable Write Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-deterministic-structural-rejection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Deterministic Structural Rejection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-tenant-aware-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Tenant-Aware Isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-failure-locality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Failure Locality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-lock-free-o1-hot-path-zero-gil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Lock-Free O(1) Hot Path (Zero-GIL)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-guarantees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-Guarantees
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trust-surface-threat-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trust-Surface Threat Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Trust-Surface Threat Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prompt-instruction-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prompt / Instruction Injection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contradictory-state-insertion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contradictory State Insertion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependency-contamination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependency Contamination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#silent-schema-drift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Silent Schema Drift
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ledger-integrity-break" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ledger Integrity Break
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replay-duplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replay / Duplication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-tenant-leakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Tenant Leakage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#async-safety-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Async Safety Failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unbounded-ast-mutation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unbounded AST Mutation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exergy-exhaustion-exa-lisp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exergy Exhaustion (EXA-LISP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#time-jacking-attack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Time-Jacking Attack
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ring-buffer-overflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ring Buffer Overflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defense-in-depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defense in Depth
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Defense in Depth">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#guards-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guards Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-gate-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy / Gate Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crypto-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Crypto Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ledger-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ledger Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audit-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-membrane" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Membrane
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ledger-integrity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ledger Integrity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ledger Integrity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#canonical-ledger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canonical Ledger
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sovereign-ledger-cortex-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sovereign Ledger (cortex-core)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#required-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-implementation-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current Implementation Contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#practical-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#encryption-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Encryption Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Encryption Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#operational-meaning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operational Meaning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#practical-rule-encryption" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical Rule (Encryption)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sovereign-swarm-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sovereign Swarm Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sovereign Swarm Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#zerocopyringbuffer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ZeroCopyRingBuffer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outboxdaemon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OutboxDaemon
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ultramap-topology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UltraMap Topology
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tenant-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tenant Isolation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tenant Isolation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expectation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expectation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audit-trails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit Trails
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compliance-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compliance Posture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#failure-domains" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure Domains
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-review-checklist-for-trust-surfaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Release Review Checklist for Trust Surfaces
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#guiding-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guiding Rule
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documents
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!-- [C5-REAL] Exergy-Maximized -->
+<h1 id="security_trust_modelmd-cortex-persist">SECURITY_TRUST_MODEL.md — CORTEX Persist<a class="headerlink" href="#security_trust_modelmd-cortex-persist" title="Permanent link">&para;</a></h1>
+<p>Package: cortex-persist v1.0.0
+License: Apache-2.0 · Python: &gt;=3.10 · Execution: C5-REAL</p>
+<p>This document describes trust boundaries, verification surfaces, and cognitive/state-mutation risks
+for the CORTEX-Persist sovereign persistence substrate.</p>
+<p>For vulnerability disclosure policy and repository security reporting, see
+<a href="https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md"><code>SECURITY.md</code></a>.</p>
+<h2 id="purpose-the-doctrinal-formula">Purpose: The Doctrinal Formula<a class="headerlink" href="#purpose-the-doctrinal-formula" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p><strong>CORTEX-Persist no confía en outputs.</strong>
+La probabilidad puede sugerir. Solo la verificación puede gobernar.</p>
+</blockquote>
+<p>This document defines the trust boundaries, guarantees, non-guarantees, and verification surfaces of CORTEX Persist.</p>
+<p>The fundamental problem of modern AI agents is not that they hallucinate; it is that their probabilistic output is granted ontological status before being verified. <strong>We do not build systems that trust the model. We build systems where unverified probabilistic output cannot survive long enough to matter.</strong> CORTEX treats all generative output as <em>thermodynamically unstable conjecture</em> (<code>Void-State</code>).</p>
+<p>CORTEX is not secure because it stores data. CORTEX is secure to the extent that it constrains who may mutate state, under which conditions, forcing probabilistic suggestions to cross a deterministic admission pipeline—formal schema validation, cryptographic ledger inscription, Ed25519 sovereign sealing, and causal taint tracking—before becoming actionable memory.</p>
+<h2 id="security-posture">Security Posture<a class="headerlink" href="#security-posture" title="Permanent link">&para;</a></h2>
+<p>CORTEX assumes that non-trivial inputs may be malformed, deceptive, stale,
+contradictory, or adversarial.</p>
+<p>This includes:</p>
+<ul>
+<li>human input</li>
+<li>agent input (including swarm-originated AEON-0 AST mutations)</li>
+<li>upstream model output</li>
+<li>tool return values</li>
+<li>external API responses</li>
+<li>replayed or duplicated facts</li>
+<li>semantically valid but operationally dangerous content</li>
+<li>EXA-LISP programs submitted for L0 execution</li>
+</ul>
+<p>Generative outputs are treated as proposals, not trusted state.</p>
+<h2 id="trust-boundary">Trust Boundary<a class="headerlink" href="#trust-boundary" title="Permanent link">&para;</a></h2>
+<p>The core trust boundary is the write path.</p>
+<p>A proposal may only become durable state after crossing deterministic controls:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>proposal
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  → guards (14+ sovereign guards: contradiction, dependency, exergy, ZK, capability, frontier, ...)
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  → schema/type validation (Pydantic v2)
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  → policy/admission checks (TelemetryGate)
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  → Ed25519 sovereign seal verification
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  → Z3 thermodynamic bound verification (AEON-0)
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  → encryption (AES-256-GCM via cortex/crypto/)
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  → ledger/audit recording (SHA-256 hash-chain + AOF binary + ZK-Seal)
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  → ZeroCopyRingBuffer O(1) dispatch (mmap, lock-free)
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>  → persistence (modular cortex-core/persistence/ subpackage)
+</code></pre></div>
+<p>If any required control fails, the write aborts.</p>
+<hr />
+<h2 id="architectural-overview-legion-10k-design-target">Architectural Overview (LEGION-10k Design Target)<a class="headerlink" href="#architectural-overview-legion-10k-design-target" title="Permanent link">&para;</a></h2>
+<p>The persistence and trust layer is organized into sovereign domains under the root <code>cortex/</code> package:</p>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cortex/engine/</code></td>
+<td>Core CRUD, Kinetic Engines (EntropyAnnihilator, AutoCrystallizer), fact store, causal scheduler</td>
+</tr>
+<tr>
+<td><code>cortex/audit/</code></td>
+<td>Master Ledger — immutable hash-chain for all actions (<code>ledger.py</code>)</td>
+</tr>
+<tr>
+<td><code>cortex/memory/</code></td>
+<td>Large public API surface for fact persistence and retrieval</td>
+</tr>
+<tr>
+<td><code>cortex/guards/</code></td>
+<td>Admission, contradiction, dependency, and sovereign seal verification</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Execution &amp; Delivery (<code>cortex/delivery/</code> &amp; <code>cortex/swarm/</code>):</strong>
+- <code>outbox.py</code> — Lock-free task dispatch integration.
+- <code>ZeroCopyRingBuffer</code> — O(1) lock-free execution (Rust-FFI integration).</p>
+<p><strong>Trust &amp; Crypto (<code>cortex/crypto/</code>):</strong>
+- AES-256-GCM encryption at rest.
+- Ed25519 Sovereign key vault management.</p>
+<hr />
+<h2 id="security-goals">Security Goals<a class="headerlink" href="#security-goals" title="Permanent link">&para;</a></h2>
+<p>CORTEX aims to provide:</p>
+<ul>
+<li>durable auditability of write behavior via dual-layer ledger (SQLite + AOF binary)</li>
+<li>cryptographic continuity across facts via SHA-256 hash-chain</li>
+<li>Ed25519 sovereign sealing (ZK-Seal) for tamper-evidence</li>
+<li>encrypted storage of sensitive fact content and metadata (AES-256-GCM)</li>
+<li>tenant-aware data isolation</li>
+<li>deterministic rejection of structurally invalid inputs</li>
+<li>explicit validation boundaries between stochastic proposals and durable state</li>
+<li>inspectable failure rather than silent permissiveness</li>
+<li>thermodynamic (exergy) bounding of all computational operations</li>
+<li>lock-free O(1) execution guarantees on the hot path</li>
+</ul>
+<hr />
+<h2 id="guarantees">Guarantees<a class="headerlink" href="#guarantees" title="Permanent link">&para;</a></h2>
+<p>CORTEX is designed to guarantee, within correct implementation and deployment:</p>
+<h3 id="1-cryptographic-traceability">1. Cryptographic Traceability<a class="headerlink" href="#1-cryptographic-traceability" title="Permanent link">&para;</a></h3>
+<p>Persisted facts participate in a dual-layer ledger continuity model:
+- <strong>SQLite</strong>: <code>ledger_records</code> table with hash-chained entries
+- <strong>AOF Binary</strong>: C-contiguous append-only file (<code>cortex_ledger_aof.bin</code>) with struct-packed records
+- <strong>Hash Chain</strong>: <code>SHA-256(previous_hash + action + vector_id + yield + timestamp)</code></p>
+<h3 id="2-sovereign-ed25519-sealing">2. Sovereign Ed25519 Sealing<a class="headerlink" href="#2-sovereign-ed25519-sealing" title="Permanent link">&para;</a></h3>
+<p>Every ledger entry is signed with a persistent Ed25519 keypair (<code>cortex_sovereign.pem</code>).
+The <code>verify_zk_seal()</code> method allows independent verification of any sealed record.</p>
+<h3 id="3-encrypted-at-rest-storage">3. Encrypted At-Rest Storage<a class="headerlink" href="#3-encrypted-at-rest-storage" title="Permanent link">&para;</a></h3>
+<p>Sensitive content and metadata are encrypted before persistence via <code>cortex/crypto/</code>:
+- <code>aes.py</code> — AES-256-GCM encryption/decryption
+- <code>keyring.py</code> — OS-level keyring integration
+- <code>vault.py</code> — Sovereign key vault
+- <code>shredder.py</code> — Cryptographic data destruction</p>
+<h3 id="4-auditable-write-path">4. Auditable Write Path<a class="headerlink" href="#4-auditable-write-path" title="Permanent link">&para;</a></h3>
+<p>State mutation emits audit-relevant trace data through:
+- Ledger hash-chain entries
+- AOF binary records (single-syscall batch writes)
+- Exergy Sentinel telemetry
+- Execution ledger (<code>cortex_execution_ledger</code> table)</p>
+<h3 id="5-deterministic-structural-rejection">5. Deterministic Structural Rejection<a class="headerlink" href="#5-deterministic-structural-rejection" title="Permanent link">&para;</a></h3>
+<p>Inputs that fail required syntax, type, schema, or guard conditions are rejected.
+The guard layer includes 14+ specialized guards:</p>
+<table>
+<thead>
+<tr>
+<th>Guard</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>contradiction_guard.py</code></td>
+<td>Detects conflicting state insertions</td>
+</tr>
+<tr>
+<td><code>dependency_guard.py</code></td>
+<td>Validates upstream dependencies</td>
+</tr>
+<tr>
+<td><code>exergy_guard.py</code></td>
+<td>Enforces thermodynamic exergy bounds</td>
+</tr>
+<tr>
+<td><code>zk_guard.py</code></td>
+<td>Verifies ZK-Seal authenticity</td>
+</tr>
+<tr>
+<td><code>capability_guard.py</code></td>
+<td>Capability-based access control</td>
+</tr>
+<tr>
+<td><code>frontier_guard.py</code></td>
+<td>Frontier exploration bounds</td>
+</tr>
+<tr>
+<td><code>health_guard.py</code></td>
+<td>System health preconditions</td>
+</tr>
+<tr>
+<td><code>path_guard.py</code></td>
+<td>Protected filesystem path enforcement</td>
+</tr>
+<tr>
+<td><code>url_guard.py</code></td>
+<td>URL validation and sanitization</td>
+</tr>
+<tr>
+<td><code>scrape_guard.py</code></td>
+<td>Web scraping safety checks</td>
+</tr>
+<tr>
+<td><code>thermodynamic.py</code></td>
+<td>Exergy/entropy balance enforcement</td>
+</tr>
+<tr>
+<td><code>sovereign_seals.py</code></td>
+<td>Sovereign seal verification pipeline</td>
+</tr>
+<tr>
+<td><code>heuristic_seals.py</code></td>
+<td>Heuristic-based seal generation</td>
+</tr>
+<tr>
+<td><code>virgo.py</code></td>
+<td>Formal verification integration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="6-tenant-aware-isolation">6. Tenant-Aware Isolation<a class="headerlink" href="#6-tenant-aware-isolation" title="Permanent link">&para;</a></h3>
+<p>Data operations preserve tenant boundary semantics.</p>
+<h3 id="7-failure-locality">7. Failure Locality<a class="headerlink" href="#7-failure-locality" title="Permanent link">&para;</a></h3>
+<p>Invalid proposals fail before contaminating downstream durable state.
+The <code>ZeroCopyRingBuffer</code> enforces C5-REAL isolation: tasks that exceed buffer capacity
+are dropped with explicit <code>RuntimeError</code> rather than silent degradation.</p>
+<h3 id="8-lock-free-o1-hot-path-zero-gil">8. Lock-Free O(1) Hot Path (Zero-GIL)<a class="headerlink" href="#8-lock-free-o1-hot-path-zero-gil" title="Permanent link">&para;</a></h3>
+<p>The <code>ZeroCopyRingBuffer</code> relies on <code>cortex_rs</code> Rust-FFI memory mapping, completely bypassing the Python GIL. It uses <code>mmap</code>-backed C-contiguous memory with lock-free atomic reservations. There is NO <code>threading.Lock()</code> on the write or read hot path, enabling 100k+ agents/sec deterministic throughput.</p>
+<hr />
+<h2 id="non-guarantees">Non-Guarantees<a class="headerlink" href="#non-guarantees" title="Permanent link">&para;</a></h2>
+<p>CORTEX does not guarantee:</p>
+<ul>
+<li>semantic truth</li>
+<li>correctness of external models</li>
+<li>safety of upstream tools or providers</li>
+<li>correctness of external APIs</li>
+<li>absence of malicious intent in upstream sources</li>
+<li>correctness of business logic added outside trust boundaries</li>
+<li>safety if callers bypass guards, policy, or verification surfaces</li>
+<li>magical immunity from bad architecture layered above it</li>
+<li>on-chain settlement (DarkPoolZK yield negotiation is C4-SIM without deployed L2 contracts)</li>
+<li>hardware provisioning success (HardwareAggressor Akash deployment depends on external CLI)</li>
+</ul>
+<p>A cryptographically logged lie is still a lie. It is merely an auditable lie.</p>
+<hr />
+<h2 id="trust-surface-threat-model">Trust-Surface Threat Model<a class="headerlink" href="#trust-surface-threat-model" title="Permanent link">&para;</a></h2>
+<p>Representative threats include:</p>
+<h3 id="prompt-instruction-injection">Prompt / Instruction Injection<a class="headerlink" href="#prompt-instruction-injection" title="Permanent link">&para;</a></h3>
+<p>Inputs attempt to coerce the system into bypassing intended policy or semantics.</p>
+<h3 id="contradictory-state-insertion">Contradictory State Insertion<a class="headerlink" href="#contradictory-state-insertion" title="Permanent link">&para;</a></h3>
+<p>Inputs attempt to create durable memory that conflicts with validated prior state.
+<strong>Mitigation</strong>: <code>contradiction_guard.py</code> performs semantic conflict detection.</p>
+<h3 id="dependency-contamination">Dependency Contamination<a class="headerlink" href="#dependency-contamination" title="Permanent link">&para;</a></h3>
+<p>Proposal depends on false, stale, or unverifiable upstream assumptions.
+<strong>Mitigation</strong>: <code>dependency_guard.py</code> validates causal chains.</p>
+<h3 id="silent-schema-drift">Silent Schema Drift<a class="headerlink" href="#silent-schema-drift" title="Permanent link">&para;</a></h3>
+<p>A change in structure weakens invariants without obvious runtime failure.</p>
+<h3 id="ledger-integrity-break">Ledger Integrity Break<a class="headerlink" href="#ledger-integrity-break" title="Permanent link">&para;</a></h3>
+<p>Hash continuity becomes invalid through bug, corruption, or unreviewed mutation.
+<strong>Mitigation</strong>: Dual-layer verification (SQLite + AOF), Ed25519 seal per entry.</p>
+<h3 id="replay-duplication">Replay / Duplication<a class="headerlink" href="#replay-duplication" title="Permanent link">&para;</a></h3>
+<p>Previously accepted facts are reintroduced in a way that degrades retrieval or
+alters interpretation.</p>
+<h3 id="cross-tenant-leakage">Cross-Tenant Leakage<a class="headerlink" href="#cross-tenant-leakage" title="Permanent link">&para;</a></h3>
+<p>Data path accidentally leaks or merges tenant state.</p>
+<h3 id="async-safety-failure">Async Safety Failure<a class="headerlink" href="#async-safety-failure" title="Permanent link">&para;</a></h3>
+<p>Blocking or cancellation bugs produce state inconsistency or partial operations.
+<strong>Mitigation</strong>: Queue-based single-writer pattern in <code>LedgerManager._signer_loop()</code>.</p>
+<h3 id="unbounded-ast-mutation">Unbounded AST Mutation<a class="headerlink" href="#unbounded-ast-mutation" title="Permanent link">&para;</a></h3>
+<p>AEON-0 compiler receives mutation payloads that could expand indefinitely.
+<strong>Mitigation</strong>: Z3 thermodynamic validation (<code>Z3ThermodynamicValidator.verify()</code>) enforces
+a hard exergy bound of 1 Joule per mutation. DarkPoolZK anchor validation in
+<code>K0Metabolism</code> enforces <code>1000 bytes per unit of exergy</code> bound.</p>
+<h3 id="exergy-exhaustion-exa-lisp">Exergy Exhaustion (EXA-LISP)<a class="headerlink" href="#exergy-exhaustion-exa-lisp" title="Permanent link">&para;</a></h3>
+<p>EXA-LISP programs consume unbounded computation.
+<strong>Mitigation</strong>: <code>ExergyEnvironment</code> with explicit Joule limits. <code>EntropyDeath</code> exception
+halts execution when budget is exceeded. Negative yield is recorded in the ledger.</p>
+<h3 id="time-jacking-attack">Time-Jacking Attack<a class="headerlink" href="#time-jacking-attack" title="Permanent link">&para;</a></h3>
+<p>Monotonic clock manipulation to break ledger ordering.
+<strong>Mitigation</strong>: <code>LedgerManager.append()</code> detects non-monotonic timestamps and
+increments by 0.001s minimum, logging a <code>SECURITY ALERT</code>.</p>
+<h3 id="ring-buffer-overflow">Ring Buffer Overflow<a class="headerlink" href="#ring-buffer-overflow" title="Permanent link">&para;</a></h3>
+<p>Task injection rate exceeds buffer capacity.
+<strong>Mitigation</strong>: <code>ZeroCopyRingBuffer.enqueue()</code> returns <code>False</code> on full buffer.
+<code>enqueue_swarm_task()</code> raises explicit <code>RuntimeError</code> — tasks are dropped to
+preserve C5-REAL thermodynamic bounds rather than silently queued.</p>
+<hr />
+<h2 id="defense-in-depth">Defense in Depth<a class="headerlink" href="#defense-in-depth" title="Permanent link">&para;</a></h2>
+<p>CORTEX relies on layered control, not a single magic wall.</p>
+<h3 id="guards-layer">Guards Layer<a class="headerlink" href="#guards-layer" title="Permanent link">&para;</a></h3>
+<p>14+ specialized guards operate before persistence:</p>
+<ul>
+<li><strong>Contradiction Guard</strong> — semantic conflict detection</li>
+<li><strong>Dependency Guard</strong> — causal chain validation</li>
+<li><strong>Exergy Guard</strong> — thermodynamic resource bounding</li>
+<li><strong>ZK Guard</strong> — cryptographic seal verification</li>
+<li><strong>Capability Guard</strong> — capability-based access control</li>
+<li><strong>Frontier Guard</strong> — exploration scope bounding</li>
+<li><strong>Path Guard</strong> — protected filesystem enforcement</li>
+<li><strong>URL Guard</strong> — URL sanitization and validation</li>
+<li><strong>Scrape Guard</strong> — web scraping safety</li>
+<li><strong>Health Guard</strong> — system health preconditions</li>
+<li><strong>Sovereign Seals</strong> — sovereign signature pipeline</li>
+<li><strong>Heuristic Seals</strong> — heuristic-based seal generation</li>
+<li><strong>Virgo</strong> — formal verification integration</li>
+<li><strong>Thermodynamic</strong> — exergy/entropy balance enforcement</li>
+</ul>
+<h3 id="policy-gate-layer">Policy / Gate Layer<a class="headerlink" href="#policy-gate-layer" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>TelemetryGate</code> — admission control for L1 external patches</li>
+<li><code>AEON0Compiler.mutate()</code> — requires valid ZK-Seal signature before AST mutation</li>
+<li><code>OutboxDaemon</code> — C5-REAL sovereign isolation rejects all unrecognized task types</li>
+</ul>
+<h3 id="crypto-layer">Crypto Layer<a class="headerlink" href="#crypto-layer" title="Permanent link">&para;</a></h3>
+<p><code>cortex/crypto/</code> provides:
+- AES-256-GCM encryption at rest
+- OS keyring integration
+- Sovereign key vault management
+- Cryptographic data shredding</p>
+<h3 id="ledger-layer">Ledger Layer<a class="headerlink" href="#ledger-layer" title="Permanent link">&para;</a></h3>
+<p>Dual-layer tamper-evidence:
+- <strong>SQLite</strong>: Hash-chained <code>ledger_records</code> with indexed access
+- <strong>AOF Binary</strong>: Struct-packed append-only file with single-syscall batch writes
+- <strong>Ed25519 Seal</strong>: Every entry signed with sovereign keypair</p>
+<h3 id="audit-layer">Audit Layer<a class="headerlink" href="#audit-layer" title="Permanent link">&para;</a></h3>
+<p>Multiple audit surfaces:
+- <code>ledger_records</code> table — primary audit trail
+- <code>cortex_execution_ledger</code> table — execution timing and returncode tracking
+- <code>ExergySentinel</code> — continuous health monitoring with HTTP dashboard
+- AOF binary file — forensic reconstruction source</p>
+<h3 id="verification-layer">Verification Layer<a class="headerlink" href="#verification-layer" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Z3 thermodynamic validation for AST mutations</li>
+<li>Ed25519 seal verification (<code>verify_zk_seal()</code>)</li>
+<li>DarkPoolZK anchor validation for swarm mutations</li>
+<li>Formal verification integration via <code>cortex/guards/virgo.py</code></li>
+</ul>
+<hr />
+<h2 id="verification-membrane">Verification Membrane<a class="headerlink" href="#verification-membrane" title="Permanent link">&para;</a></h2>
+<p>The verification membrane is the boundary between generative uncertainty and
+durable system state.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>LLM / tool / swarm proposal
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  → guard validation (14+ sovereign guards)
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  → schema / type checks (Pydantic v2)
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  → policy gate (TelemetryGate / AEON-0 ZK-Seal)
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  → Z3 thermodynamic bound verification
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  → Ed25519 sovereign sealing
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  → external verification where required
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  → cryptographic logging (SHA-256 chain + AOF + ZK-Seal)
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  → ZeroCopyRingBuffer O(1) dispatch
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  → persistence (modular subpackage)
+</code></pre></div>
+<p>The membrane exists to convert unconstrained suggestion into constrained mutation.</p>
+<hr />
+<h2 id="ledger-integrity">Ledger Integrity<a class="headerlink" href="#ledger-integrity" title="Permanent link">&para;</a></h2>
+<h3 id="canonical-ledger">Canonical Ledger<a class="headerlink" href="#canonical-ledger" title="Permanent link">&para;</a></h3>
+<p><code>cortex/ledger/</code> (<code>SovereignLedger</code>) is the canonical trust surface for the <code>cortex</code> package.
+It contains:
+- <code>ledger_core.py</code> — core ledger logic
+- <code>origin.py</code> — provenance tracking
+- <code>public_export.py</code> — public ledger export
+- <code>public_verifier.py</code> / <code>public_verifier_utils.py</code> — independent verification
+- <code>verifier.py</code> — internal verification
+- <code>writer.py</code> — canonical writer
+- <code>replay.py</code> — replay and reconstruction
+- <code>store.py</code> — persistent storage
+- <code>queue.py</code> — ledger queue management
+- <code>models.py</code> — ledger data models</p>
+<h3 id="sovereign-ledger-cortex-core">Sovereign Ledger (cortex-core)<a class="headerlink" href="#sovereign-ledger-cortex-core" title="Permanent link">&para;</a></h3>
+<p><code>cortex-core/persistence/ledger.py</code> (<code>LedgerManager</code>) implements the C5-REAL
+persistence-layer ledger for the swarm substrate. It provides:
+- SHA-256 hash-chain continuity
+- Ed25519 ZK-Seal per entry
+- AOF binary append-only file
+- Queue-based single-writer pattern (no locks on hot path)
+- Time-jacking detection
+- Bankruptcy detection and reconciliation</p>
+<h3 id="required-properties">Required Properties<a class="headerlink" href="#required-properties" title="Permanent link">&para;</a></h3>
+<ul>
+<li>append-like continuity semantics</li>
+<li>deterministic hash derivation behavior</li>
+<li>stable verification path</li>
+<li>test coverage for continuity assumptions</li>
+<li>explicit review for any change affecting link formation or verification</li>
+<li>Ed25519 seal verification for any claimed signed entry</li>
+</ul>
+<h3 id="current-implementation-contract">Current Implementation Contract<a class="headerlink" href="#current-implementation-contract" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Algorithm</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hash Chain</td>
+<td>SHA-256</td>
+<td>Ledger record continuity</td>
+</tr>
+<tr>
+<td>Sovereign Seal</td>
+<td>Ed25519</td>
+<td>Per-entry tamper-evidence</td>
+</tr>
+<tr>
+<td>AOF Binary</td>
+<td>struct.pack (C-contiguous)</td>
+<td>Forensic reconstruction</td>
+</tr>
+<tr>
+<td>Heuristic Seals</td>
+<td>SHA3-256</td>
+<td>Guard-level seal validation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="practical-rule">Practical Rule<a class="headerlink" href="#practical-rule" title="Permanent link">&para;</a></h3>
+<p>If a change can break historical verifiability, it is not a normal refactor.
+It is a trust event.</p>
+<hr />
+<h2 id="encryption-model">Encryption Model<a class="headerlink" href="#encryption-model" title="Permanent link">&para;</a></h2>
+<p>Fact content and meta are encrypted at rest via <code>cortex/crypto/</code>.</p>
+<h3 id="operational-meaning">Operational Meaning<a class="headerlink" href="#operational-meaning" title="Permanent link">&para;</a></h3>
+<ul>
+<li>sensitive payloads must not be stored plaintext</li>
+<li>decryption occurs on authorized read path</li>
+<li>key handling via OS keyring (<code>cortex/crypto/keyring.py</code>) or sovereign vault</li>
+<li>secrets must not be reintroduced unencrypted into secondary stores</li>
+<li>cryptographic shredding (<code>cortex/crypto/shredder.py</code>) for data destruction</li>
+</ul>
+<h3 id="practical-rule-encryption">Practical Rule (Encryption)<a class="headerlink" href="#practical-rule-encryption" title="Permanent link">&para;</a></h3>
+<p>"Encrypted primary store + plaintext side channel" is not security. It is cosplay.</p>
+<hr />
+<h2 id="sovereign-swarm-security">Sovereign Swarm Security<a class="headerlink" href="#sovereign-swarm-security" title="Permanent link">&para;</a></h2>
+<h3 id="zerocopyringbuffer">ZeroCopyRingBuffer<a class="headerlink" href="#zerocopyringbuffer" title="Permanent link">&para;</a></h3>
+<p>The <code>ZeroCopyRingBuffer</code> is the L4 sovereign task dispatch mechanism:</p>
+<ul>
+<li><strong>Memory</strong>: <code>mmap</code>-backed C-contiguous binary (<code>swarm_ring_vsa.bin</code>)</li>
+<li><strong>Capacity</strong>: 10,000 tasks × 256 bytes = 2.56 MB</li>
+<li><strong>Layout per task</strong>: <code>[Status:1][Timestamp:8][AgentIDHash:64][Payload:183]</code></li>
+<li><strong>Lock-free writes</strong>: <code>itertools.count()</code> atomic counter for slot reservation</li>
+<li><strong>Rust acceleration</strong>: Optional <code>cortex_rs.ZeroCopyRingBuffer</code> when compiled</li>
+<li><strong>Overflow policy</strong>: Explicit failure, not silent degradation</li>
+</ul>
+<h3 id="outboxdaemon">OutboxDaemon<a class="headerlink" href="#outboxdaemon" title="Permanent link">&para;</a></h3>
+<p>The OutboxDaemon enforces <strong>C5-REAL Sovereign Isolation</strong>:
+- Only recognized L0 interceptors execute (<code>EXA_LISP</code>, <code>QUANTUM_BRANCHING</code>, <code>AST_MUTATION</code>, <code>L1_EXTERNAL_PATCH</code>)
+- All other task types are silently rejected — no external network dispatch
+- Event-driven drain loop with zero arbitrary waits</p>
+<h3 id="ultramap-topology">UltraMap Topology<a class="headerlink" href="#ultramap-topology" title="Permanent link">&para;</a></h3>
+<p>The <code>UltramapSubstrate</code> provides O(1) spatial-temporal tracking:
+- <code>mmap</code>-backed binary (<code>ultramap.bin</code>, 96 bytes/node)
+- Exergy distance calculation using SHA-256 deterministic spatial mapping
+- Direct integration with ZeroCopyRingBuffer for swarm position updates</p>
+<hr />
+<h2 id="tenant-isolation">Tenant Isolation<a class="headerlink" href="#tenant-isolation" title="Permanent link">&para;</a></h2>
+<p>All new data operations should be tenant-aware by default.</p>
+<h3 id="risks">Risks<a class="headerlink" href="#risks" title="Permanent link">&para;</a></h3>
+<ul>
+<li>implicit defaulting in unsafe contexts</li>
+<li>missing filters in read/search paths</li>
+<li>merged indexing or caching across tenant surfaces</li>
+<li>admin tooling that assumes single-tenant world state</li>
+</ul>
+<h3 id="expectation">Expectation<a class="headerlink" href="#expectation" title="Permanent link">&para;</a></h3>
+<p>Isolation must be explicit in APIs, search, caching, and persistence behavior.</p>
+<hr />
+<h2 id="audit-trails">Audit Trails<a class="headerlink" href="#audit-trails" title="Permanent link">&para;</a></h2>
+<p>The audit system exists for:</p>
+<ul>
+<li>forensic reconstruction (AOF binary + SQLite ledger)</li>
+<li>compliance evidence (EU AI Act traceability)</li>
+<li>mutation traceability (Ed25519 seals)</li>
+<li>incident investigation (ExergySentinel telemetry)</li>
+<li>operational trust (execution ledger timing data)</li>
+</ul>
+<p>Auditability is not a substitute for correctness.
+It is the condition that makes correctness failures inspectable.</p>
+<hr />
+<h2 id="compliance-posture">Compliance Posture<a class="headerlink" href="#compliance-posture" title="Permanent link">&para;</a></h2>
+<p>CORTEX positions audit trails, decision traceability, and deterministic validation
+as foundations for regulated AI environments, including EU AI Act-adjacent needs.</p>
+<p>This should be stated carefully.</p>
+<p><strong>Correct Claim:</strong>
+"The system is designed to support traceability, auditability, and constrained
+state mutation via SHA-256 hash-chains, Ed25519 sovereign seals, and append-only
+binary ledger files."</p>
+<p><strong>Weak Claim:</strong>
+"The system is compliant because we said 'compliance' near some hashes."</p>
+<p>Compliance is not a vibe. It is evidence.</p>
+<blockquote>
+<p>For vulnerability disclosure and reporting, see <a href="https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md"><code>SECURITY.md</code></a>.</p>
+</blockquote>
+<hr />
+<h2 id="failure-domains">Failure Domains<a class="headerlink" href="#failure-domains" title="Permanent link">&para;</a></h2>
+<p>Critical failure domains include:</p>
+<ul>
+<li>write-path validation</li>
+<li>ledger integrity (both SQLite and AOF binary layers)</li>
+<li>Ed25519 key management (loss of <code>cortex_sovereign.pem</code> breaks seal verification)</li>
+<li>migrations</li>
+<li>tenant isolation</li>
+<li>async transactional correctness (single-writer queue pattern)</li>
+<li>policy bypass (TelemetryGate, AEON-0 ZK-Seal checks)</li>
+<li>index consistency</li>
+<li>external provider misclassification or drift</li>
+<li>ZeroCopyRingBuffer overflow under sustained load</li>
+<li>mmap file corruption or truncation</li>
+<li>EXA-LISP exergy budget bypass</li>
+<li>AEON-0 Z3 validator circumvention</li>
+</ul>
+<p>These domains deserve explicit review before release.</p>
+<hr />
+<h2 id="release-review-checklist-for-trust-surfaces">Release Review Checklist for Trust Surfaces<a class="headerlink" href="#release-review-checklist-for-trust-surfaces" title="Permanent link">&para;</a></h2>
+<p>Before release, review:</p>
+<ul>
+<li>[ ] guard behavior changes (14+ guards in <code>cortex/guards/</code>)</li>
+<li>[ ] ledger continuity changes (SHA-256 chain, AOF format, Ed25519 seal)</li>
+<li>[ ] encryption path changes (<code>cortex/crypto/</code>)</li>
+<li>[ ] policy/gate changes (TelemetryGate, AEON-0 admission)</li>
+<li>[ ] migration safety</li>
+<li>[ ] tenant isolation behavior</li>
+<li>[ ] async cancellation/timeout behavior (single-writer signer loop)</li>
+<li>[ ] audit event completeness</li>
+<li>[ ] API surfaces that can mutate state</li>
+<li>[ ] ZeroCopyRingBuffer memory layout changes</li>
+<li>[ ] UltraMap topology binary format changes</li>
+<li>[ ] EXA-LISP exergy bound enforcement</li>
+<li>[ ] AEON-0 Z3 thermodynamic validator bounds</li>
+<li>[ ] sovereign keypair rotation or format changes</li>
+<li>[ ] AOF struct format changes (backward compatibility)</li>
+</ul>
+<hr />
+<h2 id="guiding-rule">Guiding Rule<a class="headerlink" href="#guiding-rule" title="Permanent link">&para;</a></h2>
+<p>CORTEX does not make models truthful.
+It reduces their freedom to contaminate persistent state.</p>
+<hr />
+<h2 id="related-documents">Related Documents<a class="headerlink" href="#related-documents" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md"><code>SECURITY.md</code></a></li>
+<li><a href="https://github.com/borjamoskv/Cortex-Persist/blob/main/AGENTS.md"><code>AGENTS.md</code></a></li>
+<li><a href="../architecture/"><code>architecture.md</code></a></li>
+<li><a href="../AXIOMS/"><code>AXIOMS.md</code></a></li>
+<li><a href="../CONTRIBUTING/"><code>CONTRIBUTING.md</code></a></li>
+<li><a href="../OPERATIONS/"><code>OPERATIONS.md</code></a></li>
+<li><a href="../CORTEX_ARCHITECTURE_WHITEPAPER/"><code>CORTEX_ARCHITECTURE_WHITEPAPER.md</code></a></li>
+<li><a href="../thermodynamic-enforcement/"><code>thermodynamic-enforcement.md</code></a></li>
+<li><a href="../IMMUNITY-LAYER/"><code>IMMUNITY-LAYER.md</code></a></li>
+<li><a href="../RFC_02_CORTEX_SECURITY_SPEC/"><code>RFC_02_CORTEX_SECURITY_SPEC.md</code></a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      © 2026 MOSKV-1 Sovereign Systems · Apache 2.0
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/borjamoskv" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M357.2 48h70.6L273.6 224.2 455 464H313L201.7 318.6 74.5 464H3.8l164.9-188.5L-5.2 48h145.6l100.5 132.9zm-24.8 373.8h39.1L119.1 88h-42z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tabs", "navigation.tabs.sticky", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

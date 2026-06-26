@@ -1,0 +1,240 @@
+Home copy lista para pegar en cortexpersist.com (V2 Pulida)
+
+Hero
+
+Memory and decision lineage for autonomous systems.
+
+Context that persists. History that can be audited. Cryptographic proof for AI agents that require more than a transient prompt window.
+
+[Get Started] [View Demo]
+
+⸻
+
+Proof strip
+
+Store with intent
+Capture decisions, operational states, and errors as typed, structured memory.
+
+Verify with cryptography
+Anchor every state change to a tamper-evident ledger.
+
+Retrieve with precision
+Hybrid search that recovers exact context, bypassing semantic noise.
+
+⸻
+
+Problem
+
+Agents can act. They cannot remember.
+
+Current AI systems excel at generation but fail at continuity. They act, call tools, and produce plausible output—but lack durable, operational memory.
+
+Without a verification substrate, autonomous systems drift. They repeat work, lose context, and leave no audit trail.
+
+Right now, your agents don't have memory.
+They have disjointed logs, short-lived context windows, and optimism.
+
+⸻
+
+Solution
+
+CORTEX-Persist is the trust layer for autonomous execution.
+
+A local-first memory and verification substrate built so your AI can remember, retrieve, and cryptographically prove what happened.
+
+It unifies:
+	•	Typed, structured memory
+	•	Tamper-evident hash chaining
+	•	Hybrid semantic & lexical retrieval
+	•	Memory lifecycle governance
+	•	Audit-ready operational history
+
+Your stack shouldn't just predict the next token.
+It must preserve operational truth under pressure.
+
+⸻
+
+Demo section
+
+From event to evidence in under a minute
+
+1. Store memory
+
+cortex store "Vendor X failed compliance check" \
+  --type decision \
+  --project procurement \
+  --confidence C4 \
+  --source agent:reviewer
+
+2. Generate lineage
+
+Each write can be chained into a tamper-evident ledger with transaction ID, timestamp, hash, and previous hash.
+
+3. Retrieve context
+
+cortex search "compliance vendor failure"
+
+4. Verify integrity
+
+cortex verify-ledger
+
+Result: persistent memory with searchable context and verifiable history.
+
+[Run the Demo] [Read the Docs]
+
+⸻
+
+Feature grid
+
+Built for memory that survives contact with reality.
+
+Structured Memory
+
+Store facts, decisions, and discoveries as typed units with metadata, confidence scores, and temporal validity.
+
+Tamper-Evident Ledger
+
+Attach cryptographic lineage to memory operations. Decision history is mathematically proven, not left to interpretation.
+
+Hybrid Retrieval
+
+Combine semantic and lexical retrieval for context that is actually reusable in live systems.
+
+Memory Governance
+
+Promote, compact, decay, or archive memory. Don't turn your agent's context into a permanent landfill.
+
+Local-First Runtime
+
+Start locally with SQLite and sqlite-vec. Extend seamlessly to cloud vector backends when scale requires it.
+
+Audit-Ready History
+
+Support internal review, compliance workflows, and forensic post-mortems with hard evidence instead of reconstruction theater.
+
+⸻
+
+Use cases
+
+Where CORTEX-Persist becomes mandatory
+
+Tool-Using Agents
+
+Unify reliable context across step-transitions, sessions, and agent boundaries.
+
+Long-Running Automation
+
+Eliminate repetition, drift, and amnesia in workflows that operate over extended timeframes.
+
+Compliance & Audit
+
+Maintain strict, verifiable operational histories for regulated or review-heavy environments.
+
+Decision Systems
+
+Track not just what the model decided, but the exact lineage of why.
+
+⸻
+
+Why not just use a vector database?
+
+Because similarity is not lineage.
+
+A vector database retrieves related text. It cannot tell you what was stored, when it mutated, how it was derived, or if the history was tampered with.
+
+CORTEX-Persist adds the missing primitives:
+	•	Typed memory structs
+	•	Temporal validity
+	•	Confidence levels
+	•	Cryptographic lineage
+	•	Governed lifecycles
+
+Memory without integrity is just plausible storage.
+
+⸻
+
+Technical credibility
+
+Built for real systems, not benchmark cosplay.
+	•	Python-first architecture
+	•	SQLite + sqlite-vec by default
+	•	Optional cloud extensions
+	•	Encryption at rest
+	•	Async-native design
+	•	Typed package support
+
+This is infrastructure for systems that operate repeatedly, not a one-shot prompt wrapper.
+
+⸻
+
+CTA block
+
+Make your AI stack remember with evidence.
+
+Start with persistent memory.
+Add lineage when memory starts to matter.
+Keep both when accountability becomes non-negotiable.
+
+[Get Started] [View Demo] [GitHub]
+
+⸻
+
+GitHub description
+
+Tamper-evident memory and decision lineage for AI agents.
+
+⸻
+
+README opening
+
+CORTEX-Persist is a local-first memory and trust layer for AI systems that need persistent context, cryptographic lineage, and audit-ready history.
+
+⸻
+
+Microcopy extra
+
+Nav
+	•	Product
+	•	Demo
+	•	Docs
+	•	GitHub
+	•	Security
+
+CTA variants
+	•	Get Started
+	•	View Demo
+	•	Read the Docs
+	•	Explore GitHub
+	•	Verify the Ledger
+
+Footer one-liner
+
+Persistent memory for AI systems that need evidence, not vibes.
+
+⸻
+
+Notas de implementación
+
+El orden correcto arriba del fold es:
+	1.	hero
+	2.	proof strip de 3 bloques
+	3.	problema
+	4.	solución
+	5.	demo
+	6.	features
+	7.	use cases
+	8.	technical credibility
+	9.	CTA final
+
+No metas termodinámica, Ω ni doctrina en el primer scroll.
+Eso va en una página aparte tipo Architecture / Principles / Why CORTEX.
+
+Edge variant más agresiva
+
+Hero alternativo
+
+Your AI can act. Now make it accountable.
+
+Sub
+
+Persistent memory, tamper-evident lineage, and audit-ready history for systems that cannot afford amnesia.

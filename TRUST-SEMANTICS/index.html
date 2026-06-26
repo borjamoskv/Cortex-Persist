@@ -1,0 +1,4712 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Trust Infrastructure for Autonomous AI — cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.">
+      
+      
+      
+        <link rel="canonical" href="https://cortexpersist.com/TRUST-SEMANTICS/">
+      
+      
+        <link rel="prev" href="../SDK-SURFACE/">
+      
+      
+        <link rel="next" href="../EVENT-MODEL/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/main/src/assets/logo-white.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Trust Semantics - CORTEX Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../stylesheets/industrial_noir.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="lime">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#rfc-sortu-trust-semantics-v01" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="https://cortexpersist.com" title="CORTEX Documentation" class="md-header__button md-logo" aria-label="CORTEX Documentation" data-md-component="logo">
+      
+  <img src="https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/main/src/assets/logo-white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            CORTEX Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Trust Semantics
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="lime"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/borjamoskv/Cortex-Persist" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    borjamoskv/Cortex-Persist
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../competitors/" class="md-tabs__link">
+          
+  
+  
+  Evaluation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../personas/builder/" class="md-tabs__link">
+          
+  
+  
+  By Role
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../product-surface/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../architecture/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../developer-guide/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../SECURITY_TRUST_MODEL/" class="md-tabs__link">
+          
+  
+  
+  Compliance & Security
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../course/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../SINTETOLOGÍA AGÉNTICA.md" class="md-tabs__link">
+          
+  
+  
+  Project
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="https://cortexpersist.com" title="CORTEX Documentation" class="md-nav__button md-logo" aria-label="CORTEX Documentation" data-md-component="logo">
+      
+  <img src="https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/main/src/assets/logo-white.svg" alt="logo">
+
+    </a>
+    CORTEX Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/borjamoskv/Cortex-Persist" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    borjamoskv/Cortex-Persist
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../competitors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Comparisons vs. Vector DBs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integration_stacks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How it fits your stack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../audit_pack_anatomy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Audit Pack Anatomy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    By Role
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    By Role
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/builder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Builder (Hello World)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/security_lead/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Lead
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/compliance_buyer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance & Buyers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/architect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Systems Architect
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../product-surface/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Public Product Surface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture-crystallization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Crystallization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../skills/SKILL-TAXONOMY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Skill Taxonomy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CORTEX-CAPABILITIES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capabilities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SDK-SURFACE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SDK Surface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trust Semantics
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trust Semantics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Purpose
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-trust-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Trust Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-foundational-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Foundational Principles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Foundational Principles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-no-false-confidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 No false confidence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-silence-is-not-neutrality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Silence is not neutrality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-rejection-is-informative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Rejection is informative
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-failure-is-operational-not-moral" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Failure is operational, not moral
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-evidence-is-cumulative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Evidence is cumulative
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-degradation-must-be-visible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Degradation must be visible
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-trust-dimensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Trust Dimensions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Trust Dimensions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-provenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Provenance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-causality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Causality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-integrity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Integrity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-policy-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Policy posture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-taint-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Taint posture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-runtime-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Runtime posture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-evidence-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Evidence Levels
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Evidence Levels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-canonical-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Canonical levels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Semantics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-trust-grades-optional-aggregate-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Trust Grades (Optional Aggregate View)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-degraded-mode-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Degraded Mode Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Degraded Mode Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Definition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-visibility-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Visibility requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-required-behavior-under-degraded-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Required behavior under degraded mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-rejection-vs-failure-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Rejection vs Failure Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Rejection vs Failure Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-rejection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Rejection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-hard-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Hard rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-integrity-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Integrity Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Integrity Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-integrity-does-not-mean-truth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Integrity does not mean truth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-public-integrity-states" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Public integrity states
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Semantics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-verification-scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Verification scopes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#95-verify-result-expectations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.5 Verify result expectations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#96-legacy-path-warning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.6 Legacy path warning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-taint-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Taint Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Taint Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Definition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-taint-is-not-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Taint is not binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-suggested-interpretation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Suggested interpretation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#104-public-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 Public behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#105-open-vs-premium-guidance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.5 Open vs premium guidance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-query-trust-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Query Trust Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Query Trust Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-query-is-not-just-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Query is not just retrieval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-required-semantics-for-queryresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Required semantics for QueryResult
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-intent-specific-expectations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Intent-specific expectations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-confidence-vs-trust" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Confidence vs trust
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-write-path-trust-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Write Path Trust Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Write Path Trust Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-a-successful-write-is-not-just-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 A successful write is not just storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-a-rejected-write-is-governance-not-breakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 A rejected write is governance, not breakage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-a-write-under-degraded-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 A write under degraded mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-coordination-trust-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Coordination Trust Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Coordination Trust Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-consensus-is-not-omniscience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Consensus is not omniscience
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-required-caution-zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Required caution zones
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-coordination-truth-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Coordination truth posture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-runtime-truth-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Runtime Truth Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Runtime Truth Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141-health-is-operational-truth-not-decoration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.1 health() is operational truth, not decoration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142-capabilities-is-contractual-truth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.2 capabilities() is contractual truth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#143-contractual-expectations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.3 Contractual expectations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-trust-aware-error-code-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Trust-Aware Error Code Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="15. Trust-Aware Error Code Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#151-rejection-codes-imply-governance-meaning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.1 Rejection codes imply governance meaning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#152-failure-codes-imply-operational-meaning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.2 Failure codes imply operational meaning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#153-code-stability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.3 Code stability
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-trust-semantics-for-exports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Trust Semantics for Exports
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="16. Trust Semantics for Exports">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-canonical-export-truth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.1 Canonical export truth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#162-export-adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.2 Export adapters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Non-Goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-final-position" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Final Position
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../EVENT-MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ERROR-CODE-REGISTRY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error Code Registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operating-axioms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operating Axioms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../knowledge-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Knowledge Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../peano-soberano.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Peano Soberano (7 Axioms)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Classes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MCP Server
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sdks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SDKs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cross_platform_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cross-Platform
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance & Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compliance & Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SECURITY_TRUST_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Trust Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deep Change Protocols
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../OPERATIONS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AXIOMS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Axioms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../axiom-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Axiom Registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    EU AI Act Compliance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sovereign-infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sovereign Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../course/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Suite
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/langchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory for LangChain Agents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/consensus/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Agent Consensus
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/temporal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Time-Travel Debugging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/daemon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Site Monitoring Daemon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SINTETOLOGÍA AGÉNTICA.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sintetología Agéntica
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sovereign_agent_manifesto.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sovereign Agent Manifesto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vibe_coding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sovereign Vibe-Coding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Purpose
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-trust-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Trust Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-foundational-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Foundational Principles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Foundational Principles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-no-false-confidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 No false confidence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-silence-is-not-neutrality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Silence is not neutrality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-rejection-is-informative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Rejection is informative
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-failure-is-operational-not-moral" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Failure is operational, not moral
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-evidence-is-cumulative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Evidence is cumulative
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-degradation-must-be-visible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Degradation must be visible
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-trust-dimensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Trust Dimensions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Trust Dimensions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-provenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Provenance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-causality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Causality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-integrity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Integrity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-policy-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Policy posture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-taint-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Taint posture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-runtime-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Runtime posture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-evidence-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Evidence Levels
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Evidence Levels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-canonical-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Canonical levels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Semantics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-trust-grades-optional-aggregate-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Trust Grades (Optional Aggregate View)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-degraded-mode-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Degraded Mode Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Degraded Mode Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Definition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-visibility-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Visibility requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-required-behavior-under-degraded-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Required behavior under degraded mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-rejection-vs-failure-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Rejection vs Failure Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Rejection vs Failure Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-rejection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Rejection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-hard-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Hard rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-integrity-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Integrity Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Integrity Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-integrity-does-not-mean-truth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Integrity does not mean truth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-public-integrity-states" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Public integrity states
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Semantics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-verification-scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Verification scopes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#95-verify-result-expectations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.5 Verify result expectations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#96-legacy-path-warning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.6 Legacy path warning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-taint-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Taint Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Taint Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Definition
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-taint-is-not-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Taint is not binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-suggested-interpretation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Suggested interpretation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#104-public-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 Public behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#105-open-vs-premium-guidance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.5 Open vs premium guidance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-query-trust-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Query Trust Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Query Trust Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-query-is-not-just-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Query is not just retrieval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-required-semantics-for-queryresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Required semantics for QueryResult
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-intent-specific-expectations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Intent-specific expectations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-confidence-vs-trust" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Confidence vs trust
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-write-path-trust-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Write Path Trust Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Write Path Trust Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-a-successful-write-is-not-just-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 A successful write is not just storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-a-rejected-write-is-governance-not-breakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 A rejected write is governance, not breakage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-a-write-under-degraded-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 A write under degraded mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-coordination-trust-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Coordination Trust Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Coordination Trust Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-consensus-is-not-omniscience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Consensus is not omniscience
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-required-caution-zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Required caution zones
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-coordination-truth-posture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Coordination truth posture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-runtime-truth-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Runtime Truth Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Runtime Truth Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141-health-is-operational-truth-not-decoration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.1 health() is operational truth, not decoration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142-capabilities-is-contractual-truth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.2 capabilities() is contractual truth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#143-contractual-expectations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.3 Contractual expectations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-trust-aware-error-code-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Trust-Aware Error Code Semantics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="15. Trust-Aware Error Code Semantics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#151-rejection-codes-imply-governance-meaning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.1 Rejection codes imply governance meaning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#152-failure-codes-imply-operational-meaning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.2 Failure codes imply operational meaning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#153-code-stability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.3 Code stability
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-trust-semantics-for-exports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Trust Semantics for Exports
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="16. Trust Semantics for Exports">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-canonical-export-truth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.1 Canonical export truth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#162-export-adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.2 Export adapters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Non-Goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-final-position" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Final Position
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!-- [C5-REAL] Exergy-Maximized -->
+<h1 id="rfc-sortu-trust-semantics-v01">RFC: SORTU-Ω Trust Semantics v0.1<a class="headerlink" href="#rfc-sortu-trust-semantics-v01" title="Permanent link">&para;</a></h1>
+<p>Status: Draft
+Program: ORTU-Ω Forge
+Codename: SORTU-Ω
+Last Updated: 2026-03-14
+Audience: SDK consumers, platform engineers, compliance integrators, runtime maintainers</p>
+<hr />
+<h2 id="1-purpose">1. Purpose<a class="headerlink" href="#1-purpose" title="Permanent link">&para;</a></h2>
+<p>This document defines the <strong>trust semantics</strong> that govern SORTU-Ω public behavior.</p>
+<p><code>SDK-SURFACE.md</code> defines the shape of the API.
+This document defines the meaning of its outputs.</p>
+<p>It specifies:</p>
+<ul>
+<li>evidence levels</li>
+<li>degraded mode semantics</li>
+<li>rejection vs failure semantics</li>
+<li>integrity semantics</li>
+<li>taint semantics</li>
+<li>trust expectations for retrieval, write, verification, and coordination flows</li>
+</ul>
+<p>The goal is simple:</p>
+<blockquote>
+<p>the system must not merely produce results; it must make their trust posture legible.</p>
+</blockquote>
+<hr />
+<h2 id="2-trust-model">2. Trust Model<a class="headerlink" href="#2-trust-model" title="Permanent link">&para;</a></h2>
+<p>SORTU-Ω is not a generic retrieval engine.
+It is a <strong>stateful trust layer</strong>.</p>
+<p>Trust is represented through composition of:</p>
+<ol>
+<li><strong>provenance</strong> — where a result came from</li>
+<li><strong>causality</strong> — how it came to exist</li>
+<li><strong>integrity</strong> — whether its surrounding chain is structurally valid</li>
+<li><strong>policy posture</strong> — whether it passed applicable rules</li>
+<li><strong>taint posture</strong> — whether error or contamination risk has propagated into it</li>
+<li><strong>runtime posture</strong> — whether the system is operating in normal or degraded conditions</li>
+</ol>
+<p>Trust is never binary in the public surface.
+It is exposed as a set of machine-readable signals.</p>
+<hr />
+<h2 id="3-foundational-principles">3. Foundational Principles<a class="headerlink" href="#3-foundational-principles" title="Permanent link">&para;</a></h2>
+<h3 id="31-no-false-confidence">3.1 No false confidence<a class="headerlink" href="#31-no-false-confidence" title="Permanent link">&para;</a></h3>
+<p>The system MUST NOT present degraded, weakly sourced, or weakly verified results as if they were equivalent to fully traceable or verified results.</p>
+<h3 id="32-silence-is-not-neutrality">3.2 Silence is not neutrality<a class="headerlink" href="#32-silence-is-not-neutrality" title="Permanent link">&para;</a></h3>
+<p>If important retrieval, policy, or verification signals are missing, that absence SHOULD be surfaced as reduced trust, not hidden as normalcy.</p>
+<h3 id="33-rejection-is-informative">3.3 Rejection is informative<a class="headerlink" href="#33-rejection-is-informative" title="Permanent link">&para;</a></h3>
+<p>A rejected operation is still a successful act of governance if the rejection is intentional, explainable, and machine-readable.</p>
+<h3 id="34-failure-is-operational-not-moral">3.4 Failure is operational, not moral<a class="headerlink" href="#34-failure-is-operational-not-moral" title="Permanent link">&para;</a></h3>
+<p>A component outage or dependency failure is not a policy decision. It MUST be represented as a technical failure, not disguised as rejection.</p>
+<h3 id="35-evidence-is-cumulative">3.5 Evidence is cumulative<a class="headerlink" href="#35-evidence-is-cumulative" title="Permanent link">&para;</a></h3>
+<p>Trust increases when multiple dimensions align:
+- provenance exists
+- lineage exists
+- integrity holds
+- taint is absent or low
+- runtime is healthy</p>
+<h3 id="36-degradation-must-be-visible">3.6 Degradation must be visible<a class="headerlink" href="#36-degradation-must-be-visible" title="Permanent link">&para;</a></h3>
+<p>If runtime degradation materially changes retrieval quality, verification power, or governance enforcement, public outputs MUST reflect it.</p>
+<hr />
+<h2 id="4-trust-dimensions">4. Trust Dimensions<a class="headerlink" href="#4-trust-dimensions" title="Permanent link">&para;</a></h2>
+<h3 id="41-provenance">4.1 Provenance<a class="headerlink" href="#41-provenance" title="Permanent link">&para;</a></h3>
+<p>Provenance answers:
+- where did this item come from?
+- what subsystem produced or stored it?
+- what identifiers anchor it?</p>
+<p>Minimum provenance may include:
+- source subsystem
+- fact/tx/decision identifier
+- timestamp
+- tenant/project scope</p>
+<h3 id="42-causality">4.2 Causality<a class="headerlink" href="#42-causality" title="Permanent link">&para;</a></h3>
+<p>Causality answers:
+- what prior decision, write, or event led to this item?
+- what parent or predecessor relationship exists?
+- can lineage be traversed?</p>
+<h3 id="43-integrity">4.3 Integrity<a class="headerlink" href="#43-integrity" title="Permanent link">&para;</a></h3>
+<p>Integrity answers:
+- is the relevant chain structurally intact?
+- does the system have evidence that ledger/hash/Merkle checks passed?
+- was verification full, partial, or unavailable?</p>
+<h3 id="44-policy-posture">4.4 Policy posture<a class="headerlink" href="#44-policy-posture" title="Permanent link">&para;</a></h3>
+<p>Policy posture answers:
+- was the operation or item accepted under current rules?
+- was it blocked, quarantined, downgraded, or passed?</p>
+<h3 id="45-taint-posture">4.5 Taint posture<a class="headerlink" href="#45-taint-posture" title="Permanent link">&para;</a></h3>
+<p>Taint posture answers:
+- is the item downstream from known contradictions, failures, or suspect parents?
+- has trust been downgraded through propagation?</p>
+<h3 id="46-runtime-posture">4.6 Runtime posture<a class="headerlink" href="#46-runtime-posture" title="Permanent link">&para;</a></h3>
+<p>Runtime posture answers:
+- was the system healthy when the operation occurred?
+- were required capabilities available?
+- were important fallbacks triggered?</p>
+<hr />
+<h2 id="5-evidence-levels">5. Evidence Levels<a class="headerlink" href="#5-evidence-levels" title="Permanent link">&para;</a></h2>
+<p>Evidence levels communicate the minimum trust visibility attached to a result.</p>
+<h3 id="51-canonical-levels">5.1 Canonical levels<a class="headerlink" href="#51-canonical-levels" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypedDict</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">QueryEvidenceLevel</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">level</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;basic&quot;</span><span class="p">,</span> <span class="s2">&quot;traceable&quot;</span><span class="p">,</span> <span class="s2">&quot;verified&quot;</span><span class="p">]</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+</code></pre></div>
+<h3 id="52-semantics">5.2 Semantics<a class="headerlink" href="#52-semantics" title="Permanent link">&para;</a></h3>
+<p><strong>none</strong>
+The result exists, but the public surface cannot attach meaningful provenance or trust evidence.</p>
+<p>Typical cases:
+- raw text match
+- minimal metadata
+- transient or weakly anchored retrieval
+- degraded subsystem with no lineage available</p>
+<p><em>This level SHOULD be treated as informational, not strongly trusted.</em></p>
+<p><strong>basic</strong>
+The result has basic provenance and metadata but no strong causal chain.</p>
+<p>Typical cases:
+- source and timestamp known
+- stable fact ID exists
+- no trace expansion requested or available
+- integrity state not attached</p>
+<p><em>This level is usable for general retrieval but weak for audit or compliance workflows.</em></p>
+<p><strong>traceable</strong>
+The result can be linked to causal lineage.</p>
+<p>Typical cases:
+- causal chain exists
+- trace ID or parent decision link exists
+- provenance is stable enough to follow backward</p>
+<p><em>This is the minimum serious level for trust-centric workflows.</em></p>
+<p><strong>verified</strong>
+The result is linked to or embedded in verified integrity state.</p>
+<p>Typical cases:
+- ledger/hash/Merkle checks passed
+- verification completed recently enough to be relevant
+- chain state is structurally valid
+- evidence is not merely present, but structurally checked</p>
+<p><em>This is the strongest public trust level.</em></p>
+<h3 id="53-rules">5.3 Rules<a class="headerlink" href="#53-rules" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Systems MUST NOT emit <code>verified</code> without actual integrity basis.</li>
+<li>Systems SHOULD NOT emit <code>traceable</code> if no meaningful lineage can be traversed.</li>
+<li>Systems MAY downgrade a result’s evidence level under degraded mode.</li>
+<li><code>intent="audit"</code> SHOULD preferentially return <code>traceable</code> or <code>verified</code> items where possible.</li>
+</ul>
+<hr />
+<h2 id="6-trust-grades-optional-aggregate-view">6. Trust Grades (Optional Aggregate View)<a class="headerlink" href="#6-trust-grades-optional-aggregate-view" title="Permanent link">&para;</a></h2>
+<p>Some consumers may want a higher-level summary beyond evidence levels.</p>
+<p>A runtime MAY expose an aggregate trust grade:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypedDict</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">TrustGrade</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">grade</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;T0&quot;</span><span class="p">,</span> <span class="s2">&quot;T1&quot;</span><span class="p">,</span> <span class="s2">&quot;T2&quot;</span><span class="p">,</span> <span class="s2">&quot;T3&quot;</span><span class="p">]</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+</code></pre></div>
+<p><strong>Suggested interpretation</strong>
+- T0 — low trust / informational only
+- T1 — provenance known
+- T2 — causally traceable
+- T3 — integrity-backed / verified</p>
+<p><em>This is optional and MUST NOT replace the underlying explicit signals.</em></p>
+<hr />
+<h2 id="7-degraded-mode-semantics">7. Degraded Mode Semantics<a class="headerlink" href="#7-degraded-mode-semantics" title="Permanent link">&para;</a></h2>
+<p>Degraded mode is a first-class trust signal, not a hidden implementation detail.</p>
+<h3 id="71-definition">7.1 Definition<a class="headerlink" href="#71-definition" title="Permanent link">&para;</a></h3>
+<p>A system is in degraded mode when one or more unavailable, stale, or impaired components materially affects:
+- retrieval quality
+- verification power
+- policy enforcement
+- coordination confidence
+- export fidelity</p>
+<h3 id="72-examples">7.2 Examples<a class="headerlink" href="#72-examples" title="Permanent link">&para;</a></h3>
+<p>The following SHOULD trigger visible degradation signals when materially relevant:
+- embedder unavailable
+- vector retrieval disabled
+- graph enrichment unavailable
+- ledger verification stale or pending
+- taint propagation unavailable
+- event bus unavailable where required for coordination visibility
+- agent liveness unknown
+- export adapter unavailable
+- memory portability/export unavailable when explicitly requested</p>
+<h3 id="73-visibility-requirements">7.3 Visibility requirements<a class="headerlink" href="#73-visibility-requirements" title="Permanent link">&para;</a></h3>
+<p>Degraded mode SHOULD become visible through one or more of:
+- <code>HealthReport.status = "degraded"</code>
+- <code>HealthReport.degraded_features</code>
+- <code>AcceptanceResult.warnings</code>
+- <code>QueryPlan.degraded_mode = true</code>
+- <code>QueryPlan.fallback_reason</code>
+- lowered <code>QueryEvidenceLevel</code>
+- <code>FailureResult</code> when a forced strategy or capability cannot be honored</p>
+<h3 id="74-required-behavior-under-degraded-mode">7.4 Required behavior under degraded mode<a class="headerlink" href="#74-required-behavior-under-degraded-mode" title="Permanent link">&para;</a></h3>
+<p><strong>For strategy="auto"</strong>
+The system MAY fallback to a weaker route, but MUST expose:
+- chosen strategy
+- fallback reason
+- degraded mode</p>
+<p><strong>For forced strategy requests</strong>
+If the requested route cannot be honored:
+- return <code>FailureResult</code>, or
+- only fallback if explicit contract allows it</p>
+<p><em>Silent substitution is forbidden.</em></p>
+<p><strong>For intent="audit"</strong>
+The system SHOULD be more conservative:
+- downgrade confidence aggressively when evidence weakens
+- prefer fewer trustworthy results over many weak ones
+- surface provenance gaps
+- avoid presenting degraded results as equivalent to healthy-path results</p>
+<hr />
+<h2 id="8-rejection-vs-failure-semantics">8. Rejection vs Failure Semantics<a class="headerlink" href="#8-rejection-vs-failure-semantics" title="Permanent link">&para;</a></h2>
+<p>This distinction is non-negotiable.</p>
+<h3 id="81-rejection">8.1 Rejection<a class="headerlink" href="#81-rejection" title="Permanent link">&para;</a></h3>
+<p>A rejection means:</p>
+<p><em>the system intentionally refused an operation according to rule, policy, trust posture, or governance logic.</em></p>
+<p>It is not a crash.
+It is not a missing dependency.
+It is an act of enforcement.</p>
+<p>Canonical shape:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">RejectionResult</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">ok</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;rejection&quot;</span><span class="p">]</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">category</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;policy&quot;</span><span class="p">,</span> <span class="s2">&quot;safety&quot;</span><span class="p">,</span> <span class="s2">&quot;consistency&quot;</span><span class="p">,</span> <span class="s2">&quot;integrity&quot;</span><span class="p">,</span> <span class="s2">&quot;compliance&quot;</span><span class="p">]</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">code</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">layer</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;guard&quot;</span><span class="p">,</span> <span class="s2">&quot;membrane&quot;</span><span class="p">,</span> <span class="s2">&quot;policy&quot;</span><span class="p">,</span> <span class="s2">&quot;verification&quot;</span><span class="p">]</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">rule_id</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">severity</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;low&quot;</span><span class="p">,</span> <span class="s2">&quot;medium&quot;</span><span class="p">,</span> <span class="s2">&quot;high&quot;</span><span class="p">,</span> <span class="s2">&quot;critical&quot;</span><span class="p">]</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">evidence</span><span class="p">:</span> <span class="nb">list</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">remediation</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span>
+</code></pre></div>
+<h3 id="82-failure">8.2 Failure<a class="headerlink" href="#82-failure" title="Permanent link">&para;</a></h3>
+<p>A failure means:</p>
+<p><em>the system could not perform the requested operation due to runtime or dependency conditions.</em></p>
+<p>Canonical shape:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">FailureResult</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">ok</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;failure&quot;</span><span class="p">]</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">category</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;dependency&quot;</span><span class="p">,</span> <span class="s2">&quot;storage&quot;</span><span class="p">,</span> <span class="s2">&quot;runtime&quot;</span><span class="p">,</span> <span class="s2">&quot;timeout&quot;</span><span class="p">,</span> <span class="s2">&quot;capability&quot;</span><span class="p">]</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">code</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">retryable</span><span class="p">:</span> <span class="nb">bool</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">component</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span>
+</code></pre></div>
+<h3 id="83-hard-rules">8.3 Hard rules<a class="headerlink" href="#83-hard-rules" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Dependency outages MUST NOT be represented as rejections.</li>
+<li>Policy blocks MUST NOT be represented as failures.</li>
+<li>Consumers MUST be able to distinguish governance posture from runtime instability.</li>
+</ul>
+<h3 id="84-examples">8.4 Examples<a class="headerlink" href="#84-examples" title="Permanent link">&para;</a></h3>
+<p><strong>Rejection</strong>
+- contradiction detected
+- taint threshold exceeded
+- policy blocked scope
+- deprecated write path blocked
+- quorum denied under governance rules</p>
+<p><strong>Failure</strong>
+- embedder offline
+- database lock timeout
+- ledger I/O failure
+- capability disabled at runtime
+- event dispatch failure
+- verification scope invalid due to malformed input</p>
+<hr />
+<h2 id="9-integrity-semantics">9. Integrity Semantics<a class="headerlink" href="#9-integrity-semantics" title="Permanent link">&para;</a></h2>
+<p>Integrity is the public representation of structural validity around stored or inferred state.</p>
+<h3 id="91-integrity-does-not-mean-truth">9.1 Integrity does not mean truth<a class="headerlink" href="#91-integrity-does-not-mean-truth" title="Permanent link">&para;</a></h3>
+<p>Integrity means:
+- chain structure is consistent
+- cryptographic or structural checks passed
+- the record has not obviously drifted from its expected lineage or checkpoint basis</p>
+<p>It does NOT mean:
+- the content is philosophically true
+- the source is omniscient
+- the model never hallucinated upstream</p>
+<h3 id="92-public-integrity-states">9.2 Public integrity states<a class="headerlink" href="#92-public-integrity-states" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypedDict</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">IntegrityState</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">status</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">,</span> <span class="s2">&quot;partial&quot;</span><span class="p">,</span> <span class="s2">&quot;verified&quot;</span><span class="p">,</span> <span class="s2">&quot;failed&quot;</span><span class="p">,</span> <span class="s2">&quot;stale&quot;</span><span class="p">]</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+</code></pre></div>
+<h3 id="93-semantics">9.3 Semantics<a class="headerlink" href="#93-semantics" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>unknown</strong> — no integrity evaluation available</li>
+<li><strong>partial</strong> — only subset or limited path checked</li>
+<li><strong>verified</strong> — requested or linked integrity checks passed</li>
+<li><strong>failed</strong> — structural check failed</li>
+<li><strong>stale</strong> — integrity state exists but is too old or insufficiently current for strong claims</li>
+</ul>
+<h3 id="94-verification-scopes">9.4 Verification scopes<a class="headerlink" href="#94-verification-scopes" title="Permanent link">&para;</a></h3>
+<p>Public verification SHOULD distinguish scope:
+- fact
+- project
+- tenant
+- time range
+- tx chain</p>
+<h3 id="95-verify-result-expectations">9.5 Verify result expectations<a class="headerlink" href="#95-verify-result-expectations" title="Permanent link">&para;</a></h3>
+<p>A <code>VerifyResult</code> SHOULD report:
+- requested scope
+- checked item count
+- failed item count
+- integrity state
+- legacy path involvement
+- full vs partial verification</p>
+<h3 id="96-legacy-path-warning">9.6 Legacy path warning<a class="headerlink" href="#96-legacy-path-warning" title="Permanent link">&para;</a></h3>
+<p>If integrity verification depends on legacy hash or schema paths, that fact SHOULD be surfaced in:
+- warnings
+- metadata
+- verify result notes</p>
+<p><em>Because “verified” by archaeological compatibility is not the same as “verified” on clean modern rails.</em></p>
+<hr />
+<h2 id="10-taint-semantics">10. Taint Semantics<a class="headerlink" href="#10-taint-semantics" title="Permanent link">&para;</a></h2>
+<p>Taint models downstream trust contamination or risk inheritance.</p>
+<h3 id="101-definition">10.1 Definition<a class="headerlink" href="#101-definition" title="Permanent link">&para;</a></h3>
+<p>Taint is a trust degradation signal that propagates through dependency or causality structures when upstream inputs, decisions, or facts are suspect, contradictory, compromised, or insufficiently trustworthy.</p>
+<h3 id="102-taint-is-not-binary">10.2 Taint is not binary<a class="headerlink" href="#102-taint-is-not-binary" title="Permanent link">&para;</a></h3>
+<p>Public surfaces SHOULD expose at least a small number of taint states.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypedDict</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">TaintState</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">status</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;low&quot;</span><span class="p">,</span> <span class="s2">&quot;medium&quot;</span><span class="p">,</span> <span class="s2">&quot;high&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+</code></pre></div>
+<h3 id="103-suggested-interpretation">10.3 Suggested interpretation<a class="headerlink" href="#103-suggested-interpretation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>none</strong> — no active taint detected</li>
+<li><strong>low</strong> — weak taint signals or low-confidence contamination path</li>
+<li><strong>medium</strong> — meaningful contamination risk</li>
+<li><strong>high</strong> — serious contamination risk; downstream trust strongly reduced</li>
+<li><strong>unknown</strong> — taint system unavailable or insufficiently evaluated</li>
+</ul>
+<h3 id="104-public-behavior">10.4 Public behavior<a class="headerlink" href="#104-public-behavior" title="Permanent link">&para;</a></h3>
+<ul>
+<li>high taint SHOULD strongly affect confidence, evidence level, or rejection posture</li>
+<li>unknown taint MUST NOT be silently treated as none</li>
+<li><code>intent="audit"</code> SHOULD surface taint explicitly when requested or relevant</li>
+</ul>
+<h3 id="105-open-vs-premium-guidance">10.5 Open vs premium guidance<a class="headerlink" href="#105-open-vs-premium-guidance" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Open tier MAY expose current taint visibility</li>
+<li>Premium tier MAY expose persistent taint propagation, policy thresholds, and exportable taint lineage</li>
+</ul>
+<p><em>This split is acceptable only if open tier still exposes enough truth not to mislead consumers.</em></p>
+<hr />
+<h2 id="11-query-trust-semantics">11. Query Trust Semantics<a class="headerlink" href="#11-query-trust-semantics" title="Permanent link">&para;</a></h2>
+<h3 id="111-query-is-not-just-retrieval">11.1 Query is not just retrieval<a class="headerlink" href="#111-query-is-not-just-retrieval" title="Permanent link">&para;</a></h3>
+<p>A query result is a trust-bearing object containing:
+- content
+- confidence
+- provenance posture
+- routing plan
+- degradation context
+- optional taint/trace posture</p>
+<h3 id="112-required-semantics-for-queryresult">11.2 Required semantics for QueryResult<a class="headerlink" href="#112-required-semantics-for-queryresult" title="Permanent link">&para;</a></h3>
+<p><strong>If strategy="auto":</strong>
+- <code>plan.selected_strategy</code> MUST be present</p>
+<p><strong>If fallback materially changes route:</strong>
+- <code>plan.fallback_used = true</code>
+- <code>plan.fallback_reason</code> SHOULD be present</p>
+<p><strong>If runtime degradation materially affects the result:</strong>
+- <code>plan.degraded_mode = true</code></p>
+<h3 id="113-intent-specific-expectations">11.3 Intent-specific expectations<a class="headerlink" href="#113-intent-specific-expectations" title="Permanent link">&para;</a></h3>
+<p><strong>lookup</strong>
+Optimize for concrete retrieval with reasonable trust visibility.</p>
+<p><strong>explore</strong>
+Optimize for breadth, relation, and expansion, but still expose degradation and provenance limits.</p>
+<p><strong>audit</strong>
+Optimize for trust clarity:
+- prefer fewer, stronger results
+- expose evidence level clearly
+- expose provenance gaps
+- degrade conservatively
+- avoid overconfident ranking of weakly sourced items</p>
+<h3 id="114-confidence-vs-trust">11.4 Confidence vs trust<a class="headerlink" href="#114-confidence-vs-trust" title="Permanent link">&para;</a></h3>
+<p>Confidence score is not equivalent to trust.</p>
+<p>A result may have:
+- high lexical or vector score
+- low evidence level
+- unknown integrity
+- medium taint
+- degraded routing path</p>
+<p><em>Consumers MUST be able to distinguish “matched strongly” from “trusted strongly.”</em></p>
+<hr />
+<h2 id="12-write-path-trust-semantics">12. Write Path Trust Semantics<a class="headerlink" href="#12-write-path-trust-semantics" title="Permanent link">&para;</a></h2>
+<h3 id="121-a-successful-write-is-not-just-storage">12.1 A successful write is not just storage<a class="headerlink" href="#121-a-successful-write-is-not-just-storage" title="Permanent link">&para;</a></h3>
+<p>A successful write means the system:
+- accepted the operation under current trust policy
+- completed storage path
+- returned any required warnings
+- attached operation metadata where applicable</p>
+<h3 id="122-a-rejected-write-is-governance-not-breakage">12.2 A rejected write is governance, not breakage<a class="headerlink" href="#122-a-rejected-write-is-governance-not-breakage" title="Permanent link">&para;</a></h3>
+<p>Examples:
+- contradiction with canonical fact
+- taint threshold exceeded
+- compliance scope violation
+- policy forbids raw write into protected tenant
+- deprecated path blocked</p>
+<h3 id="123-a-write-under-degraded-mode">12.3 A write under degraded mode<a class="headerlink" href="#123-a-write-under-degraded-mode" title="Permanent link">&para;</a></h3>
+<p>If the write succeeds under degraded conditions, the system SHOULD warn when the degradation is materially relevant.</p>
+<p>Examples:
+- accepted without vector enrichment
+- accepted while compliance export unavailable
+- accepted while downstream event dispatch degraded</p>
+<p><em>Do not pretend the path was pristine if it was limping.</em></p>
+<hr />
+<h2 id="13-coordination-trust-semantics">13. Coordination Trust Semantics<a class="headerlink" href="#13-coordination-trust-semantics" title="Permanent link">&para;</a></h2>
+<p>Coordination is the noisiest place to hallucinate certainty. Do not.</p>
+<h3 id="131-consensus-is-not-omniscience">13.1 Consensus is not omniscience<a class="headerlink" href="#131-consensus-is-not-omniscience" title="Permanent link">&para;</a></h3>
+<p>Public consensus results should reflect:
+- participating agents
+- available liveness posture
+- confidence/weighting basis where exposed
+- degraded conditions
+- quorum state</p>
+<h3 id="132-required-caution-zones">13.2 Required caution zones<a class="headerlink" href="#132-required-caution-zones" title="Permanent link">&para;</a></h3>
+<p>The following conditions SHOULD reduce coordination trust or trigger warnings:
+- stale agents
+- liveness unknown
+- degraded event visibility
+- mixed legacy vote paths
+- insufficient quorum
+- disabled consensus capability
+- incomplete tracking path</p>
+<h3 id="133-coordination-truth-posture">13.3 Coordination truth posture<a class="headerlink" href="#133-coordination-truth-posture" title="Permanent link">&para;</a></h3>
+<p>Do not present a coordination result as fully trustworthy when:
+- liveness is missing
+- tracking is partial
+- vote schema is in deprecation transition
+- event bus evidence is missing where expected</p>
+<p><em>A swarm with no pulse is just a rumor.</em></p>
+<hr />
+<h2 id="14-runtime-truth-semantics">14. Runtime Truth Semantics<a class="headerlink" href="#14-runtime-truth-semantics" title="Permanent link">&para;</a></h2>
+<h3 id="141-health-is-operational-truth-not-decoration">14.1 health() is operational truth, not decoration<a class="headerlink" href="#141-health-is-operational-truth-not-decoration" title="Permanent link">&para;</a></h3>
+<p><code>health()</code> must be actionable.</p>
+<p>Consumers should be able to use it to:
+- decide whether to force a strategy
+- detect degraded mode
+- gate compliance-sensitive operations
+- switch UI states
+- annotate logs or metrics</p>
+<h3 id="142-capabilities-is-contractual-truth">14.2 capabilities() is contractual truth<a class="headerlink" href="#142-capabilities-is-contractual-truth" title="Permanent link">&para;</a></h3>
+<p><code>capabilities()</code> defines what the runtime can actually do now.</p>
+<p><em>Documentation, licensing text, and roadmap prose do not override runtime flags.</em></p>
+<h3 id="143-contractual-expectations">14.3 Contractual expectations<a class="headerlink" href="#143-contractual-expectations" title="Permanent link">&para;</a></h3>
+<p>If a capability is disabled:
+- forced use should fail clearly
+- auto mode may fallback if allowed
+- the result must not pretend premium behavior occurred</p>
+<hr />
+<h2 id="15-trust-aware-error-code-semantics">15. Trust-Aware Error Code Semantics<a class="headerlink" href="#15-trust-aware-error-code-semantics" title="Permanent link">&para;</a></h2>
+<h3 id="151-rejection-codes-imply-governance-meaning">15.1 Rejection codes imply governance meaning<a class="headerlink" href="#151-rejection-codes-imply-governance-meaning" title="Permanent link">&para;</a></h3>
+<p>Examples:
+- <code>ERR_CONTRADICTION</code>
+- <code>ERR_TAINT_HIGH</code>
+- <code>ERR_POLICY_BLOCK</code>
+- <code>ERR_COMPLIANCE_SCOPE</code>
+- <code>ERR_DEPRECATED_WRITE_PATH</code></p>
+<p>These should tell the integrator:
+- why it was blocked
+- where the block happened
+- what to do next</p>
+<h3 id="152-failure-codes-imply-operational-meaning">15.2 Failure codes imply operational meaning<a class="headerlink" href="#152-failure-codes-imply-operational-meaning" title="Permanent link">&para;</a></h3>
+<p>Examples:
+- <code>ERR_EMBEDDER_UNAVAILABLE</code>
+- <code>ERR_DB_LOCK_TIMEOUT</code>
+- <code>ERR_LEDGER_IO</code>
+- <code>ERR_EVENT_DISPATCH_FAILED</code>
+- <code>ERR_COMPONENT_UNAVAILABLE</code></p>
+<p>These should tell the integrator:
+- what broke
+- whether retry makes sense
+- whether degradation/fallback is possible</p>
+<h3 id="153-code-stability">15.3 Code stability<a class="headerlink" href="#153-code-stability" title="Permanent link">&para;</a></h3>
+<p>Codes are part of the contract.
+<em>Do not repurpose them because a naming whim passed through the building at 3 AM.</em></p>
+<hr />
+<h2 id="16-trust-semantics-for-exports">16. Trust Semantics for Exports<a class="headerlink" href="#16-trust-semantics-for-exports" title="Permanent link">&para;</a></h2>
+<h3 id="161-canonical-export-truth">16.1 Canonical export truth<a class="headerlink" href="#161-canonical-export-truth" title="Permanent link">&para;</a></h3>
+<p>The canonical export format SHOULD preserve:
+- schema version
+- identifiers
+- trust signals
+- integrity posture
+- taint posture where available
+- warnings
+- capability/degraded hints where relevant</p>
+<h3 id="162-export-adapters">16.2 Export adapters<a class="headerlink" href="#162-export-adapters" title="Permanent link">&para;</a></h3>
+<p>External dialect adapters MAY map canonical trust signals into:
+- JSON-LD-ish representations
+- compliance-specific shapes
+- audit tool formats</p>
+<p>But the canonical internal export truth SHOULD remain the source of meaning.</p>
+<p><em>Do not let the adapter become the theology.</em></p>
+<hr />
+<h2 id="17-non-goals">17. Non-Goals<a class="headerlink" href="#17-non-goals" title="Permanent link">&para;</a></h2>
+<p>This document does not claim:
+- philosophical truth of content
+- total elimination of model error
+- formal proof guarantees unless explicitly implemented
+- perfect liveness in coordination
+- omniscient provenance in all retrieval paths
+- deterministic replay from partial working-memory exports</p>
+<p><em>This is a trust contract, not a messiah contract.</em></p>
+<hr />
+<h2 id="18-final-position">18. Final Position<a class="headerlink" href="#18-final-position" title="Permanent link">&para;</a></h2>
+<p>The public system must make one thing unmistakably clear:</p>
+<p><em>a result is not just returned; it is situated.</em></p>
+<p>Its route, evidence, degradation, integrity posture, taint posture, and governance status must be legible enough that an external consumer can decide what to do next without guessing.</p>
+<p>That is the threshold between “clever memory system” and “infrastructure that can be trusted under pressure.”</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      © 2026 MOSKV-1 Sovereign Systems · Apache 2.0
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/borjamoskv" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M357.2 48h70.6L273.6 224.2 455 464H313L201.7 318.6 74.5 464H3.8l164.9-188.5L-5.2 48h145.6l100.5 132.9zm-24.8 373.8h39.1L119.1 88h-42z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tabs", "navigation.tabs.sticky", "search.highlight", "search.suggest", "content.code.copy", "content.tabs.link", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
