@@ -23,7 +23,9 @@ def run_cortex(tick_delay: float):
     click.echo(f"🚀 Booting CORTEX Runtime Kernel (Tick: {tick_delay}s)")
     runtime = CortexRuntime()
 
+    import asyncio
+
     try:
-        runtime.run_forever(tick_delay=tick_delay)
+        asyncio.run(runtime.run_forever(tick_delay=tick_delay))
     except KeyboardInterrupt:
         click.echo("\n🛑 Cortex Runtime interrupted by user. Shutting down gracefully.")

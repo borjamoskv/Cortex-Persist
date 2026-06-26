@@ -3,6 +3,8 @@ import json
 import os
 from collections import defaultdict
 from datetime import datetime
+from decimal import Decimal
+from typing import TypedDict, DefaultDict
 
 CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
 GRAPH_OUT = os.path.expanduser("~/.gemini/config/skills/_metrics/causal_graph.json")
@@ -31,7 +33,13 @@ def build_causal_graph():
     # Sort by timestamp to ensure chronological order
     records.sort(key=lambda x: x.get("timestamp", ""))
 
-    graph = defaultdict(
+    class EdgeMetrics(TypedDict):
+        count: int
+        latencies: list[float]
+        scores_from: list[Decimal]
+        scores_to: list[Decimal]
+
+    graph: DefaultDict[str, DefaultDict[str, EdgeMetrics]] = defaultdict(
         lambda: defaultdict(
             lambda: {"count": 0, "latencies": [], "scores_from": [], "scores_to": []}
         )
@@ -75,8 +83,8 @@ def build_causal_graph():
         edge = graph[wf_from][wf_to]
         edge["count"] += 1
         edge["latencies"].append(latency_sec)
-        edge["scores_from"].append(r_from.get("execution_score", 0))
-        edge["scores_to"].append(r_to.get("execution_score", 0))
+        edge["scores_from"].append(Decimal(str(r_from.get("execution_score", 0))))
+        edge["scores_to"].append(Decimal(str(r_to.get("execution_score", 0))))
 
     # Compile Final Edges
     final_graph = {"nodes": list(nodes), "edges": []}
@@ -96,10 +104,14 @@ def build_causal_graph():
         for wf_to, metrics in targets.items():
             count = metrics["count"]
             avg_lat = sum(metrics["latencies"]) / count if count > 0 else 0
-            avg_score_to = sum(metrics["scores_to"]) / count if count > 0 else 0
+            
+            if count > 0:
+                avg_score_to = sum(metrics["scores_to"]) / Decimal(count)
+            else:
+                avg_score_to = Decimal("0")
 
             # Transfer Exergy heuristically combines the probability of transition with the destination's execution score
-            transfer_exergy = round(count * avg_score_to, 2)
+            transfer_exergy = round(Decimal(count) * avg_score_to, 2)
 
             edges_list.append(
                 {
