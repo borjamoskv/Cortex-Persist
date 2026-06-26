@@ -1,4 +1,16 @@
 # [C5-REAL] Exergy-Maximized
+# DEPRECATED: This module is legacy. Use cortex.api.core instead.
+# Scheduled for removal in v1.2.0. See docs/architecture/adr/0003-canonical-api-surface.md
+import warnings
+
+warnings.warn(
+    "api.server is deprecated and frozen. "
+    "Use cortex.api.core as the canonical API surface. "
+    "Scheduled for removal in v1.2.0.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 import asyncio
 import logging
 import os

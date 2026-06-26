@@ -1,3 +1,1 @@
-https://www.cortexpersist.com/* https://cortexpersist.com/:splat 301
-https://cortexpersist.dev/* /dev/:splat 200
-https://cortexpersist.org/* /org/:splat 200
+# Cloudflare redirects - absolute redirects handled at DNS level

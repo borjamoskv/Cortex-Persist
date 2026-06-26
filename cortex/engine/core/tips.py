@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.tips")
 
 _PACKAGE_ASSET_PATH: Final[Path] = Path(__file__).with_name("assets") / "tips.json"
-_LEGACY_ASSET_PATH: Final[Path] = Path(__file__).parent.parent.parent / "config" / "tips.json"
+_LEGACY_ASSET_PATH: Final[Path] = Path(__file__).parent.parent.parent.parent / "config" / "tips.json"
 _ASSET_CANDIDATES: Final[tuple[Path, ...]] = (_PACKAGE_ASSET_PATH, _LEGACY_ASSET_PATH)
 
 
