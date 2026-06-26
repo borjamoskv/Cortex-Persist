@@ -7,6 +7,7 @@ can manage the Ouroboros memory loop autonomously.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from pathlib import Path
 from typing import Any
@@ -45,7 +46,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         svc = NotebookLMService(str(db_path))
         content = await svc.generate_digest(project=project)
 
-        Path(output).write_text(content, encoding="utf-8")
+        await asyncio.to_thread(Path(output).write_text, content, encoding="utf-8")
         word_count = len(content.split())
         facts_count = content.count("∆_CTX:")
 
@@ -127,13 +128,13 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
 
         if mode in ("digest", "both") and DIGEST_FILE.exists():
             dest = target / f"cortex-master-{ts}.md"
-            shutil.copy2(DIGEST_FILE, dest)
+            await asyncio.to_thread(shutil.copy2, DIGEST_FILE, dest)
             synced.append(str(dest))
 
         if mode in ("domains", "both") and DOMAINS_DIR.exists():
             for f in DOMAINS_DIR.glob("*.md"):
                 dest = target / f.name
-                shutil.copy2(f, dest)
+                await asyncio.to_thread(shutil.copy2, f, dest)
                 synced.append(str(dest))
 
         # Clean old files
@@ -141,8 +142,9 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         cleaned = 0
         synced_names = {Path(s).name for s in synced}
         for f in target.glob("*.md"):
-            if os.path.getmtime(f) < cutoff and f.name not in synced_names:
-                f.unlink()
+            mtime = await asyncio.to_thread(os.path.getmtime, f)
+            if mtime < cutoff and f.name not in synced_names:
+                await asyncio.to_thread(f.unlink)
                 cleaned += 1
 
         return {
@@ -171,12 +173,14 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         result: dict[str, Any] = {}
 
         # Digest status
-        if DIGEST_FILE.exists():
-            mtime = os.path.getmtime(DIGEST_FILE)
+        digest_exists = await asyncio.to_thread(DIGEST_FILE.exists)
+        if digest_exists:
+            mtime = await asyncio.to_thread(os.path.getmtime, DIGEST_FILE)
+            size = await asyncio.to_thread(os.path.getsize, DIGEST_FILE)
             age_h = (time.monotonic() - mtime) / 3600
             result["digest"] = {
                 "exists": True,
-                "size_bytes": os.path.getsize(DIGEST_FILE),
+                "size_bytes": size,
                 "updated": datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat(),
                 "age_hours": round(age_h, 1),
             }
@@ -184,12 +188,17 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
             result["digest"] = {"exists": False}
 
         # Domain fragments
-        if DOMAINS_DIR.exists():
+        domains_exists = await asyncio.to_thread(DOMAINS_DIR.exists)
+        if domains_exists:
             files = list(DOMAINS_DIR.glob("*.md"))
+            sizes = []
+            for f in files:
+                sz = await asyncio.to_thread(os.path.getsize, f)
+                sizes.append(sz)
             result["domains"] = {
                 "exists": True,
                 "file_count": len(files),
-                "total_bytes": sum(os.path.getsize(f) for f in files),
+                "total_bytes": sum(sizes),
             }
         else:
             result["domains"] = {"exists": False}
