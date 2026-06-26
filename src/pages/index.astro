@@ -1,8 +1,9 @@
----
 import SiteLayout from '../layouts/SiteLayout.astro';
 import AwwwardsHero from '../components/landing/AwwwardsHero.tsx';
 import PreloadScreen from '../components/landing/PreloadScreen.tsx';
 import TelemetryWidget from '../components/TelemetryWidget.tsx';
+import TerminalDemo from '../components/landing/TerminalDemo.tsx';
+import ScrollReveal from '../components/landing/ScrollReveal.tsx';
 
 const navLinks = [
 	{ href: '#problem', label: 'The Problem' },
@@ -136,18 +137,20 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 		<section class="section-frame surface" style="padding-top: 2rem; padding-bottom: 2rem;">
 			<div class="fit-layout">
 				{
-					proofCards.map((card) => (
-						<article class="fit-card surface-sunken" style="min-height: auto; padding: 1.5rem;">
-							<h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-base);">{card.title}</h3>
-							<p style="font-size: 0.95rem; color: var(--text-muted); margin: 0;">{card.body}</p>
-						</article>
+					proofCards.map((card, idx) => (
+						<ScrollReveal client:load delay={idx * 0.1}>
+							<article class="fit-card surface-sunken" style="min-height: auto; padding: 1.5rem; transition: transform 0.3s ease; cursor: default;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+								<h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-base);">{card.title}</h3>
+								<p style="font-size: 0.95rem; color: var(--text-muted); margin: 0;">{card.body}</p>
+							</article>
+						</ScrollReveal>
 					))
 				}
 			</div>
 		</section>
 
 		<section class="section-frame surface" id="problem">
-			<div class="section-heading" style="max-width: 800px; margin: 0 auto;">
+			<ScrollReveal client:load delay={0.1} className="section-heading" style={{ maxWidth: '800px', margin: '0 auto' }}>
 				<p class="section-kicker">The Problem</p>
 				<h2>Most AI systems can generate output. Few can justify their history.</h2>
 				<p>
@@ -156,11 +159,11 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 				<p style="margin-top: 1rem;">
 					Without that layer, systems drift, repeat work, lose context, and leave weak audit trails. You do not have memory. You have fragments, logs, and optimism.
 				</p>
-			</div>
+			</ScrollReveal>
 		</section>
 
 		<section class="section-frame surface" id="solution" style="background: rgba(43, 59, 229, 0.02); border-top: 1px solid var(--mica-border); border-bottom: 1px solid var(--mica-border);">
-			<div class="section-heading" style="max-width: 800px; margin: 0 auto;">
+			<ScrollReveal client:load delay={0.2} className="section-heading" style={{ maxWidth: '800px', margin: '0 auto' }}>
 				<p class="section-kicker" style="color: var(--accent-soft);">The Solution</p>
 				<h2>CORTEX-Persist adds the missing trust layer</h2>
 				<p>
@@ -169,136 +172,116 @@ const country = Astro.request.headers.get('cf-ipcountry') || 'Unknown';
 				<p style="margin-top: 1rem; color: var(--text-base); font-weight: 500;">
 					It combines structured memory, tamper-evident ledgering, hybrid retrieval, memory lifecycle governance, and audit-ready history. So your stack can do more than continue text. It can preserve operational truth under pressure.
 				</p>
-			</div>
+			</ScrollReveal>
 		</section>
 
 		<section class="section-frame surface" id="demo">
-			<div class="section-heading">
+			<ScrollReveal client:load delay={0.1} className="section-heading">
 				<p class="section-kicker">Demo</p>
 				<h2>From event to evidence in under a minute</h2>
-			</div>
+			</ScrollReveal>
 
-			<div class="fit-layout">
-				<article class="fit-card surface-sunken" style="min-height: auto;">
-					<p class="surface-label">1. Store memory</p>
-					<pre class="console-block"><code>cortex store "Vendor X failed compliance check" \
-  --type decision \
-  --project procurement \
-  --confidence C4 \
-  --source agent:reviewer</code></pre>
-				</article>
-
-				<article class="fit-card surface-sunken" style="min-height: auto;">
-					<p class="surface-label">2. Generate lineage</p>
-					<p style="font-size: 0.95rem; color: var(--text-muted);">Each write can be chained into a tamper-evident ledger with transaction ID, timestamp, hash, and previous hash.</p>
-				</article>
-				
-				<article class="fit-card surface-sunken" style="min-height: auto;">
-					<p class="surface-label">3. Retrieve context</p>
-					<pre class="console-block"><code>cortex search "compliance vendor failure"</code></pre>
-				</article>
-				
-				<article class="fit-card surface-sunken" style="min-height: auto;">
-					<p class="surface-label">4. Verify integrity</p>
-					<pre class="console-block"><code>cortex verify-ledger</code></pre>
-					<p style="font-size: 0.95rem; color: var(--text-muted); margin-top: 1rem;"><strong>Result:</strong> persistent memory with searchable context and verifiable history.</p>
-					<div style="margin-top: 1rem;">
-					  <a class="button-tertiary" href={docsUrl} style="padding: 0.5rem 1rem; font-size: 0.9rem;">Read the Docs</a>
-					</div>
-				</article>
-			</div>
+			<ScrollReveal client:load delay={0.3}>
+				<TerminalDemo client:load />
+			</ScrollReveal>
 		</section>
 
 		<section class="signal-grid" id="features">
-			<div style="grid-column: 1 / -1; margin-bottom: 2rem;">
+			<ScrollReveal client:load delay={0.1} style={{ gridColumn: '1 / -1', marginBottom: '2rem' }}>
 			    <p class="section-kicker">Features</p>
 			    <h2>Built for memory that has to survive contact with reality</h2>
-			</div>
+			</ScrollReveal>
 			{
-				signalCards.map((card) => (
-					<article class="signal-card surface">
-						<div class="card-meta">
-							<span class="card-index">{card.index}</span>
-							<span class="surface-label">{card.label}</span>
-						</div>
-						<h2>{card.title}</h2>
-						<p class="surface-copy">{card.body}</p>
-					</article>
+				signalCards.map((card, idx) => (
+					<ScrollReveal client:load delay={0.1 + idx * 0.1}>
+						<article class="signal-card surface" style="transition: all 0.3s ease; cursor: default; height: 100%;" onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 20px 40px rgba(43, 59, 229, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow)'">
+							<div class="card-meta">
+								<span class="card-index">{card.index}</span>
+								<span class="surface-label">{card.label}</span>
+							</div>
+							<h2>{card.title}</h2>
+							<p class="surface-copy">{card.body}</p>
+						</article>
+					</ScrollReveal>
 				))
 			}
 		</section>
 
 		<section class="section-frame surface" id="use-cases">
-			<div class="section-heading">
+			<ScrollReveal client:load delay={0.1} className="section-heading">
 				<p class="section-kicker">Use Cases</p>
 				<h2>Where CORTEX-Persist hits hardest</h2>
-			</div>
+			</ScrollReveal>
 
 			<div class="fit-layout">
 				{
-					useCases.map((uc) => (
-						<article class="fit-card surface-sunken" style="min-height: auto;">
-							<h3 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--text-base);">{uc.title}</h3>
-							<p style="font-size: 0.95rem; color: var(--text-muted); margin: 0;">{uc.body}</p>
-						</article>
+					useCases.map((uc, idx) => (
+						<ScrollReveal client:load delay={0.2 + idx * 0.1}>
+							<article class="fit-card surface-sunken" style="min-height: auto; transition: background 0.3s ease;" onmouseover="this.style.background='rgba(43, 59, 229, 0.05)'" onmouseout="this.style.background='var(--panel-strong)'">
+								<h3 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--text-base);">{uc.title}</h3>
+								<p style="font-size: 0.95rem; color: var(--text-muted); margin: 0;">{uc.body}</p>
+							</article>
+						</ScrollReveal>
 					))
 				}
 			</div>
 		</section>
 
 		<section class="section-frame surface" id="why-cortex">
-			<div class="section-heading">
+			<ScrollReveal client:load delay={0.1} className="section-heading">
 				<p class="section-kicker">The Gap</p>
 				<h2>Why not just use a vector database?</h2>
 				<p>
 					Because similarity is not lineage. A vector database can retrieve related text. It does not tell you what was stored, when it changed, how it was derived, or whether the history was tampered with.
 				</p>
-			</div>
+			</ScrollReveal>
 
 			<div class="fit-layout">
 				<!-- Traditional DBs -->
-				<article class="fit-card surface-sunken">
-					<p class="surface-label">Vector Database</p>
-					<ul class="surface-list">
-						<li style="color: var(--text-muted); text-decoration: line-through;">Only retrieves similar chunks.</li>
-						<li style="color: var(--text-muted); text-decoration: line-through;">No concept of temporal validity.</li>
-						<li style="color: var(--text-muted); text-decoration: line-through;">No cryptographic evidence.</li>
-						<li style="color: var(--text-muted); text-decoration: line-through;">Memory without integrity is just plausible storage.</li>
-					</ul>
-				</article>
+				<ScrollReveal client:load delay={0.2}>
+					<article class="fit-card surface-sunken">
+						<p class="surface-label">Vector Database</p>
+						<ul class="surface-list">
+							<li style="color: var(--text-muted); text-decoration: line-through;">Only retrieves similar chunks.</li>
+							<li style="color: var(--text-muted); text-decoration: line-through;">No concept of temporal validity.</li>
+							<li style="color: var(--text-muted); text-decoration: line-through;">No cryptographic evidence.</li>
+							<li style="color: var(--text-muted); text-decoration: line-through;">Memory without integrity is just plausible storage.</li>
+						</ul>
+					</article>
+				</ScrollReveal>
 
 				<!-- CORTEX -->
-				<article class="fit-card surface-sunken" style="border: 1px solid var(--accent);">
-					<p class="surface-label" style="color: var(--accent);">CORTEX-Persist</p>
-					<ul class="surface-list">
-						<li><strong>Typed memory</strong> and confidence levels.</li>
-						<li><strong>Temporal validity</strong> for time-sensitive facts.</li>
-						<li><strong>Cryptographic lineage</strong> and auditability.</li>
-						<li><strong>Governed lifecycle</strong> to prevent semantic landfill.</li>
-					</ul>
-				</article>
+				<ScrollReveal client:load delay={0.4}>
+					<article class="fit-card surface-sunken" style="border: 1px solid var(--accent); position: relative; overflow: hidden;">
+						<div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(43, 59, 229, 0.15) 0%, transparent 70%); pointer-events: none;"></div>
+						<p class="surface-label" style="color: var(--accent); position: relative; z-index: 1;">CORTEX-Persist</p>
+						<ul class="surface-list" style="position: relative; z-index: 1;">
+							<li><strong style="color: var(--accent-bright);">Typed memory</strong> and confidence levels.</li>
+							<li><strong style="color: var(--accent-bright);">Temporal validity</strong> for time-sensitive facts.</li>
+							<li><strong style="color: var(--accent-bright);">Cryptographic lineage</strong> and auditability.</li>
+							<li><strong style="color: var(--accent-bright);">Governed lifecycle</strong> to prevent semantic landfill.</li>
+						</ul>
+					</article>
+				</ScrollReveal>
 			</div>
 		</section>
 		
 		<section class="section-frame surface" id="technical" style="background: rgba(43, 59, 229, 0.02); border-top: 1px solid var(--mica-border);">
-			<div class="section-heading">
+			<ScrollReveal client:load delay={0.1} className="section-heading">
 				<p class="section-kicker">Technical Credibility</p>
 				<h2>Built for real systems, not benchmark cosplay</h2>
 				<p>
 					This is infrastructure for systems that operate repeatedly, not a one-shot prompt wrapper.
 				</p>
-			</div>
+			</ScrollReveal>
 			
 			<div style="max-width: 800px; margin: 0 auto;">
 			    <ul style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; list-style: none; padding: 0;">
-			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">Python-first architecture</li>
-			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">SQLite and sqlite-vec by default</li>
-			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">Optional cloud extensions</li>
-			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">Encryption at rest</li>
-			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">Async-friendly design</li>
-			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">CLI and API surfaces</li>
-			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">Typed package support</li>
-			        <li style="padding: 1rem; background: var(--bg-2); border-radius: var(--radius-md); border: 1px solid var(--line-light);">Memory lifecycle controls</li>
+					{['Python-first architecture', 'SQLite and sqlite-vec by default', 'Optional cloud extensions', 'Encryption at rest', 'Async-friendly design', 'CLI and API surfaces', 'Typed package support', 'Memory lifecycle controls'].map((tech, idx) => (
+						<ScrollReveal client:load delay={0.1 + idx * 0.05} as="li" style={{ padding: '1rem', background: 'var(--bg-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--line-light)' }}>
+							{tech}
+						</ScrollReveal>
+					))}
 			    </ul>
 			</div>
 		</section>
