@@ -15,7 +15,7 @@ def _writer_process_target(db_path: Path, sync_event: multiprocessing.Event, fau
     """Worker process that triggers sync_event at precise execution points."""
     async def _run():
         engine = CortexEngine(db_path=str(db_path))
-        await engine.init()
+        await engine.start()
         
         if fault_point == "before_sqlite":
             sync_event.set()
@@ -61,7 +61,7 @@ async def test_sigkill_crash_consistency(tmp_path: Path, fault_point: str):
     
     # 1. Initialize schema
     engine = CortexEngine(db_path=str(db_path))
-    await engine.init()
+    await engine.start()
     await engine.close()
     
     # 2. Spawn worker
@@ -79,7 +79,7 @@ async def test_sigkill_crash_consistency(tmp_path: Path, fault_point: str):
     
     # 5. Verify integrity (Recovery)
     engine_verify = CortexEngine(db_path=str(db_path))
-    await engine_verify.init()
+    await engine_verify.start()
     
     # Execute raw query to bypass cache
     async with engine_verify.session() as conn:
