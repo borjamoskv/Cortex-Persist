@@ -20,7 +20,7 @@ _ENTROPY_THRESHOLD = float(os.environ.get("CORTEX_ENTROPY_THRESHOLD", "0.15"))
 def _load_anti_limerence_runtime() -> tuple:
     """Loads anti-limerence and ultramap modules if available."""
     try:
-        from cortex_rs import AntiLimerenceTopology
+        from cortex_rs import AntiLimerenceTopology  # pyright: ignore[reportAttributeAccessIssue, reportMissingImports]
 
         anti_limerence = AntiLimerenceTopology()
         import sys

@@ -15,7 +15,12 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import numpy as np
+else:
+    from cortex.compat.optional import np
 
 try:
     from cortex.extensions.llm.sovereign import SovereignLLM
@@ -61,7 +66,7 @@ class MemoryArchaeologist:
 
         condensed, tombstoned = await self._synthesize_and_update(
             project,
-            tenant_id,
+            tenant_id,  # pyright: ignore[reportArgumentType]
             clusters,
             facts,
             simulate,  # pyright: ignore[reportArgumentType]

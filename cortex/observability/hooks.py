@@ -2,7 +2,7 @@
 import re
 import time
 
-from google.antigravity import hooks
+from google.antigravity import hooks  # pyright: ignore[reportMissingImports]
 
 from cortex.observability.telemetry import telemetry
 

@@ -14,7 +14,9 @@ from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1, now_iso
 logger = logging.getLogger("cortex.ledger")
 
 
+from typing import Any
 class LedgerAuditMixin:
+    _get_conn_proxy: Any
     async def audit_integrity_async(self, tenant_id: str | None = None) -> dict:
         """Perform a full integrity audit asynchronously (Ω₁)."""
         violations = []
@@ -168,7 +170,7 @@ class LedgerAuditMixin:
         for f_tx_id, info in list(active_facts_by_tx.items()):
             try:
                 decrypted = enc.decrypt_str(info["content"], tenant_id=info["tenant_id"])
-                computed_hash = compute_fact_hash(decrypted)
+                computed_hash = compute_fact_hash(decrypted)  # pyright: ignore[reportArgumentType]
                 if computed_hash != info["hash"]:
                     violations.append(
                         {

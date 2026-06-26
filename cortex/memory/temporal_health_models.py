@@ -9,9 +9,12 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Literal, TYPE_CHECKING
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+if TYPE_CHECKING:
+    import numpy as np
+else:
+    from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 __all__ = ["HealthReport", "HealthTier", "SchedulerConfig"]
 

@@ -3,6 +3,7 @@ from typing import Any, Protocol
 
 
 class PublicVerifierProtocol(Protocol):
+    paths: Any
     errors: list[str]
     warnings: list[str]
     events: list[dict[str, Any]]

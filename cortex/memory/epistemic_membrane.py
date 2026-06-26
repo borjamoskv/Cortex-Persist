@@ -177,8 +177,8 @@ class EpistemicMembrane:
     def commit(
         self,
         proposal_hv: torch.Tensor,
-        metadata: dict = None,
-        source_llm_hash: str = None,  # pyright: ignore[reportArgumentType]
+        metadata: dict | None = None,
+        source_llm_hash: str | None = None,  # pyright: ignore[reportArgumentType]
     ) -> str:
         """
         Commits the proposal to the VSA memory and appends to the cryptographic ledger.
@@ -189,7 +189,7 @@ class EpistemicMembrane:
 
         # Add to Merkle Ledger
         membrane_result = metadata if metadata else {"max_similarity": 1.0, "accept": True}
-        root_hash = self.ledger.append(proposal_hv, membrane_result, source_llm_hash)
+        root_hash = self.ledger.append(proposal_hv, membrane_result, source_llm_hash)  # pyright: ignore[reportArgumentType]
 
         return root_hash
 

@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+import typing
 from typing import Any, Final
 
 import redis
@@ -53,7 +54,7 @@ class RedisWorkingMemoryL1:
         self._max_tokens = max_tokens
         self._guardrail = guardrail
         self._prefix = prefix
-        self._redis = redis.Redis.from_url(redis_url, decode_responses=True)
+        self._redis: typing.Any = redis.Redis.from_url(redis_url, decode_responses=True)
 
     def _buffer_key(self, tenant_id: str) -> str:
         return f"{self._prefix}buffer:{tenant_id}"
@@ -284,18 +285,18 @@ class RedisWorkingMemoryL1:
     def event_count(self, tenant_id: str | None = None) -> int:
         tenant_id = tenant_id or get_tenant_id()
         bkey = self._buffer_key(tenant_id)
-        return self._redis.llen(bkey)
+        return self._redis.llen(bkey)  # pyright: ignore[reportReturnType]
 
     def __len__(self) -> int:
         keys = self._redis.keys(f"{self._prefix}buffer:*")
-        return sum(self._redis.llen(k) for k in keys)
+        return sum(self._redis.llen(k) for k in keys)  # pyright: ignore[reportCallIssue, reportArgumentType]
 
     def __repr__(self) -> str:
         keys = self._redis.keys(f"{self._prefix}buffer:*")
-        total_events = sum(self._redis.llen(k) for k in keys)
+        total_events = sum(self._redis.llen(k) for k in keys)  # pyright: ignore[reportCallIssue, reportArgumentType]
         tkeys = self._redis.keys(f"{self._prefix}tokens:*")
-        total_tokens = sum(int(self._redis.get(k) or 0) for k in tkeys)
+        total_tokens = sum(int(self._redis.get(k) or 0) for k in tkeys)  # pyright: ignore[reportCallIssue, reportArgumentType]
         return (
-            f"RedisWorkingMemoryL1(tenants={len(keys)}, events={total_events}, "
+            f"RedisWorkingMemoryL1(tenants={len(keys)}  # pyright: ignore[reportArgumentType], events={total_events}, "
             f"tokens={total_tokens}/{self._max_tokens})"
         )

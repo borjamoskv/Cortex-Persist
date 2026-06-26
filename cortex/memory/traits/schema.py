@@ -22,7 +22,13 @@ def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_li
     return float(0.5 ** (age / half_life))
 
 
+from typing import Any
+
 class SchemaTrait:
+    _conn: Any
+    _vector_enabled: bool
+    _encoder: Any
+
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is not None:
             return self._conn

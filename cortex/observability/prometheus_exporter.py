@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import time
 
-from prometheus_client import Counter, Gauge, Histogram
+from prometheus_client import Counter, Gauge, Histogram  # pyright: ignore[reportMissingImports]
 
 # --- CORTEX SYSTEM METRICS ---
 

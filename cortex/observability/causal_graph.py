@@ -31,7 +31,8 @@ def build_causal_graph():
     # Sort by timestamp to ensure chronological order
     records.sort(key=lambda x: x.get("timestamp", ""))
 
-    graph = defaultdict(
+    from typing import DefaultDict, Dict, Any
+    graph: DefaultDict[str, DefaultDict[str, Dict[str, Any]]] = defaultdict(
         lambda: defaultdict(
             lambda: {"count": 0, "latencies": [], "scores_from": [], "scores_to": []}
         )
