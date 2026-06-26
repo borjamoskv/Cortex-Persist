@@ -8,7 +8,7 @@ from fastapi import Request
 
 from cortex.engine import CortexEngine
 from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.extensions.timing import TimingTracker
+from cortex_extensions.timing import TimingTracker
 
 __all__ = ["get_async_engine", "get_engine", "get_tracker"]
 

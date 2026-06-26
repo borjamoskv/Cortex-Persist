@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.extensions.songlines.sensor import GhostTrace
+    from cortex_extensions.songlines.sensor import GhostTrace
 
 import aiosqlite
 
@@ -39,9 +39,9 @@ class GhostMixin(EngineMixinBase):
 
     def _ensure_songlines(self) -> tuple[Any, Any, Any]:
         if self._emitter is None or self._sensor is None or self._economy is None:
-            from cortex.extensions.songlines.economy import ThermalEconomy
-            from cortex.extensions.songlines.emitter import ResonanceEmitter
-            from cortex.extensions.songlines.sensor import TopographicSensor
+            from cortex_extensions.songlines.economy import ThermalEconomy
+            from cortex_extensions.songlines.emitter import ResonanceEmitter
+            from cortex_extensions.songlines.sensor import TopographicSensor
 
             self._emitter = ResonanceEmitter()
             self._sensor = TopographicSensor()

@@ -100,7 +100,7 @@ class EngineMixinBase:
     def _resolve_tenant(self, tenant_id: str) -> str:
         """Resolve and validate the tenant ID from context if 'default' is provided."""
         if tenant_id == "default":
-            from cortex.extensions.security.tenant import get_tenant_id
+            from cortex_extensions.security.tenant import get_tenant_id
 
             tenant_id = get_tenant_id()
 

@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 import hashlib
 
 from cortex.engine import CortexEngine
-from cortex.extensions.nous.runtime import NousRuntime
-from cortex.extensions.nous.models import (
+from cortex_extensions.nous.runtime import NousRuntime
+from cortex_extensions.nous.models import (
     NousAST,
     NousMetadata,
     NousOperation,

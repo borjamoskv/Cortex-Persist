@@ -39,7 +39,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 
-from cortex.extensions.thinking.fusion_models import (
+from cortex_extensions.thinking.fusion_models import (
     ModelResponse,
     ThinkingHistory,
     _jaccard,

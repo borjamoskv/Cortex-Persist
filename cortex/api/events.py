@@ -7,7 +7,7 @@ from collections.abc import AsyncGenerator
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
-from cortex.extensions.signals.bus import AsyncSignalBus
+from cortex_extensions.signals.bus import AsyncSignalBus
 
 router = APIRouter(prefix="/v1/public/events", tags=["events"])
 logger = logging.getLogger("cortex.api.events")

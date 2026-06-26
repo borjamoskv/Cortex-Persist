@@ -1,0 +1,9 @@
+[package]
+name = "cortex-replay-tests"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Dependencies for cryptographic hashing and IO
+sha2 = "0.10.8"
+rand = "0.8.5"

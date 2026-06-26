@@ -33,6 +33,7 @@ _ROUTE_MODULES = {
     "translate",
     "trust",
     "taas",
+    "ultramap",
 }
 
 _API_ROUTE_SPECS: tuple[tuple[str, str], ...] = (
@@ -59,6 +60,7 @@ _API_ROUTE_SPECS: tuple[tuple[str, str], ...] = (
     ("trust", "router"),
     ("taas", "router"),
     ("benchmark", "router"),
+    ("ultramap", "router"),
 )
 
 

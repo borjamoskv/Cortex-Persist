@@ -7,7 +7,7 @@ from starlette.requests import Request
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import require_permission
-from cortex.extensions.swarm.psychohistory import PsychohistoryOrchestrator
+from cortex_extensions.swarm.psychohistory import PsychohistoryOrchestrator
 
 
 async def get_manager(request: Request):

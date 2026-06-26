@@ -13,12 +13,12 @@ import time
 
 import pytest
 
-from cortex.extensions.health.collector import (
+from cortex_extensions.health.collector import (
     CollectorRegistry,
     HealthCollector,
     create_default_registry,
 )
-from cortex.extensions.health.collectors import (
+from cortex_extensions.health.collectors import (
     DbCollector,
     DiskSpaceCollector,
     EntropyCollector,
@@ -29,18 +29,18 @@ from cortex.extensions.health.collectors import (
     SystemLoadCollector,
     WalCollector,
 )
-from cortex.extensions.health.health_mixin import HealthMixin
-from cortex.extensions.health.health_protocol import MetricCollectorProtocol
-from cortex.extensions.health.invariants import verify_health_system
-from cortex.extensions.health.models import (
+from cortex_extensions.health.health_mixin import HealthMixin
+from cortex_extensions.health.health_protocol import MetricCollectorProtocol
+from cortex_extensions.health.invariants import verify_health_system
+from cortex_extensions.health.models import (
     Grade,
     HealthReport,
     HealthScore,
     HealthThresholds,
     MetricSnapshot,
 )
-from cortex.extensions.health.scorer import HealthScorer
-from cortex.extensions.health.trend import TrendDetector
+from cortex_extensions.health.scorer import HealthScorer
+from cortex_extensions.health.trend import TrendDetector
 
 # ═══════════════════════════════════════════════════════════════
 # D1: SEALED GRADE ENUM
@@ -500,7 +500,7 @@ class TestTrendPersistence:
 
 class TestFixRegistry:
     def test_registration_and_matching(self):
-        fix_registry = pytest.importorskip("cortex.extensions.health.fix_registry")
+        fix_registry = pytest.importorskip("cortex_extensions.health.fix_registry")
         FixRegistry = fix_registry.FixRegistry
 
         reg = FixRegistry()
@@ -511,7 +511,7 @@ class TestFixRegistry:
         assert matches[0].metric == "db_locked"
 
     def test_list_fixable(self):
-        fix_registry = pytest.importorskip("cortex.extensions.health.fix_registry")
+        fix_registry = pytest.importorskip("cortex_extensions.health.fix_registry")
         FixRegistry = fix_registry.FixRegistry
 
         reg = FixRegistry()
@@ -526,7 +526,7 @@ class TestFixRegistry:
 class TestHealthGuard:
     @pytest.mark.asyncio
     async def test_guard_safety_pass(self, tmp_path):
-        from cortex.extensions.health import Grade, HealthScore
+        from cortex_extensions.health import Grade, HealthScore
         from cortex.guards.health_guard import HEALTH_AVAILABLE, HealthGuard
 
         if not HEALTH_AVAILABLE:
@@ -542,7 +542,7 @@ class TestHealthGuard:
 
     @pytest.mark.asyncio
     async def test_guard_violation(self, tmp_path):
-        from cortex.extensions.health import Grade, HealthScore, HealthSLA, HealthSLAViolation
+        from cortex_extensions.health import Grade, HealthScore, HealthSLA, HealthSLAViolation
         from cortex.guards.health_guard import HEALTH_AVAILABLE, HealthGuard
 
         if not HEALTH_AVAILABLE:

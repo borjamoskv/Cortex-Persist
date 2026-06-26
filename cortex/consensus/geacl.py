@@ -17,8 +17,8 @@ import logging
 from dataclasses import dataclass
 
 from cortex.consensus.byzantine import ByzantineVerdict, WBFTConsensus
-from cortex.extensions.ha.gossip import GossipProtocol
-from cortex.extensions.thinking.fusion_models import ModelResponse, ThinkingHistory
+from cortex_extensions.ha.gossip import GossipProtocol
+from cortex_extensions.thinking.fusion_models import ModelResponse, ThinkingHistory
 
 __all__ = ["GEACLCoordinator", "GeaclCommitResult"]
 

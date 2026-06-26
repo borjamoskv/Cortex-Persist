@@ -34,12 +34,12 @@ except ImportError:
     HDCVectorStoreL2 = Any  # type: ignore[assignment,misc]
 
 try:
-    from cortex.extensions.policy.memory_os import MemoryOS
+    from cortex_extensions.policy.memory_os import MemoryOS
 except ImportError:
     MemoryOS = None  # type: ignore
 
 try:
-    from cortex.extensions.security.tenant import get_tenant_id
+    from cortex_extensions.security.tenant import get_tenant_id
 except ImportError:
 
     def get_tenant_id() -> str:
@@ -47,14 +47,14 @@ except ImportError:
 
 
 try:
-    from cortex.extensions.sovereign.endocrine import DigitalEndocrine
+    from cortex_extensions.sovereign.endocrine import DigitalEndocrine
 except ImportError:
     DigitalEndocrine = None  # type: ignore
 
 from cortex.telemetry.metrics import metrics
 
 try:
-    from cortex.extensions.thinking.fusion import ContextFusion
+    from cortex_extensions.thinking.fusion import ContextFusion
 except ImportError:
     ContextFusion = None  # type: ignore
 

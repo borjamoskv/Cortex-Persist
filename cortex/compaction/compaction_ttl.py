@@ -31,7 +31,7 @@ def find_expired_facts(
     Returns:
         (expired_ids, tombstonable_ids) - tuples of (fact_id, tenant_id).
     """
-    from cortex.extensions.axioms.ttl import FACT_TTL, is_expired, is_tombstonable
+    from cortex_extensions.axioms.ttl import FACT_TTL, is_expired, is_tombstonable
 
     expired_ids: list[tuple[int, str]] = []
     tombstonable_ids: list[tuple[int, str]] = []
@@ -92,7 +92,7 @@ async def apply_ttl_prune(
 ) -> None:
     """Deprecate facts that have exceeded their type-specific TTL.
 
-    Uses the canonical TTL policy from cortex.extensions.axioms.ttl.
+    Uses the canonical TTL policy from cortex_extensions.axioms.ttl.
     Immortal types (axiom, decision, bridge, rule, report, evolution) are skipped.
     """
     conn = await engine.get_conn()

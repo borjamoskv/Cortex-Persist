@@ -8,9 +8,9 @@ from rich.panel import Panel
 
 from cortex.cli.common import cli
 from cortex.config import DEFAULT_DB_PATH
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexLLMRouter
 from cortex.mcts.tree import MCTSEngine
+from cortex_extensions.llm.provider import LLMProvider
+from cortex_extensions.llm.router import CortexLLMRouter
 
 console = Console()
 

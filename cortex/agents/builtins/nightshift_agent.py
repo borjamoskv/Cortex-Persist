@@ -17,7 +17,7 @@ from cortex.agents.bus import MessageBus
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
 from cortex.agents.tools import ToolRegistry
-from cortex.extensions.swarm.nightshift_daemon import NightShiftCrystalDaemon
+from cortex_extensions.swarm.nightshift_daemon import NightShiftCrystalDaemon
 
 logger = logging.getLogger(__name__)
 

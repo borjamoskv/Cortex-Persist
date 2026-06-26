@@ -205,7 +205,7 @@ def _report_as_ghost_fact(key: str, lang: Lang) -> None:
 def _trigger_adaptive_repair(key: str, lang: Lang) -> None:
     """Trigger background translation if LLM is available."""
     try:
-        from cortex.extensions.llm.manager import LLMManager
+        from cortex_extensions.llm.manager import LLMManager
     except ImportError:
         return
 
@@ -228,7 +228,7 @@ def _trigger_adaptive_repair(key: str, lang: Lang) -> None:
             f"Translate only the value, be concise and professional."
         )
         try:
-            from cortex.extensions.llm.router import IntentProfile
+            from cortex_extensions.llm.router import IntentProfile
 
             translation = await llm.complete(
                 prompt,

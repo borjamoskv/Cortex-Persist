@@ -1,0 +1,8 @@
+[package]
+name = "cortex-proofs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+z3 = "0.12.1"
+proptest = "1.4.0"

@@ -65,7 +65,7 @@ def entropy_install_hook():
 def entropy_report():
     """Genera un reporte del estado de inmunidad del proyecto."""
     console.print("[bold cyan]🔍 Analizando inmunidad del ecosistema...[/]")
-    from cortex.extensions.daemon.core import MoskvDaemon
+    from cortex_extensions.daemon.core import MoskvDaemon
 
     try:
         status_dict = MoskvDaemon.load_status()
@@ -238,7 +238,7 @@ def entropy_immortality(
     verbose: bool,
 ) -> None:
     """Immortality Index (ι) - cognitive crystallization metric."""
-    from cortex.extensions.shannon.immortality import ImmortalityIndex
+    from cortex_extensions.shannon.immortality import ImmortalityIndex
 
     engine = get_engine()
     try:
@@ -328,7 +328,7 @@ def entropy_immortality(
 )
 def entropy_shannon(project: str | None, as_json: bool, verbose: bool) -> None:
     """Shannon entropy analysis of CORTEX memory."""
-    from cortex.extensions.shannon.report import EntropyReport
+    from cortex_extensions.shannon.report import EntropyReport
 
     engine = get_engine()
     try:

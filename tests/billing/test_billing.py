@@ -15,9 +15,9 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts" / "lab"))
 from stripe_config import StripeBillingConfig
-from cortex.extensions.billing.models import BillingEvent, FailureType, StripeInvoice
-from cortex.extensions.billing.gateway import StripeBillingGateway
-from cortex.extensions.billing.metering import CausalMetering
+from cortex_extensions.billing.models import BillingEvent, FailureType, StripeInvoice
+from cortex_extensions.billing.gateway import StripeBillingGateway
+from cortex_extensions.billing.metering import CausalMetering
 
 
 @pytest.fixture

@@ -1,0 +1,26 @@
+# [C5-REAL] Exergy-Maximized
+
+from cortex_extensions.alma.engine import AlmaEngine, SoulState
+from cortex_extensions.alma.taste import (
+    GRADE_DEAD,
+    GRADE_FUNCTIONAL,
+    GRADE_GOAT,
+    GRADE_MEDIOCRE,
+    GRADE_STRONG,
+    TasteDimension,
+    TasteEngine,
+    TasteVerdict,
+)
+
+__all__ = [
+    "GRADE_DEAD",
+    "GRADE_FUNCTIONAL",
+    "GRADE_GOAT",
+    "GRADE_MEDIOCRE",
+    "GRADE_STRONG",
+    "AlmaEngine",
+    "SoulState",
+    "TasteDimension",
+    "TasteEngine",
+    "TasteVerdict",
+]

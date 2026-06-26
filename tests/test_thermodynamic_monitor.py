@@ -6,7 +6,7 @@ import asyncio
 
 import pytest
 
-from cortex.extensions.daemon.monitors.thermodynamic import ThermodynamicMemoryMonitor
+from cortex_extensions.daemon.monitors.thermodynamic import ThermodynamicMemoryMonitor
 
 
 class _Manager:
@@ -41,7 +41,7 @@ class _FailingPruner:
 def test_check_succeeds_sync_without_event_loop(monkeypatch, interval_seconds: int):
     calls: list[str] = []
     monkeypatch.setattr(
-        "cortex.extensions.daemon.monitors.thermodynamic.EntropyPruner",
+        "cortex_extensions.daemon.monitors.thermodynamic.EntropyPruner",
         _pruner_factory(calls),
     )
 
@@ -63,7 +63,7 @@ def test_check_succeeds_sync_without_event_loop(monkeypatch, interval_seconds: i
 async def test_check_schedules_in_running_loop(monkeypatch):
     calls: list[str] = []
     monkeypatch.setattr(
-        "cortex.extensions.daemon.monitors.thermodynamic.EntropyPruner",
+        "cortex_extensions.daemon.monitors.thermodynamic.EntropyPruner",
         _pruner_factory(calls),
     )
 
@@ -82,7 +82,7 @@ async def test_check_schedules_in_running_loop(monkeypatch):
 
 def test_check_async_swallow_known_errors(monkeypatch):
     monkeypatch.setattr(
-        "cortex.extensions.daemon.monitors.thermodynamic.EntropyPruner",
+        "cortex_extensions.daemon.monitors.thermodynamic.EntropyPruner",
         _FailingPruner,
     )
 

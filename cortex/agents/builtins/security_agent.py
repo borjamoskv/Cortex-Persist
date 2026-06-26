@@ -16,7 +16,7 @@ from cortex.agents.bus import MessageBus
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
 from cortex.agents.tools import ToolRegistry
-from cortex.extensions.daemon.monitors.security import SecurityMonitor
+from cortex_extensions.daemon.monitors.security import SecurityMonitor
 
 logger = logging.getLogger(__name__)
 

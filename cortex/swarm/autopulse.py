@@ -7,8 +7,8 @@ import os
 import time
 
 from cortex.config import DB_PATH
-from cortex.extensions.signals.bus import AsyncSignalBus
 from cortex.swarm.tensor_glial import TensorGlialLegion
+from cortex_extensions.signals.bus import AsyncSignalBus
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cortex.swarm.autopulse")

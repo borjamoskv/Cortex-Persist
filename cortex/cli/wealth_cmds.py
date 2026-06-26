@@ -49,7 +49,7 @@ def wealth_cmds():
 @click.option("--chains", default="base,solana,arbitrum", help="Cadenas a escanear.")
 def money_radar(depth: str, chains: str):
     """Escaneo completo del mercado para Alpha y DeFi."""
-    from cortex.extensions.wealth.scanner import FundingRateScanner
+    from cortex_extensions.wealth.scanner import FundingRateScanner
 
     console.print(
         Panel("[bold #CCFF00]📡 MONEYTV-1 RADAR INICIADO[/bold #CCFF00]", border_style="#CCFF00")
@@ -178,7 +178,7 @@ def money_tax(year: str, jurisdiction: str):
 @click.argument("objetivo")
 def growth_pipeline(objetivo: str):
     """SOVEREIGN-GROWTH: de intención a revenue. Pipeline completo."""
-    from cortex.extensions.wealth.growth import GrowthEngine
+    from cortex_extensions.wealth.growth import GrowthEngine
 
     console.print(
         Panel(f"[bold #6600FF]🚀 GTM PIPELINE: {objetivo}[/bold #6600FF]", border_style="#6600FF")
@@ -220,7 +220,7 @@ def growth_pipeline(objetivo: str):
 @wealth_cmds.command("scan")
 def growth_scan():
     """Escaneo pasivo de oportunidades CORTEX."""
-    from cortex.extensions.wealth.growth import GrowthEngine
+    from cortex_extensions.wealth.growth import GrowthEngine
 
     console.print(
         Panel("[bold #6600FF]🔍 GROWTH SCAN: CORTEX[/bold #6600FF]", border_style="#6600FF")

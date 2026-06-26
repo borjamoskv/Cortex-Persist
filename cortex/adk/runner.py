@@ -20,7 +20,7 @@ import sys
 
 __all__ = ["main", "run_cli", "run_web"]
 
-logger = logging.getLogger("cortex.extensions.adk.runner")
+logger = logging.getLogger("cortex_extensions.adk.runner")
 
 
 def _parse_args() -> argparse.Namespace:
@@ -135,7 +135,7 @@ def run_cli(
         logger.error("Google ADK not installed. Install with: pip install google-adk")
         sys.exit(1)
 
-    from cortex.extensions.adk.agents import (
+    from cortex_extensions.adk.agents import (
         create_analyst_agent,
         create_cortex_swarm,
         create_gem_agent,

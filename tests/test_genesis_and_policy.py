@@ -15,7 +15,7 @@ import pytest
 
 class TestSystemSpec:
     def test_from_dict_minimal(self):
-        from cortex.extensions.genesis.models import SystemSpec
+        from cortex_extensions.genesis.models import SystemSpec
 
         spec = SystemSpec.from_dict(
             {
@@ -30,7 +30,7 @@ class TestSystemSpec:
         assert spec.components[0].name == "core"
 
     def test_from_dict_full(self):
-        from cortex.extensions.genesis.models import SystemSpec
+        from cortex_extensions.genesis.models import SystemSpec
 
         spec = SystemSpec.from_dict(
             {
@@ -62,7 +62,7 @@ class TestSystemSpec:
         assert spec.components[1].dependencies == ["models"]
 
     def test_component_spec_defaults(self):
-        from cortex.extensions.genesis.models import ComponentSpec
+        from cortex_extensions.genesis.models import ComponentSpec
 
         comp = ComponentSpec(name="test")
         assert comp.component_type == "module"
@@ -76,7 +76,7 @@ class TestSystemSpec:
 
 class TestTemplateRegistry:
     def test_registry_has_builtins(self):
-        from cortex.extensions.genesis.templates import TemplateRegistry
+        from cortex_extensions.genesis.templates import TemplateRegistry
 
         reg = TemplateRegistry()
         templates = reg.list_templates()
@@ -85,14 +85,14 @@ class TestTemplateRegistry:
         assert len(names) >= 1
 
     def test_get_nonexistent_returns_none(self):
-        from cortex.extensions.genesis.templates import TemplateRegistry
+        from cortex_extensions.genesis.templates import TemplateRegistry
 
         reg = TemplateRegistry()
         assert reg.get("nonexistent_template_xyz") is None
 
     def test_module_template_renders(self):
-        from cortex.extensions.genesis.models import ComponentSpec
-        from cortex.extensions.genesis.templates import TemplateRegistry
+        from cortex_extensions.genesis.models import ComponentSpec
+        from cortex_extensions.genesis.templates import TemplateRegistry
 
         reg = TemplateRegistry()
         tmpl = reg.get("module")
@@ -117,8 +117,8 @@ class TestTemplateRegistry:
 
 class TestGenesisValidator:
     def test_validate_empty_created_list(self):
-        from cortex.extensions.genesis.models import ComponentSpec, SystemSpec
-        from cortex.extensions.genesis.validator import GenesisValidator
+        from cortex_extensions.genesis.models import ComponentSpec, SystemSpec
+        from cortex_extensions.genesis.validator import GenesisValidator
 
         v = GenesisValidator()
         spec = SystemSpec(
@@ -139,8 +139,8 @@ class TestGenesisValidator:
 class TestGenesisEngine:
     def test_self_create_produces_valid_spec(self):
         """Ω₀: The engine can spec itself."""
-        from cortex.extensions.genesis.engine import GenesisEngine
-        from cortex.extensions.genesis.models import SystemSpec
+        from cortex_extensions.genesis.engine import GenesisEngine
+        from cortex_extensions.genesis.models import SystemSpec
 
         engine = GenesisEngine()
         spec = engine.self_create()
@@ -160,8 +160,8 @@ class TestGenesisEngine:
         assert "validator" in names
 
     def test_preview_returns_file_map(self):
-        from cortex.extensions.genesis.engine import GenesisEngine
-        from cortex.extensions.genesis.models import ComponentSpec, SystemSpec
+        from cortex_extensions.genesis.engine import GenesisEngine
+        from cortex_extensions.genesis.models import ComponentSpec, SystemSpec
 
         engine = GenesisEngine()
         spec = SystemSpec(
@@ -176,8 +176,8 @@ class TestGenesisEngine:
         assert "__init__.py" in preview["__auto__"]
 
     def test_create_writes_files(self, tmp_path):
-        from cortex.extensions.genesis.engine import GenesisEngine
-        from cortex.extensions.genesis.models import ComponentSpec, SystemSpec
+        from cortex_extensions.genesis.engine import GenesisEngine
+        from cortex_extensions.genesis.models import ComponentSpec, SystemSpec
 
         engine = GenesisEngine(cortex_root=tmp_path)
         spec = SystemSpec(
@@ -200,8 +200,8 @@ class TestGenesisEngine:
             assert Path(f).exists(), f"File not found: {f}"
 
     def test_chronos_yield_positive(self):
-        from cortex.extensions.genesis.engine import GenesisEngine
-        from cortex.extensions.genesis.models import ComponentSpec, SystemSpec
+        from cortex_extensions.genesis.engine import GenesisEngine
+        from cortex_extensions.genesis.models import ComponentSpec, SystemSpec
 
         engine = GenesisEngine()
         spec = SystemSpec(
@@ -220,8 +220,8 @@ class TestGenesisEngine:
         assert isinstance(hours, float)
 
     def test_estimate_complexity_range(self):
-        from cortex.extensions.genesis.engine import GenesisEngine
-        from cortex.extensions.genesis.models import ComponentSpec, SystemSpec
+        from cortex_extensions.genesis.engine import GenesisEngine
+        from cortex_extensions.genesis.models import ComponentSpec, SystemSpec
 
         engine = GenesisEngine()
         spec = SystemSpec(
@@ -232,7 +232,7 @@ class TestGenesisEngine:
         assert 1 <= c <= 5
 
     def test_compose_templates(self):
-        from cortex.extensions.genesis.engine import GenesisEngine
+        from cortex_extensions.genesis.engine import GenesisEngine
 
         engine = GenesisEngine()
         result = engine.compose_templates(
@@ -243,8 +243,8 @@ class TestGenesisEngine:
         assert isinstance(result, dict)
 
     def test_extend_raises_on_missing_dir(self):
-        from cortex.extensions.genesis.engine import GenesisEngine
-        from cortex.extensions.genesis.models import ComponentSpec
+        from cortex_extensions.genesis.engine import GenesisEngine
+        from cortex_extensions.genesis.models import ComponentSpec
 
         engine = GenesisEngine()
         with pytest.raises(FileNotFoundError):
@@ -261,9 +261,9 @@ class TestModelPolicyGuard:
     def test_clean_presets_no_warnings(self, caplog):
         import logging
 
-        from cortex.extensions.llm._presets import _validate_model_policy
+        from cortex_extensions.llm._presets import _validate_model_policy
 
-        with caplog.at_level(logging.WARNING, logger="cortex.extensions.llm.presets"):
+        with caplog.at_level(logging.WARNING, logger="cortex_extensions.llm.presets"):
             _validate_model_policy(
                 {
                     "good_provider": {
@@ -279,9 +279,9 @@ class TestModelPolicyGuard:
     def test_prohibited_default_model_warns(self, caplog):
         import logging
 
-        from cortex.extensions.llm._presets import _validate_model_policy
+        from cortex_extensions.llm._presets import _validate_model_policy
 
-        with caplog.at_level(logging.WARNING, logger="cortex.extensions.llm.presets"):
+        with caplog.at_level(logging.WARNING, logger="cortex_extensions.llm.presets"):
             _validate_model_policy(
                 {
                     "bad_provider": {
@@ -295,9 +295,9 @@ class TestModelPolicyGuard:
     def test_prohibited_intent_model_warns(self, caplog):
         import logging
 
-        from cortex.extensions.llm._presets import _validate_model_policy
+        from cortex_extensions.llm._presets import _validate_model_policy
 
-        with caplog.at_level(logging.WARNING, logger="cortex.extensions.llm.presets"):
+        with caplog.at_level(logging.WARNING, logger="cortex_extensions.llm.presets"):
             _validate_model_policy(
                 {
                     "bad": {
@@ -311,7 +311,7 @@ class TestModelPolicyGuard:
         assert "claude-haiku" in caplog.text
 
     def test_prohibited_tier_patterns(self):
-        from cortex.extensions.llm._presets import _PROHIBITED_TIERS
+        from cortex_extensions.llm._presets import _PROHIBITED_TIERS
 
         # Should match
         for model in [

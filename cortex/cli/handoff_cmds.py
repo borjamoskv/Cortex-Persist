@@ -12,7 +12,7 @@ from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, handle_cli_error
-from cortex.extensions.agents.handoff import generate_handoff, load_handoff, save_handoff
+from cortex_extensions.agents.handoff import generate_handoff, load_handoff, save_handoff
 
 __all__ = ["generate", "handoff", "load"]
 

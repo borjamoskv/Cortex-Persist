@@ -1,0 +1,32 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import UltramapHologram from '../components/UltramapHologram.tsx';
+---
+
+<SiteLayout
+	title="CORTEX | EDG Hologram"
+	description="Epistemic Dependency Graph Holographic Crystalization. C5-REAL spatial mapping."
+	canonical="https://cortexpersist.com/edg"
+	bodyClass="edg-body"
+>
+	<div class="min-h-screen bg-[#050505] text-white pt-24 pb-12 px-6">
+		<div class="max-w-7xl mx-auto space-y-8">
+			<header class="space-y-2 border-b border-white/10 pb-6">
+				<div class="flex items-center gap-3">
+					<span class="text-xs font-mono font-bold tracking-[0.2em] text-[#2B3BE5] bg-[#2B3BE5]/10 px-2 py-1 rounded">VÍA 2</span>
+					<span class="text-xs font-mono text-white/40 tracking-wider">CRISTALIZACIÓN HOLOGRÁFICA</span>
+				</div>
+				<h1 class="text-4xl font-bold tracking-tight uppercase" style={{ fontFamily: "'Orbitron', sans-serif" }}>
+					Grafo de Dependencias Epistémicas
+				</h1>
+				<p class="text-white/60 max-w-2xl text-lg">
+					Renderizado en tiempo real de las Primitivas Educativas Autodidactas (EDG) extraídas directamente del Ledger criptográfico C5-REAL de CORTEX.
+				</p>
+			</header>
+
+			<main>
+				<UltramapHologram client:load />
+			</main>
+		</div>
+	</div>
+</SiteLayout>

@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """Session Handoff Protocol.
 
-Re-exports from cortex.extensions.agents.handoff to avoid code duplication
+Re-exports from cortex_extensions.agents.handoff to avoid code duplication
 and preserve the public agents runtime API surface.
 
 Tested properties (parsed via static analysis):
@@ -9,7 +9,7 @@ Tested properties (parsed via static analysis):
 - "cognitive_fingerprint"
 """
 
-from cortex.extensions.agents.handoff import (
+from cortex_extensions.agents.handoff import (
     DEFAULT_HANDOFF_PATH,
     HANDOFF_VERSION,
     MAX_DECISIONS,

@@ -26,7 +26,7 @@ __all__ = [
     "adk_store",
 ]
 
-logger = logging.getLogger("cortex.extensions.adk.tools")
+logger = logging.getLogger("cortex_extensions.adk.tools")
 
 _DEFAULT_DB: Final = str(Path("~/.cortex/cortex.db").expanduser())
 

@@ -40,7 +40,7 @@ class TransactionMixin(EngineMixinBase):
 
         # JIS (SOC 2 / C5 / GDPR) Audit Policy Check
         try:
-            from cortex.extensions.policy.jis_auditor import JISAuditor
+            from cortex_extensions.policy.jis_auditor import JISAuditor
 
             auditor = JISAuditor(enforce_encryption=False)  # Enforced softly
             violations = auditor.audit_payload(detail, event_id=f"tx_pending_{project}_{action}")

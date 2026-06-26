@@ -3,12 +3,13 @@ import logging
 import os
 import re
 import sys
+
 import aiosqlite
 
 sys.path.insert(0, os.path.abspath('.'))
 
-from cortex.audit.ledger import EnterpriseAuditLedger
 import cortex_rs
+from cortex.audit.ledger import EnterpriseAuditLedger
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("inject_maldacena")
@@ -40,7 +41,6 @@ async def inject_primitives():
         for i, match in enumerate(matches):
             p_id, p_name, p_app = [m.strip() for m in match]
             axiom_claim = f"{p_id}: {p_name}"
-            constructive_proof = f"Aplicación estructural en C5-REAL: {p_app}. DAG vinculado por HoTT engine."
             
             event_hash = await ledger.log_action(
                 tenant_id="system",

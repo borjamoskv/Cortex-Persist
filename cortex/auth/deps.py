@@ -53,7 +53,7 @@ async def require_auth(
         raise HTTPException(status_code=401, detail=error_msg)
 
     # SECURE LINK: Bind the dynamic tenant context to the authenticated identity
-    from cortex.extensions.security.tenant import tenant_id_var
+    from cortex_extensions.security.tenant import tenant_id_var
 
     tenant_id_var.set(result.tenant_id)
 
@@ -101,7 +101,7 @@ async def require_consensus(
 ) -> bool:
     """Verify a claim has reached sufficient consensus with KV-Aware Caching (Ω₂)."""
     from cortex.auth.cache import AUTH_CACHE
-    from cortex.extensions.security.tenant import get_tenant_id
+    from cortex_extensions.security.tenant import get_tenant_id
 
     tenant_id = get_tenant_id()
     cached_score = AUTH_CACHE.get(claim, tenant_id)

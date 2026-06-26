@@ -24,7 +24,7 @@ __all__: list[str] = []
 
 def _get_signal_bus(db: str):
     """Create a SignalBus instance from a database path."""
-    from cortex.extensions.signals.bus import SignalBus
+    from cortex_extensions.signals.bus import SignalBus
 
     conn = db_connect(db)
     return SignalBus(conn), conn

@@ -254,7 +254,7 @@ class ChronosROI:
                 fact_id: int = cursor.lastrowid  # type: ignore[assignment]
 
                 # 2. Emit signal to bus
-                from cortex.extensions.signals.bus import SignalBus
+                from cortex_extensions.signals.bus import SignalBus
 
                 bus = SignalBus(conn)
                 bus.emit(

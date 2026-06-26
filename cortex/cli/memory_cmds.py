@@ -137,7 +137,7 @@ def store(
         if ai_time is not None and complexity is not None:
             import dataclasses
 
-            from cortex.extensions.timing.chronos import ChronosEngine
+            from cortex_extensions.timing.chronos import ChronosEngine
 
             metrics = ChronosEngine.analyze(ai_time, complexity)
             meta["chronos"] = dataclasses.asdict(metrics)

@@ -419,7 +419,7 @@ async def generate_handoff_context(
 
     Used for transferring agentic state between platforms (macOS -> Web).
     """
-    from cortex.extensions.agents.handoff import generate_handoff, save_handoff
+    from cortex_extensions.agents.handoff import generate_handoff, save_handoff
 
     lang = _get_lang(request)
 

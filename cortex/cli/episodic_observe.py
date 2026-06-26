@@ -24,7 +24,7 @@ def run_observe(workspace: str, db: str, console) -> None:
 
 
 async def _observe_async(workspace: str, db: str, console) -> None:
-    from cortex.extensions.perception import PerceptionPipeline
+    from cortex_extensions.perception import PerceptionPipeline
 
     workspace_path = Path(workspace).resolve()
     if not workspace_path.exists():

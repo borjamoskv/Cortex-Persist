@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from cortex.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
+from cortex_extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
 
 
 class TestComponentSpec:

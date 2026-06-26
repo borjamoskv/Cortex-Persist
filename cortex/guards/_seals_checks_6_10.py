@@ -89,7 +89,7 @@ def _has_temperature_drift(tree: ast.AST) -> bool:
 async def _check_latency_telemetry() -> list[str]:
     """Audit local provider latency from telemetry."""
     try:
-        from cortex.extensions.llm._telemetry import CascadeTelemetry
+        from cortex_extensions.llm._telemetry import CascadeTelemetry
 
         telemetry = CascadeTelemetry()
         stats = telemetry.stats()
@@ -157,8 +157,8 @@ async def check_seal_7_axiom_registry() -> GateResult:
     printer.seal(7, "Registry Integrity", "Axiom Registry + Prompt Budget")
     passed = True
     try:
-        from cortex.extensions.axioms import AXIOM_REGISTRY
-        from cortex.extensions.axioms.registry import enforced
+        from cortex_extensions.axioms import AXIOM_REGISTRY
+        from cortex_extensions.axioms.registry import enforced
 
         total = len(AXIOM_REGISTRY)
         enf = len(enforced())

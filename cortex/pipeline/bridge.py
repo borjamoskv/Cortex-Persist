@@ -104,7 +104,7 @@ class CortexPipelineBridge:
     def _init_budget(self) -> Any | None:
         """Initialize SwarmBudgetManager if available."""
         try:
-            from cortex.extensions.swarm.budget import get_budget_manager
+            from cortex_extensions.swarm.budget import get_budget_manager
 
             return get_budget_manager()
         except ImportError:

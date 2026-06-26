@@ -1,0 +1,74 @@
+# [C5-REAL] Exergy-Maximized
+"""Sync Engine Package.
+
+Exposes the main sync functions and result types.
+"""
+
+from __future__ import annotations
+
+import importlib
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cortex_extensions.sync.common import (
+        AGENT_DIR,
+        CORTEX_DIR,
+        MEMORY_DIR,
+        SYNC_STATE_FILE,
+        SyncResult,
+        WritebackResult,
+    )
+    from cortex_extensions.sync.common import (
+        db_content_hash as _db_content_hash,
+    )
+    from cortex_extensions.sync.common import (
+        file_hash as _file_hash,
+    )
+    from cortex_extensions.sync.obsidian import export_obsidian
+    from cortex_extensions.sync.read import sync_memory
+    from cortex_extensions.sync.snapshot import export_snapshot
+    from cortex_extensions.sync.write import export_to_json
+
+__all__ = [
+    "AGENT_DIR",
+    "CORTEX_DIR",
+    "MEMORY_DIR",
+    "SYNC_STATE_FILE",
+    "SyncResult",
+    "WritebackResult",
+    "_db_content_hash",
+    "_file_hash",
+    "export_obsidian",
+    "export_snapshot",
+    "export_to_json",
+    "sync_memory",
+]
+
+_LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    "sync_memory": ("cortex_extensions.sync.read", "sync_memory"),
+    "export_to_json": ("cortex_extensions.sync.write", "export_to_json"),
+    "export_snapshot": ("cortex_extensions.sync.snapshot", "export_snapshot"),
+    "export_obsidian": ("cortex_extensions.sync.obsidian", "export_obsidian"),
+    "SyncResult": ("cortex_extensions.sync.common", "SyncResult"),
+    "WritebackResult": ("cortex_extensions.sync.common", "WritebackResult"),
+    "MEMORY_DIR": ("cortex_extensions.sync.common", "MEMORY_DIR"),
+    "AGENT_DIR": ("cortex_extensions.sync.common", "AGENT_DIR"),
+    "CORTEX_DIR": ("cortex_extensions.sync.common", "CORTEX_DIR"),
+    "SYNC_STATE_FILE": ("cortex_extensions.sync.common", "SYNC_STATE_FILE"),
+    "_file_hash": ("cortex_extensions.sync.common", "file_hash"),
+    "_db_content_hash": ("cortex_extensions.sync.common", "db_content_hash"),
+}
+
+
+def __getattr__(name: str):
+    if name in _LAZY_IMPORTS:
+        module_path, attr_name = _LAZY_IMPORTS[name]
+        module = importlib.import_module(module_path)
+        value = getattr(module, attr_name)
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module 'cortex_extensions.sync' has no attribute {name!r}")
+
+
+def __dir__() -> list[str]:
+    return sorted(set(globals()) | set(__all__))

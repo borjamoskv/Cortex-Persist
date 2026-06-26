@@ -20,7 +20,7 @@ from cortex.engine.exergy_optimizer import ExergyOptimizer
 from cortex.engine.shared_bus import SovereignSharedBus
 from cortex.engine.slashing import SlashingPenalty
 from cortex.engine.ultrathink_physics import UltrathinkPhysicsEngine
-from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
+from cortex_extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 logger = logging.getLogger("cortex.engine.swarm_10k")
 

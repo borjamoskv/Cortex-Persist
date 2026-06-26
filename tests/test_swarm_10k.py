@@ -6,7 +6,7 @@ import pytest
 
 from cortex.engine import shared_bus as shared_bus_module
 from cortex.engine.swarm_10k import SwarmCommander
-from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
+from cortex_extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 
 @pytest.mark.asyncio

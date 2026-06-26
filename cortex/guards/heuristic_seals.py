@@ -136,7 +136,7 @@ async def check_gate_12_determinism(cached_files: dict[Path, str]) -> GateResult
 async def check_gate_13_latency() -> GateResult:
     """Seal 13: A-Record Latency Drift."""
     try:
-        from cortex.extensions.llm._telemetry import CascadeTelemetry
+        from cortex_extensions.llm._telemetry import CascadeTelemetry
     except ImportError:
         printer.warn("Seal 13 Skipped: LLM telemetry extension not found.")
         return True, "verified"

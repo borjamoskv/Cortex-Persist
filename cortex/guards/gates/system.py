@@ -90,7 +90,7 @@ async def check_gate_9_registry() -> GateResult:
     """Seal 9: Registry Load Sync (Metadata integrity)."""
     printer.seal(9, "Registry Integrity", "Axiom Registry Sync check")
     try:
-        from cortex.extensions.axioms.registry import AxiomRegistry
+        from cortex_extensions.axioms.registry import AxiomRegistry
 
         registry = AxiomRegistry()
         await registry.load()

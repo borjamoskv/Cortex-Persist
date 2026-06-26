@@ -16,8 +16,8 @@ os.environ.setdefault("CORTEX_TESTING", "1")
 
 import pytest
 
-from cortex.extensions.causality.models import Confidence, FactNode, TaintStatus
-from cortex.extensions.causality.taint import (
+from cortex_extensions.causality.models import Confidence, FactNode, TaintStatus
+from cortex_extensions.causality.taint import (
     downgrade_confidence,
     propagate_taint,
     recompute_effective_confidence,

@@ -53,7 +53,7 @@ def fingerprint_extract(
     top: int,
 ) -> None:
     """Extract the Cognitive Fingerprint from the CORTEX Ledger."""
-    from cortex.extensions.fingerprint.extractor import FingerprintExtractor
+    from cortex_extensions.fingerprint.extractor import FingerprintExtractor
 
     engine = get_engine()
     try:

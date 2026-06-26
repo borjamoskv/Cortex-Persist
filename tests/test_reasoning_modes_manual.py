@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
 
-from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile, ReasoningMode
-from cortex.extensions.llm.router import CortexLLMRouter
+from cortex_extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile, ReasoningMode
+from cortex_extensions.llm.router import CortexLLMRouter
 
 
 class MockProvider(BaseProvider):

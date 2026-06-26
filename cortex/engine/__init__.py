@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
     from cortex.mac_maestro.executor import MaestroExecutor
 try:
-    from cortex.extensions.health.health_mixin import HealthMixin
+    from cortex_extensions.health.health_mixin import HealthMixin
 except ImportError:
 
     class HealthMixin:

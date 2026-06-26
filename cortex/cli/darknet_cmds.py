@@ -12,8 +12,8 @@ from cortex.config import DEFAULT_DB_PATH
 from cortex.darknet.agents import AVATARS, DarknetAgent
 from cortex.darknet.ingestor import DarknetIngestor
 from cortex.darknet.social_ledger import DarknetLedger
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexLLMRouter
+from cortex_extensions.llm.provider import LLMProvider
+from cortex_extensions.llm.router import CortexLLMRouter
 
 console = Console()
 

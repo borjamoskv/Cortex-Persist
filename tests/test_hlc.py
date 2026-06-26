@@ -2,7 +2,7 @@
 
 import time
 
-from cortex.extensions.sync.hlc import HLCTimestamp, HybridLogicalClock
+from cortex_extensions.sync.hlc import HLCTimestamp, HybridLogicalClock
 
 
 class TestHLCTimestamp:

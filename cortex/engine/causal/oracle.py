@@ -8,7 +8,7 @@ import sqlite3
 import aiosqlite
 
 from cortex.database.core import connect
-from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+from cortex_extensions.signals.bus import AsyncSignalBus, SignalBus
 
 logger = logging.getLogger("cortex.engine.causal.oracle")
 

@@ -35,7 +35,7 @@ def produce_cmd(title, concept, bpm, key):
     Dispara el pipeline de producción de GRAMMY-Ω para un nuevo track.
     """
     try:
-        from cortex.extensions.music_engine.orchestrator import (
+        from cortex_extensions.music_engine.orchestrator import (
             GRAMMYOrchestrator,
             TrackContext,
             TrackState,

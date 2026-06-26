@@ -52,7 +52,7 @@ def mock_local_embedder(monkeypatch):
 @pytest.fixture(autouse=True)
 def reset_anomaly_detector():
     """Reset the anomaly detector before each test to prevent bulk mutation blocks."""
-    from cortex.extensions.security.anomaly_detector import DETECTOR
+    from cortex_extensions.security.anomaly_detector import DETECTOR
 
     DETECTOR.reset()
 

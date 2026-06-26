@@ -23,7 +23,7 @@ __all__ = [
     "is_adk_available",
 ]
 
-logger = logging.getLogger("cortex.extensions.adk.agents")
+logger = logging.getLogger("cortex_extensions.adk.agents")
 
 _ADK_INSTALL_MSG = "Google ADK not installed. Install with: pip install google-adk"
 
@@ -72,7 +72,7 @@ def create_memory_agent(
     if not _ADK_AVAILABLE:
         raise ImportError(_ADK_INSTALL_MSG)
 
-    from cortex.extensions.adk.tools import ALL_TOOLS
+    from cortex_extensions.adk.tools import ALL_TOOLS
 
     tools = list(ALL_TOOLS)
     if extra_tools:
@@ -133,7 +133,7 @@ def create_analyst_agent(
     if not _ADK_AVAILABLE:
         raise ImportError(_ADK_INSTALL_MSG)
 
-    from cortex.extensions.adk.tools import adk_search, adk_status
+    from cortex_extensions.adk.tools import adk_search, adk_status
 
     tools: list = [adk_search, adk_status]
     if toolbox_tools:
@@ -181,7 +181,7 @@ def create_guardian_agent(
     if not _ADK_AVAILABLE:
         raise ImportError(_ADK_INSTALL_MSG)
 
-    from cortex.extensions.adk.tools import adk_ledger_verify, adk_status
+    from cortex_extensions.adk.tools import adk_ledger_verify, adk_status
 
     tools: list = [adk_ledger_verify, adk_status]
     if mcp_tools:
@@ -229,7 +229,7 @@ def create_google_one_agent(
     if not _ADK_AVAILABLE:
         raise ImportError(_ADK_INSTALL_MSG)
 
-    from cortex.extensions.adk.goog_tools import GOOGLE_ONE_TOOLS
+    from cortex_extensions.adk.goog_tools import GOOGLE_ONE_TOOLS
 
     tools = list(GOOGLE_ONE_TOOLS)
     if mcp_tools:
