@@ -1,1 +1,5 @@
-Mock Proof IR
+(Event EV_3 3)
+(Wait 0 EV_3)
+(Event EV_4 4)
+(HappensBefore EV_3 EV_4)
+(Emit Fallback_TaskA EV_4)
