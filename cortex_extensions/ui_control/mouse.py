@@ -1,6 +1,7 @@
+import asyncio
+
 # [C5-REAL] Exergy-Maximized
 import logging
-import time
 from typing import TYPE_CHECKING, Optional
 
 try:
@@ -47,7 +48,7 @@ class MouseEngine:
         up = CG.kCGEventLeftMouseUp if button == "left" else CG.kCGEventRightMouseUp
 
         self._post_event(down, p, btn)
-        time.sleep(HUMAN_CLICK_DELAY)
+        await asyncio.sleep(HUMAN_CLICK_DELAY)
         self._post_event(up, p, btn)
 
         return InteractionResult(success=True)
@@ -69,7 +70,7 @@ class MouseEngine:
         CG.CGEventSetIntegerValueField(up1, CG.kCGMouseEventClickState, 1)
         CG.CGEventPost(CG.kCGHIDEventTap, up1)
 
-        time.sleep(0.05)
+        await asyncio.sleep(0.05)
 
         # Segundo click con clickCount=2
         down2 = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseDown, (p.x, p.y), btn)
@@ -108,7 +109,7 @@ class MouseEngine:
         # Mouse down en origen
         down = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseDown, (from_x, from_y), btn)
         CG.CGEventPost(CG.kCGHIDEventTap, down)
-        time.sleep(0.05)
+        await asyncio.sleep(0.05)
 
         # Movimiento interpolado
         for i in range(1, steps + 1):
@@ -117,7 +118,7 @@ class MouseEngine:
             cy = from_y + int((to_y - from_y) * t)
             drag_ev = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseDragged, (cx, cy), btn)
             CG.CGEventPost(CG.kCGHIDEventTap, drag_ev)
-            time.sleep(step_delay)
+            await asyncio.sleep(step_delay)
 
         # Mouse up en destino
         up = CG.CGEventCreateMouseEvent(None, CG.kCGEventLeftMouseUp, (to_x, to_y), btn)

@@ -53,7 +53,7 @@ async def test_2pc_atomic_commit():
     # Insert 1 task
     now = datetime.now(timezone.utc).isoformat()
     await db.execute(
-        "INSERT INTO system_hypotheses (id, statement, probability, svi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO system_hypotheses (id, statement, probability, evi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         ("hyp-test-2pc", "Stmt", 1.0, 1.0, 1.0, 1.0, 'ACTIVE', now)
     )
     await db.commit()
