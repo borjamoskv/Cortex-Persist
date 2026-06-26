@@ -16,7 +16,7 @@
     <rect width="800" height="200" fill="url(#grid)" rx="10"/>
 
     <text x="30" y="40" font-family="Courier, monospace" font-size="18" fill="#2B3BE5" font-weight="bold">CORTEX-PERSIST :: C5-REAL TELEMETRY</text>
-    <text x="30" y="60" font-family="Courier, monospace" font-size="12" fill="#888888">LAST UPDATE: 2026-06-26 17:31:02 UTC</text>
+    <text x="30" y="60" font-family="Courier, monospace" font-size="12" fill="#888888">LAST UPDATE: 2026-06-26 18:30:38 UTC</text>
 
     <!-- Metrics -->
     <g transform="translate(30, 100)">
@@ -24,13 +24,13 @@
         <text x="0" y="30" font-family="Courier, monospace" font-size="28" fill="#FFFFFF">0.055 ms</text>
         
         <text x="200" y="0" font-family="Courier, monospace" font-size="14" fill="#CCCCCC">DISPATCH THROUGHPUT</text>
-        <text x="200" y="30" font-family="Courier, monospace" font-size="28" fill="#FFFFFF">10304 ops/s</text>
+        <text x="200" y="30" font-family="Courier, monospace" font-size="28" fill="#FFFFFF">10237 ops/s</text>
         
         <text x="450" y="0" font-family="Courier, monospace" font-size="14" fill="#CCCCCC">ACTIVE K-0 AGENTS</text>
-        <text x="450" y="30" font-family="Courier, monospace" font-size="28" fill="#FFFFFF">9964</text>
+        <text x="450" y="30" font-family="Courier, monospace" font-size="28" fill="#FFFFFF">9973</text>
 
         <text x="650" y="0" font-family="Courier, monospace" font-size="14" fill="#CCCCCC">VSA MEMORY</text>
-        <text x="650" y="30" font-family="Courier, monospace" font-size="28" fill="#FFFFFF">45.1 MB</text>
+        <text x="650" y="30" font-family="Courier, monospace" font-size="28" fill="#FFFFFF">54.9 MB</text>
     </g>
 
     <!-- Status Bar -->
