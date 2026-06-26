@@ -17,7 +17,7 @@ Usage:
 Requirements:
     pip install cortex-persist httpx rich
 
-Docs: https://cortexpersist.org/docs/mcp
+Docs: https://github.com/borjamoskv/Cortex-Persist/tree/main/docs/mcp.md
 """
 
 from __future__ import annotations

@@ -119,4 +119,4 @@ cortex verify 1
 
 ---
 
-*by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com)*
+*by [borjamoskv.com](https://borjamoskv.com) · [cortex-persist](https://github.com/borjamoskv/Cortex-Persist)*
