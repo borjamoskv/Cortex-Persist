@@ -48,6 +48,7 @@ except ImportError:  # pragma: no cover - sqlite-vec is a base dependency in rel
     sqlite_vec = None
 
 # Python 3.12 deprecates the default datetime adapter. We register our own to prevent DeprecationWarning.
+logger = logging.getLogger("cortex.db")
 import datetime
 
 from cortex.utils.errors import DBLockError
@@ -131,7 +132,6 @@ def _secure_sqlite3_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
     Blocks any raw sqlite3.connect() calls that do not use the CortexConnection factory.
     """
     factory = kwargs.get("factory")
-    print(f"DEBUG: _secure_sqlite3_connect called with factory={factory}")
     if factory is not CortexConnection:
         import os
 
@@ -143,7 +143,6 @@ def _secure_sqlite3_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
             or "test_metal" in pytest_test
         )
         if "PYTEST_CURRENT_TEST" in os.environ and not is_security_test:
-            print(f"DEBUG: bypassing security check for test {pytest_test}")
             return __import__("typing").cast(sqlite3.Connection, _original_sqlite3_connect(*args, **kwargs))
             
         if args and isinstance(args[0], (str, bytes)) and ".coverage" in str(args[0]):
@@ -152,7 +151,6 @@ def _secure_sqlite3_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
         raise RuntimeError(
             "[C5-REAL] FATAL: Direct sqlite3.connect() is structurally forbidden. Use MTK Allocator (cortex.database.core.connect)."
         )
-    print("DEBUG: returning original with factory")
     return __import__("typing").cast(sqlite3.Connection, _original_sqlite3_connect(*args, **kwargs))
 
 
@@ -193,8 +191,6 @@ __all__ = [
     "CortexConnection",
     "causal_write",
 ]
-
-logger = logging.getLogger("cortex.db")
 
 # ─── Configuration ────────────────────────────────────────────────────
 
@@ -353,8 +349,9 @@ def connect_writer(
 
 
 async def connect_async(
-    db_path: str,
+    db_path: str | Path,
     *,
+    timeout: float = 5.0,
     read_only: bool = False,
     uri: bool = False,
 ) -> aiosqlite.Connection:
@@ -370,7 +367,7 @@ async def connect_async(
     db_path = str(db_path)
     is_uri = uri or db_path.startswith("file:")
     try:
-        conn = await aiosqlite.connect(db_path, timeout=5.0, uri=is_uri, factory=CortexConnection)
+        conn = await aiosqlite.connect(db_path, timeout=timeout, uri=is_uri, factory=CortexConnection)
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):
             raise DBLockError(f"Async database lock timeout: {e}") from e
@@ -392,8 +389,9 @@ async def connect_async(
 
 @asynccontextmanager
 async def connect_async_ctx(
-    db_path: str,
+    db_path: str | Path,
     *,
+    timeout: float = 5.0,
     read_only: bool = False,
     uri: bool = False,
 ) -> AsyncIterator[aiosqlite.Connection]:
@@ -407,7 +405,7 @@ async def connect_async_ctx(
         async with connect_async_ctx("/path/to/db") as conn:
             await conn.execute("SELECT 1")
     """
-    conn = await connect_async(db_path, read_only=read_only, uri=uri)
+    conn = await connect_async(db_path, timeout=timeout, read_only=read_only, uri=uri)
     try:
         yield conn
     finally:

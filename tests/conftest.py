@@ -111,9 +111,10 @@ def inject_test_master_key(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def isolate_swarm_ledger(tmp_path, monkeypatch):
-    """Ensure each test gets an isolated SwarmLedger database."""
+    """Ensure each test gets an isolated SwarmLedger database and KeyManager files."""
     db_path = tmp_path / "swarm_ledger.db"
     monkeypatch.setenv("CORTEX_SWARM_DB_PATH", str(db_path))
+    monkeypatch.setenv("CORTEX_DB_PATH", str(tmp_path))
 
 
 def pytest_configure(config):

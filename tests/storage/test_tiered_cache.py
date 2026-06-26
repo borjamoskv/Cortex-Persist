@@ -190,15 +190,15 @@ class MockRedis:
 
 class FaultyMockRedis(MockRedis):
     async def get(self, key: str) -> str | None:
-        raise Exception("Redis Connection Error")
+        raise redis.exceptions.RedisError("Redis Connection Error")
 
     async def set(self, key: str, value: str, ex: int | None = None) -> bool:
-        raise Exception("Redis Write Error")
+        raise redis.exceptions.RedisError("Redis Write Error")
 
     async def scan(
         self, cursor: int, match: str | None = None, count: int | None = None
     ) -> tuple[int, list[str]]:
-        raise Exception("Redis Scan Error")
+        raise redis.exceptions.RedisError("Redis Scan Error")
 
 
 @pytest.mark.asyncio

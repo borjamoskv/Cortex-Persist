@@ -14,7 +14,8 @@ from cortex.engine.core.sandbox_jit import JITSandboxViolation, SandboxJIT
 # To simulate a host crash, we can monkeypatch SandboxJIT.execute to raise a base Exception.
 
 @pytest.fixture
-def clean_km():
+def clean_km(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr("cortex.crypto.keys.keyring", None)
     # Use an isolated KeyManager for the stress test
     manager = KeyManager(service_name="stress_swarm_judge")
     yield manager

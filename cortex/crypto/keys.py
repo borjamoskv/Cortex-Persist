@@ -17,7 +17,10 @@ from pathlib import Path
 from typing import Any, NamedTuple, Optional, cast
 
 try:
-    import keyring
+    if os.environ.get("CORTEX_TESTING"):
+        keyring = None
+    else:
+        import keyring
 except ImportError:
     keyring = None
 from cryptography.exceptions import InvalidSignature

@@ -107,7 +107,7 @@ class TieredCache(Generic[T]):
             import json
 
             return json.loads(raw_val)
-        except (ValueError, TypeError, RuntimeError, OSError) as e:
+        except Exception as e:
             logger.warning("Redis get failed for key %s: %s", key, e)
             return None
 
@@ -128,7 +128,7 @@ class TieredCache(Generic[T]):
                 )
                 return
             await client.set(redis_key, serialized, ex=int(ttl))
-        except (ValueError, TypeError, RuntimeError, OSError) as e:
+        except Exception as e:
             logger.warning("Redis set failed for key %s: %s", key, e)
 
     async def set(self, key: str, value: T, ttl: float | None = None):
@@ -169,7 +169,7 @@ class TieredCache(Generic[T]):
                         await client.delete(*keys)
                     if cursor == 0:
                         break
-            except (ValueError, TypeError, RuntimeError, OSError) as e:
+            except Exception as e:
                 logger.warning("Redis invalidate failed for pattern %s: %s", pattern, e)
 
         await self._notify(CacheEvent.INVALIDATE, pattern)
@@ -190,7 +190,7 @@ class TieredCache(Generic[T]):
                         await client.delete(*keys)
                     if cursor == 0:
                         break
-            except (ValueError, TypeError, RuntimeError, OSError) as e:
+            except Exception as e:
                 logger.warning("Redis clear failed: %s", e)
 
         await self._notify(CacheEvent.CLEAR, "all")

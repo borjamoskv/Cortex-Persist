@@ -7,7 +7,6 @@ import sqlite3
 import time
 from pathlib import Path
 
-import os
 os.environ["CORTEX_NO_EMBED"] = "1"
 
 import pytest

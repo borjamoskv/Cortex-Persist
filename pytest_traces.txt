@@ -1,0 +1,743 @@
+=================================== FAILURES ===================================
+_______________________ test_strike_mode_thermal_bypass ________________________
+tests/forensic/test_strike_v8_0.py:17: in test_strike_mode_thermal_bypass
+    await commander.initialize()
+cortex/engine/swarm/swarm_10k.py:277: in initialize
+    await self.bus.initialize()
+cortex/extensions/signals/sharded_bus.py:62: in initialize
+    conn = await connect_async(db_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cortex/database/core.py:369: in connect_async
+    is_uri = uri or db_path.startswith("file:")
+                    ^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'PosixPath' object has no attribute 'startswith'
+______________________ test_forensic_strike_orchestration ______________________
+tests/forensic/test_strike_v8_0.py:55: in test_forensic_strike_orchestration
+    await commander.initialize()
+cortex/engine/swarm/swarm_10k.py:277: in initialize
+    await self.bus.initialize()
+cortex/extensions/signals/sharded_bus.py:62: in initialize
+    conn = await connect_async(db_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cortex/database/core.py:369: in connect_async
+    is_uri = uri or db_path.startswith("file:")
+                    ^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'PosixPath' object has no attribute 'startswith'
+__________________________ test_redis_fault_tolerance __________________________
+tests/storage/test_tiered_cache.py:272: in test_redis_fault_tolerance
+    await cache.set("k1", "val1")
+cortex/database/cache.py:148: in set
+    await self._redis_set(key, value, duration)
+cortex/database/cache.py:130: in _redis_set
+    await client.set(redis_key, serialized, ex=int(ttl))
+tests/storage/test_tiered_cache.py:196: in set
+    raise Exception("Redis Write Error")
+E   Exception: Redis Write Error
+____________________ test_byzantine_judge_concurrent_stress ____________________
+tests/swarm/test_byzantine_judge_stress.py:36: in test_byzantine_judge_concurrent_stress
+    judge = ByzantineJudge(km=clean_km)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cortex/swarm/byzantine_judge.py:30: in __init__
+    if not self.km.get_private_key_b64(self.judge_id) or not self.km.get_public_key_b64(self.judge_id):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cortex/crypto/keys.py:116: in get_private_key_b64
+    private_pem = keyring.get_password(self.service_name, actor_id)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/keyring/core.py:65: in get_password
+    return get_keyring().get_password(service_name, username)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/keyring/backends/macOS/__init__.py:21: in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/keyring/backends/macOS/__init__.py:61: in get_password
+    return api.find_generic_password(self.keychain, service, username)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/keyring/backends/macOS/api.py:151: in find_generic_password
+    status = SecItemCopyMatching(q, byref(data))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: Timeout (>30.0s) from pytest-timeout.
+______________ test_forensics_cli_build_verify_commit_round_trip _______________
+tests/test_forensic_cli.py:68: in test_forensics_cli_build_verify_commit_round_trip
+    committed_payload = _json_output(committed.output)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_forensic_cli.py:19: in _json_output
+    return json.loads(output)
+           ^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:352: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:363: in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+E   json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+_____________________ test_e2e_ledger_integrity_and_export _____________________
+tests/test_ghost_w5_01.py:81: in test_e2e_ledger_integrity_and_export
+    output_json = json.loads(export_result.output)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:352: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:363: in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+E   json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+----------------------------- Captured stdout call -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+_____________________ test_cascade_death_concurrent_drops ______________________
+tests/test_hito_2_2_topologic_validation.py:239: in test_cascade_death_concurrent_drops
+    assert len(signals) == 0, "Signal should be dropped if hypothesis is INVALIDATED"
+E   AssertionError: Signal should be dropped if hypothesis is INVALIDATED
+E   assert 1 == 0
+E    +  where 1 = len([SwarmSignal(agent_id='ag-1', target='hyp-1234', status='SUCCESS', payload={'result': 'data'}, metrics={})])
+----------------------------- Captured stdout call -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=None
+DEBUG: bypassing security check for test tests/test_hito_2_2_topologic_validation.py::test_cascade_death_concurrent_drops (call)
+DEBUG: _secure_sqlite3_connect called with factory=None
+DEBUG: bypassing security check for test tests/test_hito_2_2_topologic_validation.py::test_cascade_death_concurrent_drops (call)
+_____________________ test_lease_locks_and_ghost_recovery ______________________
+tests/test_hito_3_5_sanedrin_fixes.py:132: in test_lease_locks_and_ghost_recovery
+    await supervisor.initialize()
+cortex/engine/swarm/supervisor.py:52: in initialize
+    self._db = await connect_async(self.db_path, timeout=5.0)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: connect_async() got an unexpected keyword argument 'timeout'
+----------------------------- Captured stdout call -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=None
+DEBUG: bypassing security check for test tests/test_hito_3_5_sanedrin_fixes.py::test_lease_locks_and_ghost_recovery (call)
+_____________________ test_supervisor_pipeline_end_to_end ______________________
+tests/test_hito_3_supervisor_architecture.py:83: in test_supervisor_pipeline_end_to_end
+    await supervisor.initialize()
+cortex/engine/swarm/supervisor.py:52: in initialize
+    self._db = await connect_async(self.db_path, timeout=5.0)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: connect_async() got an unexpected keyword argument 'timeout'
+----------------------------- Captured stdout call -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=None
+DEBUG: bypassing security check for test tests/test_hito_3_supervisor_architecture.py::test_supervisor_pipeline_end_to_end (call)
+________________ test_gate_public_exports_materialize_on_demand ________________
+tests/test_lazy_package_imports.py:149: in test_gate_public_exports_materialize_on_demand
+    assert errors_module in sys.modules
+E   AssertionError: assert 'cortex.extensions.gate.errors' in {'4ef79d6367bb14396397__mypyc': <module '4ef79d6367bb14396397__mypyc' from '/opt/homebrew/lib/python3.14/site-packages... <module 'AppKit._AppKit' from '/opt/homebrew/lib/python3.14/site-packages/AppKit/_AppKit.cpython-314-darwin.so'>, ...}
+E    +  where {'4ef79d6367bb14396397__mypyc': <module '4ef79d6367bb14396397__mypyc' from '/opt/homebrew/lib/python3.14/site-packages... <module 'AppKit._AppKit' from '/opt/homebrew/lib/python3.14/site-packages/AppKit/_AppKit.cpython-314-darwin.so'>, ...} = sys.modules
+________________ TestExecuteThermalPurge.test_json_output_mode _________________
+tests/test_ouroboros_prune.py:441: in test_json_output_mode
+    data = json.loads(captured.out)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:352: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:363: in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+E   json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+---------------------------- Captured stdout setup -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=None
+DEBUG: bypassing security check for test tests/test_ouroboros_prune.py::TestExecuteThermalPurge::test_json_output_mode (setup)
+_________________________ test_postgres_api_endpoints __________________________
+tests/test_postgres_integration.py:238: in test_postgres_api_endpoints
+    with TestClient(app) as client:
+         ^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/starlette/testclient.py:688: in __enter__
+    portal.call(self.wait_startup)
+/opt/homebrew/lib/python3.14/site-packages/anyio/from_thread.py:334: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py:450: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py:395: in __get_result
+    raise self._exception
+/opt/homebrew/lib/python3.14/site-packages/anyio/from_thread.py:259: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/starlette/testclient.py:723: in wait_startup
+    await receive()
+/opt/homebrew/lib/python3.14/site-packages/starlette/testclient.py:714: in receive
+    self.task.result()
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py:443: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/concurrent/futures/_base.py:395: in __get_result
+    raise self._exception
+/opt/homebrew/lib/python3.14/site-packages/anyio/from_thread.py:259: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/starlette/testclient.py:704: in lifespan
+    await self.app(scope, self.stream_receive.receive, self.stream_send.send)
+/opt/homebrew/lib/python3.14/site-packages/fastapi/applications.py:1160: in __call__
+    await super().__call__(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/applications.py:107: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/middleware/errors.py:151: in __call__
+    await self.app(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/middleware/base.py:103: in __call__
+    await self.app(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/middleware/base.py:103: in __call__
+    await self.app(scope, receive, send)
+cortex/telemetry/metrics.py:256: in __call__
+    await self.app(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/middleware/base.py:103: in __call__
+    await self.app(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/middleware/base.py:103: in __call__
+    await self.app(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/middleware/base.py:103: in __call__
+    await self.app(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/middleware/base.py:103: in __call__
+    await self.app(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/middleware/base.py:103: in __call__
+    await self.app(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/middleware/base.py:103: in __call__
+    await self.app(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/middleware/cors.py:79: in __call__
+    await self.app(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/middleware/exceptions.py:49: in __call__
+    await self.app(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/routing.py:725: in app
+    await self.lifespan(scope, receive, send)
+/opt/homebrew/lib/python3.14/site-packages/starlette/routing.py:694: in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/contextlib.py:214: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/fastapi/routing.py:212: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/contextlib.py:214: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/fastapi/routing.py:212: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/contextlib.py:214: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/fastapi/routing.py:212: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/contextlib.py:214: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/fastapi/routing.py:212: in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/lib/python3.14/contextlib.py:214: in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+cortex/api/core.py:72: in lifespan
+    await engine.init_db()
+cortex/engine/core/_engine_connection.py:233: in init_db
+    conn = await self._get_or_create_conn()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cortex/engine/core/_engine_connection.py:110: in _get_or_create_conn
+    conn = await connect_async(str(self._db_path))  # pyright: ignore[reportAttributeAccessIssue]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cortex/database/core.py:380: in connect_async
+    else:
+        ^^
+cortex/database/core.py:421: in apply_pragmas_async
+    """
+/opt/homebrew/lib/python3.14/site-packages/aiosqlite/core.py:223: in execute
+    cursor = await self._execute(self._conn.execute, sql, parameters)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/aiosqlite/core.py:160: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/aiosqlite/core.py:63: in _connection_worker_thread
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.OperationalError: disk I/O error
+----------------------------- Captured stdout call -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+__________ TestPurgeBounded.test_purge_rule_with_dependencies_denied ___________
+tests/test_purge_bounded.py:68: in test_purge_rule_with_dependencies_denied
+    await conn.execute(
+/opt/homebrew/lib/python3.14/site-packages/aiosqlite/core.py:223: in execute
+    cursor = await self._execute(self._conn.execute, sql, parameters)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/aiosqlite/core.py:160: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/aiosqlite/core.py:63: in _connection_worker_thread
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.DatabaseError: not authorized
+---------------------------- Captured stdout setup -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+------------------------------ Captured log setup ------------------------------
+WARNING  cortex.engine.causal.graph:graph.py:80 Rust ATMS disabled: module 'cortex_rs' has no attribute 'AtmsGraph'
+----------------------------- Captured stdout call -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+------------------------------ Captured log call -------------------------------
+WARNING  cortex.nemesis:nemesis.py:73 Suppressed exception: [Errno 2] No such file or directory: './nemesis.md'
+WARNING  cortex.guards.memory_firewall:memory_firewall.py:71 Unrecognized confidence format 'stated', bypassing threshold check.
+WARNING  cortex.engine.causal.graph:graph.py:80 Rust ATMS disabled: module 'cortex_rs' has no attribute 'AtmsGraph'
+WARNING  cortex.nemesis:nemesis.py:73 Suppressed exception: [Errno 2] No such file or directory: './nemesis.md'
+WARNING  cortex.guards.memory_firewall:memory_firewall.py:71 Unrecognized confidence format 'stated', bypassing threshold check.
+WARNING  cortex.engine.causal.graph:graph.py:80 Rust ATMS disabled: module 'cortex_rs' has no attribute 'AtmsGraph'
+_ TestPurgeBounded.test_purge_knowledge_with_dependencies_allowed_but_quarantined_logic _
+tests/test_purge_bounded.py:111: in test_purge_knowledge_with_dependencies_allowed_but_quarantined_logic
+    await conn.execute(
+/opt/homebrew/lib/python3.14/site-packages/aiosqlite/core.py:223: in execute
+    cursor = await self._execute(self._conn.execute, sql, parameters)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/aiosqlite/core.py:160: in _execute
+    return await future
+           ^^^^^^^^^^^^
+/opt/homebrew/lib/python3.14/site-packages/aiosqlite/core.py:63: in _connection_worker_thread
+    result = function()
+             ^^^^^^^^^^
+E   sqlite3.DatabaseError: not authorized
+---------------------------- Captured stdout setup -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+------------------------------ Captured log setup ------------------------------
+WARNING  cortex.engine.causal.graph:graph.py:80 Rust ATMS disabled: module 'cortex_rs' has no attribute 'AtmsGraph'
+----------------------------- Captured stdout call -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+------------------------------ Captured log call -------------------------------
+WARNING  cortex.nemesis:nemesis.py:73 Suppressed exception: [Errno 2] No such file or directory: './nemesis.md'
+WARNING  cortex.guards.memory_firewall:memory_firewall.py:71 Unrecognized confidence format 'stated', bypassing threshold check.
+WARNING  cortex.engine.causal.graph:graph.py:80 Rust ATMS disabled: module 'cortex_rs' has no attribute 'AtmsGraph'
+WARNING  cortex.nemesis:nemesis.py:73 Suppressed exception: [Errno 2] No such file or directory: './nemesis.md'
+WARNING  cortex.guards.memory_firewall:memory_firewall.py:71 Unrecognized confidence format 'stated', bypassing threshold check.
+WARNING  cortex.engine.causal.graph:graph.py:80 Rust ATMS disabled: module 'cortex_rs' has no attribute 'AtmsGraph'
+____________________ test_sharded_signal_bus_initialization ____________________
+tests/test_swarm_10k.py:16: in test_sharded_signal_bus_initialization
+    await bus.initialize()
+cortex/extensions/signals/sharded_bus.py:62: in initialize
+    conn = await connect_async(db_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cortex/database/core.py:369: in connect_async
+    db_path = str(db_path)
+                    ^^^^^^^
+E   AttributeError: 'PosixPath' object has no attribute 'startswith'
+________________________ test_adaptive_slashing_scaling ________________________
+tests/test_swarm_kinetic_feedback.py:54: in test_adaptive_slashing_scaling
+    await cmd.initialize()
+cortex/engine/swarm/swarm_10k.py:277: in initialize
+    await self.bus.initialize()
+cortex/extensions/signals/sharded_bus.py:62: in initialize
+    conn = await connect_async(db_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cortex/database/core.py:369: in connect_async
+    db_path = str(db_path)
+                    ^^^^^^^
+E   AttributeError: 'PosixPath' object has no attribute 'startswith'
+____________________ test_contradictory_consensus_detection ____________________
+tests/verification/test_adversarial_simulation.py:164: in test_contradictory_consensus_detection
+    await engine.store(
+cortex/engine/core/_engine_delegates.py:59: in store
+    return await self.facts.store(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cortex/facts/manager.py:80: in store
+    return await self._store_delegate(
+cortex/facts/manager.py:206: in _store_delegate
+    return await StoreMixin._store_impl(
+cortex/engine/core/store_mixin.py:193: in _store_impl
+    await self._run_pre_store_guards(conn, content, project, fact_type, meta, tenant_id)
+cortex/engine/core/store_mixin.py:261: in _run_pre_store_guards
+    await pipeline.run_guards(
+cortex/engine/flow/guard_pipeline.py:62: in run_guards
+    await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
+cortex/engine/flow/guard_adapters.py:207: in check
+    await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
+cortex/guards/virgo.py:219: in check
+    await self._check_agent_validation_signature(content, project, meta, agent_id, conn, tenant_id)
+cortex/guards/virgo.py:108: in _check_agent_validation_signature
+    await self._trigger_ledger_rollback(
+cortex/guards/virgo.py:323: in _trigger_ledger_rollback
+    raise error_class(f"Logos-Critique (Virgo ♍) Rejected: {reason}")
+E   cortex.guards.virgo.VirgoValidationError: Logos-Critique (Virgo ♍) Rejected: Invalid Logos-Critique validation signature for agent fact. Sig: efe6698c0ac7c2c2...
+---------------------------- Captured stdout setup -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+----------------------------- Captured stdout call -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+------------------------------ Captured log call -------------------------------
+WARNING  cortex.security.virgo:virgo.py:290 ⚠️ [VIRGO-TRUST] Agent 'user' penalized in Trust Registry. Severity: 0.80
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: efe6698c0ac7c2c2.... Reverting ledger state.
+ERROR    cortex.facts.manager:manager.py:225 EXCEPTION IN _store_delegate: VirgoValidationError - started_tx=True, in_transaction=False
+ERROR    cortex.facts.manager:manager.py:230 SKIPPING ROLLBACK
+________________________ test_replay_attack_prevention _________________________
+tests/verification/test_adversarial_simulation.py:203: in test_replay_attack_prevention
+    fact_id = await engine.store(
+cortex/engine/core/_engine_delegates.py:59: in store
+    return await self.facts.store(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cortex/facts/manager.py:80: in store
+    return await self._store_delegate(
+cortex/facts/manager.py:206: in _store_delegate
+    return await StoreMixin._store_impl(
+cortex/engine/core/store_mixin.py:193: in _store_impl
+    await self._run_pre_store_guards(conn, content, project, fact_type, meta, tenant_id)
+cortex/engine/core/store_mixin.py:261: in _run_pre_store_guards
+    await pipeline.run_guards(
+cortex/engine/flow/guard_pipeline.py:62: in run_guards
+    await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
+cortex/engine/flow/guard_adapters.py:207: in check
+    await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
+cortex/guards/virgo.py:219: in check
+    await self._check_agent_validation_signature(content, project, meta, agent_id, conn, tenant_id)
+cortex/guards/virgo.py:108: in _check_agent_validation_signature
+    await self._trigger_ledger_rollback(
+cortex/guards/virgo.py:323: in _trigger_ledger_rollback
+    raise error_class(f"Logos-Critique (Virgo ♍) Rejected: {reason}")
+E   cortex.guards.virgo.VirgoValidationError: Logos-Critique (Virgo ♍) Rejected: Invalid Logos-Critique validation signature for agent fact. Sig: 7f396b48d04e0332...
+---------------------------- Captured stdout setup -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+----------------------------- Captured stdout call -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+------------------------------ Captured log call -------------------------------
+WARNING  cortex.security.virgo:virgo.py:290 ⚠️ [VIRGO-TRUST] Agent 'agent_normal' penalized in Trust Registry. Severity: 0.80
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 7f396b48d04e0332.... Reverting ledger state.
+ERROR    cortex.facts.manager:manager.py:225 EXCEPTION IN _store_delegate: VirgoValidationError - started_tx=True, in_transaction=False
+ERROR    cortex.facts.manager:manager.py:230 SKIPPING ROLLBACK
+________________________ test_contradiction_collisions _________________________
+tests/verification/test_frontier_stress.py:250: in test_contradiction_collisions
+    await engine.store(
+cortex/engine/core/_engine_delegates.py:59: in store
+    return await self.facts.store(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+cortex/facts/manager.py:80: in store
+    return await self._store_delegate(
+cortex/facts/manager.py:206: in _store_delegate
+    return await StoreMixin._store_impl(
+cortex/engine/core/store_mixin.py:193: in _store_impl
+    await self._run_pre_store_guards(conn, content, project, fact_type, meta, tenant_id)
+cortex/engine/core/store_mixin.py:261: in _run_pre_store_guards
+    await pipeline.run_guards(
+cortex/engine/flow/guard_pipeline.py:62: in run_guards
+    await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
+cortex/engine/flow/guard_adapters.py:207: in check
+    await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
+cortex/guards/virgo.py:219: in check
+    await self._check_agent_validation_signature(content, project, meta, agent_id, conn, tenant_id)
+cortex/guards/virgo.py:72: in _check_agent_validation_signature
+    await self._trigger_ledger_rollback(
+cortex/guards/virgo.py:323: in _trigger_ledger_rollback
+    raise error_class(f"Logos-Critique (Virgo ♍) Rejected: {reason}")
+E   cortex.guards.virgo.VirgoValidationError: Logos-Critique (Virgo ♍) Rejected: Missing required Logos-Critique validation signature (logos_signature).
+---------------------------- Captured stdout setup -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+----------------------------- Captured stdout call -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+DEBUG: _secure_sqlite3_connect called with factory=<class 'cortex.database.core.CortexConnection'>
+DEBUG: returning original with factory
+------------------------------ Captured log call -------------------------------
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Missing required Logos-Critique validation signature (logos_signature).. Reverting ledger state.
+ERROR    cortex.facts.manager:manager.py:225 EXCEPTION IN _store_delegate: VirgoValidationError - started_tx=True, in_transaction=False
+ERROR    cortex.facts.manager:manager.py:230 SKIPPING ROLLBACK
+_________________________ test_virgo_guard_concurrency _________________________
+tests/verification/test_virgo_exergy_stress.py:94: in test_virgo_guard_concurrency
+    assert successful_runs == 50, f"Expected 50 successful guard admissions, got {successful_runs}"
+E   AssertionError: Expected 50 successful guard admissions, got 0
+E   assert 0 == 50
+---------------------------- Captured stdout setup -----------------------------
+DEBUG: _secure_sqlite3_connect called with factory=None
+DEBUG: bypassing security check for test tests/verification/test_virgo_exergy_stress.py::test_virgo_guard_concurrency (setup)
+------------------------------ Captured log call -------------------------------
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 9bafbcb51db7e954.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 1cc32e4e96d4ca92.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 853725a5ed112f64.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 21b87b47aa2456ca.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: ea277441649f4b6f.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 4e7c7ad3ca2ac77b.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: dd81419949132c51.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 781adba1f62189fb.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: bfa62a99cf6552d1.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: b2047535afe5dccd.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 5fc0c717df32d0c4.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 3624eb04bdf630df.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 9c5c1d99c3abe359.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: a3e5c014e14d6c5e.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: e7dd904b425a1342.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 4ea4c797f752154c.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 9319ee0166412771.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 8075cf567fb912e2.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 02560a0fc422d68a.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 056fe58017a6137b.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: ee9c477825b3166b.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 536317ed74e556bd.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 3019c2fb2e74cec7.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 42d7cbb1fcce43db.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: c2b8e5d0e8dd8efe.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: b367ba6844f0e058.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 3f60495e6a004607.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 50af7a0f4d8534db.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 4126fafc857825e8.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: e4e33d6a85fd48e1.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: a666541e14555e91.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: c1813ed246711913.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 2c0059b11417b802.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: cd041ed4f12969e2.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: c94628a667de87f1.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: ad1018a9e42848d7.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: f14f44737ca0affe.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 719bcba866bb457d.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 526da02eb4fc0f1c.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 5cd00b062316caef.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: ffabc35964ae08b5.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 91800a36db00ed5b.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 18d34a66058f1a42.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 7d77e65b606361bc.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: c65d81e21cabde66.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 03350b46853481d5.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 7a215647089a319d.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 27965f976b722929.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: dee9b38db8ae6441.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 2865bf413d80f8e4.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 9bafbcb51db7e954.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 1cc32e4e96d4ca92.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 853725a5ed112f64.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 21b87b47aa2456ca.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: ea277441649f4b6f.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 4e7c7ad3ca2ac77b.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: dd81419949132c51.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 781adba1f62189fb.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: bfa62a99cf6552d1.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: b2047535afe5dccd.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 5fc0c717df32d0c4.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 3624eb04bdf630df.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 9c5c1d99c3abe359.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: a3e5c014e14d6c5e.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: e7dd904b425a1342.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 4ea4c797f752154c.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 9319ee0166412771.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 8075cf567fb912e2.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 02560a0fc422d68a.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 056fe58017a6137b.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: ee9c477825b3166b.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 536317ed74e556bd.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 3019c2fb2e74cec7.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 42d7cbb1fcce43db.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: c2b8e5d0e8dd8efe.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: b367ba6844f0e058.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 3f60495e6a004607.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 50af7a0f4d8534db.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 4126fafc857825e8.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: e4e33d6a85fd48e1.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: a666541e14555e91.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: c1813ed246711913.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 2c0059b11417b802.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: cd041ed4f12969e2.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: c94628a667de87f1.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: ad1018a9e42848d7.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: f14f44737ca0affe.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 719bcba866bb457d.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 526da02eb4fc0f1c.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 5cd00b062316caef.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: ffabc35964ae08b5.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 91800a36db00ed5b.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 18d34a66058f1a42.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 7d77e65b606361bc.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: c65d81e21cabde66.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 03350b46853481d5.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 7a215647089a319d.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 27965f976b722929.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: dee9b38db8ae6441.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: 2865bf413d80f8e4.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique failed. Reason: Invalid Logos-Critique validation signature for agent fact. Sig: invalid_sig_valu.... Reverting ledger state.
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:491
+  <frozen importlib._bootstrap>:491: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:491
+  <frozen importlib._bootstrap>:491: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+../../../opt/homebrew/lib/python3.14/site-packages/langchain_core/_api/deprecation.py:25
+  /opt/homebrew/lib/python3.14/site-packages/langchain_core/_api/deprecation.py:25: UserWarning: Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater.
+    from pydantic.v1.fields import FieldInfo as FieldInfoV1
+
+tests/test_chaos_audit_stream.py:4
+  /Users/borjafernandezangulo/30_CORTEX/tests/test_chaos_audit_stream.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.chaos - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.chaos
+
+tests/test_hito_3_supervisor_architecture.py:13
+  /Users/borjafernandezangulo/30_CORTEX/tests/test_hito_3_supervisor_architecture.py:13: PytestCollectionWarning: cannot collect test class 'TestAgent' because it has a __init__ constructor (from: tests/test_hito_3_supervisor_architecture.py)
+    class TestAgent(SwarmAgent):
+
+tests/test_llm_provider_status.py:4
+  /Users/borjafernandezangulo/30_CORTEX/tests/test_llm_provider_status.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+tests/test_llm_router_presets.py:4
+  /Users/borjafernandezangulo/30_CORTEX/tests/test_llm_router_presets.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+tests/test_metal_falsability.py:2
+  /Users/borjafernandezangulo/30_CORTEX/tests/test_metal_falsability.py:2: PytestUnknownMarkWarning: Unknown pytest.mark.chaos - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.chaos
+
+tests/test_postgres_integration.py:4
+  /Users/borjafernandezangulo/30_CORTEX/tests/test_postgres_integration.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+tests/test_ttt_daemon.py:4
+  /Users/borjafernandezangulo/30_CORTEX/tests/test_ttt_daemon.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+tests/verification/test_adversarial_simulation.py:4
+  /Users/borjafernandezangulo/30_CORTEX/tests/verification/test_adversarial_simulation.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.chaos - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.chaos
+
+tests/test_adk_agents.py::TestADKModuleImport::test_agents_module_import
+  /opt/homebrew/lib/python3.14/site-packages/google/genai/types.py:43: DeprecationWarning: '_UnionGenericAlias' is deprecated and slated for removal in Python 3.17
+    VersionedUnionType = Union[builtin_types.UnionType, _UnionGenericAlias]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/forensic/test_strike_v8_0.py::test_strike_mode_thermal_bypass - ...
+FAILED tests/forensic/test_strike_v8_0.py::test_forensic_strike_orchestration
+FAILED tests/storage/test_tiered_cache.py::test_redis_fault_tolerance - Excep...
+FAILED tests/swarm/test_byzantine_judge_stress.py::test_byzantine_judge_concurrent_stress
+FAILED tests/test_forensic_cli.py::test_forensics_cli_build_verify_commit_round_trip
+FAILED tests/test_ghost_w5_01.py::test_e2e_ledger_integrity_and_export - json...
+FAILED tests/test_hito_2_2_topologic_validation.py::test_cascade_death_concurrent_drops
+FAILED tests/test_hito_3_5_sanedrin_fixes.py::test_lease_locks_and_ghost_recovery
+FAILED tests/test_hito_3_supervisor_architecture.py::test_supervisor_pipeline_end_to_end
+FAILED tests/test_lazy_package_imports.py::test_gate_public_exports_materialize_on_demand
+FAILED tests/test_ouroboros_prune.py::TestExecuteThermalPurge::test_json_output_mode
+FAILED tests/test_postgres_integration.py::test_postgres_api_endpoints - sqli...
+FAILED tests/test_purge_bounded.py::TestPurgeBounded::test_purge_rule_with_dependencies_denied
+FAILED tests/test_purge_bounded.py::TestPurgeBounded::test_purge_knowledge_with_dependencies_allowed_but_quarantined_logic
+FAILED tests/test_swarm_10k.py::test_sharded_signal_bus_initialization - Attr...
+FAILED tests/test_swarm_kinetic_feedback.py::test_adaptive_slashing_scaling
+FAILED tests/verification/test_adversarial_simulation.py::test_contradictory_consensus_detection
+FAILED tests/verification/test_adversarial_simulation.py::test_replay_attack_prevention
+FAILED tests/verification/test_frontier_stress.py::test_contradiction_collisions
+FAILED tests/verification/test_virgo_exergy_stress.py::test_virgo_guard_concurrency
+===== 20 failed, 3487 passed, 42 skipped, 12 warnings in 430.70s (0:07:10) =====

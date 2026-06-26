@@ -51,16 +51,12 @@ class TestAPIGovernance:
             "The formal architecture decision record for the canonical API has been deleted."
         )
 
-    def test_legacy_server_has_deprecation_warning(self) -> None:
-        """If api/server.py still exists, it must contain a DeprecationWarning."""
+    def test_legacy_server_is_removed(self) -> None:
+        """The legacy api/server.py module must not exist (purged in v1.2.0)."""
         legacy = REPO_ROOT / "api" / "server.py"
-        if not legacy.exists():
-            # Legacy module already removed — governance satisfied.
-            return
-        source = legacy.read_text(encoding="utf-8")
-        assert "DeprecationWarning" in source, (
-            "api/server.py exists but does not contain a DeprecationWarning. "
-            "The deprecation banner has been removed, violating ADR-0003."
+        assert not legacy.exists(), (
+            "api/server.py still exists. It was scheduled for removal in v1.2.0 "
+            "and must be fully purged."
         )
 
     def test_governance_doc_declares_canonical_surface(self) -> None:

@@ -24,22 +24,17 @@ The official production surface of the CORTEX memory engine. It is the only API 
 
 ---
 
-## 🔴 Legacy Demo API (Deprecated)
+## 🔴 Legacy Demo API (Removed)
 
-* **Status:** Deprecated
-* **Module:** `api.server` (located at `api/server.py`)
-* **Entrypoint:** `api.server:app`
+* **Status:** Removed in v1.2.0
+* **Module:** `api.server` (formerly at `api/server.py`)
 
 ### Purpose
-A prototype/demo surface originally built for the "Influencer Guard" concept, toxicity tracking, and dummy telemetry WebSockets. It is a completely separate FastAPI application that **does not share** the `app` instance, middlewares, or security boundaries of the Canonical API.
+Previously a prototype/demo surface originally built for the "Influencer Guard" concept. Completely removed in v1.2.0 to enforce the Canonical API and consolidate all execution within EventSovereigntyRuntime.
 
 ### Deployment & Lifecycle
-* **Direct Execution:** `python api/server.py`
-* **Deprecation Schedule:** 
-  * **Status:** Frozen (No new features or bug fixes as of 2026-06-26)
-  * **Target Removal:** Version 1.2.0
-* **Lifecycle:** Pending consolidation. It is retained solely for historical reference of the Influencer Guard concept until v1.2.0.
-* **Warning:** Do NOT use this module as a reference for new feature development.
+* **Status:** Purged
+* **Warning:** Do NOT attempt to use or resurrect this module.
 
 ---
 

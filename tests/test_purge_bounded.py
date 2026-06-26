@@ -65,6 +65,7 @@ class TestPurgeBounded:
             )
             # Ensure causal edge is created (if store doesn't do it automatically for these types)
             async with engine.session() as conn:
+                conn._conn.authorize_causal_writes()
                 await conn.execute(
                     "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
                     (child_id, rule_id, EDGE_DERIVED_FROM),
@@ -108,6 +109,7 @@ class TestPurgeBounded:
                 source="test",
             )
             async with engine.session() as conn:
+                conn._conn.authorize_causal_writes()
                 await conn.execute(
                     "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
                     (child_id, fact_id, EDGE_DERIVED_FROM),

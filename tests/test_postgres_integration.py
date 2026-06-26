@@ -234,6 +234,8 @@ def test_postgres_api_endpoints(mock_postgres_env: None) -> None:
         patch("cortex.database.postgres_core.create_pool_async", return_value=mock_pool),
         patch("cortex.storage.postgres.PostgresBackend.connect", new_callable=AsyncMock),
         patch("cortex.storage.postgres.PostgresBackend.close", new_callable=AsyncMock),
+        patch("cortex.api.core.CortexEngine.init_db", new_callable=AsyncMock),
+        patch("cortex.api.core.CortexEngine.close", new_callable=AsyncMock),
     ):
         with TestClient(app) as client:
             # 1. Test Store Fact Endpoint

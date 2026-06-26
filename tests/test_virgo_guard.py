@@ -32,14 +32,14 @@ def mock_omega_auditor(monkeypatch):
 
 
 @pytest.fixture
-async def engine(tmp_path: Path):
+async def engine(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Create a CortexEngine with a temp database, close after test."""
     from cortex.engine import CortexEngine
 
     # Unblock tests from thermodynamic enforcement
-    os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
-    os.environ["CORTEX_STRICT_GUARDS"] = "1"
-    os.environ["CORTEX_VIRGO_MODE"] = "LEGACY"
+    monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
+    monkeypatch.setenv("CORTEX_STRICT_GUARDS", "1")
+    monkeypatch.setenv("CORTEX_VIRGO_MODE", "LEGACY")
 
     db = str(tmp_path / "test_virgo.db")
     e = CortexEngine(db_path=db, auto_embed=False)
@@ -47,13 +47,6 @@ async def engine(tmp_path: Path):
 
     yield e
     await e.close()
-
-    if "CORTEX_SKIP_EXERGY_VALIDATION" in os.environ:
-        del os.environ["CORTEX_SKIP_EXERGY_VALIDATION"]
-    if "CORTEX_STRICT_GUARDS" in os.environ:
-        del os.environ["CORTEX_STRICT_GUARDS"]
-    if "CORTEX_VIRGO_MODE" in os.environ:
-        del os.environ["CORTEX_VIRGO_MODE"]
 
 
 # ─── 1. Signature Verification Tests ──────────────────────────────────
@@ -272,10 +265,9 @@ class TestVirgoSystemBypassAndRollback:
 
 class TestVirgoStrictMode:
     @pytest.fixture(autouse=True)
-    def setup_strict_mode(self, engine):
-        os.environ["CORTEX_VIRGO_MODE"] = "STRICT"
+    def setup_strict_mode(self, engine, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.setenv("CORTEX_VIRGO_MODE", "STRICT")
         yield
-        os.environ["CORTEX_VIRGO_MODE"] = "LEGACY"
 
     async def test_virgo_strict_rejects_hash_fallback(self, engine):
         """Verifies that in STRICT mode, hash fallback signature is rejected."""
