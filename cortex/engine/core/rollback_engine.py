@@ -62,7 +62,8 @@ class CausalRollbackEngine:
         if not nodes:
             return {"status": "failed", "reason": "not_found", "details": sim}
 
-        async with aiosqlite.connect(self.db_path) as conn:
+        from cortex.database.core import connect_async
+        async with await connect_async(self.db_path) as conn:
             # Mark all affected nodes as rolled_back
             placeholders = ",".join("?" * len(nodes))
             query = f"UPDATE execution_trace_ledger SET outcome = 'rolled_back' WHERE tenant_id = ? AND id IN ({placeholders})"

@@ -25,7 +25,8 @@ class ExergyBifurcationEngine:
         """Ramifica la realidad actual (base_tenant) en una nueva línea temporal aislada."""
         new_tenant = f"tl_{uuid.uuid4().hex[:6]}"
 
-        async with aiosqlite.connect(self.db_path, timeout=10) as conn:
+        from cortex.database.core import connect_async
+        async with await connect_async(self.db_path, timeout=10) as conn:
             cursor = await conn.execute(
                 "SELECT id, origin, cost, lineage, outcome, rollback_possible, created_at FROM execution_trace_ledger WHERE tenant_id = ?",
                 (base_tenant,),
@@ -77,7 +78,8 @@ class ExergyBifurcationEngine:
         Calcula la Exergía global de cada timeline (Fitness = Coherencia * Presupuesto de Entropía).
         Permite tomar decisiones sobre qué realidades deben colapsar y cuáles prevalecen.
         """
-        async with aiosqlite.connect(self.db_path, timeout=10) as conn:
+        from cortex.database.core import connect_async
+        async with await connect_async(self.db_path, timeout=10) as conn:
             cursor = await conn.execute("SELECT DISTINCT tenant_id FROM thermodynamics_state")
             tenants = [row[0] for row in await cursor.fetchall()]
 
@@ -129,7 +131,8 @@ class ExergyBifurcationEngine:
         if not dead_tenants:
             return
 
-        async with aiosqlite.connect(self.db_path, timeout=10) as conn:
+        from cortex.database.core import connect_async
+        async with await connect_async(self.db_path, timeout=10) as conn:
             for t in dead_tenants:
                 await conn.execute("DELETE FROM execution_trace_ledger WHERE tenant_id = ?", (t,))
                 await conn.execute("DELETE FROM thermodynamics_state WHERE tenant_id = ?", (t,))

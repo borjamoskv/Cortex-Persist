@@ -109,11 +109,11 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
     }
 )
 
-# Pattern: raw sqlite3.connect( call
-_RAW_CONNECT_PATTERN = re.compile(r"(?<!\w)sqlite3\.connect\s*\(", re.MULTILINE)
+# Pattern: raw sqlite3.connect( or aiosqlite.connect(
+_RAW_CONNECT_PATTERN = re.compile(r"(?<!\w)(sqlite3|aiosqlite)\.connect\s*\(", re.MULTILINE)
 
-# Pattern: import sqlite3 (to differentiate from type hints)
-_IMPORT_PATTERN = re.compile(r"^\s*import\s+sqlite3|^\s*from\s+sqlite3\s+import", re.MULTILINE)
+# Pattern: import sqlite3 or aiosqlite (to differentiate from type hints)
+_IMPORT_PATTERN = re.compile(r"^\s*import\s+(sqlite3|aiosqlite)|^\s*from\s+(sqlite3|aiosqlite)\s+import", re.MULTILINE)
 
 
 class ConnectionViolation:
@@ -148,8 +148,9 @@ def _scan_file_lines(py_file: Path, violations: list[ConnectionViolation]) -> No
         if "# noqa" in line or "connection_guard: ignore" in line:
             continue
 
-        if "sqlite3.connect" in stripped:
-            before = stripped.split("sqlite3.connect")[0]
+        if "sqlite3.connect" in stripped or "aiosqlite.connect" in stripped:
+            split_str = "sqlite3.connect" if "sqlite3.connect" in stripped else "aiosqlite.connect"
+            before = stripped.split(split_str)[0]
             if before.count('"') % 2 == 1 or before.count("'") % 2 == 1:
                 continue
 

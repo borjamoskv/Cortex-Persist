@@ -38,7 +38,8 @@ class EntropyDaemon:
         logger.info("[EntropyDaemon] Ejecutando VACUUM e higiene WAL...")
         db_size_before = os.path.getsize(self.db_path) if os.path.exists(self.db_path) else 0
 
-        async with aiosqlite.connect(self.db_path, timeout=60) as conn:
+        from cortex.database.core import connect_async
+        async with await connect_async(self.db_path, timeout=60) as conn:
             # Checkpoint the Write-Ahead Log (WAL) to database file and truncate WAL
             await conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
             # Reclaim empty pages back to OS

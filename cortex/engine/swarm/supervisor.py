@@ -48,7 +48,8 @@ class SwarmSupervisor:
         
     async def initialize(self) -> None:
         """Starts the components and recovers ghost state."""
-        self._db = await aiosqlite.connect(self.db_path, timeout=5.0)
+        from cortex.database.core import connect_async
+        self._db = await connect_async(self.db_path, timeout=5.0)
         await self._db.execute("PRAGMA journal_mode=WAL;")
         await self._db.execute("PRAGMA busy_timeout=5000;")
         self._topo = TopologyIndex(self._db)

@@ -58,7 +58,8 @@ class ShardedAsyncSignalBus:
 
         for i in range(self.num_shards):
             db_path = self._base_dir / f"swarm_shard_{i:03d}.db"
-            conn = await aiosqlite.connect(db_path)
+            from cortex.database.core import connect_async
+            conn = await connect_async(db_path)
             await conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
             await conn.commit()
             self._shards[i] = conn
