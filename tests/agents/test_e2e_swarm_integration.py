@@ -224,7 +224,8 @@ async def test_e2e_supervisor_fault_tolerance_under_load():
         await supervisor.start_agent(agent.agent_id)
         
     # Let ticks run (Chaos agents need time to crash twice and wait 1s backoff between errors)
-    await asyncio.sleep(3.0)
+    # Each tick takes 1.0s (receive timeout). Tick 1 = 1s. Tick 2 = 2s (crashes). Sleep 0.5s. Tick 3 = 3.5s (crashes).
+    await asyncio.sleep(5.0)
     
     # Verify states
     for agent in healthy_agents:
