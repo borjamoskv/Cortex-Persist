@@ -5,7 +5,6 @@ CORTEX-TAINT: taint:moskv1:adversarial_sat:gen2:0x9f32
 """
 
 import random
-from typing import List, Tuple
 
 
 class SatGeneticSwarm:
@@ -16,9 +15,9 @@ class SatGeneticSwarm:
         self.timeout_ms = timeout_ms
         self.mutation_rate = 0.2
         # Población: lista de listas de tuplas (aristas)
-        self.population: List[List[Tuple[int, int]]] = [self._random_graph() for _ in range(self.pop_size)]
+        self.population: list[list[tuple[int, int]]] = [self._random_graph() for _ in range(self.pop_size)]
 
-    def _random_graph(self) -> List[Tuple[int, int]]:
+    def _random_graph(self) -> list[tuple[int, int]]:
         edges = []
         for i in range(self.graph_size):
             for j in range(i + 1, self.graph_size):
@@ -26,7 +25,7 @@ class SatGeneticSwarm:
                     edges.append((i, j))
         return edges
 
-    def fitness(self, graph: List[Tuple[int, int]]) -> float:
+    def fitness(self, graph: list[tuple[int, int]]) -> float:
         """
         Calcula la Entropía del grafo: queremos maximizar la cantidad de aristas (densidad)
         para forzar la explosión combinatoria en el solver SAT.
@@ -43,7 +42,7 @@ class SatGeneticSwarm:
         return float(edge_count) + random.uniform(0, 5) # Ruido estocástico para diversificación
 
     def evolve(self, generations: int = 5) -> dict:
-        for gen in range(generations):
+        for _gen in range(generations):
             # Sort by fitness
             scored = [(self.fitness(g), g) for g in self.population]
             scored.sort(key=lambda x: x[0], reverse=True)

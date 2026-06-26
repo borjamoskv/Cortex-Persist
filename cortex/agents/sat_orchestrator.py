@@ -4,15 +4,16 @@ Sovereign Component: SAT Orchestrator Agent
 CORTEX-TAINT: taint:moskv1:adversarial_sat:gen2:0x9f32
 """
 
-from typing import List, Tuple
 import time
+
 import z3
+
 
 class SatOrchestrator:
     def __init__(self, timeout_ms: int = 5000):
         self.timeout_ms = timeout_ms
 
-    def verify_k_colorability(self, nodes: int, k: int, edges: List[Tuple[int, int]]) -> dict:
+    def verify_k_colorability(self, nodes: int, k: int, edges: list[tuple[int, int]]) -> dict:
         """
         Llama al motor Z3 de Python (fallback ante la destrucción de cortex_core_rs)
         para comprobar si el grafo es K-colorable.

@@ -51,6 +51,7 @@ class HDCVectorStoreL2:
         "_item_memory",
         "_lock",
         "_ready",
+        "_vec_loaded",
     )
 
     def __init__(
@@ -67,6 +68,7 @@ class HDCVectorStoreL2:
         self._conn: sqlite3.Connection | None = None
         self._lock = asyncio.Lock()
         self._ready = False
+        self._vec_loaded = False
         self._half_life = half_life_days * 24 * 3600
 
     def _get_conn(self) -> sqlite3.Connection:
@@ -80,10 +82,18 @@ class HDCVectorStoreL2:
             self._conn.execute("PRAGMA busy_timeout=5000")
             
             if sqlite_vec is not None:
-                self._conn.enable_load_extension(True)
-                sqlite_vec.load(self._conn)
+                try:
+                    self._conn.enable_load_extension(True)
+                    sqlite_vec.load(self._conn)
+                    self._vec_loaded = True
+                except (AttributeError, OSError, sqlite3.Error) as e:
+                    logger.warning(
+                        f"Could not load sqlite_vec extension: {e}. Falling back to pure Python vectors."
+                    )
+                    self._vec_loaded = False
             else:
                 logger.warning("sqlite_vec module not installed. Falling back to pure python/numpy similarity.")
+                self._vec_loaded = False
             
             self._conn.row_factory = sqlite3.Row
 
@@ -109,7 +119,7 @@ class HDCVectorStoreL2:
 
             # Vector Table (sqlite-vec uses float[N])
             dim = self._encoder.dimension
-            if sqlite_vec is not None:
+            if self._vec_loaded:
                 self._conn.execute(f"""
                     CREATE VIRTUAL TABLE IF NOT EXISTS hdc_vec_facts USING vec0(
                         embedding float[{dim}]
@@ -243,7 +253,7 @@ class HDCVectorStoreL2:
 
         cursor = conn.cursor()
         
-        if sqlite_vec is not None:
+        if self._vec_loaded:
             cursor.execute(
                 """
                 SELECT
