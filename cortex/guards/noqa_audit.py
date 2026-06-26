@@ -20,6 +20,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 # ─── Data Model ───────────────────────────────────────────────────────────────
 
@@ -334,7 +335,7 @@ def _format_verdict(entries: list[NoqaEntry], git_commits: list[dict[str, str]])
     return lines
 
 
-def drift_score(entries: list[NoqaEntry], new_commits: list[dict]) -> int:
+def drift_score(entries: list[NoqaEntry], new_commits: list[dict[str, Any]]) -> int:
     """
     Numeric drift score for CI gate thresholds.
     0 = perfect. >threshold = gate failure.

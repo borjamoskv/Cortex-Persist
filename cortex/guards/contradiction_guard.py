@@ -23,6 +23,7 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import aiosqlite
 
@@ -237,7 +238,7 @@ def _is_noise(content: str) -> bool:
     return any(content.startswith(prefix) for prefix in _NOISE_PREFIXES)
 
 
-def _decrypt_content(content: str, decrypt_fn: Callable | None) -> str | None:
+def _decrypt_content(content: str, decrypt_fn: Callable[[str], str] | None) -> str | None:
     """Decrypt content if needed, returning None on failure."""
     if not decrypt_fn or not content.startswith("v6_aesgcm:"):
         return content
@@ -285,7 +286,7 @@ def _score_candidate(
     new_tokens: set[str],
     new_content: str,
     new_project: str,
-    decrypt_fn: Callable | None,
+    decrypt_fn: Callable[[str], str] | None,
     min_score: float,
     new_embedding: list[float] | None = None,
     existing_embedding: list[float] | None = None,
@@ -365,7 +366,7 @@ async def _fetch_decision_rows(
             """,
             (fts_terms,),
         )
-    return await cursor.fetchall()  # type: ignore[type-error]
+    return list(await cursor.fetchall())
 
 
 # ── Main detector ───────────────────────────────────────────────────
@@ -374,7 +375,7 @@ async def detect_contradictions(
     new_project: str,
     *,
     db_path: str | Path = DEFAULT_DB_PATH,
-    decrypt_fn: Callable | None = None,
+    decrypt_fn: Callable[[str], str] | None = None,
     max_candidates: int = MAX_CANDIDATES,
     min_score: float = MIN_OVERLAP_SCORE,
 ) -> ConflictReport:
@@ -430,7 +431,7 @@ async def detect_contradictions(
 async def scan_all_contradictions(
     *,
     db_path: str | Path = DEFAULT_DB_PATH,
-    decrypt_fn: Callable | None = None,
+    decrypt_fn: Callable[[str], str] | None = None,
     min_score: float = 0.45,
     limit: int = 50,
 ) -> list[tuple[ConflictCandidate, ConflictCandidate]]:
@@ -448,10 +449,10 @@ async def scan_all_contradictions(
                 ORDER BY id
                 """
             )
-            rows = await cursor.fetchall()
-            decisions = _prepare_decisions(rows, decrypt_fn)  # type: ignore[type-error]
+            rows = list(await cursor.fetchall())
+            decisions = _prepare_decisions(rows, decrypt_fn)
 
-            by_project: dict[str, list[dict]] = defaultdict(list)
+            by_project: dict[str, list[dict[str, Any]]] = defaultdict(list)
             for d in decisions:
                 by_project[d["project"]].append(d)
 
@@ -473,7 +474,7 @@ async def scan_all_contradictions(
 
 def _process_token_bucket(
     indices: list[int],
-    group: list[dict],
+    group: list[dict[str, Any]],
     seen_pairs: set[tuple[int, int]],
     pairs: list[tuple[float, ConflictCandidate, ConflictCandidate]],
     min_score: float,
@@ -499,8 +500,8 @@ def _process_token_bucket(
 
 
 def _compare_decisions(
-    a: dict,
-    b: dict,
+    a: dict[str, Any],
+    b: dict[str, Any],
     min_score: float,
 ) -> tuple[float, ConflictCandidate, ConflictCandidate] | None:
     """Score and classify a potential conflict between two decisions."""
@@ -536,7 +537,7 @@ def _compare_decisions(
     return (score, ca, cb)
 
 
-def _prepare_decisions(rows: list, decrypt_fn: Callable | None) -> list[dict]:
+def _prepare_decisions(rows: list[Any], decrypt_fn: Callable[[str], str] | None) -> list[dict[str, Any]]:
     """Decrypt and tokenize raw database rows."""
     decisions = []
     for row in rows:
@@ -558,7 +559,7 @@ def _prepare_decisions(rows: list, decrypt_fn: Callable | None) -> list[dict]:
     return decisions
 
 
-def _build_token_index(group: list[dict]) -> dict[str, list[int]]:
+def _build_token_index(group: list[dict[str, Any]]) -> dict[str, list[int]]:
     """Build inverted index: token -> list of decision indices in the group."""
     token_index: dict[str, list[int]] = defaultdict(list)
     for idx, d in enumerate(group):

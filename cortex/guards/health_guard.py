@@ -15,25 +15,25 @@ from typing import ClassVar
 
 HEALTH_AVAILABLE = True
 try:
-    from cortex_extensions.health.health_mixin import HealthMixin  # type: ignore
-    from cortex_extensions.health.models import Grade, HealthSLA, HealthSLAViolation  # type: ignore
+    from cortex_extensions.health.health_mixin import HealthMixin
+    from cortex_extensions.health.models import Grade, HealthSLA, HealthSLAViolation
 except ImportError:
     HEALTH_AVAILABLE = False
 
-    class Grade:  # type: ignore
+    class Grade:  # type: ignore[no-redef]
         DEGRADED = "DEGRADED"
 
-    class HealthSLA:  # type: ignore
+    class HealthSLA:  # type: ignore[no-redef]
         def __init__(self, target_grade: str = "DEGRADED") -> None:
             self.target_grade = target_grade
 
         def evaluate(self, score: float) -> bool:
             return True
 
-    class HealthSLAViolation(Exception):  # type: ignore
+    class HealthSLAViolation(Exception):  # type: ignore[no-redef]
         """Raised when system health violates the target SLA grade."""
 
-    class HealthMixin:  # type: ignore
+    class HealthMixin:  # type: ignore[no-redef]
         async def health_score(self) -> float:
             return 1.0
 

@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import ipaddress
 import logging
+from typing import Any
 from urllib.parse import urlparse
 
 logger = logging.getLogger("cortex.guards.url_guard")
@@ -98,10 +99,10 @@ class SafeTransport:
             raise ValueError(f"Sovereign URLGuard blocked unsafe request to: {url}")
 
     @staticmethod
-    def inject_httpx(client_args: dict) -> dict:
+    def inject_httpx(client_args: dict[str, Any]) -> dict[str, Any]:
         """Inject URL validation into httpx client arguments."""
 
-        async def _check_url(request):
+        async def _check_url(request: Any) -> None:
             SafeTransport.validate(str(request.url))
 
         event_hooks = client_args.setdefault("event_hooks", {})

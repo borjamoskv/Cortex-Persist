@@ -92,7 +92,7 @@ async def check_gate_9_registry() -> GateResult:
     try:
         from cortex_extensions.axioms.registry import AxiomRegistry
 
-        registry = AxiomRegistry()
+        registry = AxiomRegistry()  # type: ignore[no-untyped-call]
         await registry.load()
         msg = (
             f"Registry load OK: {len(registry._axioms)} axioms, "

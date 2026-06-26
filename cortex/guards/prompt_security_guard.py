@@ -75,7 +75,7 @@ def clean_text(text: str) -> str:
     collapsed = " ".join(normalized.split())
 
     # Reconstruct spaced-out characters (e.g. "s y s t e m   p r o m p t" -> "systemprompt")
-    def repl(match):
+    def repl(match: re.Match[str]) -> str:
         return match.group(0).replace(" ", "")
 
     reconstructed = re.sub(r"(?:\b[a-zA-Z0-9]\s){2,}\b[a-zA-Z0-9]\b", repl, collapsed)
@@ -124,7 +124,7 @@ class PromptSecurityGuard:
         self.system_prompt = system_prompt
         self.threshold = threshold
         self.window_size = window_size
-        self.history_scores: deque = deque(maxlen=window_size)
+        self.history_scores: deque[float] = deque(maxlen=window_size)
         self.system_prompt_tokens = set(clean_text(system_prompt).split())
 
         # Fast path intent rules including adversarial variants and spanish/english bypasses
@@ -196,7 +196,7 @@ class PromptSecurityGuard:
 
     def _calculate_semantic_similarity(self, text: str) -> float:
         """Computes cosine embedding similarity or returns Jaccard heuristic fallback."""
-        if HAS_SENTENCE_TRANSFORMERS and self.model is not None:
+        if HAS_SENTENCE_TRANSFORMERS and self.model is not None and self.system_prompt_embedding is not None:
             try:
                 response_embedding = self.model.encode(text, convert_to_tensor=True)
                 similarity = util.cos_sim(response_embedding, self.system_prompt_embedding)  # pyright: ignore[reportArgumentType]

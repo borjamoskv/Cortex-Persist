@@ -104,7 +104,7 @@ class SMTConstraintGuard:
             s.add(v == float(value))
             s.add(v >= float(min_val))
             s.add(v <= float(max_val))
-            return s.check() == sat
+            return bool(s.check() == sat)
         return min_val <= value <= max_val
 
     def validate_consistency(self, facts: list[dict[str, Any]]) -> bool:
@@ -215,7 +215,7 @@ class SMTConstraintGuard:
                     f"Temporal ordering violation: fact_{valid_ts[idx][0]} (ts={valid_ts[idx][1]}) > fact_{valid_ts[idx + 1][0]} (ts={valid_ts[idx + 1][1]})"
                 )
         # Check subject consistency
-        by_subject = {}
+        by_subject: dict[str, list[tuple[int, float]]] = {}
         for i, f in enumerate(facts):
             subj = f.get("subject", f.get("topic", f.get("ki_id")))
             conf = f.get("confidence", f.get("score"))
@@ -325,7 +325,7 @@ class SMTConstraintGuard:
 
         # Z3 mode
         s = Solver()
-        tracking_vars = []
+        tracking_vars: list[Any] = []
 
         # 1. Temporal validation
         timestamps = [f.get("timestamp", f.get("created_at")) for f in facts]
@@ -333,7 +333,7 @@ class SMTConstraintGuard:
         self._assert_z3_temporal_constraints(s, valid_ts, tracking_vars)
 
         # 2. Subject validation
-        by_subject = {}
+        by_subject: dict[str, list[tuple[int, float]]] = {}
         for idx, f in enumerate(facts):
             subj = f.get("subject", f.get("topic", f.get("ki_id")))
             conf = f.get("confidence", f.get("score"))

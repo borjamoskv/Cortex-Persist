@@ -136,6 +136,7 @@ INSTRUCTIONS:
                 logger.error("OmegaAuditor: Deep audit failed and no fallback available.")
                 return []
 
+        assert response is not None
         if "CLEAN" in response.upper() and "[" not in response:
             return []
 

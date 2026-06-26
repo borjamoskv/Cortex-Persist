@@ -190,11 +190,11 @@ async def check_seal_5_ledger() -> GateResult:
 
     # ── Schema Init ──
     try:
-        from cortex.engine import CortexEngine
+        from cortex.engine.core.cortex_engine import CortexEngine
 
         engine = CortexEngine(":memory:", auto_embed=False)
         await engine.init_db()
-        await engine.close()
+        await engine.close()  # type: ignore[no-untyped-call]
         printer.success("Ledger schema initialized successfully.")
     except (ValueError, TypeError, KeyError, AssertionError, RuntimeError) as e:
         printer.fail(f"Ledger initialization threw error: {e}")
