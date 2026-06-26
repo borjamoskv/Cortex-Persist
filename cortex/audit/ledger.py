@@ -267,7 +267,7 @@ class EnterpriseAuditLedger:
                         for item, fut in batch:
                             if not fut.done():
                                 fut.set_result(item["audit_id"])
-                    except (OSError, ValueError, RuntimeError) as e:
+                    except Exception as e:
                         logger.error("[AuditLedger] Batch insert failed: %s", e)
                         for _, fut in batch:
                             if not fut.done():
