@@ -196,21 +196,24 @@ class MoskvAegisEngine:
 
         signature = self.ledger.private_key.sign(entry_hash.encode("utf-8")).hex()
 
-        await self._conn.execute(
-            """INSERT INTO moskv_aegis_log 
-               (audit_id, timestamp, risk_score, findings, exploit_chains, prev_hash, signature)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (
-                audit_id,
-                timestamp,
-                risk_score,
-                findings_json,
-                chains_json,
-                self._last_hash,
-                signature,
-            ),
-        )
-        await self._conn.commit()
+        from cortex.database.core import causal_write
+
+        with causal_write(self._conn):
+            await self._conn.execute(
+                """INSERT INTO moskv_aegis_log 
+                   (audit_id, timestamp, risk_score, findings, exploit_chains, prev_hash, signature)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    audit_id,
+                    timestamp,
+                    risk_score,
+                    findings_json,
+                    chains_json,
+                    self._last_hash,
+                    signature,
+                ),
+            )
+            await self._conn.commit()
 
         old_last_hash = self._last_hash
         self._last_hash = entry_hash

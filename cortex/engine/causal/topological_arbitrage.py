@@ -15,8 +15,8 @@ Características:
 
 import logging
 from collections import defaultdict, deque
-from typing import Any
 from decimal import Decimal
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

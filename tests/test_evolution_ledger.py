@@ -316,12 +316,11 @@ def test_checkpoint_manager():
 def test_substrate_integration():
     """Test that UltramapSubstrate emits ledger events on update_control_vector."""
     # Import substrate
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "cortex-core"))
-    from ultramap import UltramapSubstrate
+    from cortex.engine.ultramap.ultramap import UltramapSubstrate
 
     with tempfile.TemporaryDirectory() as tmpdir:
         # Override DB_PATH for isolation
-        import ultramap as um_module
+        import cortex.engine.ultramap.ultramap as um_module
 
         original_db_path = um_module.DB_PATH
         um_module.DB_PATH = os.path.join(tmpdir, "test.db")

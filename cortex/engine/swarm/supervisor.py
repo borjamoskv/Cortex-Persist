@@ -48,8 +48,9 @@ class SwarmSupervisor:
         
     async def initialize(self) -> None:
         """Starts the components and recovers ghost state."""
-        self._db = await aiosqlite.connect(self.db_path)
+        self._db = await aiosqlite.connect(self.db_path, timeout=5.0)
         await self._db.execute("PRAGMA journal_mode=WAL;")
+        await self._db.execute("PRAGMA busy_timeout=5000;")
         self._topo = TopologyIndex(self._db)
         
         # SANEDRIN VECTOR 3: Recover ghost state globally
@@ -84,6 +85,8 @@ class SwarmSupervisor:
                 self.bus.task_done()
             except asyncio.TimeoutError:
                 continue
+            except asyncio.CancelledError:
+                break
             except Exception as e:
                 logger.error(f"State consumer encountered error: {e}")
                 raise  # Re-raise for Heartbeat

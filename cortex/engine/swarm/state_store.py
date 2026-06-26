@@ -30,9 +30,10 @@ class CausalStateStore:
         
     async def connect(self):
         if not self._db:
-            self._db = await aiosqlite.connect(self.db_path)
+            self._db = await aiosqlite.connect(self.db_path, timeout=5.0)
             await self._db.execute("PRAGMA journal_mode=WAL;")
             await self._db.execute("PRAGMA synchronous=NORMAL;")
+            await self._db.execute("PRAGMA busy_timeout=5000;")
             
             # SANEDRIN VECTOR 1: Local Audit Ledger
             await self._db.execute('''
