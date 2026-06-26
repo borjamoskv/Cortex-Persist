@@ -316,3 +316,11 @@ cortex/swarm/staged_legion_2m.py
 
 # Quarantined entropy — dead code pending permanent deletion
 .quarantine/
+
+# ── Dynamic Triage & Swarm Logs (C5-REAL) ────────
+.pytest_failures.txt
+.quarantine_tests/
+.pyright_errors.log
+.cortex_ast_dataset.json
+.cortex_swarm.lock
+cli-init.db
