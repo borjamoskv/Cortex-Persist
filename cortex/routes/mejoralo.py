@@ -11,7 +11,7 @@ from cortex.api.deps import get_engine
 from cortex.auth import require_permission
 from cortex.engine import CortexEngine
 from cortex.extensions.mejoralo import MejoraloEngine
-from cortex.types.models import (
+from cortex.types.mejoralo import (
     DimensionResultModel,
     MejoraloScanRequest,
     MejoraloScanResponse,

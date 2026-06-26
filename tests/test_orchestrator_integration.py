@@ -207,7 +207,7 @@ class TestOrchestrator:
         await orchestrator.start()
 
         # Publish enough events to reach tick >= 3
-        for i in range(3):
+        for _i in range(3):
             await orchestrator.event_bus.publish("task.lifecycle", {
                 "event_type": "task.submitted",
                 "source": "test",

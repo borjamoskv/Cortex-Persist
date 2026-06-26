@@ -181,7 +181,7 @@ def test_tracker_audit_trail_truncation():
     tracker = ReconsolidationTracker(window_seconds=10.0)
     
     # Perform 55 accesses and confirmations to exceed _MAX_AUDIT_EVENTS_PER_ENGRAM (50)
-    for i in range(55):
+    for _i in range(55):
         tracker.on_access("engram_1")
         tracker.confirm("engram_1")
         

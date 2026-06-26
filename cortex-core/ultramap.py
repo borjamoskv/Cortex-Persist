@@ -1,11 +1,10 @@
-import os
-import mmap
-import time
-import struct
+import atexit
 import hashlib
 import logging
+import mmap
+import os
+import struct
 import weakref
-import atexit
 
 logger = logging.getLogger("cortex.ultramap")
 
