@@ -134,7 +134,8 @@ async def test_lease_locks_and_ghost_recovery():
     
     try:
         # Verify task was recovered to ACTIVE
-        verify_db = await aiosqlite.connect(db_path)
+        from cortex.database.core import connect_async
+        verify_db = await connect_async(db_path)
         async with verify_db.execute("SELECT status, owner_id FROM system_hypotheses WHERE id = 'hyp-test-lease'") as cur:
             row = await cur.fetchone()
             assert row[0] == "ACTIVE"
