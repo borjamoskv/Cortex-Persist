@@ -122,7 +122,7 @@ class ZeroPromptingEvolutionStrategy:
         sovereign: SovereignAgent,
         subagent: SubAgent,
         metrics: DomainMetrics,
-        cortex_metrics: CortexMetrics,
+        _cortex_metrics: CortexMetrics,
     ) -> dict[str, Any] | None:
         """ImprovementStrategy protocol implementation."""
         # Gate: only act on fit-enough agents

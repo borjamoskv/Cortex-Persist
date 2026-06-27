@@ -336,7 +336,7 @@ class TestReflexionEngine:
         tree = make_sample_tree()
 
         outcome = await engine.execute_with_reflexion(
-            tree, realistic_executor, task_context="bounty hunting operation"
+            tree, realistic_executor
         )
         assert outcome.succeeded
         assert outcome.iterations_used == 3

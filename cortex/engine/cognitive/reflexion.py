@@ -345,7 +345,6 @@ class ReflexionEngine:
         tree: AgentOp,
         executor: Callable[[AgentOp], Awaitable[Any]],
         *,
-        task_context: str = "",
         on_reflection: Callable[[Reflection], Awaitable[None]] | None = None,
     ) -> ReflexionOutcome:
         """Execute a dispatch tree with automatic reflexion on failure.
