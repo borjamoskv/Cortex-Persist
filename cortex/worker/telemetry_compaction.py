@@ -127,8 +127,7 @@ class TelemetryCompactionWorker:
             update_query = (
                 "UPDATE facts\n"
                 "                SET tags = json_insert(tags, '$[#]', 'compacted')\n"
-                "                WHERE id IN (" + placeholders + ")\n"
-                "            "
+                "                WHERE id IN (" + placeholders + ")\n"  # nosec B608
             )
             with causal_write(conn):
                 await conn.execute(update_query, ids_to_mark)

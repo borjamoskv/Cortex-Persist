@@ -67,8 +67,11 @@ class IssueReader:
         if token:
             headers["Authorization"] = f"Bearer {token}"
 
+        if not api_url.startswith("https://"):
+            raise ValueError(f"Invalid API URL scheme: {api_url}")
+
         req = urllib.request.Request(api_url, headers=headers)
-        with urllib.request.urlopen(req, timeout=10) as response:
+        with urllib.request.urlopen(req, timeout=10) as response:  # nosec B310
             data = json.loads(response.read().decode("utf-8"))
 
         title = data.get("title", "")
@@ -80,8 +83,10 @@ class IssueReader:
         comments = []
         comments_url = data.get("comments_url")
         if data.get("comments", 0) > 0 and comments_url:
+            if not comments_url.startswith("https://"):
+                raise ValueError(f"Invalid comments URL scheme: {comments_url}")
             req_comments = urllib.request.Request(comments_url, headers=headers)
-            with urllib.request.urlopen(req_comments, timeout=10) as res_comments:
+            with urllib.request.urlopen(req_comments, timeout=10) as res_comments:  # nosec B310
                 comments_data = json.loads(res_comments.read().decode("utf-8"))
                 for comment in comments_data:
                     c_body = comment.get("body", "")
@@ -97,8 +102,10 @@ class IssueReader:
         Fallback HTML scraper (basic implementation).
         In production, this would use BeautifulSoup, but we keep dependencies zero for now.
         """
+        if not (issue_url.startswith("https://") or issue_url.startswith("http://")):
+            raise ValueError(f"Invalid issue URL scheme: {issue_url}")
         req = urllib.request.Request(issue_url, headers={"User-Agent": "CORTEX-IssueReader/1.0"})
-        with urllib.request.urlopen(req, timeout=10) as response:
+        with urllib.request.urlopen(req, timeout=10) as response:  # nosec B310
             html = response.read().decode("utf-8")
 
         # Extremely basic regex parsing for fallback
