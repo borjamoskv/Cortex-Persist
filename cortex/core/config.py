@@ -69,6 +69,7 @@ class CortexConfig:
     STORAGE_MODE: str = "local"
     TURSO_DATABASE_URL: str = ""
     TURSO_AUTH_TOKEN: str = ""
+    TURBOPUFFER_API_KEY: str = ""
 
     # Embeddings
     EMBEDDINGS_MODE: str = "local"
@@ -168,6 +169,7 @@ class CortexConfig:
             STORAGE_MODE=storage_mode,
             TURSO_DATABASE_URL=os.environ.get("TURSO_DATABASE_URL", ""),
             TURSO_AUTH_TOKEN=os.environ.get("TURSO_AUTH_TOKEN", ""),
+            TURBOPUFFER_API_KEY=os.environ.get("TURBOPUFFER_API_KEY", ""),
             EMBEDDINGS_MODE=os.environ.get("CORTEX_EMBEDDINGS", "local"),
             EMBEDDINGS_PROVIDER=os.environ.get("CORTEX_EMBEDDINGS_PROVIDER", "gemini"),
             EMBEDDINGS_DIMENSION=int(os.environ.get("CORTEX_EMBEDDINGS_DIM", "768")),
