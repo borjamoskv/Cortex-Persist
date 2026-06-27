@@ -135,6 +135,22 @@ class CausalStateStore:
                             await self._db.execute(
                                 "UPDATE system_hypotheses SET status = 'COMPLETED' WHERE id = ?", (signal.target,)
                             )
+                            
+                            # EPISTEMIC LOOP CLOSURE: Output becomes RawEvidence
+                            try:
+                                from cortex.extensions.skills.autodidact.epistemology import RawEvidence, EvidenceSource
+                                raw_ev = RawEvidence(
+                                    source=EvidenceSource.KERNEL_EVENTS,
+                                    raw_payload=signal.payload,
+                                    timestamp_iso=ledger_payload["timestamp"]
+                                )
+                                # Directly inject into raw epistemological stream (bypass engine indexes for speed, rely on async consolidators)
+                                await self._db.execute(
+                                    "INSERT INTO facts (tenant_id, project, content, fact_type, confidence, source, metadata, is_tombstoned) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                                    ("default", "global", raw_ev.model_dump_json(), "raw_evidence", "C5-REAL", f"sanedrin:{signal.agent_id}", "{}", 0)
+                                )
+                            except Exception as epi_e:
+                                logger.warning(f"[EpistemicBreaker] Failed to compile RawEvidence from {signal.target}: {epi_e}")
                     
                     # ATOMIC COMMIT (SANEDRIN VECTOR 1)
                     await self._db.commit()

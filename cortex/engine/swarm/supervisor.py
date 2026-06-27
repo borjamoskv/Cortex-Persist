@@ -17,6 +17,9 @@ from cortex.config import DB_PATH
 from cortex.engine.causal.topological_arbitrage import TopologyIndex
 from cortex.engine.swarm.legion import AsyncSignalBus, LegionPool, SwarmAgent, SwarmSignal
 from cortex.engine.swarm.state_store import CausalStateStore
+from cortex.extensions.skills.autodidact.epistemology import Hypothesis
+from pydantic import ValidationError
+import json
 
 logger = logging.getLogger("cortex.engine.swarm.supervisor")
 
@@ -108,6 +111,20 @@ class SwarmSupervisor:
                 break
                 
             try:
+                # EPISTEMIC GATEKEEPER (Sanedrin-Autodidact Fusion)
+                try:
+                    payload_dict = json.loads(task["payload"]) if isinstance(task["payload"], str) else task["payload"]
+                    Hypothesis.model_validate(payload_dict)
+                except (ValidationError, json.JSONDecodeError, TypeError) as epi_err:
+                    logger.warning(f"[EpistemicBreaker] Task {task['id']} rejected (Narrative/Stochastic Slop): {epi_err}")
+                    from cortex.database.core import causal_write
+                    with causal_write(self._db):
+                        await self._db.execute(
+                            "UPDATE system_hypotheses SET status = 'INVALIDATED' WHERE id = ?", (task["id"],)
+                        )
+                        await self._db.commit()
+                    continue
+
                 # SANEDRIN VECTOR 3: Lease lock task using supervisor_id and 5-min TTL
                 from datetime import datetime, timedelta, timezone
 
