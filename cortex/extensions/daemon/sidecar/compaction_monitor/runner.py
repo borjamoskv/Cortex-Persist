@@ -34,9 +34,29 @@ except ImportError:
 from .circuit_breaker import circuit_breaker
 from .memory_wrapper import get_mallinfo2, malloc_trim
 from .monitor import MemoryPressureMonitor
+from cortex.extensions.daemon.monitors.l2_drain import L2DrainMonitor
+from cortex.engine import CortexEngine
 
 LOGGER = logging.getLogger("compaction_sidecar")
 logging.basicConfig(level=logging.INFO)
+
+
+async def l2_drain_loop(engine: Any, interval: int = 28800) -> None:
+    """Background task to periodically drain vectors from SQLite to Turbopuffer."""
+    # Assuming "cortex-persist" as a default project, can be expanded via env or config.
+    # We could also fetch active projects from the DB, but for now we'll inject a default or read env.
+    projects = [p.strip() for p in os.getenv("L2_DRAIN_PROJECTS", "cortex-persist").split(",")]
+    monitor = L2DrainMonitor(projects=projects, interval_seconds=interval, engine=engine)
+    LOGGER.info("L2Drain loop started for projects: %s every %d seconds", projects, interval)
+    
+    while True:
+        try:
+            alerts = await monitor.check_async()
+            for alert in alerts:
+                LOGGER.info("L2 Drain Alert: %s", alert.message)
+        except Exception as e:
+            LOGGER.error("Error in L2 Drain Loop: %s", e)
+        await asyncio.sleep(interval)
 
 
 async def compaction_job(ctx: Any = None) -> None:
@@ -99,6 +119,9 @@ async def main() -> None:
 
     # Start the monitor
     monitor.start(loop=loop)
+    
+    engine = CortexEngine()
+    l2_task = asyncio.create_task(l2_drain_loop(engine=engine))
 
     # Set up ARQ worker if available
     if RedisSettings is not None:

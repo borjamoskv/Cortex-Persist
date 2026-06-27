@@ -42,7 +42,7 @@
 - [x] **TESTUDO Formation (LEGIØN-10k)** — 15-node topological quorum balancing Security, Infra, and Code for proactive infrastructure defense.
 - [x] **UI Maestro Daemon** — Sovereign deterministic agent orchestration for macOS UI DOM manipulation without legacy constraints.
 - [x] **Turbopuffer Vector Sink** — High-throughput L2 cold-storage backend for embedding offloading (replacing strict SQLite-Vec locality).
-- [ ] **L2 Compaction Daemon** — Thermodynamic vector drainage from SQLite to Turbopuffer.
+- [x] **L2 Compaction Daemon** — Thermodynamic vector drainage from SQLite to Turbopuffer.
 
 ---
 
