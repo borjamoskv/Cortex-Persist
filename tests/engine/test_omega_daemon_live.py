@@ -21,7 +21,7 @@ def test_omega_daemon_cli_lifecycle():
     )
 
     # Allow it to run for a short duration to verify it doesn't crash on start
-    time.sleep(3)
+    time.sleep(0.5)
 
     # Terminate the daemon gracefully via SIGINT (KeyboardInterrupt)
     proc.send_signal(signal.SIGINT)

@@ -28,6 +28,8 @@ logger = logging.getLogger("cortex.agents.base")
 
 
 class BaseAgent:
+    """Core autonomous agent."""
+    TICK_INTERVAL = 1.0
     """Abstract base agent with async event loop.
 
     Provides:
@@ -92,7 +94,7 @@ class BaseAgent:
                 self.state.last_heartbeat_ts = time.monotonic()
 
                 # Try to receive a message
-                msg = await self.bus.receive(self.agent_id, timeout=1.0)
+                msg = await self.bus.receive(self.agent_id, timeout=self.TICK_INTERVAL)
 
                 if msg is not None:
                     # Handle shutdown signals

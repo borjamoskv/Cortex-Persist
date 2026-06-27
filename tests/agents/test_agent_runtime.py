@@ -74,6 +74,7 @@ class FailingAgent(BaseAgent):
 
 class CountingDaemon(BaseAgent):
     """Daemon agent that increments a counter on each tick."""
+    TICK_INTERVAL = 0.01
 
     def __init__(self, *args, max_ticks: int = 5, **kwargs):
         super().__init__(*args, **kwargs)
