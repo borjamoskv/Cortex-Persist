@@ -259,14 +259,14 @@
                 <span class="logo-icon">⚡</span>
                 <span class="logo-text">CORTEX</span>
             </a>
-            <div class="nav-links">
-                <a href="#compliance">Compliance</a>
-                <a href="#use-cases">Industries</a>
-                <a href="#features">Features</a>
-                <a href="#compare">vs Mem0</a>
-                <a href="#pricing">Pricing</a>
-                <a href="site/" class="nav-docs">Docs</a>
-                <a href="https://github.com/borjamoskv/Cortex-Persist" class="nav-github" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <div class="nav-links" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px;">
+                <a href="#architecture">ARCHITECTURE</a>
+                <a href="#sintetologia">SINTETOLOGÍA</a>
+                <a href="#forense">FORENSE</a>
+                <a href="#trust">TRUST</a>
+                <a href="#soundtrack">SOUNDTRACK</a>
+                <a href="#blog">BLOG</a>
+                <a href="site/" class="nav-docs" style="text-transform: none;">Docs</a>
             </div>
             <a href="#pricing" class="nav-cta">Get Started</a>
         </div>
@@ -481,60 +481,45 @@
 
     <!-- Pricing -->
     <section id="pricing">
-        <h2>Simple Pricing</h2>
-        <p class="section-sub">Start free. Scale when you need to. Self-host forever if you want.</p>
-        <div class="pricing-grid">
-            <div class="plan">
-                <div class="plan-name">Community</div>
-                <div class="plan-price">$0<span>/forever</span></div>
-                <ul class="plan-features">
-                    <li>Full CLI & API</li>
-                    <li>1 tenant</li>
-                    <li>Semantic + Text Search</li>
-                    <li>Immutable Ledger</li>
-                    <li>Community support</li>
+        <h2 style="font-family: var(--mono); text-transform: uppercase; font-size: 4rem; text-align: left; margin-bottom: 10px;">PRICING.</h2>
+        <p class="section-sub" style="text-align: left; margin-bottom: 3rem;">Start free. Scale as your system grows.</p>
+        <div class="pricing-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="plan" style="text-align: left; padding: 40px 30px;">
+                <div class="plan-name" style="font-size: 1.25rem; font-weight: 700;">Developer</div>
+                <div class="plan-price" style="font-size: 1.5rem; margin: 20px 0 24px; font-weight: 600; color: #8B949E;">FREE</div>
+                <p style="font-size: 0.95rem; color: var(--text-dim); margin-bottom: 32px; line-height: 1.6;">Everything you need to track and verify events in dev environments.</p>
+                <ul class="plan-features" style="align-items: flex-start; text-align: left; gap: 12px; margin-bottom: 40px;">
+                    <li style="justify-content: flex-start;">10,000 events/mo</li>
+                    <li style="justify-content: flex-start;">Community support</li>
+                    <li style="justify-content: flex-start;">Standard retention</li>
+                    <li style="justify-content: flex-start;">REST API & SDKs</li>
                 </ul>
-                <button class="btn btn-outline plan-btn btn-copy" id="btn-community" onclick="copyInstallCmd(this)">
-                    <span class="copy-text">pip install cortex-persist</span>
-                    <span class="copy-icon" style="margin-left:8px;">📋</span>
-                </button>
+                <a href="#" class="btn btn-outline plan-btn" id="btn-community" style="width: 100%; border-color: rgba(255,255,255,0.1); color: #fff;">Get API Key</a>
             </div>
-            <div class="plan plan-popular">
-                <div class="plan-badge">MOST POPULAR</div>
-                <div class="plan-name">Pro</div>
-                <div class="plan-price">$29<span>/month</span></div>
-                <ul class="plan-features">
-                    <li>Multi-device sync (E2EE)</li>
-                    <li>5 tenants</li>
-                    <li>Ghost tracking</li>
-                    <li>Session handoff</li>
-                    <li>Priority support</li>
+            <div class="plan plan-popular" style="text-align: left; padding: 40px 30px;">
+                <div class="plan-badge" style="background: rgba(255,82,82,0.1); color: #FF5252; border: 1px solid rgba(255,82,82,0.3); font-size: 0.65rem; letter-spacing: 1px;">RECOMMENDED</div>
+                <div class="plan-name" style="font-size: 1.25rem; font-weight: 700;">Pro</div>
+                <div class="plan-price" style="font-size: 1.5rem; margin: 20px 0 24px; font-weight: 600; color: #8B949E;">FROM $49<span style="font-size: 1rem; color: #8B949E; margin-left: 4px;">/MO</span></div>
+                <p style="font-size: 0.95rem; color: var(--text-dim); margin-bottom: 32px; line-height: 1.6;">For production systems requiring scale and reliability.</p>
+                <ul class="plan-features" style="align-items: flex-start; text-align: left; gap: 12px; margin-bottom: 40px;">
+                    <li style="justify-content: flex-start;">1M events/mo</li>
+                    <li style="justify-content: flex-start;">99.9% SLA</li>
+                    <li style="justify-content: flex-start;">Extended retention</li>
+                    <li style="justify-content: flex-start;">Priority support</li>
                 </ul>
-                <a href="#" class="btn btn-primary plan-btn" id="btn-pro" data-plan="pro">Subscribe →</a>
+                <a href="#" class="btn btn-primary plan-btn" id="btn-pro" data-plan="pro" style="width: 100%; background: linear-gradient(90deg, #2B3BE5, #54D62C); border: none; color: #fff;">Start Pro Trial</a>
             </div>
-            <div class="plan">
-                <div class="plan-name">Team</div>
-                <div class="plan-price">$99<span>/month</span></div>
-                <ul class="plan-features">
-                    <li>Unlimited tenants</li>
-                    <li>WBFT Consensus</li>
-                    <li>Graph Knowledge Fusion</li>
-                    <li>Compliance Reports</li>
-                    <li>SLA 99.9%</li>
+            <div class="plan" style="text-align: left; padding: 40px 30px;">
+                <div class="plan-name" style="font-size: 1.25rem; font-weight: 700;">Enterprise</div>
+                <div class="plan-price" style="font-size: 1.5rem; margin: 20px 0 24px; font-weight: 600; letter-spacing: 1px; color: #8B949E;">CUSTOM</div>
+                <p style="font-size: 0.95rem; color: var(--text-dim); margin-bottom: 32px; line-height: 1.6;">For self-hosted or BYOC deployments requiring advanced compliance needs.</p>
+                <ul class="plan-features" style="align-items: flex-start; text-align: left; gap: 12px; margin-bottom: 40px;">
+                    <li style="justify-content: flex-start;">VPC Peering / BYOC</li>
+                    <li style="justify-content: flex-start;">Advanced RBAC</li>
+                    <li style="justify-content: flex-start;">Dedicated support</li>
+                    <li style="justify-content: flex-start;">Custom integrations</li>
                 </ul>
-                <a href="#" class="btn btn-outline plan-btn" id="btn-team" data-plan="team">Subscribe →</a>
-            </div>
-            <div class="plan">
-                <div class="plan-name">Enterprise</div>
-                <div class="plan-price">$499<span>+/month</span></div>
-                <ul class="plan-features">
-                    <li>On-Premise deployment</li>
-                    <li>Custom integrations</li>
-                    <li>Dedicated support</li>
-                    <li>SOC 2 / ISO 27001</li>
-                    <li>EU AI Act audit package</li>
-                </ul>
-                <a href="mailto:borja@cortexpersist.com" class="btn btn-outline plan-btn" id="btn-enterprise">Contact Sales</a>
+                <a href="mailto:borja@cortexpersist.com" class="btn btn-outline plan-btn" id="btn-enterprise" style="width: 100%; border-color: rgba(255,255,255,0.1); color: #fff;">Contact Sales</a>
             </div>
         </div>
     </section>
