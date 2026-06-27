@@ -21,9 +21,9 @@ __all__ = ["FactManager"]
 logger = logging.getLogger("cortex.facts")
 
 try:
-    from cortex.security.haiku import HaikuGuard
+    from cortex.guards.landauer_guard import LandauerGuard
 except ImportError:
-    HaikuGuard = None
+    LandauerGuard = None
 
 
 class FactManager:
@@ -125,8 +125,8 @@ class FactManager:
                 meta[k] = v
 
         # Optional guard: do not block engine startup if the immunity stack is mid-repair.
-        if HaikuGuard is not None:
-            HaikuGuard.enforce(content, {"fact_type": fact_type, "tags": tags or []})
+        if LandauerGuard is not None:
+            LandauerGuard.enforce(content, {"fact_type": fact_type, "tags": tags or []})
 
         # Sovereign Pre-filtering Gate: Active Forgetting (#350/100)
 

@@ -35,7 +35,7 @@ About to write code?                 → Is it CRITICAL surface? → Read affect
 Debugging a failure?                 → Go to §3 (Failure Signatures) before touching state.
 Schema migration?                    → Review cortex/migrate.py. Check existing migrations/.
 New session on this repo?            → Execute Multi-Session Handoff (§6.4) first.
-Writing sacred/axiom facts?          → Format as a Haiku (5-7-5) to pass HaikuGuard (Ω₄) check.
+Writing sacred/axiom facts?          → Ensure thermodynamic compression (high Shannon Entropy) to pass LandauerGuard (Ω₄) check.
 Injecting knowledge to store?        → Purge conversational slop to pass ExergyGuard (Ω₁₃).
 ```
 
@@ -97,7 +97,7 @@ All agents operating in this repository MUST self-identify by role before acting
 7. **Migration Safety:** Schema changes MUST preserve auditability and rollback awareness.
 8. **Architectural Boundaries:** CLI modules are thin wrappers. Business logic belongs in `engine/`, `services/`, or core modules.
 9. **Failure Locality:** Invalid state must be rejectable and safely abortable at any point.
-10. **Aesthetic & Exergy Bounds:** Axioms and sacred facts MUST satisfy HaikuGuard (Ω₄) (5-7-5 syllables). Knowledge facts MUST not contain low-exergy slop (ExergyGuard Ω₁₃).
+10. **Aesthetic & Exergy Bounds:** Axioms and sacred facts MUST satisfy LandauerGuard (Ω₄) (high Shannon entropy, < 256 bytes). Knowledge facts MUST not contain low-exergy slop (ExergyGuard Ω₁₃).
 
 ### ❌ Anti-Patterns & Failure Signatures
 
@@ -116,7 +116,7 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 | Plaintext secret in any metadata dict or JSON | **P0** | ✗ | Rotate immediately; encrypt at rest; audit exposure window |
 | `NO` documenting a module that doesn't exist | HIGH | ✗ | Remove reference or create the module |
 | Conversational slop/padding in facts | MEDIUM | ✓ ExergyGuard | Remove apologies/decorative phrases (e.g. 'entendí', 'por supuesto') |
-| Axiom or sacred fact not in 5-7-5 syllable metric | HIGH | ✓ HaikuGuard | Compress statements into a 3-line 5-7-5 Haiku |
+| Axiom or sacred fact has low Shannon entropy (slop) | HIGH | ✓ LandauerGuard | Thermodynamically compress statements to dense invariants |
 
 ---
 

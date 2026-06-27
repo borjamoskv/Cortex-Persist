@@ -8,7 +8,7 @@ import time
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.security.haiku import HaikuGuard
+from cortex.guards.landauer_guard import LandauerGuard
 from cortex.security.types import (
     ImmuneArtifact,
     ImmunityState,
@@ -148,8 +148,8 @@ def classify_artifact(profile: PathogenProfile, payload: Mapping[str, Any]) -> I
     """Classifies artifact state. Promotes to SEALED if it passes HaikuGuard (Ω₄)."""
     state = next_state_from_profile(profile)
 
-    # Inmunidad Haiku (Ω₄): Sacred facts that are aesthetic are SEALED immediately.
-    if HaikuGuard.validate(payload.get("content", "")):
+    # Inmunidad Landauer (Ω₄): Sacred facts that are dense/compressed are SEALED immediately.
+    if LandauerGuard.validate(payload.get("content", "")):
         if payload.get("fact_type") == "axiom" or "sacred" in payload.get("tags", []):
             return ImmunityState.SEALED
 
