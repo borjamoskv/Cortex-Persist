@@ -187,8 +187,9 @@ class CausalStateStore:
                 async with self._db.execute(query, (now_iso,)) as cur:
                     count = cur.rowcount
                     
+                await self._db.commit()
+                
                 if count > 0:
                     logger.warning(f"[SANEDRIN] Swept {count} expired lease locks. Ghost tasks recovered.")
-                    await self._db.commit()
                 
             return count
