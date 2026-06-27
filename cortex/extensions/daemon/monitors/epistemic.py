@@ -100,7 +100,21 @@ class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
             if stats.total_memories > 0:
                 stale_ratio = stats.stale_memories / stats.total_memories
 
-            if stale_ratio >= self._stale_ratio_threshold:
+            # [OUROBOROS] Autopoiesis Singularity Hook
+            if stale_ratio >= 0.50:
+                suggestions.append(
+                    WorkflowAlert(
+                        workflow="/ouroboros",
+                        reason=(
+                            f"[OUROBOROS] Singularidad entrópica detectada ({stale_ratio * 100:.1f}% obsoleta). "
+                            "Iniciando ciclo de mutación autopoietica inminente."
+                        ),
+                        confidence="C5🔴",
+                        priority=0,
+                        tags=["ouroboros", "autopoiesis", "singularity"],
+                    )
+                )
+            elif stale_ratio >= self._stale_ratio_threshold:
                 suggestions.append(
                     WorkflowAlert(
                         workflow="/nightshift",
