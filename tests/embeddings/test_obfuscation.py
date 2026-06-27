@@ -54,7 +54,7 @@ def test_obfuscation_enabled(monkeypatch):
 def test_vector_obfuscation_cosine_similarity_preservation(monkeypatch):
     monkeypatch.setenv("CORTEX_OBFUSCATE_EMBEDDINGS", "1")
     # Using a small pad scale (e.g. 0.05) preserves similarity ranking perfectly
-    monkeypatch.setenv("CORTEX_OBFUSATION_PAD_SCALE", "0.05")
+    monkeypatch.setenv("CORTEX_OBFUSCATION_PAD_SCALE", "0.05")
     
     # Create 3 vectors: query, match, and non-match
     np.random.seed(42)
@@ -88,3 +88,50 @@ def test_vector_obfuscation_cosine_similarity_preservation(monkeypatch):
     # Under a small pad scale, similarity deviation should be minimal (norm drift check)
     deviation = abs(sim_raw_match - sim_obf_match)
     assert deviation < 0.05
+
+
+@pytest.mark.asyncio
+async def test_cortex_engine_end_to_end_obfuscation(monkeypatch, tmp_path):
+    import json
+    monkeypatch.setenv("CORTEX_OBFUSCATE_EMBEDDINGS", "1")
+    monkeypatch.setenv("CORTEX_OBFUSCATION_PAD_SCALE", "0.05")
+    
+    # Unblock tests from thermodynamic enforcement
+    monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
+    
+    from cortex.engine import CortexEngine
+    db = str(tmp_path / "test_obfuscate.db")
+    engine = CortexEngine(db_path=db, auto_embed=True)
+    await engine.init_db()
+    
+    try:
+        fact_id = await engine.store(
+            project="test_proj",
+            content="Sovereign AI encryption layer",
+            fact_type="knowledge",
+            source="agent:test_suite",
+        )
+        assert fact_id > 0
+        
+        # Verify it was stored with an embedding
+        async with engine.session() as conn:
+            async with conn.execute(
+                "SELECT embedding FROM fact_embeddings WHERE fact_id = ?", (fact_id,)
+            ) as cursor:
+                row = await cursor.fetchone()
+                assert row is not None
+                stored_emb = np.frombuffer(row[0], dtype=np.float32).tolist()
+                assert len(stored_emb) == 384
+                
+        # Search for it
+        results = await engine.search(
+            query="AI encryption layer",
+            project="test_proj",
+            top_k=1
+        )
+        
+        assert len(results) > 0
+        assert "Sovereign AI" in results[0].content
+    finally:
+        await engine.close()
