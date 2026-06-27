@@ -224,6 +224,12 @@ class SovereignLedger(LedgerAuditMixin):
         timestamp: str,
         tenant_id: str,
     ) -> str:
+        # [OUROBOROS] C5-REAL Entropy Control & Autopoiesis Hook
+        if not action or action.isspace():
+            raise ValueError("[OUROBOROS] Vector P1.2: Anergic action detected. Ledger requires high exergy.")
+        if len(detail_json) < 2:
+            logger.warning("[OUROBOROS] Low entropy transaction detail. Sub-optimal exergy flow.")
+
         cursor = conn.execute(
             "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
             (tenant_id,),

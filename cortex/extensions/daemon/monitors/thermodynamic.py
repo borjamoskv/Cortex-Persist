@@ -75,11 +75,13 @@ class ThermodynamicMemoryMonitor:
                 self._last_runs[tenant] = now
 
                 if pruned_count > 0:
+                    # [OUROBOROS] Autopoiesis Callback
+                    ouroboros_prefix = "[OUROBOROS] Autopoiesis: " if pruned_count >= 10 else ""
                     alerts.append(
                         ThermodynamicAlert(
                             tenant_id=tenant,
                             pruned_count=pruned_count,
-                            message=f"Termodinámica en L2: {pruned_count} engramas entrópicos purgados.",
+                            message=f"{ouroboros_prefix}Termodinámica en L2: {pruned_count} engramas entrópicos purgados.",
                         )
                     )
                     logger.info(

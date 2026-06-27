@@ -80,6 +80,10 @@ class TurbopufferVectorBackend(VectorBackend):
         payload: dict[str, Any] | None = None,
     ) -> None:
         """Upsert a vector embedding into Turbopuffer."""
+        # [OUROBOROS] C5-REAL Entropy Control Assertion
+        if not embedding or sum(abs(x) for x in embedding) < 1e-9:
+            raise ValueError("[OUROBOROS] Vector P1.2: Embedding lacks structural exergy (zeroed or empty).")
+
         client = self._ensure_client()
         ns = self._namespace(tenant_id)
 
