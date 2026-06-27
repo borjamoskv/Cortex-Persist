@@ -137,6 +137,7 @@ def inject_reflections(
         List of InjectedLearning, ordered by relevance score (desc).
     """
     import sqlite3 as _sqlite3
+
     from cortex.database.core import connect as mt_connect
 
     conn = mt_connect(str(engine._db_path))

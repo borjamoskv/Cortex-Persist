@@ -10,7 +10,9 @@ import base64
 import hashlib
 import hmac
 import os
+
 import numpy as np
+
 
 def get_obfuscation_key() -> bytes:
     """Load the master encryption/obfuscation key from environment."""
@@ -30,7 +32,7 @@ def derive_pad_vector(dimension: int, tenant_id: str = "default", project: str =
     Uses HMAC-SHA256 based KDF to produce stable floats.
     """
     secret = get_obfuscation_key()
-    context = f"{tenant_id}:{project}".encode("utf-8")
+    context = f"{tenant_id}:{project}".encode()
     
     # Generate floats by expanding key
     okm = b""

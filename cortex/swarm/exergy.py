@@ -78,12 +78,11 @@ class ExergyBank:
             wallet.successful_commits += 1
             logger.info(f"Agent {agent_id} REWARDED (+{reward} exergy).")
 
-    def dissipate_agent(self, agent_id: str, registry: 'Any') -> None:
+    def dissipate_agent(self, agent_id: str, registry) -> None:
         """
         Entropic Dissipation (Weaponized Forgetting).
         Bankrupts the agent and physically removes it from the Swarm Registry (Apoptosis).
         """
-        from typing import Any
         wallet = self.wallets.get(agent_id)
         if wallet:
             wallet.is_alive = False

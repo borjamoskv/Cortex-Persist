@@ -349,7 +349,7 @@ def connect_writer(
 
 
 async def connect_async(
-    db_path: str | Path,
+    db_path: str,
     *,
     timeout: float = 5.0,
     read_only: bool = False,
@@ -389,7 +389,7 @@ async def connect_async(
 
 @asynccontextmanager
 async def connect_async_ctx(
-    db_path: str | Path,
+    db_path: str,
     *,
     timeout: float = 5.0,
     read_only: bool = False,
