@@ -156,6 +156,24 @@ class AlertHandlerMixin:
                 logger.info("Auto-invocando /mejoralo --brutal sobre %s", alert.project)
                 self._dispatch_warm_repair(alert.project, brutal=True)
 
+    def _alert_l2_drain(self, alerts: list) -> None:
+        """Handle L2 drain migration alerts."""
+        for alert in alerts:
+            if self._should_alert(f"l2_drain:{alert.project}"):
+                logger.info(
+                    "🧊 L2 DRAIN: %s - %s",
+                    alert.project,
+                    alert.message,
+                )
+                try:
+                    Notifier.notify(
+                        "🧊 CORTEX L2 Drain",
+                        f"{alert.project}: {alert.reduction} vectores migrados a Turbopuffer.",
+                        sound="Glass",
+                    )
+                except Exception:
+                    pass
+
     def _dispatch_warm_repair(self, project: str, brutal: bool = False) -> None:
         """Internal Dispatcher: Spawn background Swarm repair processes."""
         try:

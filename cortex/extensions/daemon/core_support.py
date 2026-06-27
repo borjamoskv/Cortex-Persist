@@ -25,6 +25,7 @@ from cortex.extensions.daemon.monitors import (
     WorkflowMonitor,
 )
 from cortex.extensions.daemon.monitors.ast_oracle import ASTOracleMonitor
+from cortex.extensions.daemon.monitors.l2_drain import L2DrainMonitor
 from cortex.extensions.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
 from cortex.extensions.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
 
@@ -83,6 +84,11 @@ def init_advanced_monitors(daemon: Any, file_config: dict[str, Any]) -> None:
         auto_heal=True,
     )
     daemon.compaction_monitor = CompactionMonitor(
+        projects=list(file_config.get("auto_mejoralo_projects", {}).keys()),
+        interval_seconds=file_config.get("compaction_interval", 28800),
+        engine=daemon._shared_engine,
+    )
+    daemon.l2_drain_monitor = L2DrainMonitor(
         projects=list(file_config.get("auto_mejoralo_projects", {}).keys()),
         interval_seconds=file_config.get("compaction_interval", 28800),
         engine=daemon._shared_engine,

@@ -112,6 +112,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
     callback_api: Any
     mejoralo_monitor: Any
     ast_debt_monitor: Any
+    l2_drain_monitor: Any
     _healed_total: int
     _failure_counts: dict[str, int]
     _shutdown: bool
@@ -167,6 +168,10 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
         self._run_monitor(
             status, "compaction_alerts", self.compaction_monitor, self._alert_compaction
         )
+        if hasattr(self, "l2_drain_monitor"):
+            self._run_monitor(
+                status, "l2_drain_alerts", self.l2_drain_monitor, self._alert_l2_drain, method="check_async"
+            )
         self._run_monitor(
             status, "perception_alerts", self.perception_monitor, self._alert_perception
         )
