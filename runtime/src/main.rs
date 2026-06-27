@@ -10,9 +10,9 @@ use std::fs;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 enum B60Type {
     I64,
-    TIME,
+    Time,
     F60,
-    UNALLOCATED,
+    Unallocated,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -45,11 +45,6 @@ impl F60 {
         }
     }
 
-    fn to_f64(&self) -> f64 {
-        let num_f = self.num.to_f64().unwrap_or(0.0);
-        let den_f = 60_f64.powi(self.scale as i32);
-        num_f / den_f
-    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -70,6 +65,7 @@ enum CoroutineState {
 
 #[derive(Clone, Debug)]
 struct Coroutine {
+    #[allow(dead_code)]
     id: usize,
     pc: usize,
     state: CoroutineState,
@@ -148,8 +144,8 @@ fn parse_b60_number(b60_str: &str) -> F60 {
 }
 
 fn get_reg_index(reg_str: &str) -> usize {
-    if reg_str.starts_with('R') {
-        reg_str[1..].parse().unwrap_or(0)
+    if let Some(stripped) = reg_str.strip_prefix('R') {
+        stripped.parse().unwrap_or(0)
     } else {
         0
     }
@@ -313,7 +309,7 @@ impl Machine {
                     let typ_str = &tokens[1];
                     let idx = get_reg_index(&tokens[2]);
                     coro.r[idx].typ = match typ_str.as_str() {
-                        "TIME" => B60Type::TIME,
+                        "TIME" => B60Type::Time,
                         "F60" => B60Type::F60,
                         _ => B60Type::I64,
                     };
@@ -470,7 +466,7 @@ fn main() {
     let initial_r = vec![
         Register {
             val: F60::new(BigInt::zero(), 0),
-            typ: B60Type::UNALLOCATED
+            typ: B60Type::Unallocated
         };
         64
     ];
