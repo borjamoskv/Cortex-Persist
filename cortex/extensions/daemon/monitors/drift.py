@@ -124,7 +124,9 @@ class DriftMonitorDaemon:
                 conn.enable_load_extension(True)
                 sqlite_vec.load(conn)
             else:
-                logger.warning("DriftMonitor: sqlite_vec not available due to missing enable_load_extension, skipping")
+                logger.warning(
+                    "DriftMonitor: sqlite_vec not available due to missing enable_load_extension, skipping"
+                )
                 conn.close()
                 return None
 
