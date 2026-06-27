@@ -75,7 +75,7 @@ class CortexEmailTransport:
 
         # 2. Ledger Commitment (SAGA-5)
         # Commit to the tamper-evident ledger BEFORE external side-effects
-        await self.ledger.log_event(
+        await self.ledger.log_action(
             tenant_id=tenant_id,
             actor_role="agent",
             actor_id=agent_id,
