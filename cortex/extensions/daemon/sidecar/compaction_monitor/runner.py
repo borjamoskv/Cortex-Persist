@@ -31,11 +31,12 @@ except ImportError:
     logging.warning("arq not installed; sidecar will use a dummy in‑process queue")
 
 # Local imports
+from cortex.engine import CortexEngine
+from cortex.extensions.daemon.monitors.l2_drain import L2DrainMonitor
+
 from .circuit_breaker import circuit_breaker
 from .memory_wrapper import get_mallinfo2, malloc_trim
 from .monitor import MemoryPressureMonitor
-from cortex.extensions.daemon.monitors.l2_drain import L2DrainMonitor
-from cortex.engine import CortexEngine
 
 LOGGER = logging.getLogger("compaction_sidecar")
 logging.basicConfig(level=logging.INFO)
@@ -121,7 +122,7 @@ async def main() -> None:
     monitor.start(loop=loop)
     
     engine = CortexEngine()
-    l2_task = asyncio.create_task(l2_drain_loop(engine=engine))
+    _ = asyncio.create_task(l2_drain_loop(engine=engine))
 
     # Set up ARQ worker if available
     if RedisSettings is not None:
