@@ -101,8 +101,8 @@ class AgencyHypervisor:
         # 2. Fire invisible side-effects (non-blocking)
         try:
             await self._projector.on_remember(fact_id, project, content)
-        except Exception:
-            logger.debug("Projector on_remember failed for fact %d", fact_id)
+        except (RuntimeError, ValueError, TypeError, OSError) as e:
+            logger.debug("Projector on_remember failed for fact %d: %s", fact_id, e)
 
         # 3. Compress to Receipt (tenant never sees fact_id as int)
         return self._compressor.to_receipt(fact_id, project)
@@ -173,7 +173,7 @@ class AgencyHypervisor:
             active_count = stats.get("active_facts", active_count)
 
             last_activity = facts[0].created_at if facts else None  # type: ignore[type-error]
-        except Exception:
+        except (RuntimeError, ValueError, TypeError, OSError):
             active_count = 0
             last_activity = None
 
@@ -185,7 +185,7 @@ class AgencyHypervisor:
                 chain_valid = (
                     result.get("valid", True) if isinstance(result, dict) else bool(result)
                 )
-        except Exception:
+        except (RuntimeError, ValueError, TypeError, OSError):
             chain_valid = False
 
         # Compress to HealthReport

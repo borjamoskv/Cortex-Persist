@@ -131,7 +131,7 @@ def _check_local_provider(name: str, preset: dict[str, Any]) -> bool:
         result = sock.connect_ex((host, port))
         sock.close()
         return result == 0
-    except Exception:
+    except OSError:
         return False
 
 

@@ -76,10 +76,11 @@ class MCPOutboundClient:
                     len(tools),
                     server_name,
                 )
-            except Exception:
+            except (ValueError, TypeError, OSError, RuntimeError, ConnectionError) as e:
                 logger.exception(
-                    "[MCP-OUT] Failed to connect to %s",
+                    "[MCP-OUT] Failed to connect to %s: %s",
                     server_name,
+                    e,
                 )
 
         self._initialized = True
@@ -186,8 +187,8 @@ class MCPOutboundClient:
         except asyncio.TimeoutError:
             logger.error("[MCP-OUT] Timeout calling tool %s", name)
             return {"error": f"Timeout calling tool {name}"}
-        except Exception:
-            logger.exception("[MCP-OUT] Error calling tool %s", name)
+        except (ValueError, TypeError, OSError, RuntimeError, ConnectionError) as e:
+            logger.exception("[MCP-OUT] Error calling tool %s: %s", name, e)
             return {"error": f"Error calling tool {name}"}
 
     async def close(self) -> None:

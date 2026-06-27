@@ -14,10 +14,10 @@ class CircuitBreaker:
             self.failures = 0
             return result
 
-        except Exception:
+        except (ValueError, TypeError, OSError, RuntimeError, ConnectionError, TimeoutError) as e:
             self.failures += 1
 
             if self.failures >= self.threshold:
                 self.open = True
 
-            raise
+            raise e

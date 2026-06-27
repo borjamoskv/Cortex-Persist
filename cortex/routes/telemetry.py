@@ -486,7 +486,8 @@ async def broadcast_nodes_update(new_node: str):
     for ws in _nodes_websockets:
         try:
             await ws.send_json(payload)
-        except Exception:
+        except (RuntimeError, WebSocketDisconnect, ConnectionError) as e:
+            logger.debug("Client disconnected during broadcast: %s", e)
             disconnected.add(ws)
     for ws in disconnected:
         _nodes_websockets.discard(ws)
