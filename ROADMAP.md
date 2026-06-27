@@ -34,6 +34,18 @@
 
 ---
 
+## 🛡️ v10.5 — Autonomous Resilience & Tactical Topologies (Current Phase)
+
+**Focus: Eradicating entropy from runtime execution and scaling proactive defense patterns.**
+
+- [x] **Zero-Wait Failover (CortexLLMRouter)** — Asymmetric hedged race execution for mitigating LLM Fast-Reject rate-limits without sequential latency.
+- [x] **TESTUDO Formation (LEGIØN-10k)** — 15-node topological quorum balancing Security, Infra, and Code for proactive infrastructure defense.
+- [x] **UI Maestro Daemon** — Sovereign deterministic agent orchestration for macOS UI DOM manipulation without legacy constraints.
+- [x] **Turbopuffer Vector Sink** — High-throughput L2 cold-storage backend for embedding offloading (replacing strict SQLite-Vec locality).
+- [ ] **L2 Compaction Daemon** — Thermodynamic vector drainage from SQLite to Turbopuffer.
+
+---
+
 ## 🔮 v11.0 — Vision (Sovereign Cloud)
 
 **Managed Enterprise Platform (Industrial Noir 2026 Aesthetic).**
