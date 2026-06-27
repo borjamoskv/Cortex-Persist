@@ -53,11 +53,13 @@ class ComponentsMixin:
         self._facts = value
 
     @property
-    def embeddings(self) -> EmbeddingManager:
+    def embeddings(self) -> EmbeddingManager | None:
         if self._embeddings is None:
-            from cortex.embeddings.manager import EmbeddingManager
-
-            self._embeddings = EmbeddingManager(self)
+            try:
+                from cortex.embeddings.manager import EmbeddingManager
+                self._embeddings = EmbeddingManager(self)
+            except ImportError:
+                return None
         return self._embeddings
 
     @embeddings.setter

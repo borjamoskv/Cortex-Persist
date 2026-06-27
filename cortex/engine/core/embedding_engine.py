@@ -64,7 +64,7 @@ async def embed_fact_async(
                 "INSERT INTO fact_embeddings (fact_id, embedding) VALUES (?, ?)",
                 (fact_id, json.dumps(embedding)),
             )
-        except (sqlite3.Error, OSError, ValueError) as e:
+        except (sqlite3.Error, OSError, ValueError, ImportError) as e:
             logger.warning("Embedding failed for fact %d: %s", fact_id, e)
 
     # 2. Vector Alpha (G10 Specular Memory)
@@ -109,5 +109,6 @@ async def embed_fact_async(
             ValueError,
             AttributeError,
             TypeError,
+            ImportError,
         ) as e:
             logger.warning("Specular Memory indexing failed for fact %d: %s", fact_id, e)

@@ -160,12 +160,14 @@ class CortexEngine(
             tenant_id,
         )
 
-    def _get_embedder(self) -> LocalEmbedder:
+    def _get_embedder(self) -> Any:
         """Protocol requirement for SearchMixin."""
         if self._embedder is None:
-            from cortex.embeddings import LocalEmbedder
-
-            self._embedder = LocalEmbedder()
+            try:
+                from cortex.embeddings import LocalEmbedder
+                self._embedder = LocalEmbedder()
+            except ImportError:
+                return None
         return self._embedder
 
     async def start(self) -> None:

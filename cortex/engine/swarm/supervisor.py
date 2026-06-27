@@ -109,8 +109,9 @@ class SwarmSupervisor:
                 
             try:
                 # SANEDRIN VECTOR 3: Lease lock task using supervisor_id and 5-min TTL
+                from datetime import datetime, timedelta, timezone
+
                 from cortex.database.core import causal_write
-                from datetime import datetime, timezone, timedelta
                 expires_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
                 with causal_write(self._db):
                     await self._db.execute(
