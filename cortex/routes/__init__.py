@@ -36,7 +36,7 @@ _ROUTE_MODULES = {
     "ultramap",
 }
 
-_API_ROUTE_SPECS: tuple[tuple[str, str], ...] = (
+_API_ROUTE_SPECS_ALL: tuple[tuple[str, str], ...] = (
     ("events", "events_router"),
     ("facts", "router"),
     ("search", "router"),
@@ -62,6 +62,29 @@ _API_ROUTE_SPECS: tuple[tuple[str, str], ...] = (
     ("benchmark", "router"),
     ("ultramap", "router"),
 )
+
+from cortex import config
+
+_DANGEROUS_CLOUD_ROUTES = {
+    "admin",
+    "daemon",
+    "dashboard",
+    "ledger",
+    "swarm",
+    "telemetry",
+    "runtime",
+    "taas",
+    "benchmark",
+    "gate",
+    "mejoralo",
+}
+
+if config.DEPLOY_MODE == "cloud":
+    _API_ROUTE_SPECS = tuple(
+        r for r in _API_ROUTE_SPECS_ALL if r[0] not in _DANGEROUS_CLOUD_ROUTES
+    )
+else:
+    _API_ROUTE_SPECS = _API_ROUTE_SPECS_ALL
 
 
 def _load_route_module(name: str):
