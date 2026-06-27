@@ -89,6 +89,10 @@ class LazyCommandsDict(dict):
         self._trigger()
         return super().__contains__(key)
 
+    def __iter__(self):
+        self._trigger()
+        return super().__iter__()
+
     def keys(self):
         self._trigger()
         return super().keys()
