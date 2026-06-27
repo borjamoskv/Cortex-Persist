@@ -143,6 +143,8 @@ def test_cli_init_without_numpy_logs_partial_memory_once(tmp_path: Path) -> None
                     "logging.basicConfig(level=logging.INFO)",
                     f"db_path = r'{db_path}'",
                     "result = CliRunner().invoke(cli, ['init', '--db', db_path])",
+                    "if result.exit_code != 0:",
+                    "    print(f'Exception: {result.exception}')",
                     "print(result.output)",
                     "raise SystemExit(result.exit_code)",
                 ]

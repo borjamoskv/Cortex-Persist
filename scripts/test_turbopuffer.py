@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from cortex.storage.turbopuffer import TurbopufferVectorBackend
 
+
 async def test_turbopuffer_backend():
     print("Initializing Turbopuffer Vector Backend...")
     api_key = os.environ.get("TURBOPUFFER_API_KEY", "")

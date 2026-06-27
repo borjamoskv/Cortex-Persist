@@ -8,10 +8,10 @@ for facts older than 7 days, maintaining true tenant isolation.
 
 from __future__ import annotations
 
+import json
 import logging
 import time
 from typing import Any
-import json
 
 from cortex.extensions.daemon.models import CompactionAlert
 from cortex.storage.qdrant import init_vector_backend

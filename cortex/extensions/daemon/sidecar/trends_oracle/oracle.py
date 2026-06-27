@@ -118,7 +118,7 @@ class TrendsOracle:
             except Exception as e:
                 logger.error("❌ [TRENDS_ORACLE] (Thread) Error: %s", e)
 
-            await asyncio.sleep(15.0)
+            time.sleep(15.0)
 
     def stop(self) -> None:
         """Gracefully stop the oracle loop."""
@@ -289,7 +289,7 @@ def _execute_with_backoff(func, max_retries: int = 3, base_backoff: float = 1.5)
             if "429" in str(e):
                 delay = (base_backoff**attempt) + random.uniform(0.5, 2.5)
                 logger.warning("⏳ [TRENDS_ORACLE] Rate limit (429). Retrying in %.1fs...", delay)
-                await asyncio.sleep(delay)
+                time.sleep(delay)
                 last_error = e
             else:
                 # Re-raise other HTTP errors

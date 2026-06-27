@@ -30,7 +30,7 @@ async def main():
 
     args = parser.parse_args()
 
-    print(f"🔱 LEGIØN-1 STRESS TEST ACTIVATED")
+    print("🔱 LEGIØN-1 STRESS TEST ACTIVATED")
     print(f"CONCURRENCY: {args.concurrency}")
     print(f"FORMATION: {args.formation}")
     print(f"MODE: {'C4-SIM' if args.sim else 'C5-REAL'}")

@@ -10,6 +10,7 @@ import hashlib
 import json
 import logging
 import random
+import time
 from pathlib import Path
 from typing import Any, Final
 
@@ -59,7 +60,7 @@ class FiatOracle:
                 self._check_signals_sync()
             except (OSError, ValueError, CortexError) as e:
                 logger.error("❌ [FIAT_ORACLE] (Thread) Error: %s", e)
-            await asyncio.sleep(self.interval)
+            time.sleep(self.interval)
 
     def _verify_signature(self, data: dict, signature: str) -> bool:
         """
@@ -251,7 +252,7 @@ class FiatOracle:
                     MAX_RETRIES,
                     delay,
                 )
-                await asyncio.sleep(delay)
+                time.sleep(delay)
 
         logger.critical(
             "💀 [FIAT_ORACLE] Falla catastrófica almacenando TX %s tras %s intentos.",
