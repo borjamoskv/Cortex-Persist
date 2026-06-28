@@ -4,11 +4,13 @@
 # Integrates the Ultrathink Physics Engine to compute thermodynamic exergy yields.
 
 import asyncio
+import math
 import os
 import time
-import math
-from cortex.engine.causal.taint_engine import enforce_taint_check, TaintValidationError
+
+from cortex.engine.causal.taint_engine import TaintValidationError, enforce_taint_check
 from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
+
 
 class DummyConnection:
     pass

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 [C5-REAL] Elite-Tier Substack Feed Generator.
 Optimized for:
@@ -121,7 +120,7 @@ def get_category(title: str) -> str:
 def load_history() -> list:
     if os.path.exists(HISTORY_PATH):
         try:
-            with open(HISTORY_PATH, 'r', encoding='utf-8') as f:
+            with open(HISTORY_PATH, encoding='utf-8') as f:
                 return json.load(f)
         except Exception:
             return []
@@ -152,7 +151,7 @@ def generate_feed(as_json: bool = False):
         sys.stderr.write(f"Error: {JSON_PATH} not found. Run scripts/export_substack_nodes.py\n")
         sys.exit(1)
 
-    with open(JSON_PATH, 'r', encoding='utf-8') as f:
+    with open(JSON_PATH, encoding='utf-8') as f:
         data = json.load(f)
 
     valid_posts = [p for p in data if len(p.get('title', '')) > 10 and p.get('exergy_score', 0) >= 500]

@@ -65,10 +65,10 @@ class ReplayEngine:
         import hashlib
         for i, node in enumerate(trajectory):
             # 1. Row-level verification
-            expected_id_v2 = hashlib.sha256(
+            hashlib.sha256(
                 f"{node['timestamp']}|{tenant_id}|PERSIST-EXECUTOR|{actor_id}|{node['action']}|{node['resource']}|{node['status']}".encode()
             ).hexdigest()
-            expected_id_v1 = hashlib.sha256(
+            hashlib.sha256(
                 f"{node['timestamp']}{tenant_id}PERSIST-EXECUTOR{actor_id}{node['action']}{node['resource']}{node['status']}".encode()
             ).hexdigest()
             
@@ -77,7 +77,7 @@ class ReplayEngine:
             
             # 2. Hash-Chain continuity check
             if i > 0:
-                prev_node = trajectory[i - 1]
+                trajectory[i - 1]
                 # Reconstruct and assert the batch or sequential linkage
                 # Note: EnterpriseAuditLedger uses Merkle batching: prev_hash connects to the previous batch hash.
                 # Since we are query-selecting a subset (tenant/actor), we verify that there is a strict cryptographic mapping.

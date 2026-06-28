@@ -1,10 +1,12 @@
 import os
 import sqlite3
 import subprocess
+
 import keyring
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives import hashes
+
 
 def get_chrome_key():
     # Attempt to retrieve via security CLI (forces system dialog if not authorized)

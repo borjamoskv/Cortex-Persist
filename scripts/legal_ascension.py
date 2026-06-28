@@ -20,7 +20,7 @@ except ImportError:
 async def ascend_node(post_id: int):
     cortex_dir = os.path.expanduser('~/30_CORTEX')
     db_path = os.path.join(cortex_dir, 'cortex', 'audit', 'substack_exergy.sqlite')
-    json_path = os.path.join(cortex_dir, 'public', 'substack_nodes.json')
+    os.path.join(cortex_dir, 'public', 'substack_nodes.json')
     
     logger.info(f"[C5-REAL] Initiating legal ascension for node {post_id}")
     

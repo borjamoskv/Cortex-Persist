@@ -7,12 +7,12 @@ Implements metadata stripping, PII containment, and system path masking.
 from __future__ import annotations
 
 import ast
+import base64
 import io
 import logging
 import re
 import unicodedata
 import urllib.parse
-import base64
 
 try:
     from PIL import Image

@@ -1,6 +1,8 @@
 import os
 import sys
-from cortex.enrichment.subscriber_triage import triage_subscriber, process_batch
+
+from cortex.enrichment.subscriber_triage import process_batch
+
 
 def run_purge():
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -12,7 +14,7 @@ def run_purge():
         print(f"Error: {raw_path} not found.")
         sys.exit(1)
         
-    with open(raw_path, "r") as f:
+    with open(raw_path) as f:
         emails = [line.strip() for line in f if line.strip()]
         
     matrix = process_batch(emails)
@@ -32,7 +34,7 @@ def run_purge():
     with open(purged_path, "w") as f:
         f.write("\n".join(purged) + "\n")
         
-    print(f"Purge complete.")
+    print("Purge complete.")
     print(f"  Total processed: {len(emails)}")
     print(f"  Cleaned (kept):  {len(cleaned)}")
     print(f"  Purged (removed): {len(purged)}")

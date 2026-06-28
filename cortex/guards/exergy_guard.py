@@ -122,6 +122,31 @@ _STOP_WORDS = frozenset(
     }
 )
 
+_ACRONYMS_WHITELIST = frozenset(
+    {
+        "xml",
+        "cnn",
+        "ssh",
+        "ssl",
+        "svg",
+        "csv",
+        "pdf",
+        "sql",
+        "txt",
+        "db",
+        "sh",
+        "fs",
+        "git",
+        "hdc",
+        "bft",
+        "mcts",
+        "dag",
+        "ast",
+        "pii",
+        "wal",
+    }
+)
+
 # Minimum threshold: Below this, the output is considered thermal noise.
 # A healthy, concise technical fact usually scores 0.6+
 MIN_EXERGY_THRESHOLD = 0.55  # Increased for Aura-Omega rigor (Ω₁₃)
@@ -163,28 +188,7 @@ def _is_anomalous_word(w: str) -> bool:
     has_vowel = any(c in vowels for c in w)
     if not has_vowel:
         # Allow common acronyms without vowels if short
-        if len(w) <= 4 and w in {
-            "xml",
-            "cnn",
-            "ssh",
-            "ssl",
-            "svg",
-            "csv",
-            "pdf",
-            "sql",
-            "txt",
-            "db",
-            "sh",
-            "fs",
-            "git",
-            "hdc",
-            "bft",
-            "mcts",
-            "dag",
-            "ast",
-            "pii",
-            "wal",
-        }:
+        if len(w) <= 4 and w in _ACRONYMS_WHITELIST:
             return False
         return True
 
@@ -232,7 +236,10 @@ def _check_short_phrase(
     if any(_is_anomalous_word(w) for w in words):
         return 0.0
     if letters and vowel_fraction < 0.25:
-        return 0.0
+        # Avoid false positives for technical phrases containing whitelisted acronyms
+        has_acronym = any(w in _ACRONYMS_WHITELIST for w in words)
+        if not has_acronym:
+            return 0.0
     if letters and rare_fraction > 0.15:
         return 0.0
     if any(marker in lower_content for marker in _DECORATIVE_MARKERS):

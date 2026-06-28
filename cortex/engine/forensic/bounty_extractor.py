@@ -1,5 +1,4 @@
 # [C5-REAL] Exergy-Maximized
-import asyncio
 import logging
 
 from cortex.darknet.ingestor import DarknetIngestor
@@ -40,7 +39,7 @@ class BountyExergyExtractor:
         commander = ForensicCommander(strike_id=f"BOUNTY-STRIKE-{self.target_source.upper()}")
         commander.missions.clear()  # Overwrite static STRIKE_V1 missions
         
-        for idx, target in enumerate(bounty_targets):
+        for _idx, target in enumerate(bounty_targets):
             mission_name = f"Bounty-{target.source_id}"
             
             # Extract target repo name safely from URL if possible, or use title

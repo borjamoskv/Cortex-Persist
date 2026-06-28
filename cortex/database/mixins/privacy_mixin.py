@@ -9,13 +9,13 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.engine.mixins.base import EngineMixinBase, FACT_COLUMNS, FACT_JOIN
+from cortex.crypto import get_default_encrypter
+from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
 from cortex.storage.classifier import (
+    COMPOSITION_RULES,
     classify_content,
     detect_correlation_signals,
-    COMPOSITION_RULES,
 )
-from cortex.crypto import get_default_encrypter
 
 __all__ = ["PrivacyMixin"]
 
