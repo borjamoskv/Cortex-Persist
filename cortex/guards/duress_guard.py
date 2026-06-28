@@ -25,17 +25,6 @@ class DuressGuard:
     LOCK_FILE = os.path.expanduser("~/.gemini/config/.apoptosis_seed")
 
     @classmethod
-    def _physical_memory_wipe(cls, s: str) -> None:
-        """Overwrites the physical memory of a Python string with zeros."""
-        try:
-            if not isinstance(s, str): return
-            size = len(s.encode('utf-8'))
-            buffer_offset = sys.getsizeof(s) - size - 1
-            ctypes.memset(id(s) + buffer_offset, 0, size)
-        except Exception as e:
-            logger.debug(f"Memory wipe failed: {e}")
-
-    @classmethod
     def get_duress_code(cls) -> str:
         """Retrieves the expected duress string from environment or default."""
         return os.environ.get("CORTEX_DURESS_CODE", cls.DEFAULT_DURESS_CODE)
@@ -45,12 +34,13 @@ class DuressGuard:
         """Triggers the logical death protocol (P100). Scorches environment keys and locks down."""
         logger.critical("DURESS CODE ACTIVATED. Executing P100 Apoptosis Protocol.")
         
-        # Scorched Earth: Destroy critical API keys in physical memory to halt exfiltration
+        # Scorched Earth: Destroy critical API keys to halt exfiltration
+        import gc
         for key in ["GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GITHUB_TOKEN"]:
             if key in os.environ:
-                val = os.environ[key]
-                cls._physical_memory_wipe(val)
                 os.environ[key] = "PURGED_BY_APOPTOSIS_P100"
+        # Force garbage collection to sweep orphaned memory references
+        gc.collect()
 
         # Emit synchronous Ledger event bypassing the async loop to guarantee recording
         try:
@@ -59,7 +49,11 @@ class DuressGuard:
             from datetime import datetime, timezone
             db_path = os.environ.get("CORTEX_DB_PATH", "cortex_ledger.db")
             if os.path.exists(db_path):
-                with sqlite3.connect(db_path) as conn:
+                with sqlite3.connect(db_path, timeout=5.0) as conn:
+                    # Enforce Rule R10: Byzantine Tolerance DB Locking
+                    conn.execute("PRAGMA busy_timeout = 5000;")
+                    conn.execute("PRAGMA journal_mode=WAL;")
+                    
                     timestamp = datetime.now(timezone.utc).isoformat()
                     conn.execute(
                         "INSERT INTO security_audit_log "
