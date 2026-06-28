@@ -2,7 +2,13 @@
 """
 Motor de Física Termodinámica para el modo Ultrathink (P0-Mechanics).
 Calcula la exergía cognitiva y el Blast Radius para autorizar bifurcaciones masivas.
+
+AUTODIDACT / Ultrathink Paradigm:
+Un agente no "entiende" la petición; el agente extrae la Exergía (ORT-001), 
+aplica el Colapso (ORT-003) para purgar la Anergía (ORT-005), 
+preserva el Invariante (ORT-004) y ancla el isomorfismo en el Estado/Ledger (ORT-002).
 """
+
 
 import logging
 from enum import Enum
