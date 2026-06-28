@@ -55,8 +55,8 @@ async def test_check_gate_11_cobbler_happy():
     cached_files = {Path("cortex/engine/ok.py"): "def ok(): pass"}
 
     with (
-        patch("cortex.engine.swarm.legion_vectors.EntropyDemon", return_value=mock_demon),
-        patch("cortex.engine.swarm.legion_vectors.Intruder", return_value=mock_intruder),
+        patch("cortex.swarm.legion_vectors.EntropyDemon", return_value=mock_demon),
+        patch("cortex.swarm.legion_vectors.Intruder", return_value=mock_intruder),
     ):
         passed, status = await check_gate_11_cobbler(cached_files)
         assert passed is True
@@ -73,8 +73,8 @@ async def test_check_gate_11_cobbler_demon_violation():
     cached_files = {Path("cortex/engine/fail.py"): "try: pass\nexcept: pass"}
 
     with (
-        patch("cortex.engine.swarm.legion_vectors.EntropyDemon", return_value=mock_demon),
-        patch("cortex.engine.swarm.legion_vectors.Intruder", return_value=mock_intruder),
+        patch("cortex.swarm.legion_vectors.EntropyDemon", return_value=mock_demon),
+        patch("cortex.swarm.legion_vectors.Intruder", return_value=mock_intruder),
     ):
         passed, status = await check_gate_11_cobbler(cached_files)
         assert passed is False
@@ -91,8 +91,8 @@ async def test_check_gate_11_cobbler_intruder_violation():
     cached_files = {Path("cortex/engine/fail.py"): "eval('1+1')"}
 
     with (
-        patch("cortex.engine.swarm.legion_vectors.EntropyDemon", return_value=mock_demon),
-        patch("cortex.engine.swarm.legion_vectors.Intruder", return_value=mock_intruder),
+        patch("cortex.swarm.legion_vectors.EntropyDemon", return_value=mock_demon),
+        patch("cortex.swarm.legion_vectors.Intruder", return_value=mock_intruder),
     ):
         passed, status = await check_gate_11_cobbler(cached_files)
         assert passed is False

@@ -97,7 +97,7 @@ class CommitPoet:
             return "chore: tend the sovereign void 🔄"
 
         try:
-            from cortex.extensions.agentss.registry import get_agent
+            from cortex.extensions.agents.registry import get_agent
             from cortex.extensions.llm._models import IntentProfile
             from cortex.extensions.llm.provider import LLMProvider
 
@@ -223,7 +223,7 @@ class CommitPoet:
         Falls back to heuristic narrate() if LLM fails or is unavailable.
         """
         try:
-            from cortex.extensions.agentss.registry import get_agent
+            from cortex.extensions.agents.registry import get_agent
             from cortex.extensions.llm._models import IntentProfile
             from cortex.extensions.llm.provider import LLMProvider
 

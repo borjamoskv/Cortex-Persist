@@ -13,7 +13,7 @@ import asyncio
 import pytest
 import time
 
-from cortex.engine.swarm.autocurative_agent import (
+from cortex.swarm.autocurative_agent import (
     AutoCurativeAgent,
     AutoCurativeConfig,
     HealingPhase,

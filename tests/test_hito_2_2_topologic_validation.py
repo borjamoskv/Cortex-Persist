@@ -10,8 +10,8 @@ import aiosqlite
 
 from cortex.config import DB_PATH
 from cortex.engine.causal.topological_arbitrage import TopologyIndex
-from cortex.engine.swarm.swarm_10k import SwarmCommander
-from cortex.engine.swarm.legion import SwarmSignal, AsyncSignalBus
+from cortex.swarm.swarm_10k import SwarmCommander
+from cortex.swarm.legion import SwarmSignal, AsyncSignalBus
 
 # Helper function to set up in-memory DB for tests
 async def setup_test_db() -> aiosqlite.Connection:
@@ -192,7 +192,7 @@ async def test_scheduler_determinism():
 @pytest.mark.asyncio
 async def test_cascade_death_concurrent_drops(caplog):
     """Test that SwarmSignal for an INVALIDATED hypothesis is dropped by SwarmStateStore."""
-    from cortex.engine.swarm.state_store import CausalStateStore
+    from cortex.swarm.state_store import CausalStateStore
     import tempfile
     import logging
     

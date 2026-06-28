@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 
-from cortex.engine.swarm.swarm_10k import CenturionSuperv
+from cortex.swarm.swarm_10k import CenturionSuperv
 from cortex.extensions.llm._cascade import CascadeManager, IntentProfile
 from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 

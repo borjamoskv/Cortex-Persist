@@ -9,7 +9,7 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 
 try:
     from fastapi.testclient import TestClient
-    from cortex.engine.swarm.inference_proxy import app
+    from cortex.swarm.inference_proxy import app
     from cortex.consensus.pki import trust_matrix
     
     client = TestClient(app)

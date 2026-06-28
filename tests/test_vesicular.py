@@ -1,6 +1,6 @@
 import os
 import pytest
-from cortex.engine.swarm.vesicular import VesicularRuntime
+from cortex.swarm.vesicular import VesicularRuntime
 
 @pytest.fixture
 def vesicle():

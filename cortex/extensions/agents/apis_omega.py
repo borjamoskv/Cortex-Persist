@@ -53,7 +53,7 @@ class ApisOmegaAgent(EngineAwareMixin):
         if self._agent_def is not None:
             return
         try:
-            from cortex.extensions.agentss.registry import get_agent
+            from cortex.extensions.agents.registry import get_agent
 
             self._agent_def = get_agent("apis_omega")
         except Exception as exc:

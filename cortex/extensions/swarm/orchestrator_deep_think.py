@@ -6,7 +6,7 @@ from typing import Any
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
-    from cortex.extensions.agentss.factory import create_agent  # type: ignore[import-not-found]
+    from cortex.extensions.agents.factory import create_agent  # type: ignore[import-not-found]
 except ImportError:
 
     async def create_agent(*args: Any, **kwargs: Any) -> Any:  # type: ignore[misc]
