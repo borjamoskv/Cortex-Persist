@@ -25,9 +25,9 @@ def test_vesicular_timeout_enforcement(vesicle):
     assert "TimeoutExpired" in stderr
 
 
-def test_vesicular_env_isolation(vesicle):
+def test_vesicular_env_isolation(vesicle, monkeypatch):
     # Try to read an env variable that might be set on host
-    os.environ["SECRET_CORTEX_KEY"] = "DO_NOT_LEAK"
+    monkeypatch.setenv("SECRET_CORTEX_KEY", "DO_NOT_LEAK")
 
     payload = "import os; print(os.environ.get('SECRET_CORTEX_KEY', 'NOT_FOUND'))"
     success, stdout, stderr = vesicle.execute(payload)
@@ -35,6 +35,3 @@ def test_vesicular_env_isolation(vesicle):
     assert success is True
     assert "NOT_FOUND" in stdout
     assert "DO_NOT_LEAK" not in stdout
-
-    # Cleanup host
-    del os.environ["SECRET_CORTEX_KEY"]
