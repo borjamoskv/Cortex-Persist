@@ -27,6 +27,9 @@ from cortex.memory.hdc.codec import HDCEncoder
 from cortex.memory.hdc.item_memory import ItemMemory
 from cortex.memory.hdc.store import HDCVectorStoreL2
 
+_default_item_memory = ItemMemory(dim=10000)
+global_hdc_encoder = HDCEncoder(_default_item_memory)
+
 __all__ = [
     "HDCEncoder",
     "HDCVectorStoreL2",
@@ -37,4 +40,5 @@ __all__ = [
     "permute",
     "random_bipolar",
     "unbind",
+    "global_hdc_encoder",
 ]

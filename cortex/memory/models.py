@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from types import MappingProxyType
 from typing import Any, Literal, Mapping
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, ValidationInfo, model_validator
 
 try:
     import numpy as np
@@ -282,6 +282,22 @@ class CortexFactModel(BaseModel):
         default=None,
         description="HDC Specular Memory (intent trace) bipolar hypervector.",
     )
+    
+    @model_validator(mode="before")
+    @classmethod
+    def _ensure_specular_embedding(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if data.get("specular_embedding") is None:
+                content = data.get("content", "")
+                if content:
+                    try:
+                        from cortex.memory.hdc import global_hdc_encoder
+                        hv = global_hdc_encoder.encode_text(content)
+                        data["specular_embedding"] = hv.tolist() if hasattr(hv, "tolist") else list(hv)
+                    except Exception as e:
+                        import logging
+                        logging.getLogger("cortex.memory.models").warning(f"HDC auto-encode failed: {e}")
+        return data
 
     # Pragmatic Metamemory Phase 1 Additions
     source_metadata: SourceMetadata = Field(
