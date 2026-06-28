@@ -95,7 +95,7 @@ class SanedrinCouncil:
         apex_dispatcher.execute(
             "OP_GIT_SENTINEL",
             commit_msg=f"CORTEX-SANEDRIN: BFT Resolution {best_eval['hash'][:8]}",
-            force=True,
+            force=False,
         )
 
         return {
