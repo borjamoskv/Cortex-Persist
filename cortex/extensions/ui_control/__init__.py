@@ -1,17 +1,17 @@
 # [C5-REAL] Exergy-Maximized
 """
-cortex.ui_control - Control soberano de escritorio macOS.
+cortex.ui_control - macOS sovereign desktop control.
 
-Motores:
-    - MaestroUI: Orquestador unificado (punto de entrada recomendado)
-    - AccessibilityEngine: Puente directo a macOS Accessibility APIs
-    - KeyboardEngine: Inyección de teclas vía AppleScript System Events
-    - MouseEngine: Control de mouse vía CoreGraphics (Quartz)
-    - WindowEngine: Gestión de ventanas vía AppleScript System Events
+Engines:
+    - MaestroUI: Unified orchestrator (recommended entry point)
+    - AccessibilityEngine: Direct bridge to macOS Accessibility APIs
+    - KeyboardEngine: Keystroke injection via AppleScript System Events
+    - MouseEngine: Mouse control via CoreGraphics (Quartz)
+    - WindowEngine: Window management via AppleScript System Events
 
-Funciones:
-    - run_applescript: Ejecución asíncrona de AppleScript con timeout
-    - capture_screen: Captura de pantalla vía CoreGraphics
+Functions:
+    - run_applescript: Asynchronous AppleScript execution with timeout
+    - capture_screen: Screen capture via CoreGraphics
 """
 
 from cortex.extensions.ui_control.accessibility import AccessibilityEngine

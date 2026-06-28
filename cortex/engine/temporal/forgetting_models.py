@@ -9,7 +9,7 @@ __all__ = ["EvictionVerdict", "OracleReport", "PolicyRecommendation"]
 
 
 class PolicyRecommendation(Enum):
-    """Ajuste de política sugerido por el Oracle."""
+    """Policy adjustment suggested by the Oracle."""
 
     OPTIMAL = "OPTIMAL"
     INCREASE_TTL = "INCREASE_TTL"
@@ -20,7 +20,7 @@ class PolicyRecommendation(Enum):
 
 @dataclass
 class EvictionVerdict:
-    """Resultado del análisis post-hoc de una evicción concreta."""
+    """Result of the post-hoc analysis of a specific eviction."""
 
     key: str
     eviction_id: int
@@ -35,7 +35,7 @@ class EvictionVerdict:
 
 @dataclass
 class OracleReport:
-    """Informe completo de una sesión de auditoría del Oracle."""
+    """Complete report of an Oracle audit session."""
 
     audited_at: float
     window_size: int

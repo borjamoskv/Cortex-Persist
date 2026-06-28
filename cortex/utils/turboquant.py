@@ -16,14 +16,14 @@ from cortex.utils import void_vec
 
 logger = logging.getLogger("cortex.utils.turboquant")
 
-# Cache estático en RAM para no desperdiciar exergía recalculando QR(R) O(D^3)
+# Static RAM cache to avoid wasting exergy recalculating QR(R) O(D^3)
 _ROTATION_CACHE: dict[int, np.ndarray] = {}  # pyright: ignore[reportInvalidTypeForm]
 
 
 def _get_rotation_matrix(dim: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
-    """Obtiene y empaqueta la matriz ortogonal isométrica Q."""
+    """Obtains and packs the orthogonal isometric matrix Q."""
     if dim not in _ROTATION_CACHE:
-        # Utilizamos la dimensión como semilla para tener isometría determinista
+        # We use the dimension as seed for deterministic isometry
         rng = np.random.RandomState(dim)
         R = rng.randn(dim, dim)
         q, _ = np.linalg.qr(R)
@@ -35,10 +35,10 @@ def optimize_vector_qjl(
     vector: Sequence[float] | Sequence[int], bits: float = 3.5, layer_depth_ratio: float = 0.0
 ) -> list[float] | bytes:
     """
-    Aplica el algoritmo de cuantización de dos fases TurboQuant.
-    Integra KV Cache Asimétrico (arXiv:2603.04428): escala los bits a 1.0 en capas profundas.
-    Devuelve un array comprimido listo para sqlite-vec (int8).
-    Elimina la entropía de float32 maximizando la eficiencia I/O.
+    Applies the TurboQuant two-stage quantization algorithm.
+    Integrates Asymmetric KV Cache (arXiv:2603.04428): scales bits to 1.0 in deep layers.
+    Returns a compressed array ready for sqlite-vec (int8).
+    Eliminates float32 entropy maximizing I/O efficiency.
     """
     try:
         # Asymmetric depth logic (Extreme Exergy for Deep Layers)
@@ -101,7 +101,7 @@ def optimize_vector_qjl(
 
 def encode_query_qjl(vector: list[float]) -> list[float]:
     """
-    Rota el vector query simétricamente para coincidir con el espacio latente QJL de int8.
+    Symmetrically rotates the query vector to match the int8 QJL latent space.
     """
     try:
         arr = np.array(vector, dtype=np.float32)
