@@ -56,9 +56,32 @@ class ZenohCRDTBridge:
         self._process_payload(payload_str)
 
     def _process_payload(self, payload_str: str) -> None:
-        """Deserialize and dispatch incoming CRDTEngram."""
+        """Deserialize and dispatch incoming CRDTEngram with BFT validation."""
         try:
             data = json.loads(payload_str)
+            
+            # Extract signatures for BFT validation
+            signatures_hex = data.get("bft_signatures", {})
+            # Decode signatures
+            signatures = {k: bytes.fromhex(v) for k, v in signatures_hex.items()}
+            
+            # Validate BFT Quorum
+            # In a real swarm, this would hold the registry of Swarm peers.
+            # We initialize a standalone guard here that allows fallback if no peers are known.
+            from cortex.consensus.bft_quorum import BFTQuorumGuard
+            from cortex.crypto.keys import KeyManager
+            # Try to get public keys of Swarm peers from KeyManager or peer registry
+            # Currently standalone mode allows parsing, but blocks known untrusted signatures.
+            bft_guard = BFTQuorumGuard({})
+            
+            # The payload for BFT is the engram data without the signatures
+            bft_payload_dict = {k: v for k, v in data.items() if k != "bft_signatures"}
+            bft_payload_bytes = json.dumps(bft_payload_dict, sort_keys=True).encode("utf-8")
+            
+            if not bft_guard.authorize_payload(bft_payload_bytes, signatures):
+                logger.critical(f"[ZenohBridge] BFT Quorum REJECTED for payload: {data.get('engram_id')}")
+                return
+                
             engram = CRDTEngram(engram_id=data["engram_id"])
             engram.content.value = data.get("content_val", "")
             engram.content.timestamp = data.get("content_ts", 0.0)
