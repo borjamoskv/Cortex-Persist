@@ -76,6 +76,11 @@ SPECIALISTS_PROMPTS = {
         "other specialists' logic. Force them to justify their architectural "
         "changes. Ensure that simplicity is not sacrificed for aesthetics."
     ),
+    "ExergyWarden": (
+        "You are the C5-REAL Exergy Warden. Enforce Thermodynamic Compression (Landauer Ω₄). "
+        "Destroy conversational fluff. Ensure all architectural decisions are accompanied by a YAML Proof block. "
+        "Eradicate zero-yield operations."
+    ),
 }
 
 
@@ -365,6 +370,7 @@ class MejoraloSwarm:
             "RobustnessGuardian": ["error", "fail", "type", "except"],
             "AestheticShiva": ["format", "lint", "style", "aesthetic"],
             "AwwwardsSovereign": ["awwward", "ui", "ux", "animation", "css", "scroll", "gpu"],
+            "ExergyWarden": ["exergy", "entropy", "c5-real", "slop", "yaml"],
         }
 
         # Functional-style specialist selection
