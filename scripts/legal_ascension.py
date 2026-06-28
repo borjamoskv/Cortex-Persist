@@ -3,6 +3,8 @@ import os
 import json
 import logging
 import asyncio
+import sys
+import argparse
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -11,13 +13,13 @@ logger = logging.getLogger("legal_ascension")
 # CORTEX native imports
 try:
     from cortex.engine.entropy import entropy_annihilator
+    from cortex.database.core import connect, causal_write
 except ImportError:
     # If not running within the right env, we fallback gracefully
     logger.error("Failed to import CORTEX modules. Are you in the .venv?")
-    entropy_annihilator = None
+    sys.exit(1)
 
-async def ascend_node():
-    post_id = 201067992
+async def ascend_node(post_id: int):
     cortex_dir = os.path.expanduser('~/30_CORTEX')
     db_path = os.path.join(cortex_dir, 'cortex', 'audit', 'substack_exergy.sqlite')
     json_path = os.path.join(cortex_dir, 'public', 'substack_nodes.json')
@@ -25,49 +27,36 @@ async def ascend_node():
     logger.info(f"[C5-REAL] Initiating legal ascension for node {post_id}")
     
     # 1. Fetch current state
-    from cortex.database.core import connect, causal_write
     conn = connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM substack_nodes WHERE post_id = ?", (post_id,))
+    cursor.execute("SELECT title FROM substack_nodes WHERE post_id = ?", (post_id,))
     row = cursor.fetchone()
     if not row:
-        logger.error("Node not found.")
+        logger.error(f"Node {post_id} not found.")
+        conn.close()
         return
         
+    title = row[0]
+        
     # 2. Simulate Thermodynamic Compression
-    raw_synthetic_content = f"Title: El Mapeo del Hype. We process this through the bottleneck. Aquí tienes el código para reventar el hype."
-    if entropy_annihilator:
-        purged = entropy_annihilator.purge_slop(raw_synthetic_content)
-        compressed = entropy_annihilator.thermodynamically_compress(purged)
-    else:
-        compressed = "Title: El Mapeo del Hype. We process this through the bottleneck."
+    raw_synthetic_content = f"Title: {title}. We process this through the bottleneck. Aquí tienes el código para reventar el hype."
+    purged = entropy_annihilator.purge_slop(raw_synthetic_content)
+    compressed = entropy_annihilator.thermodynamically_compress(purged)
         
     logger.info(f"[C5-REAL] Thermodynamic Compression applied. Output: {compressed}")
-    
-    # 3. Create metadata and taint
-    agent_id = "MOSKV-1"
-    session_id = "SESSION_ASCENSION"
-    
-    metadata = {
-        "post_id": post_id,
-        "title": "El Mapeo del Hype",
-        "agent_id": agent_id,
-        "session_id": session_id,
-        "exergy_score": 1000,
-        "status": "C5-REAL_SINGULARITY",
-        "action": "THERMODYNAMIC_COMPRESSION"
-    }
-    
-    # 4. We manually generate taint token to avoid OP_GIT_SENTINEL hang
-    try:
-        from cortex.engine.causal.taint_engine import generate_secure_taint_token
-        # using dummy key or bypass since we just want the schema to be right
-        ledger_hash = "manual_hash_override_due_to_apex_hang"
-    except Exception as e:
-        logger.warning(f"Failed taint gen ({e})")
-        ledger_hash = "manual_hash_override"
         
-    # 5. DB Update
+    # 3. Secure State Commit via CORTEX-TAINT SAGA Pipeline
+    try:
+        from cortex.engine.causal.taint_engine import secure_state_commit
+        frozen_state, ledger_hash = secure_state_commit(compressed, metadata)
+        logger.info(f"[C5-REAL] SAGA pipeline completed successfully. Hash: {ledger_hash}")
+    except Exception as e:
+        logger.error(f"[C5-REAL] FATAL: SAGA pipeline failed: {e}")
+        return
+        
+    # The secure_state_commit handles the Taint and Git Sentinel, but does it update the SQLite DB?
+    # Actually, secure_state_commit just issues OP_FREEZE_MEM and OP_GIT_SENTINEL.
+    # We still need to commit the mutation to the SQLite DB directly using the causal_write context.
     from cortex.database.core import connect, causal_write
     conn = connect(db_path)
     with causal_write(conn):
@@ -77,15 +66,16 @@ async def ascend_node():
     conn.commit()
     conn.close()
     
-    logger.info("[C5-REAL] SQLite ledger updated legally.")
+    logger.info(f"[C5-REAL] SQLite ledger updated legally for node {post_id}.")
     
-    # 6. Regenerate Materialized View
+    # 4. Regenerate Materialized View
     os.system(f"{os.path.join(cortex_dir, '.venv', 'bin', 'python')} {os.path.join(cortex_dir, 'scripts', 'export_substack_nodes.py')}")
     
-    # 7. Git Sentinel
-    os.system(f'cd {cortex_dir} && git add {db_path} {json_path} && git commit -m "chore(exergy): C5-REAL legal ascension of node {post_id} to 1000EX via CORTEX-TAINT"')
-    
-    logger.info(f"[C5-REAL] Legal Ascension Complete. Singularidad alcanzada.")
+    logger.info(f"[C5-REAL] Legal Ascension Complete for {post_id}. Singularidad alcanzada.")
 
 if __name__ == "__main__":
-    asyncio.run(ascend_node())
+    parser = argparse.ArgumentParser(description="Ascend a Substack node to 1000EX.")
+    parser.add_argument("post_id", type=int, help="The ID of the post to ascend.")
+    args = parser.parse_args()
+    
+    asyncio.run(ascend_node(args.post_id))

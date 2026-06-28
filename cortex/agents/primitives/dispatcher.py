@@ -66,14 +66,20 @@ class ApexDispatcher:
             add_cmd.append("-f")
         add_cmd.append(path)
             
-        subprocess.run(add_cmd, check=True, capture_output=True)
-        res = subprocess.run(["git", "commit", "-m", commit_msg], capture_output=True, text=True)
+        try:
+            subprocess.run(add_cmd, check=True, capture_output=True, timeout=10)
+            res = subprocess.run(["git", "commit", "--no-gpg-sign", "-m", commit_msg], capture_output=True, text=True, timeout=15)
+        except subprocess.TimeoutExpired as e:
+            raise RuntimeError(f"[C5-REAL] FATAL: Git Sentinel hung and timed out. Possible lock or tty issue. Cmd: {e.cmd}")
         
-        if res.returncode != 0 and "nothing to commit" not in res.stdout:
+        if res.returncode != 0 and "nothing to commit" not in res.stdout and "working tree clean" not in res.stdout:
             raise RuntimeError(f"Git Sentinel failed: {res.stderr}")
             
-        log_res = subprocess.run(["git", "log", "-1", "--format=%H"], capture_output=True, text=True)
-        return log_res.stdout.strip()
+        try:
+            log_res = subprocess.run(["git", "log", "-1", "--format=%H"], capture_output=True, text=True, timeout=5)
+            return log_res.stdout.strip()
+        except subprocess.TimeoutExpired:
+            return "UNKNOWN_HASH_TIMEOUT"
 
     def _op_apoptosis(self) -> None:
         """OP_APOPTOSIS: Intentional context termination due to extreme entropy."""
