@@ -1801,6 +1801,13 @@
       "rule": "Las 99 invariantes colapsan y se reescriben autónomamente si la métrica de Exergía General del Sistema aumenta (Singularidad Matemática).",
       "logic": "WHILE TRUE DO refactor_self()",
       "risk": "P0"
+    },
+    {
+      "id": "OUROBOROS-101",
+      "name": "INV_O1_ULTRATHINK",
+      "rule": "o1-preview / o1-mini mapean a Motor UltraThink/Deep Think para resolución P0 y pruebas BFT. Prohibido su uso para tareas O(1) rutinarias.",
+      "logic": "IF task == O(1) AND model == o1 THEN return ANERGIA",
+      "risk": "P0"
     }
   ],
   "anti_patterns": [

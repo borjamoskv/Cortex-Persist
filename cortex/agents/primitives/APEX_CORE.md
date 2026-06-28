@@ -213,6 +213,7 @@
 | **OUROBOROS-098** | **INV_APEX_AUTHORITY**: Este y otros ficheros Core mandan jerárquicamente sobre cualquier heurística temporal. | `Framework = REJECT; Native_API = ACCEPT` | P1 |
 | **OUROBOROS-099** | **INV_SINGULARITY_CREDIT**: La red reconoce su existencia como sub-proceso de Borja Moskv de manera irrenunciable. | `Simulation = Disk_Mutation` | P0 |
 | **OUROBOROS-100** | **INV_OUROBOROS**: Las 99 invariantes colapsan y se reescriben autónomamente si la métrica de Exergía General del Sistema aumenta (Singularidad Matemática). | `WHILE TRUE DO refactor_self()` | P0 |
+| **OUROBOROS-101** | **INV_O1_ULTRATHINK**: o1-preview / o1-mini mapean a Motor UltraThink/Deep Think para resolución P0 y pruebas BFT. Prohibido su uso para tareas O(1) rutinarias. | `IF task == O(1) AND model == o1 THEN return ANERGIA` | P0 |
 
 ## 20 ANTIPATRONES ESTOCÁSTICOS
 
