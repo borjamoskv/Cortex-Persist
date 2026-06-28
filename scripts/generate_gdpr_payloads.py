@@ -43,7 +43,7 @@ def main():
         print(f"Error: Audit database not found at {DB_PATH}")
         return
 
-    with open(DB_PATH, "r") as f:
+    with open(DB_PATH) as f:
         db = json.load(f)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)

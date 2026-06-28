@@ -1,7 +1,9 @@
-import os
-import json
-import yaml
 import glob
+import json
+import os
+
+import yaml
+
 
 def parse_markdown_table(filepath):
     entities = []

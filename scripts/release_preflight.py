@@ -1,10 +1,9 @@
-import os
 import sys
-import glob
 import tarfile
 import zipfile
-import tomllib
 from pathlib import Path
+
+import tomllib
 
 BLACKLIST = {'.env', 'scratch', '__pycache__', '.pytest_cache', '.git'}
 

@@ -1,9 +1,9 @@
-import argparse
 import asyncio
 import sys
 
 from cortex.extensions.llm.router import CortexLLMRouter
 from cortex.extensions.swarm.centauro_engine import CentauroEngine, Formation
+
 
 async def main():
     print("🔱 LEGIØN-1 ACTIVATED - DEPENDABOT SWARM (53 AGENTS)")
@@ -26,10 +26,10 @@ async def main():
 
     # Monkey patch formation size dynamically
     CentauroEngine._FORMATION_SIZES["DEPENDABOT"] = 53
-    setattr(Formation, "DEPENDABOT", "DEPENDABOT")
+    Formation.DEPENDABOT = "DEPENDABOT"
 
     print(f"MISSION: {mission}")
-    print(f"FORMATION: DEPENDABOT (53 Agents)")
+    print("FORMATION: DEPENDABOT (53 Agents)")
     print("Executing Byzantine Consensus Quorum...")
 
     try:

@@ -1,6 +1,6 @@
-import sqlite3
 import json
 import os
+import sqlite3
 
 cortex_dir = os.path.expanduser('~/30_CORTEX')
 db_path = os.path.join(cortex_dir, 'cortex', 'audit', 'substack_exergy.sqlite')

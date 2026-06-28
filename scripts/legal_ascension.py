@@ -1,10 +1,8 @@
-import sqlite3
-import os
-import json
-import logging
-import asyncio
-import sys
 import argparse
+import asyncio
+import logging
+import os
+import sys
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -12,8 +10,8 @@ logger = logging.getLogger("legal_ascension")
 
 # CORTEX native imports
 try:
+    from cortex.database.core import causal_write, connect
     from cortex.engine.entropy import entropy_annihilator
-    from cortex.database.core import connect, causal_write
 except ImportError:
     # If not running within the right env, we fallback gracefully
     logger.error("Failed to import CORTEX modules. Are you in the .venv?")

@@ -5,13 +5,12 @@ Transforms mathematical invariants into structural acoustic waves (PCM).
 Output is strictly quarantined to ~/BOCETOS to contain entropy.
 """
 
-import math
-import os
 import random
 from pathlib import Path
 
 import numpy as np
 import soundfile as sf
+
 
 class ProceduralSynth:
     """Mathematical Waveform Generator."""

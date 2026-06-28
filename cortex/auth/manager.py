@@ -77,7 +77,7 @@ class AuthManager:
         self._background_tasks: set[asyncio.Task[Any]] = set()
 
         try:
-            self._dummy_hash = getattr(cortex_rs, "hash_password")(
+            self._dummy_hash = cortex_rs.hash_password(
                 "ctx_dummy_key_to_initialize_hashing_parameters"
             )  # noqa: B009
         except AttributeError:

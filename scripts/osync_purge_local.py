@@ -3,16 +3,16 @@
 # Execution: Autonomous Terminal
 # Target: Purge implicit PII (Borja Fernández Angulo) from local development environment.
 
+import logging
 import os
 import subprocess
-import logging
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] C5-REAL: %(message)s")
 logger = logging.getLogger("OSYNC-PURGE")
 
 CORTEX_ROOT = Path.home() / "30_CORTEX"
-TARGET_PII_1 = "borjamoskv".encode()
+TARGET_PII_1 = b"borjamoskv"
 TARGET_PII_2 = ("borja" + "fernandez" + "angulo").encode()
 
 def purge_ds_store():
