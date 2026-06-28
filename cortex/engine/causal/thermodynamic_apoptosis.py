@@ -95,7 +95,8 @@ class OuroborosCollapseEngine:
         winner = max(evaluations, key=evaluations.get)
         losers = [b for b in target_branches if b != winner]
 
-        async with aiosqlite.connect(self.db_path) as conn:
+        from cortex.database.core import connect_async_ctx
+        async with connect_async_ctx(self.db_path) as conn:
             ledger = EnterpriseAuditLedger(conn)
             await ledger.ensure_table()
 
