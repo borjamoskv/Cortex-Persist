@@ -388,7 +388,6 @@ class EnterpriseAuditLedger:
                 current_last_hash = hashlib.sha256(
                     f"merkle_batch:{merkle_root}:{prev_hash_db}".encode()
                 ).hexdigest()
-                print("DEBUG INSIDE LOG_ACTION:", batch_audit_ids, prev_hash_db, current_last_hash)
             else:
                 current_last_hash = "GENESIS"
 
