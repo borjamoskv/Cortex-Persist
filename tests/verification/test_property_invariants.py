@@ -16,6 +16,9 @@ class CortexStoreMachine(RuleBasedStateMachine):
     def __init__(self):
         super().__init__()
 
+        self.old_exergy = os.environ.get("CORTEX_SKIP_EXERGY_VALIDATION")
+        self.old_taint = os.environ.get("CORTEX_NO_TAINT_ENFORCE")
+
         # Setup temporary database
         self.db_path = f"cortex_hypothesis_{id(self)}.db"
         # Temporarily bypass exergy to allow fast property testing without LLMs
@@ -43,10 +46,15 @@ class CortexStoreMachine(RuleBasedStateMachine):
                 except OSError:
                     pass
 
-        if "CORTEX_SKIP_EXERGY_VALIDATION" in os.environ:
-            del os.environ["CORTEX_SKIP_EXERGY_VALIDATION"]
-        if "CORTEX_NO_TAINT_ENFORCE" in os.environ:
-            del os.environ["CORTEX_NO_TAINT_ENFORCE"]
+        if self.old_exergy is not None:
+            os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = self.old_exergy
+        else:
+            os.environ.pop("CORTEX_SKIP_EXERGY_VALIDATION", None)
+
+        if self.old_taint is not None:
+            os.environ["CORTEX_NO_TAINT_ENFORCE"] = self.old_taint
+        else:
+            os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 
     @rule(
         project=st.text(min_size=1, max_size=50),

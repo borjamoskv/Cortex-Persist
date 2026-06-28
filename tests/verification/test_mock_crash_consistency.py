@@ -17,12 +17,12 @@ class InducedCrashError(Exception):
 
 
 @pytest.fixture
-async def engine(tmp_path: Path):
+async def engine(tmp_path: Path, monkeypatch):
     """Create a CortexEngine with a temp database, close after test."""
     from cortex.engine import CortexEngine
 
-    os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
-    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
+    monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
     db = str(tmp_path / "test_crash.db")
     e = CortexEngine(db_path=db, auto_embed=False)
     await e.init_db()
@@ -36,9 +36,6 @@ async def engine(tmp_path: Path):
 
     yield e
     await e.close()
-    if "CORTEX_SKIP_EXERGY_VALIDATION" in os.environ:
-        del os.environ["CORTEX_SKIP_EXERGY_VALIDATION"]
-    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 
 
 @pytest.mark.asyncio
