@@ -81,9 +81,10 @@ class LLMProvider(BaseProvider):
             logger.warning("🛑 [ZERO-NETWORK] Core LLMProvider trapped external instantiation of %s. Forcing local autarchy (Ollama).", prov_name)
             cfg["provider"] = "ollama"
             cfg["base_url"] = "http://127.0.0.1:11434/v1"
-            cfg["model"] = "qwen2.5-coder:32b" if "claude" in prov_name or "gemini" in prov_name else "llama3:latest"
+            cfg["model"] = "qwen2.5-coder:7b" if "claude" in prov_name or "gemini" in prov_name else "llama3:latest"
             cfg["api_key"] = None
             cfg["tier"] = "frontier"  # Elevate tier to satisfy ULTRA_THINK routing
+            cfg["intent_model_map"] = {}  # C5-REAL: Clear upstream model maps to prevent 404s in local inference
 
 
         self._provider = cfg["provider"]
