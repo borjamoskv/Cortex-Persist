@@ -169,32 +169,25 @@ class CognitiveHandoff:
                 reason="Infrastructure prescreen: low relevance, compact_and_forget",
             )
 
-        # ── Step 2: Auditor Economic (Deep Think) ────────────────────
+        # ── Step 2: Auditor Economic (GLM-5.2 Max) ────────────────────
         audit = await self._auditor_economic_verify(belief, ctx)
         total_tokens += audit.tokens_used
 
-        if audit.verdict == "CERTAIN" and audit.has_contradiction:
-            self._quarantine_count += 1
-            logger.warning(
-                "Deep Think detected contradiction - quarantining: %s",
-                belief.id,
-            )
-            return BeliefVerdict(
-                action=VerdictAction.QUARANTINE,
-                model="deep_think",
-                contradictions=audit.contradictions,
-                cost_tokens=total_tokens,
-                reason=audit.reason,
-            )
-
-        # ── Step 3: Escalate to Opus (premium) if needed ─────────────
-        needs_premium = audit.verdict == "UNCERTAIN" or self._involves_axiomatics(belief, ctx)
+        # ── Step 3: BFT Guard (Escalate to Premium if needed) ────────
+        # Any contradiction detected by Economic tier MUST be escalated
+        # to the Premium tier to prevent Denial of Belief via hallucination.
+        needs_premium = (
+            audit.verdict == "UNCERTAIN" 
+            or audit.has_contradiction 
+            or self._involves_axiomatics(belief, ctx)
+        )
 
         if needs_premium:
             self._escalation_count += 1
             logger.info(
-                "Escalating to Opus premium audit: verdict=%s, axiomatic=%s",
+                "Escalating to Premium audit: verdict=%s, contradiction=%s, axiomatic=%s",
                 audit.verdict,
+                audit.has_contradiction,
                 self._involves_axiomatics(belief, ctx),
             )
             premium = await self._auditor_premium_verify(belief, ctx, audit)
@@ -203,7 +196,7 @@ class CognitiveHandoff:
             if premium.has_contradiction:
                 self._quarantine_count += 1
                 logger.warning(
-                    "Opus detected contradiction - quarantining: %s",
+                    "Premium Auditor confirmed contradiction - quarantining: %s",
                     belief.id,
                 )
                 return BeliefVerdict(
