@@ -15,10 +15,10 @@ from typing import Any, Final
 
 from cortex.extensions.evolution.agents import (
     AgentDomain,
+    EnneagramSovereign,
+    EnneagramSubAgent,
     Mutation,
     MutationType,
-    SovereignAgent,
-    SubAgent,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ MAX_BACKUPS: Final = 5
 SCHEMA_VERSION: Final = 2
 
 
-def _serialize_agent(a: SovereignAgent) -> dict[str, Any]:
+def _serialize_agent(a: EnneagramSovereign) -> dict[str, Any]:
     """Serialización profunda de un agente y sus subagentes."""
     return {
         "id": a.id,
@@ -77,7 +77,7 @@ def _get_cycle_path(base_path: Path, cycle: int) -> Path:
     return base_path.parent / f"evolution_state_cycle_{cycle:05d}.json"
 
 
-def save_swarm(agents: list[SovereignAgent], cycle: int, path: Path = DEFAULT_STATE_PATH) -> bool:
+def save_swarm(agents: list[EnneagramSovereign], cycle: int, path: Path = DEFAULT_STATE_PATH) -> bool:
     """Guarda el estado actual y rota backups antiguos."""
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -114,7 +114,7 @@ def save_swarm(agents: list[SovereignAgent], cycle: int, path: Path = DEFAULT_ST
         return False
 
 
-def load_swarm(path: Path = DEFAULT_STATE_PATH) -> tuple[list[SovereignAgent], int] | None:
+def load_swarm(path: Path = DEFAULT_STATE_PATH) -> tuple[list[EnneagramSovereign], int] | None:
     """
     Carga el estado. Si falla, intenta cargar el backup más reciente disponible
     (Auto-Rollback).
@@ -177,14 +177,14 @@ def _parse_mutations(raw: list[dict]) -> list[Mutation]:
     return mutations
 
 
-def _reconstruct_subagent(s_data: dict) -> SubAgent | None:
-    """Reconstruct a SubAgent from a serialized dict."""
+def _reconstruct_subagent(s_data: dict) -> EnneagramSubAgent | None:
+    """Reconstruct a EnneagramSubAgent from a serialized dict."""
     try:
         s_domain = AgentDomain[s_data["domain"]]
     except KeyError:
         return None
 
-    sub = SubAgent(
+    sub = EnneagramSubAgent(
         id=s_data["id"],
         domain=s_domain,
         name=s_data["name"],
@@ -196,7 +196,7 @@ def _reconstruct_subagent(s_data: dict) -> SubAgent | None:
     return sub
 
 
-def _reconstruct_agents(agents_data: list[dict]) -> list[SovereignAgent]:
+def _reconstruct_agents(agents_data: list[dict]) -> list[EnneagramSovereign]:
     """Helper para reconstruir objetos desde el dict del estado persistido."""
     sovereigns = []
     for data in agents_data:
@@ -205,7 +205,7 @@ def _reconstruct_agents(agents_data: list[dict]) -> list[SovereignAgent]:
         except KeyError:
             continue
 
-        sovereign = SovereignAgent(id=data["id"], domain=domain)
+        sovereign = EnneagramSovereign(id=data["id"], domain=domain)
         sovereign.fitness = data.get("fitness", 0.0)
         sovereign.generation = data.get("generation", 0)
         sovereign._cycle_count = data.get("cycle_count", 0)

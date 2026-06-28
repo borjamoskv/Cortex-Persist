@@ -36,7 +36,7 @@ class AetherAgent:
     """
 
     def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
-        from cortex.extensions.agents.registry import AgentRegistry
+        from cortex.extensions.agents.registry import AgentCatalogLoader
         from cortex.extensions.llm.provider import LLMProvider
 
         self._llm = LLMProvider(provider=llm_provider)
@@ -44,7 +44,7 @@ class AetherAgent:
         system_prompt = None
         self._allowed_tools: list[str] | None = None
         if agent_id:
-            registry = AgentRegistry()
+            registry = AgentCatalogLoader()
             # Ensure registries are loaded (safe to call multiple times)
             registry.load_all()
             if agent_def := registry.get(agent_id):

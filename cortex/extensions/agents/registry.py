@@ -212,17 +212,17 @@ class AgentCatalogEntry:
         )
 
 
-class AgentRegistry:
+class AgentCatalogLoader:
     """Singleton registry for all CORTEX YAML agent catalog entries.
 
     Loads definitions lazily upon first access.
     """
 
-    _instance: AgentRegistry | None = None
+    _instance: AgentCatalogLoader | None = None
     _agents: dict[str, AgentCatalogEntry] = {}
     _loaded: bool = False
 
-    def __new__(cls) -> AgentRegistry:
+    def __new__(cls) -> AgentCatalogLoader:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
@@ -315,12 +315,12 @@ class AgentRegistry:
 
 def list_agents() -> list[str]:
     """Return all registered agent IDs."""
-    return list(AgentRegistry().agents.keys())
+    return list(AgentCatalogLoader().agents.keys())
 
 
 def get_agent(agent_id: str) -> AgentCatalogEntry | None:
     """Retrieve an agent catalog entry by ID."""
-    return AgentRegistry().get(agent_id)
+    return AgentCatalogLoader().get(agent_id)
 
 
 # Backward-compatibility alias for older imports. Prefer AgentCatalogEntry.

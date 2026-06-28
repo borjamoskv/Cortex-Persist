@@ -7,7 +7,7 @@ import pytest
 
 from cortex.extensions.agents.registry import (
     AgentCatalogEntry,
-    AgentRegistry,
+    AgentCatalogLoader,
     AgentDefinition,
     GuardrailsConfig,
     MemoryConfig,
@@ -158,7 +158,7 @@ def test_load_all_continues_after_invalid_agent_entry(tmp_path, caplog):
     (definitions_dir / "good.yaml").write_text("name: GOOD\n")
     (definitions_dir / "bad.yaml").write_text("name: BAD\nmemory:\n  sparse_encoding: maybe\n")
 
-    registry = AgentRegistry()
+    registry = AgentCatalogLoader()
     registry.clear()
 
     with caplog.at_level(logging.ERROR):
@@ -178,7 +178,7 @@ def test_load_all_skips_broken_symlink(tmp_path, caplog):
     broken = definitions_dir / "broken.yaml"
     broken.symlink_to("/does/not/exist/aether_heavy.yaml")
 
-    registry = AgentRegistry()
+    registry = AgentCatalogLoader()
     registry.clear()
 
     with caplog.at_level(logging.ERROR):
@@ -202,9 +202,9 @@ def test_agent_definition_alias_still_points_to_catalog_entry():
 
 
 def test_agent_registry_singleton(temp_definitions_dir):
-    """Test AgentRegistry loads definitions correctly and behaves as singleton."""
-    r1 = AgentRegistry()
-    r2 = AgentRegistry()
+    """Test AgentCatalogLoader loads definitions correctly and behaves as singleton."""
+    r1 = AgentCatalogLoader()
+    r2 = AgentCatalogLoader()
     assert r1 is r2  # Singleton check
 
     # Needs clear between runs to be safe
@@ -230,7 +230,7 @@ def test_agent_registry_get_is_case_insensitive(tmp_path):
     filepath = tmp_path / "casey.yaml"
     filepath.write_text("name: CASEY")
 
-    registry = AgentRegistry()
+    registry = AgentCatalogLoader()
     registry.clear()
     registry.load_all(filepath.parent)
 
@@ -256,7 +256,7 @@ def test_load_all_case_insensitive_duplicates(tmp_path, caplog, monkeypatch):
             entry.id = "ALPHA"
         return entry
 
-    registry = AgentRegistry()
+    registry = AgentCatalogLoader()
     registry.clear()
     monkeypatch.setattr(AgentCatalogEntry, "from_yaml_file", _same_id_from_yaml_file)
 
@@ -273,7 +273,7 @@ def test_load_all_refreshes_registry_and_clears_stale_agents(tmp_path):
     old_dir.mkdir()
     (old_dir / "old.yaml").write_text("name: OLD")
 
-    r1 = AgentRegistry()
+    r1 = AgentCatalogLoader()
     r1.clear()
     r1.load_all(old_dir)
     assert "old" in r1.agents
@@ -301,7 +301,7 @@ def test_registry_rejects_duplicate_agent_id(tmp_path, caplog, monkeypatch):
         entry.id = "dupe-id"
         return entry
 
-    registry = AgentRegistry()
+    registry = AgentCatalogLoader()
     registry.clear()
 
     monkeypatch.setattr(AgentCatalogEntry, "from_yaml_file", _same_id_from_yaml_file)

@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 import aiosqlite
 
-from cortex.config import DEFAULT_DB_PATH
+from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 from cortex.database.mixins.query_mixin import QueryMixin
 from cortex.database.mixins.search_mixin import SearchMixin
 from cortex.database.mixins.sync_mixin import SyncMixin

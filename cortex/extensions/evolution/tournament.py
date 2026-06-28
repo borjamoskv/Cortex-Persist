@@ -15,10 +15,10 @@ import secrets
 from dataclasses import dataclass
 
 from cortex.extensions.evolution.agents import (
+    EnneagramSovereign,
+    EnneagramSubAgent,
     Mutation,
     MutationType,
-    SovereignAgent,
-    SubAgent,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,13 +29,13 @@ _rng = secrets.SystemRandom()
 class TournamentResult:
     """Outcome of a tournament round."""
 
-    winner: SubAgent
-    loser: SubAgent
+    winner: EnneagramSubAgent
+    loser: EnneagramSubAgent
     transferred_fitness: float
 
 
 def run_tournament(
-    agent: SovereignAgent,
+    agent: EnneagramSovereign,
     tournament_size: int = 3,
 ) -> TournamentResult | None:
     """Select `tournament_size` random subagents and compete.
@@ -82,7 +82,7 @@ class Species:
     """A behavioral niche within a domain."""
 
     name: str
-    members: list[SubAgent]
+    members: list[EnneagramSubAgent]
     centroid_fitness: float
 
     @property
@@ -100,7 +100,7 @@ class Species:
 
 
 def speciate(
-    agent: SovereignAgent,
+    agent: EnneagramSovereign,
     threshold: float = 20.0,
 ) -> list[Species]:
     """Cluster subagents into species based on fitness distance.
@@ -110,7 +110,7 @@ def speciate(
     """
     sorted_subs = sorted(agent.subagents, key=lambda s: s.fitness)
     species_list: list[Species] = []
-    current_group: list[SubAgent] = []
+    current_group: list[EnneagramSubAgent] = []
 
     for sub in sorted_subs:
         if not current_group or abs(sub.fitness - current_group[0].fitness) <= threshold:
@@ -140,9 +140,9 @@ def speciate(
 
 
 def apply_elitism(
-    agent: SovereignAgent,
+    agent: EnneagramSovereign,
     elite_fraction: float = 0.2,
-) -> list[SubAgent]:
+) -> list[EnneagramSubAgent]:
     """Mark the top `elite_fraction` subagents as protected.
 
     Protected subagents skip negative mutations for one cycle.

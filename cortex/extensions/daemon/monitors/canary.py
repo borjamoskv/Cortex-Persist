@@ -9,7 +9,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from cortex import config
+from cortex.core import config
 from cortex.database.core import connect_async
 from cortex.extensions.daemon.models import SecurityAlert
 

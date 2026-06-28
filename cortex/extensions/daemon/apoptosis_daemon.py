@@ -9,7 +9,6 @@ Scans the cortex/ repository for thermodynamically dead modules
 import ast
 import asyncio
 import logging
-import os
 import subprocess
 import time
 from pathlib import Path
@@ -56,7 +55,7 @@ class ApoptosisDaemon:
     def _extract_exports(self, filepath: Path) -> list[str]:
         """Extract all Class and Function names defined in the file using AST."""
         try:
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 node = ast.parse(f.read(), filename=str(filepath))
                 
             exports = []
@@ -83,7 +82,7 @@ class ApoptosisDaemon:
                 continue
                 
             try:
-                with open(py_file, "r", encoding="utf-8") as f:
+                with open(py_file, encoding="utf-8") as f:
                     content = f.read()
                     for exp in exports:
                         if exp in content:

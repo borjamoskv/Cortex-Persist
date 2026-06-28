@@ -8,10 +8,9 @@ Replaces static known_peers with a strictly mathematical Ed25519 registry.
 import base64
 import json
 import logging
-from typing import Dict, Optional
+from typing import Optional
 
 from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 logger = logging.getLogger("cortex.consensus.pki")
@@ -21,7 +20,7 @@ class TrustMatrix:
     
     def __init__(self):
         # agent_id -> Ed25519PublicKey
-        self._peers: Dict[str, ed25519.Ed25519PublicKey] = {}
+        self._peers: dict[str, ed25519.Ed25519PublicKey] = {}
         # Tracks revoked agents to prevent Sybil re-entry
         self._revoked: set[str] = set()
         # Bootstrap tokens authorized by the Host for initial join
@@ -31,7 +30,7 @@ class TrustMatrix:
         """Host authorizes a new ephemeral token for a nascent Vesicle."""
         self._valid_bootstrap_tokens.add(token)
         
-    def get_known_peers(self) -> Dict[str, ed25519.Ed25519PublicKey]:
+    def get_known_peers(self) -> dict[str, ed25519.Ed25519PublicKey]:
         """Provides the current peer snapshot to the BFTQuorumGuard."""
         return self._peers.copy()
         
@@ -87,7 +86,7 @@ class TrustMatrix:
             # Verify the signature
             try:
                 sig_bytes = base64.b64decode(sig_b64)
-                message = f"{agent_id}:{token}".encode("utf-8")
+                message = f"{agent_id}:{token}".encode()
                 public_key.verify(sig_bytes, message)
             except InvalidSignature:
                 logger.error(f"[TrustMatrix] Signature verification failed for agent: {agent_id}")

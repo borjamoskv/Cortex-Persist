@@ -39,7 +39,7 @@ from typing import Any
 import aiosqlite
 
 from cortex.database.core import connect_async_ctx
-from cortex.extensions.evolution.agents import SovereignAgent
+from cortex.extensions.evolution.agents import EnneagramSovereign
 from cortex.extensions.evolution.persistence import (
     SCHEMA_VERSION,
     _agent_to_dict,  # type: ignore[reportAttributeAccessIssue]
@@ -70,7 +70,7 @@ async def ensure_table(db_path: str | Path = _DEFAULT_DB) -> None:
 
 
 async def save_to_db(
-    agents: list[SovereignAgent],
+    agents: list[EnneagramSovereign],
     cycle: int,
     db_path: str | Path = _DEFAULT_DB,
 ) -> None:
@@ -97,7 +97,7 @@ async def save_to_db(
 
 async def load_from_db(
     db_path: str | Path = _DEFAULT_DB,
-) -> tuple[list[SovereignAgent], int] | None:
+) -> tuple[list[EnneagramSovereign], int] | None:
     """Load the most recent swarm state from CORTEX DB.
 
     Implements episodic recall via hippocampal pattern completion

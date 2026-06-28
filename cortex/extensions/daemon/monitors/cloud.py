@@ -7,7 +7,7 @@ import sqlite3
 import time
 from typing import Any
 
-from cortex import config
+from cortex.core import config
 from cortex.extensions.daemon.models import CloudSyncAlert
 from cortex.storage.turso import TursoBackend
 

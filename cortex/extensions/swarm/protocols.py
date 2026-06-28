@@ -21,7 +21,7 @@ class SwarmIntent(str, Enum):
     HEALING = "healing"
 
 
-class AgentRole(str, Enum):
+class SwarmTopologyRole(str, Enum):
     CAPATAZ = "capataz"
     WORKER = "worker"
     ELDER = "elder"
@@ -33,7 +33,7 @@ class SwarmSignalSchema:
     agent_id: str
     intent: SwarmIntent
     payload: dict[str, Any]
-    role: AgentRole = AgentRole.WORKER
+    role: SwarmTopologyRole = SwarmTopologyRole.WORKER
     confidence: float = 1.0
     exergy_spent: float = 0.0
     timestamp: str = field(
@@ -50,7 +50,7 @@ class SwarmSignalSchema:
         if "intent" in data:
             data["intent"] = SwarmIntent(data["intent"])
         if "role" in data:
-            data["role"] = AgentRole(data["role"])
+            data["role"] = SwarmTopologyRole(data["role"])
         return cls(**data)
 
 

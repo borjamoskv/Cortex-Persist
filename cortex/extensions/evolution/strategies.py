@@ -30,10 +30,10 @@ import secrets
 from typing import Protocol
 
 from cortex.extensions.evolution.agents import (
+    EnneagramSovereign,
+    EnneagramSubAgent,
     Mutation,
     MutationType,
-    SovereignAgent,
-    SubAgent,
 )
 from cortex.extensions.evolution.cortex_metrics import CortexMetrics, DomainMetrics
 
@@ -45,7 +45,7 @@ _rng = secrets.SystemRandom()
 _metrics = CortexMetrics()
 
 
-def _dm(agent_or_sub: SovereignAgent | SubAgent) -> DomainMetrics:
+def _dm(agent_or_sub: EnneagramSovereign | EnneagramSubAgent) -> DomainMetrics:
     """Shorthand to get domain metrics for any entity."""
     return _metrics.get_domain_metrics(agent_or_sub.domain)
 
@@ -63,8 +63,8 @@ def _safe_float(val: object, default: float = 0.0) -> float:
 class ImprovementStrategy(Protocol):
     """Protocol for pluggable improvement strategies."""
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None: ...
-    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None: ...
+    def evaluate_agent(self, agent: EnneagramSovereign) -> Mutation | None: ...
+    def evaluate_subagent(self, sub: EnneagramSubAgent) -> Mutation | None: ...
 
 
 class ParameterTuningStrategy:
@@ -74,13 +74,13 @@ class ParameterTuningStrategy:
     High errors → bigger leaps (domain needs aggressive repair).
     """
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
+    def evaluate_agent(self, agent: EnneagramSovereign) -> Mutation | None:
         m = _dm(agent)
         if m.health_score > 0.9:
             return None  # Already sovereign-grade
         # Developmental Plasticity: scale with error_rate + rugeddness (fitness variance)
         # Low variance -> smooth landscape; High variance -> rugged/chaotic landscape.
-        # Note: SovereignAgent.get_fitness_variance() is expected in the population controller.
+        # Note: EnneagramSovereign.get_fitness_variance() is expected in the population controller.
         variance = getattr(agent, "avg_subagent_fitness_variance", 0.0)
         ruggedness = min(1.0, variance / 50.0) if variance > 0 else 0.0
         scale = (0.5 + 2.5 * m.error_rate) * (1.0 + ruggedness)
@@ -94,7 +94,7 @@ class ParameterTuningStrategy:
             delta_fitness=delta,
         )
 
-    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
+    def evaluate_subagent(self, sub: EnneagramSubAgent) -> Mutation | None:
         m = _dm(sub)
         if m.health_score > 0.9:
             return None
@@ -113,7 +113,7 @@ class PruneDeadPathStrategy:
     More open ghosts → more aggressive pruning (higher threshold).
     """
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
+    def evaluate_agent(self, agent: EnneagramSovereign) -> Mutation | None:
         m = _dm(agent)
         # ghost_density 0→threshold=20, density 1→threshold=40
         threshold = 20.0 + 20.0 * m.ghost_density
@@ -129,7 +129,7 @@ class PruneDeadPathStrategy:
             )
         return None
 
-    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
+    def evaluate_subagent(self, sub: EnneagramSubAgent) -> Mutation | None:
         m = _dm(sub)
         threshold = 15.0 + 10.0 * m.ghost_density
         if sub.fitness < threshold and sub.generation > 5:
@@ -161,14 +161,14 @@ class HeuristicInjectionStrategy:
         "VERIFICATION": 0.8,
     }
 
-    def _weight(self, agent: SovereignAgent) -> float:
+    def _weight(self, agent: EnneagramSovereign) -> float:
         m = _dm(agent)
         base = self._BASE_HEURISTICS.get(agent.domain.name, 0.5)
         # fact_density bonus: 0 facts → 0, 100+ facts → +0.5
         density_bonus = min(0.5, m.fact_density / 200.0)
         return base + density_bonus
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
+    def evaluate_agent(self, agent: EnneagramSovereign) -> Mutation | None:
         if agent.fitness < 80.0:
             w = self._weight(agent)
             delta = w * _rng.uniform(1.0, 3.0)
@@ -179,7 +179,7 @@ class HeuristicInjectionStrategy:
             )
         return None
 
-    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
+    def evaluate_subagent(self, sub: EnneagramSubAgent) -> Mutation | None:
         if sub.fitness < 60.0:
             m = _dm(sub)
             density_bonus = min(0.3, m.fact_density / 300.0)
@@ -199,7 +199,7 @@ class BridgeImportStrategy:
     transfer, reflecting a culture of proven cross-domain sharing.
     """
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
+    def evaluate_agent(self, agent: EnneagramSovereign) -> Mutation | None:
         best = agent.best_subagent
         worst = agent.worst_subagent
         if not best or not worst:
@@ -225,7 +225,7 @@ class BridgeImportStrategy:
             delta_fitness=delta,
         )
 
-    def evaluate_subagent(self, _: SubAgent) -> Mutation | None:
+    def evaluate_subagent(self, _: EnneagramSubAgent) -> Mutation | None:
         return None  # Bridges happen at agent level
 
 
@@ -240,7 +240,7 @@ class AdversarialStressStrategy:
     _RESILIENCE_BONUS: float = 3.0
     _FRAGILITY_THRESHOLD: float = 100.0
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
+    def evaluate_agent(self, agent: EnneagramSovereign) -> Mutation | None:
         if agent.fitness < self._FRAGILITY_THRESHOLD:
             return None
 
@@ -272,7 +272,7 @@ class AdversarialStressStrategy:
             delta_fitness=-1.0,
         )
 
-    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
+    def evaluate_subagent(self, sub: EnneagramSubAgent) -> Mutation | None:
         m = _dm(sub)
         fd = _safe_float(m.fitness_delta)
         p_queen = 0.1 + 0.3 * min(1.0, max(0.0, fd))
@@ -282,12 +282,12 @@ class AdversarialStressStrategy:
         if (sub.fitness - stress) > 70.0:
             return Mutation(
                 mutation_type=MutationType.ADVERSARIAL_STRESS,
-                description=f"SubAgent {sub.name} survived stress (−{stress:.1f})",
+                description=f"EnneagramSubAgent {sub.name} survived stress (−{stress:.1f})",
                 delta_fitness=1.5,
             )
         return Mutation(
             mutation_type=MutationType.ADVERSARIAL_STRESS,
-            description=f"SubAgent {sub.name} fragile under stress",
+            description=f"EnneagramSubAgent {sub.name} fragile under stress",
             delta_fitness=-0.5,
         )
 
@@ -301,7 +301,7 @@ class EntropyReductionStrategy:
 
     _MAX_MUTATIONS_PER_GAIN: float = 20.0
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
+    def evaluate_agent(self, agent: EnneagramSovereign) -> Mutation | None:
         if agent.generation < 10 or agent.fitness < 80.0:
             return None
         gain = max(0.1, agent.fitness - 50.0)
@@ -322,7 +322,7 @@ class EntropyReductionStrategy:
             )
         return None
 
-    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
+    def evaluate_subagent(self, sub: EnneagramSubAgent) -> Mutation | None:
         if sub.generation < 15 or sub.fitness < 70.0:
             return None
         gain = max(0.1, sub.fitness - 50.0)
@@ -349,7 +349,7 @@ class CrossoverRecombinationStrategy:
 
     _MIN_VARIANCE: float = 15.0
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
+    def evaluate_agent(self, agent: EnneagramSovereign) -> Mutation | None:
         best = agent.best_subagent
         worst = agent.worst_subagent
         if not best or not worst:
@@ -366,7 +366,7 @@ class CrossoverRecombinationStrategy:
             delta_fitness=min(delta, 5.0),
         )
 
-    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
+    def evaluate_subagent(self, sub: EnneagramSubAgent) -> Mutation | None:
         if sub.fitness < 70.0 and sub.generation > 3:
             m = _dm(sub)
             delta = max(0.5, (70.0 - sub.fitness) * 0.05 * (1.0 + m.health_score))
@@ -392,7 +392,7 @@ class StagnationBreakerStrategy:
         recent = mutations[-self._STAGNATION_WINDOW :]
         return all(abs(m.delta_fitness) < 0.5 for m in recent)
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
+    def evaluate_agent(self, agent: EnneagramSovereign) -> Mutation | None:
         if not self._is_stagnated(agent.mutations):
             return None
 
@@ -422,11 +422,11 @@ class StagnationBreakerStrategy:
             delta_fitness=shock,
         )
 
-    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
+    def evaluate_subagent(self, sub: EnneagramSubAgent) -> Mutation | None:
         if not self._is_stagnated(sub.mutations):
             return None
 
-        # ── Gould-Eldredge Circuit Breaker (SubAgent level) ────────
+        # ── Gould-Eldredge Circuit Breaker (EnneagramSubAgent level) ────────
         if sub.fitness <= 80.0:
             return None
 

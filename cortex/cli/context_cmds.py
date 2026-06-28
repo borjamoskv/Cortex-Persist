@@ -42,7 +42,7 @@ def infer_cmd(db: str, persist: bool, as_json: bool):
 
 
 async def _infer_async(db: str, persist: bool, as_json: bool):
-    from cortex import config
+    from cortex.core import config
     from cortex.extensions.context.collector import ContextCollector
     from cortex.extensions.context.inference import ContextInference
 
@@ -121,7 +121,7 @@ def signals_cmd(db: str, as_json: bool):
 
 
 async def _signals_async(db: str, as_json: bool):
-    from cortex import config
+    from cortex.core import config
     from cortex.extensions.context.collector import ContextCollector
 
     engine = get_engine(db)

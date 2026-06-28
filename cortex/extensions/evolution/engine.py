@@ -12,8 +12,8 @@ from cortex.database.core import connect as db_connect
 from cortex.extensions.evolution.action import SymbolicActionEngine
 from cortex.extensions.evolution.agents import (
     AgentDomain,
-    SovereignAgent,
-    SubAgent,
+    EnneagramSovereign,
+    EnneagramSubAgent,
 )
 from cortex.extensions.evolution.cortex_metrics import fetch_all_domain_metrics
 from cortex.extensions.evolution.ledger_db import EvolutionLedgerDB
@@ -43,7 +43,7 @@ class EvolutionEngine(EvolutionOpsMixin):
     - Adversarial Grounding (Telemetry)
     """
 
-    def __init__(self, sovereigns: list[SovereignAgent] | None = None, engine: Any | None = None):
+    def __init__(self, sovereigns: list[EnneagramSovereign] | None = None, engine: Any | None = None):
         self.sovereigns = sovereigns or []
         self.params = EngineParameters()
         self.cycle_count = 0
@@ -84,11 +84,11 @@ class EvolutionEngine(EvolutionOpsMixin):
         for domain in AgentDomain:
             if domain == AgentDomain.SYNERGY:
                 continue
-            sovereign = SovereignAgent(id=f"sov_{domain.name.lower()}", domain=domain)
+            sovereign = EnneagramSovereign(id=f"sov_{domain.name.lower()}", domain=domain)
             sovereign.subagents.clear()
 
             for i in range(10):
-                sub = SubAgent(
+                sub = EnneagramSubAgent(
                     id=f"sub_{domain.name.lower()}_{i:02d}",
                     domain=domain,
                     name=f"Genesis-{domain.name}-{i:02d}",

@@ -128,7 +128,7 @@ class SecurityMonitor:
 
     async def _blacklist_ips(self, alerts: list[SecurityAlert]) -> None:
         """Persist C5 alerts to the threat_intel blacklist."""
-        from cortex import config
+        from cortex.core import config
 
         db_path = config.DB_PATH
         try:

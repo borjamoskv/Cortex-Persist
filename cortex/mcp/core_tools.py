@@ -175,7 +175,7 @@ def _register_embed_tool(mcp, ctx: _MCPContext) -> None:
         if not text.strip():
             return "❌ text cannot be empty"
         try:
-            from cortex import config
+            from cortex.core import config
             from cortex.embeddings.api_embedder import APIEmbedder
 
             if config.EMBEDDINGS_MODE != "api":
@@ -210,7 +210,7 @@ def _register_embed_status_tool(mcp, ctx: _MCPContext) -> None:
     async def cortex_embed_status() -> str:
         """Show the current embedding provider configuration."""
         try:
-            from cortex import config
+            from cortex.core import config
             from cortex.embeddings.api_embedder import get_provider_configs
 
             configs = get_provider_configs()

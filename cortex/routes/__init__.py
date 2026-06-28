@@ -63,7 +63,7 @@ _API_ROUTE_SPECS_ALL: tuple[tuple[str, str], ...] = (
     ("ultramap", "router"),
 )
 
-from cortex import config
+from cortex.core import config
 
 _DANGEROUS_CLOUD_ROUTES = {
     "admin",

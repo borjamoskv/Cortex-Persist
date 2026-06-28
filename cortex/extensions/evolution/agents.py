@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 # cortex/evolution/agents.py
-"""Sovereign Agent & SubAgent definitions for the Continuous Improvement Engine.
+"""Sovereign Agent & EnneagramSubAgent definitions for the Continuous Improvement Engine.
 
 10 primary agents, each commanding 10 subagents (100 total).
 Each agent has a domain, fitness score, and mutation history.
@@ -64,7 +64,7 @@ class Mutation:
 
 
 @dataclass
-class SubAgent:
+class EnneagramSubAgent:
     """A specialized worker under a primary agent."""
 
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
@@ -101,7 +101,7 @@ class SubAgent:
             self.evolution_tier = "GENESIS"
 
         logger.debug(
-            "SubAgent %s mutated: %s (fitness=%.1f, tier=%s, gen=%d)",
+            "EnneagramSubAgent %s mutated: %s (fitness=%.1f, tier=%s, gen=%d)",
             self.id,
             mutation.mutation_type.name,
             self.fitness,
@@ -128,13 +128,13 @@ class SubAgent:
 
 
 @dataclass
-class SovereignAgent:
+class EnneagramSovereign:
     """A primary agent commanding 10 subagents within a domain."""
 
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
     domain: AgentDomain = AgentDomain.FABRICATION
     fitness: float = 50.0
-    subagents: list[SubAgent] = field(default_factory=list)
+    subagents: list[EnneagramSubAgent] = field(default_factory=list)
     mutations: list[Mutation] = field(default_factory=list)
     generation: int = 0
     _cycle_count: int = 0
@@ -152,7 +152,7 @@ class SovereignAgent:
                 "3w4 (The Ambitious Professional)",
             ]
             self.subagents = [
-                SubAgent(
+                EnneagramSubAgent(
                     name=f"{self.domain.name.lower()}-sub-{i}",
                     domain=self.domain,
                     enneagram=random.choice(BEST_ENEATYPOS),
@@ -167,13 +167,13 @@ class SovereignAgent:
         return sum(s.fitness for s in self.subagents) / len(self.subagents)
 
     @property
-    def best_subagent(self) -> SubAgent | None:
+    def best_subagent(self) -> EnneagramSubAgent | None:
         if not self.subagents:
             return None
         return max(self.subagents, key=lambda s: s.fitness)
 
     @property
-    def worst_subagent(self) -> SubAgent | None:
+    def worst_subagent(self) -> EnneagramSubAgent | None:
         if not self.subagents:
             return None
         return min(self.subagents, key=lambda s: s.fitness)
@@ -206,9 +206,9 @@ class SovereignAgent:
         }
 
 
-def create_sovereign_swarm() -> list[SovereignAgent]:
+def create_sovereign_swarm() -> list[EnneagramSovereign]:
     """Instantiate the full 10-agent, 100-subagent swarm."""
-    agents = [SovereignAgent(domain=domain) for domain in AgentDomain]
+    agents = [EnneagramSovereign(domain=domain) for domain in AgentDomain]
     total_subs = sum(len(a.subagents) for a in agents)
     logger.info(
         "Sovereign swarm spawned: %d agents, %d subagents",

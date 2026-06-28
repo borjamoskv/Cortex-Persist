@@ -52,7 +52,7 @@ class SQLiteHealthCheck(HealthCheck):
 
     def __init__(self, db_path: str | None = None):
         super().__init__(name="sqlite")
-        from cortex.config import DEFAULT_DB_PATH
+        from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 
         self.db_path = db_path or str(DEFAULT_DB_PATH)
 

@@ -27,7 +27,7 @@ from cortex.memory.hdc.algebra import unbind
 from cortex.memory.hdc.codec import HDCEncoder
 from cortex.memory.hdc.item_memory import ItemMemory
 from cortex.memory.models import CortexFactModel
-from cortex.memory.sqlite_vec_store import cortex_decay
+from cortex.memory.cortex_decay import cortex_decay
 
 __all__ = ["HDCVectorStoreL2"]
 

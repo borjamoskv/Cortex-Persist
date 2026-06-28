@@ -18,7 +18,7 @@ from typing import Any
 from cortex.extensions.signals.bus import AsyncSignalBus
 from cortex.extensions.swarm.auto_fix import AutoFixPipeline
 from cortex.extensions.swarm.budget import get_budget_manager
-from cortex.extensions.swarm.protocols import AgentRole, SwarmIntent, SwarmSignalSchema
+from cortex.extensions.swarm.protocols import SwarmIntent, SwarmSignalSchema, SwarmTopologyRole
 from cortex.extensions.swarm.verification_gate import RiskLevel, VerificationGate
 from cortex.extensions.swarm.worktree_isolation import isolated_worktree
 
@@ -166,7 +166,7 @@ class SwarmTask:
     id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     name: str = "Anonymous Task"
     agent_name: str = "UniversalAgent"
-    role: AgentRole = AgentRole.WORKER
+    role: SwarmTopologyRole = SwarmTopologyRole.WORKER
     status: TaskStatus = TaskStatus.PENDING
     result: Any = None
     error: str | None = None
@@ -194,7 +194,7 @@ class CapatazOrchestrator:
         mission_id: str | None = None,
         engine: Any | None = None,
         agent_name: str = "UniversalAgent",
-        role: AgentRole = AgentRole.WORKER,
+        role: SwarmTopologyRole = SwarmTopologyRole.WORKER,
         intent: SwarmIntent = SwarmIntent.DISCOVERY,
     ) -> str:
         """Execute completion and broadcast discovery via SignalBus (Ω₁₄)."""
@@ -244,7 +244,7 @@ class CapatazOrchestrator:
         name: str,
         agent_name: str,
         coro_func: Callable[..., Any],
-        role: AgentRole = AgentRole.WORKER,
+        role: SwarmTopologyRole = SwarmTopologyRole.WORKER,
         changed_files: list[str] | None = None,
         args: list[Any] | tuple[Any, ...] = (),
         kwargs: dict[str, Any] | None = None,
@@ -338,7 +338,7 @@ class CapatazOrchestrator:
                         payload={"rejection": v_res.reason, "elder": v_res.elder_id},
                         engine=engine,
                         agent_name="Elder-0",
-                        role=AgentRole.ELDER,
+                        role=SwarmTopologyRole.ELDER,
                         intent=SwarmIntent.VERIFICATION,
                     )
                     raise RuntimeError(f"Elder rejection: {v_res.reason}")
@@ -417,7 +417,7 @@ class CapatazOrchestrator:
                 name=td["name"],
                 agent_name=td["agent_name"],
                 coro_func=td["func"],
-                role=td.get("role", AgentRole.WORKER),
+                role=td.get("role", SwarmTopologyRole.WORKER),
                 changed_files=td.get("changed_files"),
                 args=td.get("args", ()),
                 kwargs=td.get("kwargs", {}),

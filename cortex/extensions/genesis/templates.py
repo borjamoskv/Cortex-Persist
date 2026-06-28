@@ -137,7 +137,7 @@ class TemplateRegistry:
         self.register(
             SystemTemplate(
                 name="agent",
-                description="YAML agent definition for AgentRegistry",
+                description="YAML agent definition for AgentCatalogLoader",
                 renderers={"{name}.yaml": _render_agent_yaml},
             )
         )

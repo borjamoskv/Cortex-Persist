@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.extensions.evolution.agents import SovereignAgent
+    from cortex.extensions.evolution.agents import EnneagramSovereign
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,7 @@ class FitnessLandscape:
             self.compute()
         return self._last_ceiling
 
-    def clamp(self, agent: SovereignAgent) -> None:
+    def clamp(self, agent: EnneagramSovereign) -> None:
         """Clamp agent + subagent fitness to the current ceiling.
 
         Call after all mutations in a cycle. Uses cached ceiling

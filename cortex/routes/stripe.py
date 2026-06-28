@@ -22,7 +22,7 @@ import time
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
 
-from cortex import config
+from cortex.core import config
 
 __all__ = [
     "CheckoutRequest",

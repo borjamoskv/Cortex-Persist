@@ -17,7 +17,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.extensions.evolution.agents import AgentDomain, SovereignAgent
+from cortex.extensions.evolution.agents import AgentDomain, EnneagramSovereign
 from cortex.extensions.evolution.cortex_metrics import DomainMetrics
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class SymbolicActionEngine:
         self._history: dict[AgentDomain, list[SymbolicActionState]] = {d: [] for d in AgentDomain}
 
     def compute_state(
-        self, agent: SovereignAgent, metrics: DomainMetrics, grace_injection: float = 0.0
+        self, agent: EnneagramSovereign, metrics: DomainMetrics, grace_injection: float = 0.0
     ) -> SymbolicActionState:
         """Compute the current L_ψ for an agent domain."""
 

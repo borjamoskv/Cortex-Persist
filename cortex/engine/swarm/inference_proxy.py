@@ -14,9 +14,10 @@ import threading
 from typing import Optional
 
 from pydantic import BaseModel
+
 try:
     import uvicorn
-    from fastapi import FastAPI, HTTPException, Request
+    from fastapi import FastAPI, HTTPException
 except ImportError:
     pass
 
@@ -48,7 +49,7 @@ async def proxy_inference(req: InferenceRequest):
         sig_bytes = base64.b64decode(req.signature_b64)
         prompt_hash = hashlib.sha256(req.prompt.encode("utf-8")).digest()
         public_key.verify(sig_bytes, prompt_hash)
-    except Exception as e:
+    except Exception:
         logger.critical(f"[InferenceProxy] REJECTED. Invalid cryptographic signature from {req.agent_id}")
         raise HTTPException(status_code=403, detail="Invalid Signature")
         

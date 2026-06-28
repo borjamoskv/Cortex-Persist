@@ -92,7 +92,7 @@ async def notebooklm_digest(
     """Generate Master Digest with Shadow Key anchors."""
     from fastapi import HTTPException
 
-    from cortex.config import DEFAULT_DB_PATH
+    from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
     from cortex.services.notebooklm import NotebookLMService
 
     base_dir = Path.cwd().resolve()
@@ -121,7 +121,7 @@ async def notebooklm_fragment(
     """Fragment CORTEX facts into semantic domain files."""
     from fastapi import HTTPException
 
-    from cortex.config import DEFAULT_DB_PATH
+    from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
     from cortex.services.notebooklm import NotebookLMService
 
     base_dir = Path.cwd().resolve()

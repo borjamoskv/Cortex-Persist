@@ -41,7 +41,7 @@ class VesicularRuntime:
         except OSError as e:
             logger.error(f"[Vesicular] Failed to annihilate membrane {path}: {e}")
 
-    def execute(self, payload: str, bootstrap_token: str = "", proxy_port: int = 13337) -> Tuple[bool, str, str]:
+    def execute(self, payload: str, bootstrap_token: str = "", proxy_port: int = 13337) -> tuple[bool, str, str]:
         """
         Execute an untrusted Python payload inside the vesicular membrane.
         

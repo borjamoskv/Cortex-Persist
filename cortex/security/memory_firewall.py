@@ -16,7 +16,6 @@ logger = logging.getLogger("cortex.security.firewall")
 
 from cortex.security.types import RiskLevel
 
-
 RISK_WEIGHTS = {
     RiskLevel.LOW: 0,
     RiskLevel.MEDIUM: 1,

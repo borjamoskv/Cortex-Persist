@@ -139,8 +139,12 @@ llm_compat = [
     "langchain-core>=1.4.8",
     "langchain-ollama>=1.1.0",
 ]
+audio = [
+    "librosa>=0.10.0",
+    "soundfile>=0.12.0",
+]
 all = [
-    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality,llm_compat]",
+    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality,llm_compat,audio]",
 ]
 
 [project.scripts]

@@ -26,14 +26,14 @@ class EmbeddingManager:
     @property
     def mode(self) -> str:
         """Return the current embeddings mode (local|api)."""
-        from cortex import config
+        from cortex.core import config
 
         return config.EMBEDDINGS_MODE
 
     @property
     def provider(self) -> str:
         """Return the configured provider name."""
-        from cortex import config
+        from cortex.core import config
 
         return config.EMBEDDINGS_PROVIDER
 
@@ -48,7 +48,7 @@ class EmbeddingManager:
             return self._embedder
 
         if self.mode == "api":
-            from cortex import config
+            from cortex.core import config
 
             try:
                 from cortex.embeddings.api_embedder import APIEmbedder

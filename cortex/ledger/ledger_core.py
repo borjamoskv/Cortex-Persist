@@ -49,7 +49,7 @@ class SovereignLedger(LedgerAuditMixin):
     HIGH_WRITE_THRESHOLD = 10  # writes/sec triggers adaptive reduction
 
     def __init__(self, db: sqlite3.Connection | aiosqlite.Connection | CortexConnectionPool):
-        from cortex import config
+        from cortex.core import config
 
         self.db = db
         self._write_timestamps: deque[float] = deque(maxlen=5000)

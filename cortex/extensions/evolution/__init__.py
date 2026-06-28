@@ -7,10 +7,10 @@
 
 from cortex.extensions.evolution.agents import (
     AgentDomain,
+    EnneagramSovereign,
+    EnneagramSubAgent,
     Mutation,
     MutationType,
-    SovereignAgent,
-    SubAgent,
     create_sovereign_swarm,
 )
 from cortex.extensions.evolution.engine import EvolutionEngine
@@ -31,8 +31,8 @@ __all__ = [
     "EvolutionType",
     "Mutation",
     "MutationType",
-    "SovereignAgent",
-    "SubAgent",
+    "EnneagramSovereign",
+    "EnneagramSubAgent",
     "create_sovereign_swarm",
     "load_swarm",
     "save_swarm",

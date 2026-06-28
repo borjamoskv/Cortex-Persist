@@ -392,7 +392,7 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
         try:
             import stripe  # pyright: ignore[reportMissingImports]
 
-            from cortex import config
+            from cortex.core import config
 
             stripe.api_key = getattr(config, "STRIPE_SECRET_KEY", None)
             if not stripe.api_key:

@@ -179,7 +179,7 @@ def pipeline_status() -> None:
         click.echo("  Pipeline Ledger: ❌ no entries yet")
 
     # Check Engine DB
-    from cortex.config import DEFAULT_DB_PATH
+    from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 
     engine_ok = os.path.exists(os.path.expanduser(str(DEFAULT_DB_PATH)))
     click.echo(f"  Engine DB:       {'✅' if engine_ok else '❌'} {DEFAULT_DB_PATH}")

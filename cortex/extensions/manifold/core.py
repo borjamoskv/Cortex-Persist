@@ -28,14 +28,14 @@ class TesseractManifold:
     """The 4D Cognitive Manifold engine."""
 
     def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
-        from cortex.extensions.agents.registry import AgentRegistry
+        from cortex.extensions.agents.registry import AgentCatalogLoader
         from cortex.extensions.llm.provider import LLMProvider
 
         self._llm = LLMProvider(provider=llm_provider)
 
         system_prompt = None
         if agent_id:
-            registry = AgentRegistry()
+            registry = AgentCatalogLoader()
             registry.load_all()
             if agent_def := registry.get(agent_id):
                 system_prompt = agent_def.system_prompt

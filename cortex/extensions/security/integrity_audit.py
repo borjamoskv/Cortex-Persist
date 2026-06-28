@@ -18,7 +18,7 @@ from typing import Any
 
 import aiosqlite
 
-from cortex import config
+from cortex.core import config
 from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger("cortex_extensions.security.integrity_audit")

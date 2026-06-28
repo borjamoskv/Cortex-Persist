@@ -17,7 +17,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.config import DEFAULT_DB_PATH
+from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 from cortex.pipeline import (
     DeliveryTarget,
     DeliveryType,

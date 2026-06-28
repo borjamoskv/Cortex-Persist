@@ -8,7 +8,6 @@ Bypasses the Python GIL by delegating tensor operations to ONNX Runtime
 import logging
 import os
 import sys
-from typing import List
 
 try:
     import onnxruntime as ort
@@ -63,7 +62,7 @@ class RustNativeEmbeddings:
             
         logger.info(f"[RustBridge] Initialized ONNX Native Backend for {model_path}")
         
-    def generate(self, texts: List[str]) -> List[List[float]]:
+    def generate(self, texts: list[str]) -> list[list[float]]:
         """
         Tokenize and execute the model forward pass via the native C++ API.
         """

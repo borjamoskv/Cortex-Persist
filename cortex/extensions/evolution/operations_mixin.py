@@ -13,10 +13,10 @@ from typing import TYPE_CHECKING
 from cortex.extensions.evolution.action import SymbolicActionState
 from cortex.extensions.evolution.agents import (
     AgentDomain,
+    EnneagramSovereign,
+    EnneagramSubAgent,
     Mutation,
     MutationType,
-    SovereignAgent,
-    SubAgent,
 )
 from cortex.extensions.evolution.cortex_metrics import DomainMetrics
 from cortex.extensions.evolution.models import EvolutionMetric, EvolutionMutation
@@ -38,7 +38,7 @@ class EvolutionOpsMixin:
 
     if TYPE_CHECKING:
         params: EngineParameters
-        sovereigns: list[SovereignAgent]
+        sovereigns: list[EnneagramSovereign]
         cycle_count: int
         _endocrine: DigitalEndocrine
         _ledger: SovereignLedger
@@ -94,7 +94,7 @@ class EvolutionOpsMixin:
         return 1
 
     def _record_merkle_checkpoint(
-        self, agent: SovereignAgent | SubAgent, mutation: Mutation
+        self, agent: EnneagramSovereign | EnneagramSubAgent, mutation: Mutation
     ) -> None:
         """Record an immutable checkpoint of the agent state (Phase 2 v3)."""
         logger.info("Axiom 12: Triggering Merkle Checkpoint for %s", agent.id)
@@ -115,10 +115,10 @@ class EvolutionOpsMixin:
 
         agent.mutations.clear()
 
-    def _crossover(self, parent_a: SubAgent, parent_b: SubAgent) -> SubAgent:
-        """Perform genetic crossover combining two parent SubAgents into a new offspring."""
+    def _crossover(self, parent_a: EnneagramSubAgent, parent_b: EnneagramSubAgent) -> EnneagramSubAgent:
+        """Perform genetic crossover combining two parent EnneagramSubAgents into a new offspring."""
         cycle = getattr(self, "cycle_count", 0)
-        child = SubAgent(
+        child = EnneagramSubAgent(
             id=f"sub_{parent_a.domain.name.lower()}_gen{cycle}_{random.randint(1000, 9999)}",
             domain=parent_a.domain,
             name=f"Offspring-{parent_a.id}x{parent_b.id}",
@@ -161,7 +161,7 @@ class EvolutionOpsMixin:
             survivors = subs[cull_limit:]
 
             while len(survivors) < len(subs):
-                spawn = SubAgent(id=f"chaos_{random.randint(100, 999)}", domain=sovereign.domain)
+                spawn = EnneagramSubAgent(id=f"chaos_{random.randint(100, 999)}", domain=sovereign.domain)
                 spawn.parameters = {"temperature": 1.0, "top_p": 1.0}
                 survivors.append(spawn)
                 culled += 1
@@ -183,7 +183,7 @@ class EvolutionOpsMixin:
 
         self.params.meta_fitness_score = avg_fitness
 
-    def _decision_archaeology(self, sovereign: SovereignAgent) -> None:
+    def _decision_archaeology(self, sovereign: EnneagramSovereign) -> None:
         """Analyze ledger to prune regressive lineages (Axioms Ω₁ + Ω₃)."""
         pruned_count = 0
         to_remove = []
@@ -210,7 +210,7 @@ class EvolutionOpsMixin:
 
         if pruned_count > 0:
             for _ in range(pruned_count):
-                spawn = SubAgent(
+                spawn = EnneagramSubAgent(
                     id=f"rev_{secrets.token_hex(4)}",
                     domain=sovereign.domain,
                     name=f"Revived-{sovereign.domain.name}",
@@ -253,7 +253,7 @@ class EvolutionOpsMixin:
                     logger.info("Ouroboros: Culled weakest subagent %s", worst.id)
 
     async def _process_sovereign(
-        self, sovereign: SovereignAgent, metrics: dict[AgentDomain, DomainMetrics]
+        self, sovereign: EnneagramSovereign, metrics: dict[AgentDomain, DomainMetrics]
     ) -> tuple[list[EvolutionMutation], list[EvolutionMutation], int, SymbolicActionState | None]:
         """Ω₀: Isolated processing for a single sovereign domain. Concurrency-safe."""
         sovereign._cycle_count += 1
@@ -331,7 +331,7 @@ class EvolutionOpsMixin:
             )
 
         # Crossover & Survival
-        subs: list[SubAgent] = sorted(sovereign.subagents, key=lambda s: s.fitness, reverse=True)
+        subs: list[EnneagramSubAgent] = sorted(sovereign.subagents, key=lambda s: s.fitness, reverse=True)
         elite = subs[:3]
         cull_count = max(1, int(len(subs) * getattr(self.params, "selection_pressure", 0.3)))
         survivors = subs[:-cull_count] if cull_count < len(subs) else subs[:1]
