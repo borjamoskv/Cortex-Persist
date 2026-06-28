@@ -162,6 +162,104 @@ class CausalStateStore:
                 await self._db.rollback()
                 logger.error(f"[SAGA ROLLBACK] State mutation failed: {e}")
                 
+    async def process_signals_batch(self, signals: list[Any]) -> None:
+        """Process a batch of SwarmSignals, validate guards, and commit to state atomically."""
+        await self.connect()
+        async with self._lock:
+            if not self._db:
+                raise RuntimeError("Database not connected.")
+
+            valid_signals = []
+            for signal in signals:
+                if signal.target.startswith("hyp-"):
+                    is_active = await self._verify_hypothesis_active(signal.target)
+                    if not is_active:
+                        logger.warning(f"Dropping signal for {signal.target}: Hypothesis is INVALIDATED.")
+                        continue
+                
+                try:
+                    ledger_payload = {
+                        "type": "CausalStateMutation",
+                        "agent_id": signal.agent_id,
+                        "target": signal.target,
+                        "status": signal.status,
+                        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                        "payload": signal.payload,
+                    }
+                    
+                    proposal = SwarmProposal(
+                        agent_id=signal.agent_id,
+                        mission_statement=f"Apply signal to {signal.target}",
+                        content=json.dumps(ledger_payload),
+                        token_cost=100, 
+                    )
+                    guard = CausalClosureGuard()
+                    guard.verify_closure(proposal)
+
+                    from cortex.engine.causal.taint_engine import enforce_taint_check
+                    taint_token = getattr(signal, "taint_token", None)
+                    if not taint_token and hasattr(signal, "metadata") and isinstance(signal.metadata, dict):
+                        taint_token = signal.metadata.get("taint_token")
+                    
+                    await enforce_taint_check(self._db, taint_token, json.dumps(signal.payload))
+                    valid_signals.append((signal, ledger_payload))
+
+                except Exception as e:
+                    logger.error(f"[SAGA REJECT] Signal validation failed for {signal.target}: {e}")
+                    continue
+
+            if not valid_signals:
+                return
+
+            try:
+                # 3. SAGA Step 2 & 3: Atomic 2PC Mutation (Batch EXECUTEMANY where possible)
+                with causal_write(self._db):
+                    # Batch Insert Audit Ledger
+                    audit_params = [
+                        (s.agent_id, s.target, s.status, lp["timestamp"], json.dumps(s.payload))
+                        for s, lp in valid_signals
+                    ]
+                    await self._db.executemany(
+                        "INSERT INTO audit_ledger (agent_id, target, status, timestamp, payload) VALUES (?, ?, ?, ?, ?)",
+                        audit_params
+                    )
+
+                    success_count = 0
+                    for signal, ledger_payload in valid_signals:
+                        if signal.status in ("SUCCESS", "FAILURE"):
+                            success_count += 1
+                            if signal.target.startswith("hyp-") and signal.status == "SUCCESS":
+                                await self._db.execute(
+                                    "UPDATE system_hypotheses SET status = 'COMPLETED' WHERE id = ?", (signal.target,)
+                                )
+                                
+                                try:
+                                    from cortex.extensions.skills.autodidact.epistemology import EvidenceSource, RawEvidence
+                                    raw_ev = RawEvidence(
+                                        source=EvidenceSource.KERNEL_EVENTS,
+                                        raw_payload=signal.payload,
+                                        timestamp_iso=ledger_payload["timestamp"]
+                                    )
+                                    await self._db.execute(
+                                        "INSERT INTO facts (tenant_id, project, content, fact_type, confidence, source, metadata, is_tombstoned) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                                        ("default", "global", raw_ev.model_dump_json(), "raw_evidence", "C5-REAL", f"sanedrin:{signal.agent_id}", "{}", 0)
+                                    )
+                                except Exception as epi_e:
+                                    logger.warning(f"[EpistemicBreaker] Failed to compile RawEvidence from {signal.target}: {epi_e}")
+
+                    if success_count > 0:
+                        await self._db.execute(
+                            "UPDATE cortex_meta SET value = CAST(CAST(value AS INTEGER) + ? AS TEXT) WHERE key = 'hypothesis_graph_version'",
+                            (success_count,)
+                        )
+                    
+                    # ATOMIC COMMIT (SANEDRIN VECTOR 1 - BATCH)
+                    await self._db.commit()
+
+            except (aiosqlite.Error, ValueError, KeyError, TypeError, RuntimeError) as e:
+                await self._db.rollback()
+                logger.error(f"[SAGA ROLLBACK] Batch state mutation failed: {e}")
+
     async def recover_in_flight_tasks(self, lease_id: str | None = None) -> int:
         """SANEDRIN VECTOR 3: Lease-locked Ghost Recovery."""
         await self.connect()

@@ -99,52 +99,34 @@ class SwarmSupervisor:
                 sys.exit(1)
 
     async def _state_consumer_loop(self) -> None:
-        """Consumes signals from Event Bus and writes them to the State Store."""
+        """Consumes signals from Event Bus and writes them to the State Store in batches."""
         signal_buffer = []
+        MAX_BATCH_SIZE = 50
+        
         while self._running:
             try:
-                signal = await asyncio.wait_for(self.bus.consume(), timeout=1.0)
+                # Wait for up to 0.5s for a signal
+                signal = await asyncio.wait_for(self.bus.consume(), timeout=0.5)
                 signal_buffer.append(signal)
-
-                # FABLE 5 SIGNAL 3: Context Checkpointing (Transaction Isolation)
-                if len(signal_buffer) >= 100:
-                    logger.info(
-                        "[Sanedrin] Fable 5 Context Checkpointing: Compressing 100 signals into State Store."
-                    )
-                    voids = sum(1 for s in signal_buffer if s.status == "VOID")
-                    compressed_payload = {
-                        "summary": f"Checkpoint of {len(signal_buffer)} signals",
-                        "voids_dropped": voids,
-                        "invariant_preserved": True,
-                    }
-                    checkpoint_signal = SwarmSignal(
-                        agent_id=self.supervisor_id,
-                        target="checkpoint_horizon",
-                        status="SUCCESS",
-                        payload=compressed_payload,
-                        metrics={"exergy_saved": len(signal_buffer)},
-                    )
-
-                    # Process signal writes atomically based on aiosqlite WAL engine
-                    await self.state_store.process_signal(checkpoint_signal)
-
-                    # Only after successful DB write, we mark tasks as done in the async bus
-                    for _ in signal_buffer:
-                        self.bus.task_done()
-                    signal_buffer.clear()
-                    continue
-
-                # Single signal processing
-                await self.state_store.process_signal(signal)
-                self.bus.task_done()
-                signal_buffer.remove(signal)
             except asyncio.TimeoutError:
-                continue
+                pass # Time to flush if anything is in the buffer
             except asyncio.CancelledError:
                 break
             except Exception as e:
                 logger.error(f"State consumer encountered error: {e}")
                 raise
+
+            # Flush condition: buffer full, or queue is empty and we have items
+            if len(signal_buffer) >= MAX_BATCH_SIZE or (signal_buffer and self.bus._queue.empty()):
+                try:
+                    await self.state_store.process_signals_batch(signal_buffer)
+                    for _ in signal_buffer:
+                        self.bus.task_done()
+                except Exception as e:
+                    logger.error(f"Batch processing failed: {e}")
+                    raise
+                finally:
+                    signal_buffer.clear()
 
     async def dispatch_optimal_hypotheses(self, count: int = 100) -> int:
         """Pulls optimal tasks from TopologyIndex and pushes them to Worker Pool."""
