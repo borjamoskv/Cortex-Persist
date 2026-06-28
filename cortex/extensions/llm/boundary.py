@@ -6,9 +6,9 @@
 
 """Sovereign Immune Boundary.
 
-Frontera determinista (KETER-∞ Phase 1) que garantiza que ninguna
-salida malformada de un LLM contamine el estado interno de CORTEX.
-Basado en Pydantic v2 Core para validación ultrarrápida (Rust).
+Deterministic boundary (KETER-∞ Phase 1) that ensures no
+malformed LLM output contaminates the internal state of CORTEX.
+Based on Pydantic v2 Core for ultra-fast validation (Rust).
 """
 
 from __future__ import annotations
@@ -65,11 +65,11 @@ def _clean_llm_json(raw: str) -> str:
 
 
 class ImmuneBoundary:
-    """Barrera estricta de validación para salidas LLM.
+    """Strict validation barrier for LLM outputs.
 
-    Inyecta un bucle de autoreparación local: si la IA devuelve
-    un JSON inválido, se retroalimenta el error en el prompt
-    para que la IA lo corrija antes de rendirse.
+    Injects a local auto-repair loop: if the AI returns
+    an invalid JSON, the error is fed back into the prompt
+    so the AI can correct it before giving up.
     """
 
     @staticmethod
@@ -78,19 +78,19 @@ class ImmuneBoundary:
         generation_func: Callable[[str | None], Awaitable[str]],
         max_retries: int = 3,
     ) -> T:
-        """Fuerza a que el resultado de `generation_func` cumpla el `schema`.
+        """Forces the result of `generation_func` to comply with the `schema`.
 
         Args:
-            schema: Modelo Pydantic esperado.
-            generation_func: Función asíncrona que retorna JSON crudo.
-                            Recibe el error de validación anterior (o None).
-            max_retries: Intentos antes de emitir un CortexError soberano.
+            schema: Expected Pydantic model.
+            generation_func: Async function returning raw JSON.
+                            Receives the previous validation error (or None).
+            max_retries: Attempts before emitting a sovereign CortexError.
 
         Returns:
-            Instancia validada de `schema`.
+            Validated instance of `schema`.
 
         Raises:
-            CortexError: Si falla la validación después de `max_retries`.
+            CortexError: If validation fails after `max_retries`.
         """
         last_error_msg: str | None = None
         last_exception: Exception | None = None
@@ -103,15 +103,15 @@ class ImmuneBoundary:
 
         for attempt in range(max_retries):
             try:
-                # Determinar cuántos argumentos acepta la función de generación
-                # Axioma 14: Determinismo Estructural (DFA schema)
+                # Determine how many arguments the generation function accepts
+                # Axiom 14: Structural Determinism (DFA schema)
                 sig = inspect.signature(generation_func)
                 params = len(sig.parameters)
 
                 if params >= 2:
                     raw_output = await generation_func(schema_dict, last_error_msg)  # type: ignore[reportCallIssue]
                 else:
-                    # Por defecto pasamos el schema (Axioma 14)
+                    # By default we pass the schema (Axiom 14)
                     raw_output = await generation_func(schema_dict)  # type: ignore[type-error]
 
                 clean_output = _clean_llm_json(raw_output)
@@ -129,7 +129,7 @@ class ImmuneBoundary:
                 )
             except (ValueError, TypeError) as e:
                 last_exception = e
-                # Si falló por argumentos (TypeError), informamos detalle
+                # If it failed due to arguments (TypeError), provide detail
                 last_error_msg = f"Parsing failure: {e!s}"
                 logger.warning(
                     "ImmuneBoundary: Parsing failure for %s (attempt %d/%d): %s",
@@ -141,6 +141,6 @@ class ImmuneBoundary:
 
         logger.error("ImmuneBoundary: Defense compromised after %d attempts.", max_retries)
         raise CortexError(
-            f"Falla la inmunidad química: comprometida tras {max_retries} intentos "
-            f"validando {schema.__name__}. Error final: {last_exception}"
+            f"Chemical immunity failure: compromised after {max_retries} attempts "
+            f"validating {schema.__name__}. Final error: {last_exception}"
         )
