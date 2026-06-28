@@ -101,6 +101,7 @@ All agents operating in this repository MUST self-identify by role before acting
 9. **Failure Locality:** Invalid state must be rejectable and safely abortable at any point.
 10. **Aesthetic & Exergy Bounds:** Axioms and sacred facts MUST satisfy LandauerGuard (Ω₄) (high Shannon entropy, < 256 bytes). Knowledge facts MUST not contain low-exergy slop (ExergyGuard Ω₁₃).
 11. **Singularidad de Red (TODO EN CLOUDFLARE):** Prohibición absoluta de ecosistemas Vercel, `vercel.json` o dependencias `@vercel/*`. Todo despliegue front/edge DEBE apuntar exclusivamente a Cloudflare Pages/Workers (via `wrangler.toml` y `next-on-pages`). Cualquier intento de desvío generará un Aborto P0 por fractura termodinámica.
+12. **Ultrathink (P0) Horizon:** The `UltraThink` cognitive mode MUST ONLY be invoked for Event Horizon P0 singularities where `epicenter_radius >= 3`. Enforcement and Exergy Yield authorization are strictly mathematically bounded by `cortex/engine/core/ultrathink_physics.py`.
 
 ### ❌ Anti-Patterns & Failure Signatures
 
@@ -201,7 +202,7 @@ Grouped by domain. Risk level governs the care required before modification.
 
 | Module | Purpose | Key Files |
 | :--- | :--- | :--- |
-| `engine/` | Core CRUD, Kinetic Engines (EntropyAnnihilator, AutoCrystallizer), fact store, causal scheduler | `crystallizer.py`, `entropy.py`, `synthesis.py`, `causal/taint_engine.py` |
+| `engine/` | Core CRUD, Kinetic Engines (EntropyAnnihilator, AutoCrystallizer, UltrathinkPhysics), fact store | `crystallizer.py`, `core/ultrathink_physics.py`, `causal/taint_engine.py` |
 | `audit/` | Master Ledger — tamper-evident hash-chain for all actions | `ledger.py` |
 | `ledger/` | Ledger origin tracking, public export, verifier utilities | `origin.py`, `public_export.py`, `public_verifier_utils.py` |
 | `guards/` | Admission, contradiction, dependency, sovereign seals, ZK guard | `sovereign_seals.py`, `virgo.py`, `zk_guard.py` |
