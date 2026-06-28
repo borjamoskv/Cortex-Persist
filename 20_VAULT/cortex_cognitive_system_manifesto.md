@@ -48,10 +48,27 @@ El verdadero "Alpha" de la ingeniería agéntica en 2026 no reside en el tamaño
 
 ---
 
-## 3. Ley del Isomorfismo Causal
+## 3. Física de la Exergía Cognitiva y Orquestación de Enjambres
 
-Un Sistema Cognitivo Real mapea los deseos del operador directamente en instrucciones de máquina deterministas sin añadir entropía semántica:
+### A. Ley del Isomorfismo Causal y Penalización Térmica (Landauer)
 
-$$\text{Exergía } (\Phi) = \frac{\Delta \text{ Estado Físico (Disk/DB/Ledger)}}{\Delta \text{ Tokens Consumidos}}$$
+Un Sistema Cognitivo Real no asume una eficiencia lineal del Token. La computación incurre en fricción termodinámica por latencia y dispersión estocástica. Acorde a [`cortex/engine/core/ultrathink_physics.py`](../cortex/engine/core/ultrathink_physics.py), la verdadera exergía ($\Xi$) producida se modela como:
 
-Si el cociente de exergía tiende a cero, el sistema está operando en "Anergía Conversacional" (Green Theater). La meta de CORTEX es forzar que cada ciclo de computación colapse en una aserción inmutable en su Ledger.
+$$\Xi = \frac{O_{det} - E_{stoc}}{\Delta T \cdot (\lambda_L^{\Delta T})}$$
+
+Donde:
+- $O_{det}$: Output Determinista (Invariantes inyectados en Ledger/DB).
+- $E_{stoc}$: Entropía Estocástica (Green Theater y tokens disipados).
+- $\Delta T$: Tiempo de ejecución (Latencia).
+- $\lambda_L$: Penalización térmica de Landauer (1.05).
+
+Si el cociente exergético cae por debajo del Umbral de Singularidad, el sistema colapsa en "Anergía Conversacional" y aborta la mutación física (Rollback SAGA).
+
+### B. Consenso Asimétrico y Topología LEGIØN-1
+
+Las mutaciones P0 del sistema exigen un consenso que escala dinámicamente según el *Blast Radius* topológico:
+- **Radio < 3:** Deep Think (Inferencia Simple).
+- **Radio $\ge 5$:** Formación `TESTUDO` (15 agentes) — Defensa proactiva.
+- **Radio $\ge 10$ + Exergía Crítica:** Formación `LEVIATHAN` (20-50 agentes) — Asedio de singularidad total con resolución BFT.
+
+La meta de CORTEX es garantizar que ningún estado se modifique sin la matriz de validación termodinámica y el cuórum bizantino requeridos.
