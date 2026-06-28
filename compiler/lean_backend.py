@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# C5-REAL: Lean 4 Translation Backend for BABYLON-60 Proof IR
+
 import sys
 import os
 
@@ -15,7 +18,7 @@ def translate_to_lean(ir_lines):
         "",
         "-- Core state declarations",
         "def Reg: Type := Nat",
-        "def Val: Type := Int",
+        "def Val: Type := String", # Represent B60 values as String for exact sexagesimal support
         "def EventId: Type := String",
         "",
         "-- Axiomatic Trace Declarations",
@@ -33,20 +36,36 @@ def translate_to_lean(ir_lines):
         elif tag == "HappensBefore":
             lean_code.append(f"axiom causal_{parts[1]}_{parts[2]} : ev_tick_{parts[1]} ≤ ev_tick_{parts[2]}")
         elif tag == "Assign":
-            # Assign R1 601 EV_0
-            lean_code.append(f"axiom assign_{parts[3]} : Val := {parts[2]}")
+            event_id = parts[-1]
+            reg = parts[1]
+            val = " ".join(parts[2:-1])
+            lean_code.append(f"axiom assign_{event_id} : Val := \"{val}\"")
         elif tag == "Add":
-            lean_code.append(f"axiom add_{parts[3]} : Val := {parts[2]}")
+            event_id = parts[-1]
+            reg = parts[1]
+            val = " ".join(parts[2:-1])
+            lean_code.append(f"axiom add_{event_id} : Val := \"{val}\"")
         elif tag == "Sub":
-            lean_code.append(f"axiom sub_{parts[3]} : Val := {parts[2]}")
+            event_id = parts[-1]
+            reg = parts[1]
+            val = " ".join(parts[2:-1])
+            lean_code.append(f"axiom sub_{event_id} : Val := \"{val}\"")
         elif tag == "Spawn":
-            lean_code.append(f"axiom spawn_{parts[2]} : String := \"{parts[1]}\"")
+            event_id = parts[-1]
+            target = " ".join(parts[1:-1])
+            lean_code.append(f"axiom spawn_{event_id} : String := \"{target}\"")
         elif tag == "Block":
-            lean_code.append(f"axiom await_{parts[2]} : String := \"{parts[1]}\"")
+            event_id = parts[-1]
+            symbol = " ".join(parts[1:-1])
+            lean_code.append(f"axiom await_{event_id} : String := \"{symbol}\"")
         elif tag == "Wait":
-            lean_code.append(f"axiom after_{parts[2]} : Nat := {parts[1]}")
+            event_id = parts[-1]
+            ticks = parts[1]
+            lean_code.append(f"axiom after_{event_id} : Nat := {ticks}")
         elif tag == "Emit":
-            lean_code.append(f"axiom emit_{parts[2]} : String := \"{parts[1]}\"")
+            event_id = parts[-1]
+            action = " ".join(parts[1:-1])
+            lean_code.append(f"axiom emit_{event_id} : String := \"{action}\"")
 
     lean_code.append("")
     lean_code.append("end Babylon60")
