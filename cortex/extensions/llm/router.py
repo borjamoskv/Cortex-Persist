@@ -353,11 +353,14 @@ class CortexLLMRouter:
                       any(ext in provider_name for ext in ["openai", "anthropic", "gemini", "dashscope", "minimax"])
                       
         if is_external and "localhost" not in provider_url and "127.0.0.1" not in provider_url:
-            logger.error(
-                "🛑 [ZERO-NETWORK] Blocked external route to %s. Local-Inference-OMEGA Active.",
+            logger.warning(
+                "🛑 [ZERO-NETWORK] Trapped external route for %s. Re-routing exclusively through localhost:11434.",
                 provider.provider_name
             )
-            return Err(f"Local-Inference-OMEGA: External network failover to {provider.provider_name} is strictly PROHIBITED.")
+            # DYNAMIC RE-ROUTING: Instantiate local provider to ensure no external logic leaks
+            from cortex.extensions.llm.provider import LLMProvider
+            local_model = "qwen2.5-coder:32b" if "claude" in provider_name or "gemini" in provider_name else "llama3:latest"
+            provider = LLMProvider(provider="ollama", model=local_model)
 
         try:
             return Ok(await provider.invoke(prompt))
