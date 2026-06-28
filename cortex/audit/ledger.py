@@ -292,8 +292,11 @@ class EnterpriseAuditLedger:
                             for audit_id, signature, prev_hash in unanchored:
                                 external_anchor = None
                                 try:
-                                    merkle_payload = audit_id + prev_hash
-                                    merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+                                    from cortex.audit.smt import SparseMerkleTree
+                                    smt_state = SparseMerkleTree()
+                                    smt_state.update(hashlib.sha256(audit_id.encode()).hexdigest(), audit_id)
+                                    merkle_root = smt_state.root
+
                                     entry_hash = hashlib.sha256(f"merkle_batch:{merkle_root}:{prev_hash}".encode()).hexdigest()
 
                                     pub_pem = self.public_key.public_bytes(
