@@ -42,8 +42,8 @@ def action(
             if getattr(t.original_stats, "runtime_mean", 0) > 0
             else 1.0
         )
-        # Mínima acción clásica minimiza (V - T), es decir, maximiza (T - V).
-        # Aquí L es (T - V - R - H). Queremos MAXIMIZAR L, por tanto la Acción (coste) a minimizar es -L * dt
+        # Classical least action minimizes (V - T), i.e., maximizes (T - V).
+        # Here L is (T - V - R - H). We want to MAXIMIZE L, so the Action (cost) to minimize is -L * dt
         S += -L * dt
     return S
 
@@ -58,7 +58,7 @@ def sample_trajectories(
     path_len = min(horizon, len(tasks))
 
     for _ in range(num_samples):
-        # Muestreo sin reemplazo (un workflow se ejecuta una vez por path)
+        # Sampling without replacement (a workflow executes once per path)
         path = random.sample(tasks, path_len)
         trajectories.append(path)
 
@@ -87,9 +87,9 @@ def select_next(
         if best_score > S:
             best_score = S
 
-    # Epsilon Path Noise: Evitar Global Path Bias Collapse
+    # Epsilon Path Noise: Prevent Global Path Bias Collapse
     if random.random() < epsilon and scored_paths:
-        # Escoge un path aleatorio entre el top 30% para inyectar entropía
+        # Choose a random path from the top 30% to inject entropy
         top_k = max(1, int(len(scored_paths) * 0.3))
         scored_paths.sort(key=lambda x: x[0])
         chosen = random.choice(scored_paths[:top_k])
@@ -100,8 +100,8 @@ def select_next(
     # No, we just sort the candidate tasks by their *individual* action cost in the best path,
     # or just sort them globally by their individual action to maintain API compatibility.
 
-    # Para el scheduler de CORTEX que espera una lista ordenada:
-    # Ordenamos todas las tareas por su "coste de acción individual"
+    # For the CORTEX scheduler which expects a sorted list:
+    # Sort all tasks by their "individual action cost"
     # Action cost = -L * dt
     scored_tasks = []
     for t in tasks:
