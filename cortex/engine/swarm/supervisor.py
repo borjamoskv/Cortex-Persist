@@ -182,7 +182,7 @@ class SwarmSupervisor:
                         agent_id="sanedrin_apex",
                         session_id=self.supervisor_id,
                         content=str(task["id"]),
-                        private_key_b64="dGVzdF9rZXlfdGVzdF9rZXlfdGVzdF9rZXlfdGVzdA==",
+                        private_key_b64="dGVzdF9rZXlfdGVzdF9rZXlfdGVzdF9rZXlfdGVzdF8=",
                     )
                     payload_dict["_steerability_taint"] = taint_token
                     payload_dict["_forced_tool_choice"] = "auto"
