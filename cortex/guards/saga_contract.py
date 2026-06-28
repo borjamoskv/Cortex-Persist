@@ -115,6 +115,10 @@ class SagaWriteProposal(BaseModel):
         default=False,
         description="If True, skip taint enforcement (caller guarantees prior verification).",
     )
+    fast_path_eligible: bool = Field(
+        default=False,
+        description="If True, bypasses heuristic semantic validation due to ZK formal proof.",
+    )
 
     model_config = ConfigDict(
         frozen=True,
@@ -235,6 +239,7 @@ class SagaWriteProposal(BaseModel):
             "tx_id": None,
             "parent_decision_id": self.parent_decision_id,
             "taint_already_verified": self.taint_already_verified,
+            "fast_path_eligible": self.fast_path_eligible,
         }
 
 

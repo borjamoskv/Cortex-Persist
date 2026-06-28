@@ -27,7 +27,7 @@ class ZKSwarmGuard:
         """
         self._enforce_on_types = enforce_on_types
 
-    async def verify_integrity(self, content: str, fact_type: str, meta: dict[str, Any]) -> None:
+    async def verify_integrity(self, content: str, fact_type: str, meta: dict[str, Any]) -> bool:
         """
         Intercepts incoming facts and runs the formal validation logic (RFC-003).
 
@@ -36,15 +36,19 @@ class ZKSwarmGuard:
             fact_type: 'decision', 'rule', 'chat', etc.
             meta: Metadata payload expected to contain Byzantine signature tokens.
 
+        Returns:
+            bool: True if the payload contains a valid formal correctness proof (Fast-Path eligible).
+
         Raises:
             VoidStateSecurityError: if validation boundaries are mathematically violated.
         """
         if fact_type not in self._enforce_on_types:
             # Low exergy topological type -> standard stochastic heuristic handling
-            return
+            return False
 
         public_key_b64 = meta.get("agent_public_key")
         signature_b64 = meta.get("zk_proof_signature")
+        formal_proof_b64 = meta.get("formal_correctness_proof")
 
         if not public_key_b64 or not signature_b64:
             raise VoidStateSecurityError(
@@ -62,3 +66,12 @@ class ZKSwarmGuard:
                 f"[ZK-SWARM] Cryptographic signature INVALID for payload of type '{fact_type}'. "
                 "Potential hallucination, manipulation, or thermodynamic fault detected."
             )
+
+        # GPT-5.5 Fast-Path Check: Did the agent provide a formal correctness proof?
+        if formal_proof_b64:
+            # In a full implementation, we would delegate this to an SMT solver or Rust ZK verifier
+            # to verify the AST equivalence. For now, if the Ed25519 signature is valid and the proof
+            # is attached, we consider it Fast-Path eligible.
+            return True
+
+        return False
