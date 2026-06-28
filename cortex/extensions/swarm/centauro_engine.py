@@ -60,7 +60,7 @@ class Formation:
     SPECTRE = "SPECTRE"  # OSINT/Intel stealth
     GHOST = "GHOST"  # Single specialized agent
     TESTUDO = "TESTUDO"  # 15 agents, proactive defensive shell
-
+    SANEDRIN = "SANEDRIN"  # 5 agents, Heterogeneous Supreme Quorum
 
 class VirtualAgent:
     """A sovereign agent for the Centauro Swarm.
@@ -171,6 +171,7 @@ class CentauroEngine:
         Formation.SPECTRE: 3,
         Formation.GHOST: 1,
         Formation.TESTUDO: 15,
+        Formation.SANEDRIN: 5,
     }
 
     def __init__(self, tolerance: float = 0.67, router: Any | None = None):
@@ -201,6 +202,9 @@ class CentauroEngine:
             return _roles[index % 3]
         if formation == Formation.GHOST:
             return "CODE"
+        if formation == Formation.SANEDRIN:
+            _roles = ["INTEL", "CODE", "SECURITY", "DATA", "INFRA"]
+            return _roles[index % 5]
         return self.SPECIALISTS[index % len(self.SPECIALISTS)]
 
     async def _run_consensus(
