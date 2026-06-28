@@ -335,20 +335,38 @@ class MHCAntigenRouter:
         self._load_static_antigens()
         self._load_dynamic_antigens()
 
+    _SOTA_CACHE = None
+
     def _load_static_antigens(self):
-        """[ULTRATHINK] Decoupled load of Empirical SOTA Vectors from JSON invariant."""
+        """[ULTRATHINK] Decoupled load of Empirical SOTA Vectors from JSON invariant.
+        Remediation: Fail-closed architecture, memoization, and hard apoptosis on failure.
+        """
+        if MHCAntigenRouter._SOTA_CACHE is not None:
+            for item in MHCAntigenRouter._SOTA_CACHE:
+                self.register_t_cell(item["agent_id"], item["pattern"])
+            return
+
         from pathlib import Path
         sota_path = Path(__file__).parent / "sota_antigens.json"
+        
         if not sota_path.exists():
-            return
+            raise TaintValidationError(f"UltraThink P0: SOTA invariant file missing at {sota_path}")
+            
         try:
             with open(sota_path, encoding="utf-8") as f:
                 data = json.load(f)
-                for item in data.get("static_t_cells", []):
-                    self.register_t_cell(item["agent_id"], item["pattern"])
-            logger.info(f"[MHC] Loaded SOTA static antigens from {sota_path.name}")
-        except Exception as e:
-            logger.error(f"[MHC] UltraThink P0: Failed to load static antigens: {e}")
+                
+            MHCAntigenRouter._SOTA_CACHE = data.get("static_t_cells", [])
+            for item in MHCAntigenRouter._SOTA_CACHE:
+                self.register_t_cell(item["agent_id"], item["pattern"])
+                
+            logger.info(f"[MHC] Loaded and cached SOTA static antigens from {sota_path.name}")
+        except json.JSONDecodeError as e:
+            logger.error(f"[MHC] UltraThink P0: JSON syntax corruption in static antigens: {e}")
+            raise TaintValidationError("SOTA invariant file corrupted. Apoptosis triggered.") from e
+        except (OSError, KeyError, TypeError) as e:
+            logger.error(f"[MHC] UltraThink P0: Structural failure loading static antigens: {e}")
+            raise TaintValidationError("MHC static routing failure.") from e
 
     def _load_dynamic_antigens(self):
         """Loads previously promoted dynamic antigens from local storage."""
