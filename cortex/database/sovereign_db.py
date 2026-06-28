@@ -216,7 +216,7 @@ class SovereignDB:
                     self._queue.task_done()
                     break
 
-            except (ValueError, TypeError, OSError, KeyError) as e:
+            except Exception as e:  # noqa: BLE001
                 loop.call_soon_threadsafe(future.set_exception, e)
             finally:
                 self._queue.task_done()
