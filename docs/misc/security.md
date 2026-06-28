@@ -26,7 +26,7 @@ CORTEX is built security-first across 7 layers:
 
 ### 1. Authentication
 
-- **HMAC-SHA256 API keys** with prefix-based lookup (`ctx_`)
+- **Argon2id and SHA-256 API keys** with prefix-based lookup (`ctx_`)
 - Keys are hashed before storage — raw keys never persist
 - Bootstrap flow: first key requires no auth, subsequent keys require admin
 - Bearer token authentication on all API endpoints
@@ -80,7 +80,7 @@ LLM-generated code is parsed via Python's AST before execution:
 
 - **Security Headers Middleware**: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, X-XSS-Protection
 - **Content Size Limit**: Request body capping to prevent DoS
-- **Rate Limiting**: Sliding window (300 req/60s per IP, configurable)
+- **Rate Limiting**: Sliding window (100 req/60s, configurable)
 - **CORS**: Explicit origin allowlist (no wildcards)
 - **Input Validation**: Pydantic models with `max_length` constraints
 
@@ -93,6 +93,9 @@ The **Nemesis Protocol** is CORTEX's autonomic immune system, acting as an inter
 - **Fail-Fast**: Blocks execution of patterns that have previously compromised system integrity (Axiom Ω₅).
 
 ### 9. Composition Leakage Shield (Holistic Redaction)
+
+> [!IMPORTANT]
+> **Design Target (Planned v7.0)**. The current C5-REAL implementation uses a regex-based static Privacy Shield (Tiers 1-4). The cross-field correlation features below describe the target state.
 
 The **fourth leakage vector** — and the most insidious — is **composition leakage**: two individually innocuous data points that, when combined by an adversary, reconstruct a secret. This is the equivalent of **correlation attacks in differential privacy**.
 
@@ -124,11 +127,11 @@ The **fourth leakage vector** — and the most insidious — is **composition le
 CORTEX provides an encrypted vault for sensitive configuration:
 
 ```python
-from cortex.crypto import CortexVault
+from cortex.crypto.vault import Vault
 
-vault = CortexVault(key_path="~/.cortex/vault.key")
-vault.encrypt("api_token", "sk-xxx...")
-value = vault.decrypt("api_token")
+vault = Vault(key=b'your_32_byte_secret_key_or_env_var_fallback')
+encrypted = vault.encrypt("sk-xxx...")
+value = vault.decrypt(encrypted)
 ```
 
 ### Environment Variables
@@ -157,7 +160,7 @@ CORTEX assumes:
 | Unauthorized access | API key auth + RBAC |
 | Cross-tenant leakage | Tenant-scoped queries at all layers |
 | Secret exposure | Privacy Shield ingress scanning |
-| **Composition leakage** | **Holistic cross-field correlation analysis** |
+| **Composition leakage** | **Holistic cross-field correlation analysis (Planned v7.0)** |
 | Code injection | AST sandbox for LLM-generated code |
 | DoS | Rate limiting + content size limits |
 | XSS/CSRF | Security headers middleware |

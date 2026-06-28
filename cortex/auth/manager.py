@@ -131,7 +131,7 @@ class AuthManager:
         self,
         name: str,
         tenant_id: str = "default",
-        role: str = "user",
+        role: str = "viewer",
         permissions: list[str] | None = None,
         rate_limit: int = 100,
     ) -> tuple[str, APIKey]:
@@ -180,7 +180,7 @@ class AuthManager:
         self,
         name: str,
         tenant_id: str = "default",
-        role: str = "user",
+        role: str = "viewer",
         permissions: list[str] | None = None,
         rate_limit: int = 100,
     ) -> tuple[str, APIKey]:
@@ -339,7 +339,7 @@ class AuthManager:
         return AuthResult(
             authenticated=True,
             tenant_id=row["tenant_id"],
-            role=row["role"] if "role" in row else "user",
+            role=row["role"] if "role" in row else "viewer",
             permissions=permissions,
             key_name=row["name"],
         )
@@ -353,7 +353,7 @@ class AuthManager:
                 name=r["name"],
                 key_prefix=r["key_prefix"],
                 tenant_id=r["tenant_id"],
-                role=r["role"] if "role" in r else "user",
+                role=r["role"] if "role" in r else "viewer",
                 permissions=json.loads(r["permissions"])
                 if isinstance(r["permissions"], str)
                 else r["permissions"],
