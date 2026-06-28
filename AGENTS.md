@@ -25,6 +25,7 @@
 | **[P0]** | **Never Bypass Guards** — do not circumvent the Write-Path Contract or downgrade validation errors | Always |
 | **[P0]** | **Verify Hash Continuity** — do not mutate `cortex/audit/ledger.py` or any state-persisting path without ensuring cryptographic auditability | Any ledger/engine change |
 | **[P0]** | **Anti-Limerence (Kill Criteria)** — 1 Prompt → 1 Execution → Stop. No infinite generation loops. | All generative loops |
+| **[P0]** | **APEX-100 Compliance** — All agent operations MUST adhere strictly to the 100 Invariants and 100 Primitives defined in [`docs/manifestos/APEX_INVARIANTS.md`](docs/manifestos/APEX_INVARIANTS.md). | Every Swarm execution |
 | **[P2]** | **Enforce Axioms** — apply AX-041 to AX-047 (§2) in architectural decisions | Architecture work |
 
 ### Decision Gate §0
