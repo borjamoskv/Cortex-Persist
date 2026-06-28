@@ -417,6 +417,37 @@ class CognitiveHandoff:
 
     # ─── Utilities ──────────────────────────────────────────────────────
 
+    def get_drm_route(self, tolerance_variance: float) -> dict[str, any]:
+        """[DRM-v1] Get target node, temperature, and reasoning mode based on Tolerance of Varianza.
+
+        Axiom: Hardware topology (continuous batching, MoE reduction drift) dictates
+        that strict determinism is inversely proportional to sequence length and scale.
+        """
+        if tolerance_variance <= 0.0:
+            # 0% Tolerance -> Gemini 3.5 Flash, LOW Temp, No Reasoning
+            return {
+                "provider": self._infra,
+                "temperature": 0.0,
+                "reasoning_mode": None,
+                "description": "DRM-v1: Preservación Estructural (0% Varianza)"
+            }
+        elif tolerance_variance <= 0.15:
+            # 15% Tolerance -> Gemini 3.1 Pro (or high-fidelity economic tier), LOW Temp
+            return {
+                "provider": self._auditor_economic,
+                "temperature": 0.0,
+                "reasoning_mode": None,
+                "description": "DRM-v1: Ingeniería Sistémica (15% Varianza)"
+            }
+        else:
+            # >90% Tolerance -> Premium Tier with reasoning (ULTRATHINK / o-series / GPT-5.5)
+            return {
+                "provider": self._auditor_premium,
+                "temperature": 0.5,
+                "reasoning_mode": ReasoningMode.ULTRA_THINK,
+                "description": "DRM-v1: Singularidad / Resolución P0 (>90% Varianza)"
+            }
+
     @staticmethod
     def _involves_axiomatics(
         belief: BeliefObject,
