@@ -10,8 +10,10 @@ import ast
 import io
 import logging
 import re
-
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 logger = logging.getLogger("cortex.guards.osint")
 
@@ -77,6 +79,10 @@ class OSINTGuard:
         """
         P-OSINT-061: Validates and strips EXIF/IPTC metadata from image bytes.
         """
+        if Image is None:
+            raise OSINTViolationError(
+                "PIL/Pillow is not installed. Image metadata stripping requires 'secure' dependencies."
+            )
         try:
             img = Image.open(io.BytesIO(image_bytes))
             # Extract raw image data and rebuild to discard auxiliary tags

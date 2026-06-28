@@ -325,3 +325,4 @@ def get_agent(agent_id: str) -> AgentCatalogEntry | None:
 
 # Backward-compatibility alias for older imports. Prefer AgentCatalogEntry.
 AgentDefinition = AgentCatalogEntry
+AgentRegistry = AgentCatalogLoader
