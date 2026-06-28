@@ -68,6 +68,10 @@ class SwarmSupervisor:
         from cortex.engine.causal.append_log import CrystallizerDaemon
         self._crystallizer = CrystallizerDaemon(db_path=db_path)
         
+        self._semantic_cache = []
+        self._in_flight_fps = {}
+        self._embedder = None
+        
         self._running = False
         self._db: aiosqlite.Connection | None = None
         self._topo: TopologyIndex | None = None
@@ -82,8 +86,16 @@ class SwarmSupervisor:
         await self._db.execute("PRAGMA busy_timeout=5000;")
         self._topo = TopologyIndex(self._db)
 
-        # SANEDRIN VECTOR 3: Recover ghost state globally
         await self.state_store.recover_in_flight_tasks(lease_id=None)
+
+        try:
+            from cortex.embeddings import LocalEmbedder
+            self._embedder = LocalEmbedder()
+            logger.info("LocalEmbedder initialized for Semantic Cache.")
+        except ImportError:
+            logger.warning("LocalEmbedder not available. Semantic Cache disabled.")
+        except Exception as e:
+            logger.warning(f"Could not load LocalEmbedder: {e}")
 
         # Start Worker Pool
         self.worker_pool.start()
@@ -128,6 +140,14 @@ class SwarmSupervisor:
 
             # Flush condition: buffer full, or queue is empty and we have items
             if len(signal_buffer) >= MAX_BATCH_SIZE or (signal_buffer and self.bus._queue.empty()):
+                for s in signal_buffer:
+                    if s.status == "SUCCESS":
+                        fp = self._in_flight_fps.pop(s.target, None)
+                        if fp:
+                            self._semantic_cache.append((fp, s.payload))
+                            if len(self._semantic_cache) > 1000:
+                                self._semantic_cache.pop(0)
+
                 try:
                     await self.state_store.process_signals_batch(signal_buffer)
                     for _ in signal_buffer:
@@ -178,6 +198,46 @@ class SwarmSupervisor:
                                 raise ValueError("Irrecoverable JSON after regex extraction")
                         else:
                             raise ValueError("No JSON structure found in payload")
+
+                    # 99.99% ENGINEER: Semantic Cache (Vectorial)
+                    statement = str(payload_raw)
+                    cached_payload = None
+                    fp = None
+                    
+                    if self._embedder:
+                        loop = asyncio.get_running_loop()
+                        from cortex.engine.core.semantic_hash import semantic_fingerprint, is_semantically_equivalent
+                        try:
+                            fp = await loop.run_in_executor(
+                                None,
+                                semantic_fingerprint,
+                                statement,
+                                self._embedder
+                            )
+                            for cached_fp, cached_result in self._semantic_cache:
+                                if is_semantically_equivalent(fp, cached_fp, threshold=0.99):
+                                    cached_payload = cached_result
+                                    break
+                        except Exception as e:
+                            logger.error(f"Semantic cache error: {e}")
+                    
+                    if cached_payload:
+                        logger.info(f"⚡ [Semantic Cache Hit] Bypassing LLM inference for task {task['id']}")
+                        from cortex.engine.swarm.legion import SwarmSignal
+                        synthetic_signal = SwarmSignal(
+                            agent_id="semantic_cache",
+                            target=task["id"],
+                            status="SUCCESS",
+                            payload=cached_payload,
+                            metrics={"exergy_saved": 1.0}
+                        )
+                        self.bus._queue.put_nowait(synthetic_signal)
+                        in_flight.add(task["id"])
+                        dispatched += 1
+                        continue
+                        
+                    if fp:
+                        self._in_flight_fps[task["id"]] = fp
 
                     # FABLE 5 SIGNAL 2: Steerability Constraint Injection (Strict Epistemic Gatekeeper)
                     # 99.99% ENGINEER: Bypass GIL completely using ProcessPoolExecutor
