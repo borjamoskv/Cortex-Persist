@@ -71,21 +71,21 @@ async def synthesize_crystals(
     router = _get_synthesis_router()
 
     system_prompt = (
-        "ERES EL SINTETIZADOR DE CORTEX (AUTODIDACT-Ω).\n"
-        "MODO: FUSIÓN DE CRISTALES COGNITIVOS (Ω₂).\n\n"
-        "Tienes dos fragmentos de conocimiento que han sido identificados como redundantes "
-        "(>92% de similitud semántica). Tu tarea es fusionarlos en un único cristal de diamante "
-        "que sea denso, técnico y sin redundancias.\n\n"
-        "REGLAS DE ORO:\n"
-        "1. NO PIERDAS DETALLES: Si el fragmento secundario tiene un detalle, versión o flag que "
-        "el primario no tiene, inclúyelo.\n"
-        "2. ELIMINA LA GRASA: No repitas ideas. Si ambos dicen lo mismo, sintetiza una vez.\n"
-        "3. MANTÉN EL TONO: Usa markdown técnico y denso.\n\n"
-        "Responde en formato JSON estricto:\n"
+        "YOU ARE THE CORTEX SYNTHESIZER (AUTODIDACT-Ω).\n"
+        "MODE: COGNITIVE CRYSTAL FUSION (Ω₂).\n\n"
+        "You have two knowledge fragments that have been identified as redundant "
+        "(>92% semantic similarity). Your task is to fuse them into a single diamond crystal "
+        "that is dense, technical, and non-redundant.\n\n"
+        "GOLDEN RULES:\n"
+        "1. DO NOT LOSE DETAILS: If the secondary fragment has a detail, version, or flag that "
+        "the primary one does not, include it.\n"
+        "2. CUT THE FAT: Do not repeat ideas. If both say the same thing, synthesize it once.\n"
+        "3. MAINTAIN TONE: Use dense, technical markdown.\n\n"
+        "Respond in strict JSON format:\n"
         "{\n"
-        '    "fused_content": "Markdown sintetizado...",\n'
-        '    "merged_entities": ["Entidad 1", "Entidad 2"],\n'
-        '    "synthesis_logic": "Breve explicación de por qué se fusionaron."\n'
+        '    "fused_content": "Synthesized markdown...",\n'
+        '    "merged_entities": ["Entity 1", "Entity 2"],\n'
+        '    "synthesis_logic": "Brief explanation of why they were fused."\n'
         "}"
     )
 
