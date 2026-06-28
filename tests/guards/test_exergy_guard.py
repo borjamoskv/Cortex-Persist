@@ -16,7 +16,7 @@ def test_calculate_exergy_short_valid() -> None:
 
 def test_calculate_exergy_short_decorated() -> None:
     # Decorative in short text
-    assert calculate_exergy("por supuesto aqui tienes") == 0.0
+    assert calculate_exergy("of course here you go") == 0.0
 
 
 def test_calculate_exergy_high_density() -> None:
@@ -26,7 +26,7 @@ def test_calculate_exergy_high_density() -> None:
 
 
 def test_calculate_exergy_low_density() -> None:
-    text = "Por supuesto, entendido. Como un modelo de lenguaje, espero que te sea útil resumir que la base de datos es SQL. Además, en conclusión, aquí tienes esto."
+    text = "Of course, understood. As an AI language model, I hope it is useful to summarize that the database is SQL. Furthermore, in conclusion, here you have this."
     score = calculate_exergy(text)
     assert score < 0.4  # Low density, a lot of decorative stuff
 
@@ -40,7 +40,7 @@ def test_exergy_guard_passes_valid_content() -> None:
 
 def test_exergy_guard_raises_decorative() -> None:
     guard = ExergyGuard()
-    text = "Por supuesto, entendido. Procedo a explicarte que el sistema funciona bien. Espero que te sea útil."
+    text = "Of course, understood. I will proceed to explain that the system works well. I hope this is useful."
     with pytest.raises(ValueError) as exc:
         guard.check_thermodynamic_yield(text, "test-project", "thought")
 
@@ -49,7 +49,7 @@ def test_exergy_guard_raises_decorative() -> None:
 
 def test_exergy_guard_ignores_non_text_fact_types() -> None:
     guard = ExergyGuard()
-    text = "Por supuesto, entendido. Procedo a explicarte que el sistema funciona bien."
+    text = "Of course, understood. I will proceed to explain that the system works well."
     # Even though text is low exergy, fact type 'code' bypasses check
     score = guard.check_thermodynamic_yield(text, "test-project", "code")
     assert score == 1.0

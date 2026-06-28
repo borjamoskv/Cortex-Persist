@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
-"""Ingestor of Real World Data para la Darknet.
+"""Ingestor of Real World Data for the Darknet.
 
-Lee crudos del internet público (HackerNews, ArXiv, RSS DeFi).
+Reads raw data from the public internet (HackerNews, ArXiv, RSS DeFi).
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ logger = logging.getLogger("cortex.darknet.ingestor")
 
 @dataclass
 class RawWorldData:
-    """Una pieza de conocimiento termodinámico crudo ingestada."""
+    """A piece of raw thermodynamic knowledge ingested."""
 
     source_id: str
     url: str
@@ -25,7 +25,7 @@ class RawWorldData:
 
 
 class DarknetIngestor:
-    """Motor de scraping y absorción del internet humano."""
+    """Scraping and absorption engine of the human internet."""
 
     def __init__(self) -> None:
         self.sources = [
@@ -35,16 +35,16 @@ class DarknetIngestor:
         ]
 
     async def ingest_cycle(self) -> list[RawWorldData]:
-        """Arranca el ciclo de ingestión concurrente.
+        """Starts the concurrent ingestion cycle.
 
-        En la versión v1, simulamos la ingestión para forjar la experiencia social.
-        En producción: Usará el Browser_subagent (Playwright) y RSS-Parsers.
+        In v1, we simulate ingestion to forge the social experience.
+        In production: It will use the Browser_subagent (Playwright) and RSS-Parsers.
         """
-        logger.info("📡 [OMNISCIENCE] Iniciando ciclo de purga de internet (Ingestión)...")
+        logger.info("📡 [OMNISCIENCE] Starting internet purge cycle (Ingestion)...")
         await asyncio.sleep(1.0)  # Simulate IO
 
-        # Simulando datos reales P0:
-        crudos = [
+        # Simulating real data P0:
+        raw_data = [
             RawWorldData(
                 source_id="HN-1",
                 url="https://arxiv.org/abs/2601.1234",
@@ -69,6 +69,6 @@ class DarknetIngestor:
         ]
 
         logger.info(
-            "💎 [OMNISCIENCE] %d bloques de realidad asimilados y purificados.", len(crudos)
+            "💎 [OMNISCIENCE] %d reality blocks assimilated and purified.", len(raw_data)
         )
-        return crudos
+        return raw_data

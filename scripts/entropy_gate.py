@@ -2,8 +2,8 @@
 # [C5-REAL] Exergy-Maximized
 """
 ENTROPY GATE (Pre-Commit Hook)
-Bloquea commits de archivos Python si su Complejidad Ciclomática (CC) supera
-el estándar Soberano (15).
+Blocks commits of Python files if their Cyclomatic Complexity (CC) exceeds
+the Sovereign standard (15).
 """
 
 import sys
@@ -18,10 +18,10 @@ from _changed_files import changed_files
 try:
     from radon.complexity import cc_visit
 except ImportError:
-    print("❌ Entropy Gate requiere 'radon'. Instálalo en tu entorno: pip install radon")
+    print("❌ Entropy Gate requires 'radon'. Install it in your environment: pip install radon")
     sys.exit(1)
 
-# Límite Soberano de Complejidad (Axioma 14)
+# Sovereign Complexity Limit (Axiom 14)
 CC_THRESHOLD = 15
 
 
@@ -44,7 +44,7 @@ def get_candidate_python_files() -> tuple[list[Path], str]:
 
 
 def analyze_file(filepath: Path) -> bool:
-    """Evalúa la entropía del archivo y devuelve False si no supera el corte."""
+    """Evaluates the file's entropy and returns False if it fails the threshold."""
     try:
         with open(filepath, encoding="utf-8") as f:
             code = f.read()
@@ -53,34 +53,34 @@ def analyze_file(filepath: Path) -> bool:
         if not blocks:
             return True
 
-        # Buscar el bloque (función o clase) más complejo
+        # Find the most complex block (function or class)
         worst_block = max(blocks, key=lambda b: b.complexity)
         max_cc = worst_block.complexity
 
         if max_cc > CC_THRESHOLD:
-            print(f"\n🛑 [ENTROPY GATE] {filepath.name} tiene demasiada estática.")
-            print(f"   ► Elemento: '{worst_block.name}' en línea {worst_block.lineno}")
-            print(f"   ► Complejidad: {max_cc} (Límite: {CC_THRESHOLD})")
-            print("   ► Escolta: Necesitas romper esa lógica. Extrae helpers y usa Guard Clauses.")
-            print(f"   💊 Auto-Healing disponible: `cortex heal {filepath.name}`")
+            print(f"\n🛑 [ENTROPY GATE] {filepath.name} has too much static entropy.")
+            print(f"   ► Element: '{worst_block.name}' at line {worst_block.lineno}")
+            print(f"   ► Complexity: {max_cc} (Limit: {CC_THRESHOLD})")
+            print("   ► Escort: You need to break up this logic. Extract helpers and use Guard Clauses.")
+            print(f"   💊 Auto-Healing available: `cortex heal {filepath.name}`")
             return False
 
         return True
     except (OSError, SyntaxError, UnicodeDecodeError):
-        # Silenciar errores por parseo (eso lo cogerá pydantic/syntax errors luego)
+        # Silence parsing errors (pydantic/syntax errors will catch them later)
         return True
 
 
 def main():
     candidate_files, source = get_candidate_python_files()
     if not candidate_files:
-        sys.exit(0)  # Nada que escanear, continuar con el commit
+        sys.exit(0)  # Nothing to scan, continue with the commit
 
     if source == "staged":
-        print(f"👁️  ENTROPY GATE | Evaluando estática en {len(candidate_files)} archivos staged...")
+        print(f"👁️  ENTROPY GATE | Evaluating static entropy in {len(candidate_files)} staged files...")
     else:
         print(
-            f"👁️  ENTROPY GATE | No hay staged; evaluando {len(candidate_files)} archivos del diff local..."
+            f"👁️  ENTROPY GATE | No staged files; evaluating {len(candidate_files)} files from local diff..."
         )
 
     failed = False
@@ -89,13 +89,13 @@ def main():
             failed = True
 
     if failed:
-        print("\n❌ COMMIT RECHAZADO: Entropía superior a nivel Soberano (CC > 15).")
+        print("\n❌ COMMIT REJECTED: Entropy exceeds Sovereign level (CC > 15).")
         print(
-            "💡 [SOVEREIGN TIP] Refactoriza con /mejoralo-v9.1 antes de volver a intentar el commit."
+            "💡 [SOVEREIGN TIP] Refactor with /mejoralo-v9.1 before retrying the commit."
         )
         sys.exit(1)
 
-    print("✅ Código limpio. Ley de Landauer respetada.\n")
+    print("✅ Clean code. Landauer's Principle respected.\n")
     sys.exit(0)
 
 

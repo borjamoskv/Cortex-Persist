@@ -6,8 +6,8 @@
 
 """CORTEX LLM Router - Models & Contracts.
 
-Tipos de datos soberanos: enums, dataclasses y BaseProvider.
-Extraído de router.py (Ω₂ Landauer split - 1371 → 5 módulos cohesivos).
+Sovereign data types: enums, dataclasses, and BaseProvider.
+Extracted from router.py (Ω₂ Landauer split - 1371 → 5 cohesive modules).
 """
 
 from __future__ import annotations
@@ -55,26 +55,26 @@ class ReasoningMode(str, Enum):
 
 
 class IntentProfile(str, Enum):
-    """Clasificación soberana de la intención del prompt.
+    """Sovereign classification of the prompt's intent.
 
-    Permite al router seleccionar fallbacks con afinidad semántica,
-    evitando que el ruido del error se propague entre dominios.
+    Allows the router to select fallbacks with semantic affinity,
+    preventing error noise from propagating across domains.
     """
 
     CODE = "code"
-    """Generación, refactoring, debugging o análisis de código."""
+    """Code generation, refactoring, debugging, or analysis."""
 
     REASONING = "reasoning"
-    """Análisis multi-paso, matemáticas, planificación estructurada."""
+    """Multi-step analysis, mathematics, structured planning."""
 
     CREATIVE = "creative"
-    """Escritura, brainstorming, contenido narrativo."""
+    """Writing, brainstorming, narrative content."""
 
     ARCHITECT = "architect"
-    """Análisis profundo de arquitectura y asedio adversario (Red Team)."""
+    """Deep architecture analysis and adversarial siege (Red Team)."""
 
     GENERAL = "general"
-    """Intención genérica o no clasificada - sin restricción de fallback."""
+    """Generic or unclassified intent - no fallback restriction."""
 
     BELIEF_AUDIT = "belief_audit"
     """Cognitive Handoff: contradiction detection, invariant verification.
@@ -140,23 +140,23 @@ class HedgedResult:
 
 
 class CortexPrompt(BaseModel):
-    """Representación Soberana de una instrucción para el enjambre.
-    Independiente del proveedor final (OpenAI, Anthropic, Gemini, etc).
+    """Sovereign representation of an instruction for the swarm.
+    Independent of the final provider (OpenAI, Anthropic, Gemini, etc).
     """
 
     system_instruction: str = Field(
         default="You are a helpful assistant.",
-        description="El prompt del sistema o rol principal.",
+        description="The system prompt or main role.",
     )
     working_memory: list[dict[str, str]] = Field(
         default_factory=list,
-        description="Historial reciente o contexto de trabajo (rol/contenido).",
+        description="Recent history or working context (role/content).",
     )
     prompt_tokens: int | None = Field(default=None, exclude=True)
     completion_tokens: int | None = Field(default=None, exclude=True)
     episodic_context: list[dict[str, str | None]] = Field(
         default_factory=list,
-        description="Recuerdos comprimidos o contexto a largo plazo recuperado.",
+        description="Compressed memories or retrieved long-term context.",
     )
     temperature: float = Field(default=0.3, ge=0.0, le=2.0)
     max_tokens: int = Field(default=4096, gt=0)
@@ -167,8 +167,8 @@ class CortexPrompt(BaseModel):
     intent: IntentProfile = Field(
         default=IntentProfile.GENERAL,
         description=(
-            "Tipo de intención del prompt. Determina qué fallbacks son "
-            "elegibles para el cascade determinista. GENERAL usa todos."
+            "Type of prompt intent. Determines which fallbacks are "
+            "eligible for the deterministic cascade. GENERAL uses all."
         ),
     )
     reasoning_mode: ReasoningMode | None = Field(
@@ -181,10 +181,10 @@ class CortexPrompt(BaseModel):
     )
 
     def to_openai_messages(self) -> list[dict[str, str]]:
-        """Convierte la estructura soberana al formato de mensajes de OpenAI."""
+        """Converts the sovereign structure to the OpenAI messages format."""
         messages: list[dict[str, str]] = [{"role": "system", "content": self.system_instruction}]
 
-        # Inyectar contexto episódico si existe, asimilado tempranamente
+        # Inject episodic context if it exists, assimilated early
         if self.episodic_context:
             context_str = "\n".join(
                 f"[{m.get('role', 'memory')}]: {m.get('content', '')}"
@@ -208,30 +208,30 @@ class CortexPrompt(BaseModel):
 
 
 class BaseProvider(ABC):
-    """Interfaz estricta que cualquier proveedor LLM debe cumplir.
+    """Strict interface that any LLM provider must fulfill.
 
-    Cada provider declara su `intent_affinity` - el conjunto de intenciones
-    que sirve con alta precisión. El router usa esta declaración para
-    construir el cascade determinista.
+    Each provider declares its `intent_affinity` - the set of intents
+    it serves with high precision. The router uses this declaration to
+    build the deterministic cascade.
     """
 
     @property
     @abstractmethod
     def provider_name(self) -> str:
-        """Identificador único del proveedor."""
+        """Unique identifier of the provider."""
         ...
 
     @property
     @abstractmethod
     def model_name(self) -> str:
-        """Nombre del modelo subyacente."""
+        """Name of the underlying model."""
         ...
 
     @property
     def intent_affinity(self) -> frozenset[IntentProfile]:
-        """Intenciones para las que este provider es adecuado.
+        """Intents for which this provider is suitable.
 
-        Override en subclases especializadas. Por defecto, GENERAL.
+        Override in specialized subclasses. By default, GENERAL.
         """
         return frozenset({IntentProfile.GENERAL})
 
@@ -252,5 +252,5 @@ class BaseProvider(ABC):
 
     @abstractmethod
     async def invoke(self, prompt: CortexPrompt) -> str:
-        """Traduce el CortexPrompt y ejecuta la inferencia."""
+        """Translates the CortexPrompt and executes the inference."""
         ...

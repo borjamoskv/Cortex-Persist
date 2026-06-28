@@ -2,7 +2,7 @@
 """Anomaly Hunter Engine - NightShift Memory Refiner.
 
 Detects physical and temporal contradictions in the daily logs.
-Implementación directa del Axioma Ω₂ (Asimetría Entrópica) y CORTEX-Sovereignty.
+Direct implementation of Axiom Ω₂ (Entropic Asymmetry) and CORTEX-Sovereignty.
 """
 
 from __future__ import annotations
@@ -23,15 +23,15 @@ logger = logging.getLogger("cortex.anomaly")
 class Anomaly:
     type: str  # TEMPORAL_INVERSION | SPATIAL_CONTRADICTION | etc.
     severity: str  # HIGH | MEDIUM | LOW
-    facts_involved: list[int]  # fact IDs de CORTEX
+    facts_involved: list[int]  # CORTEX fact IDs
     description: str
     suggested_action: str
 
 
 class AnomalyHunterEngine:
     """
-    Modo Sleep-Time Compute: se ejecuta durante NightShift (baja carga del sistema).
-    Analiza todos los facts generados en las últimas 24h.
+    Sleep-Time Compute mode: executes during NightShift (low system load).
+    Analyzes all facts generated in the last 24h.
     """
 
     def __init__(self, cortex_engine: Any, lookback_hours: int = 24):
@@ -40,7 +40,7 @@ class AnomalyHunterEngine:
         self.anomalies: list[Anomaly] = []
 
     async def _get_fact_timestamp(self, fact_id: int) -> datetime | None:
-        """Helper para extraer timestamp del engine de forma asíncrona."""
+        """Helper to extract timestamp from the engine asynchronously."""
         fact_raw = await self.cortex.get_fact(fact_id)
         if not fact_raw or not fact_raw.get("created_at"):
             return None
@@ -49,37 +49,37 @@ class AnomalyHunterEngine:
         return datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
 
     def _is_same_entity(self, fact_a: Fact, fact_b: Fact) -> bool:
-        """Determina si dos facts hablan de la misma entidad (tags, titulo...)."""
+        """Determines if two facts refer to the same entity (tags, title...)."""
         if not fact_a.tags or not fact_b.tags:
             return False
         return len(set(fact_a.tags) & set(fact_b.tags)) > 0
 
     def _are_contradictory(self, fact_a: Fact, fact_b: Fact) -> bool:
-        """Heurística básica para contradicciones espaciales."""
+        """Basic heuristic for spatial contradictions."""
         a_content = fact_a.content.lower()
         b_content = fact_b.content.lower()
 
-        # Lógica muy simplificada para el ejemplo
-        if "bloqueada" in a_content and "pasé" in b_content:
+        # Highly simplified logic for the example
+        if "blocked" in a_content and "passed" in b_content:
             return True
-        if "bloqueada" in b_content and "pasé" in a_content:
+        if "blocked" in b_content and "passed" in a_content:
             return True
         return False
 
     async def _trace_causal_chain(self, fact: Fact) -> list[Fact]:
-        """Extrae la cadena causal usando la abstracción de hierarchy."""
-        # Delegamos en el método del engine (que ya devuelve list[Fact])
+        """Extracts the causal chain using the hierarchy abstraction."""
+        # We delegate to the engine method (which already returns list[Fact])
         chain = await self.cortex.get_causal_chain(fact.id)
         return chain if chain else []
 
     async def run_full_scan(self) -> dict:
-        """Entry point NightShift: escaneo completo en paralelo."""
+        """NightShift entry point: full parallel scan."""
         threshold = datetime.fromtimestamp(time.time(), tz=timezone.utc) - self.window
         # Fetching facts from the last 24h
         time_filter = threshold.isoformat()
 
-        # Limitamos la query para Nightshift (asumiendo que hay un recall con as_of)
-        # Aquí usamos history para tener todos los estados y luego filtramos
+        # We limit the query for Nightshift (assuming there is a recall with as_of)
+        # Here we use history to have all states and then filter
 
         # Recall relevant facts from history across tracked projects
         recent_raw_facts = await self.cortex.history(project="anomaly-hunter")
@@ -87,7 +87,7 @@ class AnomalyHunterEngine:
         recent_facts = [f for f in recent_raw_facts if (f.created_at or "") > time_filter]
 
         if not recent_facts:
-            # Amplio la busqueda de manera dummy para el ejemplo
+            # Expand the search in a dummy way for the example
             pass
 
         # Run all detectors in parallel
@@ -105,8 +105,8 @@ class AnomalyHunterEngine:
 
     async def detect_temporal_inversions(self, facts: list[Fact]) -> list[Anomaly]:
         """
-        Detecta causas que ocurren DESPUÉS de sus efectos.
-        Ejemplo: 'Módulo importado' timestamp > 'Módulo creado' timestamp
+        Detects causes that occur AFTER their effects.
+        Example: 'Imported module' timestamp > 'Created module' timestamp
         """
         inversions = []
         for fact in facts:
@@ -126,11 +126,11 @@ class AnomalyHunterEngine:
                             severity="HIGH",
                             facts_involved=[fact.id, cause_id],  # pyright: ignore
                             description=(
-                                f"Efecto (fact #{fact.id}) precede a su causa. "
+                                f"Effect (fact #{fact.id}) precedes its cause. "
                                 f"Delta: {(cause_ts - effect_ts).seconds}s"
                             ),
                             suggested_action=(
-                                "Verificar timestamps de ambos hechos. Posible error de registro."
+                                "Verify timestamps of both facts. Possible logging error."
                             ),
                         )
                     )
@@ -138,8 +138,8 @@ class AnomalyHunterEngine:
 
     async def detect_spatial_contradictions(self, facts: list[Fact]) -> list[Anomaly]:
         """
-        Dos facts sobre la misma entidad con estados opuestos.
-        Usa similaridad semántica para detectar 'Ruta X bloqueada' vs 'Pasé por Ruta X'.
+        Two facts about the same entity with opposite states.
+        Uses semantic similarity to detect 'Route X blocked' vs 'Passed through Route X'.
         """
         contradictions = []
         for i, fact_a in enumerate(facts):
@@ -151,18 +151,18 @@ class AnomalyHunterEngine:
                             severity="HIGH",
                             facts_involved=[fact_a.id, fact_b.id],  # pyright: ignore
                             description=(
-                                f"Contradicción entre fact #{fact_a.id} y #{fact_b.id} "
-                                "sobre la misma entidad."
+                                f"Contradiction between fact #{fact_a.id} and #{fact_b.id} "
+                                "about the same entity."
                             ),
                             suggested_action=(
-                                "Reconciliar con fuente primaria. Uno de los dos hechos es erróneo."
+                                "Reconcile with primary source. One of the two facts is erroneous."
                             ),
                         )
                     )
         return contradictions
 
     async def detect_value_drift(self, facts: list[Fact]) -> list[Anomaly]:
-        """Detecta valores que divergen drásticamente para la misma entidad."""
+        """Detects values that diverge drastically for the same entity."""
         drifts = []
         entity_map: dict[str, list[Fact]] = {}
 
@@ -195,17 +195,17 @@ class AnomalyHunterEngine:
                                 severity="MEDIUM",
                                 facts_involved=[f1.id, f2.id],  # type: ignore
                                 description=(
-                                    f"Drift detectado en {tag_key}: {v1} -> {v2} ({drift_pct:.1%})"
+                                    f"Drift detected in {tag_key}: {v1} -> {v2} ({drift_pct:.1%})"
                                 ),
                                 suggested_action=(
-                                    "Revisar si el cambio de valor es legítimo o un error."
+                                    "Review if the value change is legitimate or an error."
                                 ),
                             )
                         )
         return drifts
 
     async def detect_ghost_resurrections(self, facts: list[Fact]) -> list[Anomaly]:
-        """Detecta entidades que estaban deprecadas ('ghost' markers) y vuelven a usarse."""
+        """Detects entities that were deprecated ('ghost' markers) and are used again."""
         resurrections = []
         for f in facts:
             if "resurrected" in f.content.lower() or f.meta.get("reopened"):
@@ -214,16 +214,16 @@ class AnomalyHunterEngine:
                         type="GHOST_RESURRECTION",
                         severity="LOW",
                         facts_involved=[f.id],  # type: ignore
-                        description=f"Entidad en fact #{f.id} re-activada tras supuesta purga.",
-                        suggested_action="Verificar si la purga previa fue incompleta.",
+                        description=f"Entity in fact #{f.id} re-activated after supposed purge.",
+                        suggested_action="Verify if the previous purge was incomplete.",
                     )
                 )
         return resurrections
 
     async def detect_confidence_collapses(self, facts: list[Fact]) -> list[Anomaly]:
         """
-        Cadenas de inferencia donde todas las fuentes son C3 (síntesis),
-        sin ningún anclaje a C4/C5 (evidencia primaria).
+        Inference chains where all sources are C3 (synthesis),
+        without any anchor to C4/C5 (primary evidence).
         """
         collapses = []
         for fact in facts:
@@ -237,18 +237,18 @@ class AnomalyHunterEngine:
                         severity="MEDIUM",
                         facts_involved=[f.id for f in chain],  # pyright: ignore
                         description=(
-                            f"Cadena de {len(chain)} hechos sin anclaje C4/C5. "
-                            "Toda la cadena es especulativa."
+                            f"Chain of {len(chain)} facts without C4/C5 anchor. "
+                            "The entire chain is speculative."
                         ),
-                        suggested_action="Buscar fuente primaria (C4/C5) o degradar toda la cadena a C2.",
+                        suggested_action="Search for primary source (C4/C5) or degrade the entire chain to C2.",
                     )
                 )
         return collapses
 
     async def generate_verification_tasks(self):
         """
-        Para cada anomalía HIGH, persiste una tarea de verificación en CORTEX.
-        El operador la verá al inicio del siguiente día de trabajo.
+        For each HIGH anomaly, persists a verification task in CORTEX.
+        The operator will see it at the start of the next workday.
         """
         high_severity = [a for a in self.anomalies if a.severity == "HIGH"]
         for anomaly in high_severity:
@@ -257,7 +257,7 @@ class AnomalyHunterEngine:
                 project="anomaly-hunter",
                 source="daemon:anomaly-hunter-v2",
                 confidence="C4",
-                summary=f"⚠️ VERIFICAR: {anomaly.type} - {anomaly.description}",
+                summary=f"⚠️ VERIFY: {anomaly.type} - {anomaly.description}",
                 meta={
                     "anomaly_type": anomaly.type,
                     "facts_involved": anomaly.facts_involved,

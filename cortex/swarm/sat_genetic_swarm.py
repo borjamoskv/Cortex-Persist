@@ -14,7 +14,7 @@ class SatGeneticSwarm:
         self.k = k
         self.timeout_ms = timeout_ms
         self.mutation_rate = 0.2
-        # Población: lista de listas de tuplas (aristas)
+        # Population: list of lists of tuples (edges)
         self.population: list[list[tuple[int, int]]] = [
             self._random_graph() for _ in range(self.pop_size)
         ]
@@ -23,25 +23,25 @@ class SatGeneticSwarm:
         edges = []
         for i in range(self.graph_size):
             for j in range(i + 1, self.graph_size):
-                if random.random() < 0.4:  # Densidad inicial
+                if random.random() < 0.4:  # Initial density
                     edges.append((i, j))
         return edges
 
     def fitness(self, graph: list[tuple[int, int]]) -> float:
         """
-        Calcula la Entropía del grafo: queremos maximizar la cantidad de aristas (densidad)
-        para forzar la explosión combinatoria en el solver SAT.
+        Calculates graph Entropy: we want to maximize the number of edges (density)
+        to force a combinatorial explosion in the SAT solver.
         """
-        # La entropía en este escenario adversarial se simplifica al conteo de aristas
-        # penalizando grafos vacíos o grafos completos triviales.
+        # Entropy in this adversarial scenario simplifies to edge count
+        # penalizing empty graphs or trivial complete graphs.
         edge_count = len(graph)
         max_edges = (self.graph_size * (self.graph_size - 1)) // 2
 
-        # Penalizamos si está demasiado cerca del grafo completo (trivialmente Unsat rápido para cliques grandes)
+        # We penalize if it is too close to a complete graph (trivially fast Unsat for large cliques)
         if edge_count > max_edges * 0.8:
             return float(edge_count) * 0.5
 
-        return float(edge_count) + random.uniform(0, 5)  # Ruido estocástico para diversificación
+        return float(edge_count) + random.uniform(0, 5)  # Stochastic noise for diversification
 
     def evolve(self, generations: int = 5) -> dict:
         for _gen in range(generations):

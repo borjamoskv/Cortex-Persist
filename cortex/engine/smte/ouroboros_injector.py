@@ -3,8 +3,8 @@ import threading
 # [C5-REAL] Exergy-Maximized
 """OUROBOROS INJECTOR - Synthetic Friction Generator.
 
-Inyecta conflictos estocásticos y asimétricos (eventos de fricción) en Redpanda
-para someter a estrés al Ouroboros Stream Kernel (CQRS Pruning).
+Injects stochastic and asymmetric conflicts (friction events) into Redpanda
+to stress the Ouroboros Stream Kernel (CQRS Pruning).
 """
 
 import json
@@ -28,11 +28,11 @@ except ImportError:
 def delivery_report(err, msg):
     """Callback triggered by Kafka on successful/failed delivery."""
     if err is not None:
-        logger.error(f"Fallo de entrega: {err}")
+        logger.error(f"Delivery failure: {err}")
 
 
 def inject_synthetic_friction(broker="localhost:9092", num_events=500):
-    """Inyecta una carga de exergía y entropía en el bus system.friction."""
+    """Injects an exergy and entropy load into the system.friction bus."""
     if Producer is None:
         logger.error(
             "confluent_kafka is not installed. Cannot inject friction. Run: pip install confluent_kafka"
@@ -40,16 +40,16 @@ def inject_synthetic_friction(broker="localhost:9092", num_events=500):
         sys.exit(1)
     producer = Producer({"bootstrap.servers": broker})
 
-    # Pool de 10 agentes virtuales
+    # Pool of 10 virtual agents
     agent_ids = [f"Agent-Ω-{i}" for i in range(10)]
 
-    logger.info(f"⚡ Iniciando inyección de {num_events} eventos hacia {broker}")
+    logger.info(f"⚡ Starting injection of {num_events} events to {broker}")
 
     for i in range(num_events):
         agent_id = random.choice(agent_ids)
 
-        # Determinismo de prueba: Agentes pares son limerentes (alta entropía, baja señal)
-        # Agentes impares son cristalinos (alta señal, baja entropía)
+        # Test determinism: Even agents are limerent (high entropy, low signal)
+        # Odd agents are crystalline (high signal, low entropy)
         is_limerent = int(agent_id.split("-")[-1]) % 2 == 0
 
         if is_limerent:
@@ -72,13 +72,13 @@ def inject_synthetic_friction(broker="localhost:9092", num_events=500):
         )
         producer.poll(0)
 
-        # Pausa ligera para emular streaming natural
+        # Slight pause to emulate natural streaming
         if i % 50 == 0:
             threading.Event().wait(0.05)  # noqa: TID251
 
     producer.flush()
     logger.info(
-        "✅ Inyección completada. El Stream Kernel debería haber podado a los agentes pares."
+        "✅ Injection completed. The Stream Kernel should have pruned the even agents."
     )
 
 
