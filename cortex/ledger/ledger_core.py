@@ -230,8 +230,9 @@ class SovereignLedger(LedgerAuditMixin):
         if len(detail_json) < 2:
             logger.warning("[OUROBOROS] Low entropy transaction detail. Sub-optimal exergy flow.")
             
+        import re
         # [C5-REAL] Context Isolation Hook (P1.2)
-        if "slop" in action.lower() or "limerence" in action.lower():
+        if re.search(r'\b(slop|limerence)\b', action.lower()):
             raise ValueError("[OUROBOROS] Vector P1.2 Context Isolation: Action blocked by C5-REAL Anti-Limerence protocol.")
 
         cursor = conn.execute(
