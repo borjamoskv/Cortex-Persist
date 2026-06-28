@@ -64,6 +64,10 @@ class SwarmSupervisor:
         from concurrent.futures import ProcessPoolExecutor
         import os
         self._crypto_pool = ProcessPoolExecutor(max_workers=max(1, (os.cpu_count() or 2) // 2))
+        
+        from cortex.engine.causal.append_log import CrystallizerDaemon
+        self._crystallizer = CrystallizerDaemon(db_path=db_path)
+        
         self._running = False
         self._db: aiosqlite.Connection | None = None
         self._topo: TopologyIndex | None = None
@@ -83,6 +87,9 @@ class SwarmSupervisor:
 
         # Start Worker Pool
         self.worker_pool.start()
+        
+        # Start AOL Crystallizer
+        self._crystallizer.start()
 
         # Start State Store Consumer with Heartbeat Monitor
         self._running = True
@@ -258,6 +265,7 @@ class SwarmSupervisor:
         """Gracefully shutdown the pipeline."""
         self._running = False
         await self.worker_pool.stop()
+        await self._crystallizer.stop()
 
         if self._state_worker_task:
             await self._state_worker_task

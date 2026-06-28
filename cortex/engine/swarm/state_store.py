@@ -212,53 +212,41 @@ class CausalStateStore:
                 return
 
             try:
-                # 3. SAGA Step 2 & 3: Atomic 2PC Mutation (Batch EXECUTEMANY where possible)
-                with causal_write(self._db):
-                    # Batch Insert Audit Ledger
-                    audit_params = [
-                        (s.agent_id, s.target, s.status, lp["timestamp"], json.dumps(s.payload))
-                        for s, lp in valid_signals
-                    ]
-                    await self._db.executemany(
-                        "INSERT INTO audit_ledger (agent_id, target, status, timestamp, payload) VALUES (?, ?, ?, ?, ?)",
-                        audit_params
-                    )
-
-                    success_count = 0
-                    for signal, ledger_payload in valid_signals:
-                        if signal.status in ("SUCCESS", "FAILURE"):
-                            success_count += 1
-                            if signal.target.startswith("hyp-") and signal.status == "SUCCESS":
-                                await self._db.execute(
-                                    "UPDATE system_hypotheses SET status = 'COMPLETED' WHERE id = ?", (signal.target,)
-                                )
-                                
-                                try:
-                                    from cortex.extensions.skills.autodidact.epistemology import EvidenceSource, RawEvidence
-                                    raw_ev = RawEvidence(
-                                        source=EvidenceSource.KERNEL_EVENTS,
-                                        raw_payload=signal.payload,
-                                        timestamp_iso=ledger_payload["timestamp"]
-                                    )
-                                    await self._db.execute(
-                                        "INSERT INTO facts (tenant_id, project, content, fact_type, confidence, source, metadata, is_tombstoned) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                                        ("default", "global", raw_ev.model_dump_json(), "raw_evidence", "C5-REAL", f"sanedrin:{signal.agent_id}", "{}", 0)
-                                    )
-                                except Exception as epi_e:
-                                    logger.warning(f"[EpistemicBreaker] Failed to compile RawEvidence from {signal.target}: {epi_e}")
-
-                    if success_count > 0:
-                        await self._db.execute(
-                            "UPDATE cortex_meta SET value = CAST(CAST(value AS INTEGER) + ? AS TEXT) WHERE key = 'hypothesis_graph_version'",
-                            (success_count,)
-                        )
+                # 3. SAGA Step 2 & 3: Atomic AOL Append (Bypass SQLite Lock)
+                mutations = []
+                for s, lp in valid_signals:
+                    mutations.append({
+                        "table": "audit_ledger",
+                        "params": (s.agent_id, s.target, s.status, lp["timestamp"], json.dumps(s.payload))
+                    })
                     
-                    # ATOMIC COMMIT (SANEDRIN VECTOR 1 - BATCH)
-                    await self._db.commit()
+                    if s.status in ("SUCCESS", "FAILURE"):
+                        if s.target.startswith("hyp-") and s.status == "SUCCESS":
+                            mutations.append({
+                                "table": "system_hypotheses",
+                                "params": (s.target,)
+                            })
+                            
+                            try:
+                                from cortex.extensions.skills.autodidact.epistemology import EvidenceSource, RawEvidence
+                                raw_ev = RawEvidence(
+                                    source=EvidenceSource.KERNEL_EVENTS,
+                                    raw_payload=s.payload,
+                                    timestamp_iso=lp["timestamp"]
+                                )
+                                mutations.append({
+                                    "table": "facts",
+                                    "params": ("default", "global", raw_ev.model_dump_json(), "raw_evidence", "C5-REAL", f"sanedrin:{s.agent_id}", "{}", 0)
+                                })
+                            except Exception as epi_e:
+                                logger.warning(f"[EpistemicBreaker] Failed to compile RawEvidence from {s.target}: {epi_e}")
 
-            except (aiosqlite.Error, ValueError, KeyError, TypeError, RuntimeError) as e:
-                await self._db.rollback()
-                logger.error(f"[SAGA ROLLBACK] Batch state mutation failed: {e}")
+                if mutations:
+                    from cortex.engine.causal.append_log import AppendOnlyLog
+                    AppendOnlyLog.append_batch(mutations)
+
+            except Exception as e:
+                logger.error(f"[SAGA ROLLBACK] Batch AOL mutation failed: {e}")
 
     async def recover_in_flight_tasks(self, lease_id: str | None = None) -> int:
         """SANEDRIN VECTOR 3: Lease-locked Ghost Recovery."""
