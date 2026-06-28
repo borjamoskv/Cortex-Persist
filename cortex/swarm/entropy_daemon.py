@@ -8,10 +8,10 @@ logger = logging.getLogger(__name__)
 
 class EntropyDaemon:
     """
-    [C5-REAL] Daemon de Higiene Termodinámica.
-    Separa la Supervivencia (ExergyDaemon) del Mantenimiento (EntropyDaemon).
-    Su función es reclamar el espacio físico en disco (Vacío, WAL truncation, Fragmentación).
-    Opera en un thread asíncrono secundario y ejecuta VACUUM con mínima interrupción I/O.
+    [C5-REAL] Thermodynamic Hygiene Daemon.
+    Separates Survival (ExergyDaemon) from Maintenance (EntropyDaemon).
+    Its function is to reclaim physical disk space (Vacuum, WAL truncation, Fragmentation).
+    Operates on a secondary asynchronous thread and executes VACUUM with minimal I/O interruption.
     """
 
     def __init__(self, db_path: str, scan_interval: int = 600):
@@ -21,7 +21,7 @@ class EntropyDaemon:
         self._task = None
 
     async def _daemon_loop(self):
-        logger.info("[EntropyDaemon] Activo. Gestión de basuras de SQLite iniciada.")
+        logger.info("[EntropyDaemon] Active. SQLite garbage collection initiated.")
         while self._running:
             try:
                 await asyncio.sleep(self.interval)
@@ -29,11 +29,11 @@ class EntropyDaemon:
             except asyncio.CancelledError:
                 break
             except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
-                logger.error(f"[EntropyDaemon] Falla durante higiene: {e}")
+                logger.error(f"[EntropyDaemon] Failure during hygiene: {e}")
 
     async def _hygiene_sweep(self):
-        """Reclama espacio físico devolviéndolo al OS."""
-        logger.info("[EntropyDaemon] Ejecutando VACUUM e higiene WAL...")
+        """Reclaims physical space returning it to the OS."""
+        logger.info("[EntropyDaemon] Executing VACUUM and WAL hygiene...")
         db_size_before = os.path.getsize(self.db_path) if os.path.exists(self.db_path) else 0
 
         from cortex.database.core import connect_async
@@ -48,7 +48,7 @@ class EntropyDaemon:
         recovered = (db_size_before - db_size_after) / 1024
 
         if recovered > 0:
-            logger.info(f"[EntropyDaemon] Limpieza exitosa. Espacio recuperado: {recovered:.2f} KB")
+            logger.info(f"[EntropyDaemon] Cleanup successful. Recovered space: {recovered:.2f} KB")
 
         # APEX-008: Ouroboros Immune - scan for recursive logging
         try:
@@ -58,10 +58,10 @@ class EntropyDaemon:
             quarantined = immune.scan_and_quarantine()
             if quarantined:
                 logger.warning(
-                    f"[EntropyDaemon] AISLADO: {len(quarantined)} archivos por Ouroboros."
+                    f"[EntropyDaemon] ISOLATED: {len(quarantined)} files by Ouroboros."
                 )
         except Exception as e:
-            logger.warning(f"[EntropyDaemon] Falla Ouroboros Immune: {e}")
+            logger.warning(f"[EntropyDaemon] Ouroboros Immune failure: {e}")
 
     def start(self):
         if self._running:
@@ -77,4 +77,4 @@ class EntropyDaemon:
                 await self._task
             except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
                 logger.warning("Suppressed exception: %s", exc)
-            logger.info("[EntropyDaemon] Terminado.")
+            logger.info("[EntropyDaemon] Terminated.")
