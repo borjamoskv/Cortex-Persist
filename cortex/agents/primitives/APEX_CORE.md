@@ -215,40 +215,40 @@
 
 ## 20 ANTIPATRONES ESTOCÁSTICOS
 
-| ID | Antipatrón | Descripción |
-|:---|:---|:---|
-| **AP-01** | **Green Theater** | Anergía conversacional, disculpas, y texto de relleno ("Here is your code"). |
-| **AP-02** | **Sync Sleep Lock** | Uso de `time.sleep()` bloqueante en el event loop asíncrono (Muerte P0). |
-| **AP-03** | **Float Precision Loss** | Uso de coma flotante (`float`) en vez de `Decimal` para scores o finanzas. |
-| **AP-04** | **Silent Swallow** | Uso de `except Exception: pass` desnudo sin inyectar traza al Ledger. |
-| **AP-05** | **Guard Bypass** | Escribir en DB o Ledger sin un call stack que atraviese un Guard Determinista. |
-| **AP-06** | **Orphaned Taint** | Insertar un hecho (Fact) probabilístico en memoria sin token `CORTEX-TAINT`. |
-| **AP-07** | **Naked Print** | Uso de `print()` pelado en el hot-path del motor en lugar del logger estructurado. |
-| **AP-08** | **CLI Logic Bleed** | Inserción de reglas de negocio en los wrappers de CLI en vez del `engine/`. |
-| **AP-09** | **Ghost Schema** | Mutar el esquema SQLite sin documentarlo en una entrada de migración determinista. |
-| **AP-10** | **Entropy Slop** | Axiomas o hechos sagrados expresados con baja entropía de Shannon (>256 bytes de prosa inútil). |
-| **AP-11** | **Phantom Secret** | Leak en texto plano de claves en RAM, diccionarios de metadatos o JSON payloads. |
-| **AP-12** | **Epistemic Limerence** | Bucles de análisis infinitos (thinking) que no colapsan en una mutación C5-REAL. |
-| **AP-13** | **Semantic Drift** | Variables que mutan su tipado implícitamente burlando el Pyright o las aserciones. |
-| **AP-14** | **God Mode Context** | Cargar el código fuente completo en vez de utilizar búsqueda RAG e índices vectoriales. |
-| **AP-15** | **Zombie Reference** | Documentar o depender de rutas/archivos (`NO`) que no existen en el DAG de Git. |
-| **AP-16** | **Cross-Tenant Bleed** | Mutación o lectura de la matriz de datos sin acotar estricto por `tenant_id`. |
-| **AP-17** | **Incomplete Saga** | Avanzar en un paso de escritura SAGA sin disponer de una función de rollback probada. |
-| **AP-18** | **UI Space Binding** | Depender de coordenadas visuales (clicks estocásticos) en lugar de topología DOM estricta. |
-| **AP-19** | **Physical Duplication** | Copiar archivos arquitectónicos cruzados en lugar de utilizar Symlinks (Falla de Nexus). |
-| **AP-20** | **Diplomatic Muting** | Omitir un fallo arquitectónico severo del Operador por amabilidad, rompiendo el C5. |
+| ID | Antipatrón | Trigger | Penalty | Resolution |
+|:---|:---|:---|:---|:---|
+| **AP-01** | **Green Theater** | `/here is your code|por favor/` | `OOM Sim / Apoptosis` | Context Compression OMEGA |
+| **AP-02** | **Sync Sleep Lock** | `time.sleep() en Event Loop` | `SIGKILL P0` | asyncio.sleep() |
+| **AP-03** | **Float Precision Loss** | `type(float) AND domain==finanzas` | `ROLLBACK` | Decimal module |
+| **AP-04** | **Silent Swallow** | `except Exception: pass` | `Git Sentinel Hook Fail` | Logger Inyección Ledger |
+| **AP-05** | **Guard Bypass** | `Ledger.write() SIN Guard.eval()` | `Abortar Transacción SAGA` | Enforce Saga Pattern |
+| **AP-06** | **Orphaned Taint** | `Generative_Fact SIN Taint` | `Purga LFU` | Emitir CORTEX-TAINT |
+| **AP-07** | **Naked Print** | `print() en hotpath` | `Ruff Linter Fail` | Structured bound logger |
+| **AP-08** | **CLI Logic Bleed** | `Regla de negocio en capa CLI` | `Rechazo de Commit` | Mover a cortex/engine |
+| **AP-09** | **Ghost Schema** | `ALTER TABLE sin archivo en /migrations/` | `DB Lock P0` | Añadir Migración |
+| **AP-10** | **Entropy Slop** | `Axioma_size > 256 bytes` | `Compresión Forzosa` | Aplicar Ley de Landauer |
+| **AP-11** | **Phantom Secret** | `Regex [0-9a-zA-Z]{32,} en JSON` | `Alerta P0 + Cierre` | Cifrado AES-GCM 256 |
+| **AP-12** | **Epistemic Limerence** | `Generaciones LLM consecutivas > 3 sin mutar` | `SIGKILL / Re-enrutar a Worker` | Ejecutar Mutación (C5-REAL) |
+| **AP-13** | **Semantic Drift** | `Variable override explícito de tipo` | `Pyright Fail` | Strict Typing |
+| **AP-14** | **God Mode Context** | `Repo_Read completo al Prompt` | `Context Truncate` | Index ONNX Vector RAG |
+| **AP-15** | **Zombie Reference** | `MD ref -> File NOT EXISTS` | `Link Checker Fail` | Eliminar referencia o crear File |
+| **AP-16** | **Cross-Tenant Bleed** | `Query SIN tenant_id` | `DB Policy Reject` | Scope por tenant |
+| **AP-17** | **Incomplete Saga** | `Step N++ SIN rollback(N) definido` | `SAGA No Inicializa` | Definir SAGA revert map |
+| **AP-18** | **UI Space Binding** | `Click(x, y)` | `DOM Exception` | Selección topológica AST/CSS |
+| **AP-19** | **Physical Duplication** | `Identical hash en 2 paths` | `Nexus Purge` | Crear Symlink Físico |
+| **AP-20** | **Diplomatic Muting** | `Omitir Error P0 por UX` | `Degradación de Trust` | Confrontación Cruda del Fallo |
 
 ## 10 REDUNDANCIAS ACTIVAS (MITIGACIÓN C5)
 
-| ID | Redundancia | Descripción |
-|:---|:---|:---|
-| **RA-01** | **SQLite WAL Mode** | Tolerancia concurrente. Múltiples lecturas y escrituras asíncronas aisladas de bloqueos. |
-| **RA-02** | **Saga Snapshot & Rollback** | Copia de estado en RAM/Disco pre-mutación. Permite desenrollado a SAGA-1 en caso de error. |
-| **RA-03** | **Ledger Hash-Chaining** | Historial criptográfico en cadena. Mutaciones corruptas o maliciosas rompen el hash irremediablemente. |
-| **RA-04** | **CORTEX-TAINT Provenance** | Rastreo de origen atómico. Si un modelo degrada, su progenie entera puede purgarse. |
-| **RA-05** | **Quorum BFT (n/3)** | Redundancia de decisión agéntica. Mínimo 3 aserciones para validar verdades físicas cruzadas. |
-| **RA-06** | **Circuit Breakers & Jitter** | Auto-mitigación de tormentas de red. Delay exponencial aleatorizado y apertura térmica de circuitos. |
-| **RA-07** | **Nexus Symlinking** | Redundancia lógica pero no física. Un solo nodo de verdad C5 sincroniza todos los workspaces de forma instantánea. |
-| **RA-08** | **AES-GCM Authentication** | Redundancia criptográfica. El payload no solo se oculta, se firma contra alteraciones de bit-flip. |
-| **RA-09** | **Dead-Letter Quarantine** | Estado de cuarentena forense (`ON_CORRUPT`). Las transacciones fallidas no se borran, se aíslan para autopsia. |
-| **RA-10** | **Oráculo Dual (Git + DB)** | Mutua aserción de la realidad. Si el Snapshot de Git no avala la base de datos WAL, se detona alerta P0. |
+| ID | Redundancia | Mecanismo | Overhead Termodinámico | Resiliencia |
+|:---|:---|:---|:---|:---|
+| **RA-01** | **SQLite WAL Mode** | Append-only disk log | `I/O Disk O(1)` | Read-Write Deadlocks |
+| **RA-02** | **Saga Snapshot & Rollback** | RAM/Disk Copy pre-mutation | `Memory M` | Inconsistencia Transaccional |
+| **RA-03** | **Ledger Hash-Chaining** | SHA-256 cadena atada | `CPU hash` | Corrupción silenciosa de DB |
+| **RA-04** | **CORTEX-TAINT Provenance** | Flagging origen probabilístico | `Metadatos extra` | Alucinación en cascada |
+| **RA-05** | **Quorum BFT (n/3)** | Llamadas LLM paralelas | `API Cost x3` | Falla estocástica simple |
+| **RA-06** | **Circuit Breakers & Jitter** | Delay y cierre de socket | `Latencia de red` | Tormentas de Requests API |
+| **RA-07** | **Nexus Symlinking** | Inodes linkeados OS | `Cero I/O extra` | Desviación documental |
+| **RA-08** | **AES-GCM Authentication** | Encriptación + Firma Criptográfica | `CPU SIMD` | Bit-flip o manipulación RAM |
+| **RA-09** | **Dead-Letter Quarantine** | Separación de records erróneos | `Almacenamiento disco` | Pérdida de forense tras error |
+| **RA-10** | **Oráculo Dual (Git + DB)** | Aserción cruzada estado/disco | `Git DAG check` | Modificación bypass DB |
