@@ -342,8 +342,8 @@ class CognitiveHandoff:
             )
 
         prompt = CortexPrompt(
-            system_instruction="You are the Premium Belief Auditor (Claude Opus). "
-            "A prior economic audit returned an UNCERTAIN verdict. "
+            system_instruction="You are the Premium Belief Auditor (Claude Opus 4.8 Thinking). "
+            "A prior economic audit returned an UNCERTAIN verdict or detected contradictions. "
             "Your task: provide a DEFINITIVE ruling on whether this belief "
             "contradicts existing axioms. Your verdict is FINAL and "
             "non-overridable. If contradiction exists, specify which beliefs "
@@ -358,8 +358,8 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.BELIEF_AUDIT,
-            # Opus does not have a native 'thinking' parameter like DeepSeek/Gemini,
-            # but setting DEEP_THINK here allows the router to allocate maximum resources.
+            # Opus 4.8 supports native extended thinking blocks.
+            # Setting DEEP_THINK allows the router to invoke its >32k thinking envelope.
             reasoning_mode=ReasoningMode.DEEP_THINK,
         )
 
@@ -377,7 +377,7 @@ class CognitiveHandoff:
         belief: BeliefObject,
         audit: _AuditResult,
     ) -> BeliefVerdict:
-        """Step 4: Schema revision via Architect (GPT-5.4).
+        """Step 4: Schema revision via Architect (Claude Fable 5).
 
         Only invoked when the audit indicates the belief structure
         needs modification - not just content contradiction but
@@ -391,7 +391,7 @@ class CognitiveHandoff:
             )
 
         prompt = CortexPrompt(
-            system_instruction="You are the System Architect (GPT-5.4). "
+            system_instruction="You are the System Architect (Claude Fable 5). "
             "A belief audit has determined that schema revision is needed. "
             "Analyze the belief and propose structural changes. "
             "Respond with the revised belief content and any schema "
