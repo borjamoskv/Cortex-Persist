@@ -1,12 +1,16 @@
 # [C5-REAL] Exergy-Maximized
 from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
 
+import pytest
 
 def test_exergy_yield_calculation():
     """Test the derivation of cognitive exergy."""
     # S_stoc = 15.0, S_det = 120.0, T = 2.0s
+    # Thermal penalty (Landauer): 1.05^2 = 1.1025
+    # Raw Exergy: (120-15)/2 = 52.5
+    # Net Exergy: 52.5 / 1.1025 = 47.619047619
     exergy = UltrathinkPhysicsEngine.calculate_exergy_yield(15.0, 120.0, 2.0)
-    assert exergy == 52.5  # (120-15)/2 = 52.5
+    assert exergy == pytest.approx(47.6190476, rel=1e-5)
 
     # Negative Exergy -> Should cap at 0
     negative_exergy = UltrathinkPhysicsEngine.calculate_exergy_yield(200.0, 10.0, 1.0)

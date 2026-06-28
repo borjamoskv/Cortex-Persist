@@ -34,18 +34,27 @@ class UltrathinkPhysicsEngine:
         "security", "vault", "engine", "sovereign", "audit", "pii", "trust"
     ]
 
+    # Constante de Landauer para penalización térmica
+    LANDAUER_THERMAL_PENALTY: float = 1.05
+
     @staticmethod
     def calculate_exergy_yield(
         stochastic_entropy: float, deterministic_output: float, execution_time: float
     ) -> float:
         """
-        Calcula la exergía (Ξ) producida en un ciclo de razonamiento.
-        Ξ = (S_out[Determinista] - S_in[Estocástico]) / ΔT
+        Calcula la exergía (Ξ) producida en un ciclo de razonamiento (Landauer Principle).
+        Ξ = ((S_out[Determinista] - S_in[Estocástico]) / ΔT) / (Penalización Térmica ^ ΔT)
         """
         if execution_time <= 0:
             return 0.0
 
-        exergy = (deterministic_output - stochastic_entropy) / execution_time
+        raw_exergy = (deterministic_output - stochastic_entropy) / execution_time
+        
+        # Penalización térmica no lineal (Ley de Landauer adaptada)
+        # El tiempo de ejecución prolongado disipa ATP/Exergía como calor
+        thermal_dissipation = UltrathinkPhysicsEngine.LANDAUER_THERMAL_PENALTY ** execution_time
+        exergy = raw_exergy / thermal_dissipation
+        
         return max(0.0, exergy)
 
     @staticmethod
