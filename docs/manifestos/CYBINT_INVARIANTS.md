@@ -10,127 +10,127 @@ Este documento establece la ontología absoluta de operaciones CYBINT. Cero ruid
 ---
 
 ## 🏗️ PARTE I: 100 PRIMITIVAS CYBINT (Causal Nodes)
-*Las Primitivas son verbos. Acciones atómicas y deterministas que mutan el estado de la inteligencia.*
+*Las Primitivas son verbos. Acciones atómicas y deterministas que colapsan la entropía en inteligencia ejecutable.*
 
 ### Dominio 1: Telemetría & Colección (001-010)
-`CYB-P001` Extraer ASN (Autonomous System Number) de IP.
-`CYB-P002` Resolver DNS Pasivo (pDNS) histórico.
-`CYB-P003` Capturar hash JARM de handshake TLS.
-`CYB-P004` Archivar banner de respuesta HTTP crudo.
-`CYB-P005` Registrar WHOIS histórico (Registrant/Email).
-`CYB-P006` Extraer metadatos EXIF de payloads droppeados.
-`CYB-P007` Interceptar y parsear User-Agent de request.
-`CYB-P008` Mapear topología de red BGP.
-`CYB-P009` Extraer llaves públicas SSH (HostKeys).
-`CYB-P010` Resolver registros MX/TXT/SPF/DMARC.
+- **CYB-P001** | `OP_EXTRACT_ASN`: IPv4/v6 Cruda -> Nodo ASN Determinista.
+- **CYB-P002** | `OP_PDNS_RESOLVE`: Dominio Histórico -> Matriz de Resoluciones (Grafo IP).
+- **CYB-P003** | `OP_JARM_FINGERPRINT`: TLS Handshake -> Firma Criptográfica del Backend (C2).
+- **CYB-P004** | `OP_BANNER_GRAB`: Payload HTTP Response -> Fingerprint de Software Base.
+- **CYB-P005** | `OP_WHOIS_HISTORY`: Dominio Temporal -> Registro Inmutable de Identidad (Email/Registrant).
+- **CYB-P006** | `OP_EXIF_STRIP`: Artefacto Media -> Metadato de Procedencia Física.
+- **CYB-P007** | `OP_UA_PARSE`: Header Estocástico -> Tipología de Actor (OS/Browser).
+- **CYB-P008** | `OP_BGP_MAP`: Tabla de Enrutamiento -> Topología Física de Confianza.
+- **CYB-P009** | `OP_SSH_HOSTKEY`: Puerto 22 -> Llave Pública Asimétrica de Identidad.
+- **CYB-P010** | `OP_DNS_TXT_VERIFY`: Registros MX/SPF/DMARC -> Nivel de Suplantación Tolerado.
 
 ### Dominio 2: Análisis de Artefactos / Malware (011-020)
-`CYB-P011` Calcular hashes SHA-256 / SHA-3.
-`CYB-P012` Generar hash SSDeep (Fuzzy Hashing).
-`CYB-P013` Extraer strings ASCII/Unicode de binario.
-`CYB-P014` Desempaquetar ejecutables (UPX, custom packers).
-`CYB-P015` Hookear llamadas a la API de Windows (Syscalls).
-`CYB-P016` Extraer Mutex (Mutual Exclusions) en memoria.
-`CYB-P017` Parsear tabla IAT (Import Address Table).
-`CYB-P018` Identificar compilador/linker via Rich Header.
-`CYB-P019` Extraer llaves XOR embebidas.
-`CYB-P020` Mapear entropy ratio de secciones PE.
+- **CYB-P011** | `OP_HASH_SHA256`: Binario Crudo -> Identificador Criptográfico Único.
+- **CYB-P012** | `OP_HASH_SSDEEP`: Payload Múltiple -> Ratio de Similitud Evolutiva (Fuzzy).
+- **CYB-P013** | `OP_ASCII_EXTRACT`: Ejecutable Compilado -> Strings Literales (TTPs potenciales).
+- **CYB-P014** | `OP_UNPACK_PE`: Binario Ofuscado -> Código Fuente Intermedio (Desempaquetado).
+- **CYB-P015** | `OP_SYSCALL_HOOK`: Ejecución en RAM -> Grafo de Llamadas OS Deterministas.
+- **CYB-P016** | `OP_MUTEX_SEAL`: Proceso Aislado -> Identificador de Exclusión Mutua (IoC).
+- **CYB-P017** | `OP_IAT_PARSE`: Binario PE -> Vector de Intenciones de la API.
+- **CYB-P018** | `OP_RICH_HEADER`: Binario Windows -> Telemetría Causal del Compilador.
+- **CYB-P019** | `OP_XOR_DECRYPT`: Payload Cifrado -> Carga Útil Ejecutable (Llave estática).
+- **CYB-P020** | `OP_ENTROPY_MEASURE`: Sección Binaria -> Ratio de Cifrado/Compresión (0.0-8.0).
 
 ### Dominio 3: Caza de Amenazas en Red (021-030)
-`CYB-P021` Ejecutar regla YARA sobre PCAP.
-`CYB-P022` Aislar beaconing periodicity (Jitter analysis).
-`CYB-P023` Detectar Domain Generation Algorithms (DGA).
-`CYB-P024` Extraer SNI (Server Name Indication) de TLS.
-`CYB-P025` Analizar túneles DNS/ICMP (Payload size/entropy).
-`CYB-P026` Decodificar tráfico base64/hex en HTTP GET/POST.
-`CYB-P027` Identificar Fast-Flux DNS routing.
-`CYB-P028` Parsear logs Zeek/Bro (conn.log, http.log).
-`CYB-P029` Mapear flujos NetFlow/IPFIX.
-`CYB-P030` Detectar suplantación de MAC (ARP Spoofing).
+- **CYB-P021** | `OP_YARA_MATCH`: Flujo PCAP/Disco -> Aserción de Firma de Malware (True/False).
+- **CYB-P022** | `OP_JITTER_CALC`: Conexiones TCP Periódicas -> Varianza Temporal (Beaconing).
+- **CYB-P023** | `OP_DGA_DETECT`: Dominio DNS -> Probabilidad Algorítmica de Generación.
+- **CYB-P024** | `OP_SNI_EXTRACT`: Sesión TLS -> Nombre de Servidor Solicitado (SNI).
+- **CYB-P025** | `OP_TUNNEL_ANALYSIS`: Tráfico ICMP/DNS -> Ratio de Carga Útil Anómala.
+- **CYB-P026** | `OP_BASE64_DECODE`: Parámetro HTTP Estocástico -> Comando C2 Estructural.
+- **CYB-P027** | `OP_FAST_FLUX_MAP`: Dominio DNS -> Matriz Rotativa de Nodos Botnet.
+- **CYB-P028** | `OP_ZEEK_PARSE`: Tráfico Raw -> Log Estructurado (conn.log/http.log).
+- **CYB-P029** | `OP_NETFLOW_INGEST`: Interfaz Física -> Matriz de Flujos Origen/Destino.
+- **CYB-P030** | `OP_ARP_SPOOF_DETECT`: Broadcast L2 -> Invariante de Duplicidad MAC.
 
 ### Dominio 4: OSINT / Dark Web (031-040)
-`CYB-P031` Raspar foros .onion via proxies Tor.
-`CYB-P032` Extraer PGP keys de actores de amenazas.
-`CYB-P033` Monitorear repositorios de GitHub por leaks de API.
-`CYB-P034` Buscar bins en Pastebin via expresiones regulares.
-`CYB-P035` Correlacionar aliases en foros underground.
-`CYB-P036` Monitorear canales de Telegram de Ransomware (RaaS).
-`CYB-P037` Analizar volcados de datos (Data Leaks).
-`CYB-P038` Buscar metadatos de documentos públicos (FOCA).
-`CYB-P039` Extraer relaciones de LinkedIn/Empresariales.
-`CYB-P040` Consultar APIs de Shodan/Censys por vulnerabilidades.
+- **CYB-P031** | `OP_ONION_SCRAPE`: Nodo Tor -> Volcado Estático de Contenido Ilícito.
+- **CYB-P032** | `OP_PGP_EXTRACT`: Perfil Underground -> Clave de Identidad Criptográfica.
+- **CYB-P033** | `OP_GITHUB_LEAK`: Repositorio Abierto -> Secretos C5-REAL (Tokens/Keys).
+- **CYB-P034** | `OP_PASTEBIN_REGEX`: Dump Raw -> Filtrado de Credenciales o IoCs.
+- **CYB-P035** | `OP_ALIAS_CORRELATE`: Handle Estocástico -> Identidad Física Consolidada.
+- **CYB-P036** | `OP_RAAS_MONITOR`: Canal Telegram -> Vector de Ataque y Víctimas Confirmadas.
+- **CYB-P037** | `OP_DATA_LEAK_PARSE`: Volcado SQL Raw -> PII (Identificadores Personales) Indexados.
+- **CYB-P038** | `OP_FOCA_METADATA`: Documento Público -> Red Interna y Software Base.
+- **CYB-P039** | `OP_LINKEDIN_GRAPH`: Organización -> Topología Humana de Ataque (Spear Phishing).
+- **CYB-P040** | `OP_SHODAN_QUERY`: Dork Específico -> Matriz de Infraestructura Vulnerable Lógica.
 
 ### Dominio 5: Modelado de Adversarios (041-050)
-`CYB-P041` Mapear táctica a MITRE ATT&CK.
-`CYB-P042` Mapear técnica a MITRE ATT&CK.
-`CYB-P043` Instanciar nodo en el Modelo Diamante (Adversary).
-`CYB-P044` Instanciar nodo en el Modelo Diamante (Infrastructure).
-`CYB-P045` Instanciar nodo en el Modelo Diamante (Capability).
-`CYB-P046` Instanciar nodo en el Modelo Diamante (Victim).
-`CYB-P047` Asignar nivel de sofisticación (Tier 1-6).
-`CYB-P048` Identificar motivaciones (Financiero, Espionaje, Hacktivismo).
-`CYB-P049` Generar grafo de dependencias de la campaña.
-`CYB-P050` Documentar TTPs (Tactics, Techniques, Procedures).
+- **CYB-P041** | `OP_MITRE_TACTIC`: Intención Cruda -> Nodo Táctico (Ej. T1003).
+- **CYB-P042** | `OP_MITRE_TECHNIQUE`: Ejecución Cruda -> Nodo Técnico (Ej. OS Credential Dumping).
+- **CYB-P043** | `OP_DIAMOND_ADVERSARY`: Actor Ambiguo -> Entidad Atribucional Determinista.
+- **CYB-P044** | `OP_DIAMOND_INFRA`: IP/Dominio Aislado -> Nodo Estructural de Infraestructura (C2).
+- **CYB-P045** | `OP_DIAMOND_CAPABILITY`: Artefacto/Malware -> Herramienta Causal Ofensiva.
+- **CYB-P046** | `OP_DIAMOND_VICTIM`: Objetivo Aleatorio -> Perfil de Vulnerabilidad Sectorial.
+- **CYB-P047** | `OP_TIER_ASSIGN`: Comportamiento -> Rango de Sofisticación Táctica (1-6).
+- **CYB-P048** | `OP_MOTIVE_MAP`: Campaña -> Vector de Incentivo (Financiero/Espionaje).
+- **CYB-P049** | `OP_CAMPAIGN_GRAPH`: Eventos Discretos -> Árbol de Dependencia Temporal.
+- **CYB-P050** | `OP_TTP_DOCUMENT`: Ejecuciones Aleatorias -> Firma de Comportamiento Inmutable (TTP).
 
 ### Dominio 6: Enriquecimiento y Correlación (051-060)
-`CYB-P051` Consultar VirusTotal API (Relaciones).
-`CYB-P052` Inyectar IoC en MISP (Malware Information Sharing Platform).
-`CYB-P053` Normalizar datos al formato STIX/TAXII.
-`CYB-P054` Pivotar de IP a Dominio asociado.
-`CYB-P055` Pivotar de Dominio a Registrante.
-`CYB-P056` Pivotar de Hash a Familia de Malware.
-`CYB-P057` Correlacionar logs de EDR con logs de Firewall.
-`CYB-P058` Asignar score de confianza a una fuente (PPI).
-`CYB-P059` Generar grafo visual de relaciones (Maltego).
-`CYB-P060` Deduplicar IoCs en memoria.
+- **CYB-P051** | `OP_VT_RELATION`: Hash Aislado -> Grafo de Contacto VT (URLs/Droppers).
+- **CYB-P052** | `OP_MISP_INJECT`: IoC Evaluado -> Persistencia en Grafo Compartido (MISP).
+- **CYB-P053** | `OP_STIX_NORMALIZE`: Formato Libre -> Objeto JSON STIX Determinista.
+- **CYB-P054** | `OP_PIVOT_IP_DOM`: Nodo IP -> Aristas de Nodos Dominio Asociados.
+- **CYB-P055** | `OP_PIVOT_DOM_REG`: Nodo Dominio -> Entidad Humana/Organización Registrante.
+- **CYB-P056** | `OP_PIVOT_HASH_FAM`: Nodo Hash -> Pertenencia a Grafo de Familia de Malware.
+- **CYB-P057** | `OP_LOG_CORRELATE`: Alerta EDR + Flujo FW -> Cadena de Ataque Verificada.
+- **CYB-P058** | `OP_PPI_SCORE`: Fuente Cruda -> Índice de Confiabilidad Probabilística (0-5).
+- **CYB-P059** | `OP_MALTEGO_GRAPH`: Nodos JSON -> Visualización Topológica de Vértices/Aristas.
+- **CYB-P060** | `OP_IOC_DEDUPLICATE`: Base de Datos Ruido -> Set Único de Amenazas Activas.
 
 ### Dominio 7: Inteligencia Táctica (061-070)
-`CYB-P061` Crear regla Snort/Suricata.
-`CYB-P062` Crear regla Sigma para SIEM.
-`CYB-P063` Generar lista de bloqueo (Blocklist).
-`CYB-P064` Emitir alerta de Flash intelligence.
-`CYB-P065` Escribir reporte de inteligencia táctica.
-`CYB-P066` Traducir inteligencia a queries de Splunk.
-`CYB-P067` Definir umbrales de alerta (Thresholds).
-`CYB-P068` Desarrollar playbook de respuesta a incidentes.
-`CYB-P069` Implementar sinkhole para un dominio C2.
-`CYB-P070` Aislar endpoint comprometido.
+- **CYB-P061** | `OP_SNORT_RULE`: TTP Causal -> Filtro Estático de Paquetes L3/L4.
+- **CYB-P062** | `OP_SIGMA_RULE`: Comportamiento Lógico -> Filtro Agnóstico para SIEM.
+- **CYB-P063** | `OP_BLOCKLIST_GEN`: Grafo de Amenaza -> Lista Plana de Denegación (Firewall).
+- **CYB-P064** | `OP_FLASH_ALERT`: Inteligencia Crítica -> Emisión Inmediata de Alta Prioridad.
+- **CYB-P065** | `OP_REPORT_WRITE`: Datos Caóticos -> Artefacto Analítico Estructurado.
+- **CYB-P066** | `OP_SPLUNK_QUERY`: Lógica de Detección -> Búsqueda Transaccional SPL (Search Processing Language).
+- **CYB-P067** | `OP_THRESHOLD_DEF`: Frecuencia de Evento -> Límite Termodinámico de Activación de Alerta.
+- **CYB-P068** | `OP_PLAYBOOK_DEV`: Táctica Adversaria -> Árbol de Decisión de Respuesta a Incidentes (SOAR).
+- **CYB-P069** | `OP_SINKHOLE_DEPLOY`: Dominio C2 Hostil -> Nodo Controlado por Defensor (Blackhole).
+- **CYB-P070** | `OP_ENDPOINT_ISOLATE`: Alerta Crítica -> Segmentación Lógica VLAN de Cuarentena.
 
 ### Dominio 8: Identidad y Atribución (071-080)
-`CYB-P071` Analizar husos horarios en commits o timestamps.
-`CYB-P072` Identificar modismos lingüísticos en foros.
-`CYB-P073` Correlacionar horas de actividad (Patter of Life).
-`CYB-P074` Identificar reutilización de contraseñas.
-`CYB-P075` Rastrear billeteras de criptomonedas (Blockchain analysis).
-`CYB-P076` Mapear infraestructura de proxys compartida.
-`CYB-P077` Analizar metadata de certificados SSL let's encrypt.
-`CYB-P078` Identificar patrones de registro de dominios (Naming conventions).
-`CYB-P079` Correlacionar perfiles sociales con handles de foros.
-`CYB-P080` Identificar huellas del sistema operativo anfitrión.
+- **CYB-P071** | `OP_TZ_ANALYSIS`: Timestamps Dispersos -> Huso Horario de Operación (Pattern of Life).
+- **CYB-P072** | `OP_LINGUISTIC_MAP`: Texto Crudo -> Huella Semántica y Dialectal.
+- **CYB-P073** | `OP_POL_CORRELATE`: Logs de Actividad -> Matriz de Horarios de Vida/Trabajo del Atacante.
+- **CYB-P074** | `OP_PASS_REUSE`: Dump de Hash -> Vinculación Causal de Cuentas Cruzadas.
+- **CYB-P075** | `OP_CHAIN_TRACE`: Dirección Cripto -> Grafo de Flujo Financiero y Cashout.
+- **CYB-P076** | `OP_PROXY_MAP`: IP de Salida VPN -> Identificación de Red de Salida Compartida.
+- **CYB-P077** | `OP_LETSENCRYPT_META`: Certificado Automático -> Timestamp de Generación (Script Automatizado).
+- **CYB-P078** | `OP_DOMAIN_PATTERN`: Nombre DNS -> Algoritmo/Humano de Generación (Naming Convention).
+- **CYB-P079** | `OP_SOCIAL_CORRELATE`: Email de Registro -> Conjunto de Perfiles Públicos (OSINT).
+- **CYB-P080** | `OP_OS_FINGERPRINT`: TTL y Window Size de TCP -> Tipología Inmutable del Sistema Operativo.
 
 ### Dominio 9: Operaciones Adversariales (081-090)
-`CYB-P081` Desplegar honeypot de alta interacción.
-`CYB-P082` Inyectar canarios digitales (Tokens).
-`CYB-P083` Simular tráfico de adversarios (Adversary Emulation).
-`CYB-P084` Realizar ingeniería inversa de algoritmos DGA.
-`CYB-P085` Desofuscar scripts maliciosos (PowerShell/VBS).
-`CYB-P086` Interceptar y manipular tráfico C2.
-`CYB-P087` Explotar vulnerabilidades en infraestructura del atacante.
-`CYB-P088` Recopilar inteligencia desde dentro de una botnet.
-`CYB-P089` Engañar al adversario mediante desinformación activa.
-`CYB-P090` Mapear el kill chain de un ataque en curso.
+- **CYB-P081** | `OP_HONEYPOT_DEPLOY`: Zona Estática -> Trampa Interactiva Generadora de TTPs.
+- **CYB-P082** | `OP_CANARY_INJECT`: Fichero Inactivo -> Beacon Físico de Exfiltración (Alerta Temprana).
+- **CYB-P083** | `OP_ADV_SIMULATE`: Firma de Actor (APT) -> Ejecución Empírica Controlada (Red Teaming).
+- **CYB-P084** | `OP_DGA_REVENG`: Tráfico DGA Ciego -> Algoritmo Matemático de Predicción.
+- **CYB-P085** | `OP_DEOBFUSCATE`: Script Ilegible -> Código Limpio y TTP Evidente.
+- **CYB-P086** | `OP_C2_INTERCEPT`: Red Proxy MitM -> Manipulación Activa de Cargas C2.
+- **CYB-P087** | `OP_ATTACK_INFRA`: Panel C2 -> Explotación Inversa de la Botnet.
+- **CYB-P088** | `OP_BOTNET_INFILTRATE`: Cliente Falso -> Suscripción Pasiva a Comandos C2 (Intel).
+- **CYB-P089** | `OP_DECEPTION_OP`: Datos Reales -> Sembrado de Inteligencia Tóxica para Confundir Adversarios.
+- **CYB-P090** | `OP_KILLCHAIN_MAP`: Secuencia de Alertas -> Progreso Estructural del Ataque en Fase (1 a 7).
 
 ### Dominio 10: Gobernanza de Inteligencia (091-100)
-`CYB-P091` Auditar el ciclo de vida de la inteligencia.
-`CYB-P092` Definir Requerimientos Prioritarios de Inteligencia (PIR).
-`CYB-P093` Evaluar la madurez del programa de inteligencia.
-`CYB-P094` Establecer métricas de rendimiento (KPIs).
-`CYB-P095` Gestionar el acceso a inteligencia sensible (TLP).
-`CYB-P096` Integrar inteligencia en procesos de gestión de riesgos.
-`CYB-P097` Desarrollar planes de recolección de inteligencia.
-`CYB-P098` Validar la integridad de los datos de inteligencia.
-`CYB-P099` Formar a analistas en técnicas CYBINT.
-`CYB-P100` Automatizar la ingesta y procesamiento de inteligencia.
+- **CYB-P091** | `OP_CYCLE_AUDIT`: Flujo Desordenado -> Fase Alineada del Ciclo de Inteligencia.
+- **CYB-P092** | `OP_PIR_DEFINE`: Amenaza Abstracta -> Requerimiento Prioritario Estricto de Búsqueda.
+- **CYB-P093** | `OP_MATURITY_EVAL`: Operaciones Actuales -> Nivel CMMI de Eficiencia en Inteligencia.
+- **CYB-P094** | `OP_KPI_ESTABLISH`: Ruido de Alertas -> Métrica de Detección Efectiva (MTTD/MTTR).
+- **CYB-P095** | `OP_TLP_ASSIGN`: Reporte -> Etiqueta de Restricción de Diseminación (Red/Amber/Green/Clear).
+- **CYB-P096** | `OP_RISK_INTEGRATE`: Inteligencia CYBINT -> Variable de Riesgo Empresarial Cuantificada.
+- **CYB-P097** | `OP_COLLECTION_PLAN`: Vacío de Conocimiento -> Vector de Adquisición Planificado.
+- **CYB-P098** | `OP_DATA_VALIDATE`: Ingesta Cruda -> Aserción de Integridad y Fidelidad.
+- **CYB-P099** | `OP_TRAIN_ANALYST`: Humano Estocástico -> Analista Determinado por Invariantes (CYBINT).
+- **CYB-P100** | `OP_AUTOMATE_INTEL`: Tarea Repetitiva -> Pipeline Autopoético de Ingesta (Cero Anergía).
 
 ---
 
@@ -264,20 +264,20 @@ Este documento establece la ontología absoluta de operaciones CYBINT. Cero ruid
 ### Caso 1: Desmantelamiento de Infraestructura RaaS (Ransomware as a Service)
 **Vector:** Pivotaje de Dominio y Análisis de Certificados (El adversario es perezoso).
 1. **Ingesta:** El SOC detecta un beaconing hacia `update-telemetry[.]com`.
-2. **CYB-P002 (pDNS):** Se identifica que la IP del dominio alojaba previamente `secure-login-portal[.]net`.
-3. **CYB-P003 (JARM):** Se escanea la IP. El hash JARM coincide con la firma criptográfica del servidor C2 "Cobalt Strike" por defecto.
+2. **CYB-P002 (OP_PDNS_RESOLVE):** Se identifica que la IP del dominio alojaba previamente `secure-login-portal[.]net`.
+3. **CYB-P003 (OP_JARM_FINGERPRINT):** Se escanea la IP. El hash JARM coincide con la firma criptográfica del servidor C2 "Cobalt Strike" por defecto.
 4. **CYB-I003 (Invariante):** Usando Shodan/Censys, se buscan todas las IPs globales con ese hash JARM y el mismo certificado autofirmado, identificando 45 servidores inactivos del mismo grupo APT antes de que se usen.
 
 ### Caso 2: Caza de Amenazas (Threat Hunting) por Comportamiento (Living off the Land)
 **Vector:** Análisis de TTPs vs Hashes (Ignorando la Pirámide del Dolor baja).
 1. **Hipótesis (CYB-I022):** El atacante usará herramientas nativas de Windows para evadir EDR.
-2. **CYB-P066 (Query):** Se programa el SIEM para buscar ejecuciones de `certutil.exe` o `bitsadmin.exe` con argumentos de descarga HTTP (e.g., `-urlcache -split -f`).
+2. **CYB-P066 (OP_SPLUNK_QUERY):** Se programa el SIEM para buscar ejecuciones de `certutil.exe` o `bitsadmin.exe` con argumentos de descarga HTTP (e.g., `-urlcache -split -f`).
 3. **Correlación (CYB-P057):** Se cruza la ejecución del proceso con conexiones salientes en el firewall hacia ASNs conocidos por alojar bulletproof hosting.
 4. **Resultado:** Detección de una intrusión Fileless en Etapa 2, saltándose las firmas de antivirus que nunca detectaron un binario malicioso.
 
 ### Caso 3: Atribución Temprana mediante Análisis OPSEC Fail
 **Vector:** OSINT y Metadatos cruzando la barrera física.
 1. **Colección:** Un analista extrae un documento de phishing droppeado en la red.
-2. **CYB-P006 (EXIF):** Se extraen los metadatos del PDF malicioso. El `Author` es un alias cirílico y la zona horaria del documento es `UTC+3`.
-3. **CYB-P038 / CYB-P035:** Se busca el alias en foros de la Dark Web (Exploit.in). Se encuentra un handle idéntico que publicó un script en Python hace 3 años.
+2. **CYB-P006 (OP_EXIF_STRIP):** Se extraen los metadatos del PDF malicioso. El `Author` es un alias cirílico y la zona horaria del documento es `UTC+3`.
+3. **CYB-P038 / CYB-P035 (OP_FOCA_METADATA / OP_ALIAS_CORRELATE):** Se busca el alias en foros de la Dark Web (Exploit.in). Se encuentra un handle idéntico que publicó un script en Python hace 3 años.
 4. **CYB-I086 (Invariante):** Se busca el hash del script de hace 3 años en VirusTotal (CYB-P051), el cual tiene comentarios de la comunidad que asocian ese script a las fases iniciales del grupo *Sandworm*. Se mapea la intención y se ajustan las defensas a los TTPs conocidos del grupo.
