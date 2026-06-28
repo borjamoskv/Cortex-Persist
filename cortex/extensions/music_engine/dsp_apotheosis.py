@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """
 DSP Apotheosis.
-Capa determinista de procesamiento de señal en Python (Mastering, Tonal Balance, Phase Alignment).
+Deterministic signal processing layer in Python (Mastering, Tonal Balance, Phase Alignment).
 """
 
 import logging
@@ -65,12 +65,12 @@ def _fast_envelope_follower(
 
 class DSPApotheosis:
     """
-    El motor de post-producción O(1).
-    Evita la manipulación no predictible de la IA mediante matemática acústica estricta.
+    The O(1) post-production engine.
+    Prevents unpredictable AI manipulation through strict acoustic mathematics.
     """
 
     def calculate_lufs(self, audio_data: np.ndarray, sample_rate: int) -> float:  # pyright: ignore[reportInvalidTypeForm]
-        """Calcula Integrated LUFS usando pyloudnorm (EBU R128 / ITU-R BS.1770)."""
+        """Calculates Integrated LUFS using pyloudnorm (EBU R128 / ITU-R BS.1770)."""
         if len(audio_data) == 0:
             return LUFS_FLOOR
         # pyloudnorm requiere [samples, channels]
@@ -80,12 +80,12 @@ class DSPApotheosis:
             return float(lufs)
         except (ValueError, AttributeError) as e:
             # Catch specific errors from pyloudnorm internals or buffer shape
-            logger.error("Error calculando LUFS: %s", e)
+            logger.error("Error calculating LUFS: %s", e)
             return LUFS_FLOOR
 
     def match_pink_noise_curve(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
         """
-        Ecualización adaptativa para balancear el espectro hacia una pendiente de -3dB/octavo.
+        Adaptive equalization to balance the spectrum towards a -3dB/octave slope.
         """
         n = len(audio_data)
         if n < MIN_AUDIO_LENGTH:
@@ -126,7 +126,7 @@ class DSPApotheosis:
 
     def apply_transient_shaping(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
         """
-        Realza ataques percusivos perdiendo 'bluntness' de IA usando un seguidor de envolvente.
+        Enhances percussive attacks, losing AI 'bluntness' using an envelope follower.
         """
         alpha_at = np.exp(-1.0 / (ATTACK_ALPHA_MS * sample_rate))
         alpha_re = np.exp(-1.0 / (RELEASE_ALPHA_MS * sample_rate))
@@ -147,9 +147,9 @@ class DSPApotheosis:
 
     def master_track(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
         """
-        Finalización determinista: Tonal Match -> Transient Design -> Loudness Norm -> Peak Limiting.
+        Deterministic finalization: Tonal Match -> Transient Design -> Loudness Norm -> Peak Limiting.
         """
-        logger.info("Iniciando mastering determinista. SR: %dHz", sample_rate)
+        logger.info("Starting deterministic mastering. SR: %dHz", sample_rate)
 
         # 1. Tonal Balance (Pink Noise matching)
         if len(audio_data.shape) > 1 and audio_data.shape[1] == 2:
@@ -174,6 +174,6 @@ class DSPApotheosis:
         audio_data = np.clip(audio_data, -PEAK_CEILING, PEAK_CEILING)
 
         final_lufs = self.calculate_lufs(audio_data, sample_rate)
-        logger.info("Mastering finalizado. LUFS Final: %.2f", final_lufs)
+        logger.info("Mastering finished. Final LUFS: %.2f", final_lufs)
 
         return audio_data
