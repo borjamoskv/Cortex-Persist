@@ -19,16 +19,16 @@ NOTEBOOKLM_DIR = Path("notebooklm_sources")
 DOMAINS_DIR = Path("notebooklm_domains")
 DIGEST_FILE = Path("cortex_notebooklm_digest.md")
 
+def _get_gdrive_paths() -> list[Path]:
+    paths = [Path.home() / "Google Drive" / "CORTEX-NotebookLM"]
+    cloud_storage = Path.home() / "Library" / "CloudStorage"
+    if cloud_storage.exists():
+        for gdrive_dir in cloud_storage.glob("GoogleDrive-*"):
+            paths.append(gdrive_dir / "Mi unidad" / "CORTEX-NotebookLM")
+    return paths
+
 CLOUD_PROVIDERS = {
-    "Google Drive": [
-        Path.home()
-        / "Library"
-        / "CloudStorage"
-        / "GoogleDrive-borja@moskv.dev"
-        / "Mi unidad"
-        / "CORTEX-NotebookLM",
-        Path.home() / "Google Drive" / "CORTEX-NotebookLM",
-    ],
+    "Google Drive": _get_gdrive_paths(),
     "OneDrive": [
         Path.home() / "Library" / "CloudStorage" / "OneDrive-Personal" / "CORTEX-NotebookLM",
     ],
