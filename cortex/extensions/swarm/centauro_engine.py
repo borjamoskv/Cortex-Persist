@@ -245,7 +245,8 @@ class CentauroEngine:
                     logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {exc}")
                     return (a_id, exc)
 
-        agent_tasks = [_run_agent(a_id, agent) for a_id, agent in squad.items()]
+        # Must wrap in asyncio.create_task so they can be explicitly cancelled later
+        agent_tasks = [asyncio.create_task(_run_agent(a_id, agent)) for a_id, agent in squad.items()]
 
         winning = None
         for future in asyncio.as_completed(agent_tasks):
