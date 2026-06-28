@@ -99,14 +99,20 @@ async def _query_agent_key_async(conn, agent_id: str) -> str | None:
         return None
 
 
+_NONCE_TABLE_CREATED_SYNC = False
+
 def _check_and_register_nonce_sync(conn, nonce: str) -> bool:
     from cortex.database.core import causal_write
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS taint_nonces (
-            nonce TEXT PRIMARY KEY,
-            timestamp REAL
-        )
-    """)
+    global _NONCE_TABLE_CREATED_SYNC
+    if not _NONCE_TABLE_CREATED_SYNC:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS taint_nonces (
+                nonce TEXT PRIMARY KEY,
+                timestamp REAL
+            )
+        """)
+        _NONCE_TABLE_CREATED_SYNC = True
+        
     cursor = conn.cursor()
     with causal_write(conn):
         cursor.execute(
@@ -115,14 +121,20 @@ def _check_and_register_nonce_sync(conn, nonce: str) -> bool:
     return cursor.rowcount > 0
 
 
+_NONCE_TABLE_CREATED_ASYNC = False
+
 async def _check_and_register_nonce_async(conn, nonce: str) -> bool:
     from cortex.database.core import causal_write
-    await conn.execute("""
-        CREATE TABLE IF NOT EXISTS taint_nonces (
-            nonce TEXT PRIMARY KEY,
-            timestamp REAL
-        )
-    """)
+    global _NONCE_TABLE_CREATED_ASYNC
+    if not _NONCE_TABLE_CREATED_ASYNC:
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS taint_nonces (
+                nonce TEXT PRIMARY KEY,
+                timestamp REAL
+            )
+        """)
+        _NONCE_TABLE_CREATED_ASYNC = True
+        
     with causal_write(conn):
         cursor = await conn.execute(
             "INSERT OR IGNORE INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time())

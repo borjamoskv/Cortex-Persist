@@ -14,23 +14,11 @@ class EntropyAnnihilator:
     def __init__(self) -> None:
         pass
 
+    _SLOP_REGEX = __import__("re").compile(r'(?im)^.*(?:Aquí tienes el código|Espero que esto ayude|Por supuesto|Entendido|Como modelo de lenguaje).*$\n?')
+
     def purge_slop(self, data: str) -> str:
         """Removes decorative prose ('Here is the code', etc.) (Ouroboros Ω13)."""
-        # Very basic structural filtering for zero-anergy compliance
-        slop_signatures = [
-            "Aquí tienes el código",
-            "Espero que esto ayude",
-            "Por supuesto",
-            "Entendido",
-            "Como modelo de lenguaje"
-        ]
-        
-        lines = data.splitlines()
-        purged = []
-        for line in lines:
-            if not any(slop in line for slop in slop_signatures):
-                purged.append(line)
-        return "\n".join(purged).strip()
+        return self._SLOP_REGEX.sub('', data).strip()
 
     def thermodynamically_compress(self, sacred_fact: str) -> str:
         """

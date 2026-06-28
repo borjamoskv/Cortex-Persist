@@ -108,13 +108,12 @@ class GarbageCollector:
         rows = await cursor.fetchall()
         existing_tables = {row[0] for row in rows}
 
-        # 1. Physical vector deletion
-        # In sqlite-vec vec0 tables, WHERE IN () is often not fully supported, so we iterate
-        for fact_id in fact_ids:
-            if "fact_embeddings" in existing_tables:
-                await conn.execute("DELETE FROM fact_embeddings WHERE fact_id = ?", (fact_id,))
-            if "specular_embeddings" in existing_tables:
-                await conn.execute("DELETE FROM specular_embeddings WHERE fact_id = ?", (fact_id,))
+        # 1. Physical vector deletion (Ouroboros optimization: executemany)
+        # We rely on executemany to push the loop down to C-level API
+        if "fact_embeddings" in existing_tables:
+            await conn.executemany("DELETE FROM fact_embeddings WHERE fact_id = ?", [(fid,) for fid in fact_ids])
+        if "specular_embeddings" in existing_tables:
+            await conn.executemany("DELETE FROM specular_embeddings WHERE fact_id = ?", [(fid,) for fid in fact_ids])
 
         # 2. Pruned embeddings archive deletion
         if "pruned_embeddings" in existing_tables:
