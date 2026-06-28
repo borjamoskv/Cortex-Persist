@@ -28,6 +28,8 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from cortex.database.core import connect
+
 # ─── Thermodynamic Constants ─────────────────────────────────────────
 MIN_EXERGY_THRESHOLD = 0.125  # 3 half-lives → tombstone
 WARM_THRESHOLD = 0.50  # 1 half-life  → HOT → WARM
@@ -140,8 +142,7 @@ def execute_thermal_purge(
     logger.info("Igniting Ouroboros Thermal Purge [%s]...", mode_label)
 
     try:
-        with sqlite3.connect(db_file) as conn:
-            conn.row_factory = sqlite3.Row
+        with connect(str(db_file), row_factory=sqlite3.Row) as conn:
             cursor = conn.cursor()
 
             # Phase 0: Build topological barrier (recursive ancestor protection)
