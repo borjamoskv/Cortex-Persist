@@ -6,20 +6,20 @@ Pipelines: TopologyIndex -> LegionPool -> AsyncSignalBus -> CausalStateStore
 """
 
 import asyncio
+import json
 import logging
 import sys
 import uuid
 from typing import Any
 
 import aiosqlite
+from pydantic import ValidationError
 
 from cortex.config import DB_PATH
 from cortex.engine.causal.topological_arbitrage import TopologyIndex
 from cortex.engine.swarm.legion import AsyncSignalBus, LegionPool, SwarmAgent, SwarmSignal
 from cortex.engine.swarm.state_store import CausalStateStore
 from cortex.extensions.skills.autodidact.epistemology import Hypothesis
-from pydantic import ValidationError
-import json
 
 logger = logging.getLogger("cortex.engine.swarm.supervisor")
 

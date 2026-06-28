@@ -182,6 +182,7 @@ class TurbopufferVectorBackend(VectorBackend):
         Requires valid CORTEX-TAINT signature to bypass standard restrictions.
         """
         import os
+
         from cortex.config import DEFAULT_DB_PATH
         from cortex.database.core import connect_async
         from cortex.engine.causal.taint_engine import verify_taint_token

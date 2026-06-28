@@ -315,9 +315,13 @@ class OmegaDaemon:
                         logger.warning("Entropía Crítica detectada. Enganchando Ouroboros a Turbopuffer para Prune.")
                         try:
                             import os
+
                             import keyring
+
+                            from cortex.engine.causal.taint_engine import (
+                                generate_secure_taint_token,
+                            )
                             from cortex.storage.turbopuffer import TurbopufferVectorBackend
-                            from cortex.engine.causal.taint_engine import generate_secure_taint_token
                             
                             priv_b64 = os.environ.get("CORTEX_ED25519_PRIVATE_KEY")
                             if not priv_b64:
@@ -326,7 +330,7 @@ class OmegaDaemon:
                                 except Exception:
                                     pass
                             
-                            ns = f"cortex_omega_daemon"
+                            ns = "cortex_omega_daemon"
                             content = f"prune:{ns}:0.99"
                             
                             if priv_b64:

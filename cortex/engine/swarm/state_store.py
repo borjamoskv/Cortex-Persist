@@ -138,7 +138,10 @@ class CausalStateStore:
                             
                             # EPISTEMIC LOOP CLOSURE: Output becomes RawEvidence
                             try:
-                                from cortex.extensions.skills.autodidact.epistemology import RawEvidence, EvidenceSource
+                                from cortex.extensions.skills.autodidact.epistemology import (
+                                    EvidenceSource,
+                                    RawEvidence,
+                                )
                                 raw_ev = RawEvidence(
                                     source=EvidenceSource.KERNEL_EVENTS,
                                     raw_payload=signal.payload,
