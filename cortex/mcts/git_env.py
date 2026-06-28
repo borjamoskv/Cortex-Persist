@@ -19,46 +19,61 @@ logger = logging.getLogger("cortex.mcts.git_env")
 
 
 class MCTSGitEnvironment:
-    """Quantum Git Environment for the AlphaZero Autodidact."""
+    """Quantum Git Environment for the AlphaZero Autodidact (Parallelized)."""
 
     def __init__(self, router: CortexLLMRouter, target_file: Path) -> None:
         self.router = router
-        self.target_file = Path(target_file).absolute()
-        if not self.target_file.exists():
-            raise FileNotFoundError(f"Target file does not exist: {self.target_file}")
+        self.repo_root = Path(target_file).parent
+        while self.repo_root != self.repo_root.parent and not (self.repo_root / ".git").exists():
+            self.repo_root = self.repo_root.parent
+        self.target_file_relative = Path(target_file).relative_to(self.repo_root)
+        self.worktrees_dir = self.repo_root.parent / "cortex_mcts_worktrees"
+        self.worktrees_dir.mkdir(exist_ok=True)
 
     async def get_current_branch(self) -> str:
-        """Returns the name of the current branch."""
+        """Returns the name of the current branch in the main repo."""
         proc = await asyncio.create_subprocess_exec(
-            "git",
-            "rev-parse",
-            "--abbrev-ref",
-            "HEAD",
-            stdout=asyncio.subprocess.PIPE,
+            "git", "rev-parse", "--abbrev-ref", "HEAD",
+            stdout=asyncio.subprocess.PIPE, cwd=str(self.repo_root)
         )
         stdout, _ = await proc.communicate()
         return stdout.decode().strip()
 
+    def _get_worktree_path(self, node_id: str) -> Path:
+        return self.worktrees_dir / f"node-{node_id}"
+
     async def branch_out(self, base_branch: str, new_node_id: str) -> str:
-        """Branches out the Git tree."""
+        """Branches out the Git tree into an isolated worktree."""
         new_name = f"chronos/node-{new_node_id}"
-        cmd = f"git checkout -b {shlex.quote(new_name)} {shlex.quote(base_branch)}"
-        proc = await asyncio.create_subprocess_shell(
-            cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        wt_path = self._get_worktree_path(new_node_id)
+        
+        # Create branch in main repo first
+        proc1 = await asyncio.create_subprocess_shell(
+            f"git branch {shlex.quote(new_name)} {shlex.quote(base_branch)}",
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            cwd=str(self.repo_root)
         )
-        await proc.communicate()
-        if proc.returncode != 0:
-            # Fallback for existing branch
-            proc_checkout = await asyncio.create_subprocess_shell(
-                f"git checkout {shlex.quote(new_name)}",
-                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-            )
-            await proc_checkout.communicate()
+        await proc1.communicate()
+        
+        # Add worktree linked to that branch
+        proc2 = await asyncio.create_subprocess_shell(
+            f"git worktree add {shlex.quote(str(wt_path))} {shlex.quote(new_name)}",
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            cwd=str(self.repo_root)
+        )
+        await proc2.communicate()
         return new_name
 
-    async def mutate(self, prompt_instruction: str) -> bool:
-        """Injects an LLM mutation into the target file."""
-        original_code = self.target_file.read_text(encoding="utf-8")
+    async def mutate(self, node_id: str, prompt_instruction: str) -> bool:
+        """Injects an LLM mutation into the target file inside the worktree."""
+        wt_path = self._get_worktree_path(node_id)
+        wt_target = wt_path / self.target_file_relative
+        
+        if not wt_target.exists():
+            logger.error("Worktree target file does not exist: %s", wt_target)
+            return False
+
+        original_code = wt_target.read_text(encoding="utf-8")
 
         prompt = CortexPrompt(
             system_instruction=(
@@ -73,7 +88,7 @@ class MCTSGitEnvironment:
                 }
             ],
             intent=IntentProfile.CODE,
-            temperature=0.8,  # High temperature to force evolutionary divergence
+            temperature=0.8,
             max_tokens=8192,
         )
 
@@ -83,7 +98,6 @@ class MCTSGitEnvironment:
             return False
 
         new_code = res.unwrap().strip()
-        # Clean markdown if present
         if new_code.startswith("```"):
             lines = new_code.split("\n")
             if lines[0].startswith("```"):
@@ -92,25 +106,22 @@ class MCTSGitEnvironment:
                 lines = lines[:-1]
             new_code = "\n".join(lines).strip()
 
-        self.target_file.write_text(new_code, encoding="utf-8")
-        logger.info("🧬 [CHRONOS] Mutated file: %s", self.target_file.name)
+        wt_target.write_text(new_code, encoding="utf-8")
+        logger.info("🧬 [CHRONOS] Mutated worktree file: %s", wt_target.name)
         return True
 
-    async def simulate(self) -> float:
-        """Plays the multiverse: Runs pytest and calculates Yield and Exergy.
-
-        Reward Function:
-        1.0 if it passes clean tests,
-        0.0 if it breaks system integrity.
-        (Future: multiply by thermal efficiency/latency).
-        """
-        logger.info("🧪 [CHRONOS] Running integrity simulation (pytest)...")
+    async def simulate(self, node_id: str) -> float:
+        """Plays the multiverse inside the isolated worktree."""
+        wt_path = self._get_worktree_path(node_id)
+        wt_target = wt_path / self.target_file_relative
+        
+        logger.info("🧪 [CHRONOS] Running integrity simulation (pytest) on %s...", node_id)
         start_time = time.perf_counter()
 
-        # We run the complete test suite or ruff rules to check syntax
-        cmd_ruff = f"ruff check {shlex.quote(str(self.target_file))}"
+        cmd_ruff = f"ruff check {shlex.quote(str(wt_target))}"
         proc_ruff = await asyncio.create_subprocess_shell(
-            cmd_ruff, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            cmd_ruff, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            cwd=str(wt_path)
         )
         await proc_ruff.communicate()
 
@@ -120,29 +131,28 @@ class MCTSGitEnvironment:
 
         cmd_test = "pytest tests/ -v -q --tb=no"
         proc_test = await asyncio.create_subprocess_shell(
-            cmd_test, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            cmd_test, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            cwd=str(wt_path)
         )
         await proc_test.communicate()
 
         duration = time.perf_counter() - start_time
 
         if proc_test.returncode == 0:
-            logger.info(
-                "💎 [CHRONOS] Thermodynamically viable mutation (Passed in %.2fs).", duration
-            )
-            # In the P0 version, it is binary
+            logger.info("💎 [CHRONOS] Thermodynamically viable mutation (Passed in %.2fs).", duration)
             return 1.0
+            
         logger.warning("💥 [CHRONOS] Mutation annihilated: Fails assertion or causes regression.")
         return 0.0
 
-    async def secure_checkout(self, branch: str) -> None:
-        """Returns to a safe branch restoring any changes."""
-        logger.debug("Restoring entropy: checkout to %s", branch)
-        p1 = await asyncio.create_subprocess_shell("git reset --hard HEAD", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    async def secure_checkout(self, node_id: str) -> None:
+        """Removes the isolated worktree and cleans up the branch if needed."""
+        wt_path = self._get_worktree_path(node_id)
+        logger.debug("Removing worktree: %s", wt_path)
+        
+        p1 = await asyncio.create_subprocess_shell(
+            f"git worktree remove --force {shlex.quote(str(wt_path))}",
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            cwd=str(self.repo_root)
+        )
         await p1.communicate()
-        
-        p2 = await asyncio.create_subprocess_shell("git clean -fd", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        await p2.communicate()
-        
-        p3 = await asyncio.create_subprocess_shell(f"git checkout {shlex.quote(branch)}", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        await p3.communicate()

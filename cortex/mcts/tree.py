@@ -6,6 +6,7 @@ Implements Monte Carlo Tree Search to navigate the code mutations space.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import math
 from dataclasses import dataclass, field
@@ -91,36 +92,52 @@ class MCTSEngine:
                 for idx, strategy in enumerate(strategies):
                     node.add_child(f"{node.state_id}-{idx}", strategy)
 
-            if node.children:
-                # Pick best UCT child (or an unvisited one, since uct() returns inf for visits=0)
-                node = max(node.children, key=lambda n: n.uct())
+            # 3. Parallel Asynchronous Evaluation (OP_ASYNC_GATHER)
+            # Find all unvisited children to evaluate in parallel
+            unvisited_children = [c for c in node.children if c.visits == 0]
+            if not unvisited_children:
+                # If all were visited (should not happen if we selected an expandable node), just break out
+                unvisited_children = [max(node.children, key=lambda n: n.uct())]
 
-            # 3. Emulate environment state (OP_GIT_MULTIVERSE)
-            parent_branch = base_branch
-            if node.parent and node.parent != root:
-                parent_branch = f"chronos/node-{node.parent.state_id}"
-            
-            await self.env.branch_out(parent_branch, node.state_id)
+            async def evaluate_child(child: MCTSNode) -> None:
+                # Apply Virtual Loss (VAD)
+                virtual_loss = 1.0
+                child.visits += 1
+                child.value -= virtual_loss
+                
+                parent_branch = base_branch
+                if child.parent and child.parent != root:
+                    parent_branch = f"chronos/node-{child.parent.state_id}"
+                
+                # OP_GIT_MULTIVERSE (creates Git Worktree)
+                await self.env.branch_out(parent_branch, child.state_id)
+                
+                # OP_DETERMINISTIC_SIM
+                mutated = await self.env.mutate(child.state_id, child.mutation_prompt)
+                if mutated:
+                    reward = await self.env.simulate(child.state_id)
+                    if reward == 0.0:
+                        child.is_terminal = True
+                else:
+                    reward = 0.0
+                    child.is_terminal = True
+                    
+                # OP_BACKPROPAGATE
+                # Remove virtual loss and add actual reward
+                curr = child
+                while curr is not None:
+                    if curr == child:
+                        curr.value += (reward + virtual_loss)
+                    else:
+                        curr.visits += 1
+                        curr.value += reward
+                    curr = curr.parent
 
-            # 4. Simulation (OP_DETERMINISTIC_SIM)
-            mutated = await self.env.mutate(node.mutation_prompt)
-            if mutated:
-                reward = await self.env.simulate()
-                if reward == 0.0:
-                    node.is_terminal = True
-            else:
-                reward = 0.0
-                node.is_terminal = True
+                # OP_LOCAL_EXTINCTION (removes Git Worktree)
+                await self.env.secure_checkout(child.state_id)
 
-            # 5. Backpropagation (OP_BACKPROPAGATE)
-            curr = node
-            while curr is not None:
-                curr.visits += 1
-                curr.value += reward
-                curr = curr.parent
-
-            # Restore main branch for the next state (OP_LOCAL_EXTINCTION)
-            await self.env.secure_checkout(base_branch)
+            logger.info("⚡ [CHRONOS] Initiating parallel evaluation for %d nodes...", len(unvisited_children))
+            await asyncio.gather(*(evaluate_child(c) for c in unvisited_children))
 
         # Select the optimal branch based on exploitation (average value)
         if not root.children:
