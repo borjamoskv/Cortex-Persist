@@ -508,16 +508,20 @@ async def get_causal_chain(
     fact_id: int,
     direction: str = Query("down", description="'up' or 'down'"),
     max_depth: int = Query(10, ge=1, le=100),
+    tenant_id: str | None = Query(None, description="Scope query to specific tenant"),
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> list[dict]:
     """Get the causal chain for a fact (up=ancestors, down=descendants)."""
+    if tenant_id and tenant_id != auth.tenant_id and auth.role != "admin":
+        raise HTTPException(status_code=403, detail="Forbidden: Tenant mismatch")
+    effective_tenant = tenant_id or auth.tenant_id
     try:
         chain = await engine.get_causal_chain(
             fact_id=str(fact_id),
             direction=direction,
             max_depth=max_depth,
-            tenant_id=auth.tenant_id,
+            tenant_id=effective_tenant,
         )
         chain_data = []
         for f in chain:
