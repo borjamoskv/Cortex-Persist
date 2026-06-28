@@ -87,7 +87,7 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         "cortex/extensions/health/trend.py",
         # New exceptions
         "cortex/mac_maestro/executor.py",
-        "cortex/mcp/toolbox_watchdog.py",
+        "cortex/mcp_server/toolbox_watchdog.py",
         "cortex/extensions/moltbook/influencer_guard.py",
         # Legacy/infra exceptions
         "cortex/memory/ingest_audience.py",

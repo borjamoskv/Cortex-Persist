@@ -46,6 +46,7 @@ class ForensicCommander(SwarmCommander):
                     "target": mission.target_repo,
                     "focus": mission.focus_areas,
                     "priority": mission.priority,
+                    "intent": getattr(mission, "intent", "audit"),
                 }
                 dispatch_tasks.append({"id": agent_id, "domain": domain, "payload": payload})
 

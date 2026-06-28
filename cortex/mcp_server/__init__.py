@@ -41,4 +41,4 @@ def __getattr__(name: str) -> object:
         value = getattr(module, attr_name)
         globals()[name] = value
         return value
-    raise AttributeError(f"module 'cortex.mcp' has no attribute {name!r}")
+    raise AttributeError(f"module 'cortex.mcp_server' has no attribute {name!r}")

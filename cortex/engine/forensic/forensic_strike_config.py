@@ -9,6 +9,7 @@ class MissionProfile:
     agent_density: int
     focus_areas: list[str]
     priority: int = 1
+    intent: str = "audit"
 
 
 @dataclass
