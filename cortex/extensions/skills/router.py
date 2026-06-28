@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 """
-Skill Routing Engine - Capa base de ejecución Soberana (MOSKV-1).
+Skill Routing Engine - Sovereign execution base layer (MOSKV-1).
 
-Transforma intención en invocación de la capability correcta.
-Enruta dinámicamente según el grafo de dependencias de la SkillRegistry.
+Transforms intent into the correct capability invocation.
+Dynamically routes based on the SkillRegistry dependency graph.
 """
 
 from __future__ import annotations
@@ -24,8 +24,8 @@ _FOK_GATE: Final[float] = 0.35
 
 class SkillRouter:
     """
-    Orquestador base que determina qué skill(s) debe ejecutarse para resolver una intención.
-    Abandona la ejecución lineal (fases hardcodeadas) en favor del enrutamiento basado en capabilities.
+    Base orchestrator that determines which skill(s) should be executed to resolve an intent.
+    Abandons linear execution (hardcoded phases) in favor of capability-based routing.
     """
 
     def __init__(self, registry: SkillRegistry | None = None) -> None:
@@ -37,13 +37,13 @@ class SkillRouter:
         self, intent: str, context: dict[str, Any] | None = None
     ) -> list[SkillManifest]:
         """
-        Analiza la intención cruda del operador (TBD: usar LLM/Noosphere) o heuristics,
-        y devuelve la secuencia de manifests óptima para ejecutarla.
+        Analyzes raw operator intent (TBD: use LLM/Noosphere) or heuristics,
+        and returns the optimal manifest sequence to execute it.
 
-        (Placeholder inicial: búsqueda simple usando metadata del manifest).
+        (Initial placeholder: simple search using manifest metadata).
         """
-        # Búsqueda semántica usando el motor de búsqueda que implementamos.
-        # Si la intención nombra explícitamente el alias o comando, lo matcheamos primero.
+        # Semantic search using the implemented search engine.
+        # If the intent explicitly names the alias or command, we match it first.
         candidates = self.registry.search(intent)
 
         # ── Procedural Metamemory Gate ────────────────────────────────────
@@ -61,7 +61,7 @@ class SkillRouter:
         if judgment.fok_score < _FOK_GATE:
             if judgment.tip_of_tongue:
                 logger.warning(
-                    "[ROUTER] Tip-of-Tongue: conceptos relacionados detectados pero sin skill exacto para: '%s'",
+                    "[ROUTER] Tip-of-Tongue: related concepts detected but no exact skill for: '%s'",
                     intent,
                 )
             else:
@@ -73,9 +73,9 @@ class SkillRouter:
                 )
             return []
 
-        # Si tenemos un "god mode" o transcendent skill, lo priorizamos si corresponde.
-        if "crea" in intent.lower() or "build" in intent.lower() or "proyecto" in intent.lower():
-            # Intentamos forzar Keter o Aether/Genesis según las keywords.
+        # If we have a "god mode" or transcendent skill, prioritize it if applicable.
+        if "create" in intent.lower() or "build" in intent.lower() or "project" in intent.lower():
+            # Attempt to force Keter or Aether/Genesis based on keywords.
             manifest = self.registry.get("keter-omega") or self.registry.get("aether-1")
             if manifest and manifest not in candidates:
                 candidates.insert(0, manifest)
@@ -84,7 +84,7 @@ class SkillRouter:
             logger.warning("[ROUTER] No skills found for intent: %s", intent)
             return []
 
-        # Re-rankeamos candidatos usando ProceduralMemory (Striatal valuation)
+        # Re-rank candidates using ProceduralMemory (Striatal valuation)
         # Auto-seed transcendent skills as permanent (no temporal decay)
         for m in candidates:
             if getattr(m, "is_transcendent", False) and not self.procedural_memory.get_engram(
@@ -107,8 +107,8 @@ class SkillRouter:
 
     def resolve_dependencies(self, manifest: SkillManifest) -> list[SkillManifest]:
         """
-        Resuelve recursivamente el DAG de dependencias de una Skill,
-        asegurando que se ejecutan los pre-requisitos antes.
+        Recursively resolves a Skill's dependency DAG,
+        ensuring prerequisites are executed first.
         """
         sequence: list[SkillManifest] = []
         visited: set[str] = set()
@@ -126,7 +126,7 @@ class SkillRouter:
 
             for req in node.requirements:
                 req_manifest = self.registry.get(req.skill_name)
-                # O podríamos buscar por require.capability
+                # Or we could search by require.capability
                 if req_manifest:
                     _dfs(req_manifest)
 
@@ -137,13 +137,13 @@ class SkillRouter:
 
     def create_execution_plan(self, intent: str) -> list[SkillManifest]:
         """
-        Crea un plan lineal y ordenado de ejecución (Pipeline).
+        Creates a linear and ordered execution plan (Pipeline).
         """
         candidates = self.route_intent(intent)
         if not candidates:
             return []
 
-        # Tomamos el principal candidato
+        # Take the primary candidate
         primary = candidates[0]
         logger.info("[ROUTER] Primary elected: %s", primary.name)
 
