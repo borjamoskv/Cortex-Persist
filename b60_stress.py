@@ -6,7 +6,7 @@ import tracemalloc
 
 # Add current path to sys.path to ensure babylon60 module is found
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from babylon60 import B60Compiler, B60MinimalVM
+from reference.interpreter import B60Compiler, B60MinimalVM
 
 def run_stress():
     code = """
@@ -15,6 +15,10 @@ def run_stress():
     FORK LABEL_A
     EXECUTE SINGULARITY_CHECK
     AWAIT SINGULARITY_CHECK LABEL_B
+    HALT
+    MUB LABEL_A
+    HALT
+    MUB LABEL_B
     CRITICAL HALT
     """
     
