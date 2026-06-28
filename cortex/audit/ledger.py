@@ -183,7 +183,7 @@ class EnterpriseAuditLedger:
         await self.ensure_table()
 
         async with self._conn.execute(
-            "SELECT rowid, audit_id, timestamp, actor_id, action, prev_hash, signature FROM security_audit_log ORDER BY rowid ASC"
+            "SELECT rowid, audit_id, timestamp, tenant_id, actor_role, actor_id, action, resource, status, prev_hash, signature FROM security_audit_log ORDER BY rowid ASC"
         ) as cursor:
             rows = list(await cursor.fetchall())
 
@@ -193,13 +193,13 @@ class EnterpriseAuditLedger:
         # Group by batch (same prev_hash and signature)
         batches = []
         current_batch = []
-        current_prev_hash = rows[0][5]
-        current_sig = rows[0][6]
+        current_prev_hash = rows[0][9]
+        current_sig = rows[0][10]
 
         for row in rows:
-            # row: 0=rowid, 1=audit_id, 2=timestamp, 3=actor_id, 4=action, 5=prev_hash, 6=signature
+            # row: 0=rowid, 1=audit_id, 2=timestamp, 3=tenant_id, 4=actor_role, 5=actor_id, 6=action, 7=resource, 8=status, 9=prev_hash, 10=signature
             # Validate individual audit_id to detect row-level tampering
-            expected_audit_id = hashlib.sha256(f"{row[2]}{row[3]}{row[4]}".encode()).hexdigest()
+            expected_audit_id = hashlib.sha256(f"{row[2]}{row[3]}{row[4]}{row[5]}{row[6]}{row[7]}{row[8]}".encode()).hexdigest()
             if expected_audit_id != row[1]:
                 return {
                     "status": "tampered",
@@ -207,12 +207,12 @@ class EnterpriseAuditLedger:
                     "reason": "row_hash_mismatch",
                 }
 
-            if row[5] == current_prev_hash and row[6] == current_sig:
+            if row[9] == current_prev_hash and row[10] == current_sig:
                 current_batch.append(row)
             else:
                 batches.append((current_prev_hash, current_sig, current_batch))
-                current_prev_hash = row[5]
-                current_sig = row[6]
+                current_prev_hash = row[9]
+                current_sig = row[10]
                 current_batch = [row]
 
         if current_batch:
@@ -355,7 +355,7 @@ class EnterpriseAuditLedger:
         await self.ensure_table()
 
         timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-        audit_id = hashlib.sha256(f"{timestamp}{actor_id}{action}".encode()).hexdigest()
+        audit_id = hashlib.sha256(f"{timestamp}{tenant_id}{actor_role}{actor_id}{action}{resource}{status}".encode()).hexdigest()
 
         in_tx_before = self._conn.in_transaction
 
