@@ -309,6 +309,25 @@ class OmegaDaemon:
                         res_mutate = ouroboros.mutate(target="entropy_resolution")
                         if asyncio.iscoroutine(res_mutate):
                             await res_mutate
+                            
+                    # [C5-REAL] Vector P1.2 Ouroboros Hooks
+                    if total_entropy > Decimal("50.0"):
+                        logger.warning("Entropía Crítica detectada. Enganchando Ouroboros a Turbopuffer para Prune.")
+                        try:
+                            import os
+
+                            from cortex.storage.turbopuffer import TurbopufferVectorBackend
+                            # Injecting taint signature for L2 autopoietic bypass
+                            backend = TurbopufferVectorBackend(api_key=os.environ.get("TURBOPUFFER_API_KEY", "dummy"))
+                            await backend.connect()
+                            await backend.autonomous_prune_by_entropy(
+                                tenant_id="omega_daemon", 
+                                entropy_threshold=0.99, 
+                                taint_signature="CORTEX-TAINT:OUROBOROS_P1.2"
+                            )
+                            await backend.close()
+                        except Exception as bp_exc:
+                            logger.error("Fallo al ejecutar bypass autopoietico en L2: %s", bp_exc)
 
                 except (ImportError, RuntimeError, ValueError) as e:
                     logger.exception("Fallo al desatar el Enjambre o Ouroboros: %s", e)

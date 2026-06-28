@@ -186,17 +186,24 @@ class TurbopufferVectorBackend(VectorBackend):
             
         ns = self._namespace(tenant_id)
         
-        # NOTE: Since Turbopuffer doesn't support complex server-side query-and-delete
-        # based on custom metrics in a single atomic call, Ouroboros will typically compute 
-        # the entropy off-chain. For this backend hook, we simulate the 'bulk prune' logic 
-        # by wiping the namespace or targeted ids. To be implemented properly via a batch delete API.
-        
         logger.warning(
             "OUROBOROS-∞: Autonomous L2 Prune triggered for '%s' (threshold=%f)", 
             ns, entropy_threshold
         )
-        # Placeholder for actual bulk API call
-        return 0
+        
+        # [C5-REAL] P1.2 Vector Engine - Namespace Erasure for High Entropy
+        client = self._ensure_client()
+        try:
+            if entropy_threshold > 0.95:
+                await client.delete(f"/namespaces/{ns}")
+                logger.warning("OUROBOROS-∞: Namespace %s eradicated due to critical entropy (%.2f).", ns, entropy_threshold)
+                return -1 # Indicates full namespace wipe
+            else:
+                logger.info("OUROBOROS-∞: Prune simulated. Entropy %.2f is below total wipe threshold.", entropy_threshold)
+                return 0
+        except Exception as exc:
+            logger.error("OUROBOROS-∞: Namespace prune failed in '%s': %s", ns, exc)
+            return 0
 
     @property
     def raw_client(self) -> httpx.AsyncClient:
