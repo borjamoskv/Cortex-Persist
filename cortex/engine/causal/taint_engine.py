@@ -420,3 +420,34 @@ class MHCAntigenRouter:
             return True
 
         return False
+
+# =====================================================================
+# APEX KERNEL INTEGRATION (P0)
+# =====================================================================
+
+def secure_state_commit(content: str, metadata: dict) -> tuple:
+    """
+    [C5-REAL] Finalizes the Write-Path by invoking the ApexDispatcher.
+    Freezes the state dictionary to prevent mutability (OP_FREEZE_MEM), 
+    and executes the Git Sentinel (OP_GIT_SENTINEL) to ensure cryptographic continuity
+    of the Sparse Merkle Tree hash chain.
+    """
+    from cortex.agents.primitives.dispatcher import apex_dispatcher
+    
+    # 1. Structural Freeze (Immutable)
+    frozen_state = apex_dispatcher.execute(
+        "OP_FREEZE_MEM", 
+        state={"content": content, "metadata": metadata, "crystallized": True}
+    )
+    
+    # 2. Cryptographic Persistence
+    agent_id = metadata.get("agent_id", "SYS_ROOT")
+    commit_msg = f"CORTEX-TAINT: Causal state commit for [{agent_id}]"
+    
+    logger.info(f"[TaintEngine] Enforcing OP_GIT_SENTINEL for agent {agent_id}")
+    hash_ledger = apex_dispatcher.execute("OP_GIT_SENTINEL", commit_msg=commit_msg, force=True)
+    
+    logger.info(f"[TaintEngine] State collapsed successfully. Ledger Hash: {hash_ledger}")
+    
+    return frozen_state, hash_ledger
+
