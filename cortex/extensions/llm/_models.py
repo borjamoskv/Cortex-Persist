@@ -78,11 +78,11 @@ class IntentProfile(str, Enum):
 
     BELIEF_AUDIT = "belief_audit"
     """Cognitive Handoff: contradiction detection, invariant verification.
-    Routes to Auditor Economic (Deep Think) or Premium (Opus)."""
+    Routes to Auditor Economic (GLM-5.2 Max) or Premium (Opus 4.8 Thinking)."""
 
     EPISODIC_PROCESSING = "episodic_processing"
     """Cognitive Handoff: massive context reads, multimodal ingestion.
-    Routes to Infrastructure (Gemini 3.1 Pro) for cost-gated prescreen."""
+    Routes to Infrastructure (Gemini 3.5 Flash) for cost-gated prescreen."""
 
 
 class CascadeTier(str, Enum):
