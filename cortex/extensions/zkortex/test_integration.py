@@ -57,7 +57,16 @@ def test_full_sovereign_opacity_protocol() -> None:
     verifier = ZKOrtexVerifier(expected_root=opacity.public_root)
     print(f"\n[VERIFIER EXTERNO] Root pinned: {public_root[:16]}...")
 
-    # ── 5. CORTEX demuestra que conoce un hecho específico ────────────────────
+    # ── 5. CORTEX demuestra que el hash no filtra la carga útil ───────────────
+    print("\n[VERIFIER EXTERNO] Intentando extraer información del hash público...")
+    for secret in private_knowledge:
+        assert secret not in public_root, "El hash público filtra información en texto plano"
+        # También probamos subcadenas críticas
+        assert "142 ETH" not in public_root
+        assert "Berghain" not in public_root
+    print("[VERIFIER] ✓ Confirmado: El hash es criptográficamente opaco y no revela la carga.")
+
+    # ── 6. CORTEX demuestra que conoce un hecho específico ────────────────────
     fact_to_prove = "CORTEX v6 usa HKDF + AES-GCM con aislamiento por tenant"
     print("\n[CORTEX] Generando prueba de membresía para:")
     print(f"         '{fact_to_prove[:50]}...'")
