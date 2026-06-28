@@ -5,7 +5,9 @@ import mmap
 import os
 import struct
 import weakref
-from typing import Any
+from typing import Any, Mapping
+
+from cortex.agents.primitives.dispatcher import apex_dispatcher
 
 logger = logging.getLogger("cortex.ultramap")
 
@@ -188,7 +190,8 @@ class UltramapSubstrate:
         Returns the Joules required to traverse the topology.
         """
         if not (0 <= agent_idx < self.capacity):
-            raise EntropyDeath("Agent Index Out of Bounds")
+            apex_dispatcher.execute("OP_APOPTOSIS")
+            raise EntropyDeath("Agent Index Out of Bounds. Apoptosis triggered.")
 
         if self._rs is not None:
             return self._rs.calculate_exergy_distance(agent_idx, target_hash)
@@ -223,7 +226,7 @@ class UltramapSubstrate:
             "dddd", self._buffer, offset + 96
         )  # pyright: ignore[reportArgumentType]
 
-        return {
+        raw_state = {
             "x": x,
             "y": y,
             "z": z,
@@ -234,6 +237,9 @@ class UltramapSubstrate:
             "causal_entropy": causal_entropy,
             "cpu_load": cpu_load,
         }
+        
+        # [C5-REAL] OP_FREEZE_MEM: Ensure structural immutability of the returned map.
+        return apex_dispatcher.execute("OP_FREEZE_MEM", state=raw_state)
 
     def update_control_vector(
         self,
