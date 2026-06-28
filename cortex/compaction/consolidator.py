@@ -160,16 +160,20 @@ class BeliefConsolidator:
         Simple single-pass clustering: O(N²) but N is bounded
         by _MAX_EVENTS_PER_CYCLE (200). GPU-accelerated embedding.
         """
-        from cortex.engine.core.semantic_hash import (
-            batch_fingerprint,
-            cosine_similarity,
-        )
+        from cortex.engine.core.semantic_hash import batch_fingerprint
+        import numpy as np
 
         if len(contents) < _MIN_CLUSTER_SIZE:
             return []
 
         fingerprints = batch_fingerprint(contents, embedder)
         n = len(fingerprints)
+
+        # Ouroboros O(1) Matrix Multiplication
+        embeddings = np.array([f.embedding for f in fingerprints])
+        norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+        embeddings_normalized = embeddings / np.where(norms == 0, 1e-10, norms)
+        sim_matrix = embeddings_normalized @ embeddings_normalized.T
 
         # Greedy clustering: assign each event to first matching cluster
         clusters: list[ClusterResult] = []
@@ -190,10 +194,7 @@ class BeliefConsolidator:
             for j in range(i + 1, n):
                 if j in assigned:
                     continue
-                sim = cosine_similarity(
-                    fingerprints[i].embedding,
-                    fingerprints[j].embedding,
-                )
+                sim = float(sim_matrix[i, j])
                 if sim >= self._similarity_threshold:
                     cluster.event_ids.append(fact_ids[j])
                     cluster.event_contents.append(contents[j])
