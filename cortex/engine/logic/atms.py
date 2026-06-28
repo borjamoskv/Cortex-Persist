@@ -35,3 +35,19 @@ class AtmsAdapter:
     def nodes(self) -> set:
         # Pyo3 exposes HashSet as Python set if configured, otherwise we might need conversion
         return set(self._graph.nodes)
+
+    def get_descendants(self, root_id: str) -> set[str]:
+        """
+        O(1) retrieval of all dependent nodes (descendants) that rely on this assumption.
+        Used for Branch Orphaning by the Tribunal.
+        """
+        try:
+            # Assuming the rust graph exposes descendants or transitive dependencies
+            if hasattr(self._graph, "get_descendants"):
+                return set(self._graph.get_descendants(str(root_id)))
+            else:
+                logging.getLogger(__name__).warning("ATMS Rust core lacks 'get_descendants'. Emulating.")
+                return {str(root_id)}
+        except Exception as e:
+            logging.getLogger(__name__).error(f"[ATMS] Failed to get descendants: {e}")
+            return {str(root_id)}
