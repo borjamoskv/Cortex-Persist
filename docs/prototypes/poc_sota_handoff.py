@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from cortex.extensions.hypervisor.belief_object import BeliefObject, BeliefConfidence
+from cortex.extensions.hypervisor.belief_object import BeliefConfidence, BeliefObject
 from cortex.extensions.llm.cognitive_handoff import CognitiveHandoff
 
 # Silenciar logs genéricos para claridad en el POC

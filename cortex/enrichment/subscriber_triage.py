@@ -2,9 +2,8 @@
 [C5-REAL] Exergy-Maximized Subscriber Triage Engine
 Transforms high-entropy subscriber strings into deterministic PPI vectors.
 """
-import re
 import hashlib
-from typing import List, Dict, Tuple
+import re
 from datetime import datetime
 
 # Heuristic Constants
@@ -38,7 +37,7 @@ def generate_taint(payload: str) -> str:
     hash_payload = hashlib.sha3_256(payload.encode()).hexdigest()
     return f"taint:MOSKV-1:enrichment:{timestamp}:{hash_payload}"
 
-def triage_subscriber(email: str) -> Tuple[str, int, str]:
+def triage_subscriber(email: str) -> tuple[str, int, str]:
     """
     Evaluates an email and returns (Vector_Class, Reality_PPI, Reason)
     """
@@ -67,7 +66,7 @@ def triage_subscriber(email: str) -> Tuple[str, int, str]:
     # [V-5] Organic C5-REAL
     return ("V5_ORGANIC", 5, "Personal/Direct Attention")
 
-def process_batch(emails: List[str]) -> Dict[str, dict]:
+def process_batch(emails: list[str]) -> dict[str, dict]:
     """Process a list of emails into a deterministic mapping."""
     results = {}
     for email in emails:

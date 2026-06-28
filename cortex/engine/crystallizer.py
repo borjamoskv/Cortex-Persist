@@ -1,8 +1,8 @@
 import logging
-from typing import Dict, Any
+from typing import Any
 
-from cortex.engine.entropy import entropy_annihilator
 from cortex.agents.primitives.dispatcher import apex_dispatcher
+from cortex.engine.entropy import entropy_annihilator
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class AutoCrystallizer:
     def __init__(self) -> None:
         pass
 
-    def crystallize_fact(self, raw_data: str) -> Dict[str, Any]:
+    def crystallize_fact(self, raw_data: str) -> dict[str, Any]:
         """
         1. Purges Anergy.
         2. Applies Thermodynamic Compression (Ω4).

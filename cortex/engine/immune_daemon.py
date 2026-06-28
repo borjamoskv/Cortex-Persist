@@ -5,12 +5,11 @@ Implementación Causal de las Primitivas INV-01 a INV-04.
 """
 
 import ast
+import logging
 import random
 import sys
 import threading
 import time
-import logging
-from typing import Callable
 
 logger = logging.getLogger("cortex.engine.immune_daemon")
 
@@ -65,14 +64,14 @@ class ImmuneDaemon:
         NOTA: En C5-REAL esto operaría extrayendo el AST del módulo real de `cortex.guards`.
         """
         # Simulación de un Guard de validación CORTEX
-        source_guard = \"\"\"
+        source_guard = """
 def validate_taint(payload: dict) -> bool:
     if "CORTEX-TAINT" not in payload:
         return False
     if payload["CORTEX-TAINT"] is None:
         return False
     return True
-\"\"\"
+"""
         # INV-01: Fuzzing
         tree = ast.parse(source_guard)
         mutator = ImmuneMutator()

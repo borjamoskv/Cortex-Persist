@@ -1,12 +1,13 @@
-import os
-import sys
-import subprocess
 import logging
 import math
+import os
+import subprocess
+import sys
+from collections.abc import Callable
 from types import MappingProxyType
-from typing import Any, Dict, Callable, Tuple
+from typing import Any
 
-from cortex.agents.primitives.registry import apex_registry, ApexPrimitive
+from cortex.agents.primitives.registry import apex_registry
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class ApexDispatcher:
     physical state mutations (Disk, Git, Memory).
     """
     def __init__(self) -> None:
-        self._handlers: Dict[str, Callable[..., Any]] = {}
+        self._handlers: dict[str, Callable[..., Any]] = {}
         self._register_native_handlers()
 
     def _register_native_handlers(self) -> None:
@@ -118,7 +119,7 @@ class ApexDispatcher:
             key_bytes[i] = os.urandom(1)[0]
         logger.info("[APEX] Ephemeral key material shredded.")
 
-    def _op_freeze_mem(self, state: Dict[Any, Any]) -> MappingProxyType[Any, Any]:
+    def _op_freeze_mem(self, state: dict[Any, Any]) -> MappingProxyType[Any, Any]:
         """OP_FREEZE_MEM: Convert a mutable dictionary into a read-only MappingProxyType."""
         return MappingProxyType(state)
 

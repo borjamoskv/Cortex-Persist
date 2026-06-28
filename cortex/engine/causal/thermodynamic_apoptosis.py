@@ -12,9 +12,10 @@ import asyncio
 import logging
 import subprocess
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import Optional
 
 import aiosqlite
+
 from cortex.audit.ledger import EnterpriseAuditLedger
 
 logger = logging.getLogger("cortex.engine.causal.apoptosis")
@@ -76,7 +77,7 @@ class OuroborosCollapseEngine:
             subprocess.run(["git", "merge", "--abort"], cwd=self.repo_path, capture_output=True)
             return False
 
-    async def run_convergence(self, target_branches: List[str]) -> Optional[str]:
+    async def run_convergence(self, target_branches: list[str]) -> Optional[str]:
         """
         Evaluates a list of divergent branches, collapses the best one, and triggers
         apoptosis on the rest. Anchors cryptographic proof in the Ledger.
@@ -85,7 +86,7 @@ class OuroborosCollapseEngine:
             logger.warning("No divergent branches provided for convergence.")
             return None
 
-        evaluations: Dict[str, float] = {}
+        evaluations: dict[str, float] = {}
         for branch in target_branches:
             evaluations[branch] = self._get_branch_exergy(branch)
             logger.info(f"Branch {branch} - Exergy Yield: {evaluations[branch]:.2f}%")

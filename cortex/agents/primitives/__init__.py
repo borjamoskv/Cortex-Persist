@@ -1,5 +1,5 @@
-from .registry import apex_registry, ApexPrimitive, OuroborosInvariant
-from .dispatcher import apex_dispatcher, ApexDispatcher
+from .dispatcher import ApexDispatcher, apex_dispatcher
+from .registry import ApexPrimitive, OuroborosInvariant, apex_registry
 
 __all__ = [
     "apex_registry",

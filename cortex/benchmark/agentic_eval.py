@@ -15,11 +15,11 @@ import csv
 import json
 import logging
 import subprocess
-import statistics
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Optional
 
 import aiosqlite
+
 from cortex.audit.ledger import EnterpriseAuditLedger
 
 logger = logging.getLogger("cortex.benchmark.agentic_eval")
@@ -52,7 +52,7 @@ class AsyncAgenticEvaluator:
         self.transcripts_dir = transcripts_dir
         self.db_path = db_path
         self.metrics = AgenticMetrics()
-        self.session_scores: List[Dict[str, float]] = []
+        self.session_scores: list[dict[str, float]] = []
 
     def _get_git_net_improvement(self) -> float:
         """[C5-REAL] Extract empirical Exergy Delta from the repository graph."""
@@ -81,7 +81,7 @@ class AsyncAgenticEvaluator:
         self.metrics.total_sessions += 1
         
         try:
-            with open(transcript_path, 'r', encoding='utf-8') as f:
+            with open(transcript_path, encoding='utf-8') as f:
                 lines = f.readlines()
         except FileNotFoundError:
             logger.error(f"Transcript not found: {transcript_path}")
@@ -157,10 +157,9 @@ class AsyncAgenticEvaluator:
             status=f"Hallucination:{hallucination_rate:.2f}"
         )
 
-    async def compute_aggregate_metrics(self) -> Dict[str, str]:
+    async def compute_aggregate_metrics(self) -> dict[str, str]:
         """Calculates final percentages akin to the A-EVAL-2026 leaderboard."""
         ts = self.metrics.total_sessions or 1
-        tc = self.metrics.total_cycles or 1
         tt = self.metrics.total_tool_calls or 1
         be = self.metrics.bash_errors or 1
         co = self.metrics.corrections or 1
@@ -179,7 +178,7 @@ class AsyncAgenticEvaluator:
             "Sessions": str(self.metrics.total_sessions)
         }
 
-    async def run_all(self, csv_export: Optional[str] = None) -> Dict[str, str]:
+    async def run_all(self, csv_export: Optional[str] = None) -> dict[str, str]:
         logger.info(f"Scanning directory: {self.transcripts_dir} for transcript.jsonl files...")
         paths = list(self.transcripts_dir.rglob("transcript.jsonl"))
         
@@ -209,7 +208,7 @@ class AsyncAgenticEvaluator:
             
         return results
 
-    def _export_csv(self, csv_path: str, results: Dict[str, str]) -> None:
+    def _export_csv(self, csv_path: str, results: dict[str, str]) -> None:
         try:
             with open(csv_path, "w", newline="") as csvfile:
                 writer = csv.writer(csvfile)

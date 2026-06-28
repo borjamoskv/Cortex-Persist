@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
 
 @dataclass(frozen=True)
@@ -27,8 +27,8 @@ class ApexRegistry:
     Loads and serves the 100 Sovereign APEX Primitives and 100 Invariants.
     """
     def __init__(self) -> None:
-        self._primitives: Dict[str, ApexPrimitive] = {}
-        self._invariants: Dict[str, OuroborosInvariant] = {}
+        self._primitives: dict[str, ApexPrimitive] = {}
+        self._invariants: dict[str, OuroborosInvariant] = {}
         self._load_registry()
 
     def _load_registry(self) -> None:
@@ -64,7 +64,7 @@ class ApexRegistry:
         """Retrieve a specific primitive by ID (e.g. 'APEX-001')"""
         return self._primitives.get(apex_id)
 
-    def list_primitives(self) -> List[ApexPrimitive]:
+    def list_primitives(self) -> list[ApexPrimitive]:
         """List all loaded primitives"""
         return list(self._primitives.values())
         
@@ -72,7 +72,7 @@ class ApexRegistry:
         """Retrieve a specific invariant by ID (e.g. 'OUROBOROS-001')"""
         return self._invariants.get(inv_id)
         
-    def list_invariants(self) -> List[OuroborosInvariant]:
+    def list_invariants(self) -> list[OuroborosInvariant]:
         """List all loaded invariants"""
         return list(self._invariants.values())
 

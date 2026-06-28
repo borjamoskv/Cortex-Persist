@@ -1,10 +1,11 @@
-from fastapi import FastAPI, HTTPException, Security, Query, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.staticfiles import StaticFiles
 import os
-import subprocess
 import shlex
+import subprocess
+
+from fastapi import Depends, FastAPI, HTTPException, Security
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 app = FastAPI(
@@ -56,7 +57,7 @@ async def health_check():
 async def get_invariants(token: str = Depends(verify_token)):
     inv_path = os.path.expanduser("~/30_CORTEX/docs/epistemology/100_invariantes_fisicas.md")
     if os.path.exists(inv_path):
-        with open(inv_path, "r") as f:
+        with open(inv_path) as f:
             return {"source": "100_invariantes_fisicas.md", "content": f.read()}
     raise HTTPException(status_code=404, detail="Invariantes no forjadas en disco")
 

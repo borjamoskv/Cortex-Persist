@@ -6,8 +6,9 @@ Inyección de entropía en la lógica del auditor para colapsar Unknown Unknowns
 
 import ast
 import random
-import sys
 import subprocess
+import sys
+
 from rich.console import Console
 
 console = Console()
@@ -31,7 +32,7 @@ class SemanticMutator(ast.NodeTransformer):
 
 def generate_mutant(source_file, target_file):
     """Lee el script S, lo muta semánticamente y escribe la versión mutante."""
-    with open(source_file, 'r') as f:
+    with open(source_file) as f:
         source_code = f.read()
     
     tree = ast.parse(source_code)

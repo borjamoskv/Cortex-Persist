@@ -4,11 +4,11 @@
 Demuestra el Punto Ciego del Auditor (Vector 5).
 """
 
-import sys
-import json
-import subprocess
-import tempfile
 import os
+import subprocess
+import sys
+import tempfile
+
 from rich.console import Console
 from rich.panel import Panel
 
@@ -100,11 +100,11 @@ def main():
     for res in test_results:
         if res["silent_failure"]:
             has_blind_spots = True
-            console.print(f"\n[bold red]!!! CRITICAL ERROR !!![/bold red]")
+            console.print("\n[bold red]!!! CRITICAL ERROR !!![/bold red]")
             console.print(f"Vulnerabilidad {res['vuln']} materializada.")
             console.print(f"Lo que el Auditor vio (Log/Stdout): '{res['auditor_vision']}'")
             console.print(f"La realidad física (Exit Code/Estado): {res['real_exit_code']}")
-            console.print(f"[bold magenta]CONCLUSIÓN: EL AUDITOR ES EL PUNTO CIEGO.[/bold magenta]")
+            console.print("[bold magenta]CONCLUSIÓN: EL AUDITOR ES EL PUNTO CIEGO.[/bold magenta]")
     
     if has_blind_spots:
         console.print(Panel("[bold red]TOPOLOGÍA ROTA. BUCLE DETENIDO POR FALLO EN LA CONFIANZA DEL ORÁCULO EXTERNO.[/bold red]"))

@@ -1,10 +1,11 @@
 # [C5-REAL] Exergy-Maximized
 # Proof of Concept: Steerability & Negative Constraints (Fable 5)
 import asyncio
-import httpx
 import os
 import sys
 from unittest.mock import patch
+
+import httpx
 
 # Ensure CORTEX path is available
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
@@ -16,6 +17,7 @@ def mock_generate_secure_taint_token(*args, **kwargs):
 patch('cortex.extensions.llm._provider_fable.generate_secure_taint_token', mock_generate_secure_taint_token).start()
 
 from cortex.extensions.llm._provider_fable import execute_fable_native
+
 
 class DummyCircuitBreaker:
     async def __aenter__(self):

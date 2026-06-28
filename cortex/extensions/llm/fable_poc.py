@@ -1,9 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 # Proof of Concept: Claude Fable 5 Agentic Orchestration
 import asyncio
-import httpx
 import os
 import sys
+
+import httpx
 
 # Ensure CORTEX path is available
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
@@ -14,9 +15,11 @@ def mock_generate_secure_taint_token(*args, **kwargs):
 
 import sys
 from unittest.mock import patch
+
 patch('cortex.extensions.llm._provider_fable.generate_secure_taint_token', mock_generate_secure_taint_token).start()
 
 from cortex.extensions.llm._provider_fable import execute_fable_native
+
 
 async def main():
     api_key = os.getenv("ANTHROPIC_API_KEY", "dummy_key_for_poc")
@@ -54,7 +57,7 @@ async def main():
     async with httpx.AsyncClient() as client:
         try:
             print(f"[*] Prompt: {prompt}")
-            print(f"[*] Expected Tool: read_cortex_ledger")
+            print("[*] Expected Tool: read_cortex_ledger")
             
             # Note: This will fail with a 401 if ANTHROPIC_API_KEY is dummy
             # but the structural binding is proven.

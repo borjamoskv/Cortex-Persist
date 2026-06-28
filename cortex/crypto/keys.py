@@ -28,12 +28,6 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from cortex.crypto.vault import Vault
-from cortex.crypto.ecc_autodidact_secp256k1 import (
-    Secp256k1Identity,
-    Secp256k1Signer,
-    Secp256k1Verifier,
-    Secp256k1KeyPair,
-)
 
 logger = logging.getLogger("cortex.crypto.keys")
 

@@ -1,7 +1,8 @@
 import logging
-from typing import List, Dict, Any, Set
-from cortex.engine.logic.atms import AtmsAdapter
+from typing import Any
+
 from cortex.agents.primitives.dispatcher import apex_dispatcher
+from cortex.engine.logic.atms import AtmsAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +19,9 @@ class TribunalEngine:
             self.atms = None
             logger.warning(f"[Tribunal] Running without Rust ATMS backend ({e}). Orphaning will be emulated.")
             
-        self.suspended_nodes: Set[str] = set()
+        self.suspended_nodes: set[str] = set()
 
-    def detect_collision(self, fact_a: Dict[str, Any], fact_b: Dict[str, Any]) -> bool:
+    def detect_collision(self, fact_a: dict[str, Any], fact_b: dict[str, Any]) -> bool:
         """
         Detects if two facts contradict each other structurally.
         (Placeholder for SMT/Z3 solvers in future phases).
@@ -29,7 +30,7 @@ class TribunalEngine:
         logger.info(f"[Tribunal] Collision detected between {fact_a.get('id')} and {fact_b.get('id')}")
         return True
 
-    def suspend_subgraph(self, root_node_id: str) -> List[str]:
+    def suspend_subgraph(self, root_node_id: str) -> list[str]:
         """
         O(1) Branch Orphaning.
         When a belief collapses, this isolates its entire dependency branch.

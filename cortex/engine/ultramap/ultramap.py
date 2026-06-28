@@ -5,7 +5,7 @@ import mmap
 import os
 import struct
 import weakref
-from typing import Any, Mapping
+from typing import Any
 
 from cortex.agents.primitives.dispatcher import apex_dispatcher
 
