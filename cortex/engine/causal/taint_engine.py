@@ -273,29 +273,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     """Enforces the CORTEX-TAINT check. Raises TaintValidationError if invalid."""
     import os
 
-    # Bypass exergy, firewall, and token checks under test environment
-    if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
-        return
-
-    # -- EXERGY & LANDAUER GUARDS (SAGA-1) --
-    from cortex.guards.exergy_guard import ExergyGuard, LandauerGuard
-    try:
-        is_sacred = "axiom" in content.lower() or "sacred" in content.lower()
-        # Treat all generic taint checks as "thought" to enforce the baseline Exergy check
-        ExergyGuard().check_thermodynamic_yield(content, project="SYS_ROOT", fact_type="thought")
-        LandauerGuard().check_landauer_limit(content, is_sacred=is_sacred)
-    except ValueError as exergy_err:
-        raise TaintValidationError(f"SAGA-1 Rejection by Thermodynamic Guard: {exergy_err}")
-
-    # -- OWASP Memory Firewall (SAGA-1.5) --
-    from cortex.security.memory_firewall import MemoryFirewall
-
-    try:
-        _, risk_level, _ = MemoryFirewall.screen_content(content)
-    except ValueError as fw_err:
-        raise TaintValidationError(f"SAGA-1 Rejection by Memory Firewall: {fw_err}")
-
-    # [C5-REAL] Host Identity Strict Containment (UltraThink P0)
+    # [C5-REAL] Host Identity Strict Containment (UltraThink P0) - ALWAYS RUN
     import base64
     import re
     import unicodedata
@@ -400,6 +378,28 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
         raise TaintValidationError(
             "SAGA-1 Rejection: Payload contains prohibited Host Identity PII."
         )
+
+    # Bypass exergy, firewall, and token checks under test environment
+    if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
+        return
+
+    # -- EXERGY & LANDAUER GUARDS (SAGA-1) --
+    from cortex.guards.exergy_guard import ExergyGuard, LandauerGuard
+    try:
+        is_sacred = "axiom" in content.lower() or "sacred" in content.lower()
+        # Treat all generic taint checks as "thought" to enforce the baseline Exergy check
+        ExergyGuard().check_thermodynamic_yield(content, project="SYS_ROOT", fact_type="thought")
+        LandauerGuard().check_landauer_limit(content, is_sacred=is_sacred)
+    except ValueError as exergy_err:
+        raise TaintValidationError(f"SAGA-1 Rejection by Thermodynamic Guard: {exergy_err}")
+
+    # -- OWASP Memory Firewall (SAGA-1.5) --
+    from cortex.security.memory_firewall import MemoryFirewall
+
+    try:
+        _, risk_level, _ = MemoryFirewall.screen_content(content)
+    except ValueError as fw_err:
+        raise TaintValidationError(f"SAGA-1 Rejection by Memory Firewall: {fw_err}")
 
     # -- SaaS Bot Inflation Firewall (Substack Crawler Guard) --
     try:
