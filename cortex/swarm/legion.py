@@ -5,7 +5,6 @@ Implementing Phase 6: Adverse Swarm Intelligence for Code Immunity.
 """
 
 from __future__ import annotations
-
 import asyncio
 import logging
 from abc import ABC, abstractmethod
@@ -25,11 +24,9 @@ except ImportError:
             logging.getLogger("cortex.motor").info(msg)
 
     bicameral = BicameralStub()
-
 from cortex.swarm.legion_vectors import RED_TEAM_SWARM, AttackVector
 
 logger = logging.getLogger(__name__)
-
 __all__ = [
     "LEGION_OMEGA",
     "AsyncSignalBus",
@@ -62,27 +59,22 @@ class AsyncSignalBus:
 
     async def emit(self, signal: SwarmSignal) -> None:
         """Emit a signal onto the bus with Backpressure.
-
         Empty payloads are considered semantically empty and are downgraded to VOID.
         """
         if not signal.payload and signal.status == "SUCCESS":
             raise ValueError("P0 Violation: SUCCESS signal emitted with empty payload.")
-
         # Enforce VOID invariant: Drop empty signals immediately
         if not signal.payload and signal.status != "VOID":
             signal.status = "VOID"
-
         # 99.99% ENGINEER: LANDAUER EPISTEMIC FILTER (Ω4)
         if signal.status == "SUCCESS" and signal.payload:
             import json
             import logging
-
             from cortex.guards.landauer_guard import LandauerGuard
 
             # Serialize to measure thermodynamic density
             payload_str = json.dumps(signal.payload)
             entropy = LandauerGuard.calculate_entropy(payload_str)
-
             # If entropy is below the threshold, it means the payload contains repetitive
             # conversational slop (Anergia) instead of dense structural invariants.
             if entropy < LandauerGuard.MIN_ENTROPY:
@@ -93,7 +85,6 @@ class AsyncSignalBus:
                 signal.payload = {
                     "error": f"LandauerGuard Violation: Payload entropy {entropy:.2f} too low. Remove conversational slop and compress."
                 }
-
         # Backpressure: If queue is full, this will block, slowing down the Swarm Supervisor
         await self._queue.put(signal)
 
@@ -130,7 +121,6 @@ class SwarmAgent(ABC):
             if target is None:
                 queue.task_done()
                 break
-
             try:
                 signal = await self.execute(target)
                 await self.bus.emit(signal)
@@ -204,7 +194,6 @@ class Squadron(ABC):
         """CRYSTALLIZE phase: Aggregate signals. Subclasses may write to the Ledger here."""
         success_count = sum(1 for s in signals if s.status == "SUCCESS")
         void_count = sum(1 for s in signals if s.status == "VOID")
-
         report = {
             "squadron": self.SQUAD_NAME,
             "total_signals": len(signals),
@@ -214,12 +203,10 @@ class Squadron(ABC):
                 {"target": s.target, "status": s.status, "payload": s.payload} for s in signals
             ],
         }
-
         # ─── AX-VIII: CAUSAL CLOSURE GUARD ───
         # Produce a real LedgerPayload to satisfy structural condensation
         import json
         from datetime import datetime, timezone
-
         from cortex.guards import CausalClosureGuard, SwarmProposal
 
         ledger_payload = {
@@ -229,14 +216,12 @@ class Squadron(ABC):
             "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "payloads": [s.payload for s in signals if s.payload],
         }
-
         # ─── Cross-System Invariance Verification ───
         try:
             from cortex.runtime.invariants.cross_system import CrossSystemInvariantCompiler
 
             shannon_trace = getattr(self.engine, "shannon_trace", None)
             substrate_ledger = getattr(self.engine, "substrate_ledger", None)
-
             if shannon_trace is not None and substrate_ledger is not None:
                 # Format raw report data into shannon steps shape for verifier
                 cortex_steps = []
@@ -255,12 +240,10 @@ class Squadron(ABC):
                                 },
                             }
                         )
-
                 # Prepend config/env_id info if trace contains it
                 cortex_ledger_input = [
                     {"env_id": shannon_trace.env_id, "seed": shannon_trace.seed}
                 ] + cortex_steps
-
                 verdict = CrossSystemInvariantCompiler.verify_global_invariance(
                     shannon_trace=shannon_trace,
                     cortex_ledger=cortex_ledger_input,
@@ -270,7 +253,6 @@ class Squadron(ABC):
                     raise RuntimeError(
                         f"[P0] AX-VIII Cross-System Invariance Violation: {'; '.join(verdict.details)}"
                     )
-
                 ledger_payload["global_proof_hash"] = verdict.global_proof_hash
                 ledger_payload["shannon_cortex_hash"] = verdict.shannon_cortex_hash
                 ledger_payload["substrate_hash"] = verdict.substrate_hash
@@ -282,9 +264,7 @@ class Squadron(ABC):
                 raise
             else:
                 logger.debug("Cross-System verifier bypassed: %s", e)
-
         content = json.dumps(ledger_payload)
-
         proposal = SwarmProposal(
             agent_id=f"Squadron-{self.SQUAD_NAME}",
             mission_statement="Crystallization Phase",
@@ -293,26 +273,21 @@ class Squadron(ABC):
         )
         guard = CausalClosureGuard()
         guard.verify_closure(proposal)
-
         return report
 
     async def deploy(self, target_pattern: str | None = None) -> dict[str, Any]:
         targets = await self._map(target_pattern)
         if not targets:
             return {"error": "No targets"}
-
         queue: asyncio.Queue[str] = asyncio.Queue()
         for t in targets:
             queue.put_nowait(t)
-
         self.agents = [
             self._create_agent(f"{self.SQUAD_NAME}-{i:03d}") for i in range(self.REPLICAS)
         ]
         tasks = [asyncio.create_task(agent.run(queue)) for agent in self.agents]
-
         for _ in range(len(self.agents)):
             queue.put_nowait(None)  # Sentinel for each agent  # type: ignore
-
         await queue.join()
         await asyncio.gather(*tasks)
         return await self._crystallize(await self.bus.get_all())
@@ -334,7 +309,6 @@ _INITIAL_INTENT_MAP = {
     "eval": "def run_dynamic(cmd):\n    return ev" + "al(cmd)\n",  # nosec B307
 }
 _DEFAULT_INITIAL = "def process_data(data):\n    return data\n"
-
 _EPIGENETIC_RULES = [
     (
         lambda f: "eval" in f,
@@ -373,16 +347,13 @@ class BlueTeamAgent:
         imports = set()
         body = []
         feedback_lower = [f.lower() for f in feedback]
-
         for condition, imp, bdy in _EPIGENETIC_RULES:
             if any(condition(f) for f in feedback_lower):
                 if imp:
                     imports.add(imp)
                 body.append(bdy)
-
         if not body:
             body.append("def process_data(data):\n    return data")
-
         return imports, body
 
     async def synthesize(
@@ -391,12 +362,9 @@ class BlueTeamAgent:
         """Generating code with defensive awareness (Epigenetic Synthesis)."""
         msg = f"Sintetizando defensa (Ciclo {len(feedback) if feedback else 0})..."
         bicameral.log_limbic(msg, source="BLUE")
-
         if not feedback:
             return f"# Intent: {intent}\n{self._get_initial(intent.lower())}"
-
         imports, body = self._apply_epigenetic(feedback)
-
         final_code = f"# Intent: {intent}\n"
         if imports:
             final_code += "\n".join(sorted(imports)) + "\n\n"
@@ -421,7 +389,6 @@ class RedTeamSwarm:
             for v in self.vectors:
                 tasks.append(v.attack(code, context))
         results = await asyncio.gather(*tasks)
-
         # Flatten results
         all_findings = [finding for result in results for finding in result]
         return all_findings
@@ -442,7 +409,6 @@ class LegionOmegaEngine:
             self.vectors_list = list(_vectors.values())
         else:
             self.vectors_list = list(_vectors)
-
         self.red_team = RedTeamSwarm(vectors=self.vectors_list)
         self.max_cycles = max_cycles
 
@@ -453,28 +419,22 @@ class LegionOmegaEngine:
         final_code = ""
         previous_code = ""
         previous_v_count = float("inf")
-
         bicameral.log_motor(f"LEGION-OMEGA: Forjando '{intent}'", action="FORGE")
-
         for cycle in range(1, self.max_cycles + 1):
             # Blue Team Synthesis
             code = await self.blue_team.synthesize(intent, ctx, feedback)
-
             # ─── Thermal Stagnation Guard (Ω₂) ───
             if code == previous_code:
                 bicameral.log_motor(
                     "Thermal Equilibrium: Code identity reached. No further delta.", action="STABLE"
                 )
                 break
-
             # Red Team Siege
             vulnerabilities = await self.red_team.siege(code, ctx)
             v_count = len(vulnerabilities)
-
             if not vulnerabilities:
                 bicameral.log_motor(f"Inmunidad Química alcanzada en ciclo {cycle}", action="Ω₆")
                 return SiegeResult(success=True, final_code=code, cycles=cycle)
-
             # Entropy Regression Check
             # Si el número de vulnerabilidades aumenta o se estanca...
             if v_count >= previous_v_count and cycle > 1:
@@ -485,17 +445,14 @@ class LegionOmegaEngine:
                     previous_v_count,
                 )
                 break
-
             # Update stats for next cycle
             logger.info("❌ [LEGION] Ciclo %d fallido. Vulnerabilidades: %d", cycle, v_count)
             feedback.extend(vulnerabilities)
             final_code = code  # Keep last attempt
             previous_code = code
             previous_v_count = v_count
-
             # Small delay to simulate evolutionary cooldown
             await asyncio.sleep(0.05)
-
         bicameral.log_motor("Asedio finalizado. Código entregado con deudas.", action="YIELD")
         return SiegeResult(
             success=False,

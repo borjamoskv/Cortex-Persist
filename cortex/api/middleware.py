@@ -421,12 +421,7 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
 
             # Fallback to mock item ID if in test/mock mode
             if not stripe_subscription_item_id:
-                try:
-                    from stripe_config import load_stripe_billing_config
-                    stripe_config = load_stripe_billing_config()
-                    is_mock = not stripe_config.secret_key or stripe_config.secret_key.startswith("sk_test_mock")
-                except ImportError:
-                    is_mock = True
+                is_mock = not config.STRIPE_SECRET_KEY or config.STRIPE_SECRET_KEY.startswith("sk_test_mock")
 
                 if is_mock:
                     stripe_subscription_item_id = f"si_{api_key[-8:]}"

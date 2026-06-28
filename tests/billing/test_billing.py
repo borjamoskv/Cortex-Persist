@@ -14,8 +14,7 @@ import pytest
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts" / "lab"))
-from stripe_config import StripeBillingConfig
+from cortex.core import config
 from cortex.extensions.billing.models import BillingEvent, FailureType, StripeInvoice
 from cortex.extensions.billing.gateway import StripeBillingGateway
 from cortex.extensions.billing.metering import CausalMetering
@@ -83,14 +82,13 @@ def test_stripe_invoice_serialization():
 # ─── Gateway Tests ───────────────────────────────────────────────────
 
 
-def test_gateway_mock_creation():
+def test_gateway_mock_creation(monkeypatch):
     """StripeBillingGateway should initialize and handle mock mode."""
-    config = StripeBillingConfig(
-        secret_key="sk_test_mock_123",
-        webhook_secret="whsec_mock_456",
-        price_table={"pro": "price_pro_123"},
-    )
-    gateway = StripeBillingGateway(config)
+    import cortex.extensions.billing.gateway as gw
+    monkeypatch.setattr(gw.config, "STRIPE_SECRET_KEY", "sk_test_mock_123")
+    monkeypatch.setattr(gw.config, "STRIPE_WEBHOOK_SECRET", "whsec_mock_456")
+    monkeypatch.setattr(gw.config, "STRIPE_PRICE_TABLE", {"pro": "price_pro_123"})
+    gateway = StripeBillingGateway()
     assert gateway.is_mock is True
 
     # Check mock operations return structured strings
@@ -157,10 +155,11 @@ def test_exergy_evaluation():
 # ─── Database Persistence & Quarantine Tests ───────────────────────
 
 
-def test_record_and_quarantine_flow(tmp_db):
+def test_record_and_quarantine_flow(tmp_db, monkeypatch):
     """CausalMetering should save records and quarantine F2 events."""
-    config = StripeBillingConfig(secret_key="sk_test_mock_123")
-    gateway = StripeBillingGateway(config)
+    import cortex.extensions.billing.gateway as gw
+    monkeypatch.setattr(gw.config, "STRIPE_SECRET_KEY", "sk_test_mock_123")
+    gateway = StripeBillingGateway()
     metering = CausalMetering(db_path=tmp_db, gateway=gateway)
 
     # 1. Standard billing event (F1)

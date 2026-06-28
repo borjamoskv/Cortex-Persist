@@ -150,25 +150,20 @@ class PostgresConnectionAdapter:
     ) -> PostgresCursorAdapter:
         sql_upper = sql.strip().upper()
 
-        # Translate transaction queries
-        if sql_upper in (
-            "BEGIN EXCLUSIVE",
-            "BEGIN TRANSACTION EXCLUSIVE",
-            "BEGIN TRANSACTION",
-            "BEGIN",
-        ):
-            sql = "BEGIN"
-            self._in_transaction = True
-        elif sql_upper in ("COMMIT", "COMMIT TRANSACTION", "COMMIT"):
-            sql = "COMMIT"
-            self._in_transaction = False
-        elif sql_upper in ("ROLLBACK", "ROLLBACK TRANSACTION", "ROLLBACK"):
-            sql = "ROLLBACK"
-            self._in_transaction = False
-        elif "WAL_CHECKPOINT" in sql_upper:
+        match sql_upper:
+            case "BEGIN EXCLUSIVE" | "BEGIN TRANSACTION EXCLUSIVE" | "BEGIN TRANSACTION" | "BEGIN":
+                sql = "BEGIN"
+                self._in_transaction = True
+            case "COMMIT" | "COMMIT TRANSACTION":
+                sql = "COMMIT"
+                self._in_transaction = False
+            case "ROLLBACK" | "ROLLBACK TRANSACTION":
+                sql = "ROLLBACK"
+                self._in_transaction = False
+
+        if "WAL_CHECKPOINT" in sql_upper:
             return PostgresCursorAdapter([])
 
-        # Translate PRAGMA table_info
         pragma_match = re.match(r"(?i)PRAGMA\s+table_info\((.+?)\)", sql.strip())
         if pragma_match:
             table_name = pragma_match.group(1).strip().strip("'\"`").lower()
@@ -179,7 +174,6 @@ class PostgresConnectionAdapter:
                 f"WHERE table_name = '{table_name}'"
             )
 
-        # Translate pragma page size/count to database size
         if "PRAGMA_PAGE_COUNT" in sql_upper or "PRAGMA_PAGE_SIZE" in sql_upper:
             sql = "SELECT pg_database_size(current_database())"
 

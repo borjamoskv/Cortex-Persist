@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from stripe_config import StripeBillingConfig, load_stripe_billing_config
+from cortex.core import config
 
 from cortex.extensions.billing.models import BillingEvent, FailureType
 
@@ -29,14 +29,13 @@ class StripeBillingGateway:
     usage reporting, webhook parsing, and F2 security quarantine.
     """
 
-    def __init__(self, config: StripeBillingConfig | None = None):
-        self.config = config or load_stripe_billing_config()
-        self.is_mock = not self.config.secret_key or self.config.secret_key.startswith(
+    def __init__(self):
+        self.is_mock = not config.STRIPE_SECRET_KEY or config.STRIPE_SECRET_KEY.startswith(
             "sk_test_mock"
         )
 
         if not self.is_mock and stripe is not None:
-            stripe.api_key = self.config.secret_key
+            stripe.api_key = config.STRIPE_SECRET_KEY
         else:
             if stripe is None:
                 logger.info("[BILLING] stripe package not installed. Running in mock mode.")
@@ -72,7 +71,7 @@ class StripeBillingGateway:
         Returns:
             Stripe subscription ID.
         """
-        price_id = self.config.price_table.get(plan, "")
+        price_id = config.STRIPE_PRICE_TABLE.get(plan, "")
         if self.is_mock or stripe is None:
             mock_sub = f"sub_mock_{customer_id[:8]}"
             logger.info(
@@ -154,7 +153,7 @@ class StripeBillingGateway:
                 return {"type": "unknown", "data": {}}
 
         try:
-            event = stripe.Webhook.construct_event(payload, signature, self.config.webhook_secret)
+            event = stripe.Webhook.construct_event(payload, signature, config.STRIPE_WEBHOOK_SECRET)
             return event
         except Exception as e:
             logger.error("Webhook verification failed: %s", e)

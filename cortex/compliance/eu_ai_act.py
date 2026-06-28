@@ -38,6 +38,8 @@ class AIDecisionReport:
         """
         Generates a transparent, human-readable record of an autonomous decision.
         """
+        logger.debug(f"Approving decision {audit_id}")
+
         timestamp = datetime.now(timezone.utc).isoformat()
         report = {
             "report_version": "1.0",
@@ -96,31 +98,26 @@ class HumanOversightGate:
             await conn.commit()
         logger.warning(f"[HumanOversight] Decision {audit_id} escalated for human review: {reason}")
 
-    # @public
-    async def approve(self, audit_id: str, reviewer_id: str, comments: str = "") -> None:
-        """Approves an escalated decision."""
+    async def _set_status(self, audit_id: str, reviewer_id: str, status: str, comments: str = "") -> None:
+        logger.debug(f"Setting decision {audit_id} to {status}")
         timestamp = datetime.now(timezone.utc).isoformat()
         async with connect_async_ctx(self.db_path) as conn:
             await self._init_db(conn)
             await conn.execute(
                 "UPDATE oversight_gates SET status = ?, reviewer_id = ?, review_timestamp = ?, comments = ? WHERE audit_id = ?",
-                ("APPROVED", reviewer_id, timestamp, comments, audit_id),
+                (status, reviewer_id, timestamp, comments, audit_id),
             )
             await conn.commit()
-        logger.info(f"[HumanOversight] Decision {audit_id} APPROVED by {reviewer_id}.")
+        logger.info(f"[HumanOversight] Decision {audit_id} {status} by {reviewer_id}.")
+
+    async def approve(self, audit_id: str, reviewer_id: str, comments: str = "") -> None:
+        """Approves an escalated decision."""
+        await self._set_status(audit_id, reviewer_id, "APPROVED", comments)
 
     # @public
     async def reject(self, audit_id: str, reviewer_id: str, comments: str = "") -> None:
         """Rejects an escalated decision."""
-        timestamp = datetime.now(timezone.utc).isoformat()
-        async with connect_async_ctx(self.db_path) as conn:
-            await self._init_db(conn)
-            await conn.execute(
-                "UPDATE oversight_gates SET status = ?, reviewer_id = ?, review_timestamp = ?, comments = ? WHERE audit_id = ?",
-                ("REJECTED", reviewer_id, timestamp, comments, audit_id),
-            )
-            await conn.commit()
-        logger.info(f"[HumanOversight] Decision {audit_id} REJECTED by {reviewer_id}.")
+        await self._set_status(audit_id, reviewer_id, "REJECTED", comments)
 
     async def get_status(self, audit_id: str) -> str | None:
         """Gets the status of an escalated decision."""

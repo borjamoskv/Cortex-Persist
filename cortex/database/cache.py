@@ -152,48 +152,52 @@ class TieredCache(Generic[T]):
 
     async def invalidate(self, pattern: str):
         """Invalidate cache entries matching pattern."""
-        # Remove from L1
+        self._invalidate_l1(pattern)
+        await self._invalidate_l2(pattern)
+        await self._notify(CacheEvent.INVALIDATE, pattern)
+
+    def _invalidate_l1(self, pattern: str):
         keys_to_remove = [k for k in self.l1.keys() if pattern in k]
         for k in keys_to_remove:
             del self.l1[k]
 
-        # Remove from L2
+    async def _invalidate_l2(self, pattern: str):
         client = await self._get_redis()
-        if client is not None:
-            try:
-                redis_pattern = self._redis_key(f"*{pattern}*")
-                cursor = 0
-                while True:
-                    cursor, keys = await client.scan(cursor, match=redis_pattern, count=100)
-                    if keys:
-                        await client.delete(*keys)
-                    if cursor == 0:
-                        break
-            except Exception as e:
-                logger.warning("Redis invalidate failed for pattern %s: %s", pattern, e)
-
-        await self._notify(CacheEvent.INVALIDATE, pattern)
+        if not client:
+            return
+        try:
+            redis_pattern = self._redis_key(f"*{pattern}*")
+            cursor = 0
+            while True:
+                cursor, keys = await client.scan(cursor, match=redis_pattern, count=100)
+                if keys:
+                    await client.delete(*keys)
+                if cursor == 0:
+                    break
+        except Exception as e:
+            logger.warning("Redis invalidate failed for pattern %s: %s", pattern, e)
 
     async def clear(self):
         """Clear all cache entries."""
         self.l1.clear()
-
-        # Clear from L2
-        client = await self._get_redis()
-        if client is not None:
-            try:
-                redis_pattern = self._redis_key("*")
-                cursor = 0
-                while True:
-                    cursor, keys = await client.scan(cursor, match=redis_pattern, count=100)
-                    if keys:
-                        await client.delete(*keys)
-                    if cursor == 0:
-                        break
-            except Exception as e:
-                logger.warning("Redis clear failed: %s", e)
-
+        await self._clear_l2()
         await self._notify(CacheEvent.CLEAR, "all")
+
+    async def _clear_l2(self):
+        client = await self._get_redis()
+        if not client:
+            return
+        try:
+            redis_pattern = self._redis_key("*")
+            cursor = 0
+            while True:
+                cursor, keys = await client.scan(cursor, match=redis_pattern, count=100)
+                if keys:
+                    await client.delete(*keys)
+                if cursor == 0:
+                    break
+        except Exception as e:
+            logger.warning("Redis clear failed: %s", e)
 
     async def subscribe(self) -> asyncio.Queue:
         """Subscribe to cache events."""

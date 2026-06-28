@@ -93,7 +93,7 @@ class SubstackPublisherBot:
                             const code = document.createElement('code');
                             code.textContent = content;
                             pre.appendChild(code);
-                            editor.innerHTML = '';
+                            editor.textContent = '';
                             editor.appendChild(pre);
                         }
                     }

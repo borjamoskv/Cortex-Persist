@@ -111,14 +111,15 @@ class AsyncAgenticEvaluator:
         step_type = event.get("type", "")
         content = event.get("content", "").lower()
 
-        if step_type == "USER_INPUT":
-            self._process_user_input(content, local_state)
-        elif step_type == "PLANNER_RESPONSE":
-            self._process_planner_response(event, local_state)
-        elif step_type == "TOOL_RESPONSE":
-            self._process_tool_response(event, local_state)
-        elif step_type == "ERROR":
-            local_state["error_count"] += 1
+        match step_type:
+            case "USER_INPUT":
+                self._process_user_input(content, local_state)
+            case "PLANNER_RESPONSE":
+                self._process_planner_response(event, local_state)
+            case "TOOL_RESPONSE":
+                self._process_tool_response(event, local_state)
+            case "ERROR":
+                local_state["error_count"] += 1
 
     async def evaluate_session(self, transcript_path: Path, ledger: EnterpriseAuditLedger) -> None:
         """Processes a single transcript.jsonl file and anchors validation to Ledger."""

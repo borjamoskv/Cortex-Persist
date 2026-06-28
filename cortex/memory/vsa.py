@@ -1,20 +1,16 @@
 # [C5-REAL] Exergy-Maximized
 """CORTEX VSA-SDM v7.1 - Zero-Dependency Sovereign Memory Substrate.
-
 Pure Python implementation of Vector Symbolic Architecture (VSA) with
 Sparse Distributed Memory (SDM) for algebraic context collapse.
-
 Replaces RAG with deterministic algebraic operations:
 - MAP-B binary hypervectors (XOR bind, majority bundle)
 - Kanerva SDM with sparse activation for O(1) recall
 - Ebbinghaus temporal decay for memory consolidation
 - SHA-256 persistence for sovereign audit trail
-
 Law Ω₀: Zero external dependencies. Pure Python list comprehensions.
 """
 
 from __future__ import annotations
-
 import hashlib
 import json
 import logging
@@ -26,9 +22,7 @@ from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger("cortex.memory.vsa")
-
 # ── Constants ────────────────────────────────────────────────────────
-
 DIMENSION = 10_000  # Hypervector dimensionality
 SDM_LOCATIONS = 1000  # Kanerva hard locations
 SDM_ACTIVATION_RADIUS = 450  # Hamming distance threshold (~45%)
@@ -36,8 +30,6 @@ PERSISTENCE_DIR = os.path.expanduser("~/.cortex/memory/vsa")
 
 
 # ── MAP-B Algebra ────────────────────────────────────────────────────
-
-
 def random_bipolar(dim: int = DIMENSION, seed: int | None = None) -> list[int]:
     """Generate a random binary hypervector {0, 1}^D."""
     rng = random.Random(seed)
@@ -56,15 +48,12 @@ def bundle(vectors: list[list[int]]) -> list[int]:
         return [0] * DIMENSION
     if n == 1:
         return list(vectors[0])
-
     dim = len(vectors[0])
     result = [0] * dim
     threshold = n / 2
-
     for i in range(dim):
         total = sum(v[i] for v in vectors)
         result[i] = 1 if total > threshold else (0 if total < threshold else random.randint(0, 1))
-
     return result
 
 
@@ -84,11 +73,8 @@ def cosine_similarity(a: list[int], b: list[int]) -> float:
 
 
 # ── Text Encoding (N-gram) ──────────────────────────────────────────
-
-
 class TextEncoder:
     """Encodes text into hypervectors via character-level n-gram binding.
-
     Strategy:
     1. Each character → deterministic random HV (seeded by char code)
     2. N-gram = rotated bind of consecutive char HVs
@@ -119,7 +105,6 @@ class TextEncoder:
         text = text.lower().strip()
         if not text:
             return [0] * self._dim
-
         # Generate n-gram HVs
         ngram_hvs = []
         for i in range(len(text) - self._n + 1):
@@ -130,16 +115,12 @@ class TextEncoder:
                 rotated = self._rotate(self._char_hv(gram[j]), j)
                 hv = bind(hv, rotated)
             ngram_hvs.append(hv)
-
         if not ngram_hvs:
             return self._char_hv(text[0])
-
         return bundle(ngram_hvs)
 
 
 # ── Kanerva SDM ──────────────────────────────────────────────────────
-
-
 @dataclass
 class SDMLocation:
     """A hard location in Kanerva SDM."""
@@ -156,7 +137,6 @@ class SDMLocation:
 
 class KanervaSDM:
     """Sparse Distributed Memory - O(1) associative recall.
-
     Architecture:
     - N hard locations with random addresses
     - Write: increment counters at all locations within activation radius
@@ -191,7 +171,6 @@ class KanervaSDM:
         """Find indices of locations within activation radius."""
         if not self._initialized:
             self.initialize()
-
         activated = []
         for i, loc in enumerate(self._locations):
             dist = hamming_distance(address, loc.address)
@@ -201,15 +180,12 @@ class KanervaSDM:
 
     def write(self, address: list[int], data: list[int]) -> int:
         """Write data vector to all activated locations.
-
         Returns number of activated locations.
         """
         if not self._initialized:
             self.initialize()
-
         activated = self._activated_locations(address)
         now = time.monotonic()
-
         for idx in activated:
             loc = self._locations[idx]
             for j in range(self._dim):
@@ -218,34 +194,28 @@ class KanervaSDM:
                 loc.counters[j] += val
             loc.write_count += 1
             loc.last_write = now
-
         logger.debug("[SDM] Write activated %d/%d locations", len(activated), self._num_locations)
         return len(activated)
 
     def read(self, address: list[int]) -> list[int]:
         """Read from all activated locations and threshold.
-
         Returns the reconstructed binary vector.
         """
         if not self._initialized:
             self.initialize()
-
         activated = self._activated_locations(address)
         if not activated:
             return [0] * self._dim
-
         # Sum counters across activated locations
         sums = [0] * self._dim
         for idx in activated:
             for j in range(self._dim):
                 sums[j] += self._locations[idx].counters[j]
-
         # Threshold to binary
         return [1 if s > 0 else 0 for s in sums]
 
     def apply_decay(self, rate: float = 0.01) -> int:
         """Ebbinghaus exponential decay on all locations.
-
         Decays counter magnitudes by rate per cycle.
         Returns number of affected locations.
         """
@@ -274,8 +244,6 @@ class KanervaSDM:
 
 
 # ── Agent Memory (Per-Agent VSA Store) ───────────────────────────────
-
-
 @dataclass
 class MemoryRecord:
     """A single memory entry with metadata."""
@@ -290,7 +258,6 @@ class MemoryRecord:
 
 class SwarmMemory:
     """Per-agent associative memory with VSA encoding + SDM storage.
-
     Provides:
     - record(): encode text → store in SDM
     - recall(): query by text similarity → ranked results
@@ -317,15 +284,12 @@ class SwarmMemory:
         tags: list[str] | None = None,
     ) -> str:
         """Encode and store a memory.
-
         Returns the record ID.
         """
         rid = record_id or hashlib.sha256(content.encode()).hexdigest()[:12]
         vector = self._encoder.encode(content)
-
         # Store in SDM
         self._sdm.write(vector, vector)
-
         # Store metadata
         self._records[rid] = MemoryRecord(
             id=rid,
@@ -334,7 +298,6 @@ class SwarmMemory:
             timestamp=time.monotonic(),
             tags=tags or [],
         )
-
         logger.debug("[VSA] Recorded memory %s (%d chars)", rid, len(content))
         return rid
 
@@ -345,27 +308,22 @@ class SwarmMemory:
         min_similarity: float = 0.05,
     ) -> list[dict[str, Any]]:
         """Recall memories by algebraic similarity.
-
         Args:
             query: Natural language query
             top_k: Maximum results
             min_similarity: Minimum cosine similarity threshold
-
         Returns:
             List of dicts with id, content, similarity, tags
         """
         query_vector = self._encoder.encode(query)
-
         # Score all records by cosine similarity
         scored = []
         for _rid, rec in self._records.items():
             sim = cosine_similarity(query_vector, rec.vector)
             if sim >= min_similarity:
                 scored.append((sim, rec))
-
         # Sort by similarity descending
         scored.sort(key=lambda x: x[0], reverse=True)
-
         results = []
         for sim, rec in scored[:top_k]:
             results.append(
@@ -377,16 +335,13 @@ class SwarmMemory:
                     "timestamp": rec.timestamp,
                 }
             )
-
         return results
 
     def consolidate(self, decay_rate: float = 0.01) -> int:
         """Apply Ebbinghaus decay and prune dead memories.
-
         Returns number of memories pruned.
         """
         self._sdm.apply_decay(decay_rate)
-
         # Prune records with vectors that no longer recall
         pruned = 0
         dead_ids = []
@@ -396,21 +351,17 @@ class SwarmMemory:
             if sim < 0.01:
                 dead_ids.append(rid)
                 pruned += 1
-
         for rid in dead_ids:
             del self._records[rid]
-
         if pruned:
             logger.info("[VSA] Consolidated: pruned %d dead memories", pruned)
         return pruned
 
     def persist(self) -> str:
         """Save memory state to disk with SHA-256 integrity hash.
-
         Returns the integrity hash.
         """
         self._persistence_path.parent.mkdir(parents=True, exist_ok=True)
-
         # Serialize records (without vectors - too large)
         data = {
             "agent_id": self._agent_id,
@@ -426,14 +377,11 @@ class SwarmMemory:
             "sdm_stats": self._sdm.stats,
             "saved_at": time.monotonic(),
         }
-
         payload = json.dumps(data, ensure_ascii=False, indent=2)
         integrity_hash = hashlib.sha256(payload.encode()).hexdigest()
         data["integrity_hash"] = integrity_hash
-
         with open(self._persistence_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-
         logger.info(
             "[VSA] Persisted %d memories to %s (hash=%s)",
             len(self._records),
@@ -444,21 +392,17 @@ class SwarmMemory:
 
     def load(self) -> int:
         """Load memory state from disk and re-encode vectors.
-
         Returns number of records loaded.
         """
         if not self._persistence_path.exists():
             return 0
-
         with open(self._persistence_path, encoding="utf-8") as f:
             data = json.load(f)
-
         count = 0
         for rid, rec_data in data.get("records", {}).items():
             content = rec_data["content"]
             vector = self._encoder.encode(content)
             self._sdm.write(vector, vector)
-
             self._records[rid] = MemoryRecord(
                 id=rid,
                 content=content,
@@ -467,7 +411,6 @@ class SwarmMemory:
                 tags=rec_data.get("tags", []),
             )
             count += 1
-
         logger.info("[VSA] Loaded %d memories from %s", count, self._persistence_path)
         return count
 
@@ -481,11 +424,8 @@ class SwarmMemory:
 
 
 # ── Pipeline Bridge ──────────────────────────────────────────────────
-
-
 class VSAPipelineBridge:
     """Bridges VSA-SDM to the ContextAssembler.
-
     Implements the interface expected by ContextAssembler._search_vsa():
     - query(intent, top_k) → list[dict] with id, content
     """

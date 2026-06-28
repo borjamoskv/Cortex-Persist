@@ -16,13 +16,13 @@ logger = logging.getLogger(__name__)
 DB_PATH = "/tmp/cortex_test_riemann.db"
 
 
-def generate_taint(n_index: int, t_fixed: str) -> str:
+def generate_sieve_taint(n_index: int, t_fixed: str) -> str:
     agent_id = "OUROBOROS-SIEVE"
     session_id = "C5-RESURRECTION"
-    timestamp = datetime.now(timezone.utc).isoformat()
-    raw = f"{agent_id}:{session_id}:{n_index}:{t_fixed}".encode()
+    now_utc = datetime.now(timezone.utc)
+    raw = f"{agent_id}:{session_id}:{n_index}:{t_fixed}".encode("utf-8")
     sha3 = hashlib.sha3_256(raw).hexdigest()
-    return f"taint:{agent_id}:{session_id}:{timestamp}:{sha3}"
+    return f"taint:{agent_id}:{session_id}:{now_utc.isoformat()}:{sha3}"
 
 
 def execute_sieve_batch(start_n: int, count: int):
@@ -37,7 +37,7 @@ def execute_sieve_batch(start_n: int, count: int):
             n = start_n + i
 
             t_fixed = get_riemann_zero(n)
-            taint = generate_taint(n, t_fixed)
+            taint = generate_sieve_taint(n, t_fixed)
 
             # SAGA-3: Nodo Epistémico y Hash C5
             scale_factor_str = str(10**20)

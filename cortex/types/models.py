@@ -1,15 +1,7 @@
 # [C5-REAL] Exergy-Maximized
-"""
-API Models.
-Centralized Pydantic models for request/response validation.
-"""
-
 from __future__ import annotations
-
 from typing import Any, Literal, TypedDict
-
 from pydantic import BaseModel, Field, field_validator
-
 __all__ = [
     "AcceptanceResult",
     "AgentRegisterRequest",
@@ -57,13 +49,8 @@ __all__ = [
     "VoteResponse",
     "VoteV2Request",
 ]
-
-
 # ─── SDK Surface v0.2 Protocol Types ─────────────────────────────────
-
 QueryStrategy = Literal["auto", "bayesian", "hybrid", "text", "vector", "temporal", "graph"]
-
-
 class QueryInput(TypedDict, total=False):
     tenant_id: str
     project: str
@@ -75,13 +62,9 @@ class QueryInput(TypedDict, total=False):
     include_graph: bool
     include_history: bool
     include_taint: bool
-
-
 class QueryEvidenceLevel(BaseModel):
     level: Literal["none", "basic", "traceable", "verified"]
     reason: str
-
-
 class QueryResultData(BaseModel):
     answer: str | None = None
     evidence_level: QueryEvidenceLevel | None = None
@@ -89,8 +72,6 @@ class QueryResultData(BaseModel):
     degraded_reason: str | None = None
     trace: dict | None = None
     facts: list[dict] | None = None
-
-
 class RejectionResult(TypedDict):
     accepted: Literal[False]
     code: str
@@ -100,25 +81,17 @@ class RejectionResult(TypedDict):
     severity: Literal["low", "medium", "high", "critical"]
     evidence: list[dict]
     remediation: list[str]
-
-
 class AcceptanceResult(TypedDict):
     accepted: Literal[True]
     operation_id: str
     warnings: list[str]
-
-
 OperationResult = AcceptanceResult | RejectionResult
-
-
 class TraceInput(BaseModel):
     tx_id: str | None = None
     fact_id: str | None = None
     decision_id: str | None = None
     query_result_id: str | None = None
     depth: int = Field(5, ge=1, le=20)
-
-
 class EventEnvelope(BaseModel):
     schema_version: str = "1.0"
     event_id: str
@@ -130,8 +103,6 @@ class EventEnvelope(BaseModel):
     sequence: int
     idempotency_key: str
     payload: dict
-
-
 class StoreRequest(BaseModel):
     project: str = Field(..., max_length=100, description="Project/namespace for the fact")
     content: str = Field(..., max_length=50000, description="The fact content")
@@ -142,21 +113,16 @@ class StoreRequest(BaseModel):
     source: str = Field("", max_length=200, description="Origin of the fact (e.g. agent:vex)")
     confidence: str | None = Field(None, description="Optional confidence level (C1-C5)")
     meta: dict | None = Field(None, description="Optional JSON metadata")
-
     @field_validator("project", "content")
     @classmethod
     def not_empty(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("Must not be empty or whitespace only")
         return v
-
-
 class StoreResponse(BaseModel):
     fact_id: str
     project: str
     message: str
-
-
 class SearchRequest(BaseModel):
     query: str = Field(..., max_length=1024, description="Natural language search query")
     k: int = Field(5, ge=1, le=50, description="Number of results")
@@ -170,15 +136,12 @@ class SearchRequest(BaseModel):
     include_graph: bool = Field(
         False, description="Include the localized context subgraph in response"
     )
-
     @field_validator("query")
     @classmethod
     def not_empty(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("Must not be empty or whitespace only")
         return v
-
-
 class SearchResult(BaseModel):
     fact_id: str
     project: str
@@ -193,19 +156,14 @@ class SearchResult(BaseModel):
     context: dict | None = Field(
         None, description="Graph-RAG context (subgraph or related entities)"
     )
-
-
 class VoteRequest(BaseModel):
     value: int = Field(..., description="1 to verify, -1 to dispute, 0 to remove")
-
     @field_validator("value")
     @classmethod
     def valid_vote(cls, v: int) -> int:
         if v not in (1, -1, 0):
             raise ValueError("Vote must be 1, -1, or 0")
         return v
-
-
 class VoteResponse(BaseModel):
     fact_id: str
     agent: str
@@ -213,29 +171,21 @@ class VoteResponse(BaseModel):
     new_consensus_score: float
     confidence: str | float | None = None
     status: str = "recorded"
-
-
 class AgentRegisterRequest(BaseModel):
     name: str = Field(..., max_length=100)
     agent_type: str = Field("ai", description="ai, human, oracle, system")
     public_key: str = Field("", description="Optional Ed25519 public key")
-
-
 class AgentResponse(BaseModel):
     agent_id: str
     name: str
     agent_type: str
     reputation_score: float
     created_at: str
-
-
 class VoteV2Request(BaseModel):
     agent_id: str = Field(..., description="UUID of the registered agent")
     vote: int = Field(..., description="1 to verify, -1 to dispute, 0 to remove")
     reason: str | None = Field(None, max_length=500)
     signature: str | None = Field(None, description="Optional cryptographic signature")
-
-
 class FactResponse(BaseModel):
     id: str
     project: str
@@ -253,8 +203,6 @@ class FactResponse(BaseModel):
     hash: str | None = None
     tx_id: str | None = None
     consensus_score: float | None = None
-
-
 class StatusResponse(BaseModel):
     version: str
     total_facts: int
@@ -264,37 +212,23 @@ class StatusResponse(BaseModel):
     embeddings: int
     transactions: int
     db_size_mb: float
-
-
 class ExportResponse(BaseModel):
-    """Response for project memory export."""
-
     status: str = "success"
     project: str
     artifact: str
     message: str
-
-
 class HealthReport(TypedDict):
     status: Literal["ok", "degraded", "blocked"]
     components: dict[str, str]
     degraded_features: list[str]
     warnings: list[str]
-
-
 class RecoveryReport(BaseModel):
-    """Report of the agent's memory recovery status during boot."""
-
     status: Literal["clean", "recovered", "failed"]
     recovered_items: int
     failed_items: int
     last_checkpoint_id: str | None = None
     warnings: list[str] = Field(default_factory=list)
-
-
 class HealthCheckDetail(BaseModel):
-    """Single health probe result."""
-
     status: str
     detail: str | None = None
     version: str | None = None
@@ -308,19 +242,13 @@ class HealthCheckDetail(BaseModel):
     useful_facts_ratio: float | None = None
     duplicates_ratio: float | None = None
     total_facts: int | None = None
-
     model_config = {"extra": "allow"}
-
-
 class DeepHealthResponse(BaseModel):
-    """Structured deep health check response."""
-
     status: str  # "healthy", "degraded"
     version: str
     schema_version: str
     checks: dict[str, HealthCheckDetail]
     latency_ms: float
-
     # V8 Evaluation Metrics
     p95_latency_ms: float | None = Field(
         default=None, description="p95 latency of ambient context boot"
@@ -328,21 +256,13 @@ class DeepHealthResponse(BaseModel):
     stale_ratio: float | None = Field(
         default=None, description="Ratio of facts older than 180 days with no hits"
     )
-
-
 class ApiKeyResponse(BaseModel):
-    """Response after creating an API key."""
-
     key: str
     name: str
     prefix: str
     tenant_id: str
     message: str
-
-
 class ApiKeyListItem(BaseModel):
-    """Non-sensitive API key metadata."""
-
     id: str
     name: str
     prefix: str
@@ -351,8 +271,6 @@ class ApiKeyListItem(BaseModel):
     is_active: bool
     created_at: str
     last_used: str | None = None
-
-
 class HeartbeatRequest(BaseModel):
     project: str = Field(..., max_length=100)
     entity: str = Field("", max_length=1024)
@@ -360,8 +278,6 @@ class HeartbeatRequest(BaseModel):
     branch: str | None = Field(None, max_length=255)
     language: str | None = Field(None, max_length=50)
     meta: dict | None = None
-
-
 class TimeSummaryResponse(BaseModel):
     total_seconds: int
     total_hours: float
@@ -370,26 +286,18 @@ class TimeSummaryResponse(BaseModel):
     entries: int
     heartbeats: int
     top_entities: list[tuple[str, int]]  # [(entity, count), ...]
-
-
 # ─── Mission Models ──────────────────────────────────────────────────
-
-
 class MissionLaunchRequest(BaseModel):
     project: str = Field(..., max_length=100)
     goal: str = Field(..., max_length=2000)
     formation: str = "IRON_DOME"
     agents: int = Field(10, ge=1, le=50)
-
-
 class MissionResponse(BaseModel):
     intent_id: int
     result_id: int | None = None
     status: str
     stdout: str | None = None
     stderr: str | None = None
-
-
 class LedgerReportResponse(BaseModel):
     valid: bool
     violations: list[dict[str, Any]]
@@ -397,30 +305,20 @@ class LedgerReportResponse(BaseModel):
     roots_checked: int = 0
     votes_checked: int = 0
     vote_checkpoints_checked: int = 0
-
-
 class CheckpointResponse(BaseModel):
     checkpoint_id: str | None
     message: str
     status: str = "success"
-
-
 # ─── MEJORAlo Models ────────────────────────────────────────────────
-
-
 class MejoraloScanRequest(BaseModel):
     project: str = Field(..., max_length=100)
     path: str = Field(..., description="Ruta al directorio del proyecto")
     deep: bool = Field(False, description="Activa dimensión Psi + análisis profundo")
-
-
 class DimensionResultModel(BaseModel):
     name: str
     score: int = Field(..., ge=0, le=100)
     weight: str
     findings: list[str] = Field(default_factory=list)
-
-
 class MejoraloScanResponse(BaseModel):
     project: str
     score: int
@@ -430,49 +328,33 @@ class MejoraloScanResponse(BaseModel):
     total_files: int = 0
     total_loc: int = 0
     fact_id: str | None = None
-
-
 class MejoraloSessionRequest(BaseModel):
     project: str = Field(..., max_length=100)
     score_before: int = Field(..., ge=0, le=100)
     score_after: int = Field(..., ge=0, le=100)
     actions: list[str] = Field(default_factory=list)
-
-
 class MejoraloSessionResponse(BaseModel):
     fact_id: str
     project: str
     delta: int
     status: str = "recorded"
-
-
 class MejoraloShipRequest(BaseModel):
     project: str = Field(..., max_length=100)
     path: str = Field(..., description="Ruta al directorio del proyecto")
-
-
 class ShipSealModel(BaseModel):
     name: str
     passed: bool
     detail: str = ""
-
-
 class MejoraloShipResponse(BaseModel):
     project: str
     ready: bool
     seals: list[ShipSealModel]
     passed: int
     total: int = 7
-
-
 # ─── SovereignGate Models ────────────────────────────────────────────
-
-
 class GateApprovalRequest(BaseModel):
     signature: str = Field(..., description="HMAC-SHA256 signature of the challenge")
     operator_id: str | None = Field(None, description="Operator identifier")
-
-
 class GateActionResponse(BaseModel):
     action_id: str
     level: str
@@ -483,8 +365,6 @@ class GateActionResponse(BaseModel):
     created_at: str
     approved_at: str | None = None
     operator_id: str | None = None
-
-
 class GateStatusResponse(BaseModel):
     policy: str
     timeout_seconds: int
@@ -494,11 +374,7 @@ class GateStatusResponse(BaseModel):
     expired: int = 0
     executed: int = 0
     total_audit_entries: int = 0
-
-
 # ─── Context Engine Models ───────────────────────────────────────────
-
-
 class ContextSignalModel(BaseModel):
     source: str
     signal_type: str
@@ -506,13 +382,9 @@ class ContextSignalModel(BaseModel):
     project: str | None = None
     timestamp: str
     weight: float
-
-
 class ProjectScoreModel(BaseModel):
     project: str
     score: float
-
-
 class ContextSnapshotResponse(BaseModel):
     active_project: str | None = None
     confidence: str
@@ -520,23 +392,15 @@ class ContextSnapshotResponse(BaseModel):
     summary: str
     top_signals: list[ContextSignalModel] = Field(default_factory=list)
     projects_ranked: list[ProjectScoreModel] = Field(default_factory=list)
-
-
 # ─── Universal Memory Schema (UMS) Models ────────────────────────────
-
-
 class UmsHeader(BaseModel):
     agent_did: str = Field(..., description="Decentralized Identifier of the agent")
     owner_did: str = Field(..., description="Decentralized Identifier of the owner")
     transaction_id: str = Field(..., description="Unique transaction hash")
     timestamp: int = Field(..., description="Unix epoch timestamp")
-
-
 class UmsVectorReference(BaseModel):
     hash: str = Field(..., description="Hash identifier of the raw vector payload")
     dimensions: int = Field(1536, description="Embedding dimensional count")
-
-
 class UmsThermodynamics(BaseModel):
     stochastic_entropy_in: float = Field(
         ..., description="Entropy calculated during input sensory phase"
@@ -545,8 +409,6 @@ class UmsThermodynamics(BaseModel):
         ..., description="Exergy yielded during JIT output state phase"
     )
     half_life_seconds: int = Field(2592000, description="Memory decay half-life threshold")
-
-
 class UmsPayload(BaseModel):
     block_id: str = Field(..., description="Deterministic block reference id")
     type: str = Field(..., description="Classification category of the memory block")
@@ -554,13 +416,9 @@ class UmsPayload(BaseModel):
     confidence: float = Field(..., description="Cognitive confidence scale (0.0 to 1.0)")
     vector_reference: UmsVectorReference
     thermodynamics: UmsThermodynamics
-
-
 class UmsProof(BaseModel):
     zk_merkle_root: str = Field(..., description="Cryptographic root reference verification")
     signature: str = Field(..., description="Ed25519 signature validation block")
-
-
 class UniversalMemorySchema(BaseModel):
     ums_version: str = Field("1.0.0", description="UMS semantic specification version")
     header: UmsHeader

@@ -64,16 +64,10 @@ async def test_billing_middleware_success_db_lookup():
 
     middleware = CortexBillingMiddleware(MagicMock())
 
-    # 2. Patch AuthManager, stripe, and stripe_config to simulate production mode
+    # 2. Patch AuthManager and stripe to simulate production mode
     with patch("cortex.auth.manager.get_auth_manager", return_value=mock_auth_manager), \
-         patch("stripe.SubscriptionItem.create_usage_record", create=True) as mock_stripe_call, \
-         patch("stripe_config.load_stripe_billing_config") as mock_load_config:
+         patch("stripe.SubscriptionItem.create_usage_record", create=True) as mock_stripe_call:
         
-        # Configure non-mock mode
-        mock_config = MagicMock()
-        mock_config.secret_key = "sk_live_prodkey"
-        mock_load_config.return_value = mock_config
-
         # Inject STRIPE_SECRET_KEY
         from cortex.core import config
         with patch.object(config, "STRIPE_SECRET_KEY", "sk_live_prodkey"):
@@ -111,13 +105,8 @@ async def test_billing_middleware_bypass_prevention_no_item_in_db():
     middleware = CortexBillingMiddleware(MagicMock())
 
     with patch("cortex.auth.manager.get_auth_manager", return_value=mock_auth_manager), \
-         patch("stripe.SubscriptionItem.create_usage_record", create=True) as mock_stripe_call, \
-         patch("stripe_config.load_stripe_billing_config") as mock_load_config:
+         patch("stripe.SubscriptionItem.create_usage_record", create=True) as mock_stripe_call:
         
-        mock_config = MagicMock()
-        mock_config.secret_key = "sk_live_prodkey"
-        mock_load_config.return_value = mock_config
-
         from cortex.core import config
         with patch.object(config, "STRIPE_SECRET_KEY", "sk_live_prodkey"):
             await middleware._report_usage(api_key, mock_request)

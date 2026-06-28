@@ -1,4 +1,3 @@
-# [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
 import base64
@@ -26,31 +25,9 @@ PUBLIC_EXPORT_MANIFEST_VERSION = "cortex-forensic-export-manifest-v1"
 KEY_REGISTRY_VERSION = "cortex-key-registry-v1"
 EVENT_SCHEMA_VERSION = "cortex-ledger-event-schema-v1"
 VERIFICATION_PROFILE_VERSION = "cortex-verification-profile-v1"
-LEGACY_LIMITATIONS = (
-    "legacy_v0_integrity_only",
-    "origin_authenticity_not_verified",
-    "manifest_completeness_not_available",
-)
-PUBLIC_EXPORT_FILES = frozenset(
-    {
-        "events.jsonl",
-        "key-events.jsonl",
-        "manifest.json",
-        "public-keys.json",
-        "schema.json",
-        "verification-profile.json",
-        "verification-report.json",
-        "checkpoints.jsonl",
-    }
-)
-FORBIDDEN_EXPORT_TOKENS = (
-    "private_key",
-    "seed_hex",
-    "begin private key",
-    "api_key",
-    "secret_key",
-    "password",
-)
+LEGACY_LIMITATIONS = ("legacy_v0_integrity_only", "origin_authenticity_not_verified", "manifest_completeness_not_available")
+PUBLIC_EXPORT_FILES = frozenset({"events.jsonl", "key-events.jsonl", "manifest.json", "public-keys.json", "schema.json", "verification-profile.json", "verification-report.json", "checkpoints.jsonl"})
+FORBIDDEN_EXPORT_TOKENS = ("private_key", "seed_hex", "begin private key", "api_key", "secret_key", "password")
 EXECUTABLE_SUFFIXES = (".bat", ".cmd", ".exe", ".js", ".mjs", ".py", ".sh")
 
 
@@ -100,17 +77,13 @@ def write_public_ledger_export(
     include_verification_report: bool = False,
     allow_overwrite: bool = False,
 ) -> LedgerExportResult:
-    """Write a signed public ledger export package without exporting fact payloads."""
     if not events:
         raise ValueError("at least one ledger event is required")
-
     root = Path(export_dir)
     _prepare_export_dir(root, allow_overwrite=allow_overwrite)
-
     event_objects = [dict(event) for event in events]
     key_objects = [dict(key) for key in public_keys]
     checkpoint_objects = [dict(cp) for cp in checkpoints]
-
     event_hashes = _validate_public_events(
         event_objects,
         tenant_id=tenant_id,
@@ -119,7 +92,6 @@ def write_public_ledger_export(
     _validate_public_key_records(key_objects)
     if checkpoint_objects:
         _validate_public_checkpoints(checkpoint_objects)
-
     key_event_objects = [dict(event) for event in key_events]
     _assert_no_private_material(
         {
@@ -129,7 +101,6 @@ def write_public_ledger_export(
             "checkpoints": checkpoint_objects,
         }
     )
-
     generated_at = created_at or _utc_now()
     events_path = root / "events.jsonl"
     public_keys_path = root / "public-keys.json"
@@ -139,7 +110,6 @@ def write_public_ledger_export(
     manifest_path = root / "manifest.json"
     verification_report_path = root / "verification-report.json"
     checkpoints_path = root / "checkpoints.jsonl" if checkpoint_objects else None
-
     _write_text_atomic(
         events_path,
         "".join(_canonical_public_json(event) + "\n" for event in event_objects),
@@ -153,7 +123,6 @@ def write_public_ledger_export(
             checkpoints_path,  # pyright: ignore[reportArgumentType]
             "".join(_canonical_public_json(cp) + "\n" for cp in checkpoint_objects),
         )
-
     _write_json_atomic(schema_path, _schema_document())
     _write_json_atomic(verification_profile_path, _verification_profile_document())
     _write_json_atomic(
@@ -165,7 +134,6 @@ def write_public_ledger_export(
             generated_at=generated_at,
         ),
     )
-
     manifest_without_signature = _manifest_document(
         events=event_objects,
         event_hashes=event_hashes,
@@ -190,7 +158,6 @@ def write_public_ledger_export(
         ),
     }
     _write_json_atomic(manifest_path, manifest)
-
     verification_result: str | None = None
     if include_verification_report:
         report = verify_export(root)
@@ -198,9 +165,7 @@ def write_public_ledger_export(
         _write_json_atomic(verification_report_path, report)
     else:
         verification_report_path = None
-
     _scan_export_safety(root)
-
     return LedgerExportResult(
         export_dir=root,
         manifest_path=manifest_path,
@@ -219,12 +184,10 @@ def write_legacy_ledger_export(
     export_dir: str | Path,
     allow_overwrite: bool = False,
 ) -> LegacyLedgerExportResult:
-    """Write legacy-v0 integrity vectors and explicit limitation notes."""
     if not vectors:
         raise ValueError("at least one legacy vector is required")
     root = Path(export_dir)
     _prepare_export_dir(root, allow_overwrite=allow_overwrite)
-
     vector_paths: list[Path] = []
     for index, vector in enumerate(vectors, start=1):
         value = dict(vector)
@@ -233,7 +196,6 @@ def write_legacy_ledger_export(
         path = root / f"legacy_v0_vector_{index}.json"
         _write_json_atomic(path, value)
         vector_paths.append(path)
-
     limitations_path = root / "LIMITATIONS.txt"
     _write_text_atomic(
         limitations_path,
@@ -272,7 +234,6 @@ def public_key_record(
     valid_until: str = "2027-01-01T00:00:00Z",
     hardware_backed: bool = False,
 ) -> dict[str, Any]:
-    """Build a public key registry record for exported ledger verification."""
     return {
         "actor_id": actor_id,
         "actor_type": actor_type,
@@ -304,7 +265,6 @@ def _manifest_document(
 ) -> dict[str, Any]:
     first = events[0]
     last = events[-1]
-
     hashes = {
         "events_file_sha256": _sha256_file(root / "events.jsonl"),
         "first_event_hash": event_hashes[0],
@@ -317,7 +277,6 @@ def _manifest_document(
     }
     if checkpoint_count > 0:
         hashes["checkpoints_file_sha256"] = _sha256_file(root / "checkpoints.jsonl")
-
     return {
         "algorithms": {
             "event_hash": "sha256",

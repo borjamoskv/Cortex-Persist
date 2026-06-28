@@ -1,31 +1,25 @@
 # [C5-REAL] Exergy-Maximized
 """Query mixin - recall, history, time-travel, causal chains, stats.
-
 Note: ``search()`` is NOT defined here. The canonical search implementation
 lives in ``SearchMixin`` which provides hybrid search with graceful fallback
 and Graph-RAG enrichment.
 """
 
 from __future__ import annotations
-
 import logging
 import sqlite3
 from typing import TYPE_CHECKING, Any
-
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
 from cortex.memory.temporal import build_temporal_filter_params, time_travel_filter
 
 if TYPE_CHECKING:
     from cortex.search import SearchResult
-
 __all__ = ["QueryMixin"]
-
 logger = logging.getLogger("cortex")
 
 
 class QueryMixin(EngineMixinBase):
     """Query Layer - Recall, History, Time-Travel, Graph, and Stats.
-
     Provides all read-path operations against the fact store:
     - ``recall()``: Bayesian-scored retrieval with temporal decay.
     - ``history()``: Full temporal audit trail (active + deprecated).
@@ -43,7 +37,6 @@ class QueryMixin(EngineMixinBase):
     ) -> list[dict[str, Any]]:
         """Retrieve all active facts, optionally filtered by project or types."""
         tenant_id = self._resolve_tenant(tenant_id)
-
         async with self.session() as conn:
             query = (
                 f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
@@ -52,16 +45,13 @@ class QueryMixin(EngineMixinBase):
                 "AND f.is_tombstoned = 0"
             )
             params: list = [tenant_id]
-
             if project:
                 query += " AND f.project = ?"
                 params.append(project)
-
             if fact_types:
                 placeholders = ", ".join("?" for _ in fact_types)
                 query += f" AND f.fact_type IN ({placeholders})"
                 params.extend(fact_types)
-
             query += " ORDER BY f.project, f.fact_type, f.id"
             async with conn.execute(query, params) as cursor:
                 rows = await cursor.fetchall()
@@ -71,7 +61,6 @@ class QueryMixin(EngineMixinBase):
     # NOTE: search() is provided by SearchMixin, not QueryMixin.
     # This avoids duplication and ensures the canonical search path
     # (with fallback + Graph-RAG enrichment) is always used.
-
     async def hybrid_search(
         self,
         query: str,
@@ -82,7 +71,6 @@ class QueryMixin(EngineMixinBase):
         **kwargs,
     ) -> list[SearchResult]:
         """Hybrid search combining vector similarity + FTS5 text matching.
-
         Delegates to the canonical ``search()`` method (from ``SearchMixin``)
         which provides automatic fallback and Graph-RAG enrichment.
         """
@@ -117,7 +105,6 @@ class QueryMixin(EngineMixinBase):
         offset: int = 0,
     ) -> list[dict[str, Any]]:
         """Bayesian-scored recall with temporal decay.
-
         Scoring: ``consensus_score * 0.8 + temporal_proximity * 0.2``.
         Excludes quarantined and tombstoned facts.
         """
@@ -131,11 +118,9 @@ class QueryMixin(EngineMixinBase):
                 "AND f.is_tombstoned = 0"
             )
             params: list = [tenant_id, project]
-
             if fact_type:
                 q += " AND f.fact_type = ?"
                 params.append(fact_type)
-
             # Unified Scoring: Bayesian reputation + Temporal decay
             # Guard json_extract against encrypted meta (v6_aesgcm: prefix)
             q += """
@@ -148,14 +133,12 @@ class QueryMixin(EngineMixinBase):
                     ))) * 0.2
                 ) DESC, f.fact_type, f.created_at DESC
             """
-
             if limit:
                 q += " LIMIT ?"
                 params.append(limit)
             if offset:
                 q += " OFFSET ?"
                 params.append(offset)
-
             async with conn.execute(q, params) as cursor:
                 rows = await cursor.fetchall()
             facts = [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
@@ -168,12 +151,10 @@ class QueryMixin(EngineMixinBase):
         as_of: str | None = None,
     ) -> list[dict[str, Any]]:
         """Full temporal audit trail - active, deprecated, and updated facts.
-
         Args:
             as_of: ISO timestamp to filter facts valid at that point in time.
         """
         tenant_id = self._resolve_tenant(tenant_id)
-
         async with self.session() as conn:
             base = (
                 f"SELECT {FACT_COLUMNS} {FACT_JOIN} "  # nosec B608
@@ -211,18 +192,14 @@ class QueryMixin(EngineMixinBase):
         tx_id: int | None = None,
     ) -> list[dict[str, Any]]:
         """Point-in-time state reconstruction at a given transaction.
-
         If ``tx_id`` is ``None``, returns current active state via ``recall()``.
-
         Raises:
             ValueError: If the transaction ID does not exist.
         """
         tenant_id = self._resolve_tenant(tenant_id)
-
         async with self.session() as conn:
             if not tx_id:
                 return await self.recall(project, tenant_id=tenant_id)
-
             async with conn.execute(
                 "SELECT created_at FROM transactions WHERE id = ? AND tenant_id = ?",
                 (tx_id, tenant_id),
@@ -230,7 +207,6 @@ class QueryMixin(EngineMixinBase):
                 tx = await cursor.fetchone()
                 if not tx:
                     raise ValueError(f"Transaction {tx_id} not found for tenant {tenant_id}")
-
             tx_time = tx[0]
             q = (
                 f"SELECT {FACT_COLUMNS} {FACT_JOIN} "  # nosec B608
@@ -256,12 +232,10 @@ class QueryMixin(EngineMixinBase):
         tx_id: int | None = None,
     ) -> list[dict[str, Any]]:
         """Global world-state snapshot at a given transaction.
-
         Unlike ``reconstruct_state()``, this is project-agnostic -
         it returns *all* facts across all projects at the given point.
         """
         tenant_id = self._resolve_tenant(tenant_id)
-
         async with self.session() as conn:
             if tx_id is None:
                 q = (
@@ -311,7 +285,6 @@ class QueryMixin(EngineMixinBase):
             ) as cursor:
                 row = await cursor.fetchone()
                 tx_count = row[0] if row else 0
-
             try:
                 async with conn.execute(
                     "SELECT COUNT(*) FROM fact_embeddings fe "
@@ -323,7 +296,6 @@ class QueryMixin(EngineMixinBase):
                     embeddings = row[0] if row else 0
             except (sqlite3.Error, OSError, ValueError):
                 embeddings = 0
-
             async with conn.execute(
                 "SELECT fact_type, COUNT(*) FROM facts "
                 "WHERE is_tombstoned = 0 AND tenant_id = ? "
@@ -331,7 +303,6 @@ class QueryMixin(EngineMixinBase):
                 (tenant_id,),
             ) as cursor:
                 types = {row[0]: row[1] for row in await cursor.fetchall()}
-
             # Causal chain coverage (zero-cost: indexed column)
             try:
                 async with conn.execute(
@@ -344,7 +315,6 @@ class QueryMixin(EngineMixinBase):
                     causal_facts = row[0] if row else 0
             except (sqlite3.Error, OSError):
                 causal_facts = 0
-
             # Database size via PRAGMA (zero-overhead, no filesystem stat needed)
             try:
                 async with conn.execute(
@@ -355,7 +325,6 @@ class QueryMixin(EngineMixinBase):
             except (sqlite3.Error, OSError):
                 db_size_bytes = 0
             db_size_mb = round(db_size_bytes / (1024 * 1024), 2)
-
             return {
                 "total_facts": total,
                 "active_facts": active,
@@ -433,18 +402,15 @@ class QueryMixin(EngineMixinBase):
         tenant_id: str = "default",
     ) -> list[dict[str, Any]]:
         """Traverse the ``parent_decision_id`` causal DAG.
-
         Args:
             fact_id: Starting fact ID.
             direction: ``'up'`` (toward root) or ``'down'`` (leaves).
             max_depth: Maximum recursion depth (default: 10).
             tenant_id: Tenant scope.
-
         Returns:
             Facts ordered by depth (0 = starting fact).
         """
         tenant_id = self._resolve_tenant(tenant_id)
-
         if direction == "up":
             sql = """
                 WITH RECURSIVE chain(id, depth) AS (
@@ -471,23 +437,18 @@ class QueryMixin(EngineMixinBase):
                 )
                 SELECT id, depth FROM chain ORDER BY depth
             """
-
         async with self.session() as conn:
             async with conn.execute(
                 sql,
                 (fact_id, tenant_id, max_depth),
             ) as cursor:
                 chain_ids = await cursor.fetchall()
-
             if not chain_ids:
                 return []
-
             id_list = [row[0] for row in chain_ids if row[0] is not None]
             depth_map = {row[0]: row[1] for row in chain_ids if row[0] is not None}
-
             if not id_list:
                 return []
-
             placeholders = ", ".join("?" for _ in id_list)
             async with conn.execute(
                 f"SELECT {FACT_COLUMNS} {FACT_JOIN} "
@@ -497,9 +458,7 @@ class QueryMixin(EngineMixinBase):
             ) as cursor:
                 rows = await cursor.fetchall()
             facts = [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
-
             for f in facts:
                 f["causal_depth"] = depth_map.get(f["id"], 0)
             facts.sort(key=lambda x: x["causal_depth"])
-
             return await self._resolve_symlinks_async(facts, conn, tenant_id)
