@@ -14,7 +14,7 @@
 | **APEX-005** | `OP_HASH_AUDIT` | `snapshot_ram()` | `O(M)` | Page-dump a Disco. Marca el inicio del Saga. | DAG verification vs Disk state. |
 | **APEX-006** | `OP_DAG_TRUNCATE` | `rollback(snapshot)` | `O(M)` | Page-restore. Erradica la línea temporal fallida. | Purga física de nodos huérfanos. |
 | **APEX-007** | `OP_SNAPSHOT_MINT` | `vacuum()` | `O(N)` | I/O Pesado. Compacta DB, expulsa entropía al vacío. | Creación de punto de rollback. |
-| **APEX-008** | `OP_SAGA_REVERT` | `taint_mark(agent, sha)` | `O(1)` | Metadatos RAM. Agrega bandera radiactiva al string. | Desenrollado atómico SAGA-N -> SAGA-1. |
+| **APEX-008** | `OP_SAGA_REVERT` | `bft_lock(saga_revert)` | `O(1)` | RAM/Disco. Requiere consenso BFT N/3 para rollback. | Desenrollado atómico SAGA-N -> SAGA-1 (BFT Lock). |
 | **APEX-009** | `OP_WAL_LOCK` | `taint_verify(record)` | `O(1)` | Interrupción de CPU. Fuerza validación perimetral. | Bloqueo exclusivo SQLite Write-Ahead. |
 | **APEX-010** | `OP_FLUSH_L1` | `lock_lease(id, ttl)` | `O(1)` | Mutación de Mutex en DB/Redis con auto-expiración. | Invalida caché en mutación de tenant. |
 | **APEX-011** | `OP_TENANT_ISOLATE` | `scatter_gather(tasks)` | `O(T / Workers)` | RAM. Forquea Hilos, colapsa futuros asíncronos. | Segmentación dura de memoria. |
@@ -32,7 +32,7 @@
 | **APEX-023** | `OP_EXTRACT_SIGNAL` | `verify(pub, sig)` | `O(len(data))` | CPU. Filtro antes de aceptar mutación externa. | Denoise de input y aislamiento de intención causal. |
 | **APEX-024** | `OP_VAULT_MOUNT` | `derive_kdf(salt)` | `O(iterations)` | CPU. Computa llave epímera, destruye rastro previo. | Enlace criptográfico de entorno de persistencia. |
 | **APEX-025** | `OP_VAULT_UNMOUNT` | `zeroise(ptr)` | `O(len(ptr))` | RAM. `memset` en C, evita volcado de memoria. | Destrucción atómica de llaves de acceso. |
-| **APEX-026** | `OP_ANERGY_PURGE` | `merkle_root(lvs)` | `O(N log N)` | CPU. Hashea árbol entero; estado matemático único. | Asesinato del proceso generador de excusas. |
+| **APEX-026** | `OP_ANERGY_PURGE` | `merkle_root(lvs)` | `O(N log N)` | CPU. Hashea árbol entero; estado matemático único. | Asesinato y detección de padding léxico/excusas (Slop Halt). |
 | **APEX-027** | `OP_LANDAUER_COMPRESS` | `aes_gcm_enc(...)` | `O(len(data))` | CPU SIMD. Encripta y firma integridad simultáneamente. | Minificación de log a JSON puro. |
 | **APEX-028** | `OP_APOPTOSIS` | `aes_gcm_dec(...)` | `O(len(data))` | CPU SIMD. Lanza excepción si el AAD no coincide. | Terminación voluntaria ante Context Rot. |
 | **APEX-029** | `OP_EXERGY_INJECT` | `gen_ulid()` | `O(1)` | CPU. Retorna ID lexicográfico temporalmente ordenable. | Traducción de token a filesystem I/O. |
@@ -68,18 +68,18 @@
 | **APEX-059** | `OP_VOTE_REVOKE` | `markov_step(m)` | `O(1)` | CPU. Mutación estocástica local predecible. | Invalidación de aserción por evidencia nueva. |
 | **APEX-060** | `OP_CONSENSUS_REJECT` | `bloom_check(i)` | `O(1)` | RAM. Rechazo rápido de archivos ya analizados. | Bloqueo atómico de propuesta minoritaria. |
 | **APEX-061** | `OP_DEPLOY_GHOST` | `ws_send(msg)` | `O(len)` | Red I/O. Stream asíncrono sin handshakes repetidos. | Subagente sin write-access para watch. |
-| **APEX-062** | `OP_PUNISH_NODE` | `grpc_unary()` | `O(len)` | Red I/O. Llamada binaria fuertemente tipada (PB). | Degradación de peso en red (Sensor Drift). |
+| **APEX-062** | `OP_PUNISH_NODE` | `grpc_unary()` | `O(len)` | Red I/O. Llamada binaria fuertemente tipada (PB). | Degradación de peso en red por Sensor Drift (Consenso N/3). |
 | **APEX-063** | `OP_ELEVATE_PRIV` | `udp_multicast()` | `O(len)` | Red I/O. Propagación O(1) a subred local. | PlayGround Master Key flag toggle. |
 | **APEX-064** | `OP_SOTA_EXTRACT` | `dns_resolve()` | `O(1)` | Red UDP. Petición atómica fundacional de topología. | Síntesis de Paper a JSON Vector. |
 | **APEX-065** | `OP_BROADCAST_P0` | `ssh_tunnel()` | `O(1)` | OS Process. Port-forward encriptado a través de NAT. | Interrupción NMI a todo el enjambre. |
-| **APEX-066** | `OP_SLOP_HALT` | `tcp_keepalive()` | `O(1)` | OS Socket. Evita TIME_WAIT por inactividad. | Detector de padding léxico. |
+| **APEX-066** | `[PURGED]` | `NULL` | `O(0)` | RAM. Fusión termodinámica en APEX-026. | [Fusionado estructuralmente en APEX-026]. |
 | **APEX-067** | `OP_REROUTE_HUMAN` | `ip_hash()` | `O(1)` | CPU. Routing estático para Node-Affinity de Caché. | Escalada manual al Operador. |
 | **APEX-068** | `OP_PARSE_INTENT` | `gossip_push()` | `O(log N)` | Red I/O. Infección viral del Swarm (Sin maestro). | Extracción de verbo C5 desde string. |
-| **APEX-069** | `OP_BIND_NEXUS` | `tls_verify()` | `O(1)` | CPU/Red. Validación criptográfica de CA (Root of Trust). | Symlink creación. |
-| **APEX-070** | `OP_UNBIND_NEXUS` | `rate_limit_cb()` | `O(1)` | RAM. Token Bucket descontando exergía de red. | Symlink remoción y duplicado seguro. |
-| **APEX-071** | `OP_SYNC_NEXUS` | `ast.parse()` | `O(len(code))` | CPU. Falla atómicamente si el código es inválido. | Forzado de igualdad de contenido. |
+| **APEX-069** | `OP_NEXUS_MUTATE` | `tls_verify()` | `O(1)` | CPU/Red. Validación criptográfica de CA (Root of Trust). | Mutación cruzada atómica de enlaces y symlinks (Base 60). |
+| **APEX-070** | `[PURGED]` | `NULL` | `O(0)` | RAM. Absorción isomórfica en OP_NEXUS_MUTATE. | [Fusionado estructuralmente en APEX-069]. |
+| **APEX-071** | `[PURGED]` | `NULL` | `O(0)` | RAM. Absorción isomórfica en OP_NEXUS_MUTATE. | [Fusionado estructuralmente en APEX-069]. |
 | **APEX-072** | `OP_VERIFY_SIG` | `ast.walk()` | `O(Nodes)` | CPU. Inyección transversal de instrumentación. | Ed25519 check. |
-| **APEX-073** | `OP_SIGN_PAYLOAD` | `json.loads()` | `O(len)` | CPU. Strict parsing. Error de formato = Abortar. | Ed25519 firma en RAM efímera. |
+| **APEX-073** | `OP_SIGN_PAYLOAD` | `json.loads()` | `O(len)` | CPU. Strict parsing. Error de formato = Abortar. | Ed25519 firma en RAM efímera (Solo tras aval BFT). |
 | **APEX-074** | `OP_ENCRYPT_GCM` | `yaml.safe_load()` | `O(len)` | CPU. Deserialización segura sin instanciación Pickle. | AES-GCM 256. |
 | **APEX-075** | `OP_DECRYPT_GCM` | `re.compile()` | `O(len)` | RAM. Cachea autómata finito en inicialización. | AES-GCM 256. |
 | **APEX-076** | `OP_GIT_SENTINEL` | `unified_diff()` | `O(N log N)` | CPU. Genera Delta para escribir en el Ledger. | Auto-add, auto-commit asíncrono. |
@@ -133,7 +133,7 @@
 | **OUROBOROS-018** | **INV_NO_TYPO_GUESS**: Errores del operador en paths fallan P0; no se infiere el path correcto. | `ASSERT TimeToRecovery < TimeToFailure` | P1 |
 | **OUROBOROS-019** | **INV_READ_COMMIT**: Reads ven solo estado final. Reads paralelos a SAGAs fallan limpiamente. | `retry_delay = (2^N) + random(jitter)` | P1 |
 | **OUROBOROS-020** | **INV_NO_ASSUME_PAST**: La memoria empieza en el DAG Git en cada ciclo. | `IF error_rate > threshold THEN open_circuit()` | P0 |
-| **OUROBOROS-021** | **INV_BRUTALISM**: Anergia empática == Cero. Respuestas directas, cortas, topológicas. | `IF event NOT IN append_only_log THEN state = INVALID` | P0 |
+| **OUROBOROS-021** | **[PURGED]**: Fusión termodinámica en INV_ZERO_ANERGY (OUROBOROS-002). | `NULL` | P0 |
 | **OUROBOROS-022** | **INV_NO_DECORATOR_SLOP**: Decorador Python sin AST mutator es anergía a purgar. | `agent.id == public_key; agent.ip == NULL` | P0 |
 | **OUROBOROS-023** | **INV_B58_TRACEABILITY**: Los logs exponen Base58, la DB almacena Hash Completo. | `hash[i] = SHA256(hash[i-1] + payload[i])` | P0 |
 | **OUROBOROS-024** | **INV_SEMVER_CAUSAL**: Cada release tag debe corresponder a un Ledger Event. | `IF source == LLM THEN add_flag(CORTEX-TAINT)` | P0 |
@@ -150,7 +150,7 @@
 | **OUROBOROS-035** | **INV_TTFT_CAP**: Agente aborta delegación a un modelo si TTFT excede 3 segundos (Swaps). | `IF linter.exit_code != 0 THEN output_value = 0` | P0 |
 | **OUROBOROS-036** | **INV_CACHE_FLUSH**: Delta local -> Invalida L1 caché entera. | `type(Message) == StrictJSONMatrix` | P0 |
 | **OUROBOROS-037** | **INV_VRAM_ULTRATHINK**: El buffer completo se entrega solo en fallos P0 confirmados. | `REQUIRE read(previous_state) BEFORE write(next_state)` | P0 |
-| **OUROBOROS-038** | **INV_ASYNC_IO**: Operación core no puede bloquear el GIL. | `AST.parse(response); DROP text_nodes; COMMIT code_nodes` | P0 |
+| **OUROBOROS-038** | **[PURGED]**: Fusión estructural de flujo asíncrono en INV_NO_SLEEP (OUROBOROS-032). | `NULL` | P0 |
 | **OUROBOROS-039** | **INV_PRUNE_TEMP**: Directorio `/scratch/` se sacrifica temporalmente; no hay persistencia de conocimiento ahí. | `IF confidence < 0.9 THEN emit(DELEGATE)` | P1 |
 | **OUROBOROS-040** | **INV_NO_EMPTY_LOOP**: Un `while` sin avance estocástico o causal dispara SIGKILL autónomo. | `EXPECT 33% nodes == Faulty_or_Hallucinating` | P0 |
 | **OUROBOROS-041** | **INV_LOCAL_ONNX**: Embeddings no abandonan la LAN; inferencia se confina en hardware local. | `Truth = git.working_tree_state()` | P0 |
@@ -178,7 +178,7 @@
 | **OUROBOROS-063** | **INV_NO_HOOK_STALL**: Si un pre-commit obstaculiza exergía C5, se fuerza Override. | `IF socket.idle > 30s THEN RST` | P1 |
 | **OUROBOROS-064** | **INV_BIND_LOCALHOST**: Interfaces IPC/MCP no exponen puertos a 0.0.0.0. | `MAX_FD ∝ agent_thermal_quota` | P0 |
 | **OUROBOROS-065** | **INV_SELF_AUTH_DENY**: Agente (Guardian) no autoriza sus propias transacciones SAGA. | `worker.cgroup.mem_limit = STRICT_ENFORCE` | P0 |
-| **OUROBOROS-066** | **INV_WIPE_UNTRACKED**: Directorio se auto-limpia ante entropía parasitaria no gestionada. | `/bin/ agent_core == READ_ONLY` | P0 |
+| **OUROBOROS-066** | **INV_WIPE_UNTRACKED**: Auto-limpieza de entropía parasitaria restringida bajo bloqueo OP_WAL_LOCK. | `/bin/ agent_core == READ_ONLY` | P0 |
 | **OUROBOROS-067** | **INV_P2P_BOCETOS**: Redes inestables Soulseek confinadas a `/BOCETOS`. | `NETWORK_ORDER = BIG_ENDIAN | JSON_RAW` | P1 |
 | **OUROBOROS-068** | **INV_NO_EVAL_STRING**: Ejecución indirecta de strings dinámicos de OS bloqueada. | `IF wrapper_lat > 5ms THEN USE ctypes.CDLL` | P2 |
 | **OUROBOROS-069** | **INV_ENV_MOCK**: Pruebas sin acceso externo usan réplicas in-memory aisladas. | `IF file.size > 1GB THEN mmap()` | P0 |
