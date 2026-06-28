@@ -271,10 +271,9 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
 
 async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     """Enforces the CORTEX-TAINT check. Raises TaintValidationError if invalid."""
-    import os
-
     # [C5-REAL] Host Identity Strict Containment (UltraThink P0) - ALWAYS RUN
     import base64
+    import os
     import re
     import unicodedata
     import urllib.parse

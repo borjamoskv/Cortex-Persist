@@ -211,18 +211,19 @@ async def test_byzantine_taint_tsunami(ledger_db):
     invalid_token = valid_token[:-5] + "XXXXX"
 
     async def attempt_taint(token):
+        old_val = os.environ.get("CORTEX_NO_TAINT_ENFORCE")
         try:
             # Ensure enforcement is not bypassed
-            old_val = os.environ.get("CORTEX_NO_TAINT_ENFORCE")
             os.environ["CORTEX_NO_TAINT_ENFORCE"] = "0"
             await enforce_taint_check(ledger_db, token, content)
-            if old_val is not None:
-                os.environ["CORTEX_NO_TAINT_ENFORCE"] = old_val
-            else:
-                del os.environ["CORTEX_NO_TAINT_ENFORCE"]
             return True
         except TaintValidationError:
             return False
+        finally:
+            if old_val is not None:
+                os.environ["CORTEX_NO_TAINT_ENFORCE"] = old_val
+            else:
+                os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 
     # Blast concurrently: 1 valid, 50 replayed, 49 invalid signatures
     tasks = [attempt_taint(valid_token)]

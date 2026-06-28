@@ -1,8 +1,9 @@
 import os
+import subprocess
 import sys
 import time
 import urllib.parse
-import subprocess
+
 
 def run_applescript(script_content: str) -> str:
     """Run inline AppleScript and return stdout."""
@@ -97,7 +98,7 @@ def main():
         print(f"Error: {purged_path} not found.")
         sys.exit(1)
         
-    with open(purged_path, "r") as f:
+    with open(purged_path) as f:
         emails = [line.strip() for line in f if line.strip()]
         
     print(f"Starting Substack purge of {len(emails)} subscribers...")

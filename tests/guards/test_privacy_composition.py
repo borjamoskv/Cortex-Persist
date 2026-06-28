@@ -13,10 +13,10 @@ from cortex.extensions.security.signatures import get_default_signer
 
 
 @pytest.fixture
-async def engine(tmp_path: Path):
+async def engine(tmp_path: Path, monkeypatch):
     """Create a CortexEngine with a temp database, close after test."""
-    os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
-    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"  # Bypass taint token trigger
+    monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")  # Bypass taint token trigger
 
     db = str(tmp_path / "test_privacy_composition.db")
     e = CortexEngine(db_path=db, auto_embed=False)
@@ -30,10 +30,6 @@ async def engine(tmp_path: Path):
 
     yield e
     await e.close()
-
-    if "CORTEX_SKIP_EXERGY_VALIDATION" in os.environ:
-        del os.environ["CORTEX_SKIP_EXERGY_VALIDATION"]
-    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 
 
 @pytest.mark.asyncio
