@@ -60,9 +60,8 @@ def test_host_pii_containment_and_logging():
 
     # 2. Verification of Logging Monkey Patch active state
     import logging
-    # Dynamic string construction to prevent triggering pre-commit PII Sentinel hooks
-    sensitive_path = f"/Users/{'borja' + 'fernandez' + 'angulo'}/30_CORTEX/cortex.db"
-    test_log_msg = f"Critical disk error on path {sensitive_path} [REDACTED_PII]"
+    # Dynamic string construction removed to avoid PII bleed
+    test_log_msg = "Critical disk error on path /Users/host/30_CORTEX/cortex.db [REDACTED_PII]"
     log_record = logging.LogRecord(
         name="cortex.test",
         level=logging.WARNING,
