@@ -85,15 +85,19 @@ class SubstackPublisherBot:
 
                 # Simulamos escribir markdown puro. Substack suele parsearlo si se pega o se tipea.
                 # Para evitar tipear lentamente, usamos inserción en DOM o pegado.
-                safe_content = markdown_content.replace("`", "\\`")
-                await page.evaluate(f"""
-                    () => {{
+                await page.evaluate("""
+                    (content) => {
                         const editor = document.querySelector('.ProseMirror');
-                        if(editor) {{
-                            editor.innerHTML = `<pre><code>{safe_content}</code></pre>`;
-                        }}
-                    }}
-                """)
+                        if (editor) {
+                            const pre = document.createElement('pre');
+                            const code = document.createElement('code');
+                            code.textContent = content;
+                            pre.appendChild(code);
+                            editor.innerHTML = '';
+                            editor.appendChild(pre);
+                        }
+                    }
+                """, markdown_content)
 
                 logger.info("[C5-REAL] Ensayo inyectado en Substack.")
 

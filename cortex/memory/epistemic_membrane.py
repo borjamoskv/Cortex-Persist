@@ -19,6 +19,7 @@ class MerkleLedger:
 
     def __init__(self):
         self.leaves = []  # (hv_hash, hv_binary, metadata)
+        self.current_root = hashlib.sha256(b"genesis").hexdigest()
 
     def hash_hv(self, hv: torch.Tensor) -> bytes:
         """Deterministic and compact hashing of a hypervector."""
@@ -37,20 +38,21 @@ class MerkleLedger:
             "llm_source": source_llm_hash,
         }
         self.leaves.append(leaf)
-        return self._compute_root()
+        
+        # O(1) Incremental Hash Chain Update:
+        # H_n = SHA256(H_{n-1} + Leaf_hash)
+        hasher = hashlib.sha256()
+        hasher.update(self.current_root.encode("utf-8"))
+        hasher.update(leaf["hash"].encode("utf-8"))
+        self.current_root = hasher.hexdigest()
+        return self.current_root
 
     def _compute_root(self) -> str:
         """
-        Computes the current Merkle root based on all leaves.
-        This provides a simplified linear hash chain for the root.
+        Returns the current pre-calculated Merkle root.
+        Maintains O(1) retrieval time.
         """
-        if not self.leaves:
-            return hashlib.sha256(b"genesis").hexdigest()
-
-        hasher = hashlib.sha256()
-        for leaf in self.leaves:
-            hasher.update(leaf["hash"].encode("utf-8"))
-        return hasher.hexdigest()
+        return self.current_root
 
 
 class EpistemicMembrane:
@@ -59,24 +61,35 @@ class EpistemicMembrane:
     Transforms memory into a membrane that validates, protects, and autopoietically evolves.
     """
 
-    def __init__(self, dim: int = D, max_history: int = 10000):
+    def __init__(
+        self,
+        dim: int = D,
+        max_history: int = 10000,
+        threshold_consistency: float = 0.68,
+        threshold_novelty: float = 0.88,
+        noise_tolerance: float = 0.25,
+        device: torch.device = None
+    ):
         self.dim = dim
         self.max_history = max_history
         self.history = []  # List of past approved tensors
 
+        # Set stable device for execution
+        self.device = device if device is not None else torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
         # Base roles for structural and semantic binding
         self.roles = {
-            "consistency": torchhd.random(1, dim, device=device)[0],
-            "novelty": torchhd.random(1, dim, device=device)[0],
-            "temporal": torchhd.random(1, dim, device=device)[0],
-            "graph_node": torchhd.random(1, dim, device=device)[0],
-            "graph_edge": torchhd.random(1, dim, device=device)[0],
+            "consistency": torchhd.random(1, dim, device=self.device)[0],
+            "novelty": torchhd.random(1, dim, device=self.device)[0],
+            "temporal": torchhd.random(1, dim, device=self.device)[0],
+            "graph_node": torchhd.random(1, dim, device=self.device)[0],
+            "graph_edge": torchhd.random(1, dim, device=self.device)[0],
         }
 
         # Epistemic Boundaries
-        self.threshold_consistency = 0.68
-        self.threshold_novelty = 0.88  # Below this implies it is novel enough
-        self.noise_tolerance = 0.25  # Maximum acceptable noise/flip percentage
+        self.threshold_consistency = threshold_consistency
+        self.threshold_novelty = threshold_novelty  # Below this implies it is novel enough
+        self.noise_tolerance = noise_tolerance  # Maximum acceptable noise/flip percentage
 
         # Cryptographic continuity
         self.ledger = MerkleLedger()
@@ -87,7 +100,7 @@ class EpistemicMembrane:
 
     def encode_graph(self, nodes: list[torch.Tensor], edges: list[tuple[int, int]]) -> torch.Tensor:
         """Encodes a graph topology (nodes + edges) into a single Hypervector."""
-        hv = torch.zeros(self.dim, device=device)
+        hv = torch.zeros(self.dim, device=self.device)
 
         # Bind nodes with their spatial/topological sequence
         for i, node in enumerate(nodes):
@@ -107,10 +120,10 @@ class EpistemicMembrane:
         self, components: list[tuple[str, torch.Tensor]], timestep: int = 0
     ) -> torch.Tensor:
         """Encodes a full episodic event from components with temporal grounding."""
-        hv = torch.zeros(self.dim, device=device)
+        hv = torch.zeros(self.dim, device=self.device)
         for role_name, filler in components:
             if role_name not in self.roles:
-                self.roles[role_name] = torchhd.random(1, self.dim, device=device)[0]
+                self.roles[role_name] = torchhd.random(1, self.dim, device=self.device)[0]
             role = self.roles[role_name]
 
             bound = F.bind(role, filler)
@@ -203,7 +216,7 @@ class EpistemicMembrane:
         if not recent_proposals:
             return None, None
 
-        global_hv = torch.zeros(self.dim, device=device)
+        global_hv = torch.zeros(self.dim, device=self.device)
         for p in recent_proposals:
             global_hv = F.bundle(global_hv, p)
         global_hv = F.normalize(global_hv)
@@ -216,7 +229,7 @@ class EpistemicMembrane:
             # Mutate: controlled superposition + noise
             mutation = global_hv
             for _ in range(generations):
-                noise = torchhd.random(1, self.dim, device=device)[0] * 0.15
+                noise = torchhd.random(1, self.dim, device=self.device)[0] * 0.15
                 mutation = F.bundle(mutation, noise)
                 mutation = F.normalize(mutation)
 

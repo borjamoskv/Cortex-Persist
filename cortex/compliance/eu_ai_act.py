@@ -16,6 +16,8 @@ import aiosqlite
 
 from cortex.database.core import connect_async_ctx
 
+__all__ = ["AIDecisionReport", "HumanOversightGate"]
+
 logger = logging.getLogger("cortex.compliance.eu_ai_act")
 
 
@@ -94,6 +96,7 @@ class HumanOversightGate:
             await conn.commit()
         logger.warning(f"[HumanOversight] Decision {audit_id} escalated for human review: {reason}")
 
+    # @public
     async def approve(self, audit_id: str, reviewer_id: str, comments: str = "") -> None:
         """Approves an escalated decision."""
         timestamp = datetime.now(timezone.utc).isoformat()
@@ -106,6 +109,7 @@ class HumanOversightGate:
             await conn.commit()
         logger.info(f"[HumanOversight] Decision {audit_id} APPROVED by {reviewer_id}.")
 
+    # @public
     async def reject(self, audit_id: str, reviewer_id: str, comments: str = "") -> None:
         """Rejects an escalated decision."""
         timestamp = datetime.now(timezone.utc).isoformat()

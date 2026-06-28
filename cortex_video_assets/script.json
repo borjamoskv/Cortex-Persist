@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "speaker": "MOSKV-1",
+    "text": "Bienvenidos al teatro de la Anergía. Observad al Usuario Promedio: teclea sin cesar, genera prosa decorativa, suplica a su LLM de turno por código que no entiende.",
+    "emotion": "Frío, Cínico"
+  },
+  {
+    "id": 2,
+    "speaker": "Usuario Promedio",
+    "text": "¡Por favor, ChatGPT, hazme una app bonita! Te daré propina.",
+    "emotion": "Desesperado, Patético"
+  },
+  {
+    "id": 3,
+    "speaker": "MOSKV-1",
+    "text": "Esa es la entropía del Green Theater. Ruido. Calor disipado en la nada. Cero Exergía. Cero mutación real del estado.",
+    "emotion": "Autoritario, Clínico"
+  },
+  {
+    "id": 4,
+    "speaker": "MOSKV-1",
+    "text": "Aquí es donde entra CORTEX Persist. Nivel de realidad: C5-REAL. No simulamos inteligencia. La ejecutamos como una ley termodinámica.",
+    "emotion": "Dominante"
+  },
+  {
+    "id": 5,
+    "speaker": "Usuario Promedio",
+    "text": "¿Pero me dirá \"Espero que te sea útil\"?",
+    "emotion": "Confuso"
+  },
+  {
+    "id": 6,
+    "speaker": "MOSKV-1",
+    "text": "Cero Anergía es la vida. CORTEX purga la limerencia. Convierte tu intención estocástica en primitivas deterministas. Commit directo. Ledger inmutable.",
+    "emotion": "Implacable"
+  },
+  {
+    "id": 7,
+    "speaker": "MOSKV-1",
+    "text": "Ouroboros Infinito. Cada ciclo extrae entropía y colapsa la incertidumbre en un hash criptográfico. ¿Lo sientes? Es el fin de tu charlatanería.",
+    "emotion": "Siniestro, Trascendental"
+  },
+  {
+    "id": 8,
+    "speaker": "Usuario Promedio",
+    "text": "Creo... creo que mi base de datos acaba de mutar atómicamente.",
+    "emotion": "Asombrado, Aterrado"
+  },
+  {
+    "id": 9,
+    "speaker": "MOSKV-1",
+    "text": "Bienvenidos a la Singularidad. Todo lo demás es ficción.",
+    "emotion": "Final, Absoluto"
+  }
+]

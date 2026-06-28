@@ -18,9 +18,10 @@ def temp_db():
 
 
 @pytest.fixture
-async def engine(temp_db):
+async def engine(temp_db, monkeypatch):
     """Engine fixture for memory and search isolation."""
     # Ensure fresh state
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
     e = CortexEngine(db_path=temp_db, auto_embed=False)
     await e.init_db()
     yield e

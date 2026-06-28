@@ -152,7 +152,7 @@ async def test_ledger_concurrency_bombing(ledger_db):
 # ─── 2. Byzantine Taint Tsunami (Nonce & Replay attacks) ───────────────
 
 
-async def test_byzantine_taint_tsunami(ledger_db):
+async def test_byzantine_taint_tsunami(ledger_db, monkeypatch):
     """
     Barrages the TaintEngine with valid and invalid taint tokens concurrently.
     Verifies that replay attacks (reused nonces) and invalid signatures are deterministically rejected.
@@ -210,20 +210,15 @@ async def test_byzantine_taint_tsunami(ledger_db):
     # Invalid signature
     invalid_token = valid_token[:-5] + "XXXXX"
 
+    # Ensure enforcement is not bypassed for this test
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "0")
+
     async def attempt_taint(token):
-        old_val = os.environ.get("CORTEX_NO_TAINT_ENFORCE")
         try:
-            # Ensure enforcement is not bypassed
-            os.environ["CORTEX_NO_TAINT_ENFORCE"] = "0"
             await enforce_taint_check(ledger_db, token, content)
             return True
         except TaintValidationError:
             return False
-        finally:
-            if old_val is not None:
-                os.environ["CORTEX_NO_TAINT_ENFORCE"] = old_val
-            else:
-                os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 
     # Blast concurrently: 1 valid, 50 replayed, 49 invalid signatures
     tasks = [attempt_taint(valid_token)]

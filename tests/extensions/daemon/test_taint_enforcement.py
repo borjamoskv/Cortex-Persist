@@ -37,10 +37,8 @@ from cortex.memory.traits.write import WriteTrait
 
 # Set environment variable to enable verification in tests
 @pytest.fixture(autouse=True)
-def enable_taint_verification():
-    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "0"
-    yield
-    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
+def enable_taint_verification(monkeypatch):
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "0")
 
 
 @pytest.fixture

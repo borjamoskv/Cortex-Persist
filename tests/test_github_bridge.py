@@ -20,6 +20,11 @@ pytestmark = pytest.mark.slow
 # ─── Fixtures ────────────────────────────────────────────────────────
 
 
+@pytest.fixture(autouse=True)
+def disable_taint(monkeypatch):
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
+
+
 def _make_issue(
     number: int,
     title: str = "Test issue",

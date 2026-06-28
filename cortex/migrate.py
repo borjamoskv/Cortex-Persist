@@ -73,6 +73,55 @@ def migrate_v31_to_v40(
     return stats
 
 
+def _migrate_system_preferences(data: dict, project: str, facts_to_store: list) -> None:
+    prefs = data.get("preferences", {})
+    if prefs:
+        facts_to_store.append({
+            "project": project,
+            "content": json.dumps(prefs, ensure_ascii=False),
+            "fact_type": "preference",
+            "tags": ["system", "preferences"],
+            "confidence": "verified",
+            "source": "migration-v3.1",
+        })
+
+def _migrate_system_operator(data: dict, project: str, facts_to_store: list) -> None:
+    operator = data.get("operator", {})
+    if operator:
+        facts_to_store.append({
+            "project": project,
+            "content": json.dumps(operator, ensure_ascii=False),
+            "fact_type": "identity",
+            "tags": ["system", "operator"],
+            "confidence": "verified",
+            "source": "migration-v3.1",
+        })
+
+def _migrate_system_global_decisions(data: dict, project: str, facts_to_store: list) -> None:
+    for decision in data.get("global_decisions", []):
+        facts_to_store.append({
+            "project": project,
+            "content": decision.get("decision", str(decision)),
+            "fact_type": "decision",
+            "tags": ["system", "global"],
+            "confidence": "verified",
+            "source": "migration-v3.1",
+            "meta": decision,
+        })
+
+def _migrate_system_knowledge(data: dict, project: str, facts_to_store: list) -> None:
+    for ki in data.get("knowledge", []):
+        facts_to_store.append({
+            "project": project,
+            "content": ki.get("content", str(ki)),
+            "fact_type": "knowledge",
+            "tags": ["system", ki.get("topic", "general")],
+            "confidence": ki.get("confidence", "stated"),
+            "source": "migration-v3.1",
+            "valid_from": ki.get("added", None),
+            "meta": ki,
+        })
+
 def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
     """Migrate system.json - preferences, decisions, knowledge, sessions."""
     try:
@@ -82,65 +131,12 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
         return
 
     project = "__system__"
-
     facts_to_store = []
 
-    # Preferences
-    prefs = data.get("preferences", {})
-    if prefs:
-        facts_to_store.append(
-            {
-                "project": project,
-                "content": json.dumps(prefs, ensure_ascii=False),
-                "fact_type": "preference",
-                "tags": ["system", "preferences"],
-                "confidence": "verified",
-                "source": "migration-v3.1",
-            }
-        )
-
-    # Operator info
-    operator = data.get("operator", {})
-    if operator:
-        facts_to_store.append(
-            {
-                "project": project,
-                "content": json.dumps(operator, ensure_ascii=False),
-                "fact_type": "identity",
-                "tags": ["system", "operator"],
-                "confidence": "verified",
-                "source": "migration-v3.1",
-            }
-        )
-
-    # Global decisions
-    for decision in data.get("global_decisions", []):
-        facts_to_store.append(
-            {
-                "project": project,
-                "content": decision.get("decision", str(decision)),
-                "fact_type": "decision",
-                "tags": ["system", "global"],
-                "confidence": "verified",
-                "source": "migration-v3.1",
-                "meta": decision,
-            }
-        )
-
-    # Knowledge items
-    for ki in data.get("knowledge", []):
-        facts_to_store.append(
-            {
-                "project": project,
-                "content": ki.get("content", str(ki)),
-                "fact_type": "knowledge",
-                "tags": ["system", ki.get("topic", "general")],
-                "confidence": ki.get("confidence", "stated"),
-                "source": "migration-v3.1",
-                "valid_from": ki.get("added", None),
-                "meta": ki,
-            }
-        )
+    _migrate_system_preferences(data, project, facts_to_store)
+    _migrate_system_operator(data, project, facts_to_store)
+    _migrate_system_global_decisions(data, project, facts_to_store)
+    _migrate_system_knowledge(data, project, facts_to_store)
 
     if facts_to_store:
         try:

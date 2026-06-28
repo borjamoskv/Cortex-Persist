@@ -202,6 +202,7 @@ class MockPostgresPool:
 def mock_postgres_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("CORTEX_STORAGE", "postgres")
     monkeypatch.setenv("POSTGRES_DSN", "postgresql://user:pass@host:5432/cortex")
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
     monkeypatch.setattr("cortex.storage.get_storage_mode", lambda: StorageMode.POSTGRES)
     monkeypatch.setattr("cortex.search.vector.get_storage_mode", lambda: StorageMode.POSTGRES)
     monkeypatch.setattr("cortex.search.text.get_storage_mode", lambda: StorageMode.POSTGRES)

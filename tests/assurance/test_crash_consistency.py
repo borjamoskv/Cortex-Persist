@@ -11,6 +11,7 @@ import pytest
 @pytest.fixture(autouse=True)
 def disable_embeddings(monkeypatch):
     monkeypatch.setenv("CORTEX_NO_EMBED", "1")
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
 
 from cortex.engine.core.cortex_engine import CortexEngine
 
@@ -19,6 +20,7 @@ def _writer_process_target(db_path: Path, sync_event: multiprocessing.Event, fau
     """Worker process that triggers sync_event at precise execution points."""
     os.environ["CORTEX_MASTER_KEY"] = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
     os.environ["CORTEX_NO_EMBED"] = "1"
+    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 
     async def _run():
         try:

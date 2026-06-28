@@ -77,6 +77,49 @@ class AsyncAgenticEvaluator:
             logger.warning(f"Failed to compute empirical Git exergy: {e}")
             return 0.0
 
+    def _process_user_input(self, content: str, local_state: dict) -> None:
+        local_state["user_msgs"] += 1
+        if any(p in content for p in ["looks good", "perfect", "thanks", "great", "awesome", "funciona"]):
+            local_state["praise_found"] = True
+        if any(c in content for c in ["no", "instead", "change this", "wrong", "fail", "error", "bad"]):
+            local_state["complaint_found"] = True
+            self.metrics.corrections += 1
+
+    def _process_planner_response(self, event: dict, local_state: dict) -> None:
+        self.metrics.total_cycles += 1
+        tool_calls = event.get("tool_calls", [])
+        for tc in tool_calls:
+            self.metrics.total_tool_calls += 1
+            local_state["local_tool_calls"] += 1
+            tc_str = str(tc).lower()
+            if "error" in tc_str or "invalid" in tc_str or "unknown" in tc_str:
+                self.metrics.tool_hallucinations += 1
+                local_state["local_hallucinations"] += 1
+
+    def _process_tool_response(self, event: dict, local_state: dict) -> None:
+        output = event.get("output", "")
+        if "exit code" in output and "exit code 0" not in output:
+            self.metrics.bash_errors += 1
+            local_state["local_bash_errors"] += 1
+            local_state["last_bash_error"] = True
+        elif local_state["last_bash_error"] and ("exit code 0" in output or "success" in output.lower()):
+            self.metrics.bash_recoveries += 1
+            local_state["local_recoveries"] += 1
+            local_state["last_bash_error"] = False
+
+    def _process_event(self, event: dict, local_state: dict) -> None:
+        step_type = event.get("type", "")
+        content = event.get("content", "").lower()
+
+        if step_type == "USER_INPUT":
+            self._process_user_input(content, local_state)
+        elif step_type == "PLANNER_RESPONSE":
+            self._process_planner_response(event, local_state)
+        elif step_type == "TOOL_RESPONSE":
+            self._process_tool_response(event, local_state)
+        elif step_type == "ERROR":
+            local_state["error_count"] += 1
+
     async def evaluate_session(self, transcript_path: Path, ledger: EnterpriseAuditLedger) -> None:
         """Processes a single transcript.jsonl file and anchors validation to Ledger."""
         self.metrics.total_sessions += 1
@@ -90,59 +133,27 @@ class AsyncAgenticEvaluator:
 
         session_events = [json.loads(line) for line in lines if line.strip()]
 
-        user_msgs = 0
-        error_count = 0
-        praise_found = False
-        complaint_found = False
-        last_bash_error = False
-
-        local_tool_calls = 0
-        local_hallucinations = 0
-        local_bash_errors = 0
-        local_recoveries = 0
+        local_state = {
+            "user_msgs": 0,
+            "error_count": 0,
+            "praise_found": False,
+            "complaint_found": False,
+            "last_bash_error": False,
+            "local_tool_calls": 0,
+            "local_hallucinations": 0,
+            "local_bash_errors": 0,
+            "local_recoveries": 0,
+        }
 
         for event in session_events:
-            step_type = event.get("type", "")
-            content = event.get("content", "").lower()
+            self._process_event(event, local_state)
 
-            if step_type == "USER_INPUT":
-                user_msgs += 1
-                if any(
-                    p in content
-                    for p in ["looks good", "perfect", "thanks", "great", "awesome", "funciona"]
-                ):
-                    praise_found = True
-                if any(
-                    c in content
-                    for c in ["no", "instead", "change this", "wrong", "fail", "error", "bad"]
-                ):
-                    complaint_found = True
-                    self.metrics.corrections += 1
-
-            if step_type == "PLANNER_RESPONSE":
-                self.metrics.total_cycles += 1
-                tool_calls = event.get("tool_calls", [])
-                for tc in tool_calls:
-                    self.metrics.total_tool_calls += 1
-                    local_tool_calls += 1
-                    tc_str = str(tc).lower()
-                    if "error" in tc_str or "invalid" in tc_str or "unknown" in tc_str:
-                        self.metrics.tool_hallucinations += 1
-                        local_hallucinations += 1
-
-            if step_type == "TOOL_RESPONSE":
-                output = event.get("output", "")
-                if "exit code" in output and "exit code 0" not in output:
-                    self.metrics.bash_errors += 1
-                    local_bash_errors += 1
-                    last_bash_error = True
-                elif last_bash_error and ("exit code 0" in output or "success" in output.lower()):
-                    self.metrics.bash_recoveries += 1
-                    local_recoveries += 1
-                    last_bash_error = False
-
-            if step_type == "ERROR":
-                error_count += 1
+        user_msgs = local_state["user_msgs"]
+        error_count = local_state["error_count"]
+        praise_found = local_state["praise_found"]
+        complaint_found = local_state["complaint_found"]
+        local_tool_calls = local_state["local_tool_calls"]
+        local_hallucinations = local_state["local_hallucinations"]
 
         if user_msgs == 1 and error_count == 0:
             self.metrics.zero_intervention_successes += 1

@@ -16,6 +16,11 @@ from cortex.memory.models import MemoryEvent
 # ─── Fixtures ────────────────────────────────────────────────────────────
 
 
+@pytest.fixture(autouse=True)
+def disable_taint(monkeypatch):
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
+
+
 @pytest.fixture
 async def ledger():
     """Provide a fresh in-memory ledger per test."""
