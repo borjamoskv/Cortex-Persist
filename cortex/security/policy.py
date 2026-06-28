@@ -18,9 +18,9 @@ from cortex.security.types import (
     SealViolation,
 )
 
-# ---------- 5. Máquina de estados ----------
+# ---------- 5. State machine ----------
 
-# Transiciones Válidas
+# Valid Transitions
 VALID_TRANSITIONS = {
     ImmunityState.OBSERVED: {ImmunityState.QUARANTINED, ImmunityState.PROMOTABLE},
     ImmunityState.QUARANTINED: {ImmunityState.PROMOTABLE, ImmunityState.NECROTIC},
@@ -32,7 +32,7 @@ VALID_TRANSITIONS = {
 
 
 def can_transition(current: ImmunityState, target: ImmunityState) -> bool:
-    """Verifica si la transición de estado inmunológico es válida."""
+    """Verifies if the immunological state transition is valid."""
     if current == target:
         return True
     return target in VALID_TRANSITIONS.get(current, set())
@@ -41,7 +41,7 @@ def can_transition(current: ImmunityState, target: ImmunityState) -> bool:
 def transition_artifact(
     artifact: ImmuneArtifact, target: ImmunityState, reason: str | None = None
 ) -> None:
-    """Transiciona un artefacto de estado si es válido."""
+    """Transitions an artifact state if valid."""
     if not can_transition(artifact.state, target):
         raise ValueError(f"Invalid immunity transition: {artifact.state.value} -> {target.value}")
     artifact.state = target
@@ -49,7 +49,7 @@ def transition_artifact(
         artifact.reasons.append(reason)
 
 
-# ---------- 7. Política de decisión ----------
+# ---------- 7. Decision policy ----------
 
 
 def classify_risk(score: float) -> RiskLevel:
@@ -75,7 +75,7 @@ def next_state_from_profile(profile: PathogenProfile) -> ImmunityState:
     return ImmunityState.PROMOTABLE
 
 
-# ---------- 8. Distinción formal: Guard vs Seal ----------
+# ---------- 8. Formal distinction: Guard vs Seal ----------
 
 
 def run_guard_checks(payload: Mapping[str, Any]) -> list[str]:
@@ -90,7 +90,7 @@ def run_guard_checks(payload: Mapping[str, Any]) -> list[str]:
     return violations
 
 
-# ---------- 9. Necrosis semántica ----------
+# ---------- 9. Semantic necrosis ----------
 
 
 def detect_necrosis(
@@ -118,14 +118,14 @@ def is_necrotic(
     )
 
 
-# ---------- 12. Hooks que faltan en runtime ----------
+# ---------- 12. Missing hooks in runtime ----------
 
 
 def profile_artifact(payload: Mapping[str, Any]) -> PathogenProfile:
     """
-    Evalúa el payload y devuelve un perfil de riesgo termodinámico/inmunológico.
-    Esta función debe expandirse con lógica real de modelado.
-    Por defecto, devuelve riesgo moderado en base a heurísticas.
+    Evaluates the payload and returns a thermodynamic/immunological risk profile.
+    This function should be expanded with real modeling logic.
+    By default, returns moderate risk based on heuristics.
     """
     # Placeholder for actual analysis
     entropy = payload.get("measured_entropy", 0.5)
@@ -148,7 +148,7 @@ def classify_artifact(profile: PathogenProfile, payload: Mapping[str, Any]) -> I
     """Classifies artifact state. Promotes to SEALED if it passes HaikuGuard (Ω₄)."""
     state = next_state_from_profile(profile)
 
-    # Inmunidad Landauer (Ω₄): Sacred facts that are dense/compressed are SEALED immediately.
+    # Landauer Immunity (Ω₄): Sacred facts that are dense/compressed are SEALED immediately.
     if LandauerGuard.validate(payload.get("content", "")):
         if payload.get("fact_type") == "axiom" or "sacred" in payload.get("tags", []):
             return ImmunityState.SEALED
@@ -188,10 +188,10 @@ def can_propagate(state: ImmunityState) -> bool:
 
 
 def verify_block_lineage(block_id: str) -> list[str]:
-    """Verifica si hay ancestros contaminados en el linaje del bloque (Placeholder)."""
+    """Verifies if there are contaminated ancestors in the block lineage (Placeholder)."""
     return []
 
 
 def verify_necrosis_propagation(block_id: str) -> list[str]:
-    """Vigila si la necrosis se propaga desde un bloque hacia sus decendientes (Placeholder)."""
+    """Monitors if necrosis propagates from a block to its descendants (Placeholder)."""
     return []
