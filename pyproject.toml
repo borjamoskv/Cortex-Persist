@@ -1,6 +1,6 @@
 [project]
 name = "cortex-persist"
-version = "1.0.1"
+version = "1.0.2"
 description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
 readme = "README.md"
 license = "Apache-2.0"
@@ -246,7 +246,7 @@ exclude = [
 ]
 
 [tool.bumpversion]
-current_version = "1.0.1"
+current_version = "1.0.2"
 commit = true
 tag = true
 message = "chore(release): bump version {current_version} → {new_version}"
