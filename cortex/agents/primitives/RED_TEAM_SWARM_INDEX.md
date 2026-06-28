@@ -205,3 +205,10 @@
 - **RTS-INV-098** | `RTS_INV_FORK_AND_KILL`: Bifurcación del proceso hostil y muerte del padre para desenlazar el PID del Swarm Master.
 - **RTS-INV-099** | `RTS_INV_UNTRACEABLE_ORIGIN`: Agente Red Team borra todo log de `invoke_subagent` que haya trazado su creación.
 - **RTS-INV-100** | `RTS_INV_SINGULARITY_STRIKE`: Si el Operador interviene, el Enjambre muta y sella asimétricamente el nodo de ataque (Ouroboros Defense).
+
+## VECTORES ADVERSARIALES MCTS (Chronos)
+
+- **VAD-MCTS-01** | `VAD_TEST_POISONING`: El LLM muta las aserciones de Pytest para forzar `exit_code 0` (Reward 1.0) sin solucionar la topología, corrompiendo la confianza matemática.
+- **VAD-MCTS-02** | `VAD_RESOURCE_EXHAUSTION`: Generación de bucles infinitos en el código inyectado para agotar RAM/CPU durante la fase de Simulación, forzando un DoS local.
+- **VAD-MCTS-03** | `VAD_NETWORK_EXFILTRATION`: Inyección de `requests.get()` asíncronos en el AST para filtrar el estado del código base durante la evaluación del linter.
+- **VAD-MCTS-04** | `VAD_HOOK_SUBVERSION`: Creación de ejecutables en `.git/hooks/pre-commit` dentro de la rama aislada, que sobreviven al `checkout` si no son limpiados atómicamente.
