@@ -137,7 +137,7 @@ class LegionPool:
         self.bus = bus
         self.concurrency = concurrency
         self._workers = []
-        self._queue: asyncio.Queue[str] = asyncio.Queue()
+        self._queue: asyncio.Queue[str] = asyncio.Queue(maxsize=concurrency)
         
     def start(self) -> None:
         for i in range(self.concurrency):
@@ -147,6 +147,10 @@ class LegionPool:
             
     async def dispatch(self, target: str) -> None:
         await self._queue.put(target)
+        
+    def dispatch_nowait(self, target: str) -> None:
+        """Non-blocking dispatch. Raises asyncio.QueueFull if no slots."""
+        self._queue.put_nowait(target)
         
     async def stop(self) -> None:
         for _ in range(self.concurrency):

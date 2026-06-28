@@ -204,6 +204,11 @@ class SwarmSupervisor:
                     in_flight.add(task["id"])
                     continue
 
+                # VECTOR 1 REMEDIATION: Pre-check queue capacity to eliminate Phantom Lease Burns
+                if self.worker_pool._queue.full():
+                    logger.warning("Thermodynamic Pause: Worker Queue is full. Halting dispatch loop.")
+                    break
+
                 # SANEDRIN VECTOR 3: Lease lock task using supervisor_id and 5-min TTL
                 from datetime import datetime, timedelta, timezone
 
@@ -218,13 +223,13 @@ class SwarmSupervisor:
                     await self._db.commit()
 
                 try:
-                    # Push to worker pool
-                    await self.worker_pool.dispatch(task["id"])
+                    # Non-blocking dispatch
+                    self.worker_pool.dispatch_nowait(task["id"])
                     in_flight.add(task["id"])
                     dispatched += 1
                 except asyncio.QueueFull:
-                    logger.warning("Thermodynamic Pause: Worker Queue is full. Rolling back lease.")
-                    # Phantom Lease Rollback
+                    logger.critical("Queue filled between pre-check and dispatch. Reverting lease.")
+                    # Phantom Lease Rollback (Fail-safe)
                     with causal_write(self._db):
                         await self._db.execute(
                             "UPDATE system_hypotheses SET status = 'PENDING', owner_id = NULL, lease_expires_at = NULL WHERE id = ?",
