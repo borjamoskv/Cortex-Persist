@@ -162,8 +162,13 @@ class TestEnterpriseAuditLedger:
             )
             batch1_rows = await cursor2.fetchall()
             batch1_ids = [r[0] for r in batch1_rows]
-            merkle_payload = "".join(batch1_ids) + "GENESIS"
-            merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+
+            from cortex.audit.smt import SparseMerkleTree
+            local_smt = SparseMerkleTree()
+            for aid in batch1_ids:
+                local_smt.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
+            merkle_root = local_smt.root
+
             expected_entry_hash = hashlib.sha256(
                 f"merkle_batch:{merkle_root}:GENESIS".encode()
             ).hexdigest()
