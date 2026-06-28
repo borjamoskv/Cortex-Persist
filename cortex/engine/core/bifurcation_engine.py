@@ -137,5 +137,5 @@ class ExergyBifurcationEngine:
             for t in dead_tenants:
                 await conn.execute("DELETE FROM execution_trace_ledger WHERE tenant_id = ?", (t,))
                 await conn.execute("DELETE FROM thermodynamics_state WHERE tenant_id = ?", (t,))
-                logger.warning(f"[Bifurcation] Pruned timeline '{t}' permanentemente del motor.")
+                logger.warning(f"[Bifurcation] Pruned timeline '{t}' permanently from the engine.")
             await conn.commit()

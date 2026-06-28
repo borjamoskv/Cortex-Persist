@@ -66,7 +66,7 @@ class SkillRouter:
                 )
             else:
                 logger.warning(
-                    "[ROUTER] Unknown Capability: FOK=%.3f < %.2f para: '%s'",
+                    "[ROUTER] Unknown Capability: FOK=%.3f < %.2f for: '%s'",
                     judgment.fok_score,
                     _FOK_GATE,
                     intent,
