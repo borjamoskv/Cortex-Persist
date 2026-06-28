@@ -74,7 +74,7 @@ async def test_ledger_tamper_evident_corruption_detection():
 
 
 @pytest.mark.asyncio
-async def test_ledger_pinned_public_key_mismatch():
+async def test_ledger_pinned_public_key_mismatch(monkeypatch):
     # 1. Setup secure environment
     temp_dir = tempfile.mkdtemp()
     db_path = os.path.join(temp_dir, "test_ledger_pinned.db")
@@ -99,17 +99,14 @@ async def test_ledger_pinned_public_key_mismatch():
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     ).decode("utf-8")
 
-    os.environ["CORTEX_LEDGER_PUBLIC_KEY"] = wrong_pem
-    try:
-        async with connect_async_ctx(db_path) as conn2:
-            conn2._conn.authorize_causal_writes()
-            ledger_verify = EnterpriseAuditLedger(conn2)
-            await ledger_verify.ensure_table()
-            verify_result = await ledger_verify.verify_chain()
+    monkeypatch.setenv("CORTEX_LEDGER_PUBLIC_KEY", wrong_pem)
+    async with connect_async_ctx(db_path) as conn2:
+        conn2._conn.authorize_causal_writes()
+        ledger_verify = EnterpriseAuditLedger(conn2)
+        await ledger_verify.ensure_table()
+        verify_result = await ledger_verify.verify_chain()
 
-            assert verify_result.get("status") == "tampered"
-            assert verify_result.get("reason") == "ledger_public_key_mismatch"
-            await ledger_verify.close()
-    finally:
-        del os.environ["CORTEX_LEDGER_PUBLIC_KEY"]
+        assert verify_result.get("status") == "tampered"
+        assert verify_result.get("reason") == "ledger_public_key_mismatch"
+        await ledger_verify.close()
 
