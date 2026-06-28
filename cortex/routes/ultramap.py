@@ -28,9 +28,9 @@ async def get_epistemic_dependency_graph(request: Request) -> dict[str, Any]:
 
     # Query the Ledger directly
     query = """
-        SELECT resource, timestamp, hash
+        SELECT target, timestamp, id
         FROM audit_ledger
-        WHERE action = 'inject_axiom' AND actor_role = 'autodidact'
+        WHERE agent_id = 'autodidact' AND status = 'SUCCESS'
         ORDER BY timestamp ASC
     """
 
@@ -39,9 +39,9 @@ async def get_epistemic_dependency_graph(request: Request) -> dict[str, Any]:
             rows = await cursor.fetchall()
 
             for i, row in enumerate(rows):
-                resource_str = row[0]  # e.g. "EDU-001: Adaptive Learning (EDG)"
+                resource_str = row[0]  # target
                 timestamp = row[1]
-                event_hash = row[2]
+                event_hash = str(row[2]) # using id as hash representation
 
                 parts = resource_str.split(":", 1)
                 node_id = parts[0].strip() if len(parts) > 1 else f"NODE-{i}"
