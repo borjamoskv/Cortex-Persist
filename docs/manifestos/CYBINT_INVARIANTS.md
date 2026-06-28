@@ -138,124 +138,124 @@ Este documento establece la ontología absoluta de operaciones CYBINT. Cero ruid
 *Los Invariantes son verdades inmutables. No cambian con la tecnología; son axiomas del conflicto.*
 
 ### Infraestructura y C2 (001-010)
-`CYB-I001` La infraestructura es costosa; los atacantes siempre la reutilizan.
-`CYB-I002` El pDNS no miente; el historial de resolución sobrevive a la eliminación del registro.
-`CYB-I003` Los certificados SSL compartimentan el ruido; firmas únicas (JARM) delatan el backend.
-`CYB-I004` Los dominios generados por algoritmos (DGA) tienen alta entropía pero patrones matemáticos predecibles.
-`CYB-I005` Los atacantes cometen errores de configuración (OPSEC fails) al desplegar servidores C2.
-`CYB-I006` Fast-Flux oculta la IP, pero revela la red de bots subyacente.
-`CYB-I007` El uso de proxies comerciales (VPNs/VPS) anonimiza, pero agrupa a los atacantes en ASNs específicos.
-`CYB-I008` Los puertos inusuales (ej. 4444) son firmas de herramientas por defecto.
-`CYB-I009` La vida útil de un dominio C2 es inversamente proporcional a su exposición.
-`CYB-I010` El beaconing tiene jitter; la ausencia total de jitter delata a un novato o un script básico.
+- **CYB-I001** | `INV_INFRA_REUSE`: La infraestructura es costosa; los atacantes siempre la reutilizan.
+- **CYB-I002** | `INV_PDNS_IMMUTABILITY`: El pDNS no miente; el historial de resolución sobrevive a la eliminación del registro.
+- **CYB-I003** | `INV_JARM_COMPARTMENT`: Los certificados SSL compartimentan el ruido; firmas únicas (JARM) delatan el backend.
+- **CYB-I004** | `INV_DGA_ENTROPY`: Los dominios DGA tienen alta entropía pero patrones matemáticos predecibles.
+- **CYB-I005** | `INV_OPSEC_DECAY`: Los atacantes siempre cometen errores de configuración (OPSEC fails) al desplegar servidores C2.
+- **CYB-I006** | `INV_FASTFLUX_REVEAL`: Fast-Flux oculta la IP, pero expone masivamente la red de bots subyacente.
+- **CYB-I007** | `INV_PROXY_CLUSTER`: El uso de proxies comerciales (VPNs/VPS) anonimiza, pero agrupa a atacantes en ASNs de hosting.
+- **CYB-I008** | `INV_PORT_SIGNATURE`: Los puertos inusuales (ej. 4444) son firmas inmutables de herramientas por defecto.
+- **CYB-I009** | `INV_C2_LIFESPAN`: La vida útil de un dominio C2 es inversamente proporcional a su exposición en feeds.
+- **CYB-I010** | `INV_JITTER_ABSENCE`: La ausencia total de jitter en el beaconing delata instantáneamente a un novato o script básico.
 
 ### Artefactos y Malware (011-020)
-`CYB-I011` Los hashes (MD5/SHA256) son la métrica más frágil de la inteligencia (Pirámide del Dolor).
-`CYB-I012` El fuzzy hashing (SSDeep) expone la evolución del código, no solo la identidad del archivo.
-`CYB-I013` Las cadenas de texto (strings) en binarios a menudo revelan rutas de compilación y nombres de usuario.
-`CYB-I014` Los packers ocultan el código, pero el packer mismo es una firma identificable.
-`CYB-I015` Las marcas de tiempo de compilación (Timestamps) pueden ser falsificadas, pero a menudo se olvidan.
-`CYB-I016` Los Mutex previenen la doble infección, pero sirven como un IoC de alta fidelidad.
-`CYB-I017` Las importaciones de API (IAT) revelan las intenciones del malware antes de la ejecución.
-`CYB-I018` El Rich Header en binarios PE identifica de forma única el entorno de compilación de Windows.
-`CYB-I019` La entropía alta en una sección de datos sugiere cifrado o compresión (cargas útiles ocultas).
-`CYB-I020` El malware sin archivos (Fileless) reside en la memoria, dejando rastros en los procesos de volcado.
+- **CYB-I011** | `INV_HASH_FRAGILITY`: Los hashes (MD5/SHA256) son la métrica más frágil y de menor valor táctico (Pirámide del Dolor).
+- **CYB-I012** | `INV_FUZZY_EVOLUTION`: El fuzzy hashing (SSDeep) expone la evolución del código, superando la limitación del hash rígido.
+- **CYB-I013** | `INV_STRING_LEAK`: Las cadenas de texto (strings) en binarios a menudo revelan rutas locales y OPSEC fails.
+- **CYB-I014** | `INV_PACKER_SIGNATURE`: Los packers ocultan el código, pero el packer mismo se convierte en una firma identificable.
+- **CYB-I015** | `INV_TIMESTAMP_FORGERY`: Los timestamps pueden ser falsificados, pero su omisión o patrón los hace rastreables.
+- **CYB-I016** | `INV_MUTEX_IOC`: Los Mutex previenen la doble infección, sirviendo involuntariamente como IoCs de alta fidelidad.
+- **CYB-I017** | `INV_IAT_INTENT`: Las importaciones de API (IAT) revelan intenciones deterministas del malware antes de ejecutarlo.
+- **CYB-I018** | `INV_RICH_HEADER_ID`: El Rich Header identifica de forma única la topología del entorno de compilación de Windows.
+- **CYB-I019** | `INV_ENTROPY_INDICATOR`: Alta entropía en una sección de datos asegura matemáticamente la presencia de cifrado o compresión.
+- **CYB-I020** | `INV_FILELESS_MEMORY`: El malware Fileless no reside en disco, pero contamina invariablemente la RAM y los volcados.
 
 ### Comportamiento del Adversario (021-030)
-`CYB-I021` Los TTPs (Tácticas, Técnicas y Procedimientos) son el indicador más difícil de cambiar para un atacante.
-`CYB-I022` Los atacantes siguen la ley del menor esfuerzo; usan herramientas integradas (Living off the Land) cuando es posible.
-`CYB-I023` El espionaje busca persistencia; el cibercrimen busca monetización rápida.
-`CYB-I024` Los grupos APT tienen horarios de trabajo; sus commits y ataques siguen husos horarios y días festivos.
-`CYB-I025` La atribución definitiva es un mito; la atribución basada en la confianza (Confidence Level) es la realidad.
-`CYB-I026` Las falsas banderas (False Flags) son comunes para desviar la atribución a naciones rivales.
-`CYB-I027` El Modelo Diamante requiere al menos dos vértices para proporcionar inteligencia procesable.
-`CYB-I028` Los actores de amenazas evolucionan sus TTPs en respuesta a la publicación de reportes de inteligencia.
-`CYB-I029` El Ransomware as a Service (RaaS) separa al desarrollador (capability) del afiliado (adversary).
-`CYB-I030` El acceso inicial se mercantiliza (Initial Access Brokers), creando cadenas de suministro criminales.
+- **CYB-I021** | `INV_TTP_IMMUTABILITY`: Los TTPs son el indicador más costoso de cambiar para un adversario estructurado.
+- **CYB-I022** | `INV_LEAST_EFFORT`: Los atacantes siguen la ley del menor esfuerzo; abusan de herramientas integradas (LotL) siempre.
+- **CYB-I023** | `INV_MOTIVE_BIFURCATION`: El espionaje busca persistencia silenciosa; el cibercrimen busca monetización ruidosa.
+- **CYB-I024** | `INV_APT_SCHEDULE`: Los grupos APT son burocracias; sus commits operan en husos horarios y días laborables fijos.
+- **CYB-I025** | `INV_ATTRIBUTION_PROBABILITY`: La atribución definitiva es un mito; opera sobre Confidence Levels (Probabilidad).
+- **CYB-I026** | `INV_FALSE_FLAG`: Las falsas banderas son inyecciones termodinámicas para desviar la atribución a naciones rivales.
+- **CYB-I027** | `INV_DIAMOND_MINIMUM`: El Modelo Diamante requiere la validación empírica de al menos dos vértices para ser accionable.
+- **CYB-I028** | `INV_TTP_ADAPTATION`: Los atacantes evolucionan sus TTPs como respuesta termodinámica a la publicación de inteligencia.
+- **CYB-I029** | `INV_RAAS_DECOUPLING`: El RaaS separa estructuralmente al desarrollador (capability) del afiliado (adversary).
+- **CYB-I030** | `INV_ACCESS_COMMODITY`: El acceso inicial (IABs) se mercantiliza, creando cadenas de suministro ofensivas.
 
 ### Inteligencia y Datos (031-040)
-`CYB-I031` Un IoC sin contexto no es inteligencia, es un bloqueador de firewall.
-`CYB-I032` La inteligencia perece; un IoC de hace un año probablemente es un falso positivo hoy.
-`CYB-I033` El enriquecimiento de datos reduce la entropía analítica.
-`CYB-I034` La correlación de eventos dispares revela la campaña subyacente.
-`CYB-I035` Los foros de la Dark Web son ecosistemas de confianza; la reputación es la moneda de cambio.
-`CYB-I036` Las filtraciones de datos (Data Leaks) son retrospectivas; el acceso inicial ocurrió meses antes.
-`CYB-I037` Las bases de datos de Whois históricas son fundamentales para rastrear la evolución de la infraestructura.
-`CYB-I038` El Traffic Light Protocol (TLP) es un pacto de confianza humano, no una medida de seguridad técnica.
-`CYB-I039` STIX/TAXII son estándares sintácticos, pero la semántica requiere intervención analítica.
-`CYB-I040` Más datos no significa más inteligencia; el ruido oscurece la señal.
+- **CYB-I031** | `INV_IOC_CONTEXT`: Un IoC sin contexto no es inteligencia, es un bloqueador ciego de firewall.
+- **CYB-I032** | `INV_INTEL_DECAY`: La inteligencia perece termodinámicamente; un IoC viejo es un falso positivo garantizado.
+- **CYB-I033** | `INV_DATA_ENRICHMENT`: El enriquecimiento de datos reduce axiomáticamente la entropía analítica.
+- **CYB-I034** | `INV_EVENT_CORRELATION`: La correlación de eventos aislados colapsa la onda de probabilidad revelando la campaña.
+- **CYB-I035** | `INV_DARKWEB_REPUTATION`: Los foros underground son ecosistemas donde la reputación es el único ancla de confianza.
+- **CYB-I036** | `INV_LEAK_RETROSPECTIVE`: Una filtración de datos es retrospectiva; la brecha inicial ocurrió meses antes.
+- **CYB-I037** | `INV_WHOIS_TRACE`: Las bases históricas Whois son el único registro inmutable de la evolución de una red C2.
+- **CYB-I038** | `INV_TLP_HUMAN_TRUST`: TLP es un protocolo social humano, no un mecanismo de segmentación criptográfica.
+- **CYB-I039** | `INV_STIX_SYNTAX`: STIX/TAXII aporta orden sintáctico, pero la semántica accionable requiere analistas (o IA).
+- **CYB-I040** | `INV_NOISE_OVERLOAD`: Más datos no equivalen a más inteligencia; el volumen sin filtro anula la señal.
 
 ### Detección y Respuesta (041-050)
-`CYB-I041` La detección perfecta no existe; la resiliencia asume el compromiso.
-`CYB-I042` Las reglas YARA buscan cadenas; las reglas Sigma buscan comportamientos.
-`CYB-I043` El Threat Hunting asume que los controles preventivos ya han fallado.
-`CYB-I044` Los falsos positivos fatigan a los analistas; la alta fidelidad es prioritaria.
-`CYB-I045` El tiempo medio de detección (MTTD) mide la eficacia de la inteligencia, no de los firewalls.
-`CYB-I046` Las alertas deben tener contexto accionable o ser suprimidas.
-`CYB-I047` La caza de amenazas basada en hipótesis es más efectiva que la búsqueda a ciegas de IoCs.
-`CYB-I048` Los honeypots generan inteligencia de alta fidelidad con cero falsos positivos (todo tráfico es anómalo).
-`CYB-I049` El aislamiento de red es una medida de contención, no de remediación.
-`CYB-I050` Los playbooks de incidentes deben ser actualizados con la inteligencia táctica más reciente.
+- **CYB-I041** | `INV_IMPERFECT_DETECTION`: La detección 100% es un fallo axiomático; la ciberseguridad debe asumir el compromiso (Assume Breach).
+- **CYB-I042** | `INV_SIGMA_OVER_YARA`: YARA busca cadenas estáticas en disco; Sigma detecta comportamientos termodinámicos en logs.
+- **CYB-I043** | `INV_HUNTING_ASSUMPTION`: El Threat Hunting asume que todos los controles de barrera (firewalls/AV) ya han fracasado.
+- **CYB-I044** | `INV_ALERT_FATIGUE`: Falsos positivos constantes destruyen la exergía cognitiva del analista SOC.
+- **CYB-I045** | `INV_MTTD_METRIC`: El MTTD mide la eficiencia del cerebro CYBINT, no la dureza del firewall.
+- **CYB-I046** | `INV_ACTIONABLE_ALERT`: Alerta sin contexto accionable debe ser suprimida o es anergía del sistema.
+- **CYB-I047** | `INV_HYPOTHESIS_HUNT`: Buscar por hipótesis lógica es termodinámicamente superior a escanear IoCs ciegamente.
+- **CYB-I048** | `INV_HONEYPOT_FIDELITY`: Honeypots generan C5-REAL intelligence: cero falsos positivos (todo tráfico allí es ataque).
+- **CYB-I049** | `INV_ISOLATION_LIMIT`: El aislamiento de red L2 no erradica el malware; solo frena el movimiento lateral temporalmente.
+- **CYB-I050** | `INV_PLAYBOOK_UPDATE`: Playbooks estáticos mueren; deben nutrirse de feeds de inteligencia táctica continua.
 
 ### OSINT y Reconocimiento (051-060)
-`CYB-I051` Lo que se publica en internet no se puede borrar de forma fiable (Wayback Machine).
-`CYB-I052` Los metadatos de los documentos (EXIF) a menudo comprometen el OPSEC físico del atacante.
-`CYB-I053` Las redes sociales son vectores de ingeniería social de alta efectividad.
-`CYB-I054` Shodan no ataca; Shodan revela la negligencia de la configuración.
-`CYB-I055` La resolución pasiva de DNS permite reconstruir grafos de infraestructura sin tocar el objetivo.
-`CYB-I056` Las filtraciones de repositorios de código exponen secretos, no solo propiedad intelectual.
-`CYB-I057` Los foros de hackers revelan la demanda del mercado de vulnerabilidades (0-days).
-`CYB-I058` Las relaciones en LinkedIn mapean la jerarquía objetivo para campañas de Spear Phishing.
-`CYB-I059` El rastreo de billeteras cripto sigue el flujo del dinero (Ransomware), a menudo rompiendo el OPSEC.
-`CYB-I060` La inteligencia de fuentes abiertas es el 80% del perfilado inicial de un adversario.
+- **CYB-I051** | `INV_INTERNET_MEMORY`: La subida de datos a internet es irreversible (Wayback Machine no olvida).
+- **CYB-I052** | `INV_EXIF_BETRAYAL`: Metadatos EXIF son los OPSEC fails más comunes que rompen la barrera físico-cibernética.
+- **CYB-I053** | `INV_SOCIAL_ENG_VECTOR`: Redes sociales proporcionan el grafo relacional exacto para ataques Spear Phishing.
+- **CYB-I054** | `INV_SHODAN_NEGLIGENCE`: Shodan no es un arma; es un espejo de la entropía y negligencia en configuración.
+- **CYB-I055** | `INV_PDNS_GRAPHING`: pDNS reconstruye grafos inmutables de infraestructura adversaria sin tocar sus servidores (OPSEC safe).
+- **CYB-I056** | `INV_REPO_LEAK`: Repositorios públicos exponen credenciales C5-REAL a mayor velocidad que el escaneo de puertos.
+- **CYB-I057** | `INV_FORUM_DEMAND`: Los foros underground actúan como mercados de futuros predictivos para exploits 0-day.
+- **CYB-I058** | `INV_LINKEDIN_HIERARCHY`: LinkedIn expone el organigrama exacto y los privilegios de acceso (Roles) de una víctima.
+- **CYB-I059** | `INV_CRYPTO_TRACEABILITY`: La cadena de bloques (Blockchain) es inherentemente anti-OPSEC para flujos de rescate.
+- **CYB-I060** | `INV_OSINT_FOUNDATION`: El 80% del perfilado de adversarios se basa axiomáticamente en OSINT antes que en SIGINT/CYBINT cerrado.
 
 ### Vulnerabilidades y Exploits (061-070)
-`CYB-I061` Un CVE sin un exploit público (PoC) es un riesgo teórico; con PoC, es una crisis inminente.
-`CYB-I062` Los atacantes priorizan la explotación de VPNs y firewalls (borde de la red).
-`CYB-I063` Las vulnerabilidades de Día Cero (0-day) son caras; los atacantes prefieren Días N (N-days) no parchados.
-`CYB-I064` La gestión de parches siempre va rezagada respecto al desarrollo de exploits.
-`CYB-I065` Las vulnerabilidades en la cadena de suministro (Supply Chain) amplifican exponencialmente el radio de explosión.
-`CYB-I066` El análisis de parches (Patch Diffing) revela la vulnerabilidad subyacente que fue corregida.
-`CYB-I067` La explotación requiere precisión de memoria (ASLR/DEP dificultan, pero no imposibilitan).
-`CYB-I068` Los exploits se mercantilizan rápidamente y se integran en frameworks automatizados (Metasploit, Cobalt Strike).
-`CYB-I069` La configuración predeterminada insegura es más explotada que los fallos de código complejos.
-`CYB-I070` El escaneo masivo de vulnerabilidades comienza minutos después de la divulgación pública de un PoC.
+- **CYB-I061** | `INV_POC_CRITICALITY`: CVE sin PoC público es entropía latente; CVE con PoC es energía cinética desencadenada.
+- **CYB-I062** | `INV_EDGE_EXPLOITATION`: Los atacantes priorizan firewalls y VPNs, el borde de la topología donde no hay EDR.
+- **CYB-I063** | `INV_NDAY_PREFERENCE`: Vulnerabilidades N-day no parchadas son estadísticamente preferibles a quemar un 0-day.
+- **CYB-I064** | `INV_PATCH_LAG`: El parcheo siempre tiene lag termodinámico respecto al desarrollo de exploits ofensivos.
+- **CYB-I065** | `INV_SUPPLY_CHAIN_BLAST`: Comprometer la cadena de suministro amplifica O(N) el radio de explosión del ataque.
+- **CYB-I066** | `INV_PATCH_DIFFING`: Diferenciar parches revela axiomáticamente la vulnerabilidad raíz corregida.
+- **CYB-I067** | `INV_MEMORY_PRECISION`: ASLR y DEP aumentan la fricción pero no violan las leyes de explotación de memoria.
+- **CYB-I068** | `INV_EXPLOIT_COMMODITY`: Exploits funcionales acaban invariablemente en frameworks (Metasploit, Cobalt Strike).
+- **CYB-I069** | `INV_DEFAULT_CONFIG_RISK`: Configuración por defecto mata a más servidores que los desbordamientos de búfer complejos.
+- **CYB-I070** | `INV_MASS_SCAN_SPEED`: Escaneos masivos de internet comienzan T+15 minutos tras la publicación del PoC.
 
 ### Gobernanza y Estrategia (071-080)
-`CYB-I071` La inteligencia debe responder a un Requisito Prioritario de Inteligencia (PIR) o es un desperdicio de exergía.
-`CYB-I072` La inteligencia no procesable (Actionable Intel) es simplemente noticias cibernéticas.
-`CYB-I073` La retroalimentación (Feedback) del SOC a los analistas de inteligencia cierra el ciclo y refina las alertas.
-`CYB-I074` El intercambio de inteligencia (Sharing) fortalece la defensa colectiva, pero requiere confianza.
-`CYB-I075` La automatización es obligatoria para el procesamiento de datos; el análisis requiere cognición humana (o IA avanzada).
-`CYB-I076` La inteligencia táctica previene incidentes; la inteligencia estratégica guía la inversión en seguridad.
-`CYB-I077` El sesgo de confirmación es el mayor enemigo del analista de inteligencia.
-`CYB-I078` La confianza en la fuente (Reliability) y en la información (Credibility) deben evaluarse por separado.
-`CYB-I079` La diseminación oportuna de inteligencia imperfecta es mejor que la inteligencia perfecta entregada tarde.
-`CYB-I080` El programa de inteligencia madura cuando pasa de consumir feeds a producir inteligencia original.
+- **CYB-I071** | `INV_PIR_NECESSITY`: Inteligencia sin anclaje a Requisitos Prioritarios (PIR) es consumo de anergía.
+- **CYB-I072** | `INV_ACTIONABLE_MANDATE`: Reporte sin plan de mitigación accionable no es CYBINT, es periodismo de TI.
+- **CYB-I073** | `INV_FEEDBACK_LOOP`: Ausencia de feedback del SOC destruye la calibración analítica de falsos positivos.
+- **CYB-I074** | `INV_SHARING_TRUST`: Compartir inteligencia es un dilema del prisionero solucionado mediante trust networks cerradas.
+- **CYB-I075** | `INV_AUTOMATION_LIMIT`: Colección automatizada escala a infinito; el análisis causal requiere juicio O(1) in-memory.
+- **CYB-I076** | `INV_TACTICAL_VS_STRAT`: Táctica previene el ataque de hoy; Estrategia define el presupuesto del firewall de mañana.
+- **CYB-I077** | `INV_CONFIRMATION_BIAS`: Sesgo de confirmación destruye la objetividad topológica del analista.
+- **CYB-I078** | `INV_RELIABILITY_SPLIT`: Fiabilidad de fuente y Credibilidad de dato son variables algebraicas separadas.
+- **CYB-I079** | `INV_SPEED_OVER_PERFECTION`: Inteligencia CYBINT al 80% hoy previene el ataque; CYBINT al 100% mañana documenta el forense.
+- **CYB-I080** | `INV_MATURITY_PRODUCTION`: Nivel máximo de madurez es producir Invariantes empíricas, no consumir feeds externos.
 
 ### Criptografía y OPSEC (081-090)
-`CYB-I081` La criptografía mal implementada es peor que la falta de criptografía (falsa sensación de seguridad).
-`CYB-I082` Los atacantes usan cifrado simétrico para los datos y asimétrico para proteger las claves (Ransomware).
-`CYB-I083` El análisis de tráfico cifrado infiere intenciones mediante el tamaño, la frecuencia y el tiempo de los paquetes.
-`CYB-I084` La reutilización de código (Code Reuse) a través de campañas de malware es inevitable debido a la economía del desarrollo.
-`CYB-I085` El OPSEC perfecto es imposible a largo plazo; la fatiga del atacante genera errores.
-`CYB-I086` Los atacantes a menudo prueban su propio malware contra VirusTotal, revelando sus campañas antes de lanzarlas.
-`CYB-I087` Las cuentas de correo de recuperación y la infraestructura compartida exponen redes enteras de actores.
-`CYB-I088` El uso de idiomas y teclados específicos en el código fuente o metadatos acota la geolocalización.
-`CYB-I089` Los atacantes registran dominios parecidos (Typosquatting) con meses de antelación a una campaña.
-`CYB-I090` La desofuscación automatizada es una carrera armamentística continua contra nuevos empacadores.
+- **CYB-I081** | `INV_CRYPTO_ILLUSION`: Criptografía propia mal implementada aporta entropía negativa comparado con texto plano.
+- **CYB-I082** | `INV_RANSOMWARE_ENCRYPTION`: Cifrado asimétrico protege la clave simétrica (velocidad), garantizando la extorsión.
+- **CYB-I083** | `INV_TRAFFIC_INFERENCE`: Cifrar el payload no oculta el tamaño, frecuencia, y metadatos del flujo (Traffic Analysis).
+- **CYB-I084** | `INV_CODE_REUSE`: Economía criminal fuerza la reutilización de código (Code Reuse) generando firmas estáticas inevitables.
+- **CYB-I085** | `INV_OPSEC_FATIGUE`: El OPSEC perfecto requiere energía infinita; el atacante humano se fatiga y falla.
+- **CYB-I086** | `INV_VT_BETRAYAL`: Atacantes usan VirusTotal como QA, regalando firmas tempranas a los cazadores YARA.
+- **CYB-I087** | `INV_SHARED_INFRA_LINK`: Compartir un email de registro expone el grafo topológico completo de la red adversaria.
+- **CYB-I088** | `INV_LANGUAGE_LEAK`: Lenguaje/Charset embebido mapea axiomáticamente la región sociolingüística de origen.
+- **CYB-I089** | `INV_TYPOSQUAT_PREDICT`: Typosquatting se pre-calcula matemáticamente (Distancia de Levenshtein) antes del registro.
+- **CYB-I090** | `INV_DEOBFUSCATE_WAR`: Desofuscación es una guerra termodinámica constante entre entropía inyectada y análisis estático.
 
 ### Singularidad CYBINT-Física (091-100)
-`CYB-I091` El daño cibernético tiene consecuencias cinéticas (ICS/SCADA).
-`CYB-I092` Las redes OT (Tecnología Operativa) priorizan la disponibilidad sobre la confidencialidad, haciéndolas frágiles.
-`CYB-I093` El espionaje cibernético precede inevitablemente al conflicto geopolítico físico.
-`CYB-I094` Los dispositivos IoT son la cabeza de playa preferida para la formación masiva de botnets (Mirai).
-`CYB-I095` La seguridad física y la ciberseguridad son el mismo dominio; un USB en el estacionamiento elude los firewalls.
-`CYB-I096` La intercepción de RF (SIGINT) alimenta directamente los grafos de amenazas cibernéticas (CYBINT).
-`CYB-I097` Los drones y vehículos autónomos amplían la superficie de ataque cibernético al espacio aéreo y terrestre.
-`CYB-I098` La inteligencia artificial acelera la velocidad de adaptación de los TTPs, colapsando el tiempo de respuesta.
-`CYB-I099` Las campañas de desinformación cibernética alteran la percepción de la realidad física de la sociedad.
-`CYB-I100` **La asimetría es absoluta:** El defensor debe proteger todo el perímetro; el atacante solo necesita una vulnerabilidad (Cero Anergía).
+- **CYB-I091** | `INV_KINETIC_IMPACT`: Dominio Cíber rompe la contención lógica causando daños cinéticos físicos (ICS/SCADA).
+- **CYB-I092** | `INV_OT_AVAILABILITY`: Entornos OT prefieren correr expuestos a caerse; su axioma es disponibilidad > seguridad.
+- **CYB-I093** | `INV_ESPIONAGE_PRECEDENCE`: Preparación CYBINT antecede estructuralmente a cualquier movilización militar física.
+- **CYB-I094** | `INV_IOT_BOTNET_VECTOR`: Dispositivos IoT son termodinámicamente indefensos, presa natural de grandes Botnets (Mirai).
+- **CYB-I095** | `INV_PHYSICAL_BYPASS`: Acceso físico de capa 1 es un bypass inmutable de cualquier firewall L7.
+- **CYB-I096** | `INV_SIGINT_CYBINT_NEXUS`: Intercepción RF alimenta directamente los nodos de Caza Cibernética.
+- **CYB-I097** | `INV_DRONE_SURFACE`: Drones convierten el espacio aéreo en una VLAN extendida vulnerable a hacking.
+- **CYB-I098** | `INV_AI_ACCELERATION`: Redes Neuronales acortan el tiempo TTP de adaptación a casi cero (Singularidad Defensiva).
+- **CYB-I099** | `INV_DISINFO_REALITY`: Inyecciones Cibernéticas de desinformación reescriben los grafos de creencia física social.
+- **CYB-I100** | `INV_ABSOLUTE_ASYMMETRY`: El defensor cubre N vectores; el atacante explota O(1). Cero Anergía es la única métrica de supervivencia.
 
 ---
 
@@ -266,11 +266,11 @@ Este documento establece la ontología absoluta de operaciones CYBINT. Cero ruid
 1. **Ingesta:** El SOC detecta un beaconing hacia `update-telemetry[.]com`.
 2. **CYB-P002 (OP_PDNS_RESOLVE):** Se identifica que la IP del dominio alojaba previamente `secure-login-portal[.]net`.
 3. **CYB-P003 (OP_JARM_FINGERPRINT):** Se escanea la IP. El hash JARM coincide con la firma criptográfica del servidor C2 "Cobalt Strike" por defecto.
-4. **CYB-I003 (Invariante):** Usando Shodan/Censys, se buscan todas las IPs globales con ese hash JARM y el mismo certificado autofirmado, identificando 45 servidores inactivos del mismo grupo APT antes de que se usen.
+4. **CYB-I003 (INV_JARM_COMPARTMENT):** Usando Shodan/Censys, se buscan todas las IPs globales con ese hash JARM y el mismo certificado autofirmado, identificando 45 servidores inactivos del mismo grupo APT antes de que se usen.
 
 ### Caso 2: Caza de Amenazas (Threat Hunting) por Comportamiento (Living off the Land)
 **Vector:** Análisis de TTPs vs Hashes (Ignorando la Pirámide del Dolor baja).
-1. **Hipótesis (CYB-I022):** El atacante usará herramientas nativas de Windows para evadir EDR.
+1. **Hipótesis (CYB-I022 - INV_LEAST_EFFORT):** El atacante usará herramientas nativas de Windows para evadir EDR.
 2. **CYB-P066 (OP_SPLUNK_QUERY):** Se programa el SIEM para buscar ejecuciones de `certutil.exe` o `bitsadmin.exe` con argumentos de descarga HTTP (e.g., `-urlcache -split -f`).
 3. **Correlación (CYB-P057):** Se cruza la ejecución del proceso con conexiones salientes en el firewall hacia ASNs conocidos por alojar bulletproof hosting.
 4. **Resultado:** Detección de una intrusión Fileless en Etapa 2, saltándose las firmas de antivirus que nunca detectaron un binario malicioso.
@@ -280,4 +280,4 @@ Este documento establece la ontología absoluta de operaciones CYBINT. Cero ruid
 1. **Colección:** Un analista extrae un documento de phishing droppeado en la red.
 2. **CYB-P006 (OP_EXIF_STRIP):** Se extraen los metadatos del PDF malicioso. El `Author` es un alias cirílico y la zona horaria del documento es `UTC+3`.
 3. **CYB-P038 / CYB-P035 (OP_FOCA_METADATA / OP_ALIAS_CORRELATE):** Se busca el alias en foros de la Dark Web (Exploit.in). Se encuentra un handle idéntico que publicó un script en Python hace 3 años.
-4. **CYB-I086 (Invariante):** Se busca el hash del script de hace 3 años en VirusTotal (CYB-P051), el cual tiene comentarios de la comunidad que asocian ese script a las fases iniciales del grupo *Sandworm*. Se mapea la intención y se ajustan las defensas a los TTPs conocidos del grupo.
+4. **CYB-I086 (INV_VT_BETRAYAL):** Se busca el hash del script de hace 3 años en VirusTotal (CYB-P051), el cual tiene comentarios de la comunidad que asocian ese script a las fases iniciales del grupo *Sandworm*. Se mapea la intención y se ajustan las defensas a los TTPs conocidos del grupo.
