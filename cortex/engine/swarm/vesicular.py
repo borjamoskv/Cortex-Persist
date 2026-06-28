@@ -41,12 +41,14 @@ class VesicularRuntime:
         except OSError as e:
             logger.error(f"[Vesicular] Failed to annihilate membrane {path}: {e}")
 
-    def execute(self, payload: str) -> tuple[bool, str, str]:
+    def execute(self, payload: str, bootstrap_token: str = "", proxy_port: int = 13337) -> Tuple[bool, str, str]:
         """
         Execute an untrusted Python payload inside the vesicular membrane.
         
         Args:
             payload: Python code string.
+            bootstrap_token: Optional ephemeral token for Swarm PKI registration.
+            proxy_port: The port where the Host's Zero-Trust Inference Proxy is listening.
             
         Returns:
             Tuple[success: bool, stdout: str, stderr: str]
@@ -55,10 +57,12 @@ class VesicularRuntime:
         logger.info(f"[Vesicular] Membrane initialized at {membrane_path}")
         
         # Strip all environment variables to prevent credential leakage (API keys)
-        # Only preserve PATH for the Python executable
+        # Inject ONLY the strict structural environment needed for Zero-Trust Inference
         safe_env = {
             "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
             "PYTHONPATH": os.environ.get("PYTHONPATH", ""),
+            "CORTEX_PROXY_URL": f"http://127.0.0.1:{proxy_port}",
+            "CORTEX_BOOTSTRAP_TOKEN": bootstrap_token
         }
         
         script_path = os.path.join(membrane_path, "payload.py")
