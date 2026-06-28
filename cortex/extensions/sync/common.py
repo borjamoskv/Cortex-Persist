@@ -59,7 +59,7 @@ def runtime_sync_state_file() -> Path:
 
 @dataclass
 class SyncResult:
-    """Resultado de una ronda de sincronización."""
+    """Result of a synchronization round."""
 
     synced_at: str = ""
     facts_synced: int = 0
@@ -80,7 +80,7 @@ class SyncResult:
 
 @dataclass
 class WritebackResult:
-    """Resultado de una ronda de write-back."""
+    """Result of a write-back round."""
 
     files_written: int = 0
     files_skipped: int = 0
@@ -93,7 +93,7 @@ class WritebackResult:
 
 
 def load_sync_state() -> dict:
-    """Carga el estado de la última sincronización (hashes de archivos)."""
+    """Loads the state of the last synchronization (file hashes)."""
     sync_state_file = runtime_sync_state_file()
     if sync_state_file.exists():
         try:
@@ -104,7 +104,7 @@ def load_sync_state() -> dict:
 
 
 def save_sync_state(state: dict) -> None:
-    """Guarda el estado de sincronización a disco."""
+    """Saves the synchronization state to disk."""
     sync_state_file = runtime_sync_state_file()
     sync_state_file.parent.mkdir(parents=True, exist_ok=True)
     sync_state_file.write_text(
@@ -114,20 +114,20 @@ def save_sync_state(state: dict) -> None:
 
 
 def file_hash(path: Path) -> str:
-    """Calcula SHA-256 de un archivo para detectar cambios."""
+    """Calculates SHA-256 of a file to detect changes."""
     if not path.exists():
         return ""
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def atomic_write(path: Path, content: str) -> None:
-    """Escritura atómica: escribe a temp + os.replace().
+    """Atomic write: writes to temp + os.replace().
 
-    Evita corrupción si el proceso muere a mitad de escritura.
-    En POSIX, os.replace() es atómico dentro del mismo filesystem.
+    Prevents corruption if the process dies mid-write.
+    In POSIX, os.replace() is atomic within the same filesystem.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    # Crear temp en el mismo directorio para garantizar mismo filesystem
+    # Create temp in the same directory to guarantee the same filesystem
     fd, tmp_path = tempfile.mkstemp(
         dir=str(path.parent),
         prefix=f".{path.name}.",
@@ -138,7 +138,7 @@ def atomic_write(path: Path, content: str) -> None:
             f.write(content)
         os.replace(tmp_path, str(path))
     except OSError:
-        # Limpiar temp si falla el replace
+        # Clean up temp if replace fails
         try:
             os.unlink(tmp_path)
         except Exception as exc:
@@ -151,15 +151,15 @@ async def get_existing_contents(
     project: str | None = None,
     fact_type: str | None = None,
 ) -> set[str]:
-    """Obtiene set de contenidos existentes para deduplicación rápida.
+    """Retrieves a set of existing contents for fast deduplication.
 
     Args:
-        engine: Instancia de CortexEngine.
-        project: Filtrar por proyecto. None = cualquiera.
-        fact_type: Filtrar por tipo. None = cualquiera.
+        engine: CortexEngine instance.
+        project: Filter by project. None = any.
+        fact_type: Filter by fact type. None = any.
 
     Returns:
-        Set de strings con el contenido de cada fact existente.
+        Set of strings containing the content of each existing fact.
     """
     async with engine.session() as conn:
         query = "SELECT content FROM facts WHERE valid_until IS NULL"
@@ -192,10 +192,10 @@ async def get_existing_contents(
 
 
 async def db_content_hash(engine: CortexEngine, fact_type: str | None = None) -> str:
-    """Calcula SHA-256 del contenido actual en DB para un tipo de fact.
+    """Calculates SHA-256 of the current DB content for a fact type.
 
-    Esto permite detectar si la DB ha cambiado desde el último write-back
-    sin necesidad de comparar fila por fila.
+    This allows detecting if the DB has changed since the last write-back
+    without needing row-by-row comparison.
     """
     async with engine.session() as conn:
         if fact_type:
@@ -211,7 +211,7 @@ async def db_content_hash(engine: CortexEngine, fact_type: str | None = None) ->
             )
         rows = await cursor.fetchall()
 
-    # Serializar el contenido completo como un hash determinista
+    # Serialize the complete content as a deterministic hash
     hasher = hashlib.sha256()
     for row in rows:
         hasher.update(f"{row[0]}|{row[1]}|{row[2]}|{row[3]}\n".encode())
@@ -221,7 +221,7 @@ async def db_content_hash(engine: CortexEngine, fact_type: str | None = None) ->
 def calculate_fact_diff(
     existing: set[str], candidates: list[dict], content_generator: Any
 ) -> list[tuple[str, dict]]:
-    """Calcula qué hechos son nuevos comparándolos con lo existente."""
+    """Calculates which facts are new by comparing them against the existing ones."""
     results = []
     for c in candidates:
         content = content_generator(c)
