@@ -452,7 +452,8 @@ class B60MinimalVM:
         manifest = {
             "version": "1.0",
             "components": ["trace.bin", "graph.canonical", "proof.ir", "metadata.json", "hashes/", "signature/"],
-            "global_hash": graph_sha256
+            "global_hash": graph_sha256,
+            "theorem_of_babylon_compliance": not self.is_halting
         }
         return manifest, canonical_graph, graph_sha256
 

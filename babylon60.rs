@@ -588,11 +588,11 @@ fn main() {
 
     println!("[MOSKV APEX] C5-REAL Execution Completed.");
     println!("[Proof] Proof obligations generated.");
-    export_artifact_bundle(&ledger);
+    export_artifact_bundle(&ledger, !is_halting);
 }
 
 // 11. Immutable Artifact Export
-fn export_artifact_bundle(ledger: &DAGLedger) {
+fn export_artifact_bundle(ledger: &DAGLedger, compliance: bool) {
     use std::io::Write;
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
@@ -617,8 +617,9 @@ fn export_artifact_bundle(ledger: &DAGLedger) {
     let manifest = format!(r#"{{
   "version": "1.0",
   "components": ["trace.bin", "graph.canonical", "proof.ir", "metadata.json", "hashes/", "signature/"],
-  "global_hash": "{}"
-}}"#, graph_hash);
+  "global_hash": "{}",
+  "theorem_of_babylon_compliance": {}
+}}"#, graph_hash, compliance);
 
     let mut ir_lines = Vec::new();
     let mut sorted_events: Vec<_> = ledger.events.values().collect();
