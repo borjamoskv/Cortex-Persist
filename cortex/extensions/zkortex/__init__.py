@@ -1,18 +1,18 @@
 # [C5-REAL] Exergy-Maximized
 """
 ZKORTEX - Zero-Knowledge Proof Layer for CORTEX.
-La soberanía epistémica: probar sin revelar.
+Epistemic sovereignty: proving without revealing.
 
 Uses __getattr__ lazy loading to avoid cascading import failures
 from optional dependencies (py_ecc via commitment/prover modules).
 
 Exports:
-    KnowledgeCommitment   - Pedersen-style commitment sobre un hecho
-    ZKMembershipProof     - Prueba de pertenencia a un conjunto (Merkle)
-    ZKRangeProof          - Prueba de que un valor entra en un rango
-    ZKOrtexProver         - Orchestrador soberano de pruebas
-    ZKOrtexVerifier       - Verificador público
-    SovereignOpacityLayer - Integración con cortex.crypto.aes
+    KnowledgeCommitment   - Pedersen-style commitment over a fact
+    ZKMembershipProof     - Proof of membership in a set (Merkle)
+    ZKRangeProof          - Proof that a value falls within a range
+    ZKOrtexProver         - Sovereign orchestrator of proofs
+    ZKOrtexVerifier       - Public verifier
+    SovereignOpacityLayer - Integration with cortex.crypto.aes
 """
 
 from __future__ import annotations
