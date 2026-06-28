@@ -81,3 +81,53 @@ async def test_branch_out(mock_router, tmp_path):
         
         assert any(f"git branch {branch_name} main" in cmd for cmd in executed_commands)
         assert any("git worktree add" in cmd and branch_name in cmd for cmd in executed_commands)
+
+@pytest.mark.asyncio
+async def test_prune_orphans_recovers_anergy(mock_router, tmp_path):
+    """
+    Test that prune_orphans safely deletes orphaned worktrees and branches.
+    """
+    # Initialize the Git environment
+    target_file = tmp_path / "dummy.py"
+    target_file.touch()
+    
+    (tmp_path / ".git").mkdir()
+    
+    env = MCTSGitEnvironment(router=mock_router, target_file=target_file)
+    
+    # Create mock orphaned worktrees
+    wt1 = env.worktrees_dir / "node-orphan-1"
+    wt2 = env.worktrees_dir / "node-orphan-2"
+    wt1.mkdir(parents=True)
+    wt2.mkdir(parents=True)
+    
+    executed_commands = []
+    
+    async def mock_create_subprocess_shell(cmd, *args, **kwargs):
+        executed_commands.append(cmd)
+        
+        mock_proc = MagicMock()
+        from unittest.mock import AsyncMock
+        
+        if "branch --list" in cmd:
+            mock_proc.communicate = AsyncMock(return_value=(b"chronos/node-orphan-1\n  chronos/node-orphan-2\n", b""))
+        else:
+            mock_proc.communicate = AsyncMock(return_value=(b"", b""))
+            
+        mock_proc.returncode = 0
+        return mock_proc
+
+    with patch("cortex.mcts.git_env.asyncio.create_subprocess_shell", side_effect=mock_create_subprocess_shell):
+        metrics = await env.prune_orphans()
+        
+        # Verify commands were executed
+        assert any(f"git worktree remove --force {wt1}" in cmd for cmd in executed_commands)
+        assert any("git branch -D chronos/node-orphan-1" in cmd for cmd in executed_commands)
+        
+        # Verify metrics
+        assert metrics["worktrees_removed"] == 2
+        assert metrics["branches_removed"] == 2
+        
+        # Verify that rm -rf was called by checking if directories exist
+        assert not wt1.exists()
+        assert not wt2.exists()

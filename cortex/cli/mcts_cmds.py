@@ -60,4 +60,29 @@ def evolve(file: str, simulations: int, prompt: str) -> None:
         raise click.Abort() from e
 
 
+@mcts_cmds.command("prune")
+def prune() -> None:
+    """[LEA-OMEGA] Garbage Collect orphaned MCTS Chronos worktrees and branches."""
+    from cortex.mcts.git_env import MCTSGitEnvironment
+    from pathlib import Path
+    
+    try:
+        console.print(Panel.fit("[bold red]🗑️  CHRONOS GC: Initiating Apoptosis[/bold red]", border_style="red"))
+        
+        # We don't need a real router or target file for pruning, just any file in the repo
+        env = MCTSGitEnvironment(router=None, target_file=Path(__file__))  # type: ignore
+        
+        metrics = asyncio.run(env.prune_orphans())
+        
+        console.print(f"[green]✔ Pruned Worktrees:[/green] {metrics['worktrees_removed']}")
+        console.print(f"[green]✔ Pruned Branches:[/green] {metrics['branches_removed']}")
+        
+        if metrics['worktrees_removed'] == 0 and metrics['branches_removed'] == 0:
+            console.print("[dim]The timeline is already clean. Zero anergy detected.[/dim]")
+            
+    except Exception as e:
+        console.print(f"[red]Pruning Error:[/red] {e}")
+        raise click.Abort() from e
+
+
 cli.add_command(mcts_cmds)

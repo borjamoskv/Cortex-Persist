@@ -166,3 +166,51 @@ class MCTSGitEnvironment:
             cwd=str(self.repo_root)
         )
         await p2.communicate()
+
+    async def prune_orphans(self) -> dict[str, int]:
+        """[LEA-OMEGA] Garbage Collector for orphaned MCTS worktrees and branches.
+        
+        Returns:
+            dict: Metrics of pruning (worktrees_removed, branches_removed).
+        """
+        metrics = {"worktrees_removed": 0, "branches_removed": 0}
+        
+        # 1. Prune orphaned worktrees
+        if self.worktrees_dir.exists() and self.worktrees_dir.is_dir():
+            for wt_path in self.worktrees_dir.iterdir():
+                if wt_path.is_dir() and wt_path.name.startswith("node-"):
+                    logger.info("🗑️  [CHRONOS GC] Pruning orphaned worktree: %s", wt_path.name)
+                    # Try git worktree remove
+                    p1 = await asyncio.create_subprocess_shell(
+                        f"git worktree remove --force {shlex.quote(str(wt_path))}",
+                        stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+                        cwd=str(self.repo_root)
+                    )
+                    await p1.communicate()
+                    
+                    # If it's still there (e.g. untracked files or corrupted), rm -rf it
+                    if wt_path.exists():
+                        import shutil
+                        shutil.rmtree(wt_path, ignore_errors=True)
+                    metrics["worktrees_removed"] += 1
+        
+        # 2. Prune orphaned branches
+        p_list = await asyncio.create_subprocess_shell(
+            "git branch --list 'chronos/node-*'",
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            cwd=str(self.repo_root)
+        )
+        stdout, _ = await p_list.communicate()
+        branches = [b.strip().lstrip("* ") for b in stdout.decode().split("\n") if b.strip()]
+        
+        for branch in branches:
+            logger.info("🗑️  [CHRONOS GC] Pruning orphaned branch: %s", branch)
+            p_del = await asyncio.create_subprocess_shell(
+                f"git branch -D {shlex.quote(branch)}",
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+                cwd=str(self.repo_root)
+            )
+            await p_del.communicate()
+            metrics["branches_removed"] += 1
+            
+        return metrics
