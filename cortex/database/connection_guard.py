@@ -30,6 +30,7 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         "cortex/database/core.py",
         "cortex/database/pool.py",
         "cortex/database/writer.py",
+        "cortex/database/sovereign_db.py",
         "cortex/engine/sync_compat.py",
         "cortex/database/connection_guard.py",
         # Memory subsystems needing raw/sync access
