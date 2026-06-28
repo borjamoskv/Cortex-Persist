@@ -170,7 +170,7 @@ class EnterpriseAuditLedger:
             self._batch_task.cancel()
             try:
                 await self._batch_task
-            except asyncio.CancelledError:
+            except (asyncio.CancelledError, Exception):
                 pass
             self._batch_task = None
 
@@ -257,6 +257,7 @@ class EnterpriseAuditLedger:
         import asyncio
         import base64
         import json
+        import sqlite3
 
         import httpx
         try:
@@ -279,11 +280,16 @@ class EnterpriseAuditLedger:
                     async with self._lock:
                         async with AsyncFileLock():
                             # Pull-Model: Fetch unanchored records from SQLite
-                            cursor = await self._conn.execute(
-                                "SELECT audit_id, signature, prev_hash FROM security_audit_log WHERE external_anchor IS NULL ORDER BY rowid ASC LIMIT ?",
-                                (self.max_batch_size,)
-                            )
-                            unanchored = await cursor.fetchall()
+                            try:
+                                cursor = await self._conn.execute(
+                                    "SELECT audit_id, signature, prev_hash FROM security_audit_log WHERE external_anchor IS NULL ORDER BY rowid ASC LIMIT ?",
+                                    (self.max_batch_size,)
+                                )
+                                unanchored = await cursor.fetchall()
+                            except (sqlite3.ProgrammingError, aiosqlite.ProgrammingError, ValueError, AttributeError, RuntimeError) as db_err:
+                                logger.info("[AuditLedger] SQLite connection closed or inactive during anchor run: %s", db_err)
+                                self._batch_task = None
+                                break
                             
                             if not unanchored:
                                 self._batch_task = None
@@ -342,7 +348,8 @@ class EnterpriseAuditLedger:
                                                 await self._conn.commit()
                                 except Exception as e:
                                     logger.error("[AuditLedger] External anchoring failed: %s", e)
-
+        except Exception as general_err:
+            logger.error("[AuditLedger] Unexpected exception in anchor worker loop: %s", general_err)
         finally:
             await rekor_client.close()
 

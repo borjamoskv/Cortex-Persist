@@ -26,26 +26,29 @@ def test_ledger_append_invariants(actor_id, tenant_id, action, details):
         import aiosqlite
         async with aiosqlite.connect(":memory:") as conn:
             ledger = EnterpriseAuditLedger(conn)
-            await ledger.ensure_table()
-            
-            await ledger.log_action(
-                tenant_id=tenant_id,
-                actor_role="system",
-                actor_id=actor_id,
-                action=action,
-                resource=json.dumps(details),
-            )
-            
-            # Verify the chain locally
-            async with conn.execute("SELECT audit_id, prev_hash, signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1") as cursor:
-                row = await cursor.fetchone()
+            try:
+                await ledger.ensure_table()
                 
-            assert row is not None
-            audit_id, prev_hash, signature = row
-            
-            assert len(audit_id) == 64
-            if prev_hash != "GENESIS":
-                assert len(prev_hash) == 64
+                await ledger.log_action(
+                    tenant_id=tenant_id,
+                    actor_role="system",
+                    actor_id=actor_id,
+                    action=action,
+                    resource=json.dumps(details),
+                )
+                
+                # Verify the chain locally
+                async with conn.execute("SELECT audit_id, prev_hash, signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1") as cursor:
+                    row = await cursor.fetchone()
+                    
+                assert row is not None
+                audit_id, prev_hash, signature = row
+                
+                assert len(audit_id) == 64
+                if prev_hash != "GENESIS":
+                    assert len(prev_hash) == 64
+            finally:
+                await ledger.close()
                 
     import asyncio
     asyncio.run(_run())

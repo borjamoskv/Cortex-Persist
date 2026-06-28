@@ -61,83 +61,86 @@ async def test_ledger_concurrency_bombing(ledger_db):
     Verifies that the hash-chain remains continuous and exactly N records are logged.
     """
     ledger = EnterpriseAuditLedger(ledger_db)
-    await ledger.ensure_table()
+    try:
+        await ledger.ensure_table()
 
-    # Pre-generate tasks to blast them concurrently
-    async def blast_ledger(agent_id: int):
-        return await ledger.log_action(
-            tenant_id="default",
-            actor_role="agent",
-            actor_id=f"agent_{agent_id}",
-            action="STRESS_TEST",
-            resource=f"resource_{agent_id}",
-        )
+        # Pre-generate tasks to blast them concurrently
+        async def blast_ledger(agent_id: int):
+            return await ledger.log_action(
+                tenant_id="default",
+                actor_role="agent",
+                actor_id=f"agent_{agent_id}",
+                action="STRESS_TEST",
+                resource=f"resource_{agent_id}",
+            )
 
-    tasks = [blast_ledger(i) for i in range(CONCURRENCY_LEVEL)]
-    start_time = time.monotonic()
+        tasks = [blast_ledger(i) for i in range(CONCURRENCY_LEVEL)]
+        start_time = time.monotonic()
 
-    # Execute all requests concurrently
-    results = await asyncio.gather(*tasks, return_exceptions=True)
+        # Execute all requests concurrently
+        results = await asyncio.gather(*tasks, return_exceptions=True)
 
-    end_time = time.monotonic()
+        end_time = time.monotonic()
 
-    # Ensure no exceptions were raised
-    failures = [r for r in results if isinstance(r, Exception)]
-    assert len(failures) == 0, f"Concurrency bombing failed: {failures}"
-    assert len(results) == CONCURRENCY_LEVEL
+        # Ensure no exceptions were raised
+        failures = [r for r in results if isinstance(r, Exception)]
+        assert len(failures) == 0, f"Concurrency bombing failed: {failures}"
+        assert len(results) == CONCURRENCY_LEVEL
 
-    # Verify the hash chain continuity (Merkle Blocks)
-    async with ledger_db.execute(
-        "SELECT audit_id, prev_hash, signature FROM security_audit_log ORDER BY rowid ASC"
-    ) as cursor:
-        rows = await cursor.fetchall()
+        # Verify the hash chain continuity (Merkle Blocks)
+        async with ledger_db.execute(
+            "SELECT audit_id, prev_hash, signature FROM security_audit_log ORDER BY rowid ASC"
+        ) as cursor:
+            rows = await cursor.fetchall()
 
-    assert len(rows) == CONCURRENCY_LEVEL
+        assert len(rows) == CONCURRENCY_LEVEL
 
-    # Group into blocks
-    blocks = []
-    current_block = []
-    current_sig = rows[0][2] if rows else None
+        # Group into blocks
+        blocks = []
+        current_block = []
+        current_sig = rows[0][2] if rows else None
 
-    for row in rows:
-        if row[2] != current_sig:
+        for row in rows:
+            if row[2] != current_sig:
+                blocks.append(current_block)
+                current_block = [row]
+                current_sig = row[2]
+            else:
+                current_block.append(row)
+        if current_block:
             blocks.append(current_block)
-            current_block = [row]
-            current_sig = row[2]
-        else:
-            current_block.append(row)
-    if current_block:
-        blocks.append(current_block)
 
-    current_hash = "GENESIS"
-    for block in blocks:
-        # All items in a block must have the same prev_hash and signature
-        prev_hash = block[0][1]
-        signature = block[0][2]
-        assert prev_hash == current_hash, (
-            f"Merkle Block Hash chain broken! Expected prev: {current_hash}, got: {prev_hash}"
+        current_hash = "GENESIS"
+        for block in blocks:
+            # All items in a block must have the same prev_hash and signature
+            prev_hash = block[0][1]
+            signature = block[0][2]
+            assert prev_hash == current_hash, (
+                f"Merkle Block Hash chain broken! Expected prev: {current_hash}, got: {prev_hash}"
+            )
+            for row in block:
+                assert row[1] == prev_hash, "Inconsistent prev_hash within block"
+                assert row[2] == signature, "Inconsistent signature within block"
+
+            # Verify cryptographic integrity of the block
+            batch_audit_ids = [row[0] for row in block]
+            merkle_payload = "".join(batch_audit_ids) + prev_hash
+            merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+            entry_hash = hashlib.sha256(f"merkle_batch:{merkle_root}:{prev_hash}".encode()).hexdigest()
+
+            assert ledger.verify_zk_seal(entry_hash, signature), (
+                "Invalid ZK seal/signature on Merkle Block"
+            )
+
+            current_hash = entry_hash
+
+        # Verify the last hash of the object is correctly updated
+        assert ledger._last_hash == current_hash
+        print(
+            f"\n[Ledger] Processed {CONCURRENCY_LEVEL} concurrent writes into {len(blocks)} Merkle Blocks in {end_time - start_time:.3f}s"
         )
-        for row in block:
-            assert row[1] == prev_hash, "Inconsistent prev_hash within block"
-            assert row[2] == signature, "Inconsistent signature within block"
-
-        # Verify cryptographic integrity of the block
-        batch_audit_ids = [row[0] for row in block]
-        merkle_payload = "".join(batch_audit_ids) + prev_hash
-        merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
-        entry_hash = hashlib.sha256(f"merkle_batch:{merkle_root}:{prev_hash}".encode()).hexdigest()
-
-        assert ledger.verify_zk_seal(entry_hash, signature), (
-            "Invalid ZK seal/signature on Merkle Block"
-        )
-
-        current_hash = entry_hash
-
-    # Verify the last hash of the object is correctly updated
-    assert ledger._last_hash == current_hash
-    print(
-        f"\n[Ledger] Processed {CONCURRENCY_LEVEL} concurrent writes into {len(blocks)} Merkle Blocks in {end_time - start_time:.3f}s"
-    )
+    finally:
+        await ledger.close()
 
 
 # ─── 2. Byzantine Taint Tsunami (Nonce & Replay attacks) ───────────────

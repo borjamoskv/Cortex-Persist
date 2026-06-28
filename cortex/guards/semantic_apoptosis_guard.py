@@ -82,6 +82,6 @@ class SemanticApoptosisGuard:
                 "Generative prose detected. Payload jettisoned."
             )
 
-        # Mark for Fast-Path if purely structural (noise_ratio ~ 0)
-        is_perfect_exergy = noise_ratio < 0.05 and slop_hits == 0
+        # Mark for Fast-Path if purely structural (noise_ratio ~ 0 or non-code text is extremely short and has no slop)
+        is_perfect_exergy = (noise_ratio < 0.05 or prose_len < 30) and slop_hits == 0
         return is_perfect_exergy
