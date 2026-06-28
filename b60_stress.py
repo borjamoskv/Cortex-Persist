@@ -11,6 +11,7 @@ from reference.interpreter import B60Compiler, B60MinimalVM
 def run_stress():
     code = """
     # B60 Stress Vector
+    ALLOC TIME R0
     NIG R0 [ < Y ] UNIT.TICK
     FORK LABEL_A
     EXECUTE SINGULARITY_CHECK

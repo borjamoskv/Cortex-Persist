@@ -18,7 +18,7 @@ TEST_SUITE = {
         NIG R1 [ - < Y ]
         HALT
         """,
-        ["(Assign R1 601"]
+        ["(Assign R1 [ < Y ]"]
     ),
     "BA.EXACT": (
         """
@@ -39,7 +39,7 @@ TEST_SUITE = {
         EXECUTE "Worker_Spawned"
         HALT
         """,
-        ["(Spawn \"TaskA\"", "(Emit Worker_Spawned"]
+        ["(Spawn TaskA", "(Emit Worker_Spawned"]
     ),
     "AWAIT": (
         """
@@ -78,6 +78,7 @@ TEST_SUITE = {
     ),
     "CRITICAL_HALT": (
         """
+        ALLOC TIME R1
         FORK "Infinite"
         EXECUTE "CRITICAL_HALT: SHUTDOWN"
         HALT
