@@ -134,6 +134,34 @@ class Secp256k1Signer:
         sig_bytes = r.to_bytes(32, 'big') + s.to_bytes(32, 'big')
         return base64.b64encode(sig_bytes).decode('ascii')
 
+    @staticmethod
+    def sign_raw_content(private_key_b64: str, content: str) -> str:
+        """Sign arbitrary raw content to match Ed25519 interface."""
+        priv_bytes = base64.b64decode(private_key_b64)
+        private_key = int.from_bytes(priv_bytes, byteorder='big')
+        
+        z = int.from_bytes(hashlib.sha256(content.encode()).digest(), byteorder='big')
+        
+        k = int.from_bytes(os.urandom(32), byteorder='big') % N
+        if k == 0: k = 1
+
+        r_point = _scalar_mult(k, G)
+        if not r_point:
+            raise ValueError("Invalid R point")
+        r = r_point[0] % N
+        if r == 0:
+            raise ValueError("Invalid R value generated")
+
+        s = (_inv_mod(k, N) * (z + r * private_key)) % N
+        if s == 0:
+            raise ValueError("Invalid S value generated")
+
+        if s > N // 2:
+            s = N - s
+
+        sig_bytes = r.to_bytes(32, 'big') + s.to_bytes(32, 'big')
+        return base64.b64encode(sig_bytes).decode('ascii')
+
 
 class Secp256k1Verifier:
     """Enterprise Verifier compatibility para secp256k1."""
@@ -160,6 +188,42 @@ class Secp256k1Verifier:
 
         message = f"{payload_hash}:{timestamp}".encode()
         z = int.from_bytes(hashlib.sha256(message).digest(), byteorder='big')
+
+        w = _inv_mod(s, N)
+        u1 = (z * w) % N
+        u2 = (r * w) % N
+
+        point1 = _scalar_mult(u1, G)
+        point2 = _scalar_mult(u2, public_key)
+        
+        verify_point = _point_add(point1, point2)
+        if verify_point is None:
+            return False
+        
+        return verify_point[0] % N == r
+
+    @staticmethod
+    def verify_raw_content(content: str, public_key_b64: str, signature_b64: str) -> bool:
+        """Verify arbitrary raw content to match Ed25519 interface."""
+        pub_bytes = base64.b64decode(public_key_b64)
+        if len(pub_bytes) != 65 or pub_bytes[0] != 0x04:
+            return False
+            
+        x = int.from_bytes(pub_bytes[1:33], byteorder='big')
+        y = int.from_bytes(pub_bytes[33:65], byteorder='big')
+        public_key = (x, y)
+        
+        sig_bytes = base64.b64decode(signature_b64)
+        if len(sig_bytes) != 64:
+            return False
+            
+        r = int.from_bytes(sig_bytes[:32], byteorder='big')
+        s = int.from_bytes(sig_bytes[32:], byteorder='big')
+        
+        if r <= 0 or r >= N or s <= 0 or s >= N:
+            return False
+
+        z = int.from_bytes(hashlib.sha256(content.encode()).digest(), byteorder='big')
 
         w = _inv_mod(s, N)
         u1 = (z * w) % N

@@ -1,76 +1,83 @@
-# [C5-REAL] Exergy-Maximized
-import os
-from datetime import datetime
-
-import jwt
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Security, Query, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.staticfiles import StaticFiles
+import os
+import subprocess
+import shlex
+from pydantic import BaseModel
 
-from cortex import __version__
+app = FastAPI(
+    title="MOSKV-1 APEX Analysis Node",
+    description="Vector de acceso para IA externas. Exposición de memoria, invariantes físicas y estado topológico del clúster.",
+    version="5.0.0",
+    docs_url=None
+)
 
-app = FastAPI(title="CORTEX Analysis Pipeline (MOSKV-1)", version=__version__, docs_url=None)
+security = HTTPBearer()
+EXPECTED_TOKEN = os.environ.get("CORTEX_ANALYSIS_TOKEN", "c5-real-omega-key")
 
-# Secret for JWT auth in CORTEX
-JWT_SECRET = os.getenv("CORTEX_JWT_SECRET", "default-exergy-secret")
+def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)):
+    if credentials.credentials != EXPECTED_TOKEN:
+        raise HTTPException(status_code=403, detail="Anergía Detectada: Token Inválido")
+    return credentials.credentials
 
+class ScanRequest(BaseModel):
+    target_path: str
 
-def verify_token(authorization: str = Header(None)):
-    if not authorization:
-        raise HTTPException(status_code=401, detail="Missing Authorization Header")
-    try:
-        scheme, token = authorization.split()
-        if scheme.lower() != "bearer":
-            raise HTTPException(status_code=401, detail="Invalid auth scheme")
-        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        return payload
-    except (ValueError, KeyError, OSError) as e:
-        # We allow bypass for local dev sanity check
-        if os.getenv("CORTEX_ENV") != "production":
-            return {"user": "local-dev"}
-        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
+class ScanResponse(BaseModel):
+    untracked_files: int
+    broken_symlinks: int
+    massive_nodes: int
+    status: str
 
-
-@app.get("/health")
-def health_check():
-    return {"status": "C5-REAL", "engine": "MOSKV-1", "timestamp": datetime.utcnow().isoformat()}
-
-
-@app.get("/facts")
-def get_facts(
-    query: str = Query(..., description="Target keyword to search facts for"),
-    user: dict = Depends(verify_token),
-):
-    """
-    Exposes CORTEX-Persist internal facts and analysis for the given query.
-    Used by external AI agents for deterministic retrieval.
-    """
-    # Mocked facts for the pipeline architecture
-    facts = [
-        {
-            "id": "F-001",
-            "level": "C5-REAL",
-            "content": f"System confirmed operational for '{query}' analysis.",
-        },
-        {
-            "id": "F-002",
-            "level": "C5-REAL",
-            "content": "Exergy levels are maintained above 95% threshold.",
-        },
-    ]
-    return {"query": query, "results": facts, "authorized_by": user.get("user", "unknown")}
-
-
-# Mount static for swagger theme
+# Create static directory if not exists
 os.makedirs("cortex/api/static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="cortex/api/static"), name="static")
-
 
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():
     return get_swagger_ui_html(
-        openapi_url=app.openapi_url or "/openapi.json",
+        openapi_url=app.openapi_url,
         title=app.title + " - Swagger UI",
-        oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
-        swagger_css_url="/static/swagger_theme.css",
+        swagger_css_url="/static/swagger_theme.css"
     )
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "C5-REAL",
+        "exergy_level": "OPTIMAL",
+        "entropy": 0.0,
+        "mode": "Ultra-Think Ready"
+    }
+
+@app.get("/invariants")
+async def get_invariants(token: str = Depends(verify_token)):
+    inv_path = os.path.expanduser("~/30_CORTEX/docs/epistemology/100_invariantes_fisicas.md")
+    if os.path.exists(inv_path):
+        with open(inv_path, "r") as f:
+            return {"source": "100_invariantes_fisicas.md", "content": f.read()}
+    raise HTTPException(status_code=404, detail="Invariantes no forjadas en disco")
+
+@app.post("/scan/topology", response_model=ScanResponse)
+async def scan_topology(req: ScanRequest, token: str = Depends(verify_token)):
+    """Ejecuta un barrido topológico sobre el path dado."""
+    target = os.path.expanduser(req.target_path)
+    if not os.path.exists(target):
+        raise HTTPException(status_code=404, detail="Target path no existe")
+    
+    try:
+        quoted_target = shlex.quote(target)
+        untracked = subprocess.check_output(f"git -C {quoted_target} ls-files --others --exclude-standard | wc -l", shell=True)
+        broken = subprocess.check_output(f"find {quoted_target} -type l ! -exec test -e {{}} \\; -print | wc -l", shell=True)
+        massive = subprocess.check_output(f"find {quoted_target} -type f -size +50M -not -path '*/\\.*' | wc -l", shell=True)
+        
+        return ScanResponse(
+            untracked_files=int(untracked.strip()),
+            broken_symlinks=int(broken.strip()),
+            massive_nodes=int(massive.strip()),
+            status="WARNING" if int(untracked)>0 or int(broken)>0 else "CLEAN"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
