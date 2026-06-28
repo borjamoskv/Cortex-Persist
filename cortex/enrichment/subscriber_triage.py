@@ -9,7 +9,7 @@ from datetime import datetime
 
 # Heuristic Constants
 V1_ROLE_BASED_REGEX = re.compile(
-    r"^(info|demos|submissions|press|news|editorial|team|sales|hello|contact|wholesale|volunteers|backme|music|detection-inquiries|nao-inquiries|benchmarks|ensdomainscollector)@",
+    r"^(info|demos|submissions|press|news|editorial|team|sales|hello|contact|wholesale|volunteers|backme|music|detection-inquiries|nao-inquiries|benchmarks|ensdomainscollector|geral|general|admin)@",
     re.IGNORECASE,
 )
 
@@ -80,6 +80,18 @@ def generate_taint(payload: str) -> str:
     return f"taint:MOSKV-1:enrichment:{timestamp}:{hash_payload}"
 
 
+def _match_domain_or_parent(domain: str, domain_set: set) -> bool:
+    """Check if domain or any of its parent domains is in the set."""
+    if domain in domain_set:
+        return True
+    parts = domain.split(".")
+    for i in range(1, len(parts) - 1):
+        parent = ".".join(parts[i:])
+        if parent in domain_set:
+            return True
+    return False
+
+
 def triage_subscriber(email: str) -> tuple[str, int, str]:
     """
     Evaluates an email and returns (Vector_Class, Reality_PPI, Reason)
@@ -95,16 +107,16 @@ def triage_subscriber(email: str) -> tuple[str, int, str]:
         return ("V1_ROLE_BASED", 1, "Role-based CRM/Sinkhole")
 
     # [V-2] Executive Assistants
-    if domain in V2_HIGH_PROFILE_DOMAINS:
+    if _match_domain_or_parent(domain, V2_HIGH_PROFILE_DOMAINS):
         return ("V2_HIGH_PROFILE", 1, "High-profile domain (EA Filtered)")
 
     # [V-3] Academic SEG Filters
-    if domain in V3_ACADEMIC_DOMAINS or domain.endswith(".edu") or domain.endswith(".ac.uk"):
+    if _match_domain_or_parent(domain, V3_ACADEMIC_DOMAINS) or domain.endswith(".edu") or domain.endswith(".ac.uk"):
         return ("V3_ACADEMIC", 3, "Academic SEG Firewall")
 
     # [V-4] Web3/VC Noise
     if (
-        domain in V4_WEB3_DOMAINS
+        _match_domain_or_parent(domain, V4_WEB3_DOMAINS)
         or domain.endswith(".exchange")
         or domain.endswith(".network")
         or domain.endswith(".xyz")
