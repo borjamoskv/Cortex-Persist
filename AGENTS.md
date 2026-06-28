@@ -100,6 +100,7 @@ All agents operating in this repository MUST self-identify by role before acting
 8. **Architectural Boundaries:** CLI modules are thin wrappers. Business logic belongs in `engine/`, `services/`, or core modules.
 9. **Failure Locality:** Invalid state must be rejectable and safely abortable at any point.
 10. **Aesthetic & Exergy Bounds:** Axioms and sacred facts MUST satisfy LandauerGuard (Ω₄) (high Shannon entropy, < 256 bytes). Knowledge facts MUST not contain low-exergy slop (ExergyGuard Ω₁₃).
+11. **Singularidad de Red (TODO EN CLOUDFLARE):** Prohibición absoluta de ecosistemas Vercel, `vercel.json` o dependencias `@vercel/*`. Todo despliegue front/edge DEBE apuntar exclusivamente a Cloudflare Pages/Workers (via `wrangler.toml` y `next-on-pages`). Cualquier intento de desvío generará un Aborto P0 por fractura termodinámica.
 
 ### ❌ Anti-Patterns & Failure Signatures
 
