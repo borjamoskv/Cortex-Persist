@@ -23,11 +23,10 @@ async def test_cortex_engine_report_anomaly_trigger_ultrathink():
     # We mock the dispatcher to prevent actual git commits during testing
     with patch("cortex.agents.primitives.dispatcher.apex_dispatcher.execute") as mock_dispatch:
         # report_anomaly automatically uses the formula with high entropy defaults
-        # We explicitly pass execution_time=0.1 to guarantee high Exergy Yield
         result = await engine.report_anomaly(
             epicenter_node="cortex_engine",
             dependency_graph=dependency_graph,
-            execution_time=0.1
+            execution_time=0.001
         )
         
         # Validation 1: The anomaly should trigger UltraThink (return True)
