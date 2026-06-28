@@ -106,11 +106,13 @@ class SwarmSupervisor:
                 
             try:
                 # SANEDRIN VECTOR 3: Lease lock task using supervisor_id
-                await self._db.execute(
-                    "UPDATE system_hypotheses SET status = 'IN_FLIGHT', owner_id = ? WHERE id = ?", 
-                    (self.supervisor_id, task["id"])
-                )
-                await self._db.commit()
+                from cortex.database.core import causal_write
+                with causal_write(self._db):
+                    await self._db.execute(
+                        "UPDATE system_hypotheses SET status = 'IN_FLIGHT', owner_id = ? WHERE id = ?", 
+                        (self.supervisor_id, task["id"])
+                    )
+                    await self._db.commit()
                 
                 # Push to worker pool
                 await self.worker_pool.dispatch(task["id"])

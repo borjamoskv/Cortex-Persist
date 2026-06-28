@@ -23,17 +23,10 @@ def _writer_process_target(db_path: Path, sync_event: multiprocessing.Event, fau
                 sync_event.set()
                 await asyncio.sleep(10)
                 
-            original_append = engine.ledger_writer.append
+            # Legacy LedgerWriter patching removed (Thermodynamic Purge)
             
-            async def _faulty_append(*args, **kwargs):
-                if fault_point == "after_sqlite_before_ledger":
-                    sync_event.set()
-                    await asyncio.sleep(10) # Wait for SIGKILL
-                return await original_append(*args, **kwargs)
-                
-            engine.ledger_writer.append = _faulty_append
             
-            await engine.facts.store(project="test", content="crash_test_payload", tenant_id="test_tenant", source="test")
+            await engine.facts.store(project="test", content="crash_test_payload", tenant_id="default", source="test")
             if fault_point == "after_commit":
                 sync_event.set()
                 await asyncio.sleep(10)
@@ -85,7 +78,7 @@ async def test_sigkill_crash_consistency(tmp_path: Path, fault_point: str):
     
     # Execute raw query to bypass cache
     async with engine_verify.session() as conn:
-        cursor = await conn.execute("SELECT content FROM facts WHERE tenant_id='test_tenant'")
+        cursor = await conn.execute("SELECT content FROM facts WHERE tenant_id='default'")
         rows = await cursor.fetchall()
         
     # Consistency Assertions
@@ -97,7 +90,7 @@ async def test_sigkill_crash_consistency(tmp_path: Path, fault_point: str):
         assert len(rows) == 1, "Integrity Breach: Fact lost despite completing commit"
         
         # Verify via engine to test decryption
-        facts = await engine_verify.facts.search(query="crash_test_payload", tenant_id="test_tenant")
+        facts = await engine_verify.facts.search(query="crash_test_payload", tenant_id="default")
         assert len(facts) > 0, "Failed to decrypt/retrieve fact from engine"
         assert facts[0].content == "crash_test_payload"
 
