@@ -14,7 +14,7 @@ from cortex.integration.rustchain.judge import (
     PolicyJudge,
     TestRunnerJudge,
 )
-from cortex.integration.rustchain.langchain_tool import RustChainStakingTool
+
 from cortex.integration.rustchain.mcp_tool import register_rustchain_tools
 from cortex.integration.rustchain.staking import (
     GateUnavailableError,
@@ -29,7 +29,7 @@ __all__ = [
     "stake_and_acquire",
     "StakingError",
     "GateUnavailableError",
-    "RustChainStakingTool",
+
     "register_rustchain_tools",
     "Judge",
     "ASTLintJudge",

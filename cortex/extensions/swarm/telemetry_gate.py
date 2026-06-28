@@ -89,11 +89,8 @@ class CircuitOpenError(Exception):
 
 
 def init_sovereign_tracing(project_name: str = "cortex-master-swarm") -> None:
-    """Force-enable LangSmith tracing.  Idempotent."""
-    os.environ["LANGCHAIN_TRACING_V2"] = "true"
-    os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
-    os.environ["LANGCHAIN_PROJECT"] = project_name
-    logger.info("RADAR-Ω: Tracing active → project=%s", project_name)
+    """[DEPRECATED] Sovereign tracing no longer uses proprietary infrastructure by default."""
+    logger.warning("RADAR-Ω: init_sovereign_tracing is deprecated. Telemetry is fully local.")
 
 
 # ═════════════════════════════════════════════════════════════════════════

@@ -15,31 +15,26 @@ import stat
 from decimal import Decimal
 from typing import Any
 
-try:
-    from cdp_langchain.agent_toolkits import CdpToolkit  # pyright: ignore[reportMissingImports]
-    from cdp_langchain.utils import CdpAgentkitWrapper  # pyright: ignore[reportMissingImports]
+# CDP Native integration pending. Stub mode active.
+CDP_AVAILABLE = False
 
-    CDP_AVAILABLE = True
-except ImportError:
-    CDP_AVAILABLE = False
+class CdpAgentkitWrapper:
+    wallet: Any
 
-    class CdpAgentkitWrapper:
-        wallet: Any
+    def __init__(self, **kwargs: Any) -> None:
+        """Initialize the mock wrapper."""
 
-        def __init__(self, **kwargs: Any) -> None:
-            """Initialize the mock wrapper."""
+    def export_wallet(self) -> str:
+        return ""
 
-        def export_wallet(self) -> str:
-            return ""
+class _MockCdpToolkit:
+    def get_tools(self) -> list[Any]:
+        return []
 
-    class _MockCdpToolkit:
-        def get_tools(self) -> list[Any]:
-            return []
-
-    class CdpToolkit:
-        @classmethod
-        def from_cdp_agentkit_wrapper(cls, wrapper: Any) -> _MockCdpToolkit:
-            return _MockCdpToolkit()
+class CdpToolkit:
+    @classmethod
+    def from_cdp_agentkit_wrapper(cls, wrapper: Any) -> _MockCdpToolkit:
+        return _MockCdpToolkit()
 
 
 logger = logging.getLogger(__name__)
