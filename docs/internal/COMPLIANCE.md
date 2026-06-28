@@ -119,4 +119,4 @@ $ cortex compliance-report
 ---
 
 **Prepared by:** MOSKV Systems
-**Contact:** borja@moskv.dev
+**Contact:** borja@moskv.com

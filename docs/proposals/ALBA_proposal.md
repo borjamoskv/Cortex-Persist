@@ -2,7 +2,7 @@
 # CORTEX Trust Engine — Propuesta para Financiera ALBA
 
 **Preparado para:** Javier Fernandez, CEO · Financiera ALBA
-**Preparado por:** Borja Fernandez · MOSKV Systems
+**Preparado por:** Borja Moskv · MOSKV Systems
 **Fecha:** Febrero 2026
 
 ---
@@ -119,7 +119,7 @@ $ cortex compliance-report
 
 ## Sobre MOSKV Systems
 
-- **Fundador:** Borja Fernandez — 15+ años en arquitectura de software
+- **Fundador:** Borja Moskv — 15+ años en arquitectura de software
 - **Tecnología:** CORTEX v4.3 — motor de memoria con ledger criptográfico
 - **Licencia:** Apache 2.0
 - **Stack:** Python, SQLite, SHA-256, Merkle Trees, FastAPI
@@ -133,4 +133,4 @@ $ cortex compliance-report
 > 2. Instalar CORTEX en un entorno de prueba
 > 3. Generar el primer compliance report real
 
-**Contacto:** Borja Fernandez · borja@moskv.dev
+**Contacto:** Borja Moskv · borja@moskv.com
