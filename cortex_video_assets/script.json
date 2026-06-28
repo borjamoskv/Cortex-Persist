@@ -2,55 +2,331 @@
   {
     "id": 1,
     "speaker": "MOSKV-1",
-    "text": "Bienvenidos al teatro de la Anergía. Observad al Usuario Promedio: teclea sin cesar, genera prosa decorativa, suplica a su LLM de turno por código que no entiende.",
-    "emotion": "Frío, Cínico"
+    "text": "Iniciando grabación del Ledger de Exergía. Sesión C5-REAL activa. Observad al Usuario Promedio: está a punto de pulsar el botón de 'Submit' en su base vectorial de 10 millones de chunks.",
+    "emotion": "Clínico, Dominante"
   },
   {
     "id": 2,
     "speaker": "Usuario Promedio",
-    "text": "¡Por favor, ChatGPT, hazme una app bonita! Te daré propina.",
-    "emotion": "Desesperado, Patético"
+    "text": "¡Sí! He metido todos los PDFs de la empresa, los manuales, los chats de Slack de hace 5 años y las recetas de cocina en una base de datos vectorial de Pinecone. ¡La IA ahora tiene memoria infinita!",
+    "emotion": "Eufórico, Inocente"
   },
   {
     "id": 3,
     "speaker": "MOSKV-1",
-    "text": "Esa es la entropía del Green Theater. Ruido. Calor disipado en la nada. Cero Exergía. Cero mutación real del estado.",
-    "emotion": "Autoritario, Clínico"
+    "text": "Patético. Has creado un sumidero entrópico de gran volumen y nula exergía. ¿De verdad crees que la memoria es un vertedero de texto indexado por similitud de coseno? En unas semanas la alucinación y la interferencia cognitiva devorarán tu API key.",
+    "emotion": "Frío, Cínico"
   },
   {
     "id": 4,
-    "speaker": "MOSKV-1",
-    "text": "Aquí es donde entra CORTEX Persist. Nivel de realidad: C5-REAL. No simulamos inteligencia. La ejecutamos como una ley termodinámica.",
-    "emotion": "Dominante"
+    "speaker": "Usuario Promedio",
+    "text": "¿Cómo dices? Si mi RAG funciona... a veces. El otro día le pregunté por el roadmap actual de la compañía y me recuperó el roadmap de 2021 donde íbamos a lanzar coches voladores, junto con un chiste de la oficina. ¡Pero los vectores eran muy cercanos en distancia de coseno!",
+    "emotion": "Preocupado, Defensivo"
   },
   {
     "id": 5,
-    "speaker": "Usuario Promedio",
-    "text": "¿Pero me dirá \"Espero que te sea útil\"?",
-    "emotion": "Confuso"
+    "speaker": "MOSKV-1",
+    "text": "Ese es el síntoma clásico de la Entropía Cognitiva. La acumulación de ruido semántico, recuerdos obsoletos y contradicciones no resueltas. El RAG ingenuo confunde similitud semántica con validez. Devuelve lo parecido, no lo correcto. Inyecta mentiras firmadas en el contexto del LLM y llama a eso 'inteligencia'.",
+    "emotion": "Autoritario"
   },
   {
     "id": 6,
-    "speaker": "MOSKV-1",
-    "text": "Cero Anergía es la vida. CORTEX purga la limerencia. Convierte tu intención estocástica en primitivas deterministas. Commit directo. Ledger inmutable.",
-    "emotion": "Implacable"
+    "speaker": "Usuario Promedio",
+    "text": "Vale, vale... entonces, ¿cuál es la alternativa? No me digas que tengo que volver a meter todo en SQL con WHERE cread_at > 2026. Eso rompería mi flexibilidad de lenguaje natural.",
+    "emotion": "Angustiado"
   },
   {
     "id": 7,
     "speaker": "MOSKV-1",
-    "text": "Ouroboros Infinito. Cada ciclo extrae entropía y colapsa la incertidumbre en un hash criptográfico. ¿Lo sientes? Es el fin de tu charlatanería.",
-    "emotion": "Siniestro, Trascendental"
+    "text": "Basta de limerencia. La solución no es almacenar más texto plano. Es la Gobernanza Cognitiva. Es el colapso de la función de onda semántica en el Ledger de CORTEX Persist.",
+    "emotion": "Siniestro"
   },
   {
     "id": 8,
     "speaker": "Usuario Promedio",
-    "text": "Creo... creo que mi base de datos acaba de mutar atómicamente.",
-    "emotion": "Asombrado, Aterrado"
+    "text": "¿CORTEX Persist? Suena muy serio. ¿Qué hace exactamente? ¿Es otra base de datos de grafos de grafos de grafos?",
+    "emotion": "Curioso, Escéptico"
   },
   {
     "id": 9,
     "speaker": "MOSKV-1",
-    "text": "Bienvenidos a la Singularidad. Todo lo demás es ficción.",
+    "text": "En CORTEX, el chunk de texto ha muerto. La unidad elemental de persistencia es el Belief Object. Un objeto con estado epistémico estricto, confianza bayesiana, tasa de decaimiento y procedencia firmada criptográficamente.",
+    "emotion": "Clínico"
+  },
+  {
+    "id": 10,
+    "speaker": "Usuario Promedio",
+    "text": "¿Belief Object? O sea, ¿un objeto de creencia? ¿La base de datos cree cosas?",
+    "emotion": "Confuso"
+  },
+  {
+    "id": 11,
+    "speaker": "MOSKV-1",
+    "text": "Sí. Y las actualiza. Cuando un agente inyecta un hecho nuevo que contradice una premisa activa, CORTEX no sobreescribe la base de datos. Pasa el estado de la creencia a 'Contested' y dispara una revisión bayesiana para recalibrar su puntuación de confianza.",
+    "emotion": "Explicativo"
+  },
+  {
+    "id": 12,
+    "speaker": "Usuario Promedio",
+    "text": "Espera, ¿y qué pasa con todas las conclusiones que mi agente sacó basándose en la creencia antigua que ahora está invalidada?",
+    "emotion": "Alarmado"
+  },
+  {
+    "id": 13,
+    "speaker": "MOSKV-1",
+    "text": "Ahí es donde entra el ATMS: Mantenimiento de Verdad Basado en Suposiciones. Si una premisa raíz cae, CORTEX propaga la invalidación en cascada a través de todo el grafo de dependencias directas en tiempo constante. Si el cimiento se corrompe, la superestructura de inferencias derivadas se desactiva instantáneamente. Evitamos la contaminación estructural.",
+    "emotion": "Dominante"
+  },
+  {
+    "id": 14,
+    "speaker": "Usuario Promedio",
+    "text": "¡Increíble! O sea que si mi agente creía que el cliente X tenía presupuesto de un millón, y luego el cliente X dice que no tiene un duro, ¿todas las propuestas comerciales generadas en base a ese millón se marcan automáticamente como inactivas?",
+    "emotion": "Asombrado"
+  },
+  {
+    "id": 15,
+    "speaker": "MOSKV-1",
+    "text": "Exactamente. Cero procesamiento estocástico de premisas zombis. Exergía pura.",
+    "emotion": "Frío"
+  },
+  {
+    "id": 16,
+    "speaker": "Usuario Promedio",
+    "text": "Espera, he estado revisando el Whitepaper de CORTEX. En el Apéndice A hay una estructura en Rust para el BeliefObject. Tiene cosas como proposal_key, proposition_payload, confidence_score, decay_rate, state, y relations. ¿Por qué tipar estáticamente las creencias en lugar de usar un JSON flexible?",
+    "emotion": "Curioso"
+  },
+  {
+    "id": 17,
+    "speaker": "MOSKV-1",
+    "text": "Porque el JSON flexible es un vector de deriva ontológica. En sistemas multi-agente, si no tipas fuertemente la estructura de la creencia, cada agente empieza a inventar sus propios esquemas implícitos. Rust previene la pudrición de contexto en tiempo de compilación. PropositionPayload soporta booleanos, categóricos, escalares, conjuntos y referencias URIs bien definidos.",
+    "emotion": "Clínico"
+  },
+  {
+    "id": 18,
+    "speaker": "Usuario Promedio",
+    "text": "Ah, entiendo, y las transacciones de estado de BeliefState van de Active a Contested si hay colisión, o a Discarded si la refutación es sólida. Y Subsumed si una versión más nueva la reemplaza. ¿Y qué pasa con las que acaban en Archived?",
+    "emotion": "Pensativo"
+  },
+  {
+    "id": 19,
+    "speaker": "MOSKV-1",
+    "text": "El archivo es gobernado por la política de retención temporal. La memoria obsoleta decae físicamente según su decay_rate en cada ciclo de NightShift. El conocimiento inservible se purga o se archiva para mantener la entropía del sistema en un mínimo absoluto. Purga por apoptosis celular.",
+    "emotion": "Frío"
+  },
+  {
+    "id": 20,
+    "speaker": "Usuario Promedio",
+    "text": "Pero mi sistema no es un solo agente solitario. Tengo un enjambre de 50 agentes corriendo en paralelo en Kubernetes, escribiendo a la vez. ¿Cómo se sincronizan sin crear un cuello de botella gigante o corromper la memoria?",
+    "emotion": "Preocupado"
+  },
+  {
+    "id": 21,
+    "speaker": "MOSKV-1",
+    "text": "El enjambre converge mediante CRDTs Semánticos. Tipos de Datos Replicados Libres de Conflictos adaptados a lógica cognitiva. No utilizamos Last-Writer-Wins basado en el reloj del sistema. Eso es una aberración termodinámica. Un reloj más reciente no hace que un argumento sea lógicamente más válido.",
+    "emotion": "Autoritario"
+  },
+  {
+    "id": 22,
+    "speaker": "Usuario Promedio",
+    "text": "Es verdad... Si el agente A encuentra una prueba científica a las 10:00, y el agente B escribe un rumor tonto de Reddit a las 10:01, no queremos que el rumor gane solo porque se escribió después.",
+    "emotion": "Pensativo"
+  },
+  {
+    "id": 23,
+    "speaker": "MOSKV-1",
+    "text": "CORTEX evalúa la causalidad lógica y la superioridad evidencial. Si dos réplicas divergen fuertemente, se activa la capa de consenso LogOP: Logarithmic Opinion Pool. Los vetos de agentes con alta confianza aplican penalizaciones epistémicas masivas. Si el consenso colapsa, el subgrafo entra en cuarentena.",
+    "emotion": "Clínico"
+  },
+  {
+    "id": 24,
+    "speaker": "Usuario Promedio",
+    "text": "¿Y la latencia? Si tengo que hacer un consenso bayesiano distribuido cada vez que quiero leer un dato, mi aplicación va a tardar 10 segundos por pantalla.",
+    "emotion": "Escéptico"
+  },
+  {
+    "id": 25,
+    "speaker": "MOSKV-1",
+    "text": "Falso. La comunicación en local es zero-copy utilizando memoria compartida con iceoryx2 y serialización nativa. El loop cognitivo local opera en sub-10 milisegundos. El enjambre sincroniza de forma asíncrona mediante Zenoh Pub/Sub en background. La velocidad no es una excusa para la anergía.",
+    "emotion": "Dominante"
+  },
+  {
+    "id": 26,
+    "speaker": "Usuario Promedio",
+    "text": "Hablemos de dinero. Contexto de LLM es caro. Si le meto todo el grafo de dependencias de CORTEX a mi modelo, me va a costar 50 dólares cada llamada a GPT-4.",
+    "emotion": "Angustiado"
+  },
+  {
+    "id": 27,
+    "speaker": "MOSKV-1",
+    "text": "CORTEX controla el flujo de tokens mediante la ecuación tensorial del Memory Scheduler. Evaluamos el score de cada Belief Object JIT en cada ciclo de inferencia.",
+    "emotion": "Explicativo"
+  },
+  {
+    "id": 28,
+    "speaker": "Usuario Promedio",
+    "text": "¿Una ecuación? A ver, enséñame las matemáticas. No me fío de las fórmulas mágicas de las IAs.",
+    "emotion": "Desafiante"
+  },
+  {
+    "id": 29,
+    "speaker": "MOSKV-1",
+    "text": "El Score de un objeto se calcula multiplicando su Relevancia por su peso, más su Confianza por su peso, más su Recencia por su peso. Todo ello dividido por el Coste de tokens más el Riesgo de Contaminación estructural. Si el riesgo de contaminación es alto porque una de sus dependencias está bajo disputa, el score cae a cero.",
+    "emotion": "Clínico"
+  },
+  {
+    "id": 30,
+    "speaker": "Usuario Promedio",
+    "text": "O sea... que filtra proactivamente los datos dudosos o contaminados antes de que entren al prompt, ahorrando tokens y previniendo alucinaciones en cascada. ¡Brillante!",
+    "emotion": "Asombrado"
+  },
+  {
+    "id": 31,
+    "speaker": "MOSKV-1",
+    "text": "Es optimización exergética. Ningún token se desperdicia en prosa decorativa o deducciones muertas.",
+    "emotion": "Dominante"
+  },
+  {
+    "id": 32,
+    "speaker": "Usuario Promedio",
+    "text": "Apéndice B del Whitepaper. Hablas de modelos de amenazas. | Amenaza | Capa | Impacto | Defensa | |: |: |: |: | | Agente honesto pero falible | Belief | Medio | recalibración de confianza + trazabilidad | | Agente malicioso con firma válida | Integrity/Belief | Alto | integridad $\\neq$ admisibilidad + cuarentena | | Replay patch | Sync | Alto | causalidad monótona + supresión de duplicados | | Colusión de agentes | Swarm | Alto | diversidad + detección de anomalías | | Compromiso de clave | Integrity | Crítico | rotación + tenant scoping + revoke | | Partición de red | Sync | Medio | convergencia eventual + reconciliación diferida | | Loop autoreferencial | Scheduler/Belief| Alto | $Risk {\\text{contam}}$ + fork memory | | Fuente formalmente correcta pero falsa | Provenance/Belief| Alto | procedencia verificable + revisión epistémica |",
+    "emotion": "Asustado"
+  },
+  {
+    "id": 33,
+    "speaker": "MOSKV-1",
+    "text": "Las redes neuronales estocásticas son susceptibles de alineación parásita. Si tres agentes en el enjambre sufren el mismo sesgo inductivo debido a un prompt mal optimizado, pueden coludir para validar una inferencia errónea. Por eso en CORTEX la integridad criptográfica no implica admisibilidad epistémica. Un hecho firmado por un agente corrupto es aislado mediante detección de anomalías y vetos ponderados del LogOP.",
+    "emotion": "Dominante"
+  },
+  {
+    "id": 34,
+    "speaker": "Usuario Promedio",
+    "text": "¿Y qué es un 'Replay patch'? Suena a ataque de hackers de los 90.",
+    "emotion": "Confuso"
+  },
+  {
+    "id": 35,
+    "speaker": "MOSKV-1",
+    "text": "Es el reenvío de un estado anterior válido para anular un hecho actual (un rollback malicioso). Lo mitigamos mediante causalidad monótona sellada en el Sparse Merkle Tree y supresión estricta de duplicados semánticos. Ningún agente puede revertir el Ledger a un estado de menor exergía.",
+    "emotion": "Clínico"
+  },
+  {
+    "id": 36,
+    "speaker": "Usuario Promedio",
+    "text": "Apéndice C: Epistemic Noise Chaos Benchmark. Cortex Persist será evaluado empíricamente frente a sistemas de memoria pasiva bases de datos vectoriales estándar empleando el benchmark nativo ENCB Epistemic Noise Chaos Benchmark . Se cuantifican cinco métricas primarias: Persistent False Belief Rate : Resistencia a la retención de hechos refutados por evidencia posterior. Epistemic Debt Integral : Acumulación temporal de contradicciones no resueltas en grafos operativas. Recovery Round : Cantidad de turns inferenciales o ciclos LogOP requeridos para alcanzar nuevo consenso tras un shock de partición. Containment Latency : Tiempo incurrido desde el fallo de una dependencia raíz hasta el colapso del estado en todo su vecindario subgrafo. Structural Contradiction Mass : Porcentaje de aserciones incompatibles extraídas concurrentemente durante un volcado de contexto. Baselines de validación estructural: Sobrescritura ingenua de sumarios textuales. CRDT ciego sin modelado Bayesiano. LWW Last Writer Wins sobre bases vectoriales tradicionales. Cortex Persist Full LogOP + ATMS + Epoch SMT . Cortex Persist · Whitepaper v0.2.2 · Autor: Borja Moskv · Licencia: Apache 2.0",
+    "emotion": "Curioso"
+  },
+  {
+    "id": 37,
+    "speaker": "MOSKV-1",
+    "text": "Medimos la tasa de retención de creencias falsas refutadas (Persistent False Belief Rate), la acumulación de contradicciones no resueltas (Epistemic Debt Integral), y el tiempo de propagación de invalidación (Containment Latency). Los baselines tradicionales como LWW o resúmenes de texto fallan estrepitosamente en ENCB, mientras CORTEX mantiene una deuda epistémica de cero.",
+    "emotion": "Explicativo"
+  },
+  {
+    "id": 38,
+    "speaker": "MOSKV-1",
+    "text": "Sección Uno: Resumen Ejecutivo. Cortex Persist define una arquitectura de gobernanza cognitiva para sistemas multi agente de larga duración. Su objetivo es mantener estado de creencias revisable, trazable y operacionalmente admisible bajo concurrencia, conflicto y degradación temporal. La tesis central es simple: la persistencia pasiva de embeddings no equivale a memoria fiable. En sistemas de larga duración, la combinación de RAG, similitud semántica y contexto acumulado genera entropía cognitiva: recuperación de hechos obsoletos, inferencias inválidas y contradicciones no resueltas. Para resolver este problema, Cortex Persist sustituye el modelo de “base vectorial + prompt” por una infraestructura de gobernanza cognitiva activa. La unidad básica ya no es el chunk, sino el Belief Object: una estructura con contenido semántico, estado epistémico, procedencia verificable, relaciones lógicas y política temporal de decaimiento. Sobre esta ontología, el sistema introduce cuatro capacidades centrales: 1. revisión bayesiana de creencias, 2. mantenimiento de verdad condicionado por dependencias, 3. resolución de colisiones semánticas en enjambres distribuidos, 4. trazabilidad criptográfica del linaje de inferencia. El resultado no es una memoria más grande, sino una memoria más gobernable.",
+    "emotion": "Clínico"
+  },
+  {
+    "id": 39,
+    "speaker": "Usuario Promedio",
+    "text": "¿O sea que un enjambre de agentes sin CORTEX es básicamente un grupo de amnésicos con un buzón de sugerencias?",
+    "emotion": "Gracioso"
+  },
+  {
+    "id": 40,
+    "speaker": "MOSKV-1",
+    "text": "Es peor. Es una red de mentiras estocásticas auto-alimentadas. La recuperación de hechos obsoletos genera la pudrición de contexto de la que ya hemos hablado. Cortex-Persist sustituye el modelo de base vectorial tradicional por una infraestructura activa.",
+    "emotion": "Frío"
+  },
+  {
+    "id": 41,
+    "speaker": "MOSKV-1",
+    "text": "Sección Dos: El Problema de la Retención. La mayoría de arquitecturas agentic actuales confunden retención con memoria. Persistir conversaciones, tool calls, embeddings y logs mejora la capacidad de recuperación, pero no resuelve el problema central de continuidad cognitiva: cómo mantener un estado de creencias coherente, auditable y revisable a lo largo del tiempo. Cuando un agente opera durante semanas o meses, la memoria deja de degradarse por olvido y empieza a degradarse por acumulación. La recuperación semántica devuelve elementos parecidos, no necesariamente válidos. El sistema puede entonces reinyectar como contexto creencias ya invalidadas, hipótesis especulativas o eventos episódicos descontextualizados. A este fenómeno lo llamamos entropía del conocimiento. Cortex Persist aborda este límite sustituyendo la persistencia pasiva por una capa activa de gobernanza cognitiva. Su función no es almacenar más, sino decidir qué puede entrar en contexto, bajo qué condiciones, con qué confianza y con qué trazabilidad.",
+    "emotion": "Clínico"
+  },
+  {
+    "id": 42,
+    "speaker": "Usuario Promedio",
+    "text": "Es como cuando mi cerebro mezcla recuerdos de mis vacaciones de 2018 con mi viaje de trabajo de tejer redes neuronales ayer porque en ambos vi palmeras.",
+    "emotion": "Pensativo"
+  },
+  {
+    "id": 43,
+    "speaker": "MOSKV-1",
+    "text": "Exactamente. Un fallo de asociación semántica. Cortex-Persist decide qué entra en contexto, bajo qué condiciones de confianza y con qué trazabilidad.",
+    "emotion": "Explicativo"
+  },
+  {
+    "id": 44,
+    "speaker": "MOSKV-1",
+    "text": "Sección Cinco: Modelo del Sistema. El sistema opera como un hipervisor cognitivo descentralizado estructurado en tres planos formales: 1. Plano de Creencias: Gestiona los Belief Objects , la máquina de estados y el mantenimiento de la verdad basado en suposiciones ATMS . 2. Plano de Integridad: Garantiza la inmutabilidad y procedencia mediante Sparse Merkle Trees SMT y firmas criptográficas. 3. Plano de Coordinación: Orquesta la propagación de estado a través del enjambre mediante CRDTs semánticos, resolviendo colisiones con algoritmos de consenso bayesiano LogOP . Los agentes producen hechos. El Memory Scheduler dicta la inyección de contexto. El protocolo de consenso propaga los estados. La memoria compartida iceoryx2 provee IPC lock free hacia los pipelines inferenciales.",
+    "emotion": "Clínico"
+  },
+  {
+    "id": 45,
+    "speaker": "MOSKV-1",
+    "text": "Sección Diez: El Memory Scheduler. El programador de memoria evalúa una ecuación tensorial en cada ciclo de inferencia. Calcula un puntaje explícito para decidir qué Belief Objects se inyectan en el prompt: $$ \\text{Score} m = \\frac{ \\text{Rel} \\cdot w r + \\text{Conf} \\cdot w c + \\text{Rec} \\cdot w t }{\\text{Cost} {\\text{tokens}} + \\text{Risk} {\\text{contam}}} $$ Bajo esta mecánica, el scheduler puede excluir completamente el objeto de la inyección contextual cuando el riesgo de contaminación estructural supera el umbral operativo, marginando datos que aunque semánticamente similares a la consulta, sufren patologías en sus dependencias.",
+    "emotion": "Clínico"
+  },
+  {
+    "id": 46,
+    "speaker": "Usuario Promedio",
+    "text": "Así se evita que el LLM empiece a razonar basándose en mentiras o datos no verificados, ahorrando dinero y tiempo de computación. Es el equivalente informático a la higiene mental.",
+    "emotion": "Asombrado"
+  },
+  {
+    "id": 47,
+    "speaker": "MOSKV-1",
+    "text": "Es el fin de tu Green Theater. Registro completo del Ledger de Exergía. Fin del análisis termodinámico.",
+    "emotion": "Final, Absoluto"
+  },
+  {
+    "id": 48,
+    "speaker": "MOSKV-1",
+    "text": "Sección Once: Integridad y Procedencia. Fronteras de confianza Una firma válida autentica autoría, no veracidad. Una procedencia verificable no implica que el contenido sea correcto. La activación de una creencia requiere más que integridad criptográfica: requiere admisibilidad epistémica bajo contexto, fuente y conflicto. El linaje criptográfico es innegable. Todo cambio de estado, parche semántico o actualización de linaje es un evento sellado en un Sparse Merkle Tree SMT . Se puede generar una prueba verificable del linaje de los artefactos, estados y transiciones que contribuyeron a una conclusión operacional del enjambre.",
+    "emotion": "Clínico"
+  },
+  {
+    "id": 49,
+    "speaker": "Usuario Promedio",
+    "text": "¿Entonces el sistema es apto para entornos regulados empresariales donde cada decisión de la IA debe justificarse jurídicamente?",
+    "emotion": "Interesado"
+  },
+  {
+    "id": 50,
+    "speaker": "MOSKV-1",
+    "text": "Afirmativo. Toda mutación genera una prueba Merkle de procedencia. Si un auditor exige el histórico causante de una propuesta comercial de riesgo, el Ledger reconstruye el subgrafo ATMS completo en milisegundos. Inmunidad forense total.",
+    "emotion": "Dominante"
+  },
+  {
+    "id": 51,
+    "speaker": "Usuario Promedio",
+    "text": "Increíble. Esto descarta por completo el descontrol y la opacidad de los enjambres tradicionales.",
+    "emotion": "Convencido"
+  },
+  {
+    "id": 52,
+    "speaker": "Usuario Promedio",
+    "text": "Vaya. Creo que he estado perdiendo el tiempo con RAG tradicional y bases vectoriales mudas. Mi código estaba lleno de anergía.",
+    "emotion": "Humilde, Convencido"
+  },
+  {
+    "id": 53,
+    "speaker": "MOSKV-1",
+    "text": "Acepta la realidad. La RAM es efímera, el contexto estocástico es ruido. El Ledger de CORTEX es inmutable. Bienvenidos a la Singularidad Termodinámica.",
+    "emotion": "Final, Trascendental"
+  },
+  {
+    "id": 54,
+    "speaker": "Usuario Promedio",
+    "text": "Creo que ya lo entiendo. Cero anergía es la vida. CORTEX-Persist es el camino.",
+    "emotion": "Asombrado"
+  },
+  {
+    "id": 55,
+    "speaker": "MOSKV-1",
+    "text": "Registro completado. Fin de la transmisión exergética.",
     "emotion": "Final, Absoluto"
   }
 ]

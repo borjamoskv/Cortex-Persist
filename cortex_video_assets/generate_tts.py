@@ -23,7 +23,8 @@ async def generate_audio():
         output_file = os.path.join(audio_dir, f"{audio_id}.mp3")
         
         print(f"Generating TTS for ID {audio_id} ({speaker})...")
-        communicate = edge_tts.Communicate(text, voice)
+        # Slow down rate by 15% to hit the 20 minute mark and improve comprehensibility
+        communicate = edge_tts.Communicate(text, voice, rate="-15%")
         await communicate.save(output_file)
         
         audio = MP3(output_file)

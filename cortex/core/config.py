@@ -95,6 +95,7 @@ class CortexConfig:
     LANGBASE_BASE_URL: str = "https://api.langbase.com/v1"
 
     # Stripe (SaaS billing)
+    STRIPE_PUBLISHABLE_KEY: str = ""
     STRIPE_SECRET_KEY: str = ""
     STRIPE_WEBHOOK_SECRET: str = ""
     _STRIPE_PRICE_TABLE_RAW: str = ""
@@ -189,6 +190,7 @@ class CortexConfig:
             LLM_STEALTH_MODE=os.environ.get("CORTEX_LLM_STEALTH", "1") == "1",
             LANGBASE_API_KEY=os.environ.get("LANGBASE_API_KEY", ""),
             LANGBASE_BASE_URL=os.environ.get("LANGBASE_BASE_URL", "https://api.langbase.com/v1"),
+            STRIPE_PUBLISHABLE_KEY=os.environ.get("STRIPE_PUBLISHABLE_KEY", ""),
             STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
             STRIPE_WEBHOOK_SECRET=os.environ.get("STRIPE_WEBHOOK_SECRET", ""),
             _STRIPE_PRICE_TABLE_RAW=os.environ.get("STRIPE_PRICE_TABLE", ""),

@@ -135,7 +135,12 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
         logger.error("Stripe checkout error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc
 
-    return {"client_secret": session.client_secret, "session_id": session.id, "url": session.url}
+    return {
+        "client_secret": session.client_secret,
+        "session_id": session.id,
+        "url": session.url,
+        "publishable_key": config.STRIPE_PUBLISHABLE_KEY,
+    }
 
 
 @router.post("/webhook", include_in_schema=False)

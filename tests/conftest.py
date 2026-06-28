@@ -49,6 +49,12 @@ os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 import pytest
 import sqlite3
 
+@pytest.fixture(autouse=True)
+def default_testing_env(monkeypatch):
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
+    monkeypatch.setenv("CORTEX_NO_EMBED", "1")
+    monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
+
 _raw_sqlite3_connect = sqlite3.connect
 
 
