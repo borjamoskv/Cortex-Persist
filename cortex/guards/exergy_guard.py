@@ -365,3 +365,33 @@ class ExergyGuard:
             )
 
         return score
+
+
+class LandauerGuard:
+    """
+    Enforces Axiom Ω₄: Landauer Limit.
+    Calculates Shannon Entropy of the payload. For critical facts (sacred axioms),
+    requires a minimum bits-per-character density to prevent epistemic limerence.
+    """
+
+    def check_landauer_limit(self, content: str, is_sacred: bool = False) -> float:
+        """
+        Validates thermodynamic density.
+        
+        Raises:
+            ValueError: If the Shannon entropy falls below the threshold for a sacred fact.
+        """
+        entropy = calculate_shannon_entropy(content)
+        
+        # Thresholds: Sacred facts require high density (minimum 4.0 bits/char)
+        if is_sacred and entropy < 4.0:
+            logger.warning(
+                "Landauer Violation (Axiom Ω₄): Rejected low entropy sacred fact "
+                "(Entropy: %.2f).", entropy
+            )
+            raise ValueError(
+                f"[Axiom Ω₄] Landauer Violation: Thermodynamic density too low for Sacred Axiom "
+                f"(Entropy: {entropy:.2f} < 4.0). Facts must be highly compressed."
+            )
+
+        return entropy

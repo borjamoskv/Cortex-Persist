@@ -87,12 +87,16 @@ Evaluación bajo los ejes de **Reality**, **Risk** y **Evidence** en escala `0-5
 
 ## 4. Análisis de Ruptura Estructural
 
-### 🔴 Zona de Contaminación (Riesgo Inevitable)
-La asociación en el ecosistema musical (Apple Music, Spotify, Viberate) es **Sistémica**. No representa una vulnerabilidad de seguridad local, sino una característica estructural de los registros globales de propiedad intelectual (IP) donde el seudónimo artístico ("Borja Moskv") debe vincularse al depositante legal de los derechos ("Borja Fernández Angulo"). 
+### 🟡 Zona de Contaminación (Mitigación Activa - Fase 2 & 3)
+Históricamente, la asociación en el ecosistema musical (Apple Music, Spotify, Viberate) fue clasificada como sistémica e inevitable debido a la estructura de los registros globales de propiedad intelectual.
+Sin embargo, tras la activación de la **Fase 2 de Erradicación**, este vector se encuentra bajo mitigación activa mediante:
+1.  **[Protocolo de Ofuscación DistroKid/SGAE](DistroKid_Obfuscation_Guide.md):** Ocultación del nombre legal mediante un Seudónimo Artístico registrado.
+2.  **[Demandas GDPR Art. 17 (Derecho al Olvido)](GDPR_Art17_Takedown.md):** Mandatos pre-litigio agresivos contra agregadores de terceros (Viberate, Musixmatch) invocando jurisprudencia del TJUE.
+3.  **Fase 3 (Erradicación de Caché):** Una vez procesada la Fase 2, se ejecuta el **[Google Removal Payload](Google_Removal_Payload.json)** para purgar el *Outdated Content* del índice de Google, desvinculando permanentemente la asociación semántica en OSINT.
 
 ### 🟢 Zona de Aislamiento Soberano (Éxito Termodinámico)
 La huella digital paralela ha logrado un aislamiento de **Nivel C5**. 
-*   **Código:** Las barreras en CORTEX (Taint Engine y pre-commits) impiden que el Host de macOS sangre su ruta de usuario hacia repositorios de GitHub.
+*   **Código:** Las barreras en CORTEX (Taint Engine y pre-commits) impiden que el Host de macOS sangre su ruta de usuario hacia repositorios de GitHub. *Validado matemáticamente por el [Ultrathink PII PoC](../../scripts/pii_firewall_poc.py) que confirma tasas masivas de aniquilación de entropía (exergía) ante cualquier inyección de PII ofuscado.*
 *   **Discurso:** La narrativa en Substack (*Jarana d'Or*, *Telmo Dinámico de Moskv*) y plataformas descentralizadas (Farcaster) está sellada herméticamente contra el nombre legal.
 *   **Comercial:** Ausencia total en directorios mercantiles y registros académicos, eliminando el vector clásico de OSINT comercial.
 

@@ -273,6 +273,16 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     """Enforces the CORTEX-TAINT check. Raises TaintValidationError if invalid."""
     import os
 
+    # -- EXERGY & LANDAUER GUARDS (SAGA-1) --
+    from cortex.guards.exergy_guard import ExergyGuard, LandauerGuard
+    try:
+        is_sacred = "axiom" in content.lower() or "sacred" in content.lower()
+        # Treat all generic taint checks as "thought" to enforce the baseline Exergy check
+        ExergyGuard().check_thermodynamic_yield(content, project="SYS_ROOT", fact_type="thought")
+        LandauerGuard().check_landauer_limit(content, is_sacred=is_sacred)
+    except ValueError as exergy_err:
+        raise TaintValidationError(f"SAGA-1 Rejection by Thermodynamic Guard: {exergy_err}")
+
     # -- OWASP Memory Firewall (SAGA-1.5) --
     from cortex.security.memory_firewall import MemoryFirewall
 
