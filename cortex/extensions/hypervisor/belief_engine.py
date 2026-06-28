@@ -297,6 +297,40 @@ class BeliefEngine:
         cache_key = f"{quarantined.tenant_id}:{quarantined.project}"
         self._cache.pop(cache_key, None)
 
+        # Trigger Cascading Quarantine (O(1) Graph Orphan) for dependencies
+        # Do not cascade if the verdict model is 'system_cascade' to avoid infinite loops 
+        # from cyclical dependencies (though they shouldn't exist).
+        if verdict.model != "system_cascade":
+            await self._cascade_quarantine(
+                root_id=quarantined.id,
+                project=quarantined.project,
+                tenant_id=quarantined.tenant_id,
+                reason=verdict.reason,
+            )
+
+    async def _cascade_quarantine(
+        self,
+        root_id: str,
+        project: str,
+        tenant_id: str,
+        reason: str,
+    ) -> None:
+        """Recursively quarantine any active beliefs that depend on the root_id (Graph Orphan)."""
+        # Load all current beliefs in the graph
+        context = await self._load_context(project, tenant_id)
+        
+        for b in context:
+            if b.status == BeliefStatus.ACTIVE and root_id in b.supported_by:
+                logger.warning("⛓️ [CASCADING QUARANTINE] Orphaning dependent belief %s (depends on %s)", b.id, root_id)
+                cascade_verdict = BeliefVerdict(
+                    action=VerdictAction.QUARANTINE,
+                    model="system_cascade",
+                    reason=f"Cascading Quarantine: Dependent root belief {root_id} collapsed. Root cause: {reason}",
+                )
+                await self._quarantine_belief(b, cascade_verdict)
+                # Recursive topological sweep for beliefs depending on this newly quarantined belief
+                await self._cascade_quarantine(b.id, project, tenant_id, reason)
+
     async def _persist_belief(self, belief: BeliefObject) -> None:
         """Persist an accepted belief to the engine."""
         if self._engine is not None:
