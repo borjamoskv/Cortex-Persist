@@ -19,7 +19,7 @@ logger = logging.getLogger("cortex_extensions.llm.backoff")
 
 
 def extract_retry_delay(text: str) -> float | None:
-    """Extrae el delay de reintento desde el JSON o via regex."""
+    """Extract retry delay from JSON or via regex."""
     try:
         data = json.loads(text)
         for detail in data.get("error", {}).get("details", []):
@@ -50,12 +50,12 @@ async def handle_429_backoff(
     payload: dict[str, Any],
     original_error: httpx.HTTPStatusError,
 ) -> str:
-    """Maneja el backoff rápido o el fallback hipersónico."""
-    # ── Protocolo PULMONES Upgrade ──
-    # Extraer wait time desde el error (Gemini/OpenAI)
+    """Handle fast backoff or hypersonic fallback."""
+    # ── PULMONES Protocol Upgrade ──
+    # Extract wait time from the error (Gemini/OpenAI)
     wait_time = extract_retry_delay(original_error.response.text)
 
-    # Si el wait_time es muy alto (>60s), fallamos inmediato para no bloquear el enjambre
+    # If wait_time is too high (>60s), fail immediately to avoid blocking the swarm
     if wait_time and wait_time > 60.0:
         logger.warning(
             "LLM API [429 Quota Exhausted] on %s. Reset delay too high (%.1fs). Falling back.",
@@ -64,15 +64,15 @@ async def handle_429_backoff(
         )
         return await execute_fallback(provider, payload, original_error)
 
-    # ── Re-Inyección con Backoff Dinámico ──
+    # ── Re-Injection with Dynamic Backoff ──
     last_error = original_error
     max_attempts = 0 if os.environ.get("CORTEX_TESTING") == "1" else 5
 
     for attempt in range(1, max_attempts + 1):
-        # Usar el delay del API + jitter, o un backoff exponencial base
+        # Use the API delay + jitter, or a base exponential backoff
         if wait_time:
             sleep_s = wait_time + (0.5 * attempt)
-            wait_time = None  # Consumido
+            wait_time = None  # Consumed
         else:
             sleep_s = (attempt * 2.5) + random.uniform(0.1, 1.0)
 
@@ -86,12 +86,12 @@ async def handle_429_backoff(
         await asyncio.sleep(sleep_s)
 
         try:
-            # Reintentamos la ejecución raw para bypass del quota manager local
+            # Retry raw execution to bypass the local quota manager
             return await provider._execute_completion_raw(url, headers, payload)
         except httpx.HTTPStatusError as e2:
             if e2.response.status_code == 429:
                 last_error = e2
-                # Actualizar wait_time si el API devuelve uno nuevo
+                # Update wait_time if the API returns a new one
                 wait_time = extract_retry_delay(e2.response.text)
                 continue
             raise original_error from e2
@@ -105,7 +105,7 @@ async def handle_429_backoff(
 async def execute_fallback(
     provider: LLMProvider, payload: dict[str, Any], original_error: httpx.HTTPStatusError
 ) -> str:
-    """Ejecuta el fallback hacia un modelo más estable si los intentos fallan."""
+    """Execute fallback to a more stable model if attempts fail."""
     logger.warning(
         "LLM API [429 Quota Exceeded Final] on %s. Fallback to Open Code (Qwen Coder)...",
         provider.model_name,
