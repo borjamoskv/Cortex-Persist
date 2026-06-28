@@ -297,6 +297,61 @@ class Verifier:
             return False
 
 
+class Secp256k1Signer:
+    """Enterprise Signer compatibility for SECP256K1 using native C/Rust bindings."""
+
+    @staticmethod
+    def sign_raw_content(private_key_b64: str, content: str) -> str:
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.primitives.asymmetric import ec
+        priv_bytes = base64.b64decode(private_key_b64)
+        
+        try:
+            priv_key = serialization.load_pem_private_key(priv_bytes, password=None)
+            if not isinstance(priv_key, ec.EllipticCurvePrivateKey):
+                raise ValueError("Key must be an EllipticCurvePrivateKey")
+        except ValueError:
+            # Fallback for raw bytes
+            priv_value = int.from_bytes(priv_bytes, "big")
+            priv_key = ec.derive_private_key(priv_value, ec.SECP256K1())
+            
+        content_hash = hashlib.sha256(content.encode("utf-8")).digest()
+        sig_bytes = priv_key.sign(content_hash, ec.ECDSA(hashes.SHA256()))
+        return base64.b64encode(sig_bytes).decode("utf-8")
+
+
+class Secp256k1Verifier:
+    """Enterprise Verifier compatibility for SECP256K1 using native C/Rust bindings."""
+
+    @staticmethod
+    def verify_raw_content(content: str, public_key_b64: str, signature_b64: str) -> bool:
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.primitives.asymmetric import ec
+        
+        try:
+            pub_bytes = base64.b64decode(public_key_b64)
+            try:
+                public_key = serialization.load_pem_public_key(pub_bytes)
+            except ValueError:
+                try:
+                    public_key = serialization.load_ssh_public_key(pub_bytes)
+                except ValueError:
+                    # Raw representation: uncompressed points 0x04 + x + y
+                    public_key = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256K1(), pub_bytes)
+
+            if not isinstance(public_key, ec.EllipticCurvePublicKey):
+                return False
+
+            signature = base64.b64decode(signature_b64)
+            content_hash = hashlib.sha256(content.encode("utf-8")).digest()
+            
+            public_key.verify(signature, content_hash, ec.ECDSA(hashes.SHA256()))
+            return True
+        except (InvalidSignature, ValueError, TypeError) as e:
+            logger.error(f"SECP256K1 Verification failed: {e}")
+            return False
+
+
 class ZKSwarmIdentity:
     """Legacy compatibility for ZK-Swarm Identity."""
 
