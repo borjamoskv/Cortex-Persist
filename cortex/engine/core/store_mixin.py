@@ -187,8 +187,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     ) -> int:
         meta = meta or {}
         if "cortex_taint" not in meta:
-            import time
-            meta["cortex_taint"] = f"taint:system:internal:{time.time()}:0:system_bypass"
+            from datetime import datetime, timezone
+            ts = datetime.now(timezone.utc).isoformat()
+            meta["cortex_taint"] = f"taint:system:internal:{ts}:0:system_bypass"
 
         await self._run_pre_store_guards(conn, content, project, fact_type, meta, tenant_id)
 
