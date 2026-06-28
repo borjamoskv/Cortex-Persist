@@ -107,6 +107,7 @@
 | **APEX-098** | `OP_EVAL_REALITY` | `Popen(uvicorn)` | `O(1)` | OS Process. Expone micro-endpoint dinámico (Servidor JIT). | Aplicación de métrica PPI (0-5). |
 | **APEX-099** | `OP_MARKDOWN_AST` | `pip_install()` | `O(Red)` | OS Process. Modificación estructural de dependencias P2P. | Conversión de README a lógica operacional. |
 | **APEX-100** | `OP_OUROBOROS_INIT` | `sys.exit(0)` | `O(1)` | Kernel. Destrucción entrópica exitosa; fin del ciclo C5. | Bucle metacognitivo de auto-refactorización. |
+| **APEX-101** | `OP_SSOT_EMIT` | `dom_inject(hash)` | `O(1)` | Red I/O. Colapso de estado interno a Canvas Web (Substack). | Publicación C5-REAL (CDP + LLM Compresión). |
 
 ## 100 INVARIANTES TERMODINÁMICAS (OUROBOROS LAWS)
 
