@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# C5-REAL: BABYLON-60 3.0.0 Formal Infrastructure
+# C5-REAL: BABYLON-60 3.0.0 Formal Infrastructure (Python Reference Interpreter)
 
 import sys
 import os
@@ -16,24 +16,77 @@ def parse_b60_digit(token):
 
 def parse_b60_number(b60_str):
     inner = b60_str.strip('[]').strip()
-    if not inner: return 0
-    places = inner.split()
-    total = 0
-    power = len(places) - 1
-    for p in places:
-        total += parse_b60_digit(p) * (60 ** power)
+    if not inner: return 0, 0
+    parts = inner.split(';')
+    int_part = parts[0]
+    
+    int_places = int_part.split()
+    int_val = 0
+    power = len(int_places) - 1 if int_places else 0
+    for p in int_places:
+        int_val += parse_b60_digit(p) * (60 ** power)
         power -= 1
-    return total
+        
+    if len(parts) < 2:
+        return int_val, 0
+        
+    frac_part = parts[1]
+    frac_places = frac_part.split()
+    scale = len(frac_places)
+    frac_val = 0
+    for i, p in enumerate(frac_places):
+        power_frac = scale - 1 - i
+        frac_val += parse_b60_digit(p) * (60 ** power_frac)
+        
+    total_val = int_val * (60 ** scale) + frac_val
+    return total_val, scale
 
-def format_b60(val):
+def format_b60(val, scale):
     if val == 0: return "[-]"
-    places = []
-    while val > 0:
-        places.append(val % 60)
-        val //= 60
-    places.reverse()
-    out = ["-" if p == 0 else ("<" * (p // 10) + "Y" * (p % 10)) for p in places]
-    return "[ " + " ".join(out) + " ]"
+    
+    denom = 60 ** scale
+    int_part = abs(val) // denom
+    frac_part = abs(val) % denom
+    
+    int_places = []
+    temp = int_part
+    while temp > 0:
+        int_places.append(temp % 60)
+        temp //= 60
+    if not int_places:
+        int_places.append(0)
+    int_places.reverse()
+    
+    int_strs = []
+    for p in int_places:
+        if p == 0:
+            int_strs.append("-")
+        else:
+            tens = p // 10
+            ones = p % 10
+            int_strs.append(("<" * tens) + ("Y" * ones))
+            
+    sign_prefix = "NEG " if val < 0 else ""
+    
+    if scale == 0:
+        return f"{sign_prefix}[ " + " ".join(int_strs) + " ]"
+        
+    frac_places = []
+    for _ in range(scale):
+        frac_part *= 60
+        frac_places.append(frac_part // denom)
+        frac_part %= denom
+        
+    frac_strs = []
+    for p in frac_places:
+        if p == 0:
+            frac_strs.append("-")
+        else:
+            tens = p // 10
+            ones = p % 10
+            frac_strs.append(("<" * tens) + ("Y" * ones))
+            
+    return f"{sign_prefix}[ " + " ".join(int_strs) + " ; " + " ".join(frac_strs) + " ]"
 
 # --- 8. Separar Tiempo Físico de Tiempo Lógico ---
 @dataclass(frozen=True)
@@ -58,8 +111,6 @@ class Event:
     signature: str
     
     def hash(self) -> str:
-        # Note: In v3.0, the global graph hash is calculated over the canonical serialization,
-        # but individual events still have their own hash for the Merkle structure.
         data = f"{self.event_id}{self.parents}{self.logical_timestamp.tick}{self.payload}{self.signature}"
         return hashlib.sha256(data.encode()).hexdigest()
 
@@ -72,8 +123,6 @@ class DAGLedger:
         self.events: Dict[str, Event] = {}
         
     def append(self, event: Event):
-        for parent in event.parents:
-            assert parent in self.events, f"Missing parent event {parent} - causality broken"
         self.events[event.event_id] = event
 
     def generate_canonical_graph(self) -> str:
@@ -90,27 +139,88 @@ class VMProgram:
 
 class B60Compiler:
     def compile(self, source: str) -> VMProgram:
-        ast = self.parse(source)
-        self.static_proof(ast)
-        return self.emit(ast)
+        lines = [line.split('#')[0].strip() for line in source.split('\n') if line.split('#')[0].strip()]
+        self.static_proof(lines)
+        return VMProgram(instructions=lines)
         
-    def parse(self, source: str):
-        return [line.split('#')[0].strip() for line in source.split('\n') if line.split('#')[0].strip()]
+    def static_proof(self, lines: List[str]):
+        labels = {}
+        allocated_regs = {}
+        defined_signals = []
+        awaited_signals = []
         
-    def static_proof(self, ast):
-        # Verifies: impossible dependencies, circular waits, uninitialized regs, unreachable events.
-        pass
-        
-    def emit(self, ast) -> VMProgram:
-        # Reproducible Compilation (SHA256 identical, no timestamps)
-        return VMProgram(instructions=ast)
+        for i, line in enumerate(lines):
+            tokens = line.split()
+            if not tokens: continue
+            cmd = tokens[0]
+            if cmd == "MUB":
+                if len(tokens) > 1:
+                    name = tokens[1].strip('"')
+                    labels[name] = i
+            elif cmd == "ALLOC":
+                if len(tokens) > 2:
+                    typ = tokens[1]
+                    reg = tokens[2]
+                    allocated_regs[reg] = typ
+            elif cmd == "EXECUTE":
+                if len(tokens) > 1:
+                    sig = tokens[1].strip('"')
+                    defined_signals.append(sig)
+            elif cmd == "AWAIT":
+                if len(tokens) > 1:
+                    sig = tokens[1].strip('"')
+                    awaited_signals.append(sig)
+                    
+        # 1. Unreachable instructions
+        in_halt_zone = False
+        for line in lines:
+            tokens = line.split()
+            if not tokens: continue
+            cmd = tokens[0]
+            if cmd == "MUB":
+                in_halt_zone = False
+            elif in_halt_zone:
+                raise ValueError(f"CRITICAL COMPILE ERROR: Unreachable instruction detected in halt zone: '{line}'")
+            elif cmd == "HALT" or (cmd == "CRITICAL" and len(tokens) > 1 and tokens[1] == "HALT"):
+                in_halt_zone = True
+                
+        # 2. Circular awaits (deadlock warning)
+        for sig in awaited_signals:
+            if sig not in defined_signals:
+                print(f"[COMPILER WARNING] Potential Deadlock: Signal '{sig}' is awaited but never executed.", file=sys.stderr)
+                
+        # 3. Uninitialized registers
+        for line in lines:
+            tokens = line.split()
+            if not tokens: continue
+            cmd = tokens[0]
+            if cmd in ["DAH", "LAL", "AFTER", "NU", "BA.EXACT"]:
+                for t in tokens[1:]:
+                    if t.startswith('R'):
+                        if t not in allocated_regs:
+                            raise ValueError(f"CRITICAL COMPILE ERROR: Access to uninitialized / unallocated register: '{t}' in instruction '{line}'")
+                            
+        # 4. Strongly typed temporal domains
+        for line in lines:
+            tokens = line.split()
+            if not tokens: continue
+            cmd = tokens[0]
+            if cmd in ["DAH", "LAL"]:
+                if len(tokens) > 2:
+                    dest = tokens[1]
+                    src = tokens[2]
+                    if dest.startswith('R') and src.startswith('R'):
+                        dest_typ = allocated_regs.get(dest)
+                        src_typ = allocated_regs.get(src)
+                        if dest_typ != src_typ:
+                            raise ValueError(f"CRITICAL COMPILE ERROR: Strongly typed temporal domain mismatch. Cannot perform arithmetic between '{dest}' ({dest_typ}) and '{src}' ({src_typ})")
 
 # --- 13. Máquina virtual mínima ---
 class Coroutine:
     def __init__(self, cid, pc, labels):
         self.id = cid
         self.pc = pc
-        self.regs = [{"val": 0, "typ": "UNALLOCATED"} for _ in range(64)]
+        self.regs = [{"val": 0, "scale": 0, "typ": "UNALLOCATED"} for _ in range(64)]
         self.state = "Ready" # Ready, Waiting(event), WaitingTimer(tick), Halted
         self.target_tick = 0
         self.wait_event = ""
@@ -118,8 +228,6 @@ class Coroutine:
 
     def clone(self, new_id, target_label):
         c = Coroutine(new_id, self.labels.get(target_label, 0), self.labels)
-        # In Rust, regs are cloned, but let's assume clean regs for new threads as per semantics,
-        # wait, Rust says: `let mut new_co = co.clone();` which copies regs.
         import copy
         c.regs = copy.deepcopy(self.regs)
         return c
@@ -141,10 +249,21 @@ def parse_unit(unit_str):
 
 def eval_expr(expr, unit, regs):
     if expr.startswith('['):
-        return parse_b60_number(expr) * parse_unit(unit)
+        val, scale = parse_b60_number(expr)
+        return val * parse_unit(unit), scale
     if expr.startswith('R'):
-        return regs[get_reg_index(expr)]["val"]
-    return 0
+        idx = get_reg_index(expr)
+        return regs[idx]["val"], regs[idx]["scale"]
+    return 0, 0
+
+def divide_exact(numerator, scale, divisor):
+    if divisor == 0: return 0, scale
+    num = numerator
+    sc = scale
+    while num % divisor != 0 and sc < 5:
+        num *= 60
+        sc += 1
+    return num // divisor, sc
 
 class B60MinimalVM:
     def __init__(self):
@@ -158,7 +277,7 @@ class B60MinimalVM:
         labels = {}
         for i, line in enumerate(program.instructions):
             if line.startswith("MUB "):
-                labels[line.split()[1]] = i
+                labels[line.split()[1].strip('"')] = i
                 
         self.queue.append(Coroutine(0, 0, labels))
         
@@ -199,7 +318,6 @@ class B60MinimalVM:
                 self.queue.append(co)
                 continue
                 
-            # Tokenizer
             tokens = []
             in_bracket = False
             in_string = False
@@ -233,25 +351,27 @@ class B60MinimalVM:
             if cmd == "NIG":
                 idx = get_reg_index(tokens[1])
                 unit = tokens[3] if len(tokens) > 3 else ""
-                val = eval_expr(tokens[2], unit, co.regs)
+                val, scale = eval_expr(tokens[2], unit, co.regs)
                 co.regs[idx]["val"] = val
-                self.ledger.append(Event(ev_id, [], LogicalClock(self.clock), f"R{idx}={val}", "SIG_OK"))
+                co.regs[idx]["scale"] = scale
+                formatted = format_b60(val, scale)
+                self.ledger.append(Event(ev_id, [], LogicalClock(self.clock), f"R{idx}={formatted}", "SIG_OK"))
             elif cmd == "FORK":
-                target = tokens[1]
+                target = tokens[1].strip('"')
                 new_co = co.clone(self.next_co_id, target)
                 self.next_co_id += 1
                 self.queue.append(new_co)
                 self.ledger.append(Event(ev_id, [], LogicalClock(self.clock), target, "SIG_OK"))
             elif cmd == "AWAIT":
                 symbol = tokens[1].strip('"')
-                target = tokens[2]
+                target = tokens[2].strip('"')
                 co.state = "Waiting"
                 co.wait_event = symbol
                 co.pc = labels.get(target, 0)
                 self.ledger.append(Event(ev_id, [], LogicalClock(self.clock), symbol, "SIG_OK"))
             elif cmd == "AFTER":
                 idx = get_reg_index(tokens[1])
-                target = tokens[2]
+                target = tokens[2].strip('"')
                 ticks = co.regs[idx]["val"]
                 co.state = "WaitingTimer"
                 co.target_tick = self.clock + ticks
@@ -269,23 +389,36 @@ class B60MinimalVM:
             elif cmd == "ALLOC":
                 typ_str = tokens[1]
                 idx = get_reg_index(tokens[2])
-                if typ_str == "TIME": co.regs[idx]["typ"] = "TIME"
-                elif typ_str == "F60": co.regs[idx]["typ"] = "F60"
-                else: co.regs[idx]["typ"] = "I64"
+                co.regs[idx]["typ"] = typ_str
             elif cmd == "DAH":
                 idx = get_reg_index(tokens[1])
-                val = eval_expr(tokens[2], "", co.regs)
-                co.regs[idx]["val"] += val
-                self.ledger.append(Event(ev_id, [], LogicalClock(self.clock), f"R{idx}+={val}", "SIG_OK"))
+                val2, scale2 = eval_expr(tokens[2], "", co.regs)
+                
+                # Exact addition
+                s_max = max(co.regs[idx]["scale"], scale2)
+                v1 = co.regs[idx]["val"] * (60 ** (s_max - co.regs[idx]["scale"]))
+                v2 = val2 * (60 ** (s_max - scale2))
+                co.regs[idx]["val"] = v1 + v2
+                co.regs[idx]["scale"] = s_max
+                
+                formatted = format_b60(val2, scale2)
+                self.ledger.append(Event(ev_id, [], LogicalClock(self.clock), f"R{idx}+={formatted}", "SIG_OK"))
             elif cmd == "LAL":
                 idx = get_reg_index(tokens[1])
-                idx2 = get_reg_index(tokens[2])
-                val = co.regs[idx2]["val"]
-                co.regs[idx]["val"] -= val
-                self.ledger.append(Event(ev_id, [], LogicalClock(self.clock), f"R{idx}-={val}", "SIG_OK"))
+                val2, scale2 = eval_expr(tokens[2], "", co.regs)
+                
+                # Exact subtraction
+                s_max = max(co.regs[idx]["scale"], scale2)
+                v1 = co.regs[idx]["val"] * (60 ** (s_max - co.regs[idx]["scale"]))
+                v2 = val2 * (60 ** (s_max - scale2))
+                co.regs[idx]["val"] = v1 - v2
+                co.regs[idx]["scale"] = s_max
+                
+                formatted = format_b60(val2, scale2)
+                self.ledger.append(Event(ev_id, [], LogicalClock(self.clock), f"R{idx}-={formatted}", "SIG_OK"))
             elif cmd == "NU":
                 idx = get_reg_index(tokens[1])
-                target = tokens[2]
+                target = tokens[2].strip('"')
                 if co.regs[idx]["val"] == 0:
                     co.pc = labels.get(target, 0)
                     self.ledger.append(Event(ev_id, [], LogicalClock(self.clock), f"JMP {target}", "SIG_OK"))
@@ -293,23 +426,23 @@ class B60MinimalVM:
                 idx = get_reg_index(tokens[1])
                 idx2 = get_reg_index(tokens[2])
                 div = co.regs[idx2]["val"]
-                if div != 0:
-                    co.regs[idx]["val"] //= div
+                new_val, new_scale = divide_exact(co.regs[idx]["val"], co.regs[idx]["scale"], div)
+                co.regs[idx]["val"] = new_val
+                co.regs[idx]["scale"] = new_scale
+                self.ledger.append(Event(ev_id, [], LogicalClock(self.clock), f"R{idx}/={div}", "SIG_OK"))
             elif cmd in ["HALT"]:
                 co.state = "Halted"
                 
             self.clock += 1
             self.queue.append(co)
             
-        # Reconstruct parents for causal DAG exactly as Rust does
-        # In the simplistic linear trace, parent is the previous event in the ledger
         sorted_events = sorted(self.ledger.events.values(), key=lambda e: e.logical_timestamp.tick)
         prev_id = ""
         for ev in sorted_events:
             if prev_id:
                 ev.parents.append(prev_id)
             prev_id = ev.event_id
-
+ 
         return "HALTED" if self.is_halting else "COMPLETED"
             
     def export_artifact(self, program: VMProgram):
@@ -338,7 +471,6 @@ if __name__ == '__main__':
     vm = B60MinimalVM()
     state = vm.execute(program)
     
-    print(f"[Runtime] Execution State: {state}")
     manifest, canonical_graph, graph_sha256 = vm.export_artifact(program)
     
     bundle_dir = "artifact_bundle_v3"
@@ -349,7 +481,3 @@ if __name__ == '__main__':
         f.write(canonical_graph)
     with open(os.path.join(bundle_dir, "proof.ir"), "w") as f:
         f.write("Mock Proof IR")
-        
-    print(f"[Exporter] Canonical graph generated. graph.sha256: {graph_sha256}")
-    print("[Exporter] Proof IR extracted. Dispatched to Lean/Coq Backends.")
-    print("[Bootstrap v3.0] Artifact Bundle securely formalized.")
