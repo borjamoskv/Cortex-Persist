@@ -187,7 +187,7 @@ class IHelpPurgeDaemon:
                                 if resp.status_code == 200:
                                     feed_content = resp.text
                                     break
-                            except Exception:
+                            except OSError:
                                 continue
 
                         if feed_content and re.search(self.antigen_signature, feed_content):

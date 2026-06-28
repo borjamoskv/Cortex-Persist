@@ -49,8 +49,8 @@ async def proxy_inference(req: InferenceRequest):
         sig_bytes = base64.b64decode(req.signature_b64)
         prompt_hash = hashlib.sha256(req.prompt.encode("utf-8")).digest()
         public_key.verify(sig_bytes, prompt_hash)
-    except Exception:
-        logger.critical(f"[InferenceProxy] REJECTED. Invalid cryptographic signature from {req.agent_id}")
+    except Exception as e:
+        logger.critical(f"[InferenceProxy] REJECTED. Invalid cryptographic signature from {req.agent_id}: {e}")
         raise HTTPException(status_code=403, detail="Invalid Signature")
         
     # 3. Execution (Host has the GEMINI_API_KEY)

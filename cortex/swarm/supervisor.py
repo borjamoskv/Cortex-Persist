@@ -194,7 +194,7 @@ class SwarmSupervisor:
                         if match:
                             try:
                                 payload_dict = json.loads(match.group(0))
-                            except Exception:
+                            except ValueError:
                                 raise ValueError("Irrecoverable JSON after regex extraction")
                         else:
                             raise ValueError("No JSON structure found in payload")
