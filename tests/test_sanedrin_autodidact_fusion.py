@@ -1,7 +1,7 @@
 import asyncio
 import json
 import pytest
-from cortex.engine.swarm.supervisor import SwarmSupervisor
+from cortex.swarm.supervisor import SwarmSupervisor
 from cortex.database.core import connect_async, causal_write
 from cortex.config import DB_PATH
 

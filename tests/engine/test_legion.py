@@ -3,7 +3,7 @@ import asyncio
 import pytest
 from unittest.mock import MagicMock, AsyncMock
 from typing import Any
-from cortex.engine.swarm.legion import (
+from cortex.swarm.legion import (
     SwarmSignal,
     AsyncSignalBus,
     SwarmAgent,

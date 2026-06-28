@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from cortex.extensions.agentss.pitches import (
+from cortex.extensions.agents.pitches import (
     PITCH_COMPLIANCE_DIRECTOR,
     PITCH_CTO_SKEPTIC,
     PITCH_JOURNALIST,
@@ -13,7 +13,7 @@ from cortex.extensions.agentss.pitches import (
     PITCH_TOM,
     PITCH_VC_FOLLOWUP,
 )
-from cortex.extensions.agentss.system_prompt import (
+from cortex.extensions.agents.system_prompt import (
     SYSTEM_PROMPT,
     SYSTEM_PROMPT_MEDIUM,
     SYSTEM_PROMPT_SHORT,

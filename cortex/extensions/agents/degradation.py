@@ -21,7 +21,7 @@ Without gradient, no learning. Without learning, the system calcifies.
 
 Usage::
 
-    from cortex.extensions.agentss.degradation import (
+    from cortex.extensions.agents.degradation import (
         AgentAction,
         AgentResult,
         AgentDegradedError,

@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from cortex.engine.swarm.swarm_10k import SwarmCommander
+from cortex.swarm.swarm_10k import SwarmCommander
 
 
 @pytest.mark.asyncio

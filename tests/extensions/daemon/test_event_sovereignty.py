@@ -43,7 +43,7 @@ async def test_event_sovereignty_runtime_telemetry():
 
 @pytest.mark.asyncio
 async def test_auth_gateway_override():
-    from cortex.engine.swarm.auth_gateway import QuorumGateway
+    from cortex.swarm.auth_gateway import QuorumGateway
 
     mock_engine = MagicMock()
     mock_pool = MagicMock()

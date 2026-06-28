@@ -6,9 +6,9 @@ import pytest
 import aiosqlite
 from datetime import datetime, timezone
 
-from cortex.engine.swarm.supervisor import SwarmSupervisor, DummyAgent
-from cortex.engine.swarm.legion import SwarmSignal
-from cortex.engine.swarm.state_store import CausalStateStore
+from cortex.swarm.supervisor import SwarmSupervisor, DummyAgent
+from cortex.swarm.legion import SwarmSignal
+from cortex.swarm.state_store import CausalStateStore
 
 async def setup_db(db_path: str) -> aiosqlite.Connection:
     db = await aiosqlite.connect(db_path)
@@ -55,8 +55,8 @@ def mock_causal_guard(monkeypatch):
     class MockGuard:
         def verify_closure(self, proposal):
             pass
-    import cortex.engine.swarm.state_store
-    monkeypatch.setattr(cortex.engine.swarm.state_store, "CausalClosureGuard", MockGuard)
+    import cortex.swarm.state_store
+    monkeypatch.setattr(cortex.swarm.state_store, "CausalClosureGuard", MockGuard)
 
 @pytest.mark.asyncio
 async def test_2pc_atomic_commit():

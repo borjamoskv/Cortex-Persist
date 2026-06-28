@@ -105,8 +105,8 @@ async def test_seal_2_boundary():
 async def test_seal_3_happy(mock_cache):
     with (
         patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
-        patch("cortex.engine.swarm.legion_vectors.EntropyDemon") as mock_demon,
-        patch("cortex.engine.swarm.legion_vectors.Intruder") as mock_intruder,
+        patch("cortex.swarm.legion_vectors.EntropyDemon") as mock_demon,
+        patch("cortex.swarm.legion_vectors.Intruder") as mock_intruder,
     ):
         mock_run.return_value = (0, "No issues")
         mock_demon.return_value.attack = AsyncMock(return_value=[])
@@ -128,8 +128,8 @@ async def test_seal_3_demon_rejection(mock_cache):
     mock_cache.files = {Path("cortex/engine/bad.py"): "try: pass\nexcept: pass"}
     with (
         patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
-        patch("cortex.engine.swarm.legion_vectors.EntropyDemon") as mock_demon,
-        patch("cortex.engine.swarm.legion_vectors.Intruder") as mock_intruder,
+        patch("cortex.swarm.legion_vectors.EntropyDemon") as mock_demon,
+        patch("cortex.swarm.legion_vectors.Intruder") as mock_intruder,
     ):
         mock_run.return_value = (0, "No issues")
         mock_demon.return_value.attack = AsyncMock(return_value=["Bare `except`"])

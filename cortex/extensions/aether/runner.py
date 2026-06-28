@@ -36,7 +36,7 @@ class AetherAgent:
     """
 
     def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
-        from cortex.extensions.agentss.registry import AgentCatalogLoader
+        from cortex.extensions.agents.registry import AgentCatalogLoader
         from cortex.extensions.llm.provider import LLMProvider
 
         self._llm = LLMProvider(provider=llm_provider)

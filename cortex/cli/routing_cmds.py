@@ -219,7 +219,7 @@ def routing_status() -> None:
 @routing.command("agents")
 def routing_agents() -> None:
     """Show all registered agents with resolved models."""
-    from cortex.extensions.agentss.registry import AgentCatalogLoader
+    from cortex.extensions.agents.registry import AgentCatalogLoader
 
     registry = AgentCatalogLoader()
     registry.clear()

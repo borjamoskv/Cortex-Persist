@@ -4,7 +4,7 @@ import time
 
 import pytest
 
-from cortex.engine.swarm.swarm_10k import ForensicLegion, SwarmCommander
+from cortex.swarm.swarm_10k import ForensicLegion, SwarmCommander
 from cortex.forensics.forensic_strike import ForensicStrikeCommander, StrikeTarget
 
 
