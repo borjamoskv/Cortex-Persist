@@ -35,7 +35,7 @@ async def test_epidemic_stress():
     logger.info(f"🚀 Spawning {N_NODES} GossipBus nodes...")
     nodes: list[GossipBus] = []
     for i in range(N_NODES):
-        node = await _spawn_node(f"node_{i}", BASE_PORT + i)
+        node = await _spawn_node(f"node_{i}", 0)
         nodes.append(node)
 
     # 1. Sparsely connect the network (Node N connects to Node N-1)
