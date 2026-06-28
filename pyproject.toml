@@ -34,9 +34,6 @@ dependencies = [
     "aiosqlite>=0.20.0",
     "cryptography>=48.0.1",
     "pydantic>=2.7.0",
-    "langchain-community>=0.4.2",
-    "langchain-core>=1.4.8",
-    "langchain-ollama>=1.1.0",
     "confluent-kafka>=2.1.0",
 ]
 
@@ -135,8 +132,13 @@ graph = [
 quality = [
     "radon>=6.0.1",
 ]
+llm_compat = [
+    "langchain-community>=0.4.2",
+    "langchain-core>=1.4.8",
+    "langchain-ollama>=1.1.0",
+]
 all = [
-    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality]",
+    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality,llm_compat]",
 ]
 
 [project.scripts]

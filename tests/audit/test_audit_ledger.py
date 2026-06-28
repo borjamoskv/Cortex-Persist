@@ -164,10 +164,10 @@ class TestEnterpriseAuditLedger:
             batch1_ids = [r[0] for r in batch1_rows]
 
             from cortex.audit.smt import SparseMerkleTree
-            local_smt = SparseMerkleTree()
+            smt_state = SparseMerkleTree()
             for aid in batch1_ids:
-                local_smt.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
-            merkle_root = local_smt.root
+                smt_state.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
+            merkle_root = smt_state.root
 
             expected_entry_hash = hashlib.sha256(
                 f"merkle_batch:{merkle_root}:GENESIS".encode()
