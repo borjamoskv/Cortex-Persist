@@ -10,6 +10,7 @@ import logging
 from typing import Any
 
 from cortex.agents.primitives.dispatcher import apex_dispatcher
+from cortex.engine.swarm.trust_registry import global_trust_registry
 
 logger = logging.getLogger("cortex.engine.logic.sanedrin")
 
@@ -75,6 +76,7 @@ class SanedrinCouncil:
         for ev in evals:
             if ev["claim"] != best_eval["claim"] and (best_eval["proof_density"] - ev["proof_density"]) > 0.1:
                 logger.warning(f"[Sanedrín] Apoptosis triggered for {ev['node']}. Proof density insufficient.")
+                global_trust_registry.epistemic_slash(ev["node"], "Failed Proof-of-Logic audit in Sanedrín")
                 
         resolution_msg = f"SANEDRIN_BFT: {best_eval['claim']} validated by {best_eval['node']}"
         

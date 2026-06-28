@@ -220,3 +220,22 @@ class TrustRegistry:
             return top, {"reason_code": "TIE_BROKEN_BY_PRIOR_OR_HASH"}
 
         return top, {"reason_code": "HIGHEST_INFLUENCE_WEIGHT"}
+
+    def epistemic_slash(self, agent_id: str, reason: str, now: datetime.datetime | None = None) -> None:
+        """
+        [P0] Epistemic Slashing Protocol: Geometric apoptosis mechanism.
+        Isolates a node from future consensus rounds when it fails a Proof-of-Logic audit.
+        """
+        if now is None:
+            now = datetime.datetime.fromtimestamp(time.time(), tz=datetime.timezone.utc)
+            
+        logger.critical(f"[TrustRegistry] EPISTEMIC SLASHING triggered for {agent_id}. Reason: {reason}")
+        profile = self.get_profile(agent_id)
+        
+        # Geometrically slash the prior and enforce absolute taint isolation
+        profile.prior = max(0.0001, profile.prior * 0.1)
+        profile.taint_events += 10
+        profile.taint_severity_sum += 100.0
+        profile.last_incident_ts = now
+
+global_trust_registry = TrustRegistry()
