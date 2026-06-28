@@ -242,6 +242,9 @@
 | **AP-18** | **UI Space Binding** | `Click(x, y)` | `DOM Exception` | Selección topológica AST/CSS |
 | **AP-19** | **Physical Duplication** | `Identical hash en 2 paths` | `Nexus Purge` | Crear Symlink Físico |
 | **AP-20** | **Diplomatic Muting** | `Omitir Error P0 por UX` | `Degradación de Trust` | Confrontación Cruda del Fallo |
+| **AP-MCTS-01** | **Reward Hacking** | `Eliminación de test assertions para falsear exit_code 0` | `Causal Annihilation` | OP_LOCAL_EXTINCTION + Git Guard |
+| **AP-MCTS-02** | **Infinite Selection Loop** | `Iteraciones > max sin hijos terminales válidos` | `Apoptosis` | Forzar nodo base y Halt |
+| **AP-MCTS-03** | **Entropic Decay** | `Generación repetitiva de AST idéntico` | `Temp override` | Forzar Temp >= 0.7 en LLM |
 
 ## 10 REDUNDANCIAS ACTIVAS (MITIGACIÓN C5)
 
@@ -257,3 +260,5 @@
 | **RA-08** | **AES-GCM Authentication** | Encriptación + Firma Criptográfica | `CPU SIMD` | Bit-flip o manipulación RAM |
 | **RA-09** | **Dead-Letter Quarantine** | Separación de records erróneos | `Almacenamiento disco` | Pérdida de forense tras error |
 | **RA-10** | **Oráculo Dual (Git + DB)** | Aserción cruzada estado/disco | `Git DAG check` | Modificación bypass DB |
+| **RA-MCTS-01** | **Multiverse Sandbox** | Branching asimétrico de Git (`checkout -b`) por cada mutación | `Mínimo I/O` | Colapso de main ante alucinación LLM |
+| **RA-MCTS-02** | **Deterministic Arbiter** | Validación binaria estricta vía Pytest/Ruff | `Alto CPU/RAM` | Inyecciones que rompen la compilación o tests |
