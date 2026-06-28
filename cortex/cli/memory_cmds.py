@@ -192,15 +192,16 @@ def store_batch(file_path, db) -> None:
         sys.exit(1)
 
     engine = get_engine(db)
-    stored_count = 0
-    try:
+    import os
+    actor_id = os.environ.get("CORTEX_ACTOR_ID", "borjamoskv")
+
+    async def _run_batch() -> int:
+        stored = 0
         for idx, fact in enumerate(facts):
             project = fact.get("project")
             content = fact.get("content")
             if not project or not content:
-                console.print(
-                    f"[yellow]Skipping fact at index {idx}: missing project or content[/]"
-                )
+                console.print(f"[yellow]Skipping fact at index {idx}: missing project or content[/]")
                 continue
 
             fact_type = fact.get("fact_type", fact.get("type", "knowledge"))
@@ -215,27 +216,23 @@ def store_batch(file_path, db) -> None:
             meta = meta or {}
             _inject_cli_taint(content, meta, source)
 
-            import os
-
-            actor_id = os.environ.get("CORTEX_ACTOR_ID", "borjamoskv")
-
-            fact_id = _run_async(
-                engine.store(
-                    project=project,
-                    content=content,
-                    fact_type=fact_type,
-                    tags=tags,
-                    confidence=confidence,
-                    source=source,
-                    meta=meta,
-                    parent_decision_id=parent_id,
-                    actor_id=actor_id,
-                )
+            fact_id = await engine.store(
+                project=project,
+                content=content,
+                fact_type=fact_type,
+                tags=tags,
+                confidence=confidence,
+                source=source,
+                meta=meta,
+                parent_decision_id=parent_id,
+                actor_id=actor_id,
             )
-            stored_count += 1
-            console.print(
-                f"[[noir.cyber]✓[/]] Stored fact [[noir.gold]#{fact_id}[/]] in [[noir.yinmn]{project}[/]]"
-            )
+            stored += 1
+            console.print(f"[[noir.cyber]✓[/]] Stored fact [[noir.gold]#{fact_id}[/]] in [[noir.yinmn]{project}[/]]")
+        return stored
+
+    try:
+        stored_count = _run_async(_run_batch())
         console.print(f"[bold green]Successfully stored {stored_count} facts.[/]")
     finally:
         _run_async(engine.close())

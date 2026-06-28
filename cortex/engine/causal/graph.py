@@ -77,7 +77,7 @@ class AsyncCausalGraph:
         try:
             self.atms = AtmsAdapter() if AtmsAdapter else None
         except (RuntimeError, AttributeError) as e:
-            logger.warning(f"Rust ATMS disabled: {e}")
+            logger.debug(f"Rust ATMS disabled: {e}")
             self.atms = None
 
     async def ensure_table(self, *, commit: bool = True) -> None:
