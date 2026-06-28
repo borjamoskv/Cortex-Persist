@@ -231,9 +231,10 @@ class BeliefEngine:
         # Query existing beliefs from the engine
         try:
             facts = await self._engine.recall(
-                query=f"project:{project} type:belief",
                 project=project,
                 limit=self._max_context,
+                tenant_id=tenant_id,
+                fact_type="belief",
             )
 
             beliefs = []
@@ -316,8 +317,26 @@ class BeliefEngine:
         reason: str,
     ) -> None:
         """Recursively quarantine any active beliefs that depend on the root_id (Graph Orphan)."""
-        # Load all current beliefs in the graph
-        context = await self._load_context(project, tenant_id)
+        # Load all current beliefs in the graph UNBOUNDED to prevent Silent Epistemic Corruption (P0)
+        # Avoid _load_context which is bounded by _max_context.
+        try:
+            facts = await self._engine.recall(
+                project=project,
+                limit=None, # Unbounded
+                tenant_id=tenant_id,
+                fact_type="belief",
+            )
+            
+            # Construct BeliefObjects
+            context = []
+            for fact in facts:
+                meta = fact.meta if hasattr(fact, "meta") else fact.get("meta", {})
+                belief_data = meta.get("belief_object")
+                if belief_data:
+                    context.append(BeliefObject.from_dict(belief_data))
+        except Exception as exc:
+            logger.error("Failed to load unbounded context for cascade: %s", exc)
+            return
         
         for b in context:
             if b.status == BeliefStatus.ACTIVE and root_id in b.supported_by:
