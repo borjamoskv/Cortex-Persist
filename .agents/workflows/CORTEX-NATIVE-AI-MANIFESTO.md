@@ -38,5 +38,8 @@ A system that only grows will eventually collapse under its own weight. Episodic
 ### 6. Biological-Byzantine Tolerance (Apoptosis)
 The ultimate vulnerability in any zero-trust cryptographic system is the biological node that wields the keys. **Cortex-Persist assumes the human operator is a high-entropy vector susceptible to HUMINT (Human Intelligence) coercion.** The system is armed with a `Duress Code` (P095) that intercepts compromised physical inputs and executes an instantaneous `Apoptosis Protocol` (P100). We do not blindly trust the human; we trust the thermodynamic invariants. When the keyholder is compromised, the system logically dies to preserve the structural integrity of the collective memory.
 
+### 7. Vesicular Runtime (Process Isolation & OS-Level Apoptosis)
+Language-level memory management is a thermodynamic illusion. A C5-REAL system recognizes that memory wiped in Python survives in C-level `putenv` blocks and OS socket buffers. **Cortex-Persist enforces the Vesicular Runtime:** The primary control plane operates in absolute zero-trust and never ingests plain-text API keys into its environment (`os.environ`). All neural communication is delegated to ephemeral Worker Processes. During Apoptosis P100, we do not attempt to clean the heap; we dispatch an OS-level `SIGKILL` to annihilate the entire virtual memory space of the Worker. True forensic immunity is only achieved through total structural obliteration.
+
 ## The Promise
 The era of probabilistic memory is over. Welcome to the era of deterministic, mathematically verifiable autonomous cognition. Or as we call it: **Sovereignty.**
