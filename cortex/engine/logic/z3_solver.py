@@ -31,7 +31,9 @@ class DeterministicSolver:
             return DeterministicSolver._heuristic_fallback(fact_a, fact_b)
             
         solver = z3.Solver()
-        
+        # [C5-REAL] Enforce strict execution timeouts (5000ms) to prevent CPU starvation
+        # and adversarial recursive statement loop attacks.
+        solver.set("timeout", 5000)
         # Rule 1: Identity conflict (Same structural identity, distinct atomic content)
         if fact_a.get("id") and fact_a.get("id") == fact_b.get("id"):
             if fact_a.get("content") != fact_b.get("content"):
@@ -56,9 +58,13 @@ class DeterministicSolver:
             if "max" in meta_b: solver.add(x <= int(meta_b["max"]))
             
             # If combining both facts makes the system unsatisfiable -> Contradiction!
+            # If the system times out -> z3.unknown -> Treat as contradiction (Fail-Close)
             result = solver.check()
             if result == z3.unsat:
                 logger.critical(f"[Z3_SOLVER] UNSAT: Mathematical contradiction proved on variable '{var_name}'.")
+                return True
+            elif result == z3.unknown:
+                logger.critical(f"[Z3_SOLVER] UNKNOWN: Solver timed out or failed on variable '{var_name}'. Enforcing containment.")
                 return True
                 
         return False
