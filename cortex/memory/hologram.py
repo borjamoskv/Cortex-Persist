@@ -135,8 +135,6 @@ class HolographicMemory:
                 "🌌 Holographic Memory loaded: %d items mapped in %.1fms", len(self._metadata), dur
             )
 
-
-
     async def recall_holographic(
         self,
         query: str,
@@ -190,7 +188,12 @@ class HolographicMemory:
 
             sim = cosine_sim[i]
             # Match the SQLite function structure exactly
-            decay = cortex_decay(int(meta.get("is_diamond", False)), float(meta.get("timestamp", now)), now, self._half_life)
+            decay = cortex_decay(
+                int(meta.get("is_diamond", False)),
+                float(meta.get("timestamp", now)),
+                now,
+                self._half_life,
+            )
 
             # Translate SQL semantic: (1.0 - distance / 2.0) equals (sim + 1.0) / 2.0
             semantic_score = (sim + 1.0) / 2.0

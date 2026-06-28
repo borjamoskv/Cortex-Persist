@@ -125,9 +125,13 @@ class CryptoShredder:
 
     async def is_shredded_async(self, fact_id: int, tenant_id: str = "default") -> bool:
         """Check if a fact's key has been shredded (async)."""
-        cursor = await __import__("typing").cast(__import__("typing").Any, self._conn).execute(
-            "SELECT 1 FROM shredded_keys WHERE fact_id = ? AND tenant_id = ?",
-            (fact_id, tenant_id),
+        cursor = (
+            await __import__("typing")
+            .cast(__import__("typing").Any, self._conn)
+            .execute(
+                "SELECT 1 FROM shredded_keys WHERE fact_id = ? AND tenant_id = ?",
+                (fact_id, tenant_id),
+            )
         )
         return (await cursor.fetchone()) is not None
 
@@ -143,9 +147,13 @@ class CryptoShredder:
 
     async def get_shredded_fact_ids_async(self, tenant_id: str = "default") -> set[int]:
         """Return all shredded fact IDs for a tenant (async)."""
-        cursor = await __import__("typing").cast(__import__("typing").Any, self._conn).execute(
-            "SELECT fact_id FROM shredded_keys WHERE tenant_id = ?",
-            (tenant_id,),
+        cursor = (
+            await __import__("typing")
+            .cast(__import__("typing").Any, self._conn)
+            .execute(
+                "SELECT fact_id FROM shredded_keys WHERE tenant_id = ?",
+                (tenant_id,),
+            )
         )
         rows = await cursor.fetchall()
         return {row[0] for row in rows}
@@ -240,11 +248,15 @@ class CryptoShredder:
 
         try:
             ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-            await __import__("typing").cast(__import__("typing").Any, self._conn).execute(
-                "INSERT INTO shredded_keys "
-                "(fact_id, tenant_id, reason, shredded_by, shredded_at) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (fact_id, tenant_id, reason, shredded_by, ts),
+            await (
+                __import__("typing")
+                .cast(__import__("typing").Any, self._conn)
+                .execute(
+                    "INSERT INTO shredded_keys "
+                    "(fact_id, tenant_id, reason, shredded_by, shredded_at) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (fact_id, tenant_id, reason, shredded_by, ts),
+                )
             )
 
             self._invalidate_fact_key(fact_id, tenant_id)
@@ -291,9 +303,13 @@ class CryptoShredder:
 
         GDPR use case: user requests erasure of all their data.
         """
-        cursor = await __import__("typing").cast(__import__("typing").Any, self._conn).execute(
-            "SELECT id FROM facts WHERE source = ? AND tenant_id = ?",
-            (source, tenant_id),
+        cursor = (
+            await __import__("typing")
+            .cast(__import__("typing").Any, self._conn)
+            .execute(
+                "SELECT id FROM facts WHERE source = ? AND tenant_id = ?",
+                (source, tenant_id),
+            )
         )
         rows = await cursor.fetchall()
         fact_ids = [row[0] for row in rows]
@@ -308,9 +324,13 @@ class CryptoShredder:
         shredded_by: str | None = None,
     ) -> ShredBatchResult:
         """Shred all facts in a project."""
-        cursor = await __import__("typing").cast(__import__("typing").Any, self._conn).execute(
-            "SELECT id FROM facts WHERE project = ? AND tenant_id = ?",
-            (project, tenant_id),
+        cursor = (
+            await __import__("typing")
+            .cast(__import__("typing").Any, self._conn)
+            .execute(
+                "SELECT id FROM facts WHERE project = ? AND tenant_id = ?",
+                (project, tenant_id),
+            )
         )
         rows = await cursor.fetchall()
         fact_ids = [row[0] for row in rows]

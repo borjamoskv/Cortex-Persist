@@ -3,12 +3,14 @@ import subprocess
 
 logger = logging.getLogger("Cortex.SubstackExtractor")
 
+
 class SubstackExtractor:
     """
     [C5-REAL] Extractor de materia prima causal.
     Lee directamente del Git Ledger para garantizar que toda emisión
     se base en invariantes físicos inmutables.
     """
+
     def __init__(self, repo_path: str = "."):
         self.repo_path = repo_path
 
@@ -33,11 +35,7 @@ class SubstackExtractor:
 
             logger.info(f"Payload causal extraído para el nodo: {commit_hash[:7]}")
 
-            return {
-                "hash": commit_hash,
-                "message": commit_msg,
-                "diff": raw_diff
-            }
+            return {"hash": commit_hash, "message": commit_msg, "diff": raw_diff}
         except subprocess.CalledProcessError as e:
             logger.error(f"Fallo al extraer el hash {commit_hash}: {e.stderr}")
             raise RuntimeError(f"Fallo de extracción C5-REAL para el hash {commit_hash}") from e

@@ -251,7 +251,9 @@ class TestAuthManager:
     async def test_authenticate_negative_cases(self, auth_manager):
         """Verify negative authentication scenarios and fuzzing inputs."""
         # Nonexistent key
-        res = await auth_manager.authenticate_async("ctx_nonexistentkeyvalue12345678901234567890123456789012345678")
+        res = await auth_manager.authenticate_async(
+            "ctx_nonexistentkeyvalue12345678901234567890123456789012345678"
+        )
         assert res.authenticated is False
 
         # Correct prefix, incorrect suffix

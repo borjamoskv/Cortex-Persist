@@ -125,11 +125,14 @@ async def test_ledger_concurrency_bombing(ledger_db):
             # Verify cryptographic integrity of the block
             batch_audit_ids = [row[0] for row in block]
             from cortex.audit.smt import SparseMerkleTree
+
             local_smt = SparseMerkleTree()
             for aid in batch_audit_ids:
                 local_smt.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
             merkle_root = local_smt.root
-            entry_hash = hashlib.sha256(f"merkle_batch:{merkle_root}:{prev_hash}".encode()).hexdigest()
+            entry_hash = hashlib.sha256(
+                f"merkle_batch:{merkle_root}:{prev_hash}".encode()
+            ).hexdigest()
 
             assert ledger.verify_zk_seal(entry_hash, signature), (
                 "Invalid ZK seal/signature on Merkle Block"

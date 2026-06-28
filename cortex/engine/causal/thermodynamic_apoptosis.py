@@ -19,9 +19,10 @@ from cortex.audit.ledger import EnterpriseAuditLedger
 logger = logging.getLogger("cortex.engine.causal.apoptosis")
 if not logger.handlers:
     ch = logging.StreamHandler()
-    ch.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    ch.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
     logger.addHandler(ch)
     logger.setLevel(logging.INFO)
+
 
 class OuroborosCollapseEngine:
     def __init__(self, repo_path: Path, db_path: str = "cortex_ledger.db"):
@@ -36,18 +37,32 @@ class OuroborosCollapseEngine:
         try:
             # Count total commits strictly in the divergent branch
             total_cmd = subprocess.run(
-                ["git", "rev-list", "--count", f"main..{branch_name}"], 
-                cwd=self.repo_path, capture_output=True, text=True, check=True
+                ["git", "rev-list", "--count", f"main..{branch_name}"],
+                cwd=self.repo_path,
+                capture_output=True,
+                text=True,
+                check=True,
             )
             total_commits = int(total_cmd.stdout.strip() or 0)
-            
+
             if total_commits == 0:
                 return 0.0
 
             # Count reverts/fixes strictly in the divergent branch
             revert_cmd = subprocess.run(
-                ["git", "log", "--oneline", "--grep=revert", "--grep=fix", "-i", f"main..{branch_name}"], 
-                cwd=self.repo_path, capture_output=True, text=True, check=True
+                [
+                    "git",
+                    "log",
+                    "--oneline",
+                    "--grep=revert",
+                    "--grep=fix",
+                    "-i",
+                    f"main..{branch_name}",
+                ],
+                cwd=self.repo_path,
+                capture_output=True,
+                text=True,
+                check=True,
             )
             revert_commits = len([line for line in revert_cmd.stdout.splitlines() if line])
 
@@ -61,7 +76,12 @@ class OuroborosCollapseEngine:
         """Destroys a branch structurally."""
         try:
             logger.warning(f"[APOPTOSIS] Destroying sub-optimal branch: {branch_name}")
-            subprocess.run(["git", "branch", "-D", branch_name], cwd=self.repo_path, check=True, capture_output=True)
+            subprocess.run(
+                ["git", "branch", "-D", branch_name],
+                cwd=self.repo_path,
+                check=True,
+                capture_output=True,
+            )
         except subprocess.CalledProcessError as e:
             logger.error(f"Apoptosis failed for {branch_name}: {e.stderr}")
 
@@ -69,11 +89,24 @@ class OuroborosCollapseEngine:
         """Merges the highest-exergy branch into the current HEAD (main)."""
         try:
             logger.info(f"[COLLAPSE] Integrating structural invariant from: {winner_branch}")
-            subprocess.run(["git", "merge", "--no-ff", "-m", f"chore(convergence): ouroboros collapse of {winner_branch}", winner_branch], 
-                           cwd=self.repo_path, check=True, capture_output=True)
+            subprocess.run(
+                [
+                    "git",
+                    "merge",
+                    "--no-ff",
+                    "-m",
+                    f"chore(convergence): ouroboros collapse of {winner_branch}",
+                    winner_branch,
+                ],
+                cwd=self.repo_path,
+                check=True,
+                capture_output=True,
+            )
             return True
         except subprocess.CalledProcessError as e:
-            logger.error(f"Wave collapse failed for {winner_branch}. Git conflicts likely: {e.stderr}")
+            logger.error(
+                f"Wave collapse failed for {winner_branch}. Git conflicts likely: {e.stderr}"
+            )
             # Rollback merge
             subprocess.run(["git", "merge", "--abort"], cwd=self.repo_path, capture_output=True)
             return False
@@ -97,6 +130,7 @@ class OuroborosCollapseEngine:
         losers = [b for b in target_branches if b != winner]
 
         from cortex.database.core import connect_async_ctx
+
         async with connect_async_ctx(self.db_path) as conn:
             ledger = EnterpriseAuditLedger(conn)
             await ledger.ensure_table()
@@ -110,23 +144,23 @@ class OuroborosCollapseEngine:
                     actor_id="ouroboros_collapse",
                     action="THERMODYNAMIC_APOPTOSIS",
                     resource=loser,
-                    status=f"Yield:{evaluations[loser]:.2f}%"
+                    status=f"Yield:{evaluations[loser]:.2f}%",
                 )
 
             # 2. Wave Collapse (Merge)
             success = self._collapse_wave(winner)
-            
+
             if success:
                 # Clean up the winner branch post-merge
                 self._execute_apoptosis(winner)
-                
+
                 await ledger.log_action(
                     tenant_id="global",
                     actor_role="system",
                     actor_id="ouroboros_collapse",
                     action="WAVE_COLLAPSED_INTEGRATION",
                     resource=winner,
-                    status=f"Yield:{evaluations[winner]:.2f}%"
+                    status=f"Yield:{evaluations[winner]:.2f}%",
                 )
                 logger.info(f"[C5-REAL] Convergence achieved. {winner} rules the domain.")
                 return winner
@@ -137,17 +171,22 @@ class OuroborosCollapseEngine:
                     actor_id="ouroboros_collapse",
                     action="COLLAPSE_FAILED",
                     resource=winner,
-                    status="Merge Conflict"
+                    status="Merge Conflict",
                 )
                 return None
+
 
 if __name__ == "__main__":
     # Test stub for CLI exposure
     import sys
+
     if len(sys.argv) > 1:
         branches = sys.argv[1:]
         engine = OuroborosCollapseEngine(Path("."))
         asyncio.run(engine.run_convergence(branches))
     else:
         import logging
-        logging.getLogger(__name__).warning("Usage: python thermodynamic_apoptosis.py <branch1> <branch2> ...")
+
+        logging.getLogger(__name__).warning(
+            "Usage: python thermodynamic_apoptosis.py <branch1> <branch2> ..."
+        )

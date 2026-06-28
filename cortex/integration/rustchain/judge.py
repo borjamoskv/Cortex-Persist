@@ -18,7 +18,9 @@ class Judge(ABC):
     """Abstract base class for all Open Judge implementations."""
 
     @abstractmethod
-    async def judge(self, code: str, config: dict[str, Any] | None = None) -> tuple[bool, list[str]]:
+    async def judge(
+        self, code: str, config: dict[str, Any] | None = None
+    ) -> tuple[bool, list[str]]:
         """Judge the provided code based on internal rules and config.
 
         Returns:
@@ -80,7 +82,9 @@ class Judge(ABC):
 class ASTLintJudge(Judge):
     """Static analysis judge checking code syntax and structures using python AST."""
 
-    async def judge(self, code: str, config: dict[str, Any] | None = None) -> tuple[bool, list[str]]:
+    async def judge(
+        self, code: str, config: dict[str, Any] | None = None
+    ) -> tuple[bool, list[str]]:
         cfg = config or {}
         banned_terms = cfg.get("banned_terms", ["eval", "exec"])
         require_docstrings = cfg.get("require_docstrings", False)
@@ -143,7 +147,9 @@ class ASTLintJudge(Judge):
 class TestRunnerJudge(Judge):
     """Spawns a pytest subprocess to execute tests against the submitted code."""
 
-    async def judge(self, code: str, config: dict[str, Any] | None = None) -> tuple[bool, list[str]]:
+    async def judge(
+        self, code: str, config: dict[str, Any] | None = None
+    ) -> tuple[bool, list[str]]:
         import os
         import subprocess
         import sys
@@ -185,7 +191,10 @@ class TestRunnerJudge(Judge):
                     output = res.stdout or ""
                     if res.stderr:
                         output += "\n" + res.stderr
-                    return False, [f"pytest failed with exit status {res.returncode}", output.strip()]
+                    return False, [
+                        f"pytest failed with exit status {res.returncode}",
+                        output.strip(),
+                    ]
             except subprocess.TimeoutExpired:
                 return False, [f"Test runner timed out after {timeout} seconds"]
             except (ValueError, TypeError, OSError, KeyError) as e:
@@ -195,7 +204,9 @@ class TestRunnerJudge(Judge):
 class PolicyJudge(Judge):
     """Validates submitted code against policy constraints like line limits and imports."""
 
-    async def judge(self, code: str, config: dict[str, Any] | None = None) -> tuple[bool, list[str]]:
+    async def judge(
+        self, code: str, config: dict[str, Any] | None = None
+    ) -> tuple[bool, list[str]]:
         cfg = config or {}
         max_lines = cfg.get("max_lines")
         banned_imports = cfg.get("banned_imports", [])

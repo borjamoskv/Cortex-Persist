@@ -26,6 +26,7 @@ class ApexRegistry:
     C5-REAL: Registry for MOSKV-1 APEX Primitives & Ouroboros Laws.
     Loads and serves the 100 Sovereign APEX Primitives and 100 Invariants.
     """
+
     def __init__(self) -> None:
         self._primitives: dict[str, ApexPrimitive] = {}
         self._invariants: dict[str, OuroborosInvariant] = {}
@@ -38,7 +39,7 @@ class ApexRegistry:
 
         with open(registry_path, encoding="utf-8") as f:
             data = json.load(f)
-            
+
             # Load Primitives
             for p in data.get("primitives", []):
                 prim = ApexPrimitive(
@@ -47,16 +48,14 @@ class ApexRegistry:
                     execute=p.get("execute", ""),
                     trigger=p.get("trigger", ""),
                     verify=p.get("verify", ""),
-                    fail=p.get("fail", "")
+                    fail=p.get("fail", ""),
                 )
                 self._primitives[prim.id] = prim
-                
+
             # Load Invariants
             for inv in data.get("invariants", []):
                 invariant = OuroborosInvariant(
-                    id=inv.get("id", ""),
-                    name=inv.get("name", ""),
-                    rule=inv.get("rule", "")
+                    id=inv.get("id", ""), name=inv.get("name", ""), rule=inv.get("rule", "")
                 )
                 self._invariants[invariant.id] = invariant
 
@@ -67,11 +66,11 @@ class ApexRegistry:
     def list_primitives(self) -> list[ApexPrimitive]:
         """List all loaded primitives"""
         return list(self._primitives.values())
-        
+
     def get_invariant(self, inv_id: str) -> Optional[OuroborosInvariant]:
         """Retrieve a specific invariant by ID (e.g. 'OUROBOROS-001')"""
         return self._invariants.get(inv_id)
-        
+
     def list_invariants(self) -> list[OuroborosInvariant]:
         """List all loaded invariants"""
         return list(self._invariants.values())

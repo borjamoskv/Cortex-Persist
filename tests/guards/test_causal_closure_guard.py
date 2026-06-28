@@ -28,6 +28,7 @@ def test_low_token_cost_does_not_bypass_strict_checks(closure_guard: CausalClosu
     )
     # Should fail because it lacks structure (Anergia Bypass was removed)
     import pytest
+
     with pytest.raises(RuntimeError, match="failed to achieve Causal Closure"):
         closure_guard.verify_closure(proposal)
 

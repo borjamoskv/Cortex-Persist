@@ -13,7 +13,9 @@ class ReplayEngine:
         self.state_cls = state_cls
 
     def run(
-        self, events: list[dict[str, Any]], expected_hashes: dict[int, str] = None  # type: ignore
+        self,
+        events: list[dict[str, Any]],
+        expected_hashes: dict[int, str] = None,  # type: ignore
     ) -> list[dict[str, Any]]:
         """
         Ejecuta los eventos secuencialmente sobre el estado.

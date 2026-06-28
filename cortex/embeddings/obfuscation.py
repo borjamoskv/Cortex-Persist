@@ -26,6 +26,7 @@ def get_obfuscation_key() -> bytes:
     except (ValueError, TypeError, OSError, KeyError):
         return key_str.encode("utf-8")
 
+
 def derive_pad_vector(dimension: int, tenant_id: str = "default", project: str = "") -> np.ndarray:
     """
     Derives a deterministic project-specific and tenant-specific pad vector (one-time pad).
@@ -33,7 +34,7 @@ def derive_pad_vector(dimension: int, tenant_id: str = "default", project: str =
     """
     secret = get_obfuscation_key()
     context = f"{tenant_id}:{project}".encode()
-    
+
     # Generate floats by expanding key
     okm = b""
     counter = 0
@@ -41,18 +42,19 @@ def derive_pad_vector(dimension: int, tenant_id: str = "default", project: str =
         h = hmac.new(secret, context + bytes([counter]), hashlib.sha256)
         okm += h.digest()
         counter += 1
-        
-    uints = np.frombuffer(okm[:dimension * 4], dtype=np.uint32)
+
+    uints = np.frombuffer(okm[: dimension * 4], dtype=np.uint32)
     raw_floats = (uints.astype(np.float32) / 4294967295.0) * 2.0 - 1.0
-    
+
     # Scale to specific small magnitude to maintain cosine similarity ranking stability.
     # Default scale factor is 0.1, configurable via CORTEX_OBFUSCATION_PAD_SCALE
     scale = float(os.environ.get("CORTEX_OBFUSCATION_PAD_SCALE", "0.1"))
     norm = np.linalg.norm(raw_floats)
     if norm > 0:
         raw_floats = (raw_floats / norm) * scale
-        
+
     return raw_floats
+
 
 def obfuscate_vector(
     vector: list[float],
@@ -69,10 +71,10 @@ def obfuscate_vector(
 
     if not vector:
         return []
-        
+
     arr = np.array(vector, dtype=np.float32)
     pad = derive_pad_vector(len(arr), tenant_id, project)
-    
+
     # Linear addition: embedding + pad
     obfuscated = arr + pad
     return obfuscated.tolist()

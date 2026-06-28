@@ -15,7 +15,9 @@ class TutorAgent:
     def __init__(self, llm_manager: Any):
         self.llm = llm_manager
 
-    async def evaluate_student_input(self, student_input: str, target_theorem: str, ast_validation: bool = True) -> dict:
+    async def evaluate_student_input(
+        self, student_input: str, target_theorem: str, ast_validation: bool = True
+    ) -> dict:
         """
         Evaluate student's semantic divergence.
         If ast_validation is True, attempts to bridge C4-SIM to C5-REAL via structural assertions.
@@ -27,7 +29,7 @@ class TutorAgent:
         result = {
             "epistemic_level": "C4-SIM",
             "semantic_divergence": semantic_divergence,
-            "formal_validation": None
+            "formal_validation": None,
         }
 
         # Bridge to C5-REAL

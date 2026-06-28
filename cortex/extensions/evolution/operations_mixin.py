@@ -115,7 +115,9 @@ class EvolutionOpsMixin:
 
         agent.mutations.clear()
 
-    def _crossover(self, parent_a: EnneagramSubAgent, parent_b: EnneagramSubAgent) -> EnneagramSubAgent:
+    def _crossover(
+        self, parent_a: EnneagramSubAgent, parent_b: EnneagramSubAgent
+    ) -> EnneagramSubAgent:
         """Perform genetic crossover combining two parent EnneagramSubAgents into a new offspring."""
         cycle = getattr(self, "cycle_count", 0)
         child = EnneagramSubAgent(
@@ -161,7 +163,9 @@ class EvolutionOpsMixin:
             survivors = subs[cull_limit:]
 
             while len(survivors) < len(subs):
-                spawn = EnneagramSubAgent(id=f"chaos_{random.randint(100, 999)}", domain=sovereign.domain)
+                spawn = EnneagramSubAgent(
+                    id=f"chaos_{random.randint(100, 999)}", domain=sovereign.domain
+                )
                 spawn.parameters = {"temperature": 1.0, "top_p": 1.0}
                 survivors.append(spawn)
                 culled += 1
@@ -331,7 +335,9 @@ class EvolutionOpsMixin:
             )
 
         # Crossover & Survival
-        subs: list[EnneagramSubAgent] = sorted(sovereign.subagents, key=lambda s: s.fitness, reverse=True)
+        subs: list[EnneagramSubAgent] = sorted(
+            sovereign.subagents, key=lambda s: s.fitness, reverse=True
+        )
         elite = subs[:3]
         cull_count = max(1, int(len(subs) * getattr(self.params, "selection_pressure", 0.3)))
         survivors = subs[:-cull_count] if cull_count < len(subs) else subs[:1]

@@ -120,7 +120,7 @@ class SovereignDB:
                 isolation_level=self.isolation_level,
                 check_same_thread=True,
             )
-            
+
             # 4. Set performance-optimized PRAGMAs
             conn.execute("PRAGMA journal_mode=WAL")
             conn.execute("PRAGMA synchronous=NORMAL")
@@ -178,7 +178,7 @@ class SovereignDB:
                         cursor.execute(sql, parameters)
                     else:
                         cursor.execute(sql)
-                    
+
                     rows = cursor.fetchall()
                     lastrowid = cursor.lastrowid
                     rowcount = cursor.rowcount
@@ -245,12 +245,14 @@ class SovereignDB:
 
     # 5. Provide methods: execute(), execute_many(), commit(), rollback(), close()
 
-    async def execute(self, sql: str, parameters: tuple[Any, ...] | dict[str, Any] | None = None) -> SovereignCursor:
+    async def execute(
+        self, sql: str, parameters: tuple[Any, ...] | dict[str, Any] | None = None
+    ) -> SovereignCursor:
         """Execute a query in the background thread."""
         if not self._running:
             raise sqlite3.ProgrammingError("Cannot operate on a closed database.")
         await self._ensure_initialized()
-        
+
         loop = asyncio.get_running_loop()
         future = loop.create_future()
         self._queue.put(("execute", sql, parameters, future, loop))
@@ -294,7 +296,7 @@ class SovereignDB:
         if not self._running:
             return
         self._running = False
-        
+
         # Don't wait for init if it failed, but wait if it's still initializing
         if not self._init_event.is_set():
             await asyncio.to_thread(self._init_event.wait)
@@ -307,7 +309,7 @@ class SovereignDB:
         future = loop.create_future()
         self._queue.put(("shutdown", future, loop))
         await future
-        
+
         # Safely join the background thread without blocking the event loop
         await asyncio.to_thread(self._thread.join, timeout=2.0)
 

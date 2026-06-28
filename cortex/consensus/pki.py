@@ -15,9 +15,10 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 
 logger = logging.getLogger("cortex.consensus.pki")
 
+
 class TrustMatrix:
     """Dynamic, thread-safe registry of Swarm Agents and their Public Keys."""
-    
+
     def __init__(self):
         # agent_id -> Ed25519PublicKey
         self._peers: dict[str, ed25519.Ed25519PublicKey] = {}
@@ -25,30 +26,30 @@ class TrustMatrix:
         self._revoked: set[str] = set()
         # Bootstrap tokens authorized by the Host for initial join
         self._valid_bootstrap_tokens: set[str] = set()
-        
+
     def authorize_bootstrap_token(self, token: str) -> None:
         """Host authorizes a new ephemeral token for a nascent Vesicle."""
         self._valid_bootstrap_tokens.add(token)
-        
+
     def get_known_peers(self) -> dict[str, ed25519.Ed25519PublicKey]:
         """Provides the current peer snapshot to the BFTQuorumGuard."""
         return self._peers.copy()
-        
+
     def get_peer_key(self, agent_id: str) -> Optional[ed25519.Ed25519PublicKey]:
         """Fetch a specific agent's public key."""
         return self._peers.get(agent_id)
-        
+
     def revoke_agent(self, agent_id: str) -> None:
         """Terminal exclusion of an agent from the Swarm."""
         if agent_id in self._peers:
             del self._peers[agent_id]
         self._revoked.add(agent_id)
         logger.critical(f"[TrustMatrix] AGENT REVOKED: {agent_id}. Mutational rights severed.")
-        
+
     def process_handshake(self, payload_str: str) -> bool:
         """
         Process an incoming Zenoh handshake broadcast.
-        
+
         Expected JSON format:
         {
             "agent_id": "...",
@@ -63,18 +64,20 @@ class TrustMatrix:
             pub_b64 = data.get("public_key_b64")
             token = data.get("bootstrap_token")
             sig_b64 = data.get("signature_b64")
-            
+
             if not all([agent_id, pub_b64, token, sig_b64]):
                 return False
-                
+
             if agent_id in self._revoked:
                 logger.warning(f"[TrustMatrix] Rejected handshake from REVOKED agent: {agent_id}")
                 return False
-                
+
             if token not in self._valid_bootstrap_tokens:
-                logger.warning(f"[TrustMatrix] Rejected handshake. Invalid/consumed bootstrap token: {token}")
+                logger.warning(
+                    f"[TrustMatrix] Rejected handshake. Invalid/consumed bootstrap token: {token}"
+                )
                 return False
-                
+
             # Decode the public key
             try:
                 pub_bytes = base64.b64decode(pub_b64)
@@ -82,7 +85,7 @@ class TrustMatrix:
             except Exception as e:
                 logger.warning(f"[TrustMatrix] Malformed public key from {agent_id}: {e}")
                 return False
-                
+
             # Verify the signature
             try:
                 sig_bytes = base64.b64decode(sig_b64)
@@ -91,16 +94,17 @@ class TrustMatrix:
             except InvalidSignature:
                 logger.error(f"[TrustMatrix] Signature verification failed for agent: {agent_id}")
                 return False
-                
+
             # Success: Register agent and burn token
             self._peers[agent_id] = public_key
             self._valid_bootstrap_tokens.remove(token)
-            
+
             logger.info(f"[TrustMatrix] Handshake ACCEPTED. Agent joined fabric: {agent_id}")
             return True
-            
+
         except json.JSONDecodeError:
             return False
+
 
 # Global Trust Matrix (Singleton)
 trust_matrix = TrustMatrix()

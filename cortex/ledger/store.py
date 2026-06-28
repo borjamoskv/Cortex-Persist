@@ -25,6 +25,7 @@ class LedgerStore:
     def tx(self) -> Iterator[sqlite3.Connection]:
         conn = self._connect()
         from cortex.database.core import causal_write
+
         try:
             with causal_write(conn):
                 yield conn

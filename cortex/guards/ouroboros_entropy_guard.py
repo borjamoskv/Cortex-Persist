@@ -67,6 +67,7 @@ class OuroborosEntropyGuard:
             if repetition_ratio > self.repetition_threshold:
                 # Find the most repeated task name
                 from collections import Counter
+
                 most_common = Counter(task_names).most_common(1)[0]
                 raise ValueError(
                     f"[P0] Ouroboros Entropy Guard: Infinite loop detected in async tasks. "

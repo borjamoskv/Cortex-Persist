@@ -76,7 +76,9 @@ class EntropicWakeDaemon:
 
         except (sqlite3.Error, OSError, ValueError) as e:
             logger.critical("RADAR-Ω SENSOR DRIFT: %s", e)
-            raise RuntimeError(f"Sensor Drift: Epistemic failure in entropy calculation. Original error: {e}")
+            raise RuntimeError(
+                f"Sensor Drift: Epistemic failure in entropy calculation. Original error: {e}"
+            )
 
         logger.debug("Current Zenón Entropy τ_z: %s", entropy_score)
         return entropy_score
@@ -121,11 +123,13 @@ class EntropicWakeDaemon:
                 tags=["Autopoiesis"],
                 confidence="C5",
                 source="daemon:entropic_wake",
-                actor_id="entropic_wake"
+                actor_id="entropic_wake",
             )
             logger.info("Logged autopoiesis cycle to CORTEX.")
         except Exception as e:
-            logger.critical("BFT CONSENSUS FAILURE: Could not persist autopoiesis cycle to Ledger. %s", e)
+            logger.critical(
+                "BFT CONSENSUS FAILURE: Could not persist autopoiesis cycle to Ledger. %s", e
+            )
             raise
 
     async def run_loop(self):

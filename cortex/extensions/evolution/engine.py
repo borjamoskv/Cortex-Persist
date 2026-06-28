@@ -43,7 +43,9 @@ class EvolutionEngine(EvolutionOpsMixin):
     - Adversarial Grounding (Telemetry)
     """
 
-    def __init__(self, sovereigns: list[EnneagramSovereign] | None = None, engine: Any | None = None):
+    def __init__(
+        self, sovereigns: list[EnneagramSovereign] | None = None, engine: Any | None = None
+    ):
         self.sovereigns = sovereigns or []
         self.params = EngineParameters()
         self.cycle_count = 0

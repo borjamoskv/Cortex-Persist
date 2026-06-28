@@ -11,6 +11,7 @@ logger = logging.getLogger("cortex.guards.homoglyph_guard")
 
 class SecurityViolation(Exception):
     """Raised when a security violation (e.g. homoglyph attack) is detected in the AST."""
+
     pass
 
 
@@ -26,9 +27,7 @@ class AntiHomoglyphVisitor(ast.NodeVisitor):
                     char_name = unicodedata.name(char)
                 except ValueError:
                     char_name = "UNKNOWN"
-                self.homoglyphs_found.append(
-                    (name, char, char_name, getattr(node, "lineno", 0))
-                )
+                self.homoglyphs_found.append((name, char, char_name, getattr(node, "lineno", 0)))
 
     def visit_Name(self, node: ast.Name) -> None:
         self.check_name(node.id, node)

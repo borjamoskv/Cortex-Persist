@@ -48,19 +48,17 @@ class TSAClient:
 
         try:
             req = rfc3161ng.make_request(payload_hash.encode("utf-8"), hash_algo="sha256")
-            
+
             response = await self._client.post(
-                self.tsa_url,
-                content=req,
-                headers={"Content-Type": "application/timestamp-query"}
+                self.tsa_url, content=req, headers={"Content-Type": "application/timestamp-query"}
             )
-            
+
             if response.status_code == 200:
                 return base64.b64encode(response.content).decode("ascii")
             else:
                 logger.error(f"[TSA] Failed to retrieve token. Status: {response.status_code}")
                 return None
-                
+
         except Exception as e:
             logger.error(f"[TSA] Exception during get_timestamp_token: {e}")
             return None

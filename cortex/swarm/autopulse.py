@@ -133,7 +133,10 @@ def _execute_anti_limerence_sync(agent: str, reality_delta: float, anti_limerenc
                 return True
     except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         import logging
-        logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex/swarm/autopulse.py - {e}")
+
+        logging.getLogger(__name__).exception(
+            f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex/swarm/autopulse.py - {e}"
+        )
         logger.error("AntiLimerence Execution Failed: %s", e)
     return False
 
@@ -149,7 +152,10 @@ def _write_ledger_sync(agent: str, payload: dict) -> str:
                     prev_hash = state["ledgers"][-1]["hash"]
         except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             import logging
-            logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex/swarm/autopulse.py - {exc}")
+
+            logging.getLogger(__name__).exception(
+                f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex/swarm/autopulse.py - {exc}"
+            )
             logger.warning("Suppressed exception: %s", exc)
 
     action = f"SwarmSolve:{agent}"
@@ -199,6 +205,7 @@ async def _append_state_ledger(agent: str, payload: dict) -> None:
         import aiosqlite
 
         from cortex.database.core import connect_async
+
         async with await connect_async(DB_PATH) as conn:
             bus = AsyncSignalBus(conn)
             await bus.emit(
@@ -260,14 +267,18 @@ async def _process_single_task(agent: str, payload: dict, anti_limerence, umap) 
         raise EntropySpikeException(f"Entropy Circuit Breaker tripped for {agent}")
 
     await _append_state_ledger(agent, payload)
-    
+
     # [P2] Emit to Gossip Protocol for decentralized consensus
     from cortex.swarm.autopulse import _gossip_bus
+
     if _gossip_bus:
-        await _gossip_bus.broadcast(signal_type="AutopulseTask", payload={"agent": agent, **payload})
+        await _gossip_bus.broadcast(
+            signal_type="AutopulseTask", payload={"agent": agent, **payload}
+        )
 
 
 _gossip_bus: GossipBus | None = None
+
 
 async def process_queue() -> None:
     """Background loop to consume and execute pending swarm tasks."""
@@ -305,7 +316,10 @@ async def process_queue() -> None:
                     await asyncio.sleep(30.0)
                 except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                     import logging
-                    logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex/swarm/autopulse.py - {e}")
+
+                    logging.getLogger(__name__).exception(
+                        f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex/swarm/autopulse.py - {e}"
+                    )
                     logger.error("Unexpected error processing task: %s", e)
 
             await asyncio.sleep(2.0)

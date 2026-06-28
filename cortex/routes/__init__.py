@@ -80,12 +80,8 @@ _DANGEROUS_CLOUD_ROUTES = {
 }
 
 if config.DEPLOY_MODE == "cloud":
-    _API_ROUTE_SPECS = tuple(
-        r for r in _API_ROUTE_SPECS_ALL if r[0] not in _DANGEROUS_CLOUD_ROUTES
-    )
-    _ROUTE_MODULES = {
-        m for m in _ROUTE_MODULES_ALL if m not in _DANGEROUS_CLOUD_ROUTES
-    }
+    _API_ROUTE_SPECS = tuple(r for r in _API_ROUTE_SPECS_ALL if r[0] not in _DANGEROUS_CLOUD_ROUTES)
+    _ROUTE_MODULES = {m for m in _ROUTE_MODULES_ALL if m not in _DANGEROUS_CLOUD_ROUTES}
 else:
     _API_ROUTE_SPECS = _API_ROUTE_SPECS_ALL
     _ROUTE_MODULES = _ROUTE_MODULES_ALL

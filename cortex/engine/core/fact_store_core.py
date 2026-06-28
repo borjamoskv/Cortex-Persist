@@ -119,17 +119,21 @@ async def insert_fact_record(
         content=content,
         source=str(meta.get("cortex_taint_source", "unknown")) if meta else "unknown",
         confidence=confidence,
-        meta=meta
+        meta=meta,
     )
 
     # Taint tokens are STRICTLY ENFORCED for all fact types (PHALANX Doomsday remediation)
     if not taint_already_verified:
         token = (
-            meta.get("cortex_taint")
-            or meta.get("CORTEX-TAINT")
-            or meta.get("cortex-taint")
-            or meta.get("CORTEX_TAINT")
-        ) if meta else None
+            (
+                meta.get("cortex_taint")
+                or meta.get("CORTEX-TAINT")
+                or meta.get("cortex-taint")
+                or meta.get("CORTEX_TAINT")
+            )
+            if meta
+            else None
+        )
         await enforce_taint_check(conn, token, content)
 
     if fact_type == "UI_ACTION" and meta:

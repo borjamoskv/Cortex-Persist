@@ -339,7 +339,9 @@ class ApexKnowledgeTool:
     def name(self) -> str:
         return "apex_knowledge"
 
-    async def execute(self, *, action: str = "lookup", apex_id: str | None = None) -> dict[str, Any]:
+    async def execute(
+        self, *, action: str = "lookup", apex_id: str | None = None
+    ) -> dict[str, Any]:
         """Query the APEX registry.
 
         Actions:
@@ -347,11 +349,13 @@ class ApexKnowledgeTool:
             lookup: Return full details (Trigger, Execute, Verify, Fail) for a specific apex_id.
         """
         from cortex.agents.primitives.registry import apex_registry
-        
+
         if action == "list":
             return {
                 "ok": True,
-                "primitives": [{"id": p.id, "name": p.name} for p in apex_registry.list_primitives()]
+                "primitives": [
+                    {"id": p.id, "name": p.name} for p in apex_registry.list_primitives()
+                ],
             }
         elif action == "lookup":
             if not apex_id:
@@ -360,7 +364,7 @@ class ApexKnowledgeTool:
             if not prim:
                 return {"ok": False, "error": f"Primitive {apex_id} not found."}
             return {"ok": True, "primitive": prim}
-        
+
         return {"ok": False, "error": f"Unknown action: {action}"}
 
 

@@ -301,14 +301,16 @@ class MemoryArchaeologist:
                 "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
                 (primary_parent_id, new_fact_id),
             )
-            
+
         try:
             from cortex.engine.core.l3_archive import l3_archiver
+
             l3_archiver.archive_facts(cluster_facts)  # type: ignore[arg-type]
         except Exception as e:
             import logging
+
             logging.getLogger("cortex.memory.archaeology").warning("L3 Archival failed: %s", e)
-            
+
         cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", str_old_ids)  # nosec B608
         cl2.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")
         cl2 = l2_conn.cursor()

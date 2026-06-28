@@ -49,6 +49,7 @@ class SwarmBudgetManager:
     def _init_db(self):
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         from contextlib import closing
+
         with closing(db_connect(str(self.db_path))) as conn:
             with conn:
                 conn.execute("""
@@ -73,6 +74,7 @@ class SwarmBudgetManager:
         now = time.monotonic()
         try:
             from cortex.database.core import causal_write
+
             with db_connect(str(self.db_path)) as conn:
                 with causal_write(conn):
                     conn.execute(

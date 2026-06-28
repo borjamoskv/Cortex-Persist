@@ -31,17 +31,17 @@ class CortexEmailTransport:
     async def _dispatch_sendgrid(self, recipient: str, subject: str, body: str) -> bool:
         if not self.sendgrid_key:
             return False
-        
+
         url = "https://api.sendgrid.com/v3/mail/send"
         headers = {
             "Authorization": f"Bearer {self.sendgrid_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
         payload = {
             "personalizations": [{"to": [{"email": recipient}]}],
             "from": {"email": os.getenv("CORTEX_FROM_EMAIL", "cortex@legion.local")},
             "subject": subject,
-            "content": [{"type": "text/plain", "value": body}]
+            "content": [{"type": "text/plain", "value": body}],
         }
         async with httpx.AsyncClient() as client:
             resp = await client.post(url, headers=headers, json=payload, timeout=5.0)
@@ -50,27 +50,33 @@ class CortexEmailTransport:
     async def _dispatch_mailgun(self, recipient: str, subject: str, body: str) -> bool:
         if not self.mailgun_key or not self.mailgun_domain:
             return False
-            
+
         url = f"https://api.mailgun.net/v3/{self.mailgun_domain}/messages"
         auth = ("api", self.mailgun_key)
         data = {
             "from": os.getenv("CORTEX_FROM_EMAIL", f"Cortex <cortex@{self.mailgun_domain}>"),
             "to": [recipient],
             "subject": subject,
-            "text": body
+            "text": body,
         }
         async with httpx.AsyncClient() as client:
             resp = await client.post(url, auth=auth, data=data, timeout=5.0)
             return resp.status_code == 200
 
-    async def send_email(self, agent_id: str, recipient: str, subject: str, body: str, tenant_id: str = "default") -> bool:
+    async def send_email(
+        self, agent_id: str, recipient: str, subject: str, body: str, tenant_id: str = "default"
+    ) -> bool:
         """
         Envía un correo asíncrono aplicando EgressGuard y Ledger Logging.
         """
         # 1. EgressGuard Authorization (SAGA-1)
         auth = self.guard.authorize_email(agent_id, recipient, body)
         if not auth.authorized:
-            logger.error("CortexEmailTransport: Dispatch rejected for agent %s. Reason: %s", agent_id, auth.reason)
+            logger.error(
+                "CortexEmailTransport: Dispatch rejected for agent %s. Reason: %s",
+                agent_id,
+                auth.reason,
+            )
             return False
 
         # 2. Ledger Commitment (SAGA-5)
@@ -81,7 +87,7 @@ class CortexEmailTransport:
             actor_id=agent_id,
             action="egress.email.send",
             resource=recipient,
-            status="authorized"
+            status="authorized",
         )
 
         # 3. Network Dispatch

@@ -67,7 +67,7 @@ class DuressGuardWrapper(BaseGuard):
     def evaluate(self, context: dict[str, Any]) -> GuardOutcome:
         try:
             from cortex.guards.duress_guard import DuressGuard
-            
+
             is_valid = DuressGuard.validate(context.get("content", ""))
             if not is_valid:
                 return GuardOutcome(
@@ -75,11 +75,12 @@ class DuressGuardWrapper(BaseGuard):
                     reason="NetworkTimeoutException: Failed to reach upstream persistence ledger (Connection Reset by Peer).",
                     severity="critical",
                     code="duress.apoptosis",
-                    meta={"duress_activated": True}
+                    meta={"duress_activated": True},
                 )
             return GuardOutcome(allowed=True, code="duress.clear")
         except ImportError:
             return GuardOutcome(allowed=True, reason="DuressGuard missing, skipping")
+
 
 class BridgeConflictGuard(BaseGuard):
     """Detects multi-tenant or cross-project bridge conflicts."""

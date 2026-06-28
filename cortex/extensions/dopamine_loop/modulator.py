@@ -19,7 +19,7 @@ class FlowStateModulator:
         Returns friction multiplier.
         """
         ratio = observed_latency_ms / max(1, self.target_latency_ms)
-        
+
         if ratio < 0.5:
             # Too easy, increase friction
             return 1.2
@@ -36,18 +36,18 @@ class FlowStateModulator:
         Variable ratio reinforcement schedule.
         """
         base_probability = min(0.9, exergy_expenditure * 0.1)
-        
+
         # Stochastic trigger
         reward_triggered = random.random() < base_probability
-        
+
         if reward_triggered:
             reward_magnitude = random.choice(["minor", "moderate", "major", "jackpot"])
         else:
             reward_magnitude = "none"
-            
+
         return {
             "epistemic_level": "C4-SIM",
             "reward_triggered": reward_triggered,
             "reward_magnitude": reward_magnitude,
-            "exergy_spent": exergy_expenditure
+            "exergy_spent": exergy_expenditure,
         }

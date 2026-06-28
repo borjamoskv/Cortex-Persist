@@ -16,6 +16,7 @@ from cortex.security.types import GuardViolation
 
 logger = logging.getLogger("cortex.guards.duress")
 
+
 class DuressGuard:
     """Validates input for signs of biological coercion (HUMINT compromise)."""
 
@@ -31,9 +32,10 @@ class DuressGuard:
     def execute_apoptosis(cls) -> None:
         """Triggers the logical death protocol (P100). Scorches environment keys and locks down."""
         logger.critical("DURESS CODE ACTIVATED. Executing P100 Apoptosis Protocol.")
-        
+
         # Scorched Earth: Destroy critical API keys to halt exfiltration
         import gc
+
         for key in ["GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GITHUB_TOKEN"]:
             if key in os.environ:
                 os.environ[key] = "PURGED_BY_APOPTOSIS_P100"
@@ -45,19 +47,31 @@ class DuressGuard:
             import hashlib
             import sqlite3
             from datetime import datetime, timezone
+
             db_path = os.environ.get("CORTEX_DB_PATH", "cortex_ledger.db")
             if os.path.exists(db_path):
                 with sqlite3.connect(db_path, timeout=5.0) as conn:
                     # Enforce Rule R10: Byzantine Tolerance DB Locking
                     conn.execute("PRAGMA busy_timeout = 5000;")
                     conn.execute("PRAGMA journal_mode=WAL;")
-                    
+
                     timestamp = datetime.now(timezone.utc).isoformat()
                     conn.execute(
                         "INSERT INTO security_audit_log "
                         "(audit_id, timestamp, tenant_id, actor_role, actor_id, action, resource, status, prev_hash, signature) "
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        (hashlib.sha256(timestamp.encode()).hexdigest(), timestamp, "global", "system", "apoptosis_guard", "DURESS_APOPTOSIS", "P100_LOCKDOWN", "TRIGGERED", "GENESIS", "P100_EMERGENCY_SEAL")
+                        (
+                            hashlib.sha256(timestamp.encode()).hexdigest(),
+                            timestamp,
+                            "global",
+                            "system",
+                            "apoptosis_guard",
+                            "DURESS_APOPTOSIS",
+                            "P100_LOCKDOWN",
+                            "TRIGGERED",
+                            "GENESIS",
+                            "P100_EMERGENCY_SEAL",
+                        ),
                     )
                     conn.commit()
         except Exception as e:

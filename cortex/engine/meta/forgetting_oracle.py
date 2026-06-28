@@ -73,6 +73,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
         # Ω₃/Ω₂: Integrated Services
         from cortex.services.notebooklm import NotebookLMService
         from cortex.services.trust import TrustService
+
         db_path = str(getattr(engine, "_db_path", ""))
         self._trust = TrustService(db_path) if db_path else None
         self._notebooklm = NotebookLMService(db_path) if db_path else None

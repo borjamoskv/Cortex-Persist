@@ -12,8 +12,10 @@ import threading
 
 logger = logging.getLogger("cortex.engine.immune_daemon")
 
+
 class ImmuneMutator(ast.NodeTransformer):
     """INV-01: Mutación Autóloga Continua. Altera la lógica booleana del AST."""
+
     def visit_Compare(self, node):
         if random.random() < 0.2:
             for i, op in enumerate(node.ops):
@@ -26,6 +28,7 @@ class ImmuneMutator(ast.NodeTransformer):
                 elif isinstance(op, ast.IsNot):
                     node.ops[i] = ast.Is()
         return self.generic_visit(node)
+
 
 class ImmuneDaemon:
     def __init__(self, target_guard_module: str):
@@ -52,7 +55,7 @@ class ImmuneDaemon:
                 self._execute_shadow_mutation()
             except Exception as e:
                 logger.error(f"[Φ4] Fallo interno en fagocitosis: {e}")
-            
+
             # Descanso termodinámico para no colapsar la RAM (Bucle asintótico)
             threading.Event().wait(10)  # noqa: TID251 # Threaded loop  # noqa: TID251 # Threaded loop
 
@@ -76,19 +79,19 @@ def validate_taint(payload: dict) -> bool:
         mutator = ImmuneMutator()
         mutated_tree = mutator.visit(tree)
         ast.fix_missing_locations(mutated_tree)
-        
+
         mutant_code = ast.unparse(mutated_tree)
-        
+
         # Ejecutar en namespace aislado
         namespace = {}
         exec(mutant_code, globals(), namespace)
         mutant_guard = namespace.get("validate_taint")
-        
+
         if mutant_guard:
             # Shadow Write: Enviamos un payload INVÁLIDO que NO tiene taint.
             # El guard ORIGINAL debería devolver False.
             shadow_payload = {"data": "malicious_injection"}
-            
+
             # Si el guard MUTADO devuelve True para un payload inválido...
             if mutant_guard(shadow_payload) is True:
                 # Significa que la mutación rompió la seguridad y podría inyectarse en el Ledger.
@@ -101,18 +104,19 @@ def validate_taint(payload: dict) -> bool:
         logger.critical("[Φ4] Un mutante AST validó un Shadow Write fraudulento.")
         logger.critical(f"[Φ4] Firma del Patógeno (Mutante):\n{mutant_signature}")
         logger.critical("[Φ4] INV-03: Disparando Apoptosis Sistémica (Exit 1).")
-        
+
         # Aquí registraríamos el patógeno en el Ledger antes de morir (INV-04)
         # ledger.commit_pathogen_signature(hash(mutant_signature))
-        
+
         # Muerte Física
         sys.exit(1)
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     daemon = ImmuneDaemon("cortex.guards.sovereign_seals")
     daemon.start()
-    
+
     # Simula el proceso principal corriendo durante 60s antes de detenerse
     try:
         threading.Event().wait(60)  # noqa: TID251 # Main process loop

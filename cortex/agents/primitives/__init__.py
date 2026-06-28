@@ -6,5 +6,5 @@ __all__ = [
     "ApexPrimitive",
     "OuroborosInvariant",
     "apex_dispatcher",
-    "ApexDispatcher"
+    "ApexDispatcher",
 ]

@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 """Git Context Guard - Prevents operations in the wrong repository clone.
 
-This guard enforces MIT-1 (Path Verification) and prevents Sensor Drift 
-by asserting that the active repository context matches the expected remote 
+This guard enforces MIT-1 (Path Verification) and prevents Sensor Drift
+by asserting that the active repository context matches the expected remote
 origin before allowing state mutations or diagnostic sweeps.
 """
 
@@ -17,6 +17,7 @@ LOG = logging.getLogger("cortex.guards.git_context_guard")
 
 class GitContextDriftError(Exception):
     """Raised when the git context does not match the expected topology."""
+
     pass
 
 
@@ -39,18 +40,20 @@ class GitContextGuard:
                 check=True,
             )
             origin_url = result.stdout.strip()
-            
+
             if expected_origin_fragment not in origin_url:
                 LOG.error(
                     "❌ [GIT_CONTEXT_GUARD] Context drift detected. "
                     "Expected origin fragment '%s' not found in '%s'. CWD: %s",
-                    expected_origin_fragment, origin_url, cwd
+                    expected_origin_fragment,
+                    origin_url,
+                    cwd,
                 )
                 raise GitContextDriftError(
                     f"Sensor Drift: Active repository ({origin_url}) does not match expected topology."
                 )
             return True
-            
+
         except subprocess.CalledProcessError as e:
             LOG.error("❌ [GIT_CONTEXT_GUARD] Failed to execute git. Not a git repository? %s", e)
             raise GitContextDriftError("Execution context is not a valid git repository.") from e

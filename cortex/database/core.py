@@ -96,10 +96,10 @@ class CortexConnection(sqlite3.Connection):
             if table and (
                 table.startswith("sqlite_")
                 or table.startswith("vec_")
-                or table.endswith("_data") 
-                or table.endswith("_idx") 
-                or table.endswith("_content") 
-                or table.endswith("_docsize") 
+                or table.endswith("_data")
+                or table.endswith("_idx")
+                or table.endswith("_content")
+                or table.endswith("_docsize")
                 or table.endswith("_config")
                 or table.endswith("_info")
                 or table == "health_history"
@@ -137,17 +137,21 @@ def _secure_sqlite3_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
 
         pytest_test = os.environ.get("PYTEST_CURRENT_TEST", "")
         is_security_test = (
-            "test_verify" in pytest_test 
-            or "test_physical_claims" in pytest_test 
-            or "test_ataque" in pytest_test 
+            "test_verify" in pytest_test
+            or "test_physical_claims" in pytest_test
+            or "test_ataque" in pytest_test
             or "test_metal" in pytest_test
         )
         if "PYTEST_CURRENT_TEST" in os.environ and not is_security_test:
-            return __import__("typing").cast(sqlite3.Connection, _original_sqlite3_connect(*args, **kwargs))
-            
+            return __import__("typing").cast(
+                sqlite3.Connection, _original_sqlite3_connect(*args, **kwargs)
+            )
+
         if args and isinstance(args[0], (str, bytes)) and ".coverage" in str(args[0]):
-            return __import__("typing").cast(sqlite3.Connection, _original_sqlite3_connect(*args, **kwargs))
-            
+            return __import__("typing").cast(
+                sqlite3.Connection, _original_sqlite3_connect(*args, **kwargs)
+            )
+
         raise RuntimeError(
             "[C5-REAL] FATAL: Direct sqlite3.connect() is structurally forbidden. Use MTK Allocator (cortex.database.core.connect)."
         )
@@ -163,7 +167,7 @@ def causal_write(conn: Any) -> Any:
     # aiosqlite connection has _conn, while raw sqlite3/CortexConnection does not
     underlying = conn._conn if hasattr(conn, "_conn") else conn
     is_cortex_conn = isinstance(underlying, CortexConnection)
-    
+
     # Only try to mutate the connection if it's a CortexConnection that supports dynamic attributes
     if is_cortex_conn:
         if getattr(underlying, "_causal_write_auth_count", 0) == 0:
@@ -367,7 +371,9 @@ async def connect_async(
     db_path = str(db_path)
     is_uri = uri or db_path.startswith("file:")
     try:
-        conn = await aiosqlite.connect(db_path, timeout=timeout, uri=is_uri, factory=CortexConnection)
+        conn = await aiosqlite.connect(
+            db_path, timeout=timeout, uri=is_uri, factory=CortexConnection
+        )
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):
             raise DBLockError(f"Async database lock timeout: {e}") from e

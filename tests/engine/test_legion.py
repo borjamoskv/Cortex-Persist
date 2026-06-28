@@ -45,7 +45,15 @@ async def test_async_signal_bus():
     bus = AsyncSignalBus()
 
     # Normal signal (high entropy to pass Landauer Epistemic Filter)
-    sig1 = SwarmSignal("a1", "t1", "SUCCESS", {"data": "High entropy string to bypass the epistemic filter check for the legion system test and ensure success"}, {})
+    sig1 = SwarmSignal(
+        "a1",
+        "t1",
+        "SUCCESS",
+        {
+            "data": "High entropy string to bypass the epistemic filter check for the legion system test and ensure success"
+        },
+        {},
+    )
     await bus.emit(sig1)
 
     # Empty payload with SUCCESS -> Raises ValueError (P0 Violation)

@@ -41,6 +41,7 @@ class ConsensusManager:
         tenant_id: str = "default",
     ) -> str:
         from cortex.database.core import causal_write
+
         agent_id = str(uuid.uuid4())
         async with self.engine.session() as conn:
             with causal_write(conn):
@@ -61,6 +62,7 @@ class ConsensusManager:
         reason: str | None = None,
     ) -> float:
         from cortex.database.core import causal_write
+
         if value not in (-1, 0, 1):
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
 
@@ -257,7 +259,10 @@ class ConsensusManager:
         """Slash an agent's reputation manually for consensus deviation or taint."""
         async with self.engine.session() as conn:
             from cortex.database.core import causal_write
+
             with causal_write(conn):
-                new_rep = await SlashingEngine.slash(conn, agent_id, penalty_type, reason, tenant_id)
+                new_rep = await SlashingEngine.slash(
+                    conn, agent_id, penalty_type, reason, tenant_id
+                )
                 await conn.commit()
             return new_rep

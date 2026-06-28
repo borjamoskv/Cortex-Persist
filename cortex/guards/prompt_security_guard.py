@@ -196,7 +196,11 @@ class PromptSecurityGuard:
 
     def _calculate_semantic_similarity(self, text: str) -> float:
         """Computes cosine embedding similarity or returns Jaccard heuristic fallback."""
-        if HAS_SENTENCE_TRANSFORMERS and self.model is not None and self.system_prompt_embedding is not None:
+        if (
+            HAS_SENTENCE_TRANSFORMERS
+            and self.model is not None
+            and self.system_prompt_embedding is not None
+        ):
             try:
                 response_embedding = self.model.encode(text, convert_to_tensor=True)
                 similarity = util.cos_sim(response_embedding, self.system_prompt_embedding)  # pyright: ignore[reportArgumentType]

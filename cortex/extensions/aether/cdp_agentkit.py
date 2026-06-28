@@ -18,6 +18,7 @@ from typing import Any
 # CDP Native integration pending. Stub mode active.
 CDP_AVAILABLE = False
 
+
 class CdpAgentkitWrapper:
     wallet: Any
 
@@ -27,9 +28,11 @@ class CdpAgentkitWrapper:
     def export_wallet(self) -> str:
         return ""
 
+
 class _MockCdpToolkit:
     def get_tools(self) -> list[Any]:
         return []
+
 
 class CdpToolkit:
     @classmethod

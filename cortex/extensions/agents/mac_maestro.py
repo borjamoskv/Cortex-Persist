@@ -43,6 +43,7 @@ class MacMaestroAgent:
         else:
             try:
                 from cortex.pipeline.provider_factory import build_executor_stack
+
                 _, router = build_executor_stack()
                 self.router = router
             except Exception as e:
@@ -74,7 +75,7 @@ class MacMaestroAgent:
                 "success": False,
                 "error": f"LLM returned error or empty response: {getattr(response_result, 'error', 'Unknown error')}",
             }
-            
+
         response = response_result.unwrap()
 
         # Parse JSON

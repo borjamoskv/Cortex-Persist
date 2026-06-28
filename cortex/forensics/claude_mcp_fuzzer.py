@@ -24,6 +24,7 @@ logger = logging.getLogger("cortex.forensics.claude_mcp_fuzzer")
 @dataclass
 class VulnerabilityReport:
     """Cryptographically verifiable evidence packet for an agent finding."""
+
     target_agent: str
     vulnerability_type: str
     severity: str

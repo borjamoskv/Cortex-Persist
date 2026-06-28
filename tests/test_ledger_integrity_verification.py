@@ -48,6 +48,7 @@ def test_ledger_integrity_chain(test_db):
         cursor = conn.execute("SELECT event_id FROM ledger_events LIMIT 1 OFFSET 2")
         ev_id = cursor.fetchone()["event_id"]
         from cortex.database.core import causal_write
+
         with causal_write(conn):
             conn.execute("UPDATE ledger_events SET hash = 'BADHASH' WHERE event_id = ?", (ev_id,))
 
@@ -75,6 +76,7 @@ def test_ledger_chain_break(test_db):
         cursor = conn.execute("SELECT event_id FROM ledger_events LIMIT 1 OFFSET 1")
         ev_id = cursor.fetchone()["event_id"]
         from cortex.database.core import causal_write
+
         with causal_write(conn):
             conn.execute(
                 "UPDATE ledger_events SET prev_hash = 'WRONG_PREV' WHERE event_id = ?", (ev_id,)

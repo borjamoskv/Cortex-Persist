@@ -38,6 +38,7 @@ def run_audit(db_path: str) -> None:
 
     async def _audit() -> None:
         from cortex.database.core import connect_async_ctx
+
         async with connect_async_ctx(db_path) as conn:
             ledger = EnterpriseAuditLedger(conn)
             await ledger.ensure_table()

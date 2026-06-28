@@ -29,6 +29,7 @@ logger = logging.getLogger("cortex.agents.base")
 
 class BaseAgent:
     """Core autonomous agent."""
+
     TICK_INTERVAL = 1.0
     """Abstract base agent with async event loop.
 

@@ -104,7 +104,7 @@ def build_causal_graph():
         for wf_to, metrics in targets.items():
             count = metrics["count"]
             avg_lat = sum(metrics["latencies"]) / count if count > 0 else 0
-            
+
             if count > 0:
                 avg_score_to = sum(metrics["scores_to"]) / Decimal(count)
             else:

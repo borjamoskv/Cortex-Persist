@@ -19,12 +19,8 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
-from uuid import uuid4
-from collections.abc import AsyncGenerator, Sequence
 
 from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import ed25519
 
 try:
     import yaml

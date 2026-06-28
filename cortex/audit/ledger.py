@@ -135,7 +135,9 @@ class EnterpriseAuditLedger:
                 await self._conn.execute(_CREATE_AUDIT_SQL)
 
                 try:
-                    await self._conn.execute("ALTER TABLE security_audit_log ADD COLUMN external_anchor TEXT")
+                    await self._conn.execute(
+                        "ALTER TABLE security_audit_log ADD COLUMN external_anchor TEXT"
+                    )
                 except Exception as e:
                     if "duplicate column name" not in str(e).lower():
                         raise e
@@ -154,10 +156,10 @@ class EnterpriseAuditLedger:
                     )
                     rows2 = await cursor2.fetchall()
                     batch_audit_ids = [r[0] for r in rows2]
-                    
+
                     for audit_id in batch_audit_ids:
                         smt_engine.update(hashlib.sha256(audit_id.encode()).hexdigest(), audit_id)
-                        
+
                     merkle_root = smt_engine.root
                     self._last_hash = hashlib.sha256(
                         f"merkle_batch:{merkle_root}:{prev_hash}".encode()
@@ -200,8 +202,12 @@ class EnterpriseAuditLedger:
         for row in rows:
             # row: 0=rowid, 1=audit_id, 2=timestamp, 3=tenant_id, 4=actor_role, 5=actor_id, 6=action, 7=resource, 8=status, 9=prev_hash, 10=signature
             # Validate individual audit_id to detect row-level tampering
-            expected_audit_id_v2 = hashlib.sha256(f"{row[2]}|{row[3]}|{row[4]}|{row[5]}|{row[6]}|{row[7]}|{row[8]}".encode()).hexdigest()
-            expected_audit_id_v1 = hashlib.sha256(f"{row[2]}{row[3]}{row[4]}{row[5]}{row[6]}{row[7]}{row[8]}".encode()).hexdigest()
+            expected_audit_id_v2 = hashlib.sha256(
+                f"{row[2]}|{row[3]}|{row[4]}|{row[5]}|{row[6]}|{row[7]}|{row[8]}".encode()
+            ).hexdigest()
+            expected_audit_id_v1 = hashlib.sha256(
+                f"{row[2]}{row[3]}{row[4]}{row[5]}{row[6]}{row[7]}{row[8]}".encode()
+            ).hexdigest()
             if row[1] not in (expected_audit_id_v2, expected_audit_id_v1):
                 return {
                     "status": "tampered",
@@ -223,6 +229,7 @@ class EnterpriseAuditLedger:
         # Verify Merkle chain and signatures
         expected_prev_hash = "GENESIS"
         from cortex.audit.smt import SparseMerkleTree
+
         local_smt = SparseMerkleTree()
 
         for prev_hash, signature, batch_rows in batches:
@@ -278,11 +285,14 @@ class EnterpriseAuditLedger:
         import sqlite3
 
         import httpx
+
         try:
             import rfc3161ng  # pyright: ignore[reportMissingImports] # Opt-in  # pyright: ignore[reportMissingImports] # Opt-in secure dependency
         except ImportError:
             rfc3161ng = None
-            logger.warning("rfc3161ng is not installed. TSA signatures will be disabled. Run pip install cortex-persist[secure]")
+            logger.warning(
+                "rfc3161ng is not installed. TSA signatures will be disabled. Run pip install cortex-persist[secure]"
+            )
         from cryptography.hazmat.primitives import serialization
 
         from cortex.audit.rekor_client import RekorClient
@@ -301,14 +311,23 @@ class EnterpriseAuditLedger:
                             try:
                                 cursor = await self._conn.execute(
                                     "SELECT audit_id, signature, prev_hash FROM security_audit_log WHERE external_anchor IS NULL ORDER BY rowid ASC LIMIT ?",
-                                    (self.max_batch_size,)
+                                    (self.max_batch_size,),
                                 )
                                 unanchored = await cursor.fetchall()
-                            except (sqlite3.ProgrammingError, aiosqlite.ProgrammingError, ValueError, AttributeError, RuntimeError) as db_err:
-                                logger.info("[AuditLedger] SQLite connection closed or inactive during anchor run: %s", db_err)
+                            except (
+                                sqlite3.ProgrammingError,
+                                aiosqlite.ProgrammingError,
+                                ValueError,
+                                AttributeError,
+                                RuntimeError,
+                            ) as db_err:
+                                logger.info(
+                                    "[AuditLedger] SQLite connection closed or inactive during anchor run: %s",
+                                    db_err,
+                                )
                                 self._batch_task = None
                                 break
-                            
+
                             if not unanchored:
                                 self._batch_task = None
                                 break
@@ -317,36 +336,57 @@ class EnterpriseAuditLedger:
                                 external_anchor = None
                                 try:
                                     from cortex.audit.smt import SparseMerkleTree
+
                                     smt_state = SparseMerkleTree()
-                                    smt_state.update(hashlib.sha256(audit_id.encode()).hexdigest(), audit_id)
+                                    smt_state.update(
+                                        hashlib.sha256(audit_id.encode()).hexdigest(), audit_id
+                                    )
                                     merkle_root = smt_state.root
 
-                                    entry_hash = hashlib.sha256(f"merkle_batch:{merkle_root}:{prev_hash}".encode()).hexdigest()
+                                    entry_hash = hashlib.sha256(
+                                        f"merkle_batch:{merkle_root}:{prev_hash}".encode()
+                                    ).hexdigest()
 
                                     pub_pem = self.public_key.public_bytes(
                                         encoding=serialization.Encoding.PEM,
                                         format=serialization.PublicFormat.SubjectPublicKeyInfo,
                                     )
 
-                                    if "PYTEST_CURRENT_TEST" in os.environ or os.environ.get("CORTEX_TEST_ENV"):
+                                    if "PYTEST_CURRENT_TEST" in os.environ or os.environ.get(
+                                        "CORTEX_TEST_ENV"
+                                    ):
                                         rekor_uuid = "mock_rekor"
                                         rfc_token = "mock_rfc"
                                     else:
                                         # Asynchronous Rekor logging
-                                        rekor_uuid = await rekor_client.log_entry(entry_hash, signature, pub_pem)  # pyright: ignore[reportArgumentType]
+                                        rekor_uuid = await rekor_client.log_entry(
+                                            entry_hash, signature, pub_pem
+                                        )  # pyright: ignore[reportArgumentType]
 
                                         tsa_signature = None
                                         if rfc3161ng is not None:
                                             try:
-                                                tsa_req = rfc3161ng.make_request(merkle_root.encode("utf-8"))
+                                                tsa_req = rfc3161ng.make_request(
+                                                    merkle_root.encode("utf-8")
+                                                )
                                                 tsa_resp = await http_client.post(
                                                     tsa_url,
                                                     content=tsa_req,
-                                                    headers={"Content-Type": "application/timestamp-query"},
+                                                    headers={
+                                                        "Content-Type": "application/timestamp-query"
+                                                    },
                                                 )
                                                 if tsa_resp.status_code == 200:
-                                                    tsa_signature = base64.b64encode(tsa_resp.content).decode("utf-8")
-                                            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
+                                                    tsa_signature = base64.b64encode(
+                                                        tsa_resp.content
+                                                    ).decode("utf-8")
+                                            except (
+                                                ValueError,
+                                                TypeError,
+                                                KeyError,
+                                                OSError,
+                                                RuntimeError,
+                                            ) as exc:
                                                 logger.warning("TSA stamping failed: %s", exc)
                                         rfc_token = tsa_signature
 
@@ -354,20 +394,22 @@ class EnterpriseAuditLedger:
                                         external_anchor = json.dumps(
                                             {"rekor_uuid": rekor_uuid, "rfc3161_token": rfc_token}
                                         )
-                                        
+
                                         # Update the row with the external anchor
                                         in_tx_before = self._conn.in_transaction
                                         with causal_write(self._conn):
                                             await self._conn.execute(
                                                 "UPDATE security_audit_log SET external_anchor = ? WHERE audit_id = ?",
-                                                (external_anchor, audit_id)
+                                                (external_anchor, audit_id),
                                             )
                                             if not in_tx_before:
                                                 await self._conn.commit()
                                 except Exception as e:
                                     logger.error("[AuditLedger] External anchoring failed: %s", e)
         except Exception as general_err:
-            logger.error("[AuditLedger] Unexpected exception in anchor worker loop: %s", general_err)
+            logger.error(
+                "[AuditLedger] Unexpected exception in anchor worker loop: %s", general_err
+            )
         finally:
             await rekor_client.close()
 
@@ -386,7 +428,9 @@ class EnterpriseAuditLedger:
         await self.ensure_table()
 
         timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-        audit_id = hashlib.sha256(f"{timestamp}|{tenant_id}|{actor_role}|{actor_id}|{action}|{resource}|{status}".encode()).hexdigest()
+        audit_id = hashlib.sha256(
+            f"{timestamp}|{tenant_id}|{actor_role}|{actor_id}|{action}|{resource}|{status}".encode()
+        ).hexdigest()
 
         in_tx_before = self._conn.in_transaction
 
@@ -404,11 +448,11 @@ class EnterpriseAuditLedger:
                 )
                 rows2 = await cursor2.fetchall()
                 batch_audit_ids = [r[0] for r in rows2]
-                
+
                 # Reconstruct Sparse Merkle Tree state for current batch
                 for aid in batch_audit_ids:
                     smt_engine.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
-                    
+
                 merkle_root = smt_engine.root
                 current_last_hash = hashlib.sha256(
                     f"merkle_batch:{merkle_root}:{prev_hash_db}".encode()
@@ -419,7 +463,9 @@ class EnterpriseAuditLedger:
             # 2. Compute the new block via SMT inclusion
             smt_engine.update(hashlib.sha256(audit_id.encode()).hexdigest(), audit_id)
             merkle_root_new = smt_engine.root
-            entry_hash = hashlib.sha256(f"merkle_batch:{merkle_root_new}:{current_last_hash}".encode()).hexdigest()
+            entry_hash = hashlib.sha256(
+                f"merkle_batch:{merkle_root_new}:{current_last_hash}".encode()
+            ).hexdigest()
             signature = self.private_key.sign(entry_hash.encode()).hex()
 
             # 3. Insert synchronously inside the existing transaction
@@ -430,9 +476,18 @@ class EnterpriseAuditLedger:
                         resource, status, prev_hash, signature, external_anchor)
                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     (
-                        audit_id, timestamp, tenant_id, actor_role, actor_id, action,
-                        resource, status, current_last_hash, signature, None
-                    )
+                        audit_id,
+                        timestamp,
+                        tenant_id,
+                        actor_role,
+                        actor_id,
+                        action,
+                        resource,
+                        status,
+                        current_last_hash,
+                        signature,
+                        None,
+                    ),
                 )
                 # Auto-commit ONLY if we are not inside a larger transaction
                 if not in_tx_before:
@@ -459,12 +514,15 @@ class EnterpriseAuditLedger:
         seal_payload = f"OUROBOROS-∞:{payload}"
         return self.private_key.sign(seal_payload.encode()).hex()
 
-    def verify_batch(self, batch_audit_ids: list[str], prev_hash: str, signature_hex: str, smt_state: Any = None) -> bool:
+    def verify_batch(
+        self, batch_audit_ids: list[str], prev_hash: str, signature_hex: str, smt_state: Any = None
+    ) -> bool:
         """Verifies the cryptographic seal of a batch against the public key using entry_hash."""
         try:
             # Reconstruct batch entry_hash
             if smt_state is None:
                 from cortex.audit.smt import SparseMerkleTree
+
                 smt_state = SparseMerkleTree()
             for aid in batch_audit_ids:
                 smt_state.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
@@ -478,9 +536,12 @@ class EnterpriseAuditLedger:
         except (InvalidSignature, ValueError):
             return False
 
-    async def compact_ledger(self, max_rows: int = 10000, snapshot_dir: Path | None = None) -> dict[str, Any]:
+    async def compact_ledger(
+        self, max_rows: int = 10000, snapshot_dir: Path | None = None
+    ) -> dict[str, Any]:
         """[C5-REAL] Compacts historical ledger events into a cryptographic snapshot.
         Delegates to ledger_compactor to preserve the SMT hash chain via COMPACTION_NODE.
         """
         from cortex.audit.ledger_compactor import compact_ledger as run_compaction
+
         return await run_compaction(self._conn, self, max_rows, snapshot_dir)

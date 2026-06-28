@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class SecurityViolationError(Exception):
     """Raised when an execution request lacks valid cryptographic PoQC (Proof of Quality Consensus)."""
+
     pass
 
 
@@ -38,7 +39,7 @@ class ZeroKnowledgeGatekeeper:
             "consensus_signature_b64": "...",
             "judge_id": "byzantine_judge_root"
         }
-        
+
         If verified, the Gatekeeper simulates or executes the AST on the OS.
         """
         judge_id = consensus_proof.get("judge_id")
@@ -48,7 +49,9 @@ class ZeroKnowledgeGatekeeper:
 
         if not all([judge_id, ast_code, timestamp, signature_b64]):
             logger.critical("[P0_ABORT] Incomplete ConsensusProof submitted to Gatekeeper.")
-            raise SecurityViolationError("Gatekeeper blocked execution: Incomplete Consensus Proof.")
+            raise SecurityViolationError(
+                "Gatekeeper blocked execution: Incomplete Consensus Proof."
+            )
 
         # 1. Fetch the Judge's Public Key
         judge_pub_key_b64 = self.km.get_public_key_b64(judge_id)  # type: ignore
@@ -59,18 +62,24 @@ class ZeroKnowledgeGatekeeper:
         # 2. Cryptographic Verification
         payload_hash = hashlib.sha256(ast_code.encode("utf-8")).hexdigest()  # type: ignore
         try:
-            is_valid = Verifier.verify_signature(judge_pub_key_b64, payload_hash, timestamp, signature_b64)  # type: ignore
+            is_valid = Verifier.verify_signature(
+                judge_pub_key_b64, payload_hash, timestamp, signature_b64
+            )  # type: ignore
         except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"Gatekeeper crypto failure: {e}")
             is_valid = False
 
         if not is_valid:
-            logger.critical("[P0_ABORT] APOPTOSIS DETONATED. Gatekeeper blocked forged execution request.")
-            raise SecurityViolationError("Gatekeeper blocked execution: Cryptographic forgery detected.")
+            logger.critical(
+                "[P0_ABORT] APOPTOSIS DETONATED. Gatekeeper blocked forged execution request."
+            )
+            raise SecurityViolationError(
+                "Gatekeeper blocked execution: Cryptographic forgery detected."
+            )
 
         # 3. Safe Execution Context (Taint-Token approved)
         logger.info(f"Gatekeeper unlocked for verified AST from {judge_id}.")
-        
+
         if dry_run:
             logger.info("[Gatekeeper] DRY_RUN Mode: OS execution bypassed.")
             return True

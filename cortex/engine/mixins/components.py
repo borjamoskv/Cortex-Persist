@@ -57,6 +57,7 @@ class ComponentsMixin:
         if self._embeddings is None:
             try:
                 from cortex.embeddings.manager import EmbeddingManager
+
                 self._embeddings = EmbeddingManager(self)
             except ImportError:
                 return None

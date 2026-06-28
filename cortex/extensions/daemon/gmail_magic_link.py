@@ -7,12 +7,14 @@ from typing import Optional
 
 logger = logging.getLogger("Cortex.GmailMagicLink")
 
+
 class GmailMagicLinkExtractor:
     """
     [C5-REAL] Extractor Autónomo de Autenticación.
     Bypassa la barrera Magic Link de Substack interceptando el token criptográfico
     directamente desde el servidor IMAP del Operador.
     """
+
     def __init__(self):
         self.email_user = os.getenv("CORTEX_EMAIL_USER")
         self.email_pass = os.getenv("CORTEX_EMAIL_APP_PASSWORD")
@@ -23,7 +25,9 @@ class GmailMagicLinkExtractor:
         Lee el inbox, localiza el último correo de Substack de sign-in y extrae la URL.
         """
         if not self.email_user or not self.email_pass:
-            logger.error("Credenciales IMAP no configuradas (CORTEX_EMAIL_USER, CORTEX_EMAIL_APP_PASSWORD)")
+            logger.error(
+                "Credenciales IMAP no configuradas (CORTEX_EMAIL_USER, CORTEX_EMAIL_APP_PASSWORD)"
+            )
             return None
 
         try:
@@ -34,7 +38,9 @@ class GmailMagicLinkExtractor:
 
             # Buscar correos de Substack recientes
             # Criterio: De substack.com
-            status, messages = mail.search(None, '(FROM "substack.com" SUBJECT "Sign in to Substack")')
+            status, messages = mail.search(
+                None, '(FROM "substack.com" SUBJECT "Sign in to Substack")'
+            )
             if status != "OK":
                 logger.warning("Fallo en la búsqueda IMAP.")
                 return None
@@ -46,7 +52,7 @@ class GmailMagicLinkExtractor:
 
             # Coger el último (el ID más alto)
             latest_id = msg_ids[-1]
-            status, msg_data = mail.fetch(latest_id, '(RFC822)')
+            status, msg_data = mail.fetch(latest_id, "(RFC822)")
             if status != "OK":
                 logger.error("Fallo al descargar el correo.")
                 return None
@@ -74,7 +80,7 @@ class GmailMagicLinkExtractor:
                 magic_link = match.group(1)
                 logger.info("[C5-REAL] Magic Link criptográfico extraído exitosamente.")
                 return magic_link
-            
+
             logger.warning("No se encontró el regex del Magic Link en el cuerpo.")
             return None
 

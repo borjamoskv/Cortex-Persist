@@ -247,9 +247,13 @@ class CortexLLMRouter:
 
         # Phase 2: Fallback cascade
         fallbacks = self._ordered_fallbacks(prompt)
-        
+
         is_fast_reject = False
-        res_error = str(getattr(res_primary, "error", "")) if not primary_valid or res_primary.is_err() else ""
+        res_error = (
+            str(getattr(res_primary, "error", ""))
+            if not primary_valid or res_primary.is_err()
+            else ""
+        )
         if not primary_valid:
             # Primary was skipped, not a fast reject
             pass
@@ -273,13 +277,15 @@ class CortexLLMRouter:
                 len(valid_fallbacks),
             )
             from cortex.extensions.llm._hedging import HedgedRequestStrategy
-            
+
             fb_start = time.monotonic()
             hedged_res, hedge_errors = await HedgedRequestStrategy.race(valid_fallbacks, prompt)
             fb_latency = (time.monotonic() - fb_start) * 1000
-            
+
             if hedged_res:
-                winner_provider = next(p for p in valid_fallbacks if p.provider_name == hedged_res.winner)
+                winner_provider = next(
+                    p for p in valid_fallbacks if p.provider_name == hedged_res.winner
+                )
                 tier = classify_tier(winner_provider, prompt.intent)
                 self._cascade.set_a_record(hedged_res.winner, fb_latency)
                 self._telemetry.emit(
@@ -296,7 +302,7 @@ class CortexLLMRouter:
                     )
                 )
                 return Ok(hedged_res.response)
-            
+
             # If the race failed, all fallbacks failed
             for err in hedge_errors:
                 errors.append(err)

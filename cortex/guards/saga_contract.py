@@ -31,29 +31,31 @@ logger = logging.getLogger("cortex.guards.saga_contract")
 _TAINT_KEYS = ("CORTEX-TAINT", "cortex_taint", "cortex-taint", "CORTEX_TAINT")
 
 # Allowed fact types in the Write-Path
-_VALID_FACT_TYPES = frozenset({
-    "knowledge",
-    "decision",
-    "error",
-    "observation",
-    "ghost",
-    "reflection",
-    "pattern",
-    "bridge",
-    "diamond",
-    "telemetry_batch",
-    "mafia_node",
-    "UI_ACTION",
-    "task",
-    "axiom",
-    "metric",
-    "session_summary",
-    "causal_link",
-    "episode",
-    "enrichment",
-    "compaction",
-    "tombstone",
-})
+_VALID_FACT_TYPES = frozenset(
+    {
+        "knowledge",
+        "decision",
+        "error",
+        "observation",
+        "ghost",
+        "reflection",
+        "pattern",
+        "bridge",
+        "diamond",
+        "telemetry_batch",
+        "mafia_node",
+        "UI_ACTION",
+        "task",
+        "axiom",
+        "metric",
+        "session_summary",
+        "causal_link",
+        "episode",
+        "enrichment",
+        "compaction",
+        "tombstone",
+    }
+)
 
 # Valid confidence levels
 _VALID_CONFIDENCE = frozenset({"C1", "C2", "C3", "C4", "C5"})
@@ -146,8 +148,7 @@ class SagaWriteProposal(BaseModel):
         """Ensure fact_type is in the whitelist."""
         if v not in _VALID_FACT_TYPES:
             raise ValueError(
-                f"[SAGA-1] Unknown fact_type '{v}'. "
-                f"Must be one of: {sorted(_VALID_FACT_TYPES)}"
+                f"[SAGA-1] Unknown fact_type '{v}'. Must be one of: {sorted(_VALID_FACT_TYPES)}"
             )
         return v
 
@@ -167,9 +168,7 @@ class SagaWriteProposal(BaseModel):
     def _validate_tenant_id(cls, v: str) -> str:
         """Strict whitelist for tenant_id (PHALANX Remediation)."""
         if not re.match(r"^[a-zA-Z0-9_-]+$", v):
-            raise ValueError(
-                f"[SAGA-1] tenant_id contains forbidden characters: '{v}'"
-            )
+            raise ValueError(f"[SAGA-1] tenant_id contains forbidden characters: '{v}'")
         return v
 
     @field_validator("tags")
@@ -177,9 +176,7 @@ class SagaWriteProposal(BaseModel):
     def _validate_tags(cls, v: list[str]) -> list[str]:
         """Limit tag count and length."""
         if len(v) > 50:
-            raise ValueError(
-                f"[SAGA-1] Too many tags: {len(v)} > 50 maximum."
-            )
+            raise ValueError(f"[SAGA-1] Too many tags: {len(v)} > 50 maximum.")
         for tag in v:
             if len(tag) > 128:
                 raise ValueError(

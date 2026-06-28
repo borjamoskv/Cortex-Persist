@@ -112,7 +112,7 @@ class ZeroPromptingDaemon:
                 tags=["ZeroPrompt", "Evolution"],
                 confidence="C5",
                 source="daemon:zero_prompting",
-                actor_id="zero_prompt"
+                actor_id="zero_prompt",
             )
             logger.info("  ↳ Written to Ledger: Immutable C5.")
         except Exception as e:

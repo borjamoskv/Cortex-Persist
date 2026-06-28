@@ -221,8 +221,11 @@ class FactManager:
             )
         except Exception as e:
             import logging
+
             log = logging.getLogger(__name__)
-            log.error(f"EXCEPTION IN _store_delegate: {type(e).__name__} - started_tx={started_tx}, in_transaction={conn.in_transaction}")
+            log.error(
+                f"EXCEPTION IN _store_delegate: {type(e).__name__} - started_tx={started_tx}, in_transaction={conn.in_transaction}"
+            )
             if started_tx and conn.in_transaction:
                 log.error("ROLLING BACK NOW")
                 await conn.rollback()

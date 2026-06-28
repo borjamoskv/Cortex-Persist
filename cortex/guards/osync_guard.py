@@ -16,6 +16,7 @@ logger = logging.getLogger("cortex.guards.osync")
 
 class OSYNCViolationError(Exception):
     """Raised when an OSYNC synchronization policy is violated."""
+
     pass
 
 
@@ -25,7 +26,7 @@ class OSYNCGuard:
     @classmethod
     def verify_nexus_symlink(cls, link_path: Path, expected_target: Path) -> None:
         """
-        INV-OSYNC-012: Asserts that a Nexus bridging node is a valid symlink 
+        INV-OSYNC-012: Asserts that a Nexus bridging node is a valid symlink
         pointing to the expected target.
         """
         if not link_path.is_symlink():
@@ -34,18 +35,19 @@ class OSYNCGuard:
 
         real_target = Path(os.readlink(link_path)).resolve()
         resolved_expected = expected_target.resolve()
-        
+
         if real_target != resolved_expected:
             logger.error(
                 "[P0] OSYNCGuard: Symlink target mismatch. Found %s, expected %s",
-                real_target, resolved_expected
+                real_target,
+                resolved_expected,
             )
             raise OSYNCViolationError("Nexus Target Drift: Symlink points to divergent codebase.")
 
     @classmethod
     def verify_git_clean(cls, repo_path: Path) -> None:
         """
-        INV-OSYNC-008: Asserts that the working tree has no uncommitted changes 
+        INV-OSYNC-008: Asserts that the working tree has no uncommitted changes
         before syncing.
         """
         try:
@@ -54,11 +56,13 @@ class OSYNCGuard:
                 cwd=repo_path,
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
             if res.stdout.strip():
                 logger.error("[P0] OSYNCGuard: Working tree is dirty at %s.", repo_path)
-                raise OSYNCViolationError("Sync Denied: Working tree contains uncommitted state changes.")
+                raise OSYNCViolationError(
+                    "Sync Denied: Working tree contains uncommitted state changes."
+                )
         except subprocess.CalledProcessError as e:
             raise OSYNCViolationError("Git execution failure during status validation.") from e
 
@@ -70,6 +74,6 @@ class OSYNCGuard:
         """
         if remote_clock < 0 or local_clock < 0:
             raise OSYNCViolationError("Logical time counters must be non-negative integers.")
-        
+
         # Clock updates to max(local, remote) + 1
         return max(local_clock, remote_clock) + 1

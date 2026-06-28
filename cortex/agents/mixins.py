@@ -4,7 +4,7 @@ from typing import Any
 
 class EngineAwareMixin:
     """Sovereign Mixin para consolidar la inicialización del motor CORTEX."""
-    
+
     _engine: Any
     _db_path: Any
 

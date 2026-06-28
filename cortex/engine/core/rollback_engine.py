@@ -62,13 +62,13 @@ class CausalRollbackEngine:
 
         from cortex.audit.ledger import EnterpriseAuditLedger
         from cortex.database.core import connect_async
-        
+
         async with await connect_async(self.db_path) as conn:
             # Mark all affected nodes as rolled_back
             placeholders = ",".join("?" * len(nodes))
             query = f"UPDATE execution_trace_ledger SET outcome = 'rolled_back' WHERE tenant_id = ? AND id IN ({placeholders})"
             await conn.execute(query, [tenant_id] + nodes)
-            
+
             # Cryptographic Audit Log (ZK-Guard Sovereign Seal)
             audit = EnterpriseAuditLedger(conn)
             for node in nodes:
@@ -78,9 +78,9 @@ class CausalRollbackEngine:
                     actor_id="causal_rollback_engine",
                     action="ROLLBACK",
                     resource=f"execution_trace:{node}",
-                    status="SUCCESS"
+                    status="SUCCESS",
                 )
-            
+
             await conn.commit()
 
         logger.info(

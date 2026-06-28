@@ -114,7 +114,9 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
 _RAW_CONNECT_PATTERN = re.compile(r"(?<!\w)(sqlite3|aiosqlite)\.connect\s*\(", re.MULTILINE)
 
 # Pattern: import sqlite3 or aiosqlite (to differentiate from type hints)
-_IMPORT_PATTERN = re.compile(r"^\s*import\s+(sqlite3|aiosqlite)|^\s*from\s+(sqlite3|aiosqlite)\s+import", re.MULTILINE)
+_IMPORT_PATTERN = re.compile(
+    r"^\s*import\s+(sqlite3|aiosqlite)|^\s*from\s+(sqlite3|aiosqlite)\s+import", re.MULTILINE
+)
 
 
 class ConnectionViolation:

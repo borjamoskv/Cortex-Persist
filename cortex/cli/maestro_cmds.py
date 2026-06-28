@@ -140,6 +140,7 @@ def type_cmd(text: str, app: str | None):
 @click.option("--button", default="left", help="left / right")
 def click_at_cmd(x: int, y: int, button: str):
     """Click en coordenadas de pantalla."""
+
     async def _run():
         m = MaestroUI(engine=get_engine())
         res = await m.click(x, y, button)
@@ -156,6 +157,7 @@ def click_at_cmd(x: int, y: int, button: str):
 @click.argument("y", type=int)
 def double_click_cmd(x: int, y: int):
     """Doble click en coordenadas de pantalla."""
+
     async def _run():
         m = MaestroUI(engine=get_engine())
         res = await m.double_click(x, y)
@@ -175,6 +177,7 @@ def double_click_cmd(x: int, y: int):
 @click.option("--duration", default=0.5, help="Duración del arrastre en segundos")
 def drag_cmd(from_x: int, from_y: int, to_x: int, to_y: int, duration: float):
     """Drag-and-drop de un punto a otro."""
+
     async def _run():
         m = MaestroUI(engine=get_engine())
         res = await m.drag(from_x, from_y, to_x, to_y, duration=duration)

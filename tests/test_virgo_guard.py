@@ -278,7 +278,9 @@ class TestVirgoStrictMode:
 
         expected_hash = hashlib.sha256(f"{content}{nonce}{project}".encode()).hexdigest()
 
-        with pytest.raises(VirgoValidationError, match="Invalid Logos-Critique validation signature"):
+        with pytest.raises(
+            VirgoValidationError, match="Invalid Logos-Critique validation signature"
+        ):
             await engine.store(
                 project=project,
                 content=content,
@@ -292,15 +294,16 @@ class TestVirgoStrictMode:
     async def test_virgo_strict_accepts_valid_ed25519(self, engine):
         """Verifies that in STRICT mode, valid Ed25519 signature is accepted."""
         from cortex.crypto.keys import KeyManager, Signer
+
         km = KeyManager("cortex_test_enterprise")
         agent_id = "agent_strict_ed25519"
-        
+
         # Generate and register a key for this agent
         public_key_b64 = km.generate_and_store_key(agent_id)
         private_key_b64 = km.get_private_key_b64(agent_id)
 
         content = "Strict Ed25519 payload validation."
-        
+
         # Sign content directly
         signature = Signer.sign_raw_content(private_key_b64, content)
 
@@ -321,19 +324,22 @@ class TestVirgoStrictMode:
     async def test_virgo_strict_rejects_altered_signature(self, engine):
         """Verifies that in STRICT mode, tampered Ed25519 signature is rejected."""
         from cortex.crypto.keys import KeyManager, Signer
+
         km = KeyManager("cortex_test_enterprise")
         agent_id = "agent_strict_altered"
-        
+
         public_key_b64 = km.generate_and_store_key(agent_id)
         private_key_b64 = km.get_private_key_b64(agent_id)
 
         content = "Strict Ed25519 payload validation."
         signature = Signer.sign_raw_content(private_key_b64, content)
-        
+
         # Tamper with signature
         tampered_sig = signature[:-4] + "AAAA"
 
-        with pytest.raises(VirgoValidationError, match="Invalid Logos-Critique validation signature"):
+        with pytest.raises(
+            VirgoValidationError, match="Invalid Logos-Critique validation signature"
+        ):
             await engine.store(
                 project="test_proj",
                 content=content,
@@ -348,16 +354,19 @@ class TestVirgoStrictMode:
     async def test_virgo_strict_rejects_altered_message(self, engine):
         """Verifies that in STRICT mode, tampered message content is rejected."""
         from cortex.crypto.keys import KeyManager, Signer
+
         km = KeyManager("cortex_test_enterprise")
         agent_id = "agent_strict_altered_msg"
-        
+
         public_key_b64 = km.generate_and_store_key(agent_id)
         private_key_b64 = km.get_private_key_b64(agent_id)
 
         content = "Strict Ed25519 payload validation."
         signature = Signer.sign_raw_content(private_key_b64, content)
 
-        with pytest.raises(VirgoValidationError, match="Invalid Logos-Critique validation signature"):
+        with pytest.raises(
+            VirgoValidationError, match="Invalid Logos-Critique validation signature"
+        ):
             await engine.store(
                 project="test_proj",
                 content="Altered payload content here.",
@@ -372,12 +381,13 @@ class TestVirgoStrictMode:
     async def test_virgo_strict_rejects_different_agent_signature(self, engine):
         """Verifies that in STRICT mode, signature from another agent's key is rejected."""
         from cortex.crypto.keys import KeyManager, Signer
+
         km = KeyManager("cortex_test_enterprise")
-        
+
         # Agent A (registered)
         agent_a = "agent_a"
         public_key_a = km.generate_and_store_key(agent_a)
-        
+
         # Agent B (signs the payload)
         agent_b = "agent_b"
         public_key_b = km.generate_and_store_key(agent_b)
@@ -387,7 +397,9 @@ class TestVirgoStrictMode:
         signature_b = Signer.sign_raw_content(private_key_b, content)
 
         # Attempt to store as Agent A, but passing Agent B's signature and Agent B's public key (mismatch with A's registered key)
-        with pytest.raises(VirgoValidationError, match="Invalid Logos-Critique validation signature"):
+        with pytest.raises(
+            VirgoValidationError, match="Invalid Logos-Critique validation signature"
+        ):
             await engine.store(
                 project="test_proj",
                 content=content,
@@ -403,9 +415,10 @@ class TestVirgoStrictMode:
     async def test_virgo_strict_rejects_tenant_mismatch(self, engine):
         """Verifies that in STRICT mode, mismatched tenant metadata causes rollback."""
         from cortex.crypto.keys import KeyManager, Signer
+
         km = KeyManager("cortex_test_enterprise")
         agent_id = "agent_strict_tenant"
-        
+
         public_key_b64 = km.generate_and_store_key(agent_id)
         private_key_b64 = km.get_private_key_b64(agent_id)
 

@@ -27,7 +27,9 @@ class ByzantineJudge:
 
         # The Judge needs its own key to sign consensus proofs
         self.judge_id = "byzantine_judge_root"
-        if not self.km.get_private_key_b64(self.judge_id) or not self.km.get_public_key_b64(self.judge_id):
+        if not self.km.get_private_key_b64(self.judge_id) or not self.km.get_public_key_b64(
+            self.judge_id
+        ):
             self.km.generate_and_store_key(self.judge_id)
 
     def evaluate_proposals(
@@ -63,17 +65,21 @@ class ByzantineJudge:
                 logger.warning(f"[AUDIT] JIT Cryptographic Enrollment for Agent: {agent_id}")
                 pub_key_b64 = self.km.generate_and_store_key(agent_id)  # type: ignore
                 # In a real spoofing test, the signature won't match this newly generated key anyway.
-            
+
             # Cryptographic Verification (PoQC)
             payload_hash = hashlib.sha256(code.encode("utf-8")).hexdigest()  # type: ignore
             try:
-                is_valid = Verifier.verify_signature(pub_key_b64, payload_hash, timestamp, signature_b64)  # type: ignore
+                is_valid = Verifier.verify_signature(
+                    pub_key_b64, payload_hash, timestamp, signature_b64
+                )  # type: ignore
             except (ValueError, TypeError) as e:
                 logger.warning(f"[SECURITY] Signature validation failed structurally: {e}")
                 is_valid = False
-                
+
             if not is_valid:
-                logger.error(f"[SECURITY] Cryptographic spoofing or corruption detected for agent {agent_id}. Slashed.")
+                logger.error(
+                    f"[SECURITY] Cryptographic spoofing or corruption detected for agent {agent_id}. Slashed."
+                )
                 wallet = self.bank.register_agent(agent_id)  # type: ignore
                 wallet.failed_commits += 1
                 wallet.balance -= self.bank.STAKE_REQUIRED_PER_PROPOSAL
@@ -111,20 +117,21 @@ class ByzantineJudge:
 
         if winning_agent:
             logger.info(f"🏆 Consensus reached. Winner: {winning_agent}")
-            
+
             # The Judge signs the final consensus choice
             from datetime import datetime, timezone
+
             consensus_timestamp = datetime.now(timezone.utc).isoformat()
             consensus_hash = hashlib.sha256(winning_ast.encode("utf-8")).hexdigest()  # type: ignore
             judge_priv = self.km.get_private_key_b64(self.judge_id)
             consensus_sig = Signer.sign_payload(judge_priv, consensus_hash, consensus_timestamp)  # type: ignore
-            
+
             return {
                 "winning_agent": winning_agent,
                 "ast_code": winning_ast,
                 "consensus_timestamp": consensus_timestamp,
                 "consensus_signature_b64": consensus_sig,
-                "judge_id": self.judge_id
+                "judge_id": self.judge_id,
             }
         else:
             logger.error("🛑 Consensus failed. All agents slashed or bankrupt.")

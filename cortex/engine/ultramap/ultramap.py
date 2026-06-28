@@ -91,7 +91,9 @@ class UltramapSubstrate:
             ledger_path = os.path.join(os.path.dirname(self.bin_path), "evolution_ledger.jsonl")
             try:
                 self._evolution_ledger = EvolutionLedger(ledger_path)  # type: ignore[misc]
-                self._checkpoint_manager = CheckpointManager(self._evolution_ledger, chunk_size=1000)  # type: ignore[misc]
+                self._checkpoint_manager = CheckpointManager(
+                    self._evolution_ledger, chunk_size=1000
+                )  # type: ignore[misc]
                 logger.info(
                     f"EVO-LEDGER Active. Head: {self._evolution_ledger.head_hash[:12]}… Seq: {self._evolution_ledger.sequence}"
                 )
@@ -240,7 +242,7 @@ class UltramapSubstrate:
             "causal_entropy": causal_entropy,
             "cpu_load": cpu_load,
         }
-        
+
         # [C5-REAL] OP_FREEZE_MEM: Ensure structural immutability of the returned map.
         return apex_dispatcher.execute("OP_FREEZE_MEM", state=raw_state)
 

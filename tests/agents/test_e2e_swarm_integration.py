@@ -37,12 +37,17 @@ async def setup_db_for_topology(db_path: str):
     """Setup schema for topological arbitrage."""
     from cortex.database.core import causal_write
     import os
+
     pool = CortexConnectionPool(db_path, read_only=False)
     await pool.initialize()
     async with pool.acquire() as conn:
         with causal_write(conn):
-            await conn.execute("CREATE TABLE IF NOT EXISTS cortex_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
-            await conn.execute("CREATE TABLE IF NOT EXISTS facts (id INTEGER PRIMARY KEY, content TEXT)")
+            await conn.execute(
+                "CREATE TABLE IF NOT EXISTS cortex_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)"
+            )
+            await conn.execute(
+                "CREATE TABLE IF NOT EXISTS facts (id INTEGER PRIMARY KEY, content TEXT)"
+            )
             await conn.execute("""
                 CREATE TABLE IF NOT EXISTS system_hypotheses (
                     id TEXT PRIMARY KEY,
@@ -72,7 +77,7 @@ async def setup_db_for_topology(db_path: str):
                     FOREIGN KEY(child_id) REFERENCES system_hypotheses(id) ON DELETE CASCADE
                 )
             """)
-        
+
         for sql in get_all_schema():
             if "USING vec0" in sql:
                 continue
@@ -81,7 +86,7 @@ async def setup_db_for_topology(db_path: str):
                     await conn.executescript(sql)
             except Exception as e:
                 pass
-        
+
         # Run migrations for topological tables
         migrations_dir = "cortex/migrations"
         if os.path.exists(migrations_dir):
@@ -101,31 +106,31 @@ async def setup_db_for_topology(db_path: str):
 
 class PingPongAgent(BaseAgent):
     """Agent that replies to ping messages and tracks counts."""
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.pings_received = 0
         self.pongs_sent = 0
-        
+
     async def handle_message(self, message: AgentMessage) -> None:
         if message.kind == MessageKind.TASK_REQUEST and message.payload.get("action") == "ping":
             self.pings_received += 1
             await self.send_result(
                 message.sender,
                 {"action": "pong", "count": self.pings_received},
-                correlation_id=message.correlation_id
+                correlation_id=message.correlation_id,
             )
             self.pongs_sent += 1
 
 
 class ChaosAgent(BaseAgent):
     """Agent that randomly crashes to test Supervisor fault tolerance."""
-    
+
     def __init__(self, *args, crash_on_tick: int = 3, **kwargs):
         super().__init__(*args, **kwargs)
         self.tick_count = 0
         self.crash_on_tick = crash_on_tick
-        
+
     async def tick(self) -> None:
         self.tick_count += 1
         print(f"[{self.agent_id}] ChaosAgent tick {self.tick_count}/{self.crash_on_tick}")
@@ -150,10 +155,10 @@ async def test_e2e_concurrent_message_bus_routing():
     db_path = _unique_db()
     bus = SqliteMessageBus(db_path=db_path)
     supervisor = Supervisor(heartbeat_timeout_s=5.0)
-    
+
     NUM_AGENTS = 10
     MESSAGES_PER_AGENT = 20
-    
+
     agents = []
     for i in range(NUM_AGENTS):
         agent_id = f"agent_{i}"
@@ -162,7 +167,7 @@ async def test_e2e_concurrent_message_bus_routing():
         agents.append(agent)
         supervisor.register(agent)
         await supervisor.start_agent(agent_id)
-        
+
     # Send messages concurrently
     send_tasks = []
     for sender in agents:
@@ -173,12 +178,12 @@ async def test_e2e_concurrent_message_bus_routing():
                         sender=sender.agent_id,
                         recipient=recipient.agent_id,
                         kind=MessageKind.TASK_REQUEST,
-                        payload={"action": "ping"}
+                        payload={"action": "ping"},
                     )
                     send_tasks.append(bus.send(msg))
-                    
+
     await asyncio.gather(*send_tasks)
-    
+
     expected_messages = NUM_AGENTS * (NUM_AGENTS - 1) * MESSAGES_PER_AGENT
 
     # Wait for processing
@@ -188,15 +193,19 @@ async def test_e2e_concurrent_message_bus_routing():
         pending_msgs = 0
         for a in agents:
             pending_msgs += await bus.pending_count(a.agent_id)
-            
-        if total_pings == expected_messages and total_pongs == expected_messages and pending_msgs == 0:
+
+        if (
+            total_pings == expected_messages
+            and total_pongs == expected_messages
+            and pending_msgs == 0
+        ):
             break
         await asyncio.sleep(0.1)
 
     # Assertions
     assert total_pings == expected_messages
     assert total_pongs == expected_messages
-    
+
     for agent in agents:
         assert await bus.pending_count(agent.agent_id) == 0
         await supervisor.stop_agent(agent.agent_id)
@@ -210,7 +219,7 @@ async def test_e2e_supervisor_fault_tolerance_under_load():
     db_path = _unique_db()
     bus = SqliteMessageBus(db_path=db_path)
     supervisor = Supervisor(heartbeat_timeout_s=2.0)
-    
+
     # Healthy agents
     healthy_agents = []
     for i in range(3):
@@ -218,7 +227,7 @@ async def test_e2e_supervisor_fault_tolerance_under_load():
         healthy_agents.append(agent)
         supervisor.register(agent)
         await supervisor.start_agent(agent.agent_id)
-        
+
     # Chaos agents
     chaos_agents = []
     for i in range(3):
@@ -226,22 +235,22 @@ async def test_e2e_supervisor_fault_tolerance_under_load():
         chaos_agents.append(agent)
         supervisor.register(agent)
         await supervisor.start_agent(agent.agent_id)
-        
+
     # Let ticks run (Chaos agents need time to crash twice and wait 1s backoff between errors)
     # Each tick takes 1.0s (receive timeout). Tick 1 = 1s. Tick 2 = 2s (crashes). Sleep 0.5s. Tick 3 = 3.5s (crashes).
     await asyncio.sleep(5.0)
-    
+
     # Verify states
     for agent in healthy_agents:
         assert agent.state.status in (AgentStatus.RUNNING, AgentStatus.IDLE)
-        
+
     for agent in chaos_agents:
         # After crashing twice (max_consecutive_errors=2), they should be QUARANTINED
         assert agent.state.status == AgentStatus.QUARANTINED
-        
+
     for agent in healthy_agents:
         await supervisor.stop_agent(agent.agent_id)
-        
+
     await bus.close()
 
 
@@ -249,30 +258,32 @@ async def test_e2e_supervisor_fault_tolerance_under_load():
 async def test_e2e_causal_scheduler_and_bus_integration():
     """Test integration between SqliteMessageBus and TopologyIndex under shared connection pool."""
     db_path = _unique_db()
-    
+
     # We must ensure both components can coexist using causal_write correctly.
     pool = await setup_db_for_topology(db_path)
-    
+
     # Topology Index connects via pool
     async with pool.acquire() as conn:
         topology = TopologyIndex(conn)
         # Should execute safely without lock/auth errors
         await topology.sync()
-        
+
     # Message Bus
     bus = SqliteMessageBus(db_path=db_path)
     agent = PingPongAgent(manifest=_make_manifest("topo_agent"), bus=bus)
-    
+
     # Send some messages
     await bus.send(new_message("sys", "topo_agent", MessageKind.TASK_REQUEST, {"action": "ping"}))
-    await asyncio.sleep(0.1) # Agent processes message
-    
-    assert await bus.pending_count("topo_agent") == 1 # Unconsumed until tick, we didn't start the agent
-    
+    await asyncio.sleep(0.1)  # Agent processes message
+
+    assert (
+        await bus.pending_count("topo_agent") == 1
+    )  # Unconsumed until tick, we didn't start the agent
+
     # Retrieve explicitly
     msg = await bus.receive("topo_agent")
     assert msg is not None
     assert msg.payload.get("action") == "ping"
-    
+
     await bus.close()
     await pool.close()

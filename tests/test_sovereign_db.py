@@ -49,7 +49,9 @@ async def db(db_path: str):
 class TestBasicOperations:
     async def test_execute_insert_and_select(self, db: SovereignDB):
         # Insert test
-        cursor = await db.execute("INSERT INTO users (name, balance) VALUES (?, ?)", ("Alice", 100.0))
+        cursor = await db.execute(
+            "INSERT INTO users (name, balance) VALUES (?, ?)", ("Alice", 100.0)
+        )
         assert cursor.lastrowid is not None
         assert cursor.lastrowid > 0
         assert cursor.rowcount == 1
@@ -133,7 +135,9 @@ class TestTransactions:
         await db.rollback()
 
         # Insert after rollback
-        await db.execute("INSERT INTO users (name, balance) VALUES (?, ?)", ("SecondPermanent", 80.0))
+        await db.execute(
+            "INSERT INTO users (name, balance) VALUES (?, ?)", ("SecondPermanent", 80.0)
+        )
         await db.commit()
 
         # Verify results
@@ -153,7 +157,9 @@ class TestConcurrencyAndDeadlocks:
         num_tasks = 20
 
         async def insert_task(index: int):
-            await db.execute("INSERT INTO users (name, balance) VALUES (?, ?)", (f"User_{index}", float(index)))
+            await db.execute(
+                "INSERT INTO users (name, balance) VALUES (?, ?)", (f"User_{index}", float(index))
+            )
 
         await asyncio.gather(*[insert_task(i) for i in range(num_tasks)])
 
@@ -187,13 +193,16 @@ class TestConcurrencyAndDeadlocks:
         import random
 
         num_tasks = 40
-        
+
         async def worker(index: int):
             # Mix of reads and writes with minor random yield to simulate natural contention
             await asyncio.sleep(random.uniform(0.001, 0.01))
             if index % 2 == 0:
                 # Write operation
-                await db.execute("INSERT INTO users (name, balance) VALUES (?, ?)", (f"Concurrent_{index}", 50.0 + index))
+                await db.execute(
+                    "INSERT INTO users (name, balance) VALUES (?, ?)",
+                    (f"Concurrent_{index}", 50.0 + index),
+                )
                 await db.commit()
             else:
                 # Read operation

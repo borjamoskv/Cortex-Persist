@@ -113,7 +113,9 @@ class SqliteWriteWorker:
         self._loop = asyncio.get_running_loop()
 
         # Create the thread which will manage the connection
-        self._thread = threading.Thread(target=self._writer_loop, args=(self._loop,), name="cortex-sqlite-writer", daemon=True)
+        self._thread = threading.Thread(
+            target=self._writer_loop, args=(self._loop,), name="cortex-sqlite-writer", daemon=True
+        )
         self._thread.start()
         self._started = True
         logger.info(
@@ -393,9 +395,7 @@ class SqliteWriteWorker:
                 Err(f"SQLite write error: {e}"),
             )
 
-    def _maybe_checkpoint(
-        self, conn: sqlite3.Connection, loop: asyncio.AbstractEventLoop
-    ) -> None:
+    def _maybe_checkpoint(self, conn: sqlite3.Connection, loop: asyncio.AbstractEventLoop) -> None:
         """Perform a WAL checkpoint if the interval has been reached."""
         try:
             conn.execute("PRAGMA wal_checkpoint(PASSIVE)")

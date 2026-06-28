@@ -63,7 +63,9 @@ class RustChainClient:
     ) -> dict[str, Any]:
         """Submit a staking transaction to lock RTC and acquire a skill."""
         if self.mock_mode:
-            tx_hash = hashlib.sha256(f"{from_address}:{amount}:{skill}:{timestamp}".encode()).hexdigest()
+            tx_hash = hashlib.sha256(
+                f"{from_address}:{amount}:{skill}:{timestamp}".encode()
+            ).hexdigest()
             attestation = {
                 "verdict": "approved",
                 "skill": skill,

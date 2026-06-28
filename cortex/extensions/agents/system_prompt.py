@@ -4,6 +4,7 @@
 This module is deprecated. Prompts have been refactored into cortex/agents/prompts/.
 Import them directly from `cortex.agents.system_prompt`.
 """
+
 from cortex.agents.system_prompt import SYSTEM_PROMPT, SYSTEM_PROMPT_MEDIUM, SYSTEM_PROMPT_SHORT
 
 __all__ = ["SYSTEM_PROMPT", "SYSTEM_PROMPT_MEDIUM", "SYSTEM_PROMPT_SHORT"]

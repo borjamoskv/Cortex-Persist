@@ -84,6 +84,7 @@ class CausalClosureGuard:
                 except json.JSONDecodeError:
                     try:
                         import ast
+
                         parsed_arr = ast.literal_eval(stripped_c)
                         if (
                             isinstance(parsed_arr, list)
@@ -125,7 +126,6 @@ class CausalClosureGuard:
         if not proposal.content.strip():
             logger.warning("[%s] Empty proposal submitted.", proposal.agent_id)
             return False
-
 
         if not self._contains_structural_condensation(proposal.content):
             logger.error(

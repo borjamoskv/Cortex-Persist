@@ -153,8 +153,9 @@ def store(
         _inject_cli_taint(content, meta, source)
 
         import os
+
         actor_id = os.environ.get("CORTEX_ACTOR_ID", "borjamoskv")
-        
+
         fact_id = _run_async(
             engine.store(
                 project=project,
@@ -215,6 +216,7 @@ def store_batch(file_path, db) -> None:
             _inject_cli_taint(content, meta, source)
 
             import os
+
             actor_id = os.environ.get("CORTEX_ACTOR_ID", "borjamoskv")
 
             fact_id = _run_async(

@@ -28,7 +28,6 @@ __all__ = [
     "stake_and_acquire",
     "StakingError",
     "GateUnavailableError",
-
     "register_rustchain_tools",
     "Judge",
     "ASTLintJudge",

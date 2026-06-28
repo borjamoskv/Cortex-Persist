@@ -21,8 +21,12 @@ def test_memory_firewall_guard_confidence_levels() -> None:
 
     # 1. Equal or higher confidence passes
     assert guard.validate_fact("Sovereign data fact.", source="agent-1", confidence="C3") is True
-    assert guard.validate_fact("Sovereign data fact.", source="agent-1", confidence="C4-SIM") is True
-    assert guard.validate_fact("Sovereign data fact.", source="agent-1", confidence="C5-REAL") is True
+    assert (
+        guard.validate_fact("Sovereign data fact.", source="agent-1", confidence="C4-SIM") is True
+    )
+    assert (
+        guard.validate_fact("Sovereign data fact.", source="agent-1", confidence="C5-REAL") is True
+    )
 
     # 2. Lower confidence fails
     with pytest.raises(ValueError, match="is below minimum threshold"):
@@ -40,7 +44,7 @@ def test_memory_firewall_guard_invalid_confidence() -> None:
 
 def test_memory_firewall_guard_require_taint() -> None:
     guard = MemoryFirewallGuard(require_taint=True)
-    
+
     # Missing taint raises error
     with pytest.raises(ValueError, match="lacks CORTEX-TAINT"):
         guard.validate_fact("Sovereign fact.", source="agent-1", confidence="C5", meta={})

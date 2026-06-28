@@ -92,11 +92,11 @@ class CognitiveHandoff:
     """
 
     # Empirical Provider Assignments (2026-06 Exergy Optimized)
-    DEFAULT_ARCHITECT = "anthropic"           # claude-fable-5
-    DEFAULT_AUDITOR_PREMIUM = "anthropic"     # claude-opus-4.8-thinking
-    DEFAULT_AUDITOR_ECONOMIC = "z_ai"         # glm-5.2 (max)
-    DEFAULT_AUDITOR_DEEPTHINK = "alibaba"     # qwen3.7-max (fallback)
-    DEFAULT_INFRA = "gemini"                  # gemini-3.5-flash
+    DEFAULT_ARCHITECT = "anthropic"  # claude-fable-5
+    DEFAULT_AUDITOR_PREMIUM = "anthropic"  # claude-opus-4.8-thinking
+    DEFAULT_AUDITOR_ECONOMIC = "z_ai"  # glm-5.2 (max)
+    DEFAULT_AUDITOR_DEEPTHINK = "alibaba"  # qwen3.7-max (fallback)
+    DEFAULT_INFRA = "gemini"  # gemini-3.5-flash
 
     def __init__(
         self,
@@ -177,8 +177,8 @@ class CognitiveHandoff:
         # Any contradiction detected by Economic tier MUST be escalated
         # to the Premium tier to prevent Denial of Belief via hallucination.
         needs_premium = (
-            audit.verdict == "UNCERTAIN" 
-            or audit.has_contradiction 
+            audit.verdict == "UNCERTAIN"
+            or audit.has_contradiction
             or self._involves_axiomatics(belief, ctx)
         )
 

@@ -14,6 +14,7 @@ Edge cases covered:
 - single agent registry
 - registry order independence (sorted keys)
 """
+
 import hashlib
 import json
 
@@ -26,6 +27,7 @@ from cortex.swarm.registry import AgentRegistry
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _hash(obj: dict) -> str:
     """Stable SHA256 for deterministic comparison."""
@@ -46,6 +48,7 @@ def _make_registry() -> AgentRegistry:
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def router() -> SwarmRouter:
     return SwarmRouter(registry=_make_registry())
@@ -54,6 +57,7 @@ def router() -> SwarmRouter:
 # ---------------------------------------------------------------------------
 # Core invariant tests
 # ---------------------------------------------------------------------------
+
 
 def test_swarm_routing_is_deterministic(router: SwarmRouter) -> None:
     """Invariant 1: pure function — same instance, same input => identical output."""
@@ -103,6 +107,7 @@ def test_routing_hash_is_stable(router: SwarmRouter) -> None:
 # Ledger-grade snapshot fixture
 # ---------------------------------------------------------------------------
 
+
 def test_swarm_replay_snapshot(router: SwarmRouter) -> None:
     """
     Snapshot contract: output must survive JSON round-trip unchanged.
@@ -135,6 +140,7 @@ def test_registry_checksum_is_stable() -> None:
 # ---------------------------------------------------------------------------
 # Edge cases
 # ---------------------------------------------------------------------------
+
 
 def test_unknown_task_fallback_is_deterministic(router: SwarmRouter) -> None:
     """

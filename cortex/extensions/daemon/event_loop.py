@@ -37,7 +37,9 @@ class EventLoopMixin:
 
     check: typing.Callable[[], None]
     _run_neural_loop_async: typing.Callable[[], typing.Coroutine[typing.Any, typing.Any, None]]
-    _run_lifecycle_daemon_async: typing.Callable[..., typing.Coroutine[typing.Any, typing.Any, None]]
+    _run_lifecycle_daemon_async: typing.Callable[
+        ..., typing.Coroutine[typing.Any, typing.Any, None]
+    ]
     _run_loop_daemon_async: typing.Callable[..., typing.Coroutine[typing.Any, typing.Any, None]]
     _run_health_loop_async: typing.Callable[[], typing.Coroutine[typing.Any, typing.Any, None]]
 

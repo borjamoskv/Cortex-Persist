@@ -12,12 +12,12 @@ def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_li
     """
     if is_diamond == 1:
         return 1.0
-    
+
     delta = current_time - timestamp
     if delta < 0:
         return 1.0
-        
+
     if half_life <= 0:
         return 1.0
-        
+
     return math.exp(-0.6931471805599453 * delta / half_life)

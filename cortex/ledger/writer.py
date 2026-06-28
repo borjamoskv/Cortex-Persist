@@ -95,6 +95,7 @@ class LedgerWriter:
             event = dataclasses.replace(event, prev_hash=prev_hash, hash=new_hash)
 
             from cortex.database.core import causal_write
+
             with causal_write(conn):
                 conn.execute(
                     """

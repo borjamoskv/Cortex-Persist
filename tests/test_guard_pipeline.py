@@ -170,11 +170,14 @@ class TestPostHooks:
         pipeline.add_post_hook(h3)
 
         await pipeline.run_post_hooks(123, "project", "knowledge", mock_conn)
+
     async def test_hook_receives_source_and_db_path(self, pipeline, mock_conn):
         """Hooks should receive source and db_path as keyword arguments."""
         received = {}
 
-        async def hook_fn(fact_id, project, fact_type, conn, *, tenant_id="default", source=None, db_path=None):
+        async def hook_fn(
+            fact_id, project, fact_type, conn, *, tenant_id="default", source=None, db_path=None
+        ):
             received["source"] = source
             received["db_path"] = db_path
 

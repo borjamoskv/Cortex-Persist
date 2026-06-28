@@ -151,9 +151,14 @@ async def test_taint_propagation_crypto_safety(engine):
 
         # 4. Verify that metadata of fact 500 was NOT clobbered
         async with engine.session() as conn:
-            cursor = await conn.execute("SELECT confidence, metadata FROM facts WHERE id = ?", (500,))
+            cursor = await conn.execute(
+                "SELECT confidence, metadata FROM facts WHERE id = ?", (500,)
+            )
             row = await cursor.fetchone()
             assert row[0] == "C1"  # Confidence SHOULD be downgraded
             import json
+
             meta = json.loads(row[1])
-            assert meta["blob"] == "Ω-ENCRYPTED-CRYPTO-STUFF-Ω"  # Metadata blob SHOULD remain intact
+            assert (
+                meta["blob"] == "Ω-ENCRYPTED-CRYPTO-STUFF-Ω"
+            )  # Metadata blob SHOULD remain intact

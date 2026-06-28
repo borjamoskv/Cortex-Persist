@@ -118,9 +118,16 @@ class KeyManager:
                 if keyring is not None:
                     private_pem = keyring.get_password(self.service_name, actor_id)
                 else:
-                    logger.warning("OS Keyring is not available (keyring package is not installed).")
+                    logger.warning(
+                        "OS Keyring is not available (keyring package is not installed)."
+                    )
             except Exception as e:
-                logger.warning("Fallo en OS Keyring (get_password) para actor %s: %s", actor_id, e, exc_info=True)
+                logger.warning(
+                    "Fallo en OS Keyring (get_password) para actor %s: %s",
+                    actor_id,
+                    e,
+                    exc_info=True,
+                )
 
         if not private_pem:
             return None
@@ -146,9 +153,16 @@ class KeyManager:
                 if keyring is not None:
                     keyring.delete_password(self.service_name, actor_id)
                 else:
-                    logger.warning("OS Keyring is not available (keyring package is not installed).")
+                    logger.warning(
+                        "OS Keyring is not available (keyring package is not installed)."
+                    )
             except Exception as e:
-                logger.warning("Fallo en OS Keyring (delete_password) para actor %s: %s", actor_id, e, exc_info=True)
+                logger.warning(
+                    "Fallo en OS Keyring (delete_password) para actor %s: %s",
+                    actor_id,
+                    e,
+                    exc_info=True,
+                )
             if self.service_name in self._fallback_keyring:
                 self._fallback_keyring[self.service_name].pop(actor_id, None)
             logger.info(f"Revoked key for actor: {actor_id}")

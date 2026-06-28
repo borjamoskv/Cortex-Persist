@@ -226,14 +226,19 @@ class SovereignLedger(LedgerAuditMixin):
     ) -> str:
         # [OUROBOROS] C5-REAL Entropy Control & Autopoiesis Hook
         if not action or action.isspace():
-            raise ValueError("[OUROBOROS] Vector P1.2: Anergic action detected. Ledger requires high exergy.")
+            raise ValueError(
+                "[OUROBOROS] Vector P1.2: Anergic action detected. Ledger requires high exergy."
+            )
         if len(detail_json) < 2:
             logger.warning("[OUROBOROS] Low entropy transaction detail. Sub-optimal exergy flow.")
-            
+
         import re
+
         # [C5-REAL] Context Isolation Hook (P1.2)
-        if re.search(r'\b(slop|limerence)\b', action.lower()):
-            raise ValueError("[OUROBOROS] Vector P1.2 Context Isolation: Action blocked by C5-REAL Anti-Limerence protocol.")
+        if re.search(r"\b(slop|limerence)\b", action.lower()):
+            raise ValueError(
+                "[OUROBOROS] Vector P1.2 Context Isolation: Action blocked by C5-REAL Anti-Limerence protocol."
+            )
 
         cursor = conn.execute(
             "SELECT hash FROM transactions WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",

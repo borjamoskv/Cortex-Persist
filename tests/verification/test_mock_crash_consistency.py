@@ -9,9 +9,12 @@ from cortex.database.core import causal_write
 
 logger = logging.getLogger(__name__)
 
+
 class InducedCrashError(Exception):
     """Exception raised specifically for simulating a system crash."""
+
     pass
+
 
 @pytest.fixture
 async def engine(tmp_path: Path):
@@ -38,19 +41,19 @@ async def engine(tmp_path: Path):
     if "CORTEX_NO_TAINT_ENFORCE" in os.environ:
         del os.environ["CORTEX_NO_TAINT_ENFORCE"]
 
+
 @pytest.mark.asyncio
 async def test_crash_before_causal_write(engine):
     """
     Test scenario where the system crashes before causal write authorization.
     Expected: No DB mutation and no Ledger mutation.
     """
-    with patch("cortex.engine.core.store_mixin.causal_write", side_effect=InducedCrashError("Crash before causal_write")):
+    with patch(
+        "cortex.engine.core.store_mixin.causal_write",
+        side_effect=InducedCrashError("Crash before causal_write"),
+    ):
         try:
-            await engine.store(
-                project="TEST", 
-                content='{"key": "val"}',
-                source="cli"
-            )
+            await engine.store(project="TEST", content='{"key": "val"}', source="cli")
         except InducedCrashError:
             pass
 
@@ -58,7 +61,7 @@ async def test_crash_before_causal_write(engine):
         cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE project = 'TEST'")
         fact_count = (await cursor.fetchone())[0]
         assert fact_count == 0, "Fact should not be written to DB"
-        
+
         cursor = await conn.execute("SELECT COUNT(*) FROM transactions WHERE project = 'TEST'")
         tx_count = (await cursor.fetchone())[0]
         assert tx_count == 0, "Transaction should not be written to Ledger"
@@ -71,28 +74,28 @@ async def test_crash_after_ledger_before_db_write(engine):
     Since they share the same SQLite connection (and transaction), the crash should rollback the Ledger write.
     """
     from cortex.engine.core import store_mixin
-    
+
     async def crashing_insert_fact_record(*args, **kwargs):
         raise InducedCrashError("Crash inside db insert")
-    
-    with patch("cortex.engine.core.store_mixin.insert_fact_record", new=crashing_insert_fact_record):
+
+    with patch(
+        "cortex.engine.core.store_mixin.insert_fact_record", new=crashing_insert_fact_record
+    ):
         try:
-            await engine.store(
-                project="TEST", 
-                content='{"key": "val2"}',
-                source="cli"
-            )
+            await engine.store(project="TEST", content='{"key": "val2"}', source="cli")
         except InducedCrashError:
             pass
-            
+
     async with engine.session() as conn:
         cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE project = 'TEST'")
         fact_count = (await cursor.fetchone())[0]
         assert fact_count == 0, "Fact write should not exist"
-        
+
         cursor = await conn.execute("SELECT COUNT(*) FROM transactions WHERE project = 'TEST'")
         tx_count = (await cursor.fetchone())[0]
-        assert tx_count == 0, "Ledger transaction should be rolled back due to uncommitted transaction"
+        assert tx_count == 0, (
+            "Ledger transaction should be rolled back due to uncommitted transaction"
+        )
 
 
 @pytest.mark.asyncio
@@ -101,16 +104,13 @@ async def test_crash_during_commit(engine):
     Test scenario where everything finishes, but commit fails.
     Expected: Rollback of both DB and Ledger writes.
     """
+
     async def crashing_commit(*args, **kwargs):
         raise InducedCrashError("Crash during commit")
 
     with patch("aiosqlite.Connection.commit", new=crashing_commit):
         try:
-            await engine.store(
-                project="TEST", 
-                content='{"key": "val3"}',
-                source="cli"
-            )
+            await engine.store(project="TEST", content='{"key": "val3"}', source="cli")
         except InducedCrashError:
             pass
 
@@ -118,7 +118,7 @@ async def test_crash_during_commit(engine):
         cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE project = 'TEST'")
         fact_count = (await cursor.fetchone())[0]
         assert fact_count == 0, "Fact write should be rolled back"
-        
+
         cursor = await conn.execute("SELECT COUNT(*) FROM transactions WHERE project = 'TEST'")
         tx_count = (await cursor.fetchone())[0]
         assert tx_count == 0, "Transaction should be rolled back"

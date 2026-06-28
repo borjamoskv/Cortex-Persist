@@ -21,7 +21,7 @@ def test_t_cell_ihelp_purge_signature_construction():
     # Check key nodes are in the signature pattern
     for node in BASE_MAFIA_NODES:
         escaped = re.escape(node)
-        cleaned = re.sub(r'(\\ )|\s+', r'\\s+', escaped)
+        cleaned = re.sub(r"(\\ )|\s+", r"\\s+", escaped)
         assert cleaned in daemon.antigen_signature
 
 
@@ -124,8 +124,10 @@ async def test_t_cell_ihelp_purge_scan_telemetry_targets(monkeypatch, tmp_path):
 
     # Patch getaddrinfo on the loop
     loop = asyncio.get_running_loop()
-    with patch.object(loop, "getaddrinfo", new=mock_getaddrinfo), \
-         patch("httpx.AsyncClient", return_value=mock_client):
+    with (
+        patch.object(loop, "getaddrinfo", new=mock_getaddrinfo),
+        patch("httpx.AsyncClient", return_value=mock_client),
+    ):
         res = await daemon.scan_telemetry_targets()
 
     assert res["status"] == "completed"
@@ -134,7 +136,9 @@ async def test_t_cell_ihelp_purge_scan_telemetry_targets(monkeypatch, tmp_path):
     # Let's inspect the database to make sure actions were written
     conn = await connect_async(str(db_file))
     try:
-        async with conn.execute("SELECT action, resource, status FROM security_audit_log ORDER BY rowid ASC") as c:
+        async with conn.execute(
+            "SELECT action, resource, status FROM security_audit_log ORDER BY rowid ASC"
+        ) as c:
             rows = await c.fetchall()
     finally:
         await conn.close()

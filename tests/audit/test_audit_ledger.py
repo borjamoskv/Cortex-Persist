@@ -26,6 +26,7 @@ import pytest
 async def audit_conn(tmp_path):
     """Provides a fresh aiosqlite connection for each test."""
     from cortex.database.core import connect_async
+
     db_path = str(tmp_path / "audit_test.db")
     conn = await connect_async(db_path)
     yield conn
@@ -164,6 +165,7 @@ class TestEnterpriseAuditLedger:
             batch1_ids = [r[0] for r in batch1_rows]
 
             from cortex.audit.smt import SparseMerkleTree
+
             smt_state = SparseMerkleTree()
             for aid in batch1_ids:
                 smt_state.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
@@ -248,6 +250,7 @@ class TestEnterpriseAuditLedger:
     async def test_run_scan_stub(self, ledger):
         """run_scan currently returns a stub; verify the expected shape."""
         from cortex.audit.analyst import AuditAnalystGrok
+
         analyst = AuditAnalystGrok(ledger)
         result = await analyst.run_scan()
         assert "status" in result

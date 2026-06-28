@@ -32,8 +32,6 @@ _L2_HYBRID_SEARCH_AVAILABLE: bool | None = None  # None = not yet checked
 logger = logging.getLogger("cortex.memory.sqlite_vec_store")
 
 
-
-
 from cortex.memory.traits.read import ReadTrait
 from cortex.memory.traits.schema import SchemaTrait
 from cortex.memory.traits.write import WriteTrait

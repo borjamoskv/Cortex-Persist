@@ -16,8 +16,9 @@ _EXFIL_PATTERNS = [
     re.compile(r"sk_live_[a-zA-Z0-9]+"),  # Stripe keys
     re.compile(r"v6_aesgcm:[a-zA-Z0-9+/=]+"),  # CORTEX internal encryption
     re.compile(r"SG\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+"),  # SendGrid API keys
-    re.compile(r"-----BEGIN (?:RSA |OPENSSH )?PRIVATE KEY-----"), # PEM Keys
+    re.compile(r"-----BEGIN (?:RSA |OPENSSH )?PRIVATE KEY-----"),  # PEM Keys
 ]
+
 
 @dataclass
 class EgressAuthorization:
@@ -34,7 +35,7 @@ class EgressGuard:
         # In-memory token bucket for rate-limiting (per agent).
         self._rate_limits: dict[str, int] = {}
         # Simple limit: 5 emails per hour per agent
-        self.max_emails_per_agent = 5 
+        self.max_emails_per_agent = 5
 
     def authorize_email(self, agent_id: str, recipient: str, body: str) -> EgressAuthorization:
         """
@@ -44,7 +45,9 @@ class EgressGuard:
         for pattern in _EXFIL_PATTERNS:
             if pattern.search(body):
                 logger.error("[P0] EgressGuard: Pattern breach detected from agent %s", agent_id)
-                return EgressAuthorization(False, "C5-REAL: Exfiltration pattern detected in payload.")
+                return EgressAuthorization(
+                    False, "C5-REAL: Exfiltration pattern detected in payload."
+                )
 
         # 2. Domain Whitelist Check
         if self.tenant_domains:

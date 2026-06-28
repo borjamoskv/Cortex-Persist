@@ -31,7 +31,9 @@ class StripeBillingGateway:
 
     def __init__(self, config: StripeBillingConfig | None = None):
         self.config = config or load_stripe_billing_config()
-        self.is_mock = not self.config.secret_key or self.config.secret_key.startswith("sk_test_mock")
+        self.is_mock = not self.config.secret_key or self.config.secret_key.startswith(
+            "sk_test_mock"
+        )
 
         if not self.is_mock and stripe is not None:
             stripe.api_key = self.config.secret_key
@@ -39,7 +41,9 @@ class StripeBillingGateway:
             if stripe is None:
                 logger.info("[BILLING] stripe package not installed. Running in mock mode.")
             else:
-                logger.info("[BILLING] Running in mock mode due to mock/missing Stripe credentials.")
+                logger.info(
+                    "[BILLING] Running in mock mode due to mock/missing Stripe credentials."
+                )
 
     def create_customer(self, tenant_id: str, email: str) -> str:
         """Create a customer in Stripe or mock.
@@ -71,7 +75,12 @@ class StripeBillingGateway:
         price_id = self.config.price_table.get(plan, "")
         if self.is_mock or stripe is None:
             mock_sub = f"sub_mock_{customer_id[:8]}"
-            logger.info("[BILLING][MOCK] Subscribed customer %s to plan %s (price=%s)", customer_id, plan, price_id)
+            logger.info(
+                "[BILLING][MOCK] Subscribed customer %s to plan %s (price=%s)",
+                customer_id,
+                plan,
+                price_id,
+            )
             return mock_sub
 
         if not price_id:
@@ -84,7 +93,12 @@ class StripeBillingGateway:
             )
             return subscription.id
         except Exception as e:
-            logger.error("Failed to create Stripe subscription for customer %s on plan %s: %s", customer_id, plan, e)
+            logger.error(
+                "Failed to create Stripe subscription for customer %s on plan %s: %s",
+                customer_id,
+                plan,
+                e,
+            )
             raise
 
     def report_usage(self, subscription_item_id: str, quantity: int) -> None:
@@ -95,7 +109,11 @@ class StripeBillingGateway:
             quantity: Increment quantity for usage.
         """
         if self.is_mock or stripe is None:
-            logger.info("[BILLING][MOCK] Reported usage: subscription_item=%s quantity=%d", subscription_item_id, quantity)
+            logger.info(
+                "[BILLING][MOCK] Reported usage: subscription_item=%s quantity=%d",
+                subscription_item_id,
+                quantity,
+            )
             return
 
         try:
@@ -106,7 +124,11 @@ class StripeBillingGateway:
                 action="increment",
             )
         except Exception as e:
-            logger.error("Failed to report usage for Stripe subscription item %s: %s", subscription_item_id, e)
+            logger.error(
+                "Failed to report usage for Stripe subscription item %s: %s",
+                subscription_item_id,
+                e,
+            )
             raise
 
     def handle_webhook(self, payload: bytes, signature: str) -> dict[str, Any]:
@@ -122,6 +144,7 @@ class StripeBillingGateway:
         if self.is_mock or stripe is None:
             # Simple mock payload bypass (useful for E2E testing)
             import json
+
             try:
                 data = json.loads(payload.decode("utf-8"))
                 logger.info("[BILLING][MOCK] Parsed mock webhook event type %s", data.get("type"))
@@ -131,9 +154,7 @@ class StripeBillingGateway:
                 return {"type": "unknown", "data": {}}
 
         try:
-            event = stripe.Webhook.construct_event(
-                payload, signature, self.config.webhook_secret
-            )
+            event = stripe.Webhook.construct_event(payload, signature, self.config.webhook_secret)
             return event
         except Exception as e:
             logger.error("Webhook verification failed: %s", e)

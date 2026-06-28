@@ -104,11 +104,15 @@ class EventLedgerL3:
 
         await self.ensure_table()
         token = (
-            event.metadata.get("cortex_taint")
-            or event.metadata.get("CORTEX-TAINT")
-            or event.metadata.get("cortex-taint")
-            or event.metadata.get("CORTEX_TAINT")
-        ) if event.metadata else None
+            (
+                event.metadata.get("cortex_taint")
+                or event.metadata.get("CORTEX-TAINT")
+                or event.metadata.get("cortex-taint")
+                or event.metadata.get("CORTEX_TAINT")
+            )
+            if event.metadata
+            else None
+        )
         await enforce_taint_check(self._conn, token, event.content)
 
         prev_hash = await self._get_last_hash(event.tenant_id)
@@ -131,7 +135,11 @@ class EventLedgerL3:
                 event.tenant_id,
                 event.prev_hash,
                 event.signature,
-                json.dumps(dict(event.metadata) if type(event.metadata).__name__ == "mappingproxy" else event.metadata),
+                json.dumps(
+                    dict(event.metadata)
+                    if type(event.metadata).__name__ == "mappingproxy"
+                    else event.metadata
+                ),
             ),
         )
         await self._conn.commit()
@@ -260,6 +268,7 @@ class EventLedgerL3:
 
 def _canonical_metadata(metadata: Any) -> str:
     from types import MappingProxyType
+
     if isinstance(metadata, MappingProxyType):
         metadata = dict(metadata)
     return json.dumps(metadata, sort_keys=True, separators=(",", ":"))

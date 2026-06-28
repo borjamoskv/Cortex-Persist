@@ -5,12 +5,14 @@ from google import genai
 
 logger = logging.getLogger("Cortex.SubstackCrystallizer")
 
+
 class SubstackCrystallizer:
     """
     [C5-REAL] Compresor Termodinámico.
     Reduce la entropía de un Diff a un ensayo de alta señal (>80% exergía)
     para publicación en Substack.
     """
+
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
         if self.api_key:
@@ -47,11 +49,13 @@ GENERA EL MARKDOWN PARA SUBSTACK:
 """
         try:
             response = self.client.models.generate_content(
-                model='gemini-2.5-pro',
+                model="gemini-2.5-pro",
                 contents=prompt,
             )
             essay = response.text.strip()
-            logger.info(f"[C5-REAL] Ensayo cristalizado exitosamente para {payload.get('hash')[:7]}")
+            logger.info(
+                f"[C5-REAL] Ensayo cristalizado exitosamente para {payload.get('hash')[:7]}"
+            )
             return essay
         except Exception as e:
             logger.error(f"Error de compresión termodinámica: {e}")

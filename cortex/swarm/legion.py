@@ -62,12 +62,12 @@ class AsyncSignalBus:
 
     async def emit(self, signal: SwarmSignal) -> None:
         """Emit a signal onto the bus with Backpressure.
-        
+
         Empty payloads are considered semantically empty and are downgraded to VOID.
         """
         if not signal.payload and signal.status == "SUCCESS":
             raise ValueError("P0 Violation: SUCCESS signal emitted with empty payload.")
-        
+
         # Enforce VOID invariant: Drop empty signals immediately
         if not signal.payload and signal.status != "VOID":
             signal.status = "VOID"
@@ -78,11 +78,11 @@ class AsyncSignalBus:
             import logging
 
             from cortex.guards.landauer_guard import LandauerGuard
-            
+
             # Serialize to measure thermodynamic density
             payload_str = json.dumps(signal.payload)
             entropy = LandauerGuard.calculate_entropy(payload_str)
-            
+
             # If entropy is below the threshold, it means the payload contains repetitive
             # conversational slop (Anergia) instead of dense structural invariants.
             if entropy < LandauerGuard.MIN_ENTROPY:
@@ -100,7 +100,7 @@ class AsyncSignalBus:
     async def consume(self) -> SwarmSignal:
         """Consume a signal from the bus."""
         return await self._queue.get()
-        
+
     async def get_all(self) -> list[SwarmSignal]:
         """Flush the queue and return all signals."""
         signals = []
@@ -111,7 +111,7 @@ class AsyncSignalBus:
 
     def task_done(self) -> None:
         self._queue.task_done()
-        
+
     async def join(self) -> None:
         await self._queue.join()
 
@@ -151,32 +151,33 @@ class SwarmAgent(ABC):
     async def execute(self, target: str) -> SwarmSignal:
         """Execute a siege task on the target."""
 
+
 class LegionPool:
     """Thermally bound worker pool. Maintains a fixed number of perpetual async consumers."""
-    
+
     def __init__(self, agent_factory, bus: AsyncSignalBus, concurrency: int = 50):
         self.agent_factory = agent_factory
         self.bus = bus
         self.concurrency = concurrency
         self._workers = []
         self._queue: asyncio.Queue[str] = asyncio.Queue(maxsize=concurrency)
-        
+
     def start(self) -> None:
         for i in range(self.concurrency):
             agent = self.agent_factory(f"agent-{i:03d}", self.bus)
             task = asyncio.create_task(agent.run(self._queue))
             self._workers.append(task)
-            
+
     async def dispatch(self, target: str) -> None:
         await self._queue.put(target)
-        
+
     def dispatch_nowait(self, target: str) -> None:
         """Non-blocking dispatch. Raises asyncio.QueueFull if no slots."""
         self._queue.put_nowait(target)
-        
+
     async def stop(self) -> None:
         for _ in range(self.concurrency):
-            await self._queue.put(None) # type: ignore
+            await self._queue.put(None)  # type: ignore
         await asyncio.gather(*self._workers, return_exceptions=True)
         self._workers.clear()
 
@@ -308,10 +309,10 @@ class Squadron(ABC):
             self._create_agent(f"{self.SQUAD_NAME}-{i:03d}") for i in range(self.REPLICAS)
         ]
         tasks = [asyncio.create_task(agent.run(queue)) for agent in self.agents]
-        
+
         for _ in range(len(self.agents)):
             queue.put_nowait(None)  # Sentinel for each agent  # type: ignore
-            
+
         await queue.join()
         await asyncio.gather(*tasks)
         return await self._crystallize(await self.bus.get_all())

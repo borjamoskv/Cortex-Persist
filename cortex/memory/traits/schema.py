@@ -108,7 +108,6 @@ class SchemaTrait:
                     """
                 conn.executescript(sql)
 
-
                 for i in range(16):
                     conn.execute(
                         f"CREATE INDEX IF NOT EXISTS idx_void_mih_s{i} ON vec_void_mih(s{i})"

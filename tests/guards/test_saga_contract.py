@@ -30,12 +30,14 @@ class TestSagaWriteProposal:
         assert p.confidence == "C5"
 
     def test_valid_proposal_with_all_fields(self):
-        p = SagaWriteProposal(**self._valid_kwargs(
-            tags=["security", "hardening"],
-            source="cli",
-            metadata={"cortex_taint": "taint:agent:session:2026:nonce:sig"},
-            parent_decision_id=42,
-        ))
+        p = SagaWriteProposal(
+            **self._valid_kwargs(
+                tags=["security", "hardening"],
+                source="cli",
+                metadata={"cortex_taint": "taint:agent:session:2026:nonce:sig"},
+                parent_decision_id=42,
+            )
+        )
         assert p.tags == ["security", "hardening"]
         assert p.source == "cli"
         assert p.parent_decision_id == 42
@@ -117,8 +119,17 @@ class TestSagaWriteProposal:
     # ── Fact Type Validation ──────────────────────────────────────────
 
     def test_valid_fact_types(self):
-        for ft in ["knowledge", "decision", "error", "observation", "ghost",
-                    "pattern", "bridge", "diamond", "telemetry_batch"]:
+        for ft in [
+            "knowledge",
+            "decision",
+            "error",
+            "observation",
+            "ghost",
+            "pattern",
+            "bridge",
+            "diamond",
+            "telemetry_batch",
+        ]:
             p = SagaWriteProposal(**self._valid_kwargs(fact_type=ft))
             assert p.fact_type == ft
 
@@ -145,27 +156,19 @@ class TestSagaWriteProposal:
     # ── Taint Token Resolution ────────────────────────────────────────
 
     def test_resolve_taint_token_cortex_taint(self):
-        p = SagaWriteProposal(**self._valid_kwargs(
-            metadata={"cortex_taint": "taint:a:s:t:n:sig"}
-        ))
+        p = SagaWriteProposal(**self._valid_kwargs(metadata={"cortex_taint": "taint:a:s:t:n:sig"}))
         assert p.resolve_taint_token() == "taint:a:s:t:n:sig"
 
     def test_resolve_taint_token_uppercase_hyphen(self):
-        p = SagaWriteProposal(**self._valid_kwargs(
-            metadata={"CORTEX-TAINT": "taint:a:s:t:n:sig"}
-        ))
+        p = SagaWriteProposal(**self._valid_kwargs(metadata={"CORTEX-TAINT": "taint:a:s:t:n:sig"}))
         assert p.resolve_taint_token() == "taint:a:s:t:n:sig"
 
     def test_resolve_taint_token_lowercase_hyphen(self):
-        p = SagaWriteProposal(**self._valid_kwargs(
-            metadata={"cortex-taint": "taint:a:s:t:n:sig"}
-        ))
+        p = SagaWriteProposal(**self._valid_kwargs(metadata={"cortex-taint": "taint:a:s:t:n:sig"}))
         assert p.resolve_taint_token() == "taint:a:s:t:n:sig"
 
     def test_resolve_taint_token_uppercase_underscore(self):
-        p = SagaWriteProposal(**self._valid_kwargs(
-            metadata={"CORTEX_TAINT": "taint:a:s:t:n:sig"}
-        ))
+        p = SagaWriteProposal(**self._valid_kwargs(metadata={"CORTEX_TAINT": "taint:a:s:t:n:sig"}))
         assert p.resolve_taint_token() == "taint:a:s:t:n:sig"
 
     def test_resolve_taint_token_missing(self):
@@ -174,12 +177,14 @@ class TestSagaWriteProposal:
 
     def test_resolve_taint_priority_order(self):
         """CORTEX-TAINT (hyphen-uppercase) takes priority over cortex_taint."""
-        p = SagaWriteProposal(**self._valid_kwargs(
-            metadata={
-                "cortex_taint": "low_priority",
-                "CORTEX-TAINT": "high_priority",
-            }
-        ))
+        p = SagaWriteProposal(
+            **self._valid_kwargs(
+                metadata={
+                    "cortex_taint": "low_priority",
+                    "CORTEX-TAINT": "high_priority",
+                }
+            )
+        )
         assert p.resolve_taint_token() == "high_priority"
 
     # ── Extra Fields Forbidden ────────────────────────────────────────

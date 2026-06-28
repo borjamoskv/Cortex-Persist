@@ -19,6 +19,7 @@ def auth() -> None:
 @click.argument("req_id")
 def submit_vote(req_id: str) -> None:
     """Submits a cryptographic vote for a pending consensus request."""
+
     async def _run() -> None:
         from cortex.extensions.security.signatures import get_default_signer
 
@@ -68,7 +69,7 @@ def submit_vote(req_id: str) -> None:
             console.print(f"[bold green]✓ Vote registered for {req_id}.[/bold green]")
         else:
             console.print(f"[bold red]✗ Failed to register vote for {req_id}.[/bold red]")
-            
+
     _run_async(_run())
 
 
@@ -76,6 +77,7 @@ def submit_vote(req_id: str) -> None:
 @click.argument("req_id")
 def reject_request(req_id: str) -> None:
     """Rejects a pending request directly (admin override)."""
+
     async def _run() -> None:
         engine = CortexEngine()
         auth_gw = QuorumGateway(engine)
@@ -85,13 +87,14 @@ def reject_request(req_id: str) -> None:
             console.print(f"[bold yellow]✓ Request {req_id} REJECTED.[/bold yellow]")
         else:
             console.print(f"[bold red]✗ Failed to reject request {req_id}.[/bold red]")
-            
+
     _run_async(_run())
 
 
 @auth.command("list")
 def list_requests() -> None:
     """Lists pending BFT quorum requests."""
+
     async def _run() -> None:
         engine = CortexEngine()
         try:

@@ -163,7 +163,7 @@ async def test_seal_4_timeout():
         mock_run.side_import = AsyncMock(
             side_effect=Exception("Timeout")
         )  # or simulate via wait_for
-        
+
         async def mock_wait_for(coro, timeout):
             coro.close()
             raise pytest.importorskip("asyncio").TimeoutError()
@@ -190,7 +190,9 @@ async def test_seal_5_happy():
 @pytest.mark.asyncio
 async def test_seal_5_init_rejection():
     with (
-        patch("cortex.engine.core.cortex_engine.CortexEngine", side_effect=RuntimeError("DB Error")),
+        patch(
+            "cortex.engine.core.cortex_engine.CortexEngine", side_effect=RuntimeError("DB Error")
+        ),
         patch("cortex.guards._seals_checks_1_5.arun_cmd", new_callable=AsyncMock) as mock_run,
     ):
         mock_run.return_value = (0, "Passed")

@@ -21,14 +21,15 @@ from cortex.audit.smt import SparseMerkleTree
 
 logger = logging.getLogger("cortex.audit.ledger_compactor")
 
+
 async def compact_ledger(
     conn: aiosqlite.Connection,
     ledger: EnterpriseAuditLedger,
     max_rows: int = 10000,
-    snapshot_dir: Path | None = None
+    snapshot_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Compacts the oldest ledger entries into a cryptographic snapshot."""
-    
+
     if snapshot_dir is None:
         snapshot_dir = Path("~/.gemini/config/.cortex/snapshots").expanduser()
     snapshot_dir.mkdir(parents=True, exist_ok=True)
@@ -41,7 +42,7 @@ async def compact_ledger(
     async with ledger._lock:
         async with conn.execute(
             "SELECT rowid, audit_id, timestamp, tenant_id, actor_role, actor_id, action, resource, status, prev_hash, signature, external_anchor FROM security_audit_log ORDER BY rowid ASC LIMIT ?",
-            (max_rows,)
+            (max_rows,),
         ) as cursor:
             rows = list(await cursor.fetchall())
 
@@ -77,10 +78,10 @@ async def compact_ledger(
 
         # We will compact all but the last batch in this list to ensure batch boundary integrity
         batches_to_compact = batches[:-1]
-        
+
         # Calculate start and end bounds
-        h_start = batches_to_compact[0][0] # prev_hash of first batch
-        
+        h_start = batches_to_compact[0][0]  # prev_hash of first batch
+
         # Calculate the h_end by walking the SMT for the batches we compact
         expected_prev_hash = h_start
         local_smt = SparseMerkleTree()
@@ -89,14 +90,14 @@ async def compact_ledger(
             if len(batch_rows) == 1 and batch_rows[0][6] == "COMPACTION_NODE":
                 expected_prev_hash = batch_rows[0][8]
                 continue
-            
+
             batch_audit_ids = [r[1] for r in batch_rows]
             for aid in batch_audit_ids:
                 local_smt.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
             merkle_root = local_smt.root
             entry_hash_payload = f"merkle_batch:{merkle_root}:{expected_prev_hash}"
             expected_prev_hash = hashlib.sha256(entry_hash_payload.encode()).hexdigest()
-            
+
         h_end = expected_prev_hash
 
         # Collect all rowids to delete and prepare the snapshot payload
@@ -105,27 +106,29 @@ async def compact_ledger(
         for _, _, batch_rows in batches_to_compact:
             for r in batch_rows:
                 rowids_to_delete.append(r[0])
-                snapshot_data.append({
-                    "audit_id": r[1],
-                    "timestamp": r[2],
-                    "tenant_id": r[3],
-                    "actor_role": r[4],
-                    "actor_id": r[5],
-                    "action": r[6],
-                    "resource": r[7],
-                    "status": r[8],
-                    "prev_hash": r[9],
-                    "signature": r[10],
-                    "external_anchor": r[11]
-                })
+                snapshot_data.append(
+                    {
+                        "audit_id": r[1],
+                        "timestamp": r[2],
+                        "tenant_id": r[3],
+                        "actor_role": r[4],
+                        "actor_id": r[5],
+                        "action": r[6],
+                        "resource": r[7],
+                        "status": r[8],
+                        "prev_hash": r[9],
+                        "signature": r[10],
+                        "external_anchor": r[11],
+                    }
+                )
 
         snapshot_json = json.dumps(snapshot_data, indent=2).encode("utf-8")
         snapshot_hash = hashlib.sha256(snapshot_json).hexdigest()
-        
+
         timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         filename = f"ledger_snapshot_{timestamp_str}_{snapshot_hash[:8]}.json.gz"
         filepath = snapshot_dir / filename
-        
+
         with gzip.open(filepath, "wb") as f:
             f.write(snapshot_json)
 
@@ -144,14 +147,16 @@ async def compact_ledger(
         try:
             if not in_tx_before:
                 await conn.execute("BEGIN IMMEDIATE")
-            
+
             # Delete old rows
             placeholders = ",".join(["?"] * len(rowids_to_delete))
-            await conn.execute(f"DELETE FROM security_audit_log WHERE rowid IN ({placeholders})", rowids_to_delete)
-            
+            await conn.execute(
+                f"DELETE FROM security_audit_log WHERE rowid IN ({placeholders})", rowids_to_delete
+            )
+
             # Insert COMPACTION_NODE at the exact rowid of the first deleted row to maintain ORDER BY rowid ASC
             first_rowid = rowids_to_delete[0]
-            
+
             await conn.execute(
                 """INSERT INTO security_audit_log
                    (rowid, audit_id, timestamp, tenant_id, actor_role, actor_id, action,
@@ -169,23 +174,27 @@ async def compact_ledger(
                     h_end,
                     h_start,
                     compaction_signature,
-                    json.dumps({"snapshot_path": str(filepath)})
-                )
+                    json.dumps({"snapshot_path": str(filepath)}),
+                ),
             )
 
             if not in_tx_before:
                 await conn.commit()
-                
+
         except Exception as e:
             if not in_tx_before:
                 await conn.rollback()
             raise e
 
-    logger.info("C5-REAL: Ledger Compaction Complete. %d rows compacted into %s", len(rowids_to_delete), filename)
+    logger.info(
+        "C5-REAL: Ledger Compaction Complete. %d rows compacted into %s",
+        len(rowids_to_delete),
+        filename,
+    )
     return {
         "status": "compacted",
         "rows_compacted": len(rowids_to_delete),
         "snapshot_path": str(filepath),
         "h_start": h_start,
-        "h_end": h_end
+        "h_end": h_end,
     }

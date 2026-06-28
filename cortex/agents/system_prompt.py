@@ -14,11 +14,13 @@ __all__ = ["SYSTEM_PROMPT", "SYSTEM_PROMPT_MEDIUM", "SYSTEM_PROMPT_SHORT"]
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
 
+
 def _load_prompt(filename: str) -> str:
     path = _PROMPTS_DIR / filename
     if path.exists():
         return path.read_text(encoding="utf-8").strip()
     return f"[CORTEX] WARNING: Missing prompt template {filename}"
+
 
 SYSTEM_PROMPT_SHORT = _load_prompt("short.md")
 SYSTEM_PROMPT_MEDIUM = _load_prompt("medium.md")

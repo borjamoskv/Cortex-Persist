@@ -86,7 +86,7 @@ class FrontierDaemon:
                 tags=["Evolution", type],
                 confidence="C5",
                 source="daemon:frontier",
-                actor_id="frontier"
+                actor_id="frontier",
             )
             logger.info("[FRONTIER] Evolution event logged to CORTEX: %s", type)
         except Exception as e:

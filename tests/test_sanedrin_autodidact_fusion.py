@@ -5,6 +5,7 @@ from cortex.swarm.supervisor import SwarmSupervisor
 from cortex.database.core import connect_async, causal_write
 from cortex.config import DB_PATH
 
+
 @pytest.mark.asyncio
 async def test_epistemic_breaker_rejects_narrative(tmp_path):
     """
@@ -12,13 +13,13 @@ async def test_epistemic_breaker_rejects_narrative(tmp_path):
     Verify that SwarmSupervisor rejects non-Epistemological tasks.
     """
     db_path = str(tmp_path / "cortex_test.db")
-    
+
     # Create dummy schema first
     # Create dummy schema first
     db = await connect_async(db_path)
     try:
         with causal_write(db):
-            await db.execute('''
+            await db.execute("""
                 CREATE TABLE IF NOT EXISTS system_hypotheses (
                     id TEXT PRIMARY KEY,
                     payload TEXT,
@@ -27,11 +28,16 @@ async def test_epistemic_breaker_rejects_narrative(tmp_path):
                     owner_id TEXT,
                     lease_expires_at TEXT
                 )
-            ''')
+            """)
             # 1. Inject Stochastic Slop (Narrative)
             await db.execute(
                 "INSERT INTO system_hypotheses (id, payload, status, priority) VALUES (?, ?, ?, ?)",
-                ("hyp-slop", json.dumps({"content": "This is a hallucinated LLM plan without latent basis"}), "ACTIVE", 10)
+                (
+                    "hyp-slop",
+                    json.dumps({"content": "This is a hallucinated LLM plan without latent basis"}),
+                    "ACTIVE",
+                    10,
+                ),
             )
             # 2. Inject valid Hypothesis
             valid_hypothesis = {
@@ -39,18 +45,18 @@ async def test_epistemic_breaker_rejects_narrative(tmp_path):
                     "inputs": [],
                     "model": "rule_based",
                     "posterior": 0.99,
-                    "inferred_state": {}
+                    "inferred_state": {},
                 },
                 "proposed_intervention": {
                     "action_name": "test_action",
                     "parameters": {},
                     "predicted_outcomes": {},
-                    "confidence": 0.9
-                }
+                    "confidence": 0.9,
+                },
             }
             await db.execute(
                 "INSERT INTO system_hypotheses (id, payload, status, priority) VALUES (?, ?, ?, ?)",
-                ("hyp-valid", json.dumps(valid_hypothesis), "ACTIVE", 10)
+                ("hyp-valid", json.dumps(valid_hypothesis), "ACTIVE", 10),
             )
             await db.execute(
                 "CREATE TABLE IF NOT EXISTS cortex_meta (key TEXT PRIMARY KEY, value TEXT)"
@@ -71,19 +77,26 @@ async def test_epistemic_breaker_rejects_narrative(tmp_path):
         def __init__(self, db):
             self.db = db
             self.tasks = [
-                {"id": "hyp-slop", "payload": json.dumps({"content": "This is a hallucinated LLM plan without latent basis"})},
-                {"id": "hyp-valid", "payload": json.dumps(valid_hypothesis)}
+                {
+                    "id": "hyp-slop",
+                    "payload": json.dumps(
+                        {"content": "This is a hallucinated LLM plan without latent basis"}
+                    ),
+                },
+                {"id": "hyp-valid", "payload": json.dumps(valid_hypothesis)},
             ]
+
         async def sync(self):
             pass
+
         def get_next_optimal_task(self, in_flight):
             for t in self.tasks:
                 if t["id"] not in in_flight:
                     return t
             return None
-            
+
     supervisor._topo = DummyTopo(supervisor._db)
-    
+
     class DummyQueue:
         def full(self):
             return False
@@ -92,27 +105,34 @@ async def test_epistemic_breaker_rejects_narrative(tmp_path):
     class DummyWorkerPool:
         def __init__(self):
             self._queue = DummyQueue()
+
         def dispatch_nowait(self, task_id):
             pass
+
         async def stop(self):
             pass
+
     supervisor.worker_pool = DummyWorkerPool()
 
     try:
         # Execute
         dispatched = await supervisor.dispatch_optimal_hypotheses(count=2)
-        
+
         # It should only dispatch 1 valid task
         assert dispatched == 1
-        
+
         # Check DB status
         db2 = await connect_async(db_path)
         try:
-            async with db2.execute("SELECT status FROM system_hypotheses WHERE id = 'hyp-slop'") as cur:
+            async with db2.execute(
+                "SELECT status FROM system_hypotheses WHERE id = 'hyp-slop'"
+            ) as cur:
                 status_slop = (await cur.fetchone())[0]
                 assert status_slop == "INVALIDATED"
-                
-            async with db2.execute("SELECT status FROM system_hypotheses WHERE id = 'hyp-valid'") as cur:
+
+            async with db2.execute(
+                "SELECT status FROM system_hypotheses WHERE id = 'hyp-valid'"
+            ) as cur:
                 status_valid = (await cur.fetchone())[0]
                 assert status_valid == "IN_FLIGHT"
         finally:

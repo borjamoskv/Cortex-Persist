@@ -19,6 +19,7 @@ NOTEBOOKLM_DIR = Path("notebooklm_sources")
 DOMAINS_DIR = Path("notebooklm_domains")
 DIGEST_FILE = Path("cortex_notebooklm_digest.md")
 
+
 def _get_gdrive_paths() -> list[Path]:
     paths = [Path.home() / "Google Drive" / "CORTEX-NotebookLM"]
     cloud_storage = Path.home() / "Library" / "CloudStorage"
@@ -26,6 +27,7 @@ def _get_gdrive_paths() -> list[Path]:
         for gdrive_dir in cloud_storage.glob("GoogleDrive-*"):
             paths.append(gdrive_dir / "Mi unidad" / "CORTEX-NotebookLM")
     return paths
+
 
 # Default Cloud Sync paths (macOS)
 CLOUD_PROVIDERS: dict[str, list[Path]] = {

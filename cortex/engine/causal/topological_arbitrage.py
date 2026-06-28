@@ -180,11 +180,14 @@ class TopologyIndex:
 
         self.sorted_nodes = topo_order
         # Invariant: the graph is a DAG so topo sort length must equal node count.
-        assert len(self.sorted_nodes) == len(self.nodes), "Topological sort dropped nodes! Cycle detected?"
+        assert len(self.sorted_nodes) == len(self.nodes), (
+            "Topological sort dropped nodes! Cycle detected?"
+        )
 
         # Reverse pass for descendants aggregate impact
         subtree_impact = {
-            u: Decimal(str(self.nodes[u]["probability"])) * Decimal(str(self.nodes[u]["impact"])) for u in self.nodes
+            u: Decimal(str(self.nodes[u]["probability"])) * Decimal(str(self.nodes[u]["impact"]))
+            for u in self.nodes
         }
         descendants_count = {u: 0 for u in self.nodes}
 
@@ -268,13 +271,16 @@ class TopologyIndex:
                     age_seconds = max(1.0, now - dt.timestamp())
                 except Exception as e:
                     import logging
-                    logging.getLogger(__name__).warning("Failed to parse created_at for starvation boost: %s", e)
+
+                    logging.getLogger(__name__).warning(
+                        "Failed to parse created_at for starvation boost: %s", e
+                    )
 
                 import math
 
                 # Starvation boost: CBR scales logarithmically with age
                 boosted_cbr = cbr * Decimal(str(1.0 + math.log1p(age_seconds / 3600.0)))
-                
+
                 # Invariants
                 assert age_seconds >= 0.0, "Age cannot be negative"
                 assert boosted_cbr >= cbr, "Boosted CBR must be >= base CBR"
@@ -341,7 +347,7 @@ class TopologyIndex:
         """
         import hashlib
         import json
-        
+
         state_repr = []
         # Sort nodes lexicographically by ID to ensure determinism
         for u in sorted(self.nodes.keys()):
@@ -354,9 +360,9 @@ class TopologyIndex:
                 "cbr": float(m.get("cbr", 0.0)),
                 "depth": m.get("depth", 0),
                 "in_degree": len(self.adj_in.get(u, [])),
-                "out_degree": len(self.adj_out.get(u, []))
+                "out_degree": len(self.adj_out.get(u, [])),
             }
             state_repr.append(node_state)
-            
+
         serialized = json.dumps(state_repr, sort_keys=True)
         return hashlib.sha256(serialized.encode("utf-8")).hexdigest()

@@ -75,6 +75,7 @@ class SearchMixin(EngineMixinBase):
                 embedding = embedder.embed(query)
 
                 from cortex.embeddings.obfuscation import obfuscate_vector
+
                 embedding = obfuscate_vector(embedding, tenant_id=tenant_id, project=project or "")
 
                 results = await hybrid_search(
@@ -113,19 +114,22 @@ class SearchMixin(EngineMixinBase):
                 symlink_results = [r for r in results if r.content.startswith("NEXUS_SYMLINK:")]
                 if symlink_results:
                     from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
-                    target_hashes = list({r.content.split("NEXUS_SYMLINK:")[1] for r in symlink_results})
+
+                    target_hashes = list(
+                        {r.content.split("NEXUS_SYMLINK:")[1] for r in symlink_results}
+                    )
                     placeholders = ",".join("?" for _ in target_hashes)
                     query_sl = f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.tenant_id = ? AND f.hash IN ({placeholders}) AND f.is_tombstoned = 0"
-                    
+
                     async with conn.execute(query_sl, [tenant_id, *target_hashes]) as cursor:
                         sl_rows = await cursor.fetchall()
-                        
+
                     target_facts = {
-                        f["hash"]: f 
+                        f["hash"]: f
                         for f in [self._row_to_fact(r, tenant_id) for r in sl_rows]
                         if f.get("hash")
                     }
-                    
+
                     for r in symlink_results:
                         target_hash = r.content.split("NEXUS_SYMLINK:")[1]
                         if target_hash in target_facts:

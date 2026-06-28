@@ -77,7 +77,9 @@ def _get_cycle_path(base_path: Path, cycle: int) -> Path:
     return base_path.parent / f"evolution_state_cycle_{cycle:05d}.json"
 
 
-def save_swarm(agents: list[EnneagramSovereign], cycle: int, path: Path = DEFAULT_STATE_PATH) -> bool:
+def save_swarm(
+    agents: list[EnneagramSovereign], cycle: int, path: Path = DEFAULT_STATE_PATH
+) -> bool:
     """Guarda el estado actual y rota backups antiguos."""
     try:
         path.parent.mkdir(parents=True, exist_ok=True)

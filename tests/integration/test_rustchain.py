@@ -27,6 +27,7 @@ from mcp.server.fastmcp import FastMCP
 
 # ─── Wallet Tests ──────────────────────────────────────────────────
 
+
 def test_rustchain_wallet_creation() -> None:
     wallet = RustChainWallet.create()
     assert wallet.address.startswith("RTC")
@@ -37,8 +38,12 @@ def test_rustchain_wallet_creation() -> None:
     # From private key bytes
     priv_bytes = wallet._private_key.private_bytes(
         encoding=pytest.importorskip("cryptography.hazmat.primitives.serialization").Encoding.Raw,
-        format=pytest.importorskip("cryptography.hazmat.primitives.serialization").PrivateFormat.Raw,
-        encryption_algorithm=pytest.importorskip("cryptography.hazmat.primitives.serialization").NoEncryption()
+        format=pytest.importorskip(
+            "cryptography.hazmat.primitives.serialization"
+        ).PrivateFormat.Raw,
+        encryption_algorithm=pytest.importorskip(
+            "cryptography.hazmat.primitives.serialization"
+        ).NoEncryption(),
     )
     imported = RustChainWallet.from_private_key_bytes(priv_bytes)
     assert imported.address == wallet.address
@@ -62,6 +67,7 @@ def test_rustchain_wallet_signing() -> None:
 
 # ─── Client Tests ──────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_rustchain_client_mock_mode() -> None:
     client = RustChainClient(mock_mode=True)
@@ -81,6 +87,7 @@ async def test_rustchain_client_mock_mode() -> None:
 
 # ─── Staking Tests ─────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_stake_and_acquire_success() -> None:
     wallet = RustChainWallet.create()
@@ -94,6 +101,7 @@ async def test_stake_and_acquire_success() -> None:
 @pytest.mark.asyncio
 async def test_stake_and_acquire_gate_unavailable() -> None:
     wallet = RustChainWallet.create()
+
     # Mock client indicating unhealthy status
     class UnhealthyClient(RustChainClient):
         async def health(self) -> dict:
@@ -105,8 +113,6 @@ async def test_stake_and_acquire_gate_unavailable() -> None:
 
 
 # ─── LangChain & MCP Tool Tests ───────────────────────────────────
-
-
 
 
 def test_mcp_tool_registration() -> None:
@@ -121,6 +127,7 @@ def test_mcp_tool_registration() -> None:
 
 
 # ─── Judge Interface & Implementation Tests ───────────────────────
+
 
 @pytest.mark.asyncio
 async def test_ast_lint_judge() -> None:
@@ -222,12 +229,16 @@ def test_verdict_signing_and_verification() -> None:
 
     priv_bytes = priv_key.private_bytes(
         encoding=pytest.importorskip("cryptography.hazmat.primitives.serialization").Encoding.Raw,
-        format=pytest.importorskip("cryptography.hazmat.primitives.serialization").PrivateFormat.Raw,
-        encryption_algorithm=pytest.importorskip("cryptography.hazmat.primitives.serialization").NoEncryption()
+        format=pytest.importorskip(
+            "cryptography.hazmat.primitives.serialization"
+        ).PrivateFormat.Raw,
+        encryption_algorithm=pytest.importorskip(
+            "cryptography.hazmat.primitives.serialization"
+        ).NoEncryption(),
     )
     pub_bytes = pub_key.public_bytes(
         encoding=pytest.importorskip("cryptography.hazmat.primitives.serialization").Encoding.Raw,
-        format=pytest.importorskip("cryptography.hazmat.primitives.serialization").PublicFormat.Raw
+        format=pytest.importorskip("cryptography.hazmat.primitives.serialization").PublicFormat.Raw,
     )
 
     reasons = ["Use of banned term: eval", "bare except"]

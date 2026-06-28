@@ -142,7 +142,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "camera=(), microphone=(), geolocation=(), payment=()"
         )
         response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
-        
+
         # [P0] OSINT Mitigation - Erradicación de Dorking
         response.headers["X-Robots-Tag"] = "noindex, nofollow"
 

@@ -13,6 +13,7 @@ import pytest
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts" / "lab"))
 from stripe_config import StripeBillingConfig
 from cortex.extensions.billing.models import BillingEvent, FailureType, StripeInvoice
@@ -30,6 +31,7 @@ def tmp_db():
 
 
 # ─── Model Tests ─────────────────────────────────────────────────────
+
 
 def test_billing_event_serialization():
     """BillingEvent should serialize and deserialize correctly."""
@@ -80,6 +82,7 @@ def test_stripe_invoice_serialization():
 
 # ─── Gateway Tests ───────────────────────────────────────────────────
 
+
 def test_gateway_mock_creation():
     """StripeBillingGateway should initialize and handle mock mode."""
     config = StripeBillingConfig(
@@ -106,6 +109,7 @@ def test_gateway_mock_creation():
 
 # ─── Metering Tests ──────────────────────────────────────────────────
 
+
 def test_cost_calculation():
     """CausalMetering should calculate costs based on SSU and failure multipliers."""
     metering = CausalMetering(db_path=":memory:")
@@ -119,19 +123,25 @@ def test_cost_calculation():
 
     # 2. Stochastic failure (F1 -> multiplier 0.5)
     # Cost = 21.5 SSU * 0.01 * 0.5 = $0.1075
-    ssu, cost = metering.calculate_cost(duration=10.0, tokens_used=5000, search_depth=3, failure_type=FailureType.F1)
+    ssu, cost = metering.calculate_cost(
+        duration=10.0, tokens_used=5000, search_depth=3, failure_type=FailureType.F1
+    )
     assert ssu == 21.5
     assert cost == 0.1075
 
     # 3. Induced failure (F2 -> multiplier 2.0)
     # Cost = 21.5 SSU * 0.01 * 2.0 = $0.43
-    ssu, cost = metering.calculate_cost(duration=10.0, tokens_used=5000, search_depth=3, failure_type=FailureType.F2)
+    ssu, cost = metering.calculate_cost(
+        duration=10.0, tokens_used=5000, search_depth=3, failure_type=FailureType.F2
+    )
     assert ssu == 21.5
     assert cost == 0.43
 
     # 4. Synthetic failure (F3 -> multiplier 1.0)
     # Cost = 21.5 SSU * 0.01 * 1.0 = $0.215
-    ssu, cost = metering.calculate_cost(duration=10.0, tokens_used=5000, search_depth=3, failure_type=FailureType.F3)
+    ssu, cost = metering.calculate_cost(
+        duration=10.0, tokens_used=5000, search_depth=3, failure_type=FailureType.F3
+    )
     assert ssu == 21.5
     assert cost == 0.215
 
@@ -145,6 +155,7 @@ def test_exergy_evaluation():
 
 
 # ─── Database Persistence & Quarantine Tests ───────────────────────
+
 
 def test_record_and_quarantine_flow(tmp_db):
     """CausalMetering should save records and quarantine F2 events."""

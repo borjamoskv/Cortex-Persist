@@ -26,8 +26,6 @@ class FrictionAnnihilatorAgent(EngineAwareMixin):
         self._engine: Any = None
         self.mutator = LLMMutator()
 
-
-
     async def annihilate_friction(
         self, target_file: str, error_trace: str, context: str
     ) -> dict[str, Any]:

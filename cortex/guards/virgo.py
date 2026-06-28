@@ -92,16 +92,17 @@ class VirgoContextGuard:
         # C. Verify agent registered key matches (if registered and signature is valid)
         if is_valid_sig and agent_id and agent_public_key:
             from cortex.crypto.keys import KeyManager
+
             try:
                 km = KeyManager(service_name=tenant_id)
                 registered_key = km._metadata.get(agent_id, {}).get("public_key_b64")
                 if registered_key and registered_key != agent_public_key:
                     is_valid_sig = False
-                    logger.error(f"Agent key mismatch: key passed {agent_public_key[:16]}... does not match registered key {registered_key[:16]}...")
+                    logger.error(
+                        f"Agent key mismatch: key passed {agent_public_key[:16]}... does not match registered key {registered_key[:16]}..."
+                    )
             except Exception as e:
                 logger.debug(f"Could not load KeyManager metadata for agent key verification: {e}")
-
-
 
         if not is_valid_sig:
             self._apply_trust_penalty(agent_id, taint_severity=0.8)
@@ -189,7 +190,8 @@ class VirgoContextGuard:
         if meta_tenant and meta_tenant != tenant_id:
             self._apply_trust_penalty(agent_id, taint_severity=0.5)
             await self._trigger_ledger_rollback(
-                conn, f"Tenant mismatch: metadata tenant '{meta_tenant}' does not match context tenant '{tenant_id}'."
+                conn,
+                f"Tenant mismatch: metadata tenant '{meta_tenant}' does not match context tenant '{tenant_id}'.",
             )
 
         # Determine if this write originates from an autonomous agent
@@ -216,7 +218,9 @@ class VirgoContextGuard:
             )
 
         # 2. Deterministic Validation Signature Verification
-        await self._check_agent_validation_signature(content, project, meta, agent_id, conn, tenant_id)
+        await self._check_agent_validation_signature(
+            content, project, meta, agent_id, conn, tenant_id
+        )
 
         # 3. Replay Protection: Check if this nonce has already been used
         nonce = meta.get("nonce", "")

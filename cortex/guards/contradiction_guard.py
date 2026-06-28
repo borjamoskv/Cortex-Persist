@@ -537,7 +537,9 @@ def _compare_decisions(
     return (score, ca, cb)
 
 
-def _prepare_decisions(rows: list[Any], decrypt_fn: Callable[[str], str] | None) -> list[dict[str, Any]]:
+def _prepare_decisions(
+    rows: list[Any], decrypt_fn: Callable[[str], str] | None
+) -> list[dict[str, Any]]:
     """Decrypt and tokenize raw database rows."""
     decisions = []
     for row in rows:

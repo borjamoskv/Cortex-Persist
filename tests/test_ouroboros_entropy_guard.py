@@ -18,7 +18,9 @@ async def test_ouroboros_entropy_guard_normal():
     """Verify normal content and tasks do not raise."""
     guard = OuroborosEntropyGuard()
     # Content has enough entropy and no task duplication
-    content = "Unique content describing a new plan for the cognitive swarm with high entropy details."
+    content = (
+        "Unique content describing a new plan for the cognitive swarm with high entropy details."
+    )
     await guard.check(
         content=content,
         project="test",
@@ -81,7 +83,7 @@ async def test_ouroboros_entropy_guard_low_entropy():
     """Verify abnormally low Shannon entropy content raises ValueError."""
     guard = OuroborosEntropyGuard()
     low_entropy_content = "a" * 150  # 150 repeating characters = 0 entropy
-    
+
     with pytest.raises(ValueError, match="abnormally low Shannon entropy"):
         await guard.check(
             content=low_entropy_content,

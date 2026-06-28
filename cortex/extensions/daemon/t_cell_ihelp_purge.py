@@ -31,7 +31,7 @@ class IHelpPurgeDaemon:
         escaped_nodes = []
         for node in BASE_MAFIA_NODES:
             escaped = re.escape(node)
-            cleaned = re.sub(r'(\\ )|\s+', r'\\s+', escaped)
+            cleaned = re.sub(r"(\\ )|\s+", r"\\s+", escaped)
             escaped_nodes.append(cleaned)
 
         # Regex signature targeting the specific Anergy vectors
@@ -91,11 +91,14 @@ class IHelpPurgeDaemon:
 
             row = None
             try:
-                async with conn.execute("SELECT id FROM agents WHERE id = ?", (self.agent_id,)) as cursor:
+                async with conn.execute(
+                    "SELECT id FROM agents WHERE id = ?", (self.agent_id,)
+                ) as cursor:
                     row = await cursor.fetchone()
             except sqlite3.OperationalError:
                 # Create agents table if missing
                 from cortex.database.schema_extensions import CREATE_AGENTS
+
                 with causal_write(conn):
                     await conn.execute(CREATE_AGENTS)
                     await conn.commit()
@@ -104,7 +107,7 @@ class IHelpPurgeDaemon:
                 with causal_write(conn):
                     await conn.execute(
                         "INSERT INTO agents (id, public_key, name, agent_type, tenant_id) VALUES (?, ?, ?, ?, ?)",
-                        (self.agent_id, pub_key, self.agent_id, "daemon", "global")
+                        (self.agent_id, pub_key, self.agent_id, "daemon", "global"),
                     )
                     await conn.commit()
 
@@ -117,7 +120,7 @@ class IHelpPurgeDaemon:
                 agent_id=self.agent_id,
                 session_id=session_id,
                 content=payload,
-                private_key_b64=priv_key_b64
+                private_key_b64=priv_key_b64,
             )
 
             # Write PHAGOCYTOSIS to Master Ledger
@@ -127,7 +130,7 @@ class IHelpPurgeDaemon:
                 actor_id=self.agent_id,
                 action="PHAGOCYTOSIS",
                 resource=taint_token,
-                status="SUCCESS"
+                status="SUCCESS",
             )
         finally:
             await conn.close()
@@ -192,7 +195,9 @@ class IHelpPurgeDaemon:
 
                         if feed_content and re.search(self.antigen_signature, feed_content):
                             # Trigger phagocytosis
-                            await self.phagocytize(feed_content, source_agent=f"rss_feed:{hostname}")
+                            await self.phagocytize(
+                                feed_content, source_agent=f"rss_feed:{hostname}"
+                            )
 
                 except Exception as e:
                     logger.error(f"[{self.agent_id}] Domain checkout failed for {hostname}: {e}")
@@ -203,7 +208,7 @@ class IHelpPurgeDaemon:
                         actor_id=self.agent_id,
                         action="FORENSIC_ANOMALY",
                         resource=hostname,
-                        status="ANOMALY"
+                        status="ANOMALY",
                     )
 
         try:

@@ -63,15 +63,17 @@ class SwarmSupervisor:
         )
         import os
         from concurrent.futures import ProcessPoolExecutor
+
         self._crypto_pool = ProcessPoolExecutor(max_workers=max(1, (os.cpu_count() or 2) // 2))
-        
+
         from cortex.engine.causal.append_log import CrystallizerDaemon
+
         self._crystallizer = CrystallizerDaemon(db_path=db_path)
-        
+
         self._semantic_cache = []
         self._in_flight_fps = {}
         self._embedder = None
-        
+
         self._running = False
         self._db: aiosqlite.Connection | None = None
         self._topo: TopologyIndex | None = None
@@ -90,6 +92,7 @@ class SwarmSupervisor:
 
         try:
             from cortex.embeddings import LocalEmbedder
+
             self._embedder = LocalEmbedder()
             logger.info("LocalEmbedder initialized for Semantic Cache.")
         except ImportError:
@@ -99,7 +102,7 @@ class SwarmSupervisor:
 
         # Start Worker Pool
         self.worker_pool.start()
-        
+
         # Start AOL Crystallizer
         self._crystallizer.start()
 
@@ -124,14 +127,14 @@ class SwarmSupervisor:
         """Consumes signals from Event Bus and writes them to the State Store in batches."""
         signal_buffer = []
         MAX_BATCH_SIZE = 50
-        
+
         while self._running:
             try:
                 # Wait for up to 0.5s for a signal
                 signal = await asyncio.wait_for(self.bus.consume(), timeout=0.5)
                 signal_buffer.append(signal)
             except asyncio.TimeoutError:
-                pass # Time to flush if anything is in the buffer
+                pass  # Time to flush if anything is in the buffer
             except asyncio.CancelledError:
                 break
             except Exception as e:
@@ -183,13 +186,14 @@ class SwarmSupervisor:
                         ) as cur:
                             row = await cur.fetchone()
                             payload_raw = row[0] if row else "{}"
-                            
+
                     try:
                         payload_dict = (
                             json.loads(payload_raw) if isinstance(payload_raw, str) else payload_raw
                         )
                     except json.JSONDecodeError:
                         import re
+
                         match = re.search(r"\{.*\}", str(payload_raw), re.DOTALL)
                         if match:
                             try:
@@ -203,19 +207,17 @@ class SwarmSupervisor:
                     statement = str(payload_raw)
                     cached_payload = None
                     fp = None
-                    
+
                     if self._embedder:
                         loop = asyncio.get_running_loop()
                         from cortex.engine.core.semantic_hash import (
                             is_semantically_equivalent,
                             semantic_fingerprint,
                         )
+
                         try:
                             fp = await loop.run_in_executor(
-                                None,
-                                semantic_fingerprint,
-                                statement,
-                                self._embedder
+                                None, semantic_fingerprint, statement, self._embedder
                             )
                             for cached_fp, cached_result in self._semantic_cache:
                                 if is_semantically_equivalent(fp, cached_fp, threshold=0.99):
@@ -223,22 +225,25 @@ class SwarmSupervisor:
                                     break
                         except Exception as e:
                             logger.error(f"Semantic cache error: {e}")
-                    
+
                     if cached_payload:
-                        logger.info(f"⚡ [Semantic Cache Hit] Bypassing LLM inference for task {task['id']}")
+                        logger.info(
+                            f"⚡ [Semantic Cache Hit] Bypassing LLM inference for task {task['id']}"
+                        )
                         from cortex.swarm.legion import SwarmSignal
+
                         synthetic_signal = SwarmSignal(
                             agent_id="semantic_cache",
                             target=task["id"],
                             status="SUCCESS",
                             payload=cached_payload,
-                            metrics={"exergy_saved": 1.0}
+                            metrics={"exergy_saved": 1.0},
                         )
                         self.bus._queue.put_nowait(synthetic_signal)
                         in_flight.add(task["id"])
                         dispatched += 1
                         continue
-                        
+
                     if fp:
                         self._in_flight_fps[task["id"]] = fp
 
@@ -275,7 +280,9 @@ class SwarmSupervisor:
 
                 # VECTOR 1 REMEDIATION: Pre-check queue capacity to eliminate Phantom Lease Burns
                 if self.worker_pool._queue.full():
-                    logger.warning("Thermodynamic Pause: Worker Queue is full. Halting dispatch loop.")
+                    logger.warning(
+                        "Thermodynamic Pause: Worker Queue is full. Halting dispatch loop."
+                    )
                     break
 
                 # SANEDRIN VECTOR 3: Lease lock task using supervisor_id and 5-min TTL

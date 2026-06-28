@@ -24,11 +24,15 @@ class WriteTrait:
         from cortex.engine.causal.taint_engine import enforce_taint_check
 
         token = (
-            fact.metadata.get("cortex_taint")
-            or fact.metadata.get("CORTEX-TAINT")
-            or fact.metadata.get("cortex-taint")
-            or fact.metadata.get("CORTEX_TAINT")
-        ) if fact.metadata else None
+            (
+                fact.metadata.get("cortex_taint")
+                or fact.metadata.get("CORTEX-TAINT")
+                or fact.metadata.get("cortex-taint")
+                or fact.metadata.get("CORTEX_TAINT")
+            )
+            if fact.metadata
+            else None
+        )
         await enforce_taint_check(conn, token, fact.content)
 
         # ─── PII Sanitization Gate (Moved outside the DB Lock) ────────

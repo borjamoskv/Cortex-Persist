@@ -48,22 +48,32 @@ def frontier_cmd(project: str, model: str | None):
 
 
 @audit.command("export")
-@click.option("--format", "-f", required=True, type=click.Choice(["eu-ai-act"]), help="Export format standard.")
+@click.option(
+    "--format",
+    "-f",
+    required=True,
+    type=click.Choice(["eu-ai-act"]),
+    help="Export format standard.",
+)
 @click.option("--out", "-o", default="audit_bundle.zip", help="Output zip file path.")
 def export_cmd(format: str, out: str):
     """Export the Master Ledger to a verifiable compliance bundle."""
-    console.print(f"[bold magenta]📦 Exporting {format.upper()} Compliance Bundle to {out}...[/bold magenta]")
-    
+    console.print(
+        f"[bold magenta]📦 Exporting {format.upper()} Compliance Bundle to {out}...[/bold magenta]"
+    )
+
     from cortex.audit.compliance_bundle import ComplianceBundler
-    
+
     # In a real CLI, we'd fetch the configured db path, but we'll use the default or typical local path.
     bundler = ComplianceBundler(db_path=".cortex/cortex_ledger.db")
     success = bundler.export_bundle(out)
-    
+
     if success:
         console.print("[bold green]✔ Compliance bundle exported successfully.[/bold green]")
     else:
-        console.print("[bold red]❌ Failed to export compliance bundle. Check logs for details.[/bold red]")
+        console.print(
+            "[bold red]❌ Failed to export compliance bundle. Check logs for details.[/bold red]"
+        )
 
 
 @audit.command("verify-bundle")
@@ -71,13 +81,15 @@ def export_cmd(format: str, out: str):
 @click.option("--public-key", "-k", required=True, help="Base64-encoded Ed25519 Public Key")
 def verify_bundle_cmd(bundle: str, public_key: str):
     """Offline cryptographic verification of an EU AI Act compliance bundle."""
-    console.print(f"[bold magenta]🔍 Initiating offline verification of bundle: {bundle}[/bold magenta]")
-    
+    console.print(
+        f"[bold magenta]🔍 Initiating offline verification of bundle: {bundle}[/bold magenta]"
+    )
+
     from cortex.audit.compliance_verifier import ComplianceVerifier
-    
+
     verifier = ComplianceVerifier(bundle_path=bundle, public_key_b64=public_key)
     report = verifier.verify()
-    
+
     if report["status"] == "VALID":
         console.print("[bold green]✔ Bundle Cryptographically Verified[/bold green]")
         console.print(f"  Records Verified: {report.get('records_verified')}")
@@ -87,4 +99,5 @@ def verify_bundle_cmd(bundle: str, public_key: str):
         console.print(f"[bold red]❌ Verification Failed: {report['status']}[/bold red]")
         console.print(f"  Reason: {report.get('reason')}")
         import sys
+
         sys.exit(1)

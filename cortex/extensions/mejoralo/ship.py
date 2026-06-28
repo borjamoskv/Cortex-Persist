@@ -79,11 +79,11 @@ def _seal_linter(stack: str, cwd: str) -> ShipSeal:
 def _seal_visual(p: Path) -> ShipSeal:
     """Seal 4: Visual Proof."""
     import json
-    
+
     visual_json = p / "visual_proof.json"
     screenshots = list(p.glob("**/screenshot*.png"))
     visual_ok = visual_json.exists() or len(screenshots) > 0
-    
+
     if visual_json.exists():
         try:
             with open(visual_json) as f:

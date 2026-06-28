@@ -151,6 +151,7 @@ class CortexEncrypter:
             return None
         try:
             from typing import cast
+
             return cast(dict[str, Any], json.loads(plain))
         except json.JSONDecodeError:
             logger.warning("decrypt_json: invalid JSON after decryption, returning empty dict")

@@ -38,6 +38,7 @@ async def run_concurrent_appends(engine, n_writers: int) -> list[int]:
 
     async def append_one(i: int) -> int:
         from cortex.engine.core.store_mixin import causal_write
+
         async with engine.session() as conn:
             with causal_write(conn):
                 tx_id = await engine._log_transaction(

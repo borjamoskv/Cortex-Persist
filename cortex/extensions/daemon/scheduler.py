@@ -291,7 +291,7 @@ class SovereignScheduler:
 
             start = time.monotonic()
             error = ""
-            
+
             if self.engine is not None:
                 try:
                     await self.engine.store(
@@ -301,11 +301,11 @@ class SovereignScheduler:
                         tags=["Scheduler", "Trigger"],
                         confidence="C5",
                         source="daemon:scheduler",
-                        actor_id="scheduler"
+                        actor_id="scheduler",
                     )
                 except Exception as e:
                     logger.debug("Scheduler failed to log trigger to Ledger: %s", e)
-            
+
             try:
                 await asyncio.wait_for(factory(), timeout=300.0)
             except asyncio.TimeoutError:

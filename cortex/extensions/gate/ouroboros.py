@@ -150,11 +150,12 @@ class OuroborosGate:
                 cursor = self.conn.execute("PRAGMA database_list")
                 db_path = None
                 for row in cursor.fetchall():
-                    if row[1] == 'main':
+                    if row[1] == "main":
                         db_path = row[2]
                         break
-                if not db_path or db_path == '':
+                if not db_path or db_path == "":
                     import os
+
                     db_path = os.environ.get("CORTEX_DB_PATH", "cortex.db")
 
                 async with connect_async_ctx(db_path) as aconn:
@@ -170,11 +171,12 @@ class OuroborosGate:
                             ts=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
                             source="ag:ouroboros",
                             meta=None,
-                            tx_id=None
+                            tx_id=None,
                         )
                         await aconn.commit()
             except Exception as e:
                 import logging
+
                 logging.getLogger("ouroboros").error("Failed to async log scaling event: %s", e)
 
         try:

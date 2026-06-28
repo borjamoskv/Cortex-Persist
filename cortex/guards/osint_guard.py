@@ -21,6 +21,7 @@ logger = logging.getLogger("cortex.guards.osint")
 
 class OSINTViolationError(Exception):
     """Raised when an OSINT containment policy is violated."""
+
     pass
 
 
@@ -41,11 +42,13 @@ class OSINTGuard:
         Raises OSINTViolationError if containment boundaries are breached.
         """
         target = cls.get_pii_target()
-        
+
         # 1. Check for raw target PII
         if target in content.lower():
             logger.error("[P0] OSINTGuard: PII Bleed detected in memory proposal.")
-            raise OSINTViolationError("PII Containment Breach: Real identity trace found in payload.")
+            raise OSINTViolationError(
+                "PII Containment Breach: Real identity trace found in payload."
+            )
 
         # 2. Check for absolute local developer paths
         # Matches e.g., /Users/username/
@@ -67,7 +70,7 @@ class OSINTGuard:
         """
         target = cls.get_pii_target()
         user_path_pattern = re.compile(rf"/Users/{target}(/[a-zA-Z0-9_\-\./]*)?")
-        
+
         def replacer(match: re.Match) -> str:
             subpath = match.group(1) or ""
             return f"$HOME{subpath}"
@@ -90,7 +93,7 @@ class OSINTGuard:
             data = list(img.getdata())  # type: ignore
             clean_img = Image.new(img.mode, img.size)
             clean_img.putdata(data)
-            
+
             output = io.BytesIO()
             clean_img.save(output, format=img.format, exif=b"")
             return output.getvalue()
@@ -103,6 +106,7 @@ class ASTPIIScanner(ast.NodeVisitor):
     """
     AST-level analyzer to verify no PII constants exist in Python code files.
     """
+
     def __init__(self) -> None:
         self.target_pii = "".join(OSINTGuard.PII_PARTS)
         self.violations: list[tuple[int, str]] = []

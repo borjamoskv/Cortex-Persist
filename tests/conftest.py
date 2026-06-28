@@ -8,13 +8,17 @@ import importlib
 import importlib.abc
 import importlib.util
 
+
 class AliasLoader(importlib.abc.Loader):
     def __init__(self, target_module):
         self.target_module = target_module
+
     def create_module(self, spec):
         return self.target_module
+
     def exec_module(self, module):
         pass
+
 
 class CortexExtensionsRedirector(importlib.abc.MetaPathFinder):
     def find_spec(self, fullname, path, target=None):
@@ -22,11 +26,14 @@ class CortexExtensionsRedirector(importlib.abc.MetaPathFinder):
             target_name = fullname.replace("cortex_extensions", "cortex.extensions", 1)
             try:
                 mod = importlib.import_module(target_name)
-                spec = importlib.util.spec_from_loader(fullname, AliasLoader(mod), origin=getattr(mod, "__file__", None))
+                spec = importlib.util.spec_from_loader(
+                    fullname, AliasLoader(mod), origin=getattr(mod, "__file__", None)
+                )
                 return spec
             except ImportError:
                 return None
         return None
+
 
 sys.meta_path.insert(0, CortexExtensionsRedirector())
 from pathlib import Path
@@ -44,6 +51,7 @@ import sqlite3
 
 _raw_sqlite3_connect = sqlite3.connect
 
+
 def _test_safe_sqlite3_connect(*args, **kwargs):
     """Enforce WAL and busy_timeout in tests to prevent flaky lock errors."""
     conn = _raw_sqlite3_connect(*args, **kwargs)
@@ -54,6 +62,7 @@ def _test_safe_sqlite3_connect(*args, **kwargs):
     except sqlite3.Error:
         pass
     return conn
+
 
 sqlite3.connect = _test_safe_sqlite3_connect
 
@@ -108,6 +117,7 @@ def inject_test_master_key(monkeypatch):
     monkeypatch.setenv("DASHSCOPE_API_KEY", "test")
     # Base64 for 32 bytes of '0'
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
+
 
 @pytest.fixture(autouse=True)
 def isolate_swarm_ledger(tmp_path, monkeypatch):

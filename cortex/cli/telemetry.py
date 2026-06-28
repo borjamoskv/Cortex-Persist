@@ -11,7 +11,7 @@ from cortex.cli.common import _run_async, cli, console
 async def _render_telemetry():
     """Async function to simulate fetching and rendering telemetry."""
     await asyncio.sleep(0.1)
-    
+
     table = Table(title="CORTEX TELEMETRY (SIMULATED)", border_style="cyan")
     table.add_column("Métrica", style="magenta", no_wrap=True)
     table.add_column("Valor", style="green")
@@ -21,6 +21,7 @@ async def _render_telemetry():
     table.add_row("Tiempo de ejecución", "12h")
 
     console.print(table)
+
 
 @cli.command("telemetry")
 def telemetry_cmd():

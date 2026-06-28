@@ -21,7 +21,7 @@ def test_divergence_map_identical():
         {"action": "read_file"},
         {"action": "write_file"},
     ]
-    
+
     distance = DivergenceMap.compute_distance(traj_a, traj_b)
     assert distance == 0.0
 
@@ -38,7 +38,7 @@ def test_divergence_map_divergent():
         {"action": "error"},
         {"action": "abort"},
     ]
-    
+
     distance = DivergenceMap.compute_distance(traj_a, traj_b)
     assert distance > 0.0
     assert distance <= 1.0
@@ -63,10 +63,10 @@ def test_meta_arbiter_collapse_topology():
         {"action": "delete_all"},
         {"action": "abort"},
     ]
-    
+
     trajectories = [traj_hallucination, traj_consensus_1, traj_consensus_2]
-    
+
     canonical = MetaArbiter.collapse_topology(trajectories)
-    
+
     # The arbiter should collapse to the consensus trajectory
     assert canonical == traj_consensus_1

@@ -81,10 +81,10 @@ async def test_background_tasks_cancellation(manager):
     # Register a worker task
     task = asyncio.create_task(asyncio.sleep(10))
     manager._bg_workers.append(task)
-    
+
     # Trigger cancellation
     await manager._cancel_background_tasks()
-    
+
     # All tasks should be cancelled or completed
     assert all(t.cancelled() or t.done() for t in manager._bg_workers)
 
@@ -96,10 +96,10 @@ async def test_wait_for_background_timeout(manager):
     for worker in manager._bg_workers:
         worker.cancel()
     manager._bg_workers.clear()
-    
+
     # Enqueue a mock item into the queue
     await manager._bg_queue.put(([], "sess", "tenant", "proj"))
-    
+
     with patch("cortex.memory.manager.logger") as mock_logger:
         await manager.wait_for_background(timeout=0.01)
         # Should have logged error due to timeout

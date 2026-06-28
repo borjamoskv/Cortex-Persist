@@ -18,7 +18,15 @@ logger = logging.getLogger(__name__)
 
 _COMMAND_MODULE_SUFFIX = "_cmds"
 _COMMAND_DIR = Path(__file__).parent
-_LEGACY_COMMAND_MODULES = ("crud", "ledger", "purge", "slow_tip", "vote_ledger", "apoptosis", "telemetry")
+_LEGACY_COMMAND_MODULES = (
+    "crud",
+    "ledger",
+    "purge",
+    "slow_tip",
+    "vote_ledger",
+    "apoptosis",
+    "telemetry",
+)
 
 
 def _discover_command_modules() -> list[str]:
@@ -70,6 +78,7 @@ def _ensure_loaded() -> None:
 
 class LazyCommandsDict(dict):
     """A dictionary that lazily triggers command module loading on access."""
+
     def __init__(self, loader) -> None:
         self._loader = loader
         super().__init__()

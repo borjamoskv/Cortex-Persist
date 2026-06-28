@@ -32,6 +32,7 @@ class _PoolState:
         self.semaphore = asyncio.Semaphore(max_connections)
         self.initialized: bool = False
 
+
 class CortexConnectionPool:
     """
     Production-grade connection pool for CORTEX.

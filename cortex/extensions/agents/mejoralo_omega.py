@@ -67,6 +67,7 @@ class MejoraloOmegaAgent(EngineAwareMixin):
         if self._engine is not None:
             return
         from cortex.extensions.mejoralo.engine import MejoraloEngine
+
         assert self._engine is not None
         self._mejoralo = MejoraloEngine(engine=self._engine)
 

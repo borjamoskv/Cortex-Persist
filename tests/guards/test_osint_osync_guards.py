@@ -37,7 +37,7 @@ def test_osint_guard_mask_system_paths() -> None:
     target_pii = "".join(["borja", "fernandez", "angulo"])
     raw_path = f"/Users/{target_pii}/30_CORTEX/docs/epistemology/100_osync_osint.md"
     clean_path = OSINTGuard.mask_system_paths(raw_path)
-    
+
     assert clean_path == "$HOME/30_CORTEX/docs/epistemology/100_osync_osint.md"
 
 
@@ -47,15 +47,15 @@ def test_osint_guard_verify_and_strip_image() -> None:
     assert Image is not None
     img = Image.new("RGB", (1, 1), color="red")
     exif_data = img.getexif()
-    exif_data[271] = "MakerTag" # Document name tag/make
-    
+    exif_data[271] = "MakerTag"  # Document name tag/make
+
     img_bytes_io = io.BytesIO()
     img.save(img_bytes_io, format="JPEG", exif=exif_data)
     raw_bytes = img_bytes_io.getvalue()
-    
+
     # Verify metadata is stripped
     clean_bytes = OSINTGuard.verify_and_strip_image(raw_bytes)
-    
+
     clean_img = Image.open(io.BytesIO(clean_bytes))
     assert not clean_img.getexif()
 
@@ -63,18 +63,18 @@ def test_osint_guard_verify_and_strip_image() -> None:
 def test_osync_guard_verify_nexus_symlink(tmp_path: Path) -> None:
     src_file = tmp_path / "source.txt"
     src_file.write_text("Sovereign data.")
-    
+
     link_file = tmp_path / "link.txt"
-    
+
     # 1. Non-existent symlink raises error
     with pytest.raises(OSYNCViolationError, match="must be a symlink"):
         OSYNCGuard.verify_nexus_symlink(link_file, src_file)
-        
+
     # 2. Existing file (not a symlink) raises error
     link_file.write_text("Duplicate data.")
     with pytest.raises(OSYNCViolationError, match="must be a symlink"):
         OSYNCGuard.verify_nexus_symlink(link_file, src_file)
-        
+
     # 3. Correct symlink passes
     link_file.unlink()
     os.symlink(src_file, link_file)

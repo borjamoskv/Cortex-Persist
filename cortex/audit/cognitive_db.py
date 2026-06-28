@@ -34,6 +34,7 @@ async def ensure_table_for_router(router: Any) -> None:
                 or "routing_policy_version" not in sql
             ):
                 from cortex.database.core import causal_write
+
                 try:
                     with causal_write(router._conn):
                         await router._conn.execute(
@@ -82,6 +83,7 @@ async def ensure_table_for_router(router: Any) -> None:
                     raise
         else:
             from cortex.database.core import causal_write
+
             with causal_write(router._conn):
                 await router._conn.execute(_CREATE_ROUTER_LOG_SQL)
                 await router._conn.commit()

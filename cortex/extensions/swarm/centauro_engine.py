@@ -62,6 +62,7 @@ class Formation:
     TESTUDO = "TESTUDO"  # 15 agents, proactive defensive shell
     SANEDRIN = "SANEDRIN"  # 5 agents, Heterogeneous Supreme Quorum
 
+
 class VirtualAgent:
     """A sovereign agent for the Centauro Swarm.
 
@@ -118,17 +119,22 @@ class VirtualAgent:
                     return str(result.ok)
                 if hasattr(result, "err") and result.err is not None:
                     # [C5-REAL] Sanedrín Soft-Fallback
-                    if hasattr(self, "formation") and getattr(self, "formation", None) == "SANEDRIN":
+                    if (
+                        hasattr(self, "formation")
+                        and getattr(self, "formation", None) == "SANEDRIN"
+                    ):
                         logger.warning(
                             "VirtualAgent %s: SANEDRIN cascade exhausted/404 for task %s. Reassigning role dynamically from %s to OSINT.",
-                            self.agent_id, task_idx, self.specialty
+                            self.agent_id,
+                            task_idx,
+                            self.specialty,
                         )
                         self.specialty = "OSINT"
                         cortex_prompt.system_instruction = f"You are a sovereign {self.specialty} specialist agent (id={self.agent_id}). Answer concisely and deterministically."
                         retry_result = await self._router.execute_resilient(cortex_prompt)
                         if hasattr(retry_result, "ok") and retry_result.ok is not None:
                             return str(retry_result.ok)
-                        
+
                     logger.warning(
                         "VirtualAgent %s: router returned error for task %s: %s - "
                         "falling back to C4-SIM stub.",
@@ -143,7 +149,10 @@ class VirtualAgent:
                 if hasattr(self, "formation") and getattr(self, "formation", None) == "SANEDRIN":
                     logger.warning(
                         "VirtualAgent %s: SANEDRIN exception %s for task %s. Reassigning role dynamically from %s to INTEL.",
-                        self.agent_id, exc, task_idx, self.specialty
+                        self.agent_id,
+                        exc,
+                        task_idx,
+                        self.specialty,
                     )
                     self.specialty = "INTEL"
                     try:
@@ -153,9 +162,12 @@ class VirtualAgent:
                             return str(retry_result.ok)
                     except Exception as fallback_exc:
                         exc = fallback_exc
-                        
+
                 import logging
-                logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {exc}")
+
+                logging.getLogger(__name__).exception(
+                    f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {exc}"
+                )
                 logger.warning(
                     "VirtualAgent %s: C5-REAL dispatch failed (%s) - "
                     "degrading to C4-SIM for task %s.",
@@ -254,9 +266,9 @@ class CentauroEngine:
             try:
                 providers = [self.router.primary] + self.router.fallbacks
                 is_local = all(
-                    getattr(p, "_provider", "") in ["ollama", "lmstudio"] or 
-                    "localhost" in getattr(p, "_base_url", "") or 
-                    "127.0.0.1" in getattr(p, "_base_url", "")
+                    getattr(p, "_provider", "") in ["ollama", "lmstudio"]
+                    or "localhost" in getattr(p, "_base_url", "")
+                    or "127.0.0.1" in getattr(p, "_base_url", "")
                     for p in providers
                 )
             except (ValueError, TypeError, OSError, KeyError):
@@ -271,11 +283,16 @@ class CentauroEngine:
                     return (a_id, await a.execute("M-01", mission))
                 except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
                     import logging
-                    logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {exc}")
+
+                    logging.getLogger(__name__).exception(
+                        f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {exc}"
+                    )
                     return (a_id, exc)
 
         # Must wrap in asyncio.create_task so they can be explicitly cancelled later
-        agent_tasks = [asyncio.create_task(_run_agent(a_id, agent)) for a_id, agent in squad.items()]
+        agent_tasks = [
+            asyncio.create_task(_run_agent(a_id, agent)) for a_id, agent in squad.items()
+        ]
 
         winning = None
         for future in asyncio.as_completed(agent_tasks):
@@ -361,7 +378,10 @@ class CentauroEngine:
                     }
                 except (ValueError, TypeError, KeyError, OSError, RuntimeError) as leap_e:
                     import logging
-                    logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {leap_e}")
+
+                    logging.getLogger(__name__).exception(
+                        f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {leap_e}"
+                    )
                     logger.error("ALEPH-Ω Leap failed: %s", leap_e)
                     result = {
                         "status": "failure",
@@ -377,7 +397,10 @@ class CentauroEngine:
 
         except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             import logging
-            logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {e}")
+
+            logging.getLogger(__name__).exception(
+                f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {e}"
+            )
             if not mission_future.done():
                 mission_future.set_exception(e)
             raise

@@ -30,7 +30,7 @@ class ReplayEngine:
         The trajectory is a sequence of states/actions ordered by time (and ledger chain).
         """
         await self._ledger.ensure_table()
-        
+
         # We query the SQLite backend ordered strictly by rowid (causal time).
         # In a real environment we would also verify the chain of the extracted subset.
         query = """
@@ -39,13 +39,13 @@ class ReplayEngine:
             WHERE tenant_id = ? AND actor_id = ?
         """
         params = [tenant_id, actor_id]
-        
+
         if session_action_prefix:
             query += " AND action LIKE ?"
             params.append(f"{session_action_prefix}%")
-            
+
         query += " ORDER BY rowid ASC"
-        
+
         trajectory = []
         async with self._ledger._conn.execute(query, tuple(params)) as cursor:
             async for row in cursor:
@@ -60,14 +60,17 @@ class ReplayEngine:
                     "signature": row[6],
                 }
                 trajectory.append(state_vector)
-                
+
         return trajectory
 
-    async def stream_replay(self, trajectory: list[dict[str, Any]], delay_ms: int = 0) -> AsyncGenerator[dict[str, Any], None]:
+    async def stream_replay(
+        self, trajectory: list[dict[str, Any]], delay_ms: int = 0
+    ) -> AsyncGenerator[dict[str, Any], None]:
         """
         Streams a past execution trajectory, optionally simulating the temporal delays.
         """
         import asyncio
+
         for state in trajectory:
             yield state
             if delay_ms > 0:

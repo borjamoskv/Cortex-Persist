@@ -177,7 +177,9 @@ class SQLiteAuthBackend(BaseAuthBackend):
         conn = await self._get_conn_async()
         try:
             with causal_write(conn):
-                cursor = await conn.execute("UPDATE api_keys SET is_active = 0 WHERE id = ?", (key_id,))
+                cursor = await conn.execute(
+                    "UPDATE api_keys SET is_active = 0 WHERE id = ?", (key_id,)
+                )
                 await conn.commit()
                 return cursor.rowcount > 0
         finally:

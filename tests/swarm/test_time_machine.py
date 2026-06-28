@@ -8,18 +8,29 @@ from cortex.swarm.ledger import SwarmLedger, SwarmTimeMachine
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 class _FakeRegistry:
     _frozen = True
-    def snapshot(self): return {"agents": []}
-    def get_candidates(self, task): return []
+
+    def snapshot(self):
+        return {"agents": []}
+
+    def get_candidates(self, task):
+        return []
 
 
 @pytest.fixture
 def candidates():
     return [
-        SalienceCandidate(agent_id="insula",   region="Insula",  network="SN", salience=0.91, latency_ms=12.0),
-        SalienceCandidate(agent_id="acc",      region="ACC",     network="SN", salience=0.85, latency_ms=18.0),
-        SalienceCandidate(agent_id="thalamus", region="Thalamus",network="SN", salience=0.72, latency_ms=8.0),
+        SalienceCandidate(
+            agent_id="insula", region="Insula", network="SN", salience=0.91, latency_ms=12.0
+        ),
+        SalienceCandidate(
+            agent_id="acc", region="ACC", network="SN", salience=0.85, latency_ms=18.0
+        ),
+        SalienceCandidate(
+            agent_id="thalamus", region="Thalamus", network="SN", salience=0.72, latency_ms=8.0
+        ),
     ]
 
 
@@ -28,6 +39,7 @@ def router_and_tm(candidates, tmp_path):
     mock_source = MockSNGraphSource(candidates)
     r = SwarmRouter(registry=_FakeRegistry(), graph_source=mock_source)
     import cortex.swarm.ledger.engine as eng
+
     r.ledger = eng.SwarmLedger(path=str(tmp_path / "tm_test.db"))
     tm = SwarmTimeMachine(r.ledger)
     return r, tm
@@ -36,6 +48,7 @@ def router_and_tm(candidates, tmp_path):
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 def test_replay_from_timestamp_returns_subset(router_and_tm):
     router, tm = router_and_tm

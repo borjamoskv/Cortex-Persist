@@ -5,8 +5,10 @@ import aiosqlite
 
 _orig = sqlite3.connect
 
+
 def _patched(*args, **kwargs):
     raise RuntimeError("Forbidden")
+
 
 async def main():
     try:
@@ -14,6 +16,7 @@ async def main():
             await db.execute("SELECT 1")
     except Exception as e:
         print("aiosqlite failed:", e)
+
 
 if __name__ == "__main__":
     sqlite3.connect = _patched

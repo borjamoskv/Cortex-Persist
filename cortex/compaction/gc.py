@@ -111,9 +111,13 @@ class GarbageCollector:
         # 1. Physical vector deletion (Ouroboros optimization: executemany)
         # We rely on executemany to push the loop down to C-level API
         if "fact_embeddings" in existing_tables:
-            await conn.executemany("DELETE FROM fact_embeddings WHERE fact_id = ?", [(fid,) for fid in fact_ids])
+            await conn.executemany(
+                "DELETE FROM fact_embeddings WHERE fact_id = ?", [(fid,) for fid in fact_ids]
+            )
         if "specular_embeddings" in existing_tables:
-            await conn.executemany("DELETE FROM specular_embeddings WHERE fact_id = ?", [(fid,) for fid in fact_ids])
+            await conn.executemany(
+                "DELETE FROM specular_embeddings WHERE fact_id = ?", [(fid,) for fid in fact_ids]
+            )
 
         # 2. Pruned embeddings archive deletion
         if "pruned_embeddings" in existing_tables:

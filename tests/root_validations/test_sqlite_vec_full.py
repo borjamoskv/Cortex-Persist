@@ -2,8 +2,9 @@ import sqlite3
 
 import sqlite_vec
 
+
 def main():
-    conn = sqlite3.connect(':memory:')
+    conn = sqlite3.connect(":memory:")
     conn.enable_load_extension(True)
     sqlite_vec.load(conn)
     try:
@@ -26,6 +27,7 @@ def main():
         print("Success executescript full")
     except Exception as e:
         print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     main()

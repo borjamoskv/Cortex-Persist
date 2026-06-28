@@ -86,6 +86,7 @@ def skill_sync():
     if code != 0:
         sys.exit(code)
 
+
 @nexus_cmds.command("bind")
 @click.option("--target", required=True, help="Target workspace path")
 @click.option("--artifact", required=True, help="Artifact path relative to CORTEX root")
@@ -94,11 +95,11 @@ def bind_cmd(target: str, artifact: str):
     import os
 
     from cortex.extensions.nexus.symlink_engine import SymlinkEngine
-    
+
     # Assumes CORTEX root is current directory or predefined
     cortex_root = os.path.abspath(os.getcwd())
     engine = SymlinkEngine(canonical_root=cortex_root)
-    
+
     results = engine.propagate([target], [artifact])
     if results.get(target):
         console.print(f"[bold green]✔ Successfully bound {artifact} to {target}[/bold green]")
@@ -114,18 +115,22 @@ def auto_sync_cmd(config: str):
 
     from cortex.extensions.nexus.config import load_nexus_config
     from cortex.extensions.nexus.symlink_engine import SymlinkEngine
-    
+
     cortex_root = os.path.abspath(os.getcwd())
     engine = SymlinkEngine(canonical_root=cortex_root)
     conf = load_nexus_config(config)
-    
+
     if not conf.target_workspaces or not conf.artifacts:
-        console.print(f"[bold yellow]⚠️ No valid mappings found in {config}. Skipping auto-sync.[/bold yellow]")
+        console.print(
+            f"[bold yellow]⚠️ No valid mappings found in {config}. Skipping auto-sync.[/bold yellow]"
+        )
         return
-        
-    console.print(f"[bold magenta]🌌 Auto-Syncing {len(conf.artifacts)} artifacts to {len(conf.target_workspaces)} workspaces...[/bold magenta]")
+
+    console.print(
+        f"[bold magenta]🌌 Auto-Syncing {len(conf.artifacts)} artifacts to {len(conf.target_workspaces)} workspaces...[/bold magenta]"
+    )
     results = engine.propagate(conf.target_workspaces, conf.artifacts)
-    
+
     for workspace, success in results.items():
         if success:
             console.print(f"  [green]✔ {workspace}[/green]")
@@ -141,22 +146,28 @@ def audit_cmd(config: str):
 
     from cortex.extensions.nexus.config import load_nexus_config
     from cortex.extensions.nexus.symlink_engine import SymlinkEngine
-    
+
     cortex_root = os.path.abspath(os.getcwd())
     engine = SymlinkEngine(canonical_root=cortex_root)
     conf = load_nexus_config(config)
-    
+
     if not conf.target_workspaces or not conf.artifacts:
         console.print(f"[bold yellow]⚠️ No valid mappings found in {config}.[/bold yellow]")
         return
-        
-    console.print(f"[bold cyan]🔍 Auditing {len(conf.artifacts)} artifacts across {len(conf.target_workspaces)} workspaces...[/bold cyan]")
+
+    console.print(
+        f"[bold cyan]🔍 Auditing {len(conf.artifacts)} artifacts across {len(conf.target_workspaces)} workspaces...[/bold cyan]"
+    )
     is_valid = engine.validate_invariants(conf.target_workspaces, conf.artifacts)
-    
+
     if is_valid:
-        console.print("[bold green]✔ INV_NEXUS_LINK strictly enforced across all queried nodes.[/bold green]")
+        console.print(
+            "[bold green]✔ INV_NEXUS_LINK strictly enforced across all queried nodes.[/bold green]"
+        )
     else:
-        console.print("[bold red]❌ Entropy detected. One or more workspaces suffer from physical redundancy.[/bold red]")
+        console.print(
+            "[bold red]❌ Entropy detected. One or more workspaces suffer from physical redundancy.[/bold red]"
+        )
         sys.exit(1)
 
 

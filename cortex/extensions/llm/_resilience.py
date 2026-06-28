@@ -92,7 +92,13 @@ class CircuitBreaker:
         """Determines if an exception should count towards the circuit breaker threshold."""
         if isinstance(
             exc,
-            (httpx.NetworkError, httpx.TimeoutException, httpx.RemoteProtocolError, httpx.DecodingError, UnicodeDecodeError),
+            (
+                httpx.NetworkError,
+                httpx.TimeoutException,
+                httpx.RemoteProtocolError,
+                httpx.DecodingError,
+                UnicodeDecodeError,
+            ),
         ):
             return True
         if isinstance(exc, httpx.HTTPStatusError):

@@ -59,6 +59,7 @@ class ShardedAsyncSignalBus:
         for i in range(self.num_shards):
             db_path = self._base_dir / f"swarm_shard_{i:03d}.db"
             from cortex.database.core import connect_async
+
             conn = await connect_async(str(db_path))
             await conn.executescript(_CREATE_TABLE + _CREATE_INDEXES)
             await conn.commit()

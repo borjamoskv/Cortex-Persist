@@ -11,12 +11,14 @@ from cortex.agents.primitives.registry import apex_registry
 
 logger = logging.getLogger(__name__)
 
+
 class ApexDispatcher:
     """
     C5-REAL: Execution Engine for MOSKV-1 APEX Primitives.
-    Translates structural invariants and semantic APEX intents into 
+    Translates structural invariants and semantic APEX intents into
     physical state mutations (Disk, Git, Memory).
     """
+
     def __init__(self) -> None:
         self._handlers: dict[str, Callable[..., Any]] = {}
         self._register_native_handlers()
@@ -29,12 +31,12 @@ class ApexDispatcher:
         self._bind("OP_ANNIHILATE", self._op_annihilate)
         self._bind("OP_OOM_SIM", self._op_oom_sim)
         self._bind("OP_HALT_LOOP", self._op_halt_loop)
-        
+
         # Crypto & Data
         self._bind("OP_B58_ENCODE", self._op_b58_encode)
         self._bind("OP_B58_DECODE", self._op_b58_decode)
         self._bind("OP_SHRED_KEY", self._op_shred_key)
-        
+
         # Memory & Thermodynamics
         self._bind("OP_FREEZE_MEM", self._op_freeze_mem)
         self._bind("OP_MEASURE_SHANNON", self._op_measure_shannon)
@@ -49,34 +51,49 @@ class ApexDispatcher:
         prim = next((p for p in apex_registry.list_primitives() if p.name == op_name), None)
         if not prim:
             raise ValueError(f"[C5-REAL] FATAL: Primitive {op_name} not found in APEX_REGISTRY.")
-            
+
         handler = self._handlers.get(prim.id)
         if not handler:
-            raise NotImplementedError(f"[C5-REAL] ERROR: Physical handler for {op_name} ({prim.id}) is not yet wired.")
-            
+            raise NotImplementedError(
+                f"[C5-REAL] ERROR: Physical handler for {op_name} ({prim.id}) is not yet wired."
+            )
+
         logger.info(f"[APEX DISPATCH] Executing {op_name}...")
         return handler(**kwargs)
 
     # --- PHYSICAL IMPLEMENTATIONS (C5-REAL) ---
-    
+
     def _op_git_sentinel(self, commit_msg: str, force: bool = False, path: str = ".") -> str:
         """OP_GIT_SENTINEL: Causal persistence via cryptographic commit."""
         add_cmd = ["git", "add"]
         if force:
             add_cmd.append("-f")
         add_cmd.append(path)
-            
+
         try:
             subprocess.run(add_cmd, check=True, capture_output=True, timeout=10)
-            res = subprocess.run(["git", "commit", "--no-gpg-sign", "-m", commit_msg], capture_output=True, text=True, timeout=15)
+            res = subprocess.run(
+                ["git", "commit", "--no-gpg-sign", "-m", commit_msg],
+                capture_output=True,
+                text=True,
+                timeout=15,
+            )
         except subprocess.TimeoutExpired as e:
-            raise RuntimeError(f"[C5-REAL] FATAL: Git Sentinel hung and timed out. Possible lock or tty issue. Cmd: {e.cmd}")
-        
-        if res.returncode != 0 and "nothing to commit" not in res.stdout and "working tree clean" not in res.stdout:
+            raise RuntimeError(
+                f"[C5-REAL] FATAL: Git Sentinel hung and timed out. Possible lock or tty issue. Cmd: {e.cmd}"
+            )
+
+        if (
+            res.returncode != 0
+            and "nothing to commit" not in res.stdout
+            and "working tree clean" not in res.stdout
+        ):
             raise RuntimeError(f"Git Sentinel failed: {res.stderr}")
-            
+
         try:
-            log_res = subprocess.run(["git", "log", "-1", "--format=%H"], capture_output=True, text=True, timeout=5)
+            log_res = subprocess.run(
+                ["git", "log", "-1", "--format=%H"], capture_output=True, text=True, timeout=5
+            )
             return log_res.stdout.strip()
         except subprocess.TimeoutExpired:
             return "UNKNOWN_HASH_TIMEOUT"
@@ -99,21 +116,27 @@ class ApexDispatcher:
     def _op_annihilate(self, target_path: str) -> None:
         """OP_ANNIHILATE: Authorized rm -rf."""
         if not target_path.startswith("/"):
-            raise ValueError("[C5-REAL] P0 VIOLATION (INV_ABSOLUTE_PATH): Annihilate requires absolute paths.")
+            raise ValueError(
+                "[C5-REAL] P0 VIOLATION (INV_ABSOLUTE_PATH): Annihilate requires absolute paths."
+            )
         if target_path in ("/", "/private/var/db", "/System"):
-            raise ValueError("[C5-REAL] P0 VIOLATION (INV_SYSTEM_ROOT): Cannot annihilate protected zones.")
-            
+            raise ValueError(
+                "[C5-REAL] P0 VIOLATION (INV_SYSTEM_ROOT): Cannot annihilate protected zones."
+            )
+
         subprocess.run(["rm", "-rf", target_path], check=True)
         logger.warning(f"[APEX] Annihilated {target_path}")
 
     def _op_b58_encode(self, payload: bytes) -> str:
         """OP_B58_ENCODE: Base58 encoding for shorter tamper-evident hashes."""
         import base58
-        return base58.b58encode(payload).decode('utf-8')
+
+        return base58.b58encode(payload).decode("utf-8")
 
     def _op_b58_decode(self, payload: str) -> bytes:
         """OP_B58_DECODE: Base58 decode back to original entropy."""
         import base58
+
         return base58.b58decode(payload)
 
     def _op_shred_key(self, key_bytes: bytearray) -> None:
@@ -140,5 +163,6 @@ class ApexDispatcher:
             p = count / length
             entropy -= p * math.log2(p)
         return entropy
+
 
 apex_dispatcher = ApexDispatcher()

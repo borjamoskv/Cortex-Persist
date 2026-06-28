@@ -31,7 +31,7 @@ class SymlinkEngine:
         while os.path.exists(backup_path):
             backup_path = f"{target_path}.nexus_bak_{idx}"
             idx += 1
-        
+
         logger.warning(f"[Nexus] Backing up physical entity: {target_path} -> {backup_path}")
         if os.path.isdir(target_path) and not os.path.islink(target_path):
             shutil.copytree(target_path, backup_path)
@@ -48,22 +48,24 @@ class SymlinkEngine:
         if not os.path.exists(source_path):
             logger.error(f"[Nexus] Canonical source missing: {source_path}")
             return False
-            
+
         if os.path.islink(target_path):
             current_target = os.readlink(target_path)
             if current_target == source_path:
                 return True
             else:
                 os.remove(target_path)
-                
+
         elif os.path.exists(target_path):
             # Physical redundancy detected! Context Rot.
-            logger.critical(f"[Nexus] Physical redundancy detected at {target_path}. Overwriting with symlink.")
+            logger.critical(
+                f"[Nexus] Physical redundancy detected at {target_path}. Overwriting with symlink."
+            )
             self._safe_backup(target_path)
-            
+
         # Ensure parent directory of target exists
         os.makedirs(os.path.dirname(target_path), exist_ok=True)
-        
+
         os.symlink(source_path, target_path)
         logger.info(f"[Nexus] OP_BIND_NEXUS: {target_path} -> {source_path}")
         return True
@@ -71,31 +73,31 @@ class SymlinkEngine:
     def propagate(self, target_workspaces: list[str], artifacts: list[str]) -> dict[str, bool]:
         """
         Force physical symlinks for core artifacts across given workspaces.
-        
+
         Args:
             target_workspaces: List of absolute paths to satellite repositories.
             artifacts: List of filenames/directories relative to the canonical root.
-            
+
         Returns:
             Dict mapping workspace to success bool.
         """
         results = {}
         for workspace in target_workspaces:
             workspace_ok = True
-            
+
             if not os.path.isdir(os.path.abspath(workspace)):
                 logger.warning(f"[Nexus] Target workspace unreachable: {workspace}")
                 results[workspace] = False
                 continue
-                
+
             for artifact in artifacts:
                 source = os.path.join(self.canonical_root, artifact)
                 target = os.path.join(os.path.abspath(workspace), artifact)
-                
+
                 if not self._enforce_link(source, target):
                     workspace_ok = False
             results[workspace] = workspace_ok
-            
+
         return results
 
     def validate_invariants(self, target_workspaces: list[str], artifacts: list[str]) -> bool:
@@ -106,6 +108,8 @@ class SymlinkEngine:
             for artifact in artifacts:
                 target = os.path.join(os.path.abspath(workspace), artifact)
                 if os.path.exists(target) and not os.path.islink(target):
-                    logger.critical(f"[Nexus] INV_NEXUS_LINK VIOLATED: {target} is a physical entity, not a symlink.")
+                    logger.critical(
+                        f"[Nexus] INV_NEXUS_LINK VIOLATED: {target} is a physical entity, not a symlink."
+                    )
                     return False
         return True

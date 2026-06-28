@@ -304,6 +304,7 @@ class SwarmCommander:
         from cortex.config import DB_PATH
         from cortex.database.core import connect_async
         from cortex.engine.causal.topological_arbitrage import TopologyIndex
+
         async with await connect_async(DB_PATH) as db:
             topo = TopologyIndex(db)
             await topo.sync()

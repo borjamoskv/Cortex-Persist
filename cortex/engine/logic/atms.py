@@ -46,7 +46,9 @@ class AtmsAdapter:
             if hasattr(self._graph, "get_descendants"):
                 return set(self._graph.get_descendants(str(root_id)))
             else:
-                logging.getLogger(__name__).warning("ATMS Rust core lacks 'get_descendants'. Emulating.")
+                logging.getLogger(__name__).warning(
+                    "ATMS Rust core lacks 'get_descendants'. Emulating."
+                )
                 return {str(root_id)}
         except Exception as e:
             logging.getLogger(__name__).error(f"[ATMS] Failed to get descendants: {e}")

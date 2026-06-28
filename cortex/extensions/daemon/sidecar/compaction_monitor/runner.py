@@ -49,7 +49,7 @@ async def l2_drain_loop(engine: Any, interval: int = 28800) -> None:
     projects = [p.strip() for p in os.getenv("L2_DRAIN_PROJECTS", "cortex-persist").split(",")]
     monitor = L2DrainMonitor(projects=projects, interval_seconds=interval, engine=engine)
     LOGGER.info("L2Drain loop started for projects: %s every %d seconds", projects, interval)
-    
+
     while True:
         try:
             alerts = await monitor.check_async()
@@ -120,7 +120,7 @@ async def main() -> None:
 
     # Start the monitor
     monitor.start(loop=loop)
-    
+
     engine = CortexEngine()
     _ = asyncio.create_task(l2_drain_loop(engine=engine))
 

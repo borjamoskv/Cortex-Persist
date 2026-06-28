@@ -3,7 +3,7 @@
 Semantic Apoptosis Guard (Information Bottleneck)
 
 Terminates stochastic payloads containing low-density semantic noise (prose, apologies)
-at the boundary. Forces frontier LLMs (like GPT-5.5) to communicate purely in 
+at the boundary. Forces frontier LLMs (like GPT-5.5) to communicate purely in
 structural invariants (AST, YAML, JSON, diffs).
 """
 
@@ -28,7 +28,7 @@ class SemanticApoptosisGuard:
 
     def __init__(self, max_noise_ratio: float = 0.15) -> None:
         self.max_noise_ratio = max_noise_ratio
-        
+
         # Heuristics for GPT-style conversational slop
         self._slop_patterns = re.compile(
             r"(?i)\b(espero que|aquí tienes|por supuesto|sin problema|en conclusión|"
@@ -50,7 +50,7 @@ class SemanticApoptosisGuard:
 
         content = proposal
         total_len = len(content.strip())
-        
+
         if total_len == 0:
             raise SemanticApoptosisError("Payload is empty.")
 
@@ -68,11 +68,13 @@ class SemanticApoptosisGuard:
         # If no code blocks and heavy slop, immediate kill
         if code_len == 0 and slop_hits > 0:
             logger.warning("Semantic Apoptosis: Payload consists entirely of conversational slop.")
-            raise SemanticApoptosisError("Payload consists entirely of conversational slop. Jettisoned.")
+            raise SemanticApoptosisError(
+                "Payload consists entirely of conversational slop. Jettisoned."
+            )
 
         # Ratio check
         noise_ratio = prose_len / total_len if total_len > 0 else 0.0
-        
+
         if noise_ratio > self.max_noise_ratio and slop_hits > 0:
             logger.warning(
                 f"Semantic Apoptosis: Noise ratio {noise_ratio:.2f} exceeds {self.max_noise_ratio}."

@@ -15,11 +15,13 @@ from cortex.integration.rustchain.wallet import RustChainWallet
 
 class StakingError(Exception):
     """Base exception for staking operations."""
+
     pass
 
 
 class GateUnavailableError(StakingError):
     """Raised when the staking gate or node is offline/unhealthy."""
+
     pass
 
 
@@ -60,7 +62,9 @@ async def stake_and_acquire(
             timestamp=timestamp,
         )
         if receipt.get("status") != "success":
-            raise StakingError(f"Staking transaction rejected: {receipt.get('error', 'unknown error')}")
+            raise StakingError(
+                f"Staking transaction rejected: {receipt.get('error', 'unknown error')}"
+            )
         return receipt
     except Exception as e:
         if isinstance(e, StakingError):

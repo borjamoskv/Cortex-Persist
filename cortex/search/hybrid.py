@@ -48,6 +48,7 @@ def _apply_temporal_decay(results: list[SearchResult], recency_weight: float) ->
     """
     now = datetime.now(timezone.utc)
     from typing import cast
+
     for r in results:
         try:
             if isinstance(r.created_at, datetime):

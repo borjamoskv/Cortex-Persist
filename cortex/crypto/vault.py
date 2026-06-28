@@ -13,6 +13,7 @@ __all__ = ["Vault"]
 
 try:
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
     _HAS_AESGCM = True
 except ImportError:
     _HAS_AESGCM = False

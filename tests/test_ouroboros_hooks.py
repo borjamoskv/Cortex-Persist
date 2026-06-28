@@ -8,6 +8,7 @@ from dataclasses import dataclass
 
 # [OUROBOROS] Vector P1.2 Integration Tests
 
+
 def test_ledger_blocks_anergic_actions():
     # Ledger should block empty actions due to Ouroboros Hook
     conn = sqlite3.connect(":memory:")
@@ -15,27 +16,32 @@ def test_ledger_blocks_anergic_actions():
     ledger = SovereignLedger(db=conn)
     with pytest.raises(ValueError, match=r"\[OUROBOROS\] Vector P1.2: Anergic action detected"):
         ledger.record_transaction(
-            action="   ", # Anergic
+            action="   ",  # Anergic
             project="test_project",
             detail={},
             tenant_id="test_tenant",
         )
 
+
 @pytest.mark.asyncio
 async def test_turbopuffer_blocks_zero_embedding():
     # Turbopuffer backend should block zeroed embeddings
     backend = TurbopufferVectorBackend(api_key="test_fake_key")
-    with pytest.raises(ValueError, match=r"\[OUROBOROS\] Vector P1.2: Embedding lacks structural exergy"):
+    with pytest.raises(
+        ValueError, match=r"\[OUROBOROS\] Vector P1.2: Embedding lacks structural exergy"
+    ):
         await backend.upsert(
             fact_id=123,
-            embedding=[0.0, 0.0, 0.0, 0.0], # Zero exergy
-            tenant_id="test_tenant"
+            embedding=[0.0, 0.0, 0.0, 0.0],  # Zero exergy
+            tenant_id="test_tenant",
         )
+
 
 @dataclass
 class MockStats:
     total_memories: int
     stale_memories: int
+
 
 @pytest.mark.asyncio
 async def test_epistemic_monitor_triggers_ouroboros():

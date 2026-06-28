@@ -61,18 +61,19 @@ class L2DrainMonitor:
             return None
 
         drained_count = 0
-        
+
         try:
             conn = await self._engine.get_conn()
-            
+
             # Support Ouroboros dynamic threshold
             threshold_seconds = MAX_AGE_SECONDS
             try:
                 from cortex.extensions.evolution.ouroboros_hook import get_dynamic_threshold
+
                 threshold_seconds = await get_dynamic_threshold(conn, project)
             except (ValueError, TypeError, OSError, KeyError):
                 pass
-            
+
             # Select facts that are HOT and updated_at is older than threshold
             query = """
                 SELECT f.id, f.tenant_id, v.embedding
@@ -86,19 +87,21 @@ class L2DrainMonitor:
             """
             cursor = await conn.execute(query, (project, threshold_seconds))
             rows = await cursor.fetchall()
-            
+
             if not rows:
                 self._last_runs[project] = now
                 return None
 
-            logger.info("L2Drain: Found %d vectors in %s to migrate to Turbopuffer.", len(rows), project)
+            logger.info(
+                "L2Drain: Found %d vectors in %s to migrate to Turbopuffer.", len(rows), project
+            )
 
             for fact_id, tenant_id, embedding_bytes in rows:
                 cursor_json = await conn.execute("SELECT vec_to_json(?)", (embedding_bytes,))
                 json_row = await cursor_json.fetchone()
                 if not json_row or not json_row[0]:
                     continue
-                
+
                 embedding = json.loads(json_row[0])
 
                 # 1. Upsert to Turbopuffer
@@ -106,26 +109,28 @@ class L2DrainMonitor:
                     fact_id=fact_id,
                     embedding=embedding,
                     tenant_id=tenant_id,
-                    payload={"project": project}
+                    payload={"project": project},
                 )
-                
+
                 # 2. Delete from sqlite-vec physically
                 await conn.execute("DELETE FROM fact_embeddings WHERE fact_id = ?", (fact_id,))
-                
+
                 # 3. Mark as COLD
-                await conn.execute("UPDATE facts SET storage_tier = 'COLD' WHERE id = ?", (fact_id,))
-                
+                await conn.execute(
+                    "UPDATE facts SET storage_tier = 'COLD' WHERE id = ?", (fact_id,)
+                )
+
                 drained_count += 1
-            
+
             await conn.commit()
             self._last_runs[project] = now
-            
+
             if drained_count > 0:
                 return CompactionAlert(
                     project=project,
                     reduction=drained_count,
                     deprecated=0,
-                    message=f"Migración L2: {drained_count} vectores movidos a Turbopuffer."
+                    message=f"Migración L2: {drained_count} vectores movidos a Turbopuffer.",
                 )
 
         except Exception as e:

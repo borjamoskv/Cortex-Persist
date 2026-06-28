@@ -335,9 +335,7 @@ class TestReflexionEngine:
         engine = ReflexionEngine(config=ReflexionConfig(max_iterations=4, timeout_ms=15_000))
         tree = make_sample_tree()
 
-        outcome = await engine.execute_with_reflexion(
-            tree, realistic_executor
-        )
+        outcome = await engine.execute_with_reflexion(tree, realistic_executor)
         assert outcome.succeeded
         assert outcome.iterations_used == 3
         assert len(outcome.reflections) == 2

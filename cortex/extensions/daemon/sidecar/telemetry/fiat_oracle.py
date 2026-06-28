@@ -27,7 +27,7 @@ class FiatOracle:
     """Monitors fiat flow and emits telemetry events. (Zero-Trust)"""
 
     def __init__(self, engine: Any, interval: float = 30.0):
-        # We accept both sync and async engine for flexibility, 
+        # We accept both sync and async engine for flexibility,
         # but execution logic is unified via sovereign_run.
         self.engine = engine
         self.interval = interval
@@ -55,7 +55,7 @@ class FiatOracle:
         """For running in MoskvDaemon separate thread."""
         logger.info("💸 [FIAT_ORACLE] (Thread) started.")
         self.running = True
-        
+
         from cortex.events.loop import sovereign_run
 
         while self.running:

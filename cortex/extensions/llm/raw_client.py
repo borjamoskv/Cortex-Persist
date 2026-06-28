@@ -7,12 +7,16 @@ from typing import Optional
 
 logger = logging.getLogger("cortex.llm.raw_client")
 
+
 class RawLLMClient:
     """
     C5-REAL Zero-Entropy LLM Client.
     Direct HTTP communication via urllib to bypass LangChain bloat.
     """
-    def __init__(self, base_url: str = "http://localhost:11434/api", model: str = "qwen2.5-coder:32b"):
+
+    def __init__(
+        self, base_url: str = "http://localhost:11434/api", model: str = "qwen2.5-coder:32b"
+    ):
         self.base_url = base_url.rstrip("/")
         self.model = model
 
@@ -23,14 +27,14 @@ class RawLLMClient:
             "model": self.model,
             "prompt": prompt,
             "stream": False,
-            "options": {"temperature": temperature}
+            "options": {"temperature": temperature},
         }
         if system:
             payload["system"] = system
 
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-        
+
         try:
             with urllib.request.urlopen(req, timeout=30) as response:
                 result = json.loads(response.read().decode("utf-8"))
@@ -46,12 +50,12 @@ class RawLLMClient:
             "model": self.model,
             "messages": messages,
             "stream": False,
-            "options": {"temperature": temperature}
+            "options": {"temperature": temperature},
         }
 
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-        
+
         try:
             with urllib.request.urlopen(req, timeout=60) as response:
                 result = json.loads(response.read().decode("utf-8"))

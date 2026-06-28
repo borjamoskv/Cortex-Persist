@@ -196,7 +196,9 @@ class PostgresConnectionAdapter:
             if is_insert:
                 row = await conn.fetchrow(pg_sql, *pg_params)
                 lastrowid = row["id"] if row else 0
-                logger.info("ADAPTER INSERT: SQL=%s | ROW=%s | lastrowid=%s", pg_sql, row, lastrowid)
+                logger.info(
+                    "ADAPTER INSERT: SQL=%s | ROW=%s | lastrowid=%s", pg_sql, row, lastrowid
+                )
                 return PostgresCursorAdapter([row] if row else [], lastrowid=lastrowid)
             else:
                 rows = await conn.fetch(pg_sql, *pg_params)

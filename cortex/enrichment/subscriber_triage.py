@@ -2,6 +2,7 @@
 [C5-REAL] Exergy-Maximized Subscriber Triage Engine
 Transforms high-entropy subscriber strings into deterministic PPI vectors.
 """
+
 import hashlib
 import re
 from datetime import datetime
@@ -9,33 +10,75 @@ from datetime import datetime
 # Heuristic Constants
 V1_ROLE_BASED_REGEX = re.compile(
     r"^(info|demos|submissions|press|news|editorial|team|sales|hello|contact|wholesale|volunteers|backme|music|detection-inquiries|nao-inquiries|benchmarks|ensdomainscollector)@",
-    re.IGNORECASE
+    re.IGNORECASE,
 )
 
 V2_HIGH_PROFILE_DOMAINS = {
-    "amazon.com", "coinbase.com", "nvidia.com", "shopify.com", "foundersfund.com",
-    "socialcapital.com", "microstrategy.com", "inflection.ai", "openai.com", "ssi.inc",
-    "iohk.io", "adobe.com", "near.org", "huggingface.co"
+    "amazon.com",
+    "coinbase.com",
+    "nvidia.com",
+    "shopify.com",
+    "foundersfund.com",
+    "socialcapital.com",
+    "microstrategy.com",
+    "inflection.ai",
+    "openai.com",
+    "ssi.inc",
+    "iohk.io",
+    "adobe.com",
+    "near.org",
+    "huggingface.co",
 }
 
 V3_ACADEMIC_DOMAINS = {
-    "csic.es", "ugr.es", "upv.es", "us.es", "ual.es", "upc.edu", "uva.es", "stanford.edu",
-    "dair-institute.org", "cuny.edu"
+    "csic.es",
+    "ugr.es",
+    "upv.es",
+    "us.es",
+    "ual.es",
+    "upc.edu",
+    "uva.es",
+    "stanford.edu",
+    "dair-institute.org",
+    "cuny.edu",
 }
 
 V4_WEB3_DOMAINS = {
-    "blocknative.com", "wintermute.com", "nunet.io", "starkware.co", "bittensor.com",
-    "dydx.exchange", "lagrange.dev", "spheron.network", "myshell.ai", "gsr.io",
-    "maven11.com", "pyth.network", "morpheus.network", "herodotus.dev", "axiom.xyz",
-    "drift.trade", "aethir.com", "singularitynet.io", "helium.com", "phala.network",
-    "nillion.com", "jup.ag", "ankr.com", "sentient.foundation", "succinct.xyz", "dealflow.es"
+    "blocknative.com",
+    "wintermute.com",
+    "nunet.io",
+    "starkware.co",
+    "bittensor.com",
+    "dydx.exchange",
+    "lagrange.dev",
+    "spheron.network",
+    "myshell.ai",
+    "gsr.io",
+    "maven11.com",
+    "pyth.network",
+    "morpheus.network",
+    "herodotus.dev",
+    "axiom.xyz",
+    "drift.trade",
+    "aethir.com",
+    "singularitynet.io",
+    "helium.com",
+    "phala.network",
+    "nillion.com",
+    "jup.ag",
+    "ankr.com",
+    "sentient.foundation",
+    "succinct.xyz",
+    "dealflow.es",
 }
+
 
 def generate_taint(payload: str) -> str:
     """Generate CORTEX-TAINT for structural integrity."""
     timestamp = datetime.utcnow().isoformat()
     hash_payload = hashlib.sha3_256(payload.encode()).hexdigest()
     return f"taint:MOSKV-1:enrichment:{timestamp}:{hash_payload}"
+
 
 def triage_subscriber(email: str) -> tuple[str, int, str]:
     """
@@ -60,11 +103,17 @@ def triage_subscriber(email: str) -> tuple[str, int, str]:
         return ("V3_ACADEMIC", 3, "Academic SEG Firewall")
 
     # [V-4] Web3/VC Noise
-    if domain in V4_WEB3_DOMAINS or domain.endswith(".exchange") or domain.endswith(".network") or domain.endswith(".xyz"):
+    if (
+        domain in V4_WEB3_DOMAINS
+        or domain.endswith(".exchange")
+        or domain.endswith(".network")
+        or domain.endswith(".xyz")
+    ):
         return ("V4_WEB3_VC", 3, "Web3/VC High Noise Inbox")
 
     # [V-5] Organic C5-REAL
     return ("V5_ORGANIC", 5, "Personal/Direct Attention")
+
 
 def process_batch(emails: list[str]) -> dict[str, dict]:
     """Process a list of emails into a deterministic mapping."""
@@ -76,9 +125,10 @@ def process_batch(emails: list[str]) -> dict[str, dict]:
             "vector": vector,
             "ppi_reality": ppi,
             "reason": reason,
-            "signature": taint
+            "signature": taint,
         }
     return results
+
 
 if __name__ == "__main__":
     # Test collapse
@@ -87,7 +137,7 @@ if __name__ == "__main__":
         "borja@borjamoskv.com",
         "jeff@amazon.com",
         "sierra@iiia.csic.es",
-        "Matt@blocknative.com"
+        "Matt@blocknative.com",
     ]
     matrix = process_batch(test_set)
     for k, v in matrix.items():

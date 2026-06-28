@@ -127,27 +127,32 @@ def compact_ledger_cmd(db: str, max_rows: int, snapshot_dir: str):
     import asyncio
 
     from cortex.audit.ledger import EnterpriseAuditLedger
-    
+
     # We initialize an EnterpriseAuditLedger which is backed by aiosqlite, not LedgerStore
     async def _run_compaction():
         from cortex.database.core import connect_async
+
         conn = await connect_async(db)
         try:
             ledger = EnterpriseAuditLedger(conn)
             await ledger.ensure_table()
-            
+
             with console.status(f"[bold cyan]Compacting up to {max_rows} rows from the ledger..."):
-                result = await ledger.compact_ledger(max_rows=max_rows, snapshot_dir=Path(snapshot_dir))
-                
+                result = await ledger.compact_ledger(
+                    max_rows=max_rows, snapshot_dir=Path(snapshot_dir)
+                )
+
             if result.get("status") == "compacted":
                 console.print("[bold green]✔ Ledger successfully compacted.[/bold green]")
                 console.print(f"  Rows compacted: {result.get('rows_compacted')}")
                 console.print(f"  Snapshot saved to: {result.get('snapshot_path')}")
             else:
-                console.print(f"[bold yellow]No compaction performed:[/bold yellow] {result.get('reason')}")
+                console.print(
+                    f"[bold yellow]No compaction performed:[/bold yellow] {result.get('reason')}"
+                )
         finally:
             await conn.close()
-            
+
     asyncio.run(_run_compaction())
 
 

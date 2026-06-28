@@ -309,10 +309,12 @@ class OmegaDaemon:
                         res_mutate = ouroboros.mutate(target="entropy_resolution")
                         if asyncio.iscoroutine(res_mutate):
                             await res_mutate
-                            
+
                     # [C5-REAL] Vector P1.2 Ouroboros Hooks
                     if total_entropy > Decimal("50.0"):
-                        logger.warning("Entropía Crítica detectada. Enganchando Ouroboros a Turbopuffer para Prune.")
+                        logger.warning(
+                            "Entropía Crítica detectada. Enganchando Ouroboros a Turbopuffer para Prune."
+                        )
                         try:
                             import os
 
@@ -322,17 +324,19 @@ class OmegaDaemon:
                                 generate_secure_taint_token,
                             )
                             from cortex.storage.turbopuffer import TurbopufferVectorBackend
-                            
+
                             priv_b64 = os.environ.get("CORTEX_ED25519_PRIVATE_KEY")
                             if not priv_b64:
                                 try:
-                                    priv_b64 = keyring.get_password("cortex_v6", "ed25519_private_key")
+                                    priv_b64 = keyring.get_password(
+                                        "cortex_v6", "ed25519_private_key"
+                                    )
                                 except (ValueError, TypeError, OSError, KeyError):
                                     pass
-                            
+
                             ns = "cortex_omega_daemon"
                             content = f"prune:{ns}:0.99"
-                            
+
                             if priv_b64:
                                 taint_signature = generate_secure_taint_token(
                                     agent_id="omega_daemon",
@@ -343,12 +347,14 @@ class OmegaDaemon:
                             else:
                                 taint_signature = "CORTEX-TAINT:OUROBOROS_P1.2_FALLBACK"
 
-                            backend = TurbopufferVectorBackend(api_key=os.environ.get("TURBOPUFFER_API_KEY", "dummy"))
+                            backend = TurbopufferVectorBackend(
+                                api_key=os.environ.get("TURBOPUFFER_API_KEY", "dummy")
+                            )
                             await backend.connect()
                             await backend.autonomous_prune_by_entropy(
-                                tenant_id="omega_daemon", 
-                                entropy_threshold=0.99, 
-                                taint_signature=taint_signature
+                                tenant_id="omega_daemon",
+                                entropy_threshold=0.99,
+                                taint_signature=taint_signature,
                             )
                             await backend.close()
                         except Exception as bp_exc:

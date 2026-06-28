@@ -59,7 +59,9 @@ async def test_taint_preserves_encrypted_metadata(db, encrypter, monkeypatch):
     # Mock the global encrypter used by AsyncCausalGraph and TaintPropagator
     monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: encrypter)
     monkeypatch.setattr("cortex.engine.flow.causality.get_default_encrypter", lambda: encrypter)
-    monkeypatch.setattr("cortex.engine.causal.taint_propagation.get_default_encrypter", lambda: encrypter)
+    monkeypatch.setattr(
+        "cortex.engine.causal.taint_propagation.get_default_encrypter", lambda: encrypter
+    )
 
     graph = AsyncCausalGraph(db)
     tenant = "tenant-alpha"
@@ -118,7 +120,9 @@ async def test_taint_isolation_between_tenants(db, encrypter, monkeypatch):
     """Verify that taint does NOT cross tenant boundaries even if IDs overlap."""
     monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: encrypter)
     monkeypatch.setattr("cortex.engine.flow.causality.get_default_encrypter", lambda: encrypter)
-    monkeypatch.setattr("cortex.engine.causal.taint_propagation.get_default_encrypter", lambda: encrypter)
+    monkeypatch.setattr(
+        "cortex.engine.causal.taint_propagation.get_default_encrypter", lambda: encrypter
+    )
 
     graph = AsyncCausalGraph(db)
 

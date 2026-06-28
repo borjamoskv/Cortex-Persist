@@ -74,10 +74,10 @@ class CascadeRouter:
                 # LOCAL-INFERENCE-OMEGA OVERRIDES (ENFORCED C5-REAL)
                 # Zero-Network Policy: All semantic ignition MUST occur on local silicon.
                 # External network failover is strictly PROHIBITED.
-                
+
                 primary_model = "qwen2.5-coder:32b"
                 fallback_model = "qwen2.5-coder:7b"
-                
+
                 # Graceful Degradation: Fallback to lighter local quant if attempt > 1
                 if attempt == 1:
                     if engine in ("gemini", "claude"):
@@ -88,7 +88,9 @@ class CascadeRouter:
                         raise ValueError(f"Unknown engine: {engine}")
                 else:
                     active_model = fallback_model
-                    logger.warning(f"⚠️ [ROUTER] Graceful Degradation Triggered. Falling back to {active_model}")
+                    logger.warning(
+                        f"⚠️ [ROUTER] Graceful Degradation Triggered. Falling back to {active_model}"
+                    )
 
                 cmd = ["ollama", "run", active_model, prompt]
                 logger.info(

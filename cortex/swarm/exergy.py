@@ -87,10 +87,14 @@ class ExergyBank:
         if wallet:
             wallet.is_alive = False
             wallet.balance = 0.0
-            logger.warning(f"[C5-REAL] Agent {agent_id} DISSIPATED (Entropy Purge). Apoptosis executed.")
-        
+            logger.warning(
+                f"[C5-REAL] Agent {agent_id} DISSIPATED (Entropy Purge). Apoptosis executed."
+            )
+
         if hasattr(registry, "_agents"):
-            keys_to_remove = [k for k, v in registry._agents.items() if getattr(v, "agent_id", None) == agent_id]
+            keys_to_remove = [
+                k for k, v in registry._agents.items() if getattr(v, "agent_id", None) == agent_id
+            ]
             for k in keys_to_remove:
                 del registry._agents[k]
 

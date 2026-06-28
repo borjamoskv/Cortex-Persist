@@ -239,7 +239,8 @@ class SovereignLock:
                 depth = count_row[0] if count_row else 0
                 with causal_write(conn):
                     await conn.execute(
-                        "UPDATE lock_state SET queue_depth = ? WHERE resource = ?", (depth, resource)
+                        "UPDATE lock_state SET queue_depth = ? WHERE resource = ?",
+                        (depth, resource),
                     )
 
         with causal_write(conn):

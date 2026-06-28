@@ -25,6 +25,7 @@ import pytest
 async def audit_conn(tmp_path):
     """Provides a fresh aiosqlite connection for each test."""
     from cortex.database.core import connect_async
+
     db_path = str(tmp_path / "audit_test.db")
     conn = await connect_async(db_path)
     yield conn
@@ -254,6 +255,7 @@ class TestCognitiveRouter:
         # Insert two entries directly with the same prev_hash to trigger database constraint
 
         from cortex.database.core import causal_write
+
         with causal_write(router._conn):
             await router._conn.execute(
                 """INSERT INTO cognitive_router_log 

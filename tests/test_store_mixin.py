@@ -203,6 +203,7 @@ class TestTaintIntegration:
         from cortex.engine.flow.causality import EDGE_DERIVED_FROM
 
         from cortex.database.core import causal_write
+
         async with engine.session() as conn, conn.cursor() as cur:
             with causal_write(conn):
                 await cur.execute(
@@ -257,6 +258,7 @@ class TestTaintIntegration:
         from cortex.engine.flow.causality import EDGE_DERIVED_FROM, EDGE_TAINTED_BY
 
         from cortex.database.core import causal_write
+
         async with engine.session() as conn, conn.cursor() as cur:
             with causal_write(conn):
                 await cur.execute(

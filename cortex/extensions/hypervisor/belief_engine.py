@@ -143,28 +143,38 @@ class BeliefEngine:
             await self._quarantine_belief(candidate, verdict)
 
             # Epistemic Slashing (Axiom Ω₃) - Punish source if Supreme Court (Opus/Fable) confirmed quarantine
-            has_source = bool(candidate.provenance.entries and candidate.provenance.entries[-1].source_id)
-            if verdict.model in ("opus", "fable", "architect", "o1-preview", "o1-mini") and has_source:
+            has_source = bool(
+                candidate.provenance.entries and candidate.provenance.entries[-1].source_id
+            )
+            if (
+                verdict.model in ("opus", "fable", "architect", "o1-preview", "o1-mini")
+                and has_source
+            ):
                 source_id = candidate.provenance.entries[-1].source_id
                 try:
                     from cortex.engine.forensic.slashing import SlashingEngine, SlashingPenalty
-                    conn = getattr(self._engine, "conn", None) or getattr(self._engine, "_conn", None)
+
+                    conn = getattr(self._engine, "conn", None) or getattr(
+                        self._engine, "_conn", None
+                    )
                     if conn:
                         logger.error(
-                            "⚔️ [Ω₃] EPISTEMIC SLASHING: %s quarantined by %s", 
-                            source_id, verdict.model
+                            "⚔️ [Ω₃] EPISTEMIC SLASHING: %s quarantined by %s",
+                            source_id,
+                            verdict.model,
                         )
                         await SlashingEngine.slash(
                             conn=conn,
                             agent_id=str(source_id),
                             penalty_type=SlashingPenalty.CRYPTOGRAPHIC_TAINT,
                             reason=f"Hallucination/Contradiction caught by {verdict.model}: {verdict.reason}",
-                            tenant_id=candidate.tenant_id
+                            tenant_id=candidate.tenant_id,
                         )
                     else:
                         logger.warning(
-                            "⚔️ [Ω₃] EPISTEMIC SLASHING DEFERRED: %s caught by %s (No direct DB conn available)", 
-                            source_id, verdict.model
+                            "⚔️ [Ω₃] EPISTEMIC SLASHING DEFERRED: %s caught by %s (No direct DB conn available)",
+                            source_id,
+                            verdict.model,
                         )
                 except Exception as exc:
                     logger.error("Failed to execute Epistemic Slashing: %s", exc)
@@ -301,7 +311,7 @@ class BeliefEngine:
         self._cache.pop(cache_key, None)
 
         # Trigger Cascading Quarantine (O(1) Graph Orphan) for dependencies
-        # Do not cascade if the verdict model is 'system_cascade' to avoid infinite loops 
+        # Do not cascade if the verdict model is 'system_cascade' to avoid infinite loops
         # from cyclical dependencies (though they shouldn't exist).
         if verdict.model != "system_cascade":
             await self._cascade_quarantine(
@@ -323,15 +333,15 @@ class BeliefEngine:
         # Avoid _load_context which is bounded by _max_context.
         if self._engine is None:
             return
-            
+
         try:
             facts = await self._engine.recall(
                 project=project,
-                limit=None, # Unbounded
+                limit=None,  # Unbounded
                 tenant_id=tenant_id,
                 fact_type="belief",
             )
-            
+
             # Construct BeliefObjects
             context = []
             for fact in facts:
@@ -342,10 +352,14 @@ class BeliefEngine:
         except Exception as exc:
             logger.error("Failed to load unbounded context for cascade: %s", exc)
             return
-        
+
         for b in context:
             if b.status == BeliefStatus.ACTIVE and root_id in b.supported_by:
-                logger.warning("⛓️ [CASCADING QUARANTINE] Orphaning dependent belief %s (depends on %s)", b.id, root_id)
+                logger.warning(
+                    "⛓️ [CASCADING QUARANTINE] Orphaning dependent belief %s (depends on %s)",
+                    b.id,
+                    root_id,
+                )
                 cascade_verdict = BeliefVerdict(
                     action=VerdictAction.QUARANTINE,
                     model="system_cascade",

@@ -80,7 +80,10 @@ class SwarmManager:
                     await state.shutdown_event.wait()
             except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
                 import logging
-                logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/manager.py - {exc}")
+
+                logging.getLogger(__name__).exception(
+                    f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/manager.py - {exc}"
+                )
                 state.status = "failed"
                 ready_event.set()
                 logger.error("Worktree %s lifecycle failed: %s", worktree_id, exc)
@@ -91,7 +94,10 @@ class SwarmManager:
                         await self.autofix.process_ghost(state)  # type: ignore[reportArgumentType]
                     except (ValueError, TypeError, KeyError, OSError, RuntimeError) as fix_err:
                         import logging
-                        logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/manager.py - {fix_err}")
+
+                        logging.getLogger(__name__).exception(
+                            f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/manager.py - {fix_err}"
+                        )
                         logger.error("AutoFix failed for worktree %s: %s", worktree_id, fix_err)
 
                 state.status = "destroyed"
@@ -348,7 +354,10 @@ class CapatazOrchestrator:
             return result
         except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             import logging
-            logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/manager.py - {exc}")
+
+            logging.getLogger(__name__).exception(
+                f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/manager.py - {exc}"
+            )
             task.status = TaskStatus.FAILED
             task.error = str(exc)
             logger.error("[%s] Capataz: Agent %s failed: %s", self.mission_id, agent_name, exc)
@@ -391,7 +400,10 @@ class CapatazOrchestrator:
             logger.info("[%s] Capataz: KV Cache Preheat successful.", self.mission_id)
         except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             import logging
-            logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/manager.py - {e}")
+
+            logging.getLogger(__name__).exception(
+                f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/manager.py - {e}"
+            )
             logger.warning("[%s] Capataz: KV Cache Preheat failed: %s", self.mission_id, e)
 
     async def run_parallel(self, task_definitions: list[dict[str, Any]]) -> list[Any]:

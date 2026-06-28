@@ -33,7 +33,9 @@ class ExergyCostScheduler:
         try:
             import yaml
         except ImportError:
-            logger.warning("[COST-SCHEDULER] PyYAML is not installed. Routing policy cannot be loaded.")
+            logger.warning(
+                "[COST-SCHEDULER] PyYAML is not installed. Routing policy cannot be loaded."
+            )
             self.policy = {}
             return
 

@@ -89,6 +89,7 @@ class EnrichmentWorker:
 
     async def _mark_success(self, conn: aiosqlite.Connection, job_id: int):
         from cortex.database.core import causal_write
+
         query = """
             UPDATE enrichment_jobs
             SET status = 'completed', updated_at = ?
@@ -114,6 +115,7 @@ class EnrichmentWorker:
             WHERE id = ?
         """
         from cortex.database.core import causal_write
+
         with causal_write(conn):
             await conn.execute(
                 query,

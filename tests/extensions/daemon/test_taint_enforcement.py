@@ -250,6 +250,7 @@ async def test_store_mixin_taint_rejection_precedes_transaction(agent_keys, tmp_
     engine = CortexEngine(db_path=str(db_path), auto_embed=False)
     await engine.init_db()
     from cortex.database.core import causal_write
+
     try:
         async with engine.session() as conn:
             with causal_write(conn):

@@ -82,7 +82,9 @@ class TurbopufferVectorBackend(VectorBackend):
         """Upsert a vector embedding into Turbopuffer."""
         # [OUROBOROS] C5-REAL Entropy Control Assertion
         if not embedding or sum(abs(x) for x in embedding) < 1e-9:
-            raise ValueError("[OUROBOROS] Vector P1.2: Embedding lacks structural exergy (zeroed or empty).")
+            raise ValueError(
+                "[OUROBOROS] Vector P1.2: Embedding lacks structural exergy (zeroed or empty)."
+            )
 
         client = self._ensure_client()
         ns = self._namespace(tenant_id)
@@ -96,9 +98,9 @@ class TurbopufferVectorBackend(VectorBackend):
         data = {
             "ids": [fact_id],
             "vectors": [embedding],
-            "attributes": attributes if attributes else None
+            "attributes": attributes if attributes else None,
         }
-        
+
         # Remove None values
         data = {k: v for k, v in data.items() if v is not None}
 
@@ -107,7 +109,9 @@ class TurbopufferVectorBackend(VectorBackend):
             resp.raise_for_status()
             logger.debug("Turbopuffer: Upserted fact_id=%d in '%s'", fact_id, ns)
         except httpx.HTTPStatusError as exc:
-            logger.error("Turbopuffer: Upsert failed for fact_id=%d: %s", fact_id, exc.response.text)
+            logger.error(
+                "Turbopuffer: Upsert failed for fact_id=%d: %s", fact_id, exc.response.text
+            )
             raise RuntimeError(f"Turbopuffer upsert failed: {exc.response.text}") from exc
         except Exception as exc:
             logger.error("Turbopuffer: Upsert failed for fact_id=%d: %s", fact_id, exc)
@@ -136,14 +140,14 @@ class TurbopufferVectorBackend(VectorBackend):
 
         try:
             resp = await client.post(f"/vectors/{ns}/query", json=data)
-            
+
             # Turbopuffer returns 404 if namespace doesn't exist yet
             if resp.status_code == 404:
                 return []
-                
+
             resp.raise_for_status()
             result = resp.json()
-            
+
             hits = []
             for i in range(len(result.get("ids", []))):
                 hit_id = result["ids"][i]
@@ -152,7 +156,7 @@ class TurbopufferVectorBackend(VectorBackend):
                 # turbopuffer returns distance, similarity = 1 - distance
                 similarity = 1.0 - hit_dist
                 hits.append((hit_id, similarity))
-                
+
             return hits
         except Exception as exc:
             logger.error("Turbopuffer: Search failed in '%s': %s", ns, exc)
@@ -177,7 +181,7 @@ class TurbopufferVectorBackend(VectorBackend):
     async def autonomous_prune_by_entropy(
         self, tenant_id: str = "default", entropy_threshold: float = 0.8, taint_signature: str = ""
     ) -> int:
-        """[C5-REAL] Autonomous Swarm Pruning. 
+        """[C5-REAL] Autonomous Swarm Pruning.
         Allows Ouroboros to prune noisy semantic vectors directly from L2 storage.
         Requires valid CORTEX-TAINT signature to bypass standard restrictions.
         """
@@ -186,35 +190,50 @@ class TurbopufferVectorBackend(VectorBackend):
         from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
         from cortex.database.core import connect_async_ctx
         from cortex.engine.causal.taint_engine import verify_taint_token
-        
+
         ns = self._namespace(tenant_id)
         content = f"prune:{ns}:{entropy_threshold}"
 
         if not taint_signature.startswith("taint:"):
-            if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1" and "CORTEX-TAINT:" in taint_signature:
-                pass # Fallback permitted
+            if (
+                os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1"
+                and "CORTEX-TAINT:" in taint_signature
+            ):
+                pass  # Fallback permitted
             else:
-                raise PermissionError("L2 Vector prune rejected: Missing cryptographic taint signature.")
+                raise PermissionError(
+                    "L2 Vector prune rejected: Missing cryptographic taint signature."
+                )
         else:
             async with connect_async_ctx(str(DEFAULT_DB_PATH)) as conn:
                 is_valid = await verify_taint_token(conn, taint_signature, content)
                 if not is_valid:
-                    raise PermissionError("L2 Vector prune rejected: Cryptographic taint signature is invalid.")
-        
+                    raise PermissionError(
+                        "L2 Vector prune rejected: Cryptographic taint signature is invalid."
+                    )
+
         logger.warning(
-            "OUROBOROS-∞: Autonomous L2 Prune triggered for '%s' (threshold=%f)", 
-            ns, entropy_threshold
+            "OUROBOROS-∞: Autonomous L2 Prune triggered for '%s' (threshold=%f)",
+            ns,
+            entropy_threshold,
         )
-        
+
         # [C5-REAL] P1.2 Vector Engine - Namespace Erasure for High Entropy
         client = self._ensure_client()
         try:
             if entropy_threshold > 0.95:
                 await client.delete(f"/namespaces/{ns}")
-                logger.warning("OUROBOROS-∞: Namespace %s eradicated due to critical entropy (%.2f).", ns, entropy_threshold)
-                return -1 # Indicates full namespace wipe
+                logger.warning(
+                    "OUROBOROS-∞: Namespace %s eradicated due to critical entropy (%.2f).",
+                    ns,
+                    entropy_threshold,
+                )
+                return -1  # Indicates full namespace wipe
             else:
-                logger.info("OUROBOROS-∞: Prune simulated. Entropy %.2f is below total wipe threshold.", entropy_threshold)
+                logger.info(
+                    "OUROBOROS-∞: Prune simulated. Entropy %.2f is below total wipe threshold.",
+                    entropy_threshold,
+                )
                 return 0
         except Exception as exc:
             logger.error("OUROBOROS-∞: Namespace prune failed in '%s': %s", ns, exc)

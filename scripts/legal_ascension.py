@@ -45,7 +45,21 @@ async def ascend_node(post_id: int):
         
     logger.info(f"[C5-REAL] Thermodynamic Compression applied. Output: {compressed}")
         
-    # 3. Secure State Commit via CORTEX-TAINT SAGA Pipeline
+    # 3. Create metadata
+    agent_id = "MOSKV-1"
+    session_id = "SESSION_ASCENSION"
+    
+    metadata = {
+        "post_id": post_id,
+        "title": title,
+        "agent_id": agent_id,
+        "session_id": session_id,
+        "exergy_score": 1000,
+        "status": "C5-REAL_SINGULARITY",
+        "action": "THERMODYNAMIC_COMPRESSION"
+    }
+        
+    # 4. Secure State Commit via CORTEX-TAINT SAGA Pipeline
     try:
         from cortex.engine.causal.taint_engine import secure_state_commit
         frozen_state, ledger_hash = secure_state_commit(compressed, metadata)
@@ -57,7 +71,6 @@ async def ascend_node(post_id: int):
     # The secure_state_commit handles the Taint and Git Sentinel, but does it update the SQLite DB?
     # Actually, secure_state_commit just issues OP_FREEZE_MEM and OP_GIT_SENTINEL.
     # We still need to commit the mutation to the SQLite DB directly using the causal_write context.
-    from cortex.database.core import connect, causal_write
     conn = connect(db_path)
     with causal_write(conn):
         cursor = conn.cursor()

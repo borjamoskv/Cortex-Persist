@@ -39,7 +39,12 @@ def _fast_sha3(buffer: bytes | memoryview) -> str:
 
 
 def generate_secure_taint_token(
-    agent_id: str, session_id: str, content: str, private_key_b64: str, nonce: str | None = None, curve: str = "ed25519"
+    agent_id: str,
+    session_id: str,
+    content: str,
+    private_key_b64: str,
+    nonce: str | None = None,
+    curve: str = "ed25519",
 ) -> str:
     """Generates a secure cryptographically signed CORTEX-TAINT token.
 
@@ -59,10 +64,12 @@ def generate_secure_taint_token(
 
     if curve == "secp256k1":
         from cortex.crypto.keys import Secp256k1Signer  # type: ignore[attr-defined]
+
         signature = Secp256k1Signer.sign_raw_content(private_key_b64, canonical_payload)
         return f"taint:{curve}:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
     else:
         from cortex.crypto.keys import Signer
+
         signature = Signer.sign_raw_content(private_key_b64, canonical_payload)
         return f"taint:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
 
@@ -101,8 +108,10 @@ async def _query_agent_key_async(conn, agent_id: str) -> str | None:
 
 _NONCE_TABLE_CREATED_SYNC = False
 
+
 def _check_and_register_nonce_sync(conn, nonce: str) -> bool:
     from cortex.database.core import causal_write
+
     global _NONCE_TABLE_CREATED_SYNC
     if not _NONCE_TABLE_CREATED_SYNC:
         conn.execute("""
@@ -112,19 +121,22 @@ def _check_and_register_nonce_sync(conn, nonce: str) -> bool:
             )
         """)
         _NONCE_TABLE_CREATED_SYNC = True
-        
+
     cursor = conn.cursor()
     with causal_write(conn):
         cursor.execute(
-            "INSERT OR IGNORE INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time())
+            "INSERT OR IGNORE INTO taint_nonces (nonce, timestamp) VALUES (?, ?)",
+            (nonce, time.time()),
         )
     return cursor.rowcount > 0
 
 
 _NONCE_TABLE_CREATED_ASYNC = False
 
+
 async def _check_and_register_nonce_async(conn, nonce: str) -> bool:
     from cortex.database.core import causal_write
+
     global _NONCE_TABLE_CREATED_ASYNC
     if not _NONCE_TABLE_CREATED_ASYNC:
         await conn.execute("""
@@ -134,10 +146,11 @@ async def _check_and_register_nonce_async(conn, nonce: str) -> bool:
             )
         """)
         _NONCE_TABLE_CREATED_ASYNC = True
-        
+
     with causal_write(conn):
         cursor = await conn.execute(
-            "INSERT OR IGNORE INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time())
+            "INSERT OR IGNORE INTO taint_nonces (nonce, timestamp) VALUES (?, ?)",
+            (nonce, time.time()),
         )
     return cursor.rowcount > 0
 
@@ -231,13 +244,21 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
 
     if curve == "secp256k1":
         from cortex.crypto.keys import Secp256k1Verifier  # type: ignore[attr-defined]
-        is_verified = Secp256k1Verifier.verify_raw_content(canonical_payload, public_key_b64, signature)
+
+        is_verified = Secp256k1Verifier.verify_raw_content(
+            canonical_payload, public_key_b64, signature
+        )
     else:
         from cortex.crypto.keys import Verifier
+
         is_verified = Verifier.verify_raw_content(canonical_payload, public_key_b64, signature)
 
     if is_verified:
-        logger.info("[TaintEngine] Cryptographic Taint Signature verified for Agent %s (Curve: %s)", agent_id, curve)
+        logger.info(
+            "[TaintEngine] Cryptographic Taint Signature verified for Agent %s (Curve: %s)",
+            agent_id,
+            curve,
+        )
         return True
     else:
         logger.error(
@@ -262,13 +283,16 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     # [C5-REAL] Host Identity Strict Containment (UltraThink P0)
     if "[redacted_pii]" in content.lower():
         logger.error("[TaintEngine] P0 SINGULARITY: Host Identity Bleed detected in Taint payload.")
-        raise TaintValidationError("SAGA-1 Rejection: Payload contains prohibited Host Identity PII.")
+        raise TaintValidationError(
+            "SAGA-1 Rejection: Payload contains prohibited Host Identity PII."
+        )
 
     # -- SaaS Bot Inflation Firewall (Substack Crawler Guard) --
     try:
         data = json.loads(content)
-        if isinstance(data, dict) and 'Email' in data and 'Emails opened (6mo)' in data:
+        if isinstance(data, dict) and "Email" in data and "Emails opened (6mo)" in data:
             from cortex.guards.substack_crawler_guard import SubstackCrawlerGuard
+
             try:
                 SubstackCrawlerGuard().enforce_saga_contract(data)
             except ValueError as guard_err:
@@ -285,9 +309,6 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
         raise TaintValidationError(
             "SAGA-1 Rejection: Valid cryptographically signed CORTEX-TAINT token is required."
         )
-
-
-
 
 
 # =====================================================================
@@ -339,19 +360,20 @@ class MHCAntigenRouter:
             return
 
         from pathlib import Path
+
         sota_path = Path(__file__).parent / "sota_antigens.json"
-        
+
         if not sota_path.exists():
             raise TaintValidationError(f"UltraThink P0: SOTA invariant file missing at {sota_path}")
-            
+
         try:
             with open(sota_path, encoding="utf-8") as f:
                 data = json.load(f)
-                
+
             MHCAntigenRouter._SOTA_CACHE = data.get("static_t_cells", [])
             for item in MHCAntigenRouter._SOTA_CACHE:
                 self.register_t_cell(item["agent_id"], item["pattern"])
-                
+
             logger.info(f"[MHC] Loaded and cached SOTA static antigens from {sota_path.name}")
         except json.JSONDecodeError as e:
             logger.error(f"[MHC] UltraThink P0: JSON syntax corruption in static antigens: {e}")
@@ -447,33 +469,34 @@ class MHCAntigenRouter:
 
         return False
 
+
 # =====================================================================
 # APEX KERNEL INTEGRATION (P0)
 # =====================================================================
 
+
 def secure_state_commit(content: str, metadata: dict) -> tuple:
     """
     [C5-REAL] Finalizes the Write-Path by invoking the ApexDispatcher.
-    Freezes the state dictionary to prevent mutability (OP_FREEZE_MEM), 
+    Freezes the state dictionary to prevent mutability (OP_FREEZE_MEM),
     and executes the Git Sentinel (OP_GIT_SENTINEL) to ensure cryptographic continuity
     of the Sparse Merkle Tree hash chain.
     """
     from cortex.agents.primitives.dispatcher import apex_dispatcher
-    
+
     # 1. Structural Freeze (Immutable)
     frozen_state = apex_dispatcher.execute(
-        "OP_FREEZE_MEM", 
-        state={"content": content, "metadata": metadata, "crystallized": True}
+        "OP_FREEZE_MEM", state={"content": content, "metadata": metadata, "crystallized": True}
     )
-    
+
     # 2. Cryptographic Persistence
     agent_id = metadata.get("agent_id", "SYS_ROOT")
     commit_msg = f"CORTEX-TAINT: Causal state commit for [{agent_id}]"
-    
-    logger.info(f"[TaintEngine] Enforcing OP_GIT_SENTINEL for agent {agent_id}")
-    hash_ledger = apex_dispatcher.execute("OP_GIT_SENTINEL", commit_msg=commit_msg, force=True)
-    
-    logger.info(f"[TaintEngine] State collapsed successfully. Ledger Hash: {hash_ledger}")
-    
-    return frozen_state, hash_ledger
 
+    logger.info(f"[TaintEngine] Enforcing OP_GIT_SENTINEL for agent {agent_id}")
+    # UltraThink Fix: force=False prevents git add -f . which hangs scanning massive .venv and adds ignored files.
+    hash_ledger = apex_dispatcher.execute("OP_GIT_SENTINEL", commit_msg=commit_msg, force=False)
+
+    logger.info(f"[TaintEngine] State collapsed successfully. Ledger Hash: {hash_ledger}")
+
+    return frozen_state, hash_ledger

@@ -222,18 +222,20 @@ class SubagentRunner:
             for attempt in range(req.max_retries + 1):
                 t0 = time.monotonic()
                 try:
-                    momentum = decision.get("angular_momentum", 0.5) if 'decision' in locals() else 0.5
-                    
+                    momentum = (
+                        decision.get("angular_momentum", 0.5) if "decision" in locals() else 0.5
+                    )
+
                     async with lock:
                         run_task = asyncio.create_task(handler.run(req))
                         torque_task = asyncio.create_task(self.torque_event.wait())
-                        
+
                         done, pending = await asyncio.wait(
-                            [run_task, torque_task], 
-                            timeout=req.timeout_ms / 1000, 
-                            return_when=asyncio.FIRST_COMPLETED
+                            [run_task, torque_task],
+                            timeout=req.timeout_ms / 1000,
+                            return_when=asyncio.FIRST_COMPLETED,
                         )
-                        
+
                         if torque_task in done:
                             # P0 Torque Event detected
                             if momentum < 0.9:
@@ -245,12 +247,12 @@ class SubagentRunner:
                                 # High momentum protects the task from torque unless it's catastrophic
                                 # Let it finish, but torque remains active
                                 pass
-                        
+
                         if not done:
                             run_task.cancel()
                             torque_task.cancel()
                             raise asyncio.TimeoutError()
-                            
+
                         torque_task.cancel()
                         exc = run_task.exception()
                         if exc is not None:

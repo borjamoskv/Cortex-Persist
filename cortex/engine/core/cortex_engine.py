@@ -165,6 +165,7 @@ class CortexEngine(
         if self._embedder is None:
             try:
                 from cortex.embeddings import LocalEmbedder
+
                 self._embedder = LocalEmbedder()
             except ImportError:
                 return None

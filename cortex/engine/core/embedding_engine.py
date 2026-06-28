@@ -56,8 +56,9 @@ async def embed_fact_async(
                 embedding = await embedder.embed(content)
             else:
                 embedding = await asyncio.to_thread(embedder.embed, content)
-            
+
             from cortex.embeddings.obfuscation import obfuscate_vector
+
             embedding = obfuscate_vector(embedding, tenant_id=tenant_id, project=project)
 
             await conn.execute(

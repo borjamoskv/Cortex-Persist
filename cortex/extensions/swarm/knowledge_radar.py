@@ -22,6 +22,7 @@ from typing import Any
 
 try:
     import yaml
+
     YAMLError: Any = getattr(yaml, "YAMLError", Exception)
 except ImportError:
     yaml = None

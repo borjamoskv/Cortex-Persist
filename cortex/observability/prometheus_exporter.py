@@ -8,6 +8,7 @@ try:
 except ImportError:
     _PROMETHEUS_AVAILABLE = False
     from typing import Any
+
     Counter: Any = None
     Gauge: Any = None
     Histogram: Any = None

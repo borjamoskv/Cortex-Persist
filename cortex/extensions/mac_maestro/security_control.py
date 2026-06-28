@@ -18,6 +18,7 @@ __all__ = ["SecurityControl", "SecurityState"]
 @dataclass(frozen=True)
 class SecurityState:
     """Deterministic representation of a Security Control audit state."""
+
     domain: str
     status: str
     is_secure: bool
@@ -26,8 +27,8 @@ class SecurityState:
 
 class SecurityControl:
     """C5-REAL Security Auditor for macOS.
-    
-    Verifies physical system state by interacting directly with macOS 
+
+    Verifies physical system state by interacting directly with macOS
     security binaries and parsing system plists.
     """
 
@@ -35,9 +36,7 @@ class SecurityControl:
         """Runs a subprocess command safely without shell expansion."""
         try:
             proc = await asyncio.create_subprocess_exec(
-                *args,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
             stdout, stderr = await proc.communicate()
             return proc.returncode or 0, stdout.decode().strip(), stderr.decode().strip()
@@ -75,10 +74,12 @@ class SecurityControl:
 
     async def audit_xprotect(self) -> SecurityState:
         """Verify XProtect version from system plist."""
-        plist_path = Path("/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/XProtect.meta.plist")
+        plist_path = Path(
+            "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/XProtect.meta.plist"
+        )
         if not plist_path.exists():
             return SecurityState("XProtect", "Not Found", False, "File missing")
-        
+
         try:
             with open(plist_path, "rb") as f:
                 data = plistlib.load(f)
@@ -92,17 +93,17 @@ class SecurityControl:
         code, out, err = await self._run_cmd("lsof", "-i", "-P", "-n")
         lines = out.splitlines()
         listening = [line for line in lines if "LISTEN" in line]
-        
+
         # For now, observing counts as valid (true secure state depends on a whitelist).
         raw_out = "\n".join(listening[:10])
         if len(listening) > 10:
             raw_out += f"\n... and {len(listening) - 10} more"
-            
+
         return SecurityState(
-            domain="Ports", 
-            status=f"{len(listening)} open ports", 
-            is_secure=True, 
-            raw_output=raw_out
+            domain="Ports",
+            status=f"{len(listening)} open ports",
+            is_secure=True,
+            raw_output=raw_out,
         )
 
     async def audit_all(self) -> list[SecurityState]:
@@ -114,9 +115,9 @@ class SecurityControl:
             self.audit_firewall(),
             self.audit_xprotect(),
             self.audit_ports(),
-            return_exceptions=True
+            return_exceptions=True,
         )
-        
+
         # Handle potential exceptions from asyncio.gather
         clean_results = []
         for i, res in enumerate(results):
@@ -125,5 +126,5 @@ class SecurityControl:
                 clean_results.append(SecurityState(f"Domain_{i}", "Error", False, str(res)))
             else:
                 clean_results.append(res)
-                
+
         return clean_results

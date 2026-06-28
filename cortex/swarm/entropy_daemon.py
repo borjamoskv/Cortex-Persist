@@ -37,6 +37,7 @@ class EntropyDaemon:
         db_size_before = os.path.getsize(self.db_path) if os.path.exists(self.db_path) else 0
 
         from cortex.database.core import connect_async
+
         async with await connect_async(self.db_path, timeout=60) as conn:
             # Checkpoint the Write-Ahead Log (WAL) to database file and truncate WAL
             await conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
@@ -52,10 +53,13 @@ class EntropyDaemon:
         # APEX-008: Ouroboros Immune - scan for recursive logging
         try:
             from cortex.engine.causal.ouroboros_immune import OuroborosImmuneSystem
+
             immune = OuroborosImmuneSystem()
             quarantined = immune.scan_and_quarantine()
             if quarantined:
-                logger.warning(f"[EntropyDaemon] AISLADO: {len(quarantined)} archivos por Ouroboros.")
+                logger.warning(
+                    f"[EntropyDaemon] AISLADO: {len(quarantined)} archivos por Ouroboros."
+                )
         except Exception as e:
             logger.warning(f"[EntropyDaemon] Falla Ouroboros Immune: {e}")
 

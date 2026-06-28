@@ -22,11 +22,10 @@ class RustChainWallet:
     def __init__(self, private_key: ed25519.Ed25519PrivateKey) -> None:
         self._private_key = private_key
         self._public_key = private_key.public_key()
-        
+
         # Address: prefix + first 20 bytes of double SHA256 of b"address" + public_key_bytes
         pub_bytes = self._public_key.public_bytes(
-            encoding=serialization.Encoding.Raw,
-            format=serialization.PublicFormat.Raw
+            encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
         )
         h1 = hashlib.sha256(b"address" + pub_bytes).digest()
         h2 = hashlib.sha256(h1).digest()
@@ -51,8 +50,7 @@ class RustChainWallet:
     @property
     def public_key_bytes(self) -> bytes:
         return self._public_key.public_bytes(
-            encoding=serialization.Encoding.Raw,
-            format=serialization.PublicFormat.Raw
+            encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
         )
 
     @property
