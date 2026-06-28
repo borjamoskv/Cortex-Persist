@@ -33,23 +33,23 @@ class NemesisProtocol:
     ANTI_PATTERNS = [
         (
             r"console\.log\(.*?\)",
-            "Debugging efímero (console.log). Usa logging estructurado temporal o destrúyelo.",
+            "Ephemeral debugging (console.log). Use temporary structured logging or destroy it.",
         ),
         (
             r"t.o.d.o:|f.i.x.m.e:|h.a.c.k:",
-            "Marcadores de deuda técnica detectados. Resuélvelo ahora, no lo dejes para después.",
+            "Technical debt markers detected. Resolve it now, do not leave it for later.",
         ),
         (
             r"copy-paste|copiado de|stackoverflow",
-            "Código no asimilado. Viola el Axioma I (Causal Over Correlation).",
+            "Unassimilated code. Violates Axiom I (Causal Over Correlation).",
         ),
         (
             r"por si acaso|just in case",
-            "Abstracción defensiva ('por si acaso'). Viola el Axioma IV: Densidad Infinita.",
+            "Defensive abstraction ('just in case'). Violates Axiom IV: Infinite Density.",
         ),
         (
             r"bootstrap|tailwind default",
-            "Estética genérica detectada. Exigimos Industrial Noir 130/100.",
+            "Generic aesthetics detected. We demand Industrial Noir 130/100.",
         ),
     ]
 
@@ -81,7 +81,7 @@ class NemesisProtocol:
         for pattern, reason in cls.ANTI_PATTERNS:
             if re.search(pattern, content_lower):
                 ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.4, reason=f"Nemesis Static: {reason}")
-                return f"[NEMESIS PROTOCOL ACTIVO] Entropía detectada: {reason}"
+                return f"[NEMESIS PROTOCOL ACTIVE] Entropy detected: {reason}"
 
         # 2. Dynamic Antibody Check (Delegated to reduce complexity)
         return cls._check_dynamic_antibodies(content_lower, db_path)
@@ -97,7 +97,7 @@ class NemesisProtocol:
         for pattern, reason in cls.ANTI_PATTERNS:
             if re.search(pattern, content_lower):
                 ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.4, reason=f"Nemesis Static: {reason}")
-                return f"[NEMESIS PROTOCOL ACTIVO] Entropía detectada: {reason}"
+                return f"[NEMESIS PROTOCOL ACTIVE] Entropy detected: {reason}"
 
         # 2. Dynamic Antibody Check
         for pattern, reason in cls._load_dynamic_antibodies():
@@ -172,7 +172,7 @@ class NemesisProtocol:
     def assimilate(cls, vector: str, reason: str, db_path: str | None = None) -> bool:  # pyright: ignore[reportSelfClsParameterName]
         """
         Ω₅: Dynamic Immunity. Converts an attack vector into a permanent antibody.
-        'Asimilar el ataque y convertirlo en anticuerpo antes de que llegue al núcleo.'
+        'Assimilate the attack and convert it into an antibody before it reaches the core.'
         """
         if any(v == vector for v, _ in cls.ANTI_PATTERNS) or any(
             v == vector for v, _ in cls._load_dynamic_antibodies()

@@ -69,17 +69,17 @@ def fixed_event_trace(seed: int = 42, length: int = 20) -> list[dict[str, Any]]:
 
 class ReplayCIGate:
     """
-    CI Gate que demuestra execution identity across temporal reconstruction.
+    CI Gate that demonstrates execution identity across temporal reconstruction.
 
-    Ejecuta N réplicas independientes de la misma traza de eventos
-    y verifica que TODAS producen cadenas de hash idénticas.
+    Executes N independent replicas of the same event trace
+    and verifies that ALL produce identical hash chains.
 
-    Si alguna diverge → el sistema ha perdido determinismo → fallo catastrófico.
+    If any diverges -> the system has lost determinism -> catastrophic failure.
     """
 
     def __init__(self, state_cls: type[Any], *, replicas: int = 3):
         if replicas < 2:
-            raise ValueError("CI Gate requiere mínimo 2 réplicas para verificar identidad.")
+            raise ValueError("CI Gate requires minimum 2 replicas to verify identity.")
         self.state_cls = state_cls
         self.replicas = replicas
 

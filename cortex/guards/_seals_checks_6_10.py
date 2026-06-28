@@ -105,7 +105,7 @@ async def _check_latency_telemetry() -> list[str]:
 
 async def check_seal_6_async_perf() -> GateResult:
     """Check asynchronous performance invariants."""
-    printer.seal(6, "AX-III Colapso Entrópico", "Async & Performance")
+    printer.seal(6, "AX-III Entropic Collapse", "Async & Performance")
     passed = True
     exclude = frozenset(
         [

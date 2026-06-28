@@ -419,9 +419,9 @@ async def detect_contradictions(
         except aiosqlite.OperationalError:
             logger.warning("Contradiction scan failed (DB error)", exc_info=True)
         except (ValueError, TypeError, KeyError, AssertionError):
-            # [Axiom Ω2] Teorema de Degradación de Robinson-Moskv
-            # Blindaje de la ingesta de AST/Diffs. Fallo estructural imputable a Sensor Drift.
-            logger.exception("☢️ Sensor Drift: Fallo crítico estructural (Apoptosis Local)")
+            # [Axiom Ω2] Robinson-Moskv Degradation Theorem
+            # Shielding of the AST/Diffs ingestion. Structural failure attributable to Sensor Drift.
+            logger.exception("☢️ Sensor Drift: Critical structural failure (Local Apoptosis)")
             report.candidates = []
 
     return report

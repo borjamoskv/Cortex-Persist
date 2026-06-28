@@ -59,10 +59,16 @@ class AnomalyHunterEngine:
         a_content = fact_a.content.lower()
         b_content = fact_b.content.lower()
 
-        # Highly simplified logic for the example
-        if "blocked" in a_content and "passed" in b_content:
+        # Highly simplified logic for the example, supporting English and Spanish
+        is_a_blocked = "blocked" in a_content or "bloquead" in a_content
+        is_b_passed = "passed" in b_content or "pasé" in b_content or "pase" in b_content
+
+        is_b_blocked = "blocked" in b_content or "bloquead" in b_content
+        is_a_passed = "passed" in a_content or "pasé" in a_content or "pase" in a_content
+
+        if is_a_blocked and is_b_passed:
             return True
-        if "blocked" in b_content and "passed" in a_content:
+        if is_b_blocked and is_a_passed:
             return True
         return False
 

@@ -83,7 +83,7 @@ class TestDistillSovereignMemo:
             return_value=Ok(
                 '{"content_markdown": "Test crystal", '
                 '"entities": ["Python"], '
-                '"resonancia_axiomatica": "Ω₂ verified"}'
+                '"axiomatic_resonance": "Ω₂ verified"}'
             )
         )
 
@@ -125,7 +125,7 @@ class TestDistillSovereignMemo:
 
         call_args = mock_router.execute_resilient.call_args
         prompt = call_args[0][0]
-        assert "ENFOQUE LÁSER" in prompt.system_instruction
+        assert "LASER FOCUS" in prompt.system_instruction
         assert "Redis optimization" in prompt.system_instruction
 
     @pytest.mark.asyncio

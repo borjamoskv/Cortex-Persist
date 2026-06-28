@@ -95,7 +95,7 @@ class CausalScheduler:
         if eb < 0.0:
             mode = "chaotic_irreversible"
             candidates = []  # Defensive operations forbidden, the whole system burns
-        # 2. Coherence collapse (Fragmentación de realidad)
+        # 2. Coherence collapse (Reality fragmentation)
         elif cf < self.cf_threshold:
             mode = "coherence_lock"
             candidates = []  # Block new rollbacks to reconcile first

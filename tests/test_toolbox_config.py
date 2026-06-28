@@ -16,7 +16,7 @@ import yaml
 
 # ─── Fixtures ─────────────────────────────────────────────────────────
 
-TOOLS_YAML = Path(__file__).resolve().parent.parent / "cortex" / "mcp" / "toolbox" / "tools.yaml"
+TOOLS_YAML = Path(__file__).resolve().parent.parent / "cortex" / "mcp_server" / "toolbox" / "tools.yaml"
 
 VALID_TOOL_PARAM_TYPES = {"string", "integer", "float", "boolean"}
 

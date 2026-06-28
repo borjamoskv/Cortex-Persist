@@ -90,9 +90,9 @@ class OuroborosCompiler(EngineAwareMixin):
 
         if analysis.get("must_amputate"):
             logger.info(
-                f"[L-EPI GUARD] FATAL: Limerencia Epistémica detectada en {target_path.name}. "
+                f"[L-EPI GUARD] FATAL: Epistemic Limerence detected in {target_path.name}. "
                 f"dead_code_ratio={analysis['dead_code_ratio']:.2f}, limerence_penalty={analysis['limerence_penalty']:.2f}. "
-                "Amputación automática iniciada."
+                "Automatic amputation initiated."
             )
             target_path.unlink()
 
@@ -165,7 +165,7 @@ class OuroborosCompiler(EngineAwareMixin):
             # Replace the old entity with the compressed minimal path
             temp_path.replace(target_path)
             logger.info(
-                f"OuroborosCompiler: Entity {target_path.name} compressed successfully (Exergía Maximizada)."
+                f"OuroborosCompiler: Entity {target_path.name} compressed successfully (Maximized Exergy)."
             )
 
             # Persist to ledger

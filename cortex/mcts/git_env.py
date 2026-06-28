@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
-"""MCTS Entorno de Simulación Git (Chronos).
+"""MCTS Git Simulation Environment (Chronos).
 
-Proporciona la interfaz determinista para bifurcar el multiverso CORTEX,
-inyectar mutaciones, y simular la exergía termodinámica.
+Provides the deterministic interface to branch out the CORTEX multiverse,
+inject mutations, and simulate thermodynamic exergy.
 """
 
 from __future__ import annotations
@@ -19,16 +19,16 @@ logger = logging.getLogger("cortex.mcts.git_env")
 
 
 class MCTSGitEnvironment:
-    """Entorno Git Cuántico para el AlphaZero Autodidact."""
+    """Quantum Git Environment for the AlphaZero Autodidact."""
 
     def __init__(self, router: CortexLLMRouter, target_file: Path) -> None:
         self.router = router
         self.target_file = Path(target_file).absolute()
         if not self.target_file.exists():
-            raise FileNotFoundError(f"Target file no existe: {self.target_file}")
+            raise FileNotFoundError(f"Target file does not exist: {self.target_file}")
 
     async def get_current_branch(self) -> str:
-        """Devuelve el nombre de la rama actual."""
+        """Returns the name of the current branch."""
         proc = await asyncio.create_subprocess_exec(
             "git",
             "rev-parse",
@@ -40,7 +40,7 @@ class MCTSGitEnvironment:
         return stdout.decode().strip()
 
     async def branch_out(self, base_branch: str, new_node_id: str) -> str:
-        """Bifurca el árbol de Git."""
+        """Branches out the Git tree."""
         new_name = f"chronos/node-{new_node_id}"
         cmd = f"git checkout -b {shlex.quote(new_name)} {shlex.quote(base_branch)}"
         proc = await asyncio.create_subprocess_shell(
@@ -55,7 +55,7 @@ class MCTSGitEnvironment:
         return new_name
 
     async def mutate(self, prompt_instruction: str) -> bool:
-        """Inyecta una mutación LLM en el archivo objetivo."""
+        """Injects an LLM mutation into the target file."""
         original_code = self.target_file.read_text(encoding="utf-8")
 
         prompt = CortexPrompt(
@@ -71,13 +71,13 @@ class MCTSGitEnvironment:
                 }
             ],
             intent=IntentProfile.CODE,
-            temperature=0.8,  # Alta temperatura para forzar divergencia evolutiva
+            temperature=0.8,  # High temperature to force evolutionary divergence
             max_tokens=8192,
         )
 
         res = await self.router.execute_resilient(prompt)
         if res.is_err():
-            logger.error("Error en mutación LLM: %s", res.error)  # pyright: ignore[reportAttributeAccessIssue]
+            logger.error("LLM mutation error: %s", res.error)  # pyright: ignore[reportAttributeAccessIssue]
             return False
 
         new_code = res.unwrap().strip()
@@ -91,21 +91,21 @@ class MCTSGitEnvironment:
             new_code = "\n".join(lines).strip()
 
         self.target_file.write_text(new_code, encoding="utf-8")
-        logger.info("🧬 [CHRONOS] Archivo mutado: %s", self.target_file.name)
+        logger.info("🧬 [CHRONOS] Mutated file: %s", self.target_file.name)
         return True
 
     async def simulate(self) -> float:
-        """Juega el multiverso: Ejecuta pytest y calcula el Yield y Exergía.
+        """Plays the multiverse: Runs pytest and calculates Yield and Exergy.
 
         Reward Function:
-        1.0 si pasa tests limpios,
-        0.0 si rompe la integridad del sistema.
-        (Futuro: multiplicar por eficiencia térmica/latencia).
+        1.0 if it passes clean tests,
+        0.0 if it breaks system integrity.
+        (Future: multiply by thermal efficiency/latency).
         """
-        logger.info("🧪 [CHRONOS] Ejecutando simulación de integridad (pytest)...")
+        logger.info("🧪 [CHRONOS] Running integrity simulation (pytest)...")
         start_time = time.perf_counter()
 
-        # Corremos la suite de pruebas completa o las reglas ruff para chequear syntax
+        # We run the complete test suite or ruff rules to check syntax
         cmd_ruff = f"ruff check {shlex.quote(str(self.target_file))}"
         proc_ruff = await asyncio.create_subprocess_shell(
             cmd_ruff, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -113,7 +113,7 @@ class MCTSGitEnvironment:
         await proc_ruff.communicate()
 
         if proc_ruff.returncode != 0:
-            logger.warning("💥 [CHRONOS] Mutación aniquilada: Invalida el linter estricto.")
+            logger.warning("💥 [CHRONOS] Mutation annihilated: Invalidates strict linter.")
             return 0.0
 
         cmd_test = "pytest tests/ -v -q --tb=no"
@@ -126,16 +126,16 @@ class MCTSGitEnvironment:
 
         if proc_test.returncode == 0:
             logger.info(
-                "💎 [CHRONOS] Mutación termodinámicamente viable (Passed en %.2fs).", duration
+                "💎 [CHRONOS] Thermodynamically viable mutation (Passed in %.2fs).", duration
             )
-            # En la versión P0, es binario
+            # In the P0 version, it is binary
             return 1.0
-        logger.warning("💥 [CHRONOS] Mutación aniquilada: Falla aserción o causa regresión.")
+        logger.warning("💥 [CHRONOS] Mutation annihilated: Fails assertion or causes regression.")
         return 0.0
 
     async def secure_checkout(self, branch: str) -> None:
-        """Vuelve a una rama segura restaurando cualquier cambio."""
-        logger.debug("Restaurando entropía: checkout a %s", branch)
+        """Returns to a safe branch restoring any changes."""
+        logger.debug("Restoring entropy: checkout to %s", branch)
         await asyncio.create_subprocess_shell("git reset --hard HEAD").communicate()  # pyright: ignore[reportAttributeAccessIssue]
         await asyncio.create_subprocess_shell("git clean -fd").communicate()  # pyright: ignore[reportAttributeAccessIssue]
         await asyncio.create_subprocess_shell(f"git checkout {shlex.quote(branch)}").communicate()  # pyright: ignore[reportAttributeAccessIssue]

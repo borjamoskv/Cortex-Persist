@@ -16,7 +16,7 @@ logger = logging.getLogger("cortex.engine.logic.sanedrin")
 
 
 class SanedrinNode:
-    """A sovereign node within the Sanedrín cluster."""
+    """A sovereign node within the Sanhedrin cluster."""
 
     def __init__(self, node_id: str, archetype: str) -> None:
         self.node_id = node_id
@@ -34,7 +34,7 @@ class SanedrinNode:
         id_a = fact_a.get("id", "A")
         id_b = fact_b.get("id", "B")
 
-        # En una implementación SOTA, esto llamaría a un LLM real y extraería un grafo lógico.
+        # In a SOTA implementation, this would call a real LLM and extract a logical graph.
         chosen_claim = id_a if hash(id_a) > hash(id_b) else id_b
         density = 0.85 if chosen_claim == id_a else 0.92
 
@@ -51,7 +51,7 @@ class SanedrinNode:
 
 class SanedrinCouncil:
     """
-    C5-REAL: The BFT Tribunal (Sanedrín).
+    C5-REAL: The BFT Tribunal (Sanhedrin).
     A multi-agent consensus cluster that erradicates Single Point of Truth.
     """
 
@@ -67,7 +67,7 @@ class SanedrinCouncil:
         Convenes the council to resolve an epistemic collision geometrically.
         """
         logger.critical(
-            f"[Sanedrín] Council convened for collision: {fact_a.get('id')} VS {fact_b.get('id')}"
+            f"[Sanhedrin] Council convened for collision: {fact_a.get('id')} VS {fact_b.get('id')}"
         )
 
         # 1. Parallel BFT Evaluation (No blocking)
@@ -83,10 +83,10 @@ class SanedrinCouncil:
                 and (best_eval["proof_density"] - ev["proof_density"]) > 0.1
             ):
                 logger.warning(
-                    f"[Sanedrín] Apoptosis triggered for {ev['node']}. Proof density insufficient."
+                    f"[Sanhedrin] Apoptosis triggered for {ev['node']}. Proof density insufficient."
                 )
                 global_trust_registry.epistemic_slash(
-                    ev["node"], "Failed Proof-of-Logic audit in Sanedrín"
+                    ev["node"], "Failed Proof-of-Logic audit in Sanhedrin"
                 )
 
         resolution_msg = f"SANEDRIN_BFT: {best_eval['claim']} validated by {best_eval['node']}"

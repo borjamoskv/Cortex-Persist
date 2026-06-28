@@ -215,7 +215,7 @@ class ContextCacheManager:
             from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
             from cortex.utils.turboquant import optimize_vector_qjl
 
-            # Aplicamos cuantización asimétrica TurboQuant 3.5b -> 1.0b
+            # We apply asymmetric quantization TurboQuant 3.5b -> 1.0b
             quantized_int8_list = optimize_vector_qjl(
                 raw_tensor, bits=3.5, layer_depth_ratio=layer_depth_ratio
             )
@@ -253,10 +253,10 @@ class ContextCacheManager:
                 },
             )
 
-            # Conexión directa al Layer de SQLite (Solo Puntero MMAP)
+            # Direct connection to SQLite Layer (MMAP Pointer Only)
             await vector_db.memorize(fact)
             logger.info(
-                "⚡ KV Cache %s persistido a disco vía zero-copy MMAP eficientemente.", handle
+                "⚡ KV Cache %s persisted to disk efficiently via zero-copy MMAP.", handle
             )
 
         except ImportError as e:
@@ -292,7 +292,7 @@ class ContextCacheManager:
             return False
 
         logger.info(
-            "🚄 DMA Prefetch: Precargando Delta KV Cache '%s' asincrónicamente para latencia cero...",
+            "🚄 DMA Prefetch: Prefetching Delta KV Cache '%s' asynchronously for zero latency...",
             cache_id,
         )
 

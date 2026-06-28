@@ -61,7 +61,7 @@ async def test_property_a_commit_persists_both(db_path):
 
 @pytest.mark.asyncio
 async def test_property_b_exception_intermediate(db_path):
-    """Propiedad B: Excepción antes del commit -> Ninguno persiste."""
+    """Property B: Exception before commit -> None persist."""
     from cortex.database.core import causal_write
 
     conn, ledger = await setup_ledger(db_path)
@@ -92,7 +92,7 @@ async def test_property_b_exception_intermediate(db_path):
 
 @pytest.mark.asyncio
 async def test_property_c_rollback(db_path):
-    """Propiedad C: Rollback explícito -> Ninguno persiste."""
+    """Property C: Explicit Rollback -> None persist."""
     from cortex.database.core import causal_write
 
     conn, ledger = await setup_ledger(db_path)
@@ -157,7 +157,7 @@ def _run_crash_target(db_path):
 
 
 def test_property_d_crash_consistency(db_path):
-    """Propiedad D: Cierre inesperado (SIGKILL) antes del commit -> Consistencia estricta (0 y 0)."""
+    """Property D: Unexpected closure (SIGKILL) before commit -> Strict consistency (0 and 0)."""
     p = multiprocessing.Process(target=_run_crash_target, args=(db_path,))
     p.start()
     p.join()
@@ -167,6 +167,6 @@ def test_property_d_crash_consistency(db_path):
     a_count = check_conn.execute("SELECT count(*) FROM security_audit_log").fetchone()[0]
     check_conn.close()
 
-    # Ambos deben ser 0 porque la transacción no se cerró.
+    # Both must be 0 because the transaction was not closed.
     assert b_count == 0
     assert a_count == 0

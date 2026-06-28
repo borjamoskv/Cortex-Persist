@@ -27,7 +27,7 @@ def test_verify_files_success(runner, tmp_path):
     result = runner.invoke(cli, ["verify-files", str(valid_file)])
     assert result.exit_code == 0
     assert "PASSED" in result.output
-    assert "VERIFICACIÓN FORMAL COMPLETADA CON ÉXITO" in result.output
+    assert "FORMAL VERIFICATION COMPLETED SUCCESSFULLY" in result.output
 
 
 def test_verify_files_failure_eval(runner, tmp_path):
@@ -40,7 +40,7 @@ def test_verify_files_failure_eval(runner, tmp_path):
     assert "FAILED" in result.output
     assert "Prohibited use of 'eval'" in result.output
     assert "prevents termination analysis" in result.output
-    assert "FALLÓ LA VERIFICACIÓN FORMAL. Bloqueando integración." in result.output
+    assert "FORMAL VERIFICATION FAILED. Blocking integration." in result.output
 
 
 def test_verify_files_failure_delete(runner, tmp_path):
@@ -56,7 +56,7 @@ def test_verify_files_failure_delete(runner, tmp_path):
     assert "FAILED" in result.output
     assert "Prohibited method call" in result.output
     assert "delete" in result.output
-    assert "FALLÓ LA VERIFICACIÓN FORMAL. Bloqueando integración." in result.output
+    assert "FORMAL VERIFICATION FAILED. Blocking integration." in result.output
 
 
 def test_verify_files_syntax_error(runner, tmp_path):
@@ -68,4 +68,4 @@ def test_verify_files_syntax_error(runner, tmp_path):
     assert result.exit_code == 1
     assert "FAILED" in result.output
     assert "Code parsing failed" in result.output
-    assert "FALLÓ LA VERIFICACIÓN FORMAL. Bloqueando integración." in result.output
+    assert "FORMAL VERIFICATION FAILED. Blocking integration." in result.output

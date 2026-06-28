@@ -101,7 +101,7 @@ class TestReplayCIGate:
         assert result.events_per_run == 2
 
     def test_gate_rejects_single_replica(self):
-        with pytest.raises(ValueError, match="mínimo 2"):
+        with pytest.raises(ValueError, match="minimum 2"):
             ReplayCIGate(RuntimeState, replicas=1)
 
     def test_gate_result_to_dict(self):

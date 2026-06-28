@@ -53,7 +53,7 @@ class UltrathinkPhysicsEngine:
                     elif isinstance(neighbors, dict):
                         queue.extend([n for n in neighbors.keys() if n not in visited])
 
-        # El Blast Radius es el tamaño del clúster afectado
+        # The Blast Radius is the size of the affected cluster
         radius = len(visited)
         logger.debug("Blast Radius measure for %s: %d", epicenter_node, radius)
         return radius

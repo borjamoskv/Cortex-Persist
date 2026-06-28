@@ -15,7 +15,7 @@ GateResult = tuple[bool, str]
 # SEAL 1: CODE QUALITY - Ruff Lint + LOC Guard (≤600)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_1_code_quality() -> GateResult:
-    printer.seal(1, "AX-IV Cognición Termodinámica", "Code Quality (Ruff + LOC ≤700)")
+    printer.seal(1, "AX-IV Thermodynamic Cognition", "Code Quality (Ruff + LOC ≤700)")
     passed = True
 
     # ── Ruff Lint ──
@@ -52,7 +52,7 @@ async def check_seal_1_code_quality() -> GateResult:
 # SEAL 2: TYPE SAFETY - Pyright/Mypy
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_2_type_safety() -> GateResult:
-    printer.seal(2, "AX-I Determinismo Estocástico", "Type Check (Pyright)")
+    printer.seal(2, "AX-I Stochastic Determinism", "Type Check (Pyright)")
     code, out = await arun_cmd(["pyright", "cortex/", "--outputjson"], timeout=180.0)
     if code == 127:
         printer.warn("No type checker found (pyright/mypy) - skipping")
@@ -87,7 +87,7 @@ async def check_seal_2_type_safety() -> GateResult:
 # SEAL 3: SECURITY - Bandit + Cobbler Self-Audit
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_3_security() -> GateResult:
-    printer.seal(3, "AX-VII Inmunología Computacional", "Security (Bandit + Self-Audit)")
+    printer.seal(3, "AX-VII Computational Immunology", "Security (Bandit + Self-Audit)")
     passed = True
 
     # ── Bandit Scan ──
@@ -162,7 +162,7 @@ async def check_seal_3_security() -> GateResult:
 # SEAL 4: TESTS - pytest
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_4_tests() -> GateResult:
-    printer.seal(4, "AX-II Paradoja Epistémica", "Tests & Coverage")
+    printer.seal(4, "AX-II Epistemic Paradox", "Tests & Coverage")
     python_cmd = sys.executable
     cmd = [str(python_cmd), "-m", "pytest", "tests/", "-x", "-q", "--tb=short"]
     try:
@@ -183,7 +183,7 @@ async def check_seal_4_tests() -> GateResult:
 # SEAL 5: LEDGER INTEGRITY - Schema Init + Connection Guard
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_5_ledger() -> GateResult:
-    printer.seal(5, "AX-II Paradoja Epistémica", "Schema Init + Connection Guard")
+    printer.seal(5, "AX-II Epistemic Paradox", "Schema Init + Connection Guard")
     passed = True
 
     # ── Schema Init ──

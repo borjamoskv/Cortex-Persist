@@ -44,13 +44,13 @@ async def test_ledger_tamper_evident_corruption_detection():
         )
         await ledger_verify.close()
 
-    # 4. Inyección de Corrupción (Mutilación Física en Caliente)
-    # Atacante interno modifica la base de datos saltándose el Ledger
+    # 4. Corruption Injection (Hot Physical Mutilation)
+    # Internal attacker modifies the database bypassing the Ledger
     conn_sync = connect(db_path)
     conn_sync.authorize_causal_writes()
     cursor = conn_sync.cursor()
 
-    # Cambiamos "CREATE" por "EXFILTRATE" para simular un ataque
+    # We change "CREATE" to "EXFILTRATE" to simulate an attack
     cursor.execute("UPDATE security_audit_log SET action = 'EXFILTRATE' WHERE audit_id = ?", (id1,))
     conn_sync.commit()
     conn_sync.close()
@@ -63,11 +63,11 @@ async def test_ledger_tamper_evident_corruption_detection():
 
         tampered_result = await ledger_tampered.verify_chain()
 
-        # El sistema debe detectar la ruptura de la cadena Merkle o la falsificación de la firma
+        # The system must detect the Merkle chain break or signature forgery
         assert tampered_result.get("status") == "tampered", (
-            "El Ledger no detectó la mutilación física."
+            "The Ledger did not detect the physical mutilation."
         )
         assert tampered_result.get("corrupted_audit_id") == id1, (
-            "No se identificó el nodo exacto de la corrupción."
+            "The exact corrupted node was not identified."
         )
         await ledger_tampered.close()

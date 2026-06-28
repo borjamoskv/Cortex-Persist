@@ -65,10 +65,10 @@ class PolicyMixin:
         if regret_rate <= 0.05:
             return 0.0, 0
 
-        # TTL: aumentar proporcionalmente al regret rate (máx +1800s)
+        # TTL: increase proportionally to the regret rate (max +1800s)
         ttl_delta = min(1800.0, regret_rate * 3600.0)
 
-        # Capacidad: aumentar un 15% si hay errores LRU
+        # Capacity: increase by 15% if there are LRU errors
         lru_error_rate = sum(
             1 for v in verdicts if v.was_regrettable and v.reason == "lru_capacity"
         ) / max(len(verdicts), 1)

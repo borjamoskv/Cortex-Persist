@@ -37,7 +37,7 @@ class TestListWindows:
 
     @pytest.mark.asyncio
     async def test_list_windows_empty(self, win):
-        """Sin ventanas devuelve lista vacía."""
+        """No windows returns empty list."""
         with patch(
             "cortex_extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
@@ -47,12 +47,12 @@ class TestListWindows:
 
 
 class TestGetFrontmost:
-    """Tests de WindowEngine.get_frontmost()."""
+    """Tests of WindowEngine.get_frontmost()."""
 
     @pytest.mark.asyncio
     async def test_get_frontmost_success(self, win):
-        """Devuelve la ventana activa con formato pipe."""
-        # Formato real: appName|||winName|||x,y|||w,h
+        """Returns the active window with pipe format."""
+        # Real format: appName|||winName|||x,y|||w,h
         mock_output = "Safari|||Main Window|||0,0|||1440,900"
         with patch(
             "cortex_extensions.ui_control.window.run_applescript", new_callable=AsyncMock
@@ -66,7 +66,7 @@ class TestGetFrontmost:
 
     @pytest.mark.asyncio
     async def test_get_frontmost_no_window(self, win):
-        """Sin ventana activa devuelve None."""
+        """No active window returns None."""
         with patch(
             "cortex_extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
@@ -76,11 +76,11 @@ class TestGetFrontmost:
 
 
 class TestWindowOperations:
-    """Tests para move, resize, minimize, restore, fullscreen, close."""
+    """Tests for move, resize, minimize, restore, fullscreen, close."""
 
     @pytest.mark.asyncio
     async def test_move_window(self, win):
-        """Mueve la ventana a coordenadas específicas."""
+        """Moves the window to specific coordinates."""
         with patch(
             "cortex_extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
@@ -93,7 +93,7 @@ class TestWindowOperations:
 
     @pytest.mark.asyncio
     async def test_resize_window(self, win):
-        """Redimensiona la ventana."""
+        """Resizes the window."""
         with patch(
             "cortex_extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
@@ -103,7 +103,7 @@ class TestWindowOperations:
 
     @pytest.mark.asyncio
     async def test_minimize_window(self, win):
-        """Minimiza una ventana."""
+        """Minimizes a window."""
         with patch(
             "cortex_extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:
@@ -113,7 +113,7 @@ class TestWindowOperations:
 
     @pytest.mark.asyncio
     async def test_close_window(self, win):
-        """Cierra la ventana (Cmd+W)."""
+        """Closes the window (Cmd+W)."""
         with patch(
             "cortex_extensions.ui_control.window.run_applescript", new_callable=AsyncMock
         ) as mock:

@@ -47,12 +47,12 @@ class CausalRollbackEngine:
         }
 
     async def apply_rollback(self, event_id: str, tenant_id: str = "default") -> dict[str, Any]:
-        """Aplica el rollback físico marcando el DAG como revertido."""
+        """Applies the physical rollback marking the DAG as reverted."""
         sim = await self.simulate_reversal_cost(event_id, tenant_id)
 
         if not sim["possible"]:
             logger.warning(
-                f"[Causal Rollback] FAILED para {event_id}. Subgrafo contiene nodos irreversibles."
+                f"[Causal Rollback] FAILED for {event_id}. Subgraph contains irreversible nodes."
             )
             return {"status": "failed", "reason": "irreversible_nodes", "details": sim}
 

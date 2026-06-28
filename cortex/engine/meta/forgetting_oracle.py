@@ -96,15 +96,15 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
         if not eviction_records:
             return self._empty_report()
 
-        # 1. Análisis paralelo de cada evicción
+        # 1. Parallel analysis of each eviction
         verdict_tasks = [self._analyze_eviction(record) for record in eviction_records]
         verdicts: list[EvictionVerdict] = await asyncio.gather(*verdict_tasks)
 
-        # 2. Métricas agregadas
+        # 2. Aggregated metrics
         regret_rate = self._calc_regret_rate(verdicts)
         avg_value = sum(v.eviction_value for v in verdicts) / len(verdicts)
 
-        # 3. Recomendación de política
+        # 3. Policy recommendation
         recommendation = self._derive_recommendation(verdicts, regret_rate)
         ttl_delta, capacity_delta = self._calc_policy_deltas(regret_rate, verdicts)
 
@@ -130,7 +130,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
         # 5. Emit signal for downstream consumers (immune, daemon)
         self._emit_audit_signal(report)
 
-        # 6. Auto-ajuste si el umbral de arrepentimiento es crítico
+        # 6. Self-adjustment if the regret threshold is critical
         if regret_rate > self.REGRET_THRESHOLD and self._cache:
             self._apply_policy_adjustment(report)
 
@@ -209,7 +209,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
         )
 
     def calculate_semantic_gravity(self, fact_id: int) -> float:
-        """Calculate thermodynamic decay based on Ebbinghaus curve (Masa-Energía)."""
+        """Calculate thermodynamic decay based on Ebbinghaus curve (Mass-Energy)."""
         try:
             fact = getattr(self._engine, "get_fact_sync", lambda x: None)(fact_id)
             if not fact:
@@ -222,7 +222,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
                 return base_mass
 
             try:
-                # Intenta parsear ISO
+                # Attempt to parse ISO
                 created_dt = datetime.fromisoformat(created_at_iso.replace("Z", "+00:00"))
                 created_at_ts = created_dt.timestamp()
             except (ValueError, TypeError, AttributeError):
@@ -230,7 +230,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
 
             time_delta_hours = max((time.monotonic() - created_at_ts) / 3600.0, 0.0)
 
-            # Lambda rate: Axioms decaen muy lentamente, ghosts decaen rápido
+            # Lambda rate: Axioms decay very slowly, ghosts decay fast
             lambda_rate = 0.001 if fact.get("fact_type") == "axiom" else 0.05
 
             decay_factor = math.exp(-lambda_rate * time_delta_hours)

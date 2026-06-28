@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
-"""MCTS Algoritmo Central (CORTEX Chronos).
+"""MCTS Central Algorithm (CORTEX Chronos).
 
-Implementa Monte Carlo Tree Search para navegar el espacio de mutaciones de código.
+Implements Monte Carlo Tree Search to navigate the code mutations space.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ logger = logging.getLogger("cortex.mcts.tree")
 
 @dataclass
 class MCTSNode:
-    """Nodo en el árbol cuántico de Git."""
+    """Node in the quantum Git tree."""
 
     state_id: str
     mutation_prompt: str
@@ -49,7 +49,7 @@ class MCTSNode:
 
 
 class MCTSEngine:
-    """Motor Cuántico MCTS-Git."""
+    """MCTS-Git Quantum Engine."""
 
     def __init__(self, target_file: str, router: CortexLLMRouter) -> None:
         self.target_file = Path(target_file)
@@ -60,21 +60,21 @@ class MCTSEngine:
         self, max_iterations: int = 10, mutation_str: str = "Refactor to O(1) syntax"
     ) -> str:
         """
-        Inicia el recorrido cuántico.
+        Starts the quantum traversal.
 
-        Devuelve el nombre de la rama ganadora con máxima exergía.
+        Returns the name of the winning branch with maximum exergy.
         """
         base_branch = await self.env.get_current_branch()
         root = MCTSNode(state_id=f"{base_branch}-0", mutation_prompt=mutation_str)
 
         logger.info(
-            "🌌 [CHRONOS] Iniciando Singularidad MCTS (%d iteraciones) sobre %s",
+            "🌌 [CHRONOS] Starting MCTS Singularity (%d iterations) on %s",
             max_iterations,
             self.target_file.name,
         )
 
         for i in range(max_iterations):
-            logger.debug("Iteración MCTS %d/%d", i + 1, max_iterations)
+            logger.debug("MCTS Iteration %d/%d", i + 1, max_iterations)
 
             # 1. Selection & Expansion
             node = root
@@ -113,12 +113,12 @@ class MCTSEngine:
                 node.parent.visits += 1
                 node.parent.value += reward
 
-            # Restaurar rama principal para el siguiente estado (Evita colapso destructivo)
+            # Restore main branch for the next state (Prevents destructive collapse)
             await self.env.secure_checkout(base_branch)
 
-        # Seleccionar la rama óptima basándonos en la explotación (valor promedio)
+        # Select the optimal branch based on exploitation (average value)
         if not root.children:
-            logger.warning("No se expandieron nodos. Quedándose en rama base.")
+            logger.warning("No nodes were expanded. Staying on base branch.")
             return base_branch
 
         best_node = max(root.children, key=lambda n: (n.value / n.visits) if n.visits > 0 else -1)
@@ -126,12 +126,12 @@ class MCTSEngine:
 
         if best_node.visits > 0 and (best_node.value / best_node.visits) > 0:
             logger.info(
-                "👑 [CHRONOS] Realidad Colapsada: %s (Reward: %.2f)",
+                "👑 [CHRONOS] Collapsed Reality: %s (Reward: %.2f)",
                 best_branch,
                 best_node.value / best_node.visits,
             )
             return best_branch
         logger.warning(
-            "💀 [CHRONOS] Ninguna línea temporal superó los tests. Extinción local declarada."
+            "💀 [CHRONOS] No timelines passed the tests. Local extinction declared."
         )
         return base_branch

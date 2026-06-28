@@ -52,10 +52,8 @@ async def test_semantic_crystal_merge_preserves_unique_details(mock_get_router):
     fused_lower = fused_content.lower()
 
     # Must contain the core idea
-    assert "sovereign" in fused_lower or "soberan" in fused_lower, "Lost core concept: sovereign"
-    assert "asynchron" in fused_lower or "asíncron" in fused_lower, (
-        "Lost core concept: asynchronous"
-    )
+    assert "sovereign" in fused_lower, "Lost core concept: sovereign"
+    assert "asynchron" in fused_lower, "Lost core concept: asynchronous"
 
     # Must contain unique detail from Crystal A
     # (In this simple test, both are fairly similar, but let's check for "LLM")

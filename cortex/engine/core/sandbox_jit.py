@@ -35,25 +35,25 @@ class ASTSecurityScanner(ast.NodeVisitor):
 
     def visit_Call(self, node: ast.Call) -> None:
         if isinstance(node.func, ast.Name) and node.func.id in self.FORBIDDEN_NAMES:
-            raise JITSandboxViolation(f"Llamada a función prohibida detectada: {node.func.id}")
+            raise JITSandboxViolation(f"Prohibited function call detected: {node.func.id}")
         if isinstance(node.func, ast.Attribute) and node.func.attr.startswith("__"):
-            raise JITSandboxViolation(f"Atributo Dunder prohibido: {node.func.attr}")
+            raise JITSandboxViolation(f"Prohibited Dunder attribute: {node.func.attr}")
         self.generic_visit(node)
 
     def visit_Import(self, node: ast.Import) -> None:
         for alias in node.names:
             if alias.name.split(".")[0] in self.FORBIDDEN_IMPORTS:
-                raise JITSandboxViolation(f"Importación prohibida: {alias.name}")
+                raise JITSandboxViolation(f"Prohibited import: {alias.name}")
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         if node.module and node.module.split(".")[0] in self.FORBIDDEN_IMPORTS:
-            raise JITSandboxViolation(f"Importación prohibida (from): {node.module}")
+            raise JITSandboxViolation(f"Prohibited import (from): {node.module}")
         self.generic_visit(node)
 
     def visit_Attribute(self, node: ast.Attribute) -> None:
         if node.attr.startswith("__"):
-            raise JITSandboxViolation(f"Acceso a atributo dunder prohibido: {node.attr}")
+            raise JITSandboxViolation(f"Prohibited dunder attribute access: {node.attr}")
         self.generic_visit(node)
 
 
@@ -96,9 +96,9 @@ class SandboxJIT:
             tree = ast.parse(code_str)
         except SyntaxError as e:
             logger.error(f"SandboxJIT SyntaxError: {e}")
-            raise JITSandboxViolation(f"SyntaxError en el código propuesto: {e}")
+            raise JITSandboxViolation(f"SyntaxError in the proposed code: {e}")
 
-        # 1. Escaneo estático de seguridad
+        # 1. Static security scan
         scanner = ASTSecurityScanner()
         scanner.visit(tree)
 
@@ -113,4 +113,4 @@ class SandboxJIT:
             return exec_locals
         except Exception as e:
             logger.error(f"SandboxJIT RuntimeException: {e}")
-            raise JITSandboxViolation(f"Error de ejecución en Sandbox: {e}")
+            raise JITSandboxViolation(f"Sandbox execution error: {e}")

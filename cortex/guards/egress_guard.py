@@ -27,7 +27,7 @@ class EgressAuthorization:
 
 
 class EgressGuard:
-    """Cortafuegos termodinámico para llamadas I/O externas."""
+    """Thermodynamic firewall for external I/O calls."""
 
     def __init__(self, tenant_domains: list[str] | None = None):
         # Whitelisted domains. If None, any domain is allowed, but heavily rate-limited.

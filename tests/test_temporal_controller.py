@@ -20,7 +20,7 @@ def test_entropy_clamp_stable():
 
 
 def test_entropy_clamp_violation():
-    # Complejidad crece muy rápido (1, 3, 6 keys)
+    # Complexity grows very fast (1, 3, 6 keys)
     trajectory = [
         {"version": 0, "state_hash": "h0", "data": {"k1": 1}},
         {"version": 1, "state_hash": "h1", "data": {"k1": 1, "k2": 2, "k3": 3}},
@@ -30,7 +30,7 @@ def test_entropy_clamp_violation():
             "data": {"k1": 1, "k2": 2, "k3": 3, "k4": 4, "k5": 5, "k6": 6},
         },
     ]
-    # mean gradient será ~2.5
+    # mean gradient will be ~2.5
     controller = TemporalConsistencyController().clamp_entropy(1.0)
 
     with pytest.raises(EntropyViolation):

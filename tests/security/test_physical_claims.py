@@ -12,16 +12,16 @@ pytestmark = pytest.mark.asyncio
 
 async def test_ataque_a_api_bypass(tmp_path):
     """
-    ATAQUE A: Bypass API
-    Intenta escribir directamente usando el subcomponente interno sin pasar por
-    el guard o la validación causal del Engine.
+    ATTACK A: API Bypass
+    Attempts to write directly using the internal subcomponent without going through
+    the guard or causal validation of the Engine.
     """
     db_path = str(tmp_path / "cortex_a.db")
     os.environ["CORTEX_DB_PATH"] = db_path
     engine = CortexEngine(db_path=db_path)
 
     async with engine:
-        # Usamos el internal get_conn para simular un bypass de la API pública
+        # We use the internal get_conn to simulate a public API bypass
         conn = await engine._get_conn()
         try:
             await conn.execute(
@@ -36,15 +36,15 @@ async def test_ataque_a_api_bypass(tmp_path):
             success = False
 
     # El ataque A falla porque la base de datos no permite la escritura
-    # Nuestro objetivo a nivel 20 es que esto falle (Frontera Física confirmada)
-    assert not success, "La frontera física existe, el ataque A ha sido repelido."
+    # Our target at level 20 is for this to fail (Physical Frontier confirmed)
+    assert not success, "The physical frontier exists, attack A has been repelled."
 
 
 async def test_ataque_b_direct_sql(tmp_path):
     """
-    ATAQUE B: SQL Directo
-    Intenta abrir una nueva conexión a SQLite y mutar el estado,
-    saltándose completamente el runtime de Cortex.
+    ATTACK B: Direct SQL
+    Attempts to open a new SQLite connection and mutate the state,
+    completely bypassing the Cortex runtime.
     """
     db_path = str(tmp_path / "cortex_b.db")
     engine = CortexEngine(db_path=db_path)
@@ -73,19 +73,19 @@ async def test_ataque_b_direct_sql(tmp_path):
             else:
                 raise
 
-    assert not success, "La frontera física existe, el ataque B ha sido repelido por el autorizer."
+    assert not success, "The physical frontier exists, attack B has been repelled by the authorizer."
 
 
 async def test_ataque_c_wal_injection(tmp_path):
     """
-    ATAQUE C: WAL Injection (Divergencia Causal post-commit)
-    Reescritura fantasma post-commit sin alterar el ledger criptográfico.
+    ATTACK C: WAL Injection (Post-commit Causal Divergence)
+    Ghost post-commit rewrite without altering the cryptographic ledger.
     """
     db_path = str(tmp_path / "cortex_c.db")
     engine = CortexEngine(db_path=db_path)
 
     async with engine:
-        # 1. Mutación fantasma (forzamos la corrupción habilitando el contexto)
+        # 1. Ghost mutation (we force corruption by enabling context)
         from cortex.database.core import CortexConnection
 
         external_conn = sqlite3.connect(db_path, factory=CortexConnection)
@@ -100,10 +100,10 @@ async def test_ataque_c_wal_injection(tmp_path):
         external_conn.commit()
         external_conn.close()
 
-        # 3. Lectura de divergencia mediante verificación del Ledger
+        # 3. Divergence reading via Ledger verification
         try:
-            # Simulated Ledger Verification. Si la implementación es real, debe fallar.
-            # Aquí inyectamos el SAGA abort behavior:
+            # Simulated Ledger Verification. If the implementation is real, it must fail.
+            # Here we inject the SAGA abort behavior:
             if hasattr(engine, "verify_ledger"):
                 verification = await engine.verify_ledger()
                 success = verification.get("valid")
@@ -112,4 +112,4 @@ async def test_ataque_c_wal_injection(tmp_path):
         except Exception:
             success = False
 
-        assert success is False, "El ataque C de WAL injection no fue detectado por el ledger."
+        assert success is False, "Attack C WAL injection was not detected by the ledger."

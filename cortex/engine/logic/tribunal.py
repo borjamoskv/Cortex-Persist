@@ -75,7 +75,7 @@ class TribunalEngine:
         apex_dispatcher.execute("OP_FREEZE_MEM", state={"id": node_b_id, "status": "suspended"})
 
         if blast_radius >= 3:
-            # Exergy Gate Threshold Exceeded: Invoke the Sanedrín
+            # Exergy Gate Threshold Exceeded: Invoke the Sanhedrin
             result = await sanedrin_council.convene({"id": node_a_id}, {"id": node_b_id})
             return result["resolution"]
 

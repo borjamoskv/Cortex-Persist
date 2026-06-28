@@ -29,7 +29,7 @@ class InfluencerIngestRequest(BaseModel):
     cliche: str = Field(..., min_length=1, max_length=1024)
     verdict: str = Field(..., min_length=1, max_length=1024)
     territory: str = Field("ES", min_length=2, max_length=10)
-    reality_level: str = Field("C4-SINTÉTICO", min_length=2, max_length=30)
+    reality_level: str = Field("C4-SYNTHETIC", min_length=2, max_length=30)
 
 
 class InfluencerResponse(BaseModel):
@@ -118,7 +118,7 @@ async def list_influencers(
                         territory=data.get("territory", "ES"),
                         reality_level=data.get(
                             "reality_level",
-                            fact_dict.get("meta", {}).get("reality_level", "C4-SINTÉTICO"),
+                            fact_dict.get("meta", {}).get("reality_level", "C4-SYNTHETIC"),
                         ),
                         fact_id=fact_dict["id"],
                     )

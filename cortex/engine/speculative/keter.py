@@ -283,12 +283,12 @@ class KeterEngine:
                 import secrets
 
                 rng = secrets.SystemRandom()
-                # La ventana de caos crece fractalmente con la Proporción Áurea (Phi)
+                # The chaos window grows fractally with the Golden Ratio (Phi)
                 base_delay = BASE_BACKOFF**attempt
                 jitter = rng.uniform(0.1, 1.618 ** (attempt + 1))
                 delay = base_delay + jitter
                 logger.error(
-                    "❌ [KETER] Error en %s: %s. Reintento %d/%d en %.2fs",
+                    "❌ [KETER] Error in %s: %s. Retry %d/%d in %.2fs",
                     phase.__class__.__name__,
                     e,
                     attempt + 1,

@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class PhysicsContext:
-    """Contexto físico parametrizado para operación multi-planetaria."""
+    """Parameterized physical context for multi-planetary operation."""
 
     gravity: float = 9.8  # m/s² - Earth default
     day_seconds: float = 86400  # seconds - Earth default
@@ -26,7 +26,7 @@ class PhysicsContext:
     atm_pressure_kpa: float = 101.3  # atmospheric pressure
 
 
-# Presets Axiomáticos
+# Axiomatic Presets
 EARTH = PhysicsContext()
 
 MARS = PhysicsContext(

@@ -100,10 +100,10 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
                     if problem == "euclides":
                         hypothesis = x + y == y + x
                         result = attack_theorem(
-                            "Propiedad Conmutativa de la Adición Entera",
+                            "Commutative Property of Integer Addition",
                             hypothesis,
                         )
-                        return f"{'✅ DEMOSTRADO' if result else '❌ REFUTADO'}: {problem}"
+                        return f"{'✅ PROVED' if result else '❌ REFUTED'}: {problem}"
                     return f"❌ Theorem '{problem}' not in attack registry."
                 except ImportError:
                     return "❌ Z3 not installed."

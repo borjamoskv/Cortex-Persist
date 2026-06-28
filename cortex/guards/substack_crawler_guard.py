@@ -92,8 +92,8 @@ class SubstackCrawlerGuard:
                     f"{ts_delta_ms}ms is sub-human. Firewall scanner confirmed for {email}."
                 )
 
-        # 4. Fallback Aritmético (Si no hay ts_delta_ms)
-        # Bots abren repetidamente cada link incrustado para analizarlos en sandboxes
+        # 4. Arithmetic Fallback (If ts_delta_ms is not present)
+        # Bots repeatedly open each embedded link to analyze them in sandboxes
         if opens > 50 and clicks > 0 and abs(opens - clicks) <= 5:
             logger.error("Symmetrical engagement ratio anomaly detected for %s", email)
             raise ValueError(
@@ -101,7 +101,7 @@ class SubstackCrawlerGuard:
                 f"Identity '{email}' is operating a Link Scanner."
             )
 
-        # Si supera los filtros BFT, es un nodo humano SOTA
+        # If it passes the BFT filters, it is a SOTA human node
         return 1.0
 
     def enforce_saga_contract(self, subscriber_record: dict[str, Any]) -> dict[str, Any]:

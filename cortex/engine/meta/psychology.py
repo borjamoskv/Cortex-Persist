@@ -76,7 +76,7 @@ class PsychMedic:
             return {"action": "no-op"}
 
         logger.debug(
-            "Intervención sugerida para %s: %s",
+            "Suggested intervention for %s: %s",
             profile.agent_id,
             profile.state.name,
             extra={"source": "MEDIC"},
@@ -100,7 +100,7 @@ class PsychMedic:
             return {
                 "action": "RE_PRIME",
                 "reason": "Axiomatic drift",
-                "inject_rules": ["Ω₆: Zenón's Razor"],
+                "inject_rules": ["Ω₆: Zeno's Razor"],
             }
 
         return {"action": "MONITOR"}

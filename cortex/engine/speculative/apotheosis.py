@@ -135,7 +135,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
     _SLEEP_JITTER: float = 0.05
 
     async def _omniscience_loop(self) -> None:
-        """Ciclo infinito de latencia negativa con sueño adaptativo y hormonal."""
+        """Infinite loop of negative latency with adaptive and hormonal sleep."""
         import random as _random
 
         consecutive_clean = 0
@@ -171,7 +171,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
             from cortex.cli.bicameral import bicameral
 
             bicameral.log_bio(
-                f"Ciclo Ω. Entropía={entropy_found}. Sueño: {duration:.1f}s", signal="Ω"
+                f"Ω Cycle. Entropy={entropy_found}. Sleep: {duration:.1f}s", signal="Ω"
             )
             # Bypass sleep during high-adrenaline state
             if adrenaline > 0.8:
@@ -290,7 +290,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
             for p in parasites:
                 node_name = p["name"]
                 bicameral.log_motor(
-                    f"Poda Sináptica: {node_name} in {py_file.name}", action="PRUNE"
+                    f"Synaptic Pruning: {node_name} in {py_file.name}", action="PRUNE"
                 )
                 intent = (
                     f"Extraction Protocol: '{node_name}' in {py_file.name} is a Thermal Parasite."

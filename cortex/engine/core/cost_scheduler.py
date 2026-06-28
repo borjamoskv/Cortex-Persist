@@ -143,7 +143,7 @@ class ExergyCostScheduler:
             else:  # IDLE_STATE
                 config = {
                     "model": "3.1 Flash-Lite",
-                    "thinking": "Estándar",
+                    "thinking": "Standard",
                     "epistemology": "C4-SIM",
                     "max_tokens": 4096,
                 }

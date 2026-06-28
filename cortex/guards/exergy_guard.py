@@ -37,6 +37,17 @@ _DECORATIVE_MARKERS = frozenset(
         "no dudes en",
         "importante notar",
         "tener en cuenta",
+        "of course",
+        "here you go",
+        "as an ai language model",
+        "hope it is useful",
+        "in conclusion",
+        "furthermore",
+        "here you have",
+        "understood",
+        "hope this is useful",
+        "proceed to explain",
+        "helpful to summarize",
     }
 )
 

@@ -1,8 +1,12 @@
 import glob
 import json
+import logging
 import os
 
 import yaml
+
+logger = logging.getLogger(__name__)
+
 
 
 def parse_markdown_table(filepath):
@@ -27,11 +31,11 @@ def parse_markdown_table(filepath):
                     if entity.get('ID'):
                         entities.append(entity)
     except Exception as e:
-        print(f"Error parsing {filepath}: {e}")
+        logger.error(f"Error parsing {filepath}: {e}")
     return entities
 
 def compile_ontology(primitives_dir, output_json, output_yaml):
-    print("[C5-REAL] Iniciando Ontology Compiler...")
+    logger.info("[C5-REAL] Iniciando Ontology Compiler...")
     
     ontology = {
         'M1_PRIMITIVES': [],
@@ -60,7 +64,7 @@ def compile_ontology(primitives_dir, output_json, output_yaml):
     for k, v in ontology.items():
         # Sort by ID
         v.sort(key=lambda x: x.get('ID', ''))
-        print(f"Compiled {len(v)} entities for {k}")
+        logger.info(f"Compiled {len(v)} entities for {k}")
         
     with open(output_json, 'w', encoding='utf-8') as f:
         json.dump(ontology, f, indent=2, ensure_ascii=False)
@@ -68,9 +72,10 @@ def compile_ontology(primitives_dir, output_json, output_yaml):
     with open(output_yaml, 'w', encoding='utf-8') as f:
         yaml.dump(ontology, f, allow_unicode=True, sort_keys=False)
         
-    print(f"[C5-REAL] Ontología cristalizada en JSON y YAML en {primitives_dir}")
+    logger.info(f"[C5-REAL] Ontology crystallized in JSON and YAML at {primitives_dir}")
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
     PRIMITIVES_DIR = "cortex/agents/primitives"
     OUTPUT_JSON = os.path.join(PRIMITIVES_DIR, "CORTEX_ONTOLOGY.json")
     OUTPUT_YAML = os.path.join(PRIMITIVES_DIR, "CORTEX_ONTOLOGY.yaml")

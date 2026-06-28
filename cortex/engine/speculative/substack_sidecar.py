@@ -5,7 +5,7 @@ from pathlib import Path
 
 from cortex.services.email import send_reengagement_email
 
-# Configuración de Logging
+# Logging Configuration
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("CausalScheduler")
 
@@ -14,16 +14,16 @@ CORTEX_DB_PATH = Path("~/10_PROJECTS/cortex-persist/cortex_data.db")
 
 def evaluate_retention(dry_run=True):
     """
-    Escanea la base de datos local y evalúa el 'last_sign_in_at' o 'days_active'.
-    Si un nodo de élite lleva inactivo > 15 días, dispara re-engagement.
+    Scans the local database and evaluates 'last_sign_in_at' or 'days_active'.
+    If an elite node has been inactive > 15 days, triggers re-engagement.
     """
-    logger.info("Iniciando Causal Scheduler (Evaluación de Retención)...")
+    logger.info("Starting Causal Scheduler (Retention Evaluation)...")
 
     conn = sqlite3.connect(CORTEX_DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
-    # Extraer Élite en riesgo (days_active > 15 y que sean import/music_media)
+    # Extract Elite at risk (days_active > 15 and of type import/music_media)
     cursor.execute("""
         SELECT email, name, days_active, opens, cluster 
         FROM audience 
@@ -34,31 +34,31 @@ def evaluate_retention(dry_run=True):
 
     risk_nodes = cursor.fetchall()
 
-    logger.info(f"Nodos de Élite evaluados: {len(risk_nodes)} en riesgo inminente de Churn.")
+    logger.info(f"Elite Nodes evaluated: {len(risk_nodes)} in imminent risk of Churn.")
 
     for node in risk_nodes:
         logger.info(
-            f"[TAINT: RISK_OF_CHURN] {node['name']} ({node['email']}) - {node['days_active']} días sin actividad. Aperturas: {node['opens']}."
+            f"[TAINT: RISK_OF_CHURN] {node['name']} ({node['email']}) - {node['days_active']} days without activity. Opens: {node['opens']}."
         )
 
         if not dry_run:
-            # Aquí irá la integración de Mailgun / SMTP local
-            logger.warning(f"DISPARANDO TRANSSACCIÓN A: {node['email']}")
+            # Here Mailgun / local SMTP integration will go
+            logger.warning(f"TRIGGERING TRANSACTION TO: {node['email']}")
 
-            # Conexión resuelta a cortex.services.email
+            # Connection resolved to cortex.services.email
             send_reengagement_email(node["email"], node["cluster"])
 
-            # Actualizar estado para no bombardear
+            # Update status to prevent spamming
             cursor.execute(
                 "UPDATE audience SET status = 'churn_mitigated' WHERE email = ?", (node["email"],)
             )
 
-    # Extraer Volumen puro (Para ataques de Reciprocidad Dirigida)
+    # Extract pure Volume (For Directed Reciprocity attacks)
     cursor.execute("""
         SELECT count(*) as total FROM audience WHERE source = 'global_enriched'
     """)
     volume_total = cursor.fetchone()["total"]
-    logger.info(f"Nodos de Volumen disponibles para Reciprocidad Dirigida: {volume_total}")
+    logger.info(f"Volume Nodes available for Directed Reciprocity: {volume_total}")
 
     if not dry_run:
         conn.commit()
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--execute",
         action="store_true",
-        help="Desactiva el dry-run y ejecuta mutaciones de estado/envíos",
+        help="Deactivates dry-run and executes state mutations/sends",
     )
 
     args = parser.parse_args()

@@ -65,13 +65,13 @@ class AnalyzerMixin:
         eviction_id = audit.get("eviction_id", 0)
         reason = audit.get("reason", "unknown")
 
-        # A. ¿Fue el key requerido de nuevo?
+        # A. Was the key required again?
         was_regrettable = await self._detect_cache_miss_after_eviction(
             target_key,
             record["ts"],
         )
 
-        # B. Peso causal + profundidad de cadena
+        # B. Causal weight + chain depth
         causal_weight, causal_depth = await self._estimate_causal_weight(
             target_key,
         )

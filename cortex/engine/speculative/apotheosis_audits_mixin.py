@@ -92,14 +92,14 @@ class ApotheosisAuditsMixin:
             logger.error("[METAMEMORY] Audit failure: %s", e)
 
     async def _oracle_audit(self) -> None:
-        """Ejecuta la auditoría de olvido en segundo plano (Ω₅)."""
+        """Executes forgetting audit in the background (Ω₅)."""
         if not getattr(self, "_cortex", None):
             return
         try:
             from cortex.engine.meta.forgetting_oracle import ForgettingOracle
 
             if getattr(self, "_oracle", None) is None:
-                # Obtener referencia al caché del motor optimizado si existe
+                # Get reference to the optimized engine cache if it exists
                 cache_ref = getattr(self._cortex, "_cache", None)
                 # Pass L1 reference so Oracle reads real access frequency data,
                 # not the transaction-count approximation ghost (Ω₁ + Ω₂).

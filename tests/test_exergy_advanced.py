@@ -43,7 +43,7 @@ def test_exergy_guard_rejection():
     # Should raise ValueError for padding
     with pytest.raises(ValueError, match="Thermodynamic Violation"):
         guard.check_thermodynamic_yield(
-            "Hola! Por supuesto, te daré la información. Es muy importante notar que...",
+            "Hello! Of course, I will give you the information. It is very important to note that...",
             "test_proj",
             "decision",
         )

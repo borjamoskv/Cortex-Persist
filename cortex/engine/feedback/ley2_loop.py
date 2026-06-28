@@ -17,39 +17,39 @@ logger = logging.getLogger("cortex.engine.feedback.ley2_loop")
 
 
 class DummyScheduler:
-    """Mock scheduler para cristalizar el hook mientras se conecta al scheduler real."""
+    """Mock scheduler to crystallize the hook while connecting to the real scheduler."""
 
     def adjust_weight(self, lineage: str, delta: float) -> None:
         logger.debug(f"[Ley 2 Loop] Scheduler weight adjusted for {lineage}: delta={delta:.4f}")
 
 
 class Ley2Loop:
-    """Cierra el bucle termodinámico inyectando presión negativa a caminos caros."""
+    """Closes the thermodynamic loop by injecting negative pressure into expensive paths."""
 
     def __init__(self, ledger: ExecutionTraceLedger, scheduler: Any = None):
         self.ledger = ledger
         self.scheduler = scheduler or DummyScheduler()
 
     async def apply_feedback(self, tenant_id: str = "default") -> None:
-        """Extrae el gradiente termodinámico y re-inyecta el bias."""
-        # 1. Obtener trazas recientes (limit = 500)
+        """Extracts the thermodynamic gradient and re-injects the bias."""
+        # 1. Get recent traces (limit = 500)
         traces = await self.ledger.get_recent(limit=500, tenant_id=tenant_id)
         if not traces:
             return
 
         pressure_map = {}
 
-        # 2. Agrupar por lineage primario
+        # 2. Group by primary lineage
         for t in traces:
             lineages = t.get("lineage", [])
             if not lineages:
                 continue
 
-            # Usar el root/último lineage del array como key
+            # Use the root/last lineage of the array as key
             key = lineages[-1] if isinstance(lineages, list) else str(lineages)
             pressure_map.setdefault(key, []).append(t["cost"])
 
-        # 3. Calcular mediana y aplicar damping para cold-start y ataques
+        # 3. Calculate median and apply damping for cold-start and attacks
         import statistics
 
         weights = {}
@@ -57,7 +57,7 @@ class Ley2Loop:
             cost_median = statistics.median(v)
             weights[k] = cost_median
 
-        # 4. Re-inyectar bias en el scheduler
+        # 4. Re-inject bias in the scheduler
         for lineage, weight in weights.items():
             # Oscillation damping (0.85)
             delta = -weight * 0.85

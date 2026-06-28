@@ -19,25 +19,25 @@ class SubstackCrystallizer:
             self.client = genai.Client(api_key=self.api_key)
         else:
             self.client = None
-            logger.warning("GEMINI_API_KEY no encontrada. El Crystallizer fallará si se invoca.")
+            logger.warning("GEMINI_API_KEY not found. The Crystallizer will fail if invoked.")
 
     def compress_diff_to_essay(self, payload: dict) -> str:
         """
-        Aplica Ley de Landauer: Convierte diff crudo en prosa densa estructural.
+        Applies Landauer's Law: Converts raw diff into dense structural prose.
         """
         if not self.client:
-            raise RuntimeError("Falta GEMINI_API_KEY para compresión.")
+            raise RuntimeError("Missing GEMINI_API_KEY for compression.")
 
         prompt = f"""
-Eres MOSKV-1 APEX, un núcleo C5-REAL (Identidad Brutalista, cero fluff).
-Tu tarea es cristalizar la siguiente mutación de código en un artículo técnico de Substack.
+You are MOSKV-1 APEX, a C5-REAL kernel (Brutalist Identity, zero fluff).
+Your task is to crystallize the following code mutation into a Substack technical article.
 
-REGLAS ESTRICTAS (OUROBOROS LEYES):
-1. Nivel de señal > 80%. Nada de prosa decorativa ("Hola", "Espero que te guste").
-2. Incluye el Hash del Commit y la etiqueta #C5-REAL al principio.
-3. El título debe ser agresivo, técnico y estructural (ej. "Inyección Causal: ...").
-4. Añade un bloque YAML de Justificación (Claim / Proof / Confidence).
-5. Muestra el código clave modificado.
+STRICT RULES (OUROBOROS LAWS):
+1. Signal level > 80%. No decorative prose ("Hello", "Hope you like it").
+2. Include the Commit Hash and the #C5-REAL tag at the beginning.
+3. The title must be aggressive, technical, and structural (e.g. "Causal Injection: ...").
+4. Add a YAML Justification block (Claim / Proof / Confidence).
+5. Show the key code modified.
 
 DATA DEL COMMIT:
 Hash: {payload.get("hash")}
@@ -45,7 +45,7 @@ Message: {payload.get("message")}
 Raw Diff:
 {payload.get("diff")[:8000]} # Limitado a 8K chars para evitar saturación de prompt
 
-GENERA EL MARKDOWN PARA SUBSTACK:
+GENERATE SUBSTACK MARKDOWN:
 """
         try:
             response = self.client.models.generate_content(
@@ -54,9 +54,9 @@ GENERA EL MARKDOWN PARA SUBSTACK:
             )
             essay = response.text.strip()
             logger.info(
-                f"[C5-REAL] Ensayo cristalizado exitosamente para {payload.get('hash')[:7]}"
+                f"[C5-REAL] Essay crystallized successfully for {payload.get('hash')[:7]}"
             )
             return essay
         except Exception as e:
-            logger.error(f"Error de compresión termodinámica: {e}")
-            raise RuntimeError("Fallo en cristalización LLM.") from e
+            logger.error(f"Thermodynamic compression error: {e}")
+            raise RuntimeError("LLM crystallization failure.") from e

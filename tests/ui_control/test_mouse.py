@@ -71,7 +71,7 @@ class TestMouseDrag:
 
     @pytest.mark.asyncio
     async def test_drag(self, mouse):
-        """Drag-and-drop con interpolación."""
+        """Drag-and-drop with interpolation."""
         with patch("cortex_extensions.ui_control.mouse.CG") as mock_cg:
             mock_cg.kCGMouseButtonLeft = 0
             mock_cg.kCGEventLeftMouseDown = 1
@@ -86,7 +86,7 @@ class TestMouseDrag:
 
     @pytest.mark.asyncio
     async def test_drag_and_drop(self, mouse):
-        """drag_and_drop delega a drag con parámetros convertidos."""
+        """drag_and_drop delegates to drag with converted parameters."""
         with patch.object(mouse, "drag", new_callable=AsyncMock) as mock_drag:
             from cortex.extensions.ui_control.models import InteractionResult
 

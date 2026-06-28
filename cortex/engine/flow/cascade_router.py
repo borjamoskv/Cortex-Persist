@@ -168,12 +168,12 @@ class CascadeRouter:
                                     "UPDATE tasks SET status=? WHERE id=?", (status, task_id)
                                 )
                             except sqlite3.OperationalError:
-                                pass  # Ignorar si la tabla tasks no tiene esa estructura
+                                pass  # Ignore if the tasks table does not have that structure
                             conn.commit()
                             conn.close()
                     except (ValueError, TypeError, KeyError, OSError, RuntimeError) as db_e:
                         logger.error(
-                            f"⚠️ [ROUTER] Falló la persistencia en BD para indexación: {db_e}"
+                            f"⚠️ [ROUTER] DB persistence failed for indexing: {db_e}"
                         )
 
                 if process.returncode != 0:
@@ -182,7 +182,7 @@ class CascadeRouter:
                 return stdout
 
             except FileNotFoundError:
-                logger.error("🔌 [ROUTER] CLI no encontrado en PATH. Activando fallback...")
+                logger.error("🔌 [ROUTER] CLI not found in PATH. Activating fallback...")
                 return self.fallback_response(engine, prompt)
             except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
                 logger.error(f"🔥 [ROUTER] Subprocess execution exception: {e}")

@@ -362,7 +362,6 @@ class InferenceEngine:
                 continue
 
             from cortex.config import DB_PATH
-
             from cortex.guards.contradiction_guard import detect_contradictions
 
             # FALSATION PROTOCOL (L7): Prevent entropy leaks by culling contradictory derivations

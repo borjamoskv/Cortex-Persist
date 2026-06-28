@@ -42,7 +42,7 @@ class ConnectionMixin:
 
     @asynccontextmanager
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:
-        """Proporciona una sesión transaccional (conexión) válida."""
+        """Provides a valid transactional session (connection)."""
         if hasattr(self, "_pool") and self._pool is not None:  # pyright: ignore[reportAttributeAccessIssue]
             async with self._pool.acquire() as conn:  # pyright: ignore[reportAttributeAccessIssue]
                 yield conn
@@ -131,7 +131,7 @@ class ConnectionMixin:
             if self._schema_ready:
                 return
 
-            # Autorizar migraciones físicamente
+            # Physically authorize migrations
             if hasattr(conn._conn, "authorize_causal_writes"):
                 getattr(conn._conn, "authorize_causal_writes")()  # noqa: B009
             try:
@@ -214,7 +214,7 @@ class ConnectionMixin:
         return conn
 
     def _get_sync_conn(self):
-        """Devuelve una conexión síncrona para procesos bloqueantes."""
+        """Returns a synchronous connection for blocking processes."""
 
         conn = connect(str(self._db_path), row_factory=sqlite3.Row)  # pyright: ignore[reportAttributeAccessIssue]
         try:

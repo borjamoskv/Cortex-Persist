@@ -26,7 +26,7 @@ def test_rust_bridge_generation():
         model_path="dummy_model.onnx", tokenizer_path="dummy_tokenizer.json"
     )
 
-    texts = ["Cero anergía es la muerte", "El estado 99.99 ya es la invariante"]
+    texts = ["Zero anergy is death", "The 99.99 state is already the invariant"]
 
     embeddings = engine.generate(texts)
 

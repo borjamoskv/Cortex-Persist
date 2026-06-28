@@ -55,7 +55,7 @@ async def client(mock_engine):
 @pytest.mark.asyncio
 async def test_psychohistory_simulation_api(client, mock_engine):
     payload = {
-        "scenario_name": "Apagón Satelital Test",
+        "scenario_name": "Satellite Blackout Test",
         "simulated_years": 10,
         "project": "TEST_PROJECT",
     }
@@ -64,7 +64,7 @@ async def test_psychohistory_simulation_api(client, mock_engine):
     assert resp.status_code == 200
 
     data = resp.json()
-    assert data["scenario"] == "Apagón Satelital Test"
+    assert data["scenario"] == "Satellite Blackout Test"
     assert data["simulated_years"] == 10
     assert data["active_agents"] == len(AGENT_BIASES)  # Should be 50
     assert data["contingency_crystal"] == "O(1) Contingency Crystal"
@@ -79,7 +79,7 @@ async def test_psychohistory_simulation_api(client, mock_engine):
     assert store_kwargs["fact_type"] == "bridge"
     assert store_kwargs["confidence"] == "C5"
     assert store_kwargs["source"] == "swarm:psychohistory"
-    assert store_kwargs["meta"]["scenario"] == "Apagón Satelital Test"
+    assert store_kwargs["meta"]["scenario"] == "Satellite Blackout Test"
 
 
 @pytest.mark.asyncio

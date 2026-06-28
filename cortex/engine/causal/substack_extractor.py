@@ -19,23 +19,23 @@ class SubstackExtractor:
         Extrae el SSOT (Single Source of Truth) de un commit.
         """
         try:
-            # Obtener el mensaje del commit
+            # Get the commit message
             msg_cmd = ["git", "show", "-s", "--format=%B", commit_hash]
             msg_result = subprocess.run(
                 msg_cmd, cwd=self.repo_path, capture_output=True, text=True, check=True
             )
             commit_msg = msg_result.stdout.strip()
 
-            # Obtener el diff completo
+            # Get the full diff
             diff_cmd = ["git", "show", commit_hash]
             diff_result = subprocess.run(
                 diff_cmd, cwd=self.repo_path, capture_output=True, text=True, check=True
             )
             raw_diff = diff_result.stdout.strip()
 
-            logger.info(f"Payload causal extraído para el nodo: {commit_hash[:7]}")
+            logger.info(f"Causal payload extracted for node: {commit_hash[:7]}")
 
             return {"hash": commit_hash, "message": commit_msg, "diff": raw_diff}
         except subprocess.CalledProcessError as e:
-            logger.error(f"Fallo al extraer el hash {commit_hash}: {e.stderr}")
-            raise RuntimeError(f"Fallo de extracción C5-REAL para el hash {commit_hash}") from e
+            logger.error(f"Failed to extract hash {commit_hash}: {e.stderr}")
+            raise RuntimeError(f"C5-REAL extraction failure for hash {commit_hash}") from e

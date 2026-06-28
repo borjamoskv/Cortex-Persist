@@ -149,38 +149,38 @@ async def distill_sovereign_memo(
     el diferenciador sobre instruction grounding estándar.
     """
     logger.info(
-        "🟢 [SYNTHESIS] Cristalización via Sovereign Router (Intent: %s)...",
+        "🟢 [SYNTHESIS] Crystallization via Sovereign Router (Intent: %s)...",
         intent[:60] if intent else "GENERAL",
     )
 
     router = _get_synthesis_router()
 
-    # ── Intent Directive Láser (El Diferenciador de CORTEX) ──
+    # ── Laser Intent Directive (The CORTEX Differentiator) ──
     if intent:
         intent_directive = (
-            f"ENFOQUE LÁSER EN EL INTENT DEL AGENTE: '{intent}'. "
-            "Filtra cualquier elemento que no resuelva directa o indirectamente esta necesidad."
+            f"LASER FOCUS ON THE AGENT INTENT: '{intent}'. "
+            "Filter out any elements that do not directly or indirectly resolve this need."
         )
     else:
-        intent_directive = "ENFOQUE GENERAL: Extracción de todos los patrones útiles."
+        intent_directive = "ENFOQUE GENERAL / GENERAL FOCUS: Extraction of all useful patterns."
 
     system_prompt = (
-        "ERES AUTODIDACT-Ω. MODO: CRISTALIZACIÓN DE DIAMANTE (130/100).\n"
-        "Tu directiva es convertir radiación entrópica en un fragmento "
-        "de conocimiento soberano.\n"
+        "YOU ARE AUTODIDACT-Ω. MODE: DIAMOND CRYSTALLIZATION (130/100).\n"
+        "Your directive is to convert entropic radiation into a fragment "
+        "of sovereign knowledge.\n"
         f"{intent_directive}\n\n"
-        "LEYES DE SÍNTESIS:\n"
-        "1. ZERO FLUFF: Elimina ruidos de navegación, anuncios y redundancias.\n"
-        "2. ENTITY EXTRACTION: Identifica conceptos técnicos clave "
-        "(G-Nodes), versiones y protocolos.\n"
-        "3. AXIOMATIC RESONANCE: Describe cómo esta información expande "
-        "los horizontes del sistema.\n\n"
-        "Responde en formato JSON estricto:\n"
+        "SYNTHESIS LAWS:\n"
+        "1. ZERO FLUFF: Eliminate navigation noise, ads, and redundancies.\n"
+        "2. ENTITY EXTRACTION: Identify key technical concepts "
+        "(G-Nodes), versions and protocols.\n"
+        "3. AXIOMATIC RESONANCE: Describe how this information expands "
+        "the horizons of the system.\n\n"
+        "Respond in strict JSON format:\n"
         "{\n"
-        '    "content_markdown": "Texto destilado denso y técnico.",\n'
-        '    "entities": ["Entidad A", "Protocolo B"],\n'
-        '    "metadatos_extraidos": {"complexity": "tierra", "version": "1.0"},\n'
-        '    "resonancia_axiomatica": "Impacto en Ω₀-Ω₆"\n'
+        '    "content_markdown": "Dense and technical distilled text.",\n'
+        '    "entities": ["Entity A", "Protocol B"],\n'
+        '    "metadatos_extraidos": {"complexity": "land", "version": "1.0"},\n'
+        '    "axiomatic_resonance": "Impact on Ω₀-Ω₆"\n'
         "}"
     )
 
@@ -213,23 +213,23 @@ async def distill_sovereign_memo(
         return {
             "content_markdown": text_content,
             "entities": [],
-            "resonancia_axiomatica": "Fail JSON",
+            "axiomatic_resonance": "Fail JSON",
         }
     except Exception as e:  # noqa: BLE001 - parsing failure must fall back to raw content
-        logger.error("Error parseando cristal: %s", e)
+        logger.error("Error parsing crystal: %s", e)
         return {"content_markdown": raw_data[:FALLBACK_CONTENT_LENGTH], "error": str(e)}
 
 
 # ==============================================================================
-# 3. EL PROTOCOLO TERMINAL (Integración AUTODIDACT-Ω)
+# 3. THE TERMINAL PROTOCOL (AUTODIDACT-Ω Integration)
 # ==============================================================================
 async def execute_cognitive_synthesis(
     raw_data: str, source: str, force: bool = False, intent: str = ""
 ) -> str:
-    """Final del Pipeline: Verifica, Destila, Indexa."""
+    """Pipeline End: Verify, Distill, Index."""
     is_redundant, existing_id = await check_semantic_redundancy(raw_data)
     if is_redundant and not force:
-        logger.info("❄️ Isoterma detectada: %s", existing_id)
+        logger.info("❄️ Isotherm detected: %s", existing_id)
         return existing_id or ""
 
     cristal_raw = await distill_sovereign_memo(raw_data, source, intent)
@@ -241,15 +241,15 @@ async def execute_cognitive_synthesis(
     if isinstance(cristal, dict):
         memo_content: str = cristal.get("content_markdown", "")
         entities: list[str] = cristal.get("entities", [])  # type: ignore[type-error]
-        resonancia: str = cristal.get("resonancia_axiomatica", "")
+        resonancia: str = cristal.get("axiomatic_resonance", "")
     else:
         memo_content = str(cristal)
         entities = []
         resonancia = ""
 
     bytes_in, bytes_out = len(raw_data), len(memo_content)
-    rendimiento = (1 - (bytes_out / bytes_in)) * 100 if bytes_in > 0 else 0
-    logger.info("✅ Destilación: %.1f%% ruido eliminado. Entidades: %d", rendimiento, len(entities))
+    yield_efficiency = (1 - (bytes_out / bytes_in)) * 100 if bytes_in > 0 else 0
+    logger.info("✅ Distillation: %.1f%% noise removed. Entities: %d", yield_efficiency, len(entities))
 
     # ── EPISTEMIC CONTRADICTION GUARD (Axioma Ω₁) ──
     from cortex.guards.contradiction_guard import detect_contradictions
@@ -260,14 +260,14 @@ async def execute_cognitive_synthesis(
     )
     if conflict_report.has_conflicts and conflict_report.severity == "high":
         logger.error(
-            "🛑 [EPISTEMIC SHOCK] Autodidact-Ω generó una aserción que contradice "
-            "frontalmente la memoria persistida (C5 Bypass Intercepted)."
+            "🛑 [EPISTEMIC SHOCK] Autodidact-Ω generated an assertion that directly "
+            "contradicts the persisted memory (C5 Bypass Intercepted)."
         )
         for conflict in conflict_report.candidates[:3]:
             logger.error(
-                "   Contradicción (score: %.3f) -> %s", conflict.overlap_score, conflict.fact_id
+                "   Contradiction (score: %.3f) -> %s", conflict.overlap_score, conflict.fact_id
             )
-        logger.error("Abortando cristalización para preservar integridad termodinámica del Tensor.")
+        logger.error("Aborting crystallization to preserve thermodynamic integrity of the Tensor.")
         return f"REJECTED_EPISTEMIC_CONTRADICTION: {conflict_report.candidates[0].fact_id}"
 
     embed_result = await generate_cortex_embedding(memo_content)
@@ -276,7 +276,7 @@ async def execute_cognitive_synthesis(
     else:
         base_embedding = await encode_engine.encode(memo_content)
 
-    # Inyección Axioma Ω₂ + TurboQuant (arXiv:2504.19874)
+    # Ingesting Axiom Ω₂ + TurboQuant (arXiv:2504.19874)
     final_embedding = optimize_vector_qjl(base_embedding, bits=3.5)
 
     memo_id = f"MEMO_{os.urandom(4).hex().upper()}"
@@ -301,5 +301,5 @@ async def execute_cognitive_synthesis(
     )
 
     await vector_db.memorize(fact)
-    logger.info("✨ Singularidad Cognitiva grabada: %s", memo_id)
+    logger.info("✨ Cognitive Singularity written: %s", memo_id)
     return memo_id

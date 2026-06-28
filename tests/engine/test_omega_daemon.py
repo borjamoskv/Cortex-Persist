@@ -27,7 +27,7 @@ async def test_omega_kernel_hibernation():
 
     kernel = OmegaKernel(tick_rate_seconds=1)
 
-    # Simular una carga masiva de entropía
+    # Simulate a massive load of entropy
     kernel.guard.consume(Decimal("1000.0"))  # Dejar exergía a 0
     assert kernel.guard.current_exergy == Decimal("0.0")
 
@@ -38,8 +38,8 @@ async def test_omega_kernel_hibernation():
 
     kernel.sensor.scan = mock_scan
 
-    # Ejecutamos un latido
+    # We execute a heartbeat
     await kernel._metabolize()
 
-    # Verificamos que la exergía no bajó de 0 y el sistema no crashó
+    # We verify that exergy did not fall below 0 and the system did not crash
     assert kernel.guard.current_exergy == Decimal("0.0")

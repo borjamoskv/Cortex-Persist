@@ -269,7 +269,7 @@ async def _apply_bridge_guard(conn, content, project, tenant_id, fact_type):
         # Thermodynamic pointer (zero-entropy)
         content = f"NEXUS_SYMLINK:{source_hash}"
         
-        # Validar usando el contenido adaptado original (para no romper reglas de longitud y semántica)
+        # Validate using the original adapted content (to avoid breaking length and semantic rules)
         bridge_eval_content = adaptation
         if "→" not in adaptation and "->" not in adaptation:
             bridge_eval_content = f"Pattern from {source_proj} → {project}. Adaptation: {adaptation}"

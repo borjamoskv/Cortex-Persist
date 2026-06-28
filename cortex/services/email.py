@@ -97,17 +97,17 @@ class CortexEmailTransport:
             success = await self._dispatch_mailgun(recipient, subject, body)
         else:
             # Dry-run
-            logger.info("[DRY-RUN] Enviando email a %s (Subject: %s)", recipient, subject)
+            logger.info("[DRY-RUN] Sending email to %s (Subject: %s)", recipient, subject)
             success = True
 
         return success
 
 
-# Mantener retrocompatibilidad para scripts sincrónicos antiguos (deprecated)
+# Maintain backward compatibility for old synchronous scripts (deprecated)
 def send_reengagement_email(email: str, cluster: str) -> bool:
     """
     Mock implementation of email service (Deprecated).
     Use CortexEmailTransport.send_email instead for C5-REAL mode.
     """
-    logger.info("Enviando email de re-engagement a %s (Cluster: %s) [DEPRECATED]", email, cluster)
+    logger.info("Sending re-engagement email to %s (Cluster: %s) [DEPRECATED]", email, cluster)
     return True

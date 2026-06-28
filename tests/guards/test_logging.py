@@ -29,7 +29,7 @@ async def test_verify_seal_printer_logging(mock_cache):
 
         # Verify seal initialization was called
         mock_printer.seal.assert_called_with(
-            1, "AX-IV Cognición Termodinámica", "Code Quality (Ruff + LOC ≤700)"
+            1, "AX-IV Thermodynamic Cognition", "Code Quality (Ruff + LOC ≤700)"
         )
 
         # Verify success message for Ruff

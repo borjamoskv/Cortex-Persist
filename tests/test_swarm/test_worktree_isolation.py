@@ -8,9 +8,9 @@ from cortex.extensions.swarm.worktree_isolation import isolated_worktree
 
 @pytest.mark.asyncio
 async def test_isolated_worktree_lifecycle(tmp_path):
-    """Prueba que el ciclo térmodinámico de creación y limpieza del worktree funciona."""
-    # Como esta prueba se corre dentro de cortex que es un repo git válido,
-    # la comprobación funcionará
+    """Tests that the thermodynamic creation and cleanup cycle of the worktree works."""
+    # Since this test runs inside cortex which is a valid git repo,
+    # the check will work
     branch_name = "test/entropy-zero-agent-branch"
     base_target = tmp_path / "worktrees"
 
@@ -23,13 +23,13 @@ async def test_isolated_worktree_lifecycle(tmp_path):
         test_file.write_text("Sovereign mutation")
         assert test_file.exists()
 
-    # Fuera del context manager, el worktree debió ser aniquilado
+    # Outside the context manager, the worktree must have been annihilated
     assert not worktree_path.exists()
 
 
 @pytest.mark.asyncio
 async def test_isolated_worktree_exception_cleanup(tmp_path):
-    """Garantiza la limpieza Anti-basura O(1) incluso si el agente explota desde dentro."""
+    """Guarantees O(1) Anti-garbage cleanup even if the agent explodes from within."""
     branch_name = "test/entropy-zero-error-branch"
     base_target = tmp_path / "worktrees_err"
     worktree_ref = None
@@ -44,6 +44,6 @@ async def test_isolated_worktree_exception_cleanup(tmp_path):
 
     # Catch the expected error
 
-    # Aniquilación termodinámica confirmada
+    # Thermodynamic annihilation confirmed
     assert worktree_ref is not None
     assert not worktree_ref.exists()

@@ -115,6 +115,7 @@ class ComplianceVerifier:
             # Verify the signature over the entry_hash directly as ledger.py does
             try:
                 import cryptography.hazmat.primitives.asymmetric.ed25519 as ed25519
+                from cryptography.exceptions import InvalidSignature
                 from cryptography.hazmat.primitives import serialization
 
                 pub_bytes = base64.b64decode(self.public_key_b64)
@@ -124,7 +125,7 @@ class ComplianceVerifier:
                     public_key = serialization.load_ssh_public_key(pub_bytes)
 
                 public_key.verify(sig_bytes, entry_hash.encode())  # type: ignore
-            except (ValueError, TypeError, OSError, KeyError):
+            except (InvalidSignature, ValueError, TypeError, OSError, KeyError):
                 return {
                     "status": "CRITICAL_TAMPER_DETECTED",
                     "reason": f"Signature mismatch for batch starting at {rows[0]['audit_id']}. Ledger forged.",

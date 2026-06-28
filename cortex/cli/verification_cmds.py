@@ -23,13 +23,13 @@ def verify_files_cmd(files: tuple[str, ...]) -> None:
     all_valid = True
 
     table = Table(
-        title="Resultados de Verificación Formal (Z3 + AST)",
+        title="Formal Verification Results (Z3 + AST)",
         show_header=True,
         header_style="bold magenta",
     )
-    table.add_column("Archivo", style="cyan")
-    table.add_column("Resultado", style="bold")
-    table.add_column("Detalles de Violación", style="red")
+    table.add_column("File", style="cyan")
+    table.add_column("Result", style="bold")
+    table.add_column("Violation Details", style="red")
 
     for file_path in files:
         if not file_path.endswith(".py"):
@@ -50,26 +50,26 @@ def verify_files_cmd(files: tuple[str, ...]) -> None:
                 table.add_row(file_path, "[red]FAILED[/]", violations_str)
         except (ValueError, TypeError, OSError, KeyError) as e:
             all_valid = False
-            table.add_row(file_path, "[red]CRASHED[/]", f"Error de lectura/procesamiento: {str(e)}")
+            table.add_row(file_path, "[red]CRASHED[/]", f"Read/processing error: {str(e)}")
 
     console.print(table)
 
     if not all_valid:
-        console.print("\n[bold red]❌ FALLÓ LA VERIFICACIÓN FORMAL. Bloqueando integración.[/]")
+        console.print("\n[bold red]❌ FORMAL VERIFICATION FAILED. Blocking integration.[/]")
         raise click.exceptions.Exit(1)
 
-    console.print("\n[bold green]✓ VERIFICACIÓN FORMAL COMPLETADA CON ÉXITO.[/]")
+    console.print("\n[bold green]✓ FORMAL VERIFICATION COMPLETED SUCCESSFULLY.[/]")
 
 
 @cli.command("verify-ledger")
 @click.option("--db-path", default=None, help="Path to the cortex SQLite DB")
 def verify_ledger_cmd(db_path: str | None) -> None:
-    """Verifica criptográficamente la integridad offline del CORTEX Ledger (H5.1)."""
+    """Cryptographically verifies the offline integrity of the CORTEX Ledger (H5.1)."""
     import asyncio
 
     from cortex.compliance.tracker import ComplianceTracker
 
-    console.print("[bold cyan]Iniciando auditoría offline del Sovereign Ledger...[/]")
+    console.print("[bold cyan]Starting offline audit of the Sovereign Ledger...[/]")
 
     kwargs = {}
     if db_path:
@@ -80,24 +80,24 @@ def verify_ledger_cmd(db_path: str | None) -> None:
         result = asyncio.run(tracker.verify_chain_async())
 
         table = Table(title="Sovereign Ledger Audit", show_header=True)
-        table.add_column("Métrica", style="cyan")
-        table.add_column("Valor", style="bold")
+        table.add_column("Metric", style="cyan")
+        table.add_column("Value", style="bold")
 
         table.add_row(
-            "Estado", "[green]VÁLIDO[/]" if result.get("valid") else "[red]COMPROMETIDO[/]"
+            "Status", "[green]VALID[/]" if result.get("valid") else "[red]COMPROMISED[/]"
         )
-        table.add_row("Transacciones", str(result.get("tx_checked", 0)))
-        table.add_row("Nodos Merkle", str(result.get("roots_checked", 0)))
+        table.add_row("Transactions", str(result.get("tx_checked", 0)))
+        table.add_row("Merkle Nodes", str(result.get("roots_checked", 0)))
 
         console.print(table)
 
         if not result.get("valid"):
-            console.print("[bold red]❌ FALLO DE INTEGRIDAD CRIPTOGRÁFICA DETECTADO.[/]")
+            console.print("[bold red]❌ CRYPTOGRAPHIC INTEGRITY FAILURE DETECTED.[/]")
             for v in result.get("violations", []):
                 console.print(f"[red] - {v}[/]")
             raise click.exceptions.Exit(1)
 
-        console.print("[bold green]✓ EL LEDGER ESTÁ CRIPTOGRÁFICAMENTE INTACTO.[/]")
+        console.print("[bold green]✓ THE LEDGER IS CRYPTOGRAPHICALLY INTACT.[/]")
 
     finally:
         tracker.close()

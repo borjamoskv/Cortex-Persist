@@ -84,18 +84,18 @@ class TestKeyboardHotkey:
 
 
 class TestKeyboardTypeText:
-    """Tests de KeyboardEngine.type_text()."""
+    """Tests of KeyboardEngine.type_text()."""
 
     @pytest.mark.asyncio
     async def test_type_short_text(self, kb):
-        """Texto corto usa un único script AppleScript con todos los keystrokes."""
+        """Short text uses a single AppleScript script with all keystrokes."""
         with patch(
             "cortex_extensions.ui_control.keyboard.run_applescript", new_callable=AsyncMock
         ) as mock:
             mock.return_value = ""
             result = await kb.type_text("abc")
             assert result.success
-            # Un solo script con todos los keystrokes incrustados
+            # A single script with all embedded keystrokes
             assert mock.call_count == 1
             script = mock.call_args[0][0]
             assert 'keystroke "a"' in script
@@ -103,7 +103,7 @@ class TestKeyboardTypeText:
 
     @pytest.mark.asyncio
     async def test_type_long_text_uses_clipboard(self, kb):
-        """Texto largo usa clipboard paste en un solo script."""
+        """Long text uses clipboard paste in a single script."""
         long_text = "x" * 200
         with patch(
             "cortex_extensions.ui_control.keyboard.run_applescript", new_callable=AsyncMock
@@ -111,7 +111,7 @@ class TestKeyboardTypeText:
             mock.return_value = ""
             result = await kb.type_text(long_text)
             assert result.success
-            # Clipboard: set + paste en un único script
+            # Clipboard: set + paste in a single script
             assert mock.call_count == 1
             script = mock.call_args[0][0]
             assert "set the clipboard" in script
@@ -119,11 +119,11 @@ class TestKeyboardTypeText:
 
 
 class TestKeyboardPressSpecial:
-    """Tests de KeyboardEngine.press_special()."""
+    """Tests of KeyboardEngine.press_special()."""
 
     @pytest.mark.asyncio
     async def test_press_return(self, kb):
-        """Pulsa tecla Return."""
+        """Presses Return key."""
         with patch(
             "cortex_extensions.ui_control.keyboard.run_applescript", new_callable=AsyncMock
         ) as mock:
@@ -135,7 +135,7 @@ class TestKeyboardPressSpecial:
 
     @pytest.mark.asyncio
     async def test_press_unknown_key(self, kb):
-        """Tecla desconocida devuelve error con 'Unknown'."""
+        """Unknown key returns error with 'Unknown'."""
         result = await kb.press_special("nonexistent")
         assert not result.success
         assert "Unknown" in result.error

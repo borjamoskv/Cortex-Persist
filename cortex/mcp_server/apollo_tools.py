@@ -43,7 +43,7 @@ def register_apollo_tools(mcp: FastMCP) -> None:  # pyright: ignore[reportInvali
 
         output_path = Path(os.getcwd()) / output_filename
 
-        logger.info(f"[*] Iniciando extracción C5-REAL: Objetivo {target_leads} leads.")
+        logger.info(f"[*] Starting C5-REAL extraction: Target {target_leads} leads.")
 
         url = "https://api.apollo.io/v1/mixed_people/search"
         headers = {"Cache-Control": "no-cache", "Content-Type": "application/json"}

@@ -67,7 +67,7 @@ async def test_vector_sqlite_wal_deadlock():
 
 @pytest.mark.asyncio
 async def test_vector_taint_engine_collapse():
-    """Vector 2: Inyección de hashes SHA3-256 colisionados (Simulación de rechazo)"""
+    """Vector 2: Injection of colliding SHA3-256 hashes (Rejection simulation)"""
     # SQLite PK constraint should reject colliding hashes
     hash_collision = hashlib.sha3_256(b"taint_collision_seed").hexdigest()
 
@@ -88,7 +88,7 @@ async def test_vector_taint_engine_collapse():
 
 @pytest.mark.asyncio
 async def test_vector_ledger_chain_break():
-    """Vector 3: Mutación de firmas Ed25519 en nodos históricos (Simulación de detección)"""
+    """Vector 3: Mutation of Ed25519 signatures in historical nodes (Detection simulation)"""
     async with aiosqlite.connect(DB_PATH) as db:
         # 1. Valid insert
         valid_hash = hashlib.sha256(b"valid_node").hexdigest()
@@ -115,7 +115,7 @@ async def test_vector_ledger_chain_break():
 
 @pytest.mark.asyncio
 async def test_vector_swarm_apoptosis():
-    """Vector 4: Inyección de 500 subagentes paralelos exigiendo consenso BFT"""
+    """Vector 4: Injection of 500 parallel subagents demanding BFT consensus"""
 
     async def subagent_task(agent_id):
         # Simulate BFT assertion delay and write

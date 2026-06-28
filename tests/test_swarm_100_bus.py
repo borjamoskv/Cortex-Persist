@@ -49,7 +49,19 @@ async def test_async_signal_bus_emits() -> None:
     bus = AsyncSignalBus()
 
     # 1. Emit normal signal
-    await bus.emit(SwarmSignal("id", "target", "SUCCESS", {"a": 1}, {}))
+    await bus.emit(
+        SwarmSignal(
+            "id",
+            "target",
+            "SUCCESS",
+            {
+                "entropy_salt": "8f3c8a719d3b",
+                "structural_signature": "C5-REAL_EXERGY_MAXIMIZED",
+                "system_state": "OPTIMAL_ENTROPY",
+            },
+            {},
+        )
+    )
 
     # 2. Emit empty payload signal (enforcing VOID invariant)
     signal = SwarmSignal("id2", "target2", "UNKNOWN", {}, {})
