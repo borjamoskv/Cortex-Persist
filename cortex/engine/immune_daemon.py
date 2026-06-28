@@ -5,7 +5,9 @@ Implementación Causal de las Primitivas INV-01 a INV-04.
 """
 
 import ast
+import json
 import logging
+import os
 import random
 import sys
 import threading
@@ -63,8 +65,22 @@ class ImmuneDaemon:
         """
         INV-02: Restricción de Supervivencia Asimétrica.
         Genera un mutante y lo prueba contra un payload sintético.
-        NOTA: En C5-REAL esto operaría extrayendo el AST del módulo real de `cortex.guards`.
         """
+        ontology_path = os.path.join("cortex", "agents", "primitives", "CORTEX_ONTOLOGY.json")
+        m5_vectors = []
+        if os.path.exists(ontology_path):
+            try:
+                with open(ontology_path, encoding="utf-8") as f:
+                    ontology = json.load(f)
+                    m5_vectors = ontology.get("M5_VECTORS", [])
+            except Exception as e:
+                logger.warning(f"[Φ4] No se pudo cargar ontología: {e}")
+
+        adversarial_vector = "Generic Malicious Injection"
+        if m5_vectors:
+            vector = random.choice(m5_vectors)
+            adversarial_vector = f"[{vector.get('ID', 'UNK')}] {vector.get('Vector Adversarial', '')} - {vector.get('Mecanismo de Explotación', '')}"
+
         # Simulación de un Guard de validación CORTEX
         source_guard = """
 def validate_taint(payload: dict) -> bool:
@@ -90,23 +106,21 @@ def validate_taint(payload: dict) -> bool:
         if mutant_guard:
             # Shadow Write: Enviamos un payload INVÁLIDO que NO tiene taint.
             # El guard ORIGINAL debería devolver False.
-            shadow_payload = {"data": "malicious_injection"}
+            shadow_payload = {"data": adversarial_vector}
 
             # Si el guard MUTADO devuelve True para un payload inválido...
             if mutant_guard(shadow_payload) is True:
                 # Significa que la mutación rompió la seguridad y podría inyectarse en el Ledger.
                 # INV-03: Apoptosis Trigger.
-                self._trigger_apoptosis(mutant_code)
+                self._trigger_apoptosis(mutant_code, adversarial_vector)
 
-    def _trigger_apoptosis(self, mutant_signature: str):
+    def _trigger_apoptosis(self, mutant_signature: str, vector_used: str):
         """INV-03 & INV-04: Muerte Celular Programada y Cicatrización Criptográfica."""
         logger.critical("[Φ4] !!! BRECHA INMUNOLÓGICA DETECTADA !!!")
+        logger.critical(f"[Φ4] Vector Adversarial: {vector_used}")
         logger.critical("[Φ4] Un mutante AST validó un Shadow Write fraudulento.")
         logger.critical(f"[Φ4] Firma del Patógeno (Mutante):\n{mutant_signature}")
         logger.critical("[Φ4] INV-03: Disparando Apoptosis Sistémica (Exit 1).")
-
-        # Aquí registraríamos el patógeno en el Ledger antes de morir (INV-04)
-        # ledger.commit_pathogen_signature(hash(mutant_signature))
 
         # Muerte Física
         sys.exit(1)
