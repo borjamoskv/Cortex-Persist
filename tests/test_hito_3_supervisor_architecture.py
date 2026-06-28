@@ -84,7 +84,7 @@ async def test_supervisor_pipeline_end_to_end():
     await db.close()
 
     # Initialize Supervisor
-    supervisor = SwarmSupervisor(db_path=db_path, agent_factory=TestAgent, concurrency=2, bus_maxsize=10)
+    supervisor = SwarmSupervisor(db_path=db_path, agent_factory=TestAgent, concurrency=5, bus_maxsize=10)
     await supervisor.initialize()
 
     try:
