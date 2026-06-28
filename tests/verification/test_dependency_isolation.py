@@ -12,11 +12,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 class TestDependencyIsolation(unittest.TestCase):
     def setUp(self):
+        self.old_no_embed = os.environ.get("CORTEX_NO_EMBED")
         # Force auto_embed off for core tests
         os.environ["CORTEX_NO_EMBED"] = "true"
-        # Clear any existing cached modules if necessary (risky but for this test we want to be sure)
-        # Note: We won't clear sys.modules here as it's a global state,
-        # but we will check it.
+
+    def tearDown(self):
+        if self.old_no_embed is not None:
+            os.environ["CORTEX_NO_EMBED"] = self.old_no_embed
+        else:
+            os.environ.pop("CORTEX_NO_EMBED", None)
 
     def test_engine_init_no_torch(self):
         """Verify that initializing CortexEngine does not load torch."""

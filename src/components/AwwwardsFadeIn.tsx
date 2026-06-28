@@ -1,11 +1,5 @@
-// @C5-REAL
 import React, { useEffect, useRef, useState } from 'react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { motion, useInView } from 'framer-motion';
 
 interface AwwwardsFadeInProps {
   children: React.ReactNode;
@@ -17,58 +11,49 @@ interface AwwwardsFadeInProps {
 
 export default function AwwwardsFadeIn({ 
   children, 
-  className, 
+  className = "", 
   delay = 0, 
   direction = 'up',
   duration = 0.8 
 }: AwwwardsFadeInProps) {
-  const [isInView, setIsInView] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-10% 0px" });
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true);
-          observer.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.1, rootMargin: "-10% 0px" }
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  const getDirectionClass = () => {
-    if (isInView) return 'opacity-100 translate-x-0 translate-y-0';
+  const getInitialVariants = () => {
     switch (direction) {
-      case 'up': return 'opacity-0 translate-y-10';
-      case 'down': return 'opacity-0 -translate-y-10';
-      case 'left': return 'opacity-0 translate-x-10';
-      case 'right': return 'opacity-0 -translate-x-10';
-      case 'none': return 'opacity-0';
-      default: return 'opacity-0 translate-y-10';
+      case 'up': return { y: 40, opacity: 0 };
+      case 'down': return { y: -40, opacity: 0 };
+      case 'left': return { x: 40, opacity: 0 };
+      case 'right': return { x: -40, opacity: 0 };
+      case 'none': return { opacity: 0 };
+      default: return { y: 40, opacity: 0 };
+    }
+  };
+
+  const getAnimateVariants = () => {
+    switch (direction) {
+      case 'up':
+      case 'down': return { y: 0, opacity: 1 };
+      case 'left':
+      case 'right': return { x: 0, opacity: 1 };
+      case 'none': return { opacity: 1 };
+      default: return { y: 0, opacity: 1 };
     }
   };
 
   return (
-    <div
+    <motion.div
       ref={ref}
-      className={cn(
-        "transition-all ease-[cubic-bezier(0.21,0.47,0.32,0.98)]",
-        getDirectionClass(),
-        className
-      )}
-      style={{
-        transitionDuration: `${duration}s`,
-        transitionDelay: `${delay}s`,
+      className={className}
+      initial={getInitialVariants()}
+      animate={isInView ? getAnimateVariants() : getInitialVariants()}
+      transition={{
+        duration: duration,
+        delay: delay,
+        ease: [0.21, 0.47, 0.32, 0.98]
       }}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }

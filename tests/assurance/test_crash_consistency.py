@@ -5,11 +5,11 @@ import os
 import signal
 import sqlite3
 import time
-from pathlib import Path
-
-os.environ["CORTEX_NO_EMBED"] = "1"
-
 import pytest
+
+@pytest.fixture(autouse=True)
+def disable_embeddings(monkeypatch):
+    monkeypatch.setenv("CORTEX_NO_EMBED", "1")
 
 from cortex.engine.core.cortex_engine import CortexEngine
 

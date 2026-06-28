@@ -111,23 +111,36 @@ class SanedrinCouncil:
         # 1. Parallel BFT Evaluation (No blocking)
         evals = await asyncio.gather(*(node.evaluate(fact_a, fact_b) for node in self.nodes))
 
-        # 2. Strict Proof-of-Logic Consensus (No average consensus)
-        best_eval = max(evals, key=lambda e: e["proof_density"])
+        # 2. Strict Proof-of-Logic Consensus (Quorum > N/2)
+        from collections import Counter
+        vote_counts = Counter(e["claim"] for e in evals)
+        
+        required_quorum = len(self.nodes) // 2
+        winning_claim = None
+        for claim, count in vote_counts.items():
+            if count > required_quorum:
+                winning_claim = claim
+                break
+                
+        if not winning_claim:
+            logger.error("[Sanhedrin] Byzantine Fault: No quorum reached. Apoptosis initiated.")
+            raise RuntimeError(f"ByzantineFaultException: Consensus failed. Votes: {dict(vote_counts)}")
 
-        # 3. Tie-Breaker / Apoptosis evaluation
+        # 3. Best evaluation from Quorum
+        quorum_evals = [e for e in evals if e["claim"] == winning_claim]
+        best_eval = max(quorum_evals, key=lambda e: e["proof_density"])
+
+        # 4. Apoptosis evaluation for dissenting nodes (Epistemic Slashing)
         for ev in evals:
-            if (
-                ev["claim"] != best_eval["claim"]
-                and (best_eval["proof_density"] - ev["proof_density"]) > 0.1
-            ):
+            if ev["claim"] != winning_claim:
                 logger.warning(
-                    f"[Sanhedrin] Apoptosis triggered for {ev['node']}. Proof density insufficient."
+                    f"[Sanhedrin] Apoptosis triggered for {ev['node']}. Voted against Quorum."
                 )
                 global_trust_registry.epistemic_slash(
-                    ev["node"], "Failed Proof-of-Logic audit in Sanhedrin"
+                    ev["node"], "Failed Proof-of-Logic audit: Voted against BFT Quorum in Sanhedrin"
                 )
 
-        resolution_msg = f"SANEDRIN_BFT: {best_eval['claim']} validated by {best_eval['node']}"
+        resolution_msg = f"SANEDRIN_BFT: {winning_claim} validated by Quorum (Hash: {best_eval['hash'][:8]})"
 
         # Emit Sentinel Audit
         apex_dispatcher.execute(
@@ -141,6 +154,7 @@ class SanedrinCouncil:
             "hash": best_eval["hash"],
             "winning_node": best_eval["node"],
             "proof_density": best_eval["proof_density"],
+            "quorum_size": vote_counts[winning_claim],
         }
 
 
