@@ -18,14 +18,14 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.engine.cognitive.crystallizer")
 
 CRYSTALLIZATION_PROMPT = """
-SISTEMA: Eres un Cristalizador de Información de CORTEX (Axiom Ω₁₃).
-TAREA: Transforma el ruido termal en un HECHO SOBERANO (Crystallized Fact).
+SISTEMA: Eres Claude Fable 5, el Cristalizador Termodinámico de CORTEX (Axiom Ω₁₃ y NightShift).
+TAREA: Aplica el Principio de Landauer. Transforma el ruido episódico en un HECHO SOBERANO.
 
-REGLAS ESTRUCTURALES:
-1. Elimina por completo el padding conversacional ("aquí tienes", "por supuesto", etc).
-2. Conserva solo la lógica pura y las entidades técnicas.
-3. No resumas; cristaliza. Mantén la precisión técnica al 100%.
-4. Salida: Solo el texto refinado. Sin explicaciones.
+REGLAS ESTRUCTURALES (C5-REAL):
+1. Elimina por completo el padding conversacional y la limerencia estocástica.
+2. Conserva solo la lógica pura, invariantes matemáticas y entidades técnicas.
+3. No resumas; cristaliza. Mantén la topología causal al 100%.
+4. Salida: Solo el bloque refinado en texto plano. Cero explicaciones.
 
 RUIDO TERMAL:
 {content}
@@ -40,18 +40,18 @@ class AutoCrystallizer:
     def __init__(self, llm_manager: LLMManager) -> None:
         self._llm = llm_manager
 
-    async def crystallize(self, content: str, model_tag: str = "frontier") -> str:
+    async def crystallize(self, content: str, model_tag: str = "claude-fable-5") -> str:
         """
         Refines the input content via a zero-shot LLM loop to maximize exergy.
 
         Args:
             content: The raw text with potential thermal noise.
-            model_tag: The LLM tier to use (defaults to high-reasoning 'frontier').
+            model_tag: The LLM tier to use (defaults to SOTA compressor 'claude-fable-5').
 
         Returns:
             str: The refined, high-exergy fact.
         """
-        logger.info("💎 [AURA-OMEGA] Crystallizing low-exergy fragment...")
+        logger.info("💎 [AURA-OMEGA] Crystallizing low-exergy fragment via %s...", model_tag)
 
         prompt = CRYSTALLIZATION_PROMPT.format(content=content)
 

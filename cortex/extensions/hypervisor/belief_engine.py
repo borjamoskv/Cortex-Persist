@@ -142,6 +142,31 @@ class BeliefEngine:
         if verdict.action == VerdictAction.QUARANTINE:
             await self._quarantine_belief(candidate, verdict)
 
+            # Epistemic Slashing (Axiom Ω₃) - Punish source if Supreme Court (Opus/Fable) confirmed quarantine
+            if verdict.model in ("opus", "fable", "architect") and candidate.provenance.source_id:
+                try:
+                    from cortex.engine.forensic.slashing import SlashingEngine, SlashingPenalty
+                    conn = getattr(self._engine, "conn", None) or getattr(self._engine, "_conn", None)
+                    if conn:
+                        logger.error(
+                            "⚔️ [Ω₃] EPISTEMIC SLASHING: %s quarantined by %s", 
+                            candidate.provenance.source_id, verdict.model
+                        )
+                        await SlashingEngine.slash(
+                            conn=conn,
+                            agent_id=candidate.provenance.source_id,
+                            penalty_type=SlashingPenalty.CRYPTOGRAPHIC_TAINT,
+                            reason=f"Hallucination/Contradiction caught by {verdict.model}: {verdict.reason}",
+                            tenant_id=candidate.tenant_id
+                        )
+                    else:
+                        logger.warning(
+                            "⚔️ [Ω₃] EPISTEMIC SLASHING DEFERRED: %s caught by %s (No direct DB conn available)", 
+                            candidate.provenance.source_id, verdict.model
+                        )
+                except Exception as exc:
+                    logger.error("Failed to execute Epistemic Slashing: %s", exc)
+
         # Handle accept - persist the belief
         elif verdict.action == VerdictAction.ACCEPT:
             await self._persist_belief(candidate)
