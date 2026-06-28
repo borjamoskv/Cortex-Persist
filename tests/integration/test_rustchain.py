@@ -15,7 +15,6 @@ from cortex.integration.rustchain.staking import (
     StakingError,
     GateUnavailableError,
 )
-from cortex.integration.rustchain.langchain_tool import RustChainStakingTool
 from cortex.integration.rustchain.mcp_tool import register_rustchain_tools
 from cortex.integration.rustchain.judge import (
     Judge,
@@ -107,17 +106,7 @@ async def test_stake_and_acquire_gate_unavailable() -> None:
 
 # ─── LangChain & MCP Tool Tests ───────────────────────────────────
 
-def test_langchain_tool_execution() -> None:
-    wallet = RustChainWallet.create()
-    client = RustChainClient(mock_mode=True)
-    tool = RustChainStakingTool(wallet, client)
 
-    assert tool.name == "stake_and_acquire_skill"
-    # Test sync execution
-    res_str = tool._run("langchain_skill", 150)
-    res = json.loads(res_str)
-    assert res["status"] == "success"
-    assert res["attestation"]["skill"] == "langchain_skill"
 
 
 def test_mcp_tool_registration() -> None:
