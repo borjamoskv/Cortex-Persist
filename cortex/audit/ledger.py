@@ -220,6 +220,8 @@ class EnterpriseAuditLedger:
 
         # Verify Merkle chain and signatures
         expected_prev_hash = "GENESIS"
+        from cortex.audit.smt import SparseMerkleTree
+        local_smt = SparseMerkleTree()
 
         for prev_hash, signature, batch_rows in batches:
             if prev_hash != expected_prev_hash:
@@ -230,8 +232,9 @@ class EnterpriseAuditLedger:
                 }
 
             batch_audit_ids = [r[1] for r in batch_rows]
-            merkle_payload = "".join(batch_audit_ids) + prev_hash
-            merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+            for aid in batch_audit_ids:
+                local_smt.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
+            merkle_root = local_smt.root
 
             entry_hash_payload = f"merkle_batch:{merkle_root}:{prev_hash}"
             entry_hash = hashlib.sha256(entry_hash_payload.encode()).hexdigest()
@@ -382,6 +385,7 @@ class EnterpriseAuditLedger:
                 current_last_hash = hashlib.sha256(
                     f"merkle_batch:{merkle_root}:{prev_hash_db}".encode()
                 ).hexdigest()
+                print("DEBUG INSIDE LOG_ACTION:", batch_audit_ids, prev_hash_db, current_last_hash)
             else:
                 current_last_hash = "GENESIS"
 
@@ -428,12 +432,16 @@ class EnterpriseAuditLedger:
         seal_payload = f"OUROBOROS-∞:{payload}"
         return self.private_key.sign(seal_payload.encode()).hex()
 
-    def verify_batch(self, batch_audit_ids: list[str], prev_hash: str, signature_hex: str) -> bool:
+    def verify_batch(self, batch_audit_ids: list[str], prev_hash: str, signature_hex: str, smt_state: Any = None) -> bool:
         """Verifies the cryptographic seal of a batch against the public key using entry_hash."""
         try:
             # Reconstruct batch entry_hash
-            merkle_payload = "".join(batch_audit_ids) + prev_hash
-            merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+            if smt_state is None:
+                from cortex.audit.smt import SparseMerkleTree
+                smt_state = SparseMerkleTree()
+            for aid in batch_audit_ids:
+                smt_state.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
+            merkle_root = smt_state.root
             entry_hash = hashlib.sha256(
                 f"merkle_batch:{merkle_root}:{prev_hash}".encode()
             ).hexdigest()
