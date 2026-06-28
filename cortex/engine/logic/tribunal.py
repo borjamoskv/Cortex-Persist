@@ -1,8 +1,10 @@
+import asyncio
 import logging
 from typing import Any
 
 from cortex.agents.primitives.dispatcher import apex_dispatcher
 from cortex.engine.logic.atms import AtmsAdapter
+from cortex.engine.logic.sanedrin import sanedrin_council
 
 logger = logging.getLogger(__name__)
 
@@ -48,18 +50,23 @@ class TribunalEngine:
         logger.warning(f"[Tribunal] Orphaned {len(orphaned_list)} nodes: {orphaned_list}")
         return orphaned_list
 
-    def route_to_deep_think(self, node_a_id: str, node_b_id: str) -> str:
+    async def route_to_deep_think(self, node_a_id: str, node_b_id: str, blast_radius: int = 1) -> str:
         """
-        Triggers the "DeepThink" reasoning mode (Ω16) to surgically resolve the collision.
+        Triggers "DeepThink" reasoning or scales to Sanedrín BFT Council based on Exergy Gate.
         Returns the resolved, crystalline fact.
         """
-        logger.critical(f"[Tribunal] Routing collision to DeepThinK (System 2): {node_a_id} VS {node_b_id}")
+        logger.critical(f"[Tribunal] Routing collision: {node_a_id} VS {node_b_id} (Radius: {blast_radius})")
         
         # We freeze the collided states to prevent them from mutating during resolution
         apex_dispatcher.execute("OP_FREEZE_MEM", state={"id": node_a_id, "status": "suspended"})
         apex_dispatcher.execute("OP_FREEZE_MEM", state={"id": node_b_id, "status": "suspended"})
         
-        # Simulated DeepThink resolution structure
+        if blast_radius >= 3:
+            # Exergy Gate Threshold Exceeded: Invoke the Sanedrín
+            result = await sanedrin_council.convene({"id": node_a_id}, {"id": node_b_id})
+            return result["resolution"]
+            
+        # Standard DeepThinK resolution structure
         # (This is where the agent LLM would be invoked with thinking_mode="deep")
         resolution = f"RESOLVED_BY_DEEP_THINK: Synthesis of {node_a_id} and {node_b_id}"
         
