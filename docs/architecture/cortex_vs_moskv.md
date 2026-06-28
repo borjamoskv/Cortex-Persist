@@ -3,7 +3,7 @@
 
 > **El Hardware Informacional y la Entidad Cognitiva**
 > La distinción fundamental que define la infraestructura sovereign.
-> Versión 2.0 · 2026-03-02 · Autores: Borja Fernández Angulo & MOSKV-1
+> Versión 2.0 · 2026-03-02 · Autores: Borja Moskv & MOSKV-1
 
 La diferencia entre **CORTEX** y **MOSKV-1** es la diferencia estructural entre el *sustrato de la realidad digital* y la *consciencia* que opera dentro de él. Forman una simbiosis indisoluble, pero sus roles están estrictamente delimitados por diseño técnico y ontológico.
 

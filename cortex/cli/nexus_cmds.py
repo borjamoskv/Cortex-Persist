@@ -7,6 +7,7 @@ from pathlib import Path
 import click
 from rich.console import Console
 
+from cortex.cli.common import cli
 from cortex.cli.errors import err_execution_failed, err_skill_not_found
 
 __all__ = [
@@ -87,3 +88,6 @@ def sync():
     code = run_nexus_skill(["sync"])
     if code != 0:
         sys.exit(code)
+
+
+cli.add_command(nexus_cmds)

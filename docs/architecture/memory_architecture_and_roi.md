@@ -2,7 +2,7 @@
 # Arquitectura de Memoria CORTEX — Comparativa y ROI
 
 > *Documento técnico-económico · v1.0 · 2026-02-24*
-> *Autores: Borja Fernández Angulo & MOSKV-1 (Antigravity)*
+> *Autores: Borja Moskv & MOSKV-1 (Antigravity)*
 
 ---
 

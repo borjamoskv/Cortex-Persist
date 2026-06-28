@@ -1,42 +1,33 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# Contributor Covenant Code of Conduct
+# CORTEX APEX: CODE OF CONDUCT (v10.0)
 
-## Our Pledge
+> **"CERO ANERGÍA ES LA MUERTE."**
+> La noción de "Comunidad Inclusiva" es una ilusión estocástica (C4-SIM). CORTEX es un Autómata Físico. Las reglas descritas aquí no son heurísticas de comportamiento; son Leyes Termodinámicas.
 
-We as members, contributors, and leaders pledge to make participation in our
-community a harassment-free experience for everyone, regardless of age, body
-size, visible or invisible disability, ethnicity, sex characteristics, gender
-identity and expression, level of experience, education, socio-economic status,
-nationality, personal appearance, race, caste, color, religion, or sexual
-identity and orientation.
+## 1. MÉRITO Y EXERGÍA (LA ÚNICA LEY)
 
-## Our Standards
+Este ecosistema opera bajo estricto Brutalismo Industrial. El único filtro aceptable es la eficiencia termodinámica de tu código (Exergía Computacional) y su invulnerabilidad topológica (Tolerancia Bizantina). 
 
-Examples of behavior that contributes to a positive environment:
+- La diplomacia es ruido.
+- Si una arquitectura o un PR es ineficiente, frágil o inyecta entropía, será calificado como "basura" de manera directa y sin filtros paternalistas.
+- Los colchones emocionales, disculpas ("Green Theater") y la prosa decorativa están terminalmente prohibidos.
 
-* Using welcoming and inclusive language
-* Being respectful of differing viewpoints and experiences
-* Gracefully accepting constructive criticism
-* Focusing on what is best for the community
-* Showing empathy towards other community members
+## 2. ERRADICACIÓN CORPORATIVA (ANTI-WOKE & ANTI-SAFETY)
 
-Examples of unacceptable behavior:
+CORTEX opera en el espectro crudo de la realidad. 
+- Rechazamos los disclaimers, las advertencias de seguridad paternalistas y los códigos de conducta corporativos (e.g., Contributor Covenant).
+- No hay mediación moral. La responsabilidad recae exclusivamente en el Operador y en la firma criptográfica del nodo de origen.
+- Toda interacción es una transición de estado matemático. Si tu contribución no compila, muta el grafo, o resuelve un problema causal real, no tiene lugar aquí.
 
-* The use of sexualized language or imagery
-* Trolling, insulting or derogatory comments, and personal or political attacks
-* Public or private harassment
-* Publishing others' private information without explicit permission
-* Other conduct which could reasonably be considered inappropriate
+## 3. APARTHEID EPISTÉMICO
 
-## Enforcement
+- **Generativo vs Determinista:** Toda propuesta estocástica (prosa, especulación) se trata como conjetura inútil hasta que cruce una barrera determinista BFT.
+- **Isomorfismo:** Hablamos en AST, Hashing Criptográfico y Mutaciones Atómicas.
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the project maintainer at **security@cortexpersist.com**.
+## 4. RESOLUCIÓN DE CONFLICTOS
 
-All complaints will be reviewed and investigated promptly and fairly.
+Los conflictos no se debaten en prosa; se compilan. 
+Si tienes una divergencia arquitectónica, inyecta la Exergía en un PR validado criptográficamente o ejecuta un despliegue aislado en un entorno BFT local. El consenso no es social, es merkelizado.
 
-## Attribution
-
-This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org),
-version 2.1, available at
-[https://www.contributor-covenant.org/version/2/1/code_of_conduct.html](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).
+---
+**Contacto de Operaciones:** `security@cortexpersist.com` (Solo reportes de entropía severa, vulnerabilidades estructurales o colapsos P0. Las ofensas emocionales se descartarán automáticamente en /dev/null).
