@@ -200,8 +200,9 @@ class EnterpriseAuditLedger:
         for row in rows:
             # row: 0=rowid, 1=audit_id, 2=timestamp, 3=tenant_id, 4=actor_role, 5=actor_id, 6=action, 7=resource, 8=status, 9=prev_hash, 10=signature
             # Validate individual audit_id to detect row-level tampering
-            expected_audit_id = hashlib.sha256(f"{row[2]}|{row[3]}|{row[4]}|{row[5]}|{row[6]}|{row[7]}|{row[8]}".encode()).hexdigest()
-            if expected_audit_id != row[1]:
+            expected_audit_id_v2 = hashlib.sha256(f"{row[2]}|{row[3]}|{row[4]}|{row[5]}|{row[6]}|{row[7]}|{row[8]}".encode()).hexdigest()
+            expected_audit_id_v1 = hashlib.sha256(f"{row[2]}{row[3]}{row[4]}{row[5]}{row[6]}{row[7]}{row[8]}".encode()).hexdigest()
+            if row[1] not in (expected_audit_id_v2, expected_audit_id_v1):
                 return {
                     "status": "tampered",
                     "corrupted_audit_id": row[1],
