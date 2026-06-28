@@ -98,9 +98,9 @@ class AiosqliteCursorStub:
         self._cursor = cursor
 
     def __await__(self):
-        async def _async_self():
-            return self
-        return _async_self().__await__()
+        yield
+        return self
+
 
     async def __aenter__(self):
         return self
