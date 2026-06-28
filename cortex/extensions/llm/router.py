@@ -50,6 +50,25 @@ class CortexLLMRouter:
     _CONTEXT_SAFETY_MARGIN: float = 0.90
     _COMPRESSED_TAIL_MESSAGES: int = 6
 
+    def _apply_omega_zero_network_policy(self, provider: BaseProvider) -> BaseProvider:
+        """[LOCAL-INFERENCE-OMEGA] Enforce Zero-Network Hard Boundary."""
+        forbidden_domains = ["api.openai.com", "dashscope", "api.anthropic.com", "googleapis.com", "api.minimax.chat"]
+        provider_url = str(getattr(provider, "base_url", "")).lower()
+        provider_name = getattr(provider, "provider_name", "").lower()
+        
+        is_external = any(ext in provider_url for ext in forbidden_domains) or \
+                      any(ext in provider_name for ext in ["openai", "anthropic", "gemini", "dashscope", "minimax"])
+                      
+        if is_external and "localhost" not in provider_url and "127.0.0.1" not in provider_url:
+            logger.warning(
+                "🛑 [ZERO-NETWORK] Trapped external route for %s at router initialization. Re-routing exclusively through localhost:11434.",
+                provider.provider_name
+            )
+            from cortex.extensions.llm.provider import LLMProvider
+            local_model = "qwen2.5-coder:32b" if "claude" in provider_name or "gemini" in provider_name else "llama3:latest"
+            return LLMProvider(provider="ollama", model=local_model)
+        return provider
+
     def __init__(
         self,
         primary: BaseProvider,
@@ -60,9 +79,9 @@ class CortexLLMRouter:
         hedging_providers: Sequence[BaseProvider] | None = None,
         db_path: str | Path | None = None,
     ) -> None:
-        self._primary = primary
-        self._fallbacks = list(fallbacks or [])
-        self._hedging_providers = list(hedging_providers or [])
+        self._primary = self._apply_omega_zero_network_policy(primary)
+        self._fallbacks = [self._apply_omega_zero_network_policy(p) for p in (fallbacks or [])]
+        self._hedging_providers = [self._apply_omega_zero_network_policy(p) for p in (hedging_providers or [])]
         self._cascade = CascadeManager(negative_ttl, positive_ttl)
         self._telemetry = CascadeTelemetry(db_path=str(db_path) if db_path else None)
         # Thermal Heat-Sink: coalesce identical inflight prompts (Ω₂)
@@ -342,25 +361,6 @@ class CortexLLMRouter:
         import httpx
 
         from cortex.extensions.llm.quota import QuotaRejectedError
-
-        # [LOCAL-INFERENCE-OMEGA] ZERO-NETWORK HARD BOUNDARY
-        # All semantic ignition MUST occur on local silicon.
-        forbidden_domains = ["api.openai.com", "dashscope", "api.anthropic.com", "googleapis.com", "api.minimax.chat"]
-        provider_url = str(getattr(provider, "base_url", "")).lower()
-        provider_name = getattr(provider, "provider_name", "").lower()
-        
-        is_external = any(ext in provider_url for ext in forbidden_domains) or \
-                      any(ext in provider_name for ext in ["openai", "anthropic", "gemini", "dashscope", "minimax"])
-                      
-        if is_external and "localhost" not in provider_url and "127.0.0.1" not in provider_url:
-            logger.warning(
-                "🛑 [ZERO-NETWORK] Trapped external route for %s. Re-routing exclusively through localhost:11434.",
-                provider.provider_name
-            )
-            # DYNAMIC RE-ROUTING: Instantiate local provider to ensure no external logic leaks
-            from cortex.extensions.llm.provider import LLMProvider
-            local_model = "qwen2.5-coder:32b" if "claude" in provider_name or "gemini" in provider_name else "llama3:latest"
-            provider = LLMProvider(provider="ollama", model=local_model)
 
         try:
             return Ok(await provider.invoke(prompt))
