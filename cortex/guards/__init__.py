@@ -10,6 +10,8 @@ from cortex.guards.homoglyph_guard import (
     SecurityViolation,
     cassandra_validate_identifiers,
 )
+from cortex.guards.osint_guard import OSINTGuard, OSINTViolationError
+from cortex.guards.osync_guard import OSYNCGuard, OSYNCViolationError
 from cortex.guards.prompt_security_guard import PromptExtractionBlockedError, PromptSecurityGuard
 from cortex.guards.scrape_guard import SanitizedPayload, ScrapeSanitizerGuard
 from cortex.guards.secret_guard import PlaintextSecretError, SecretGuard
@@ -39,6 +41,10 @@ __all__ = [
     "VirgoContextGuard",
     "VirgoValidationError",
     "MemoryFirewallGuard",
+    "OSINTGuard",
+    "OSINTViolationError",
+    "OSYNCGuard",
+    "OSYNCViolationError",
 ]
 
 from cortex.guards.memory_firewall import MemoryFirewallGuard
