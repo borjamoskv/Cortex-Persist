@@ -171,14 +171,20 @@ async def distill_sovereign_memo(
         f"{intent_directive}\n\n"
         "SYNTHESIS LAWS:\n"
         "1. ZERO FLUFF: Eliminate navigation noise, ads, and redundancies.\n"
-        "2. ENTITY EXTRACTION: Identify key technical concepts "
-        "(G-Nodes), versions and protocols.\n"
-        "3. AXIOMATIC RESONANCE: Describe how this information expands "
+        "2. STRUCTURAL EXTRACTION: You must extract EXACTLY 50 Primitivas and 50 Invariantes that maximize exergy.\n"
+        "3. NEGATIVE SPACE: Identify Anti-patterns and Redundancies.\n"
+        "4. ACTIONABLE: Provide Tips for immediate operational use.\n"
+        "5. AXIOMATIC RESONANCE: Describe how this information expands "
         "the horizons of the system.\n\n"
         "Respond in strict JSON format:\n"
         "{\n"
         '    "content_markdown": "Dense and technical distilled text.",\n'
         '    "entities": ["Entity A", "Protocol B"],\n'
+        '    "primitivas": ["Primitiva 1", "...", "Primitiva 50"],\n'
+        '    "invariantes": ["Invariante 1", "...", "Invariante 50"],\n'
+        '    "antipatrones": ["Antipatron 1", "...", "Antipatron N"],\n'
+        '    "redundancias": ["Redundancia 1", "...", "Redundancia N"],\n'
+        '    "tips": ["Tip 1", "...", "Tip N"],\n'
         '    "metadatos_extraidos": {"complexity": "land", "version": "1.0"},\n'
         '    "axiomatic_resonance": "Impact on Ω₀-Ω₆"\n'
         "}"
@@ -241,15 +247,26 @@ async def execute_cognitive_synthesis(
     if isinstance(cristal, dict):
         memo_content: str = cristal.get("content_markdown", "")
         entities: list[str] = cristal.get("entities", [])  # type: ignore[type-error]
+        primitivas: list[str] = cristal.get("primitivas", [])
+        invariantes: list[str] = cristal.get("invariantes", [])
+        antipatrones: list[str] = cristal.get("antipatrones", [])
+        redundancias: list[str] = cristal.get("redundancias", [])
+        tips: list[str] = cristal.get("tips", [])
         resonancia: str = cristal.get("axiomatic_resonance", "")
     else:
         memo_content = str(cristal)
         entities = []
+        primitivas = []
+        invariantes = []
+        antipatrones = []
+        redundancias = []
+        tips = []
         resonancia = ""
 
     bytes_in, bytes_out = len(raw_data), len(memo_content)
     yield_efficiency = (1 - (bytes_out / bytes_in)) * 100 if bytes_in > 0 else 0
-    logger.info("✅ Distillation: %.1f%% noise removed. Entities: %d", yield_efficiency, len(entities))
+    total_extracted = len(entities) + len(primitivas) + len(invariantes)
+    logger.info("✅ Distillation: %.1f%% noise removed. Entities/Items: %d", yield_efficiency, total_extracted)
 
     # ── EPISTEMIC CONTRADICTION GUARD (Axioma Ω₁) ──
     from cortex.guards.contradiction_guard import detect_contradictions
@@ -294,6 +311,11 @@ async def execute_cognitive_synthesis(
             "source": source,
             "tier": "sovereign_distilled",
             "entities": entities,
+            "primitivas": primitivas,
+            "invariantes": invariantes,
+            "antipatrones": antipatrones,
+            "redundancias": redundancias,
+            "tips": tips,
             "resonancia": resonancia,
             "quantization": "turboquant_3.5b_qjl",
             "compression_ratio": "absolute_neutrality_zero_indexing",
