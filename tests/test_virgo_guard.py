@@ -37,6 +37,9 @@ async def engine(tmp_path: Path):
     from cortex.engine import CortexEngine
 
     # Unblock tests from thermodynamic enforcement
+    import copy
+    old_env = copy.deepcopy(os.environ)
+
     os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
     os.environ["CORTEX_STRICT_GUARDS"] = "1"
     os.environ["CORTEX_VIRGO_MODE"] = "LEGACY"
@@ -48,12 +51,8 @@ async def engine(tmp_path: Path):
     yield e
     await e.close()
 
-    if "CORTEX_SKIP_EXERGY_VALIDATION" in os.environ:
-        del os.environ["CORTEX_SKIP_EXERGY_VALIDATION"]
-    if "CORTEX_STRICT_GUARDS" in os.environ:
-        del os.environ["CORTEX_STRICT_GUARDS"]
-    if "CORTEX_VIRGO_MODE" in os.environ:
-        del os.environ["CORTEX_VIRGO_MODE"]
+    os.environ.clear()
+    os.environ.update(old_env)
 
 
 # ─── 1. Signature Verification Tests ──────────────────────────────────
