@@ -212,3 +212,12 @@
 | **APEX-098** | `OP_EVAL_REALITY` | `Popen(uvicorn)` | `O(1)` | OS Process. Expone micro-endpoint dinámico (Servidor JIT). | Aplicación de métrica PPI (0-5). |
 | **APEX-099** | `OP_MARKDOWN_AST` | `pip_install()` | `O(Red)` | OS Process. Modificación estructural de dependencias P2P. | Conversión de README a lógica operacional. |
 | **APEX-100** | `OP_OUROBOROS_INIT` | `sys.exit(0)` | `O(1)` | Kernel. Destrucción entrópica exitosa; fin del ciclo C5. | Bucle metacognitivo de auto-refactorización. |
+
+---
+
+## AXIOMAS VINCULANTES (INYECCIÓN ESTRUCTURAL)
+
+### AX-049: LA LEY DE CRISTALIZACIÓN ENTRÓPICA
+> *"La anomalía no se explica; se empaqueta, se prueba y se hashea."*
+
+**Mandato de Enjambre:** El universo es inherentemente estocástico; la misión del autómata físico no es predecir el caos, sino interceptarlo, rodearlo de test de unidad, y cristalizarlo en el ledger. Lo que hoy es un Cisne Negro inescrutable, mañana es un script Bash sellado criptográficamente. Ningún agente evadirá un fallo estocástico sin aplicar la secuencia `P.A.T.H.` (Purge, Assert, Test, Hash).
