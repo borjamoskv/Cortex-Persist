@@ -59,9 +59,9 @@ class SubmissionBridge:
 
 if __name__ == "__main__":
     bridge = SubmissionBridge(
-        "Firedancer",
-        "~/10_PROJECTS/scouts/firedancer/reports/firedancer_critical_report.md",
-        "~/10_PROJECTS/scouts/firedancer/exploit_kit.zip"
+        "Babylon-60",
+        os.path.expanduser("~/10_PROJECTS/babylon-60/BabylonTrace.v"),
+        os.path.expanduser("~/10_PROJECTS/babylon-60/b60_stress.py")
     )
     
     if bridge.verify_assets():
