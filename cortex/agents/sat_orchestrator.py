@@ -15,8 +15,8 @@ class SatOrchestrator:
 
     def verify_k_colorability(self, nodes: int, k: int, edges: list[tuple[int, int]]) -> dict:
         """
-        Llama al motor Z3 de Python (fallback ante la destrucción de cortex_core_rs)
-        para comprobar si el grafo es K-colorable.
+        Calls the Python Z3 engine (fallback in case of cortex_core_rs destruction)
+        to check if the graph is K-colorable.
         """
         start_time = time.time()
 
