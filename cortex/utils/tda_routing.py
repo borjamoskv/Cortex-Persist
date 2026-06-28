@@ -13,7 +13,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any, Final
 
-DB_PATH: Final[Path] = Path("/Users/borjafernandezangulo/.cortex/cortex.db")
+DB_PATH: Final[Path] = Path("~/.cortex/cortex.db")
 
 
 class HodgeMemoryRouter:

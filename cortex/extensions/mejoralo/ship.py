@@ -78,11 +78,22 @@ def _seal_linter(stack: str, cwd: str) -> ShipSeal:
 
 def _seal_visual(p: Path) -> ShipSeal:
     """Seal 4: Visual Proof."""
+    import json
+    
     visual_json = p / "visual_proof.json"
     screenshots = list(p.glob("**/screenshot*.png"))
     visual_ok = visual_json.exists() or len(screenshots) > 0
+    
     if visual_json.exists():
-        detail = "Found visual_proof.json"
+        try:
+            with open(visual_json) as f:
+                data = json.load(f)
+            # Renderizar métricas básicas si existen
+            components = data.get("components_tested", len(data.get("tests", [])))
+            status = data.get("status", "OK")
+            detail = f"Visual Proof: {components} components rendered | Status: {status}"
+        except Exception as e:
+            detail = f"Found visual_proof.json (parse error: {e})"
     elif screenshots:
         detail = f"Found {len(screenshots)} screenshots"
     else:

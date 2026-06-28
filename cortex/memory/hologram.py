@@ -16,6 +16,7 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from cortex.memory.cortex_decay import cortex_decay
 from cortex.memory.models import CortexFactModel
 
 if TYPE_CHECKING:
@@ -134,12 +135,7 @@ class HolographicMemory:
                 "🌌 Holographic Memory loaded: %d items mapped in %.1fms", len(self._metadata), dur
             )
 
-    def _cortex_decay(self, is_diamond: bool, timestamp: float, current_time: float) -> float:
-        """Physical decay calculation in Python space."""
-        if is_diamond:
-            return 1.0
-        age = max(0.0, current_time - timestamp)
-        return float((0.5) ** (age / self._half_life))
+
 
     async def recall_holographic(
         self,
@@ -194,7 +190,7 @@ class HolographicMemory:
 
             sim = cosine_sim[i]
             # Match the SQLite function structure exactly
-            decay = self._cortex_decay(meta["is_diamond"], meta["timestamp"], now)
+            decay = cortex_decay(int(meta.get("is_diamond", False)), float(meta.get("timestamp", now)), now, self._half_life)
 
             # Translate SQL semantic: (1.0 - distance / 2.0) equals (sim + 1.0) / 2.0
             semantic_score = (sim + 1.0) / 2.0

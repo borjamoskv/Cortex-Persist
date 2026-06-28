@@ -265,7 +265,7 @@ def get_total_yield_dynamic():
 
 def query_bridge_responses(limit: int = 10):
     """Synthesizes intelligence logs from private bridge responses."""
-    resp_dir = Path("/Users/borjafernandezangulo/Downloads/WIKIPEDIA BORJA MOSKV/CODEX H/autodidact-engine/bridge/a2a-sovereign/responses")
+    resp_dir = Path("~/Downloads/WIKIPEDIA BORJA MOSKV/CODEX H/autodidact-engine/bridge/a2a-sovereign/responses")
     if not resp_dir.exists():
         return []
     

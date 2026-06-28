@@ -2096,7 +2096,7 @@ reached.',
     )
 )
 ToolCallPart(
-    arguments_part='/borjafernandezangulo/cortex/cortex/mcp_server.py"}'
+    arguments_part='/[REDACTED_PII]/cortex/cortex/mcp_server.py"}'
 )
 StatusUpdate(
     context_usage=0.10919952392578125,

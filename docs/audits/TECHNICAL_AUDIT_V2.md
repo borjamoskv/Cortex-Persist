@@ -2,7 +2,7 @@
 
 * **Author / Demiurgo:** Borja Moskv (`borjamoskv`)
 * **System:** CORTEX-Persist
-* **Repository:** `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist`
+* **Repository:** `~/10_PROJECTS/cortex-persist`
 * **Audit Level:** C5-REAL (local deterministic execution context)
 * **Timestamp:** 2026-06-26T11:43:00+02:00
 

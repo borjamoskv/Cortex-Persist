@@ -32,12 +32,6 @@ _L2_HYBRID_SEARCH_AVAILABLE: bool | None = None  # None = not yet checked
 logger = logging.getLogger("cortex.memory.sqlite_vec_store")
 
 
-def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_life: float) -> float:
-    """Calcula el decaimiento temporal soberano."""
-    if is_diamond:
-        return 1.0
-    age = max(0.0, current_time - timestamp)
-    return float(0.5 ** (age / half_life))
 
 
 from cortex.memory.traits.read import ReadTrait

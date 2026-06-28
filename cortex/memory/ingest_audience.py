@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Rutas
-CORTEX_DB_PATH = Path("/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex_data.db")
+CORTEX_DB_PATH = Path("~/10_PROJECTS/cortex-persist/cortex_data.db")
 if not CORTEX_DB_PATH.parent.exists():
     CORTEX_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 

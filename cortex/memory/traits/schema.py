@@ -14,12 +14,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_life: float) -> float:
-    """Calcula el decaimiento temporal soberano."""
-    if is_diamond:
-        return 1.0
-    age = max(0.0, current_time - timestamp)
-    return float(0.5 ** (age / half_life))
+from cortex.memory.cortex_decay import cortex_decay
 
 
 class SchemaTrait:

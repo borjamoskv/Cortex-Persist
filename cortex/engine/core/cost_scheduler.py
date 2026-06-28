@@ -16,7 +16,7 @@ from typing import Any
 logger = logging.getLogger("cortex.engine.core.cost_scheduler")
 
 DEFAULT_POLICY_PATH = Path(
-    "/Users/borjafernandezangulo/.gemini/antigravity/scratch/exergy_engine/antigravity_routing_policy.yaml"
+    "~/.gemini/antigravity/scratch/exergy_engine/antigravity_routing_policy.yaml"
 )
 
 

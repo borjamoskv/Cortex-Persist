@@ -83,4 +83,4 @@ Se han erradicado los archivos físicos repetidos como `CHANGELOG.md` y `VERIFIC
 El AST base de `moskv-1-apex` fue sometido a la purga *Autonomous-Audit-OMEGA* (vía Ruff). El código no opera, sino que **existe libre de Anergía** (Variables muertas, imports asimétricos, redundancias booleanas = 0). 
 
 ### 4. Cristalización de Memoria (Brain State)
-Las variaciones térmicas en el `git tree` raíz del cerebro de la máquina (`/Users/borjafernandezangulo/`) fueron congeladas y firmadas criptográficamente. El sistema no padece ya de derivas o amnesia temporal.
+Las variaciones térmicas en el `git tree` raíz del cerebro de la máquina (`~/`) fueron congeladas y firmadas criptográficamente. El sistema no padece ya de derivas o amnesia temporal.

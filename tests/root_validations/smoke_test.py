@@ -52,8 +52,8 @@ async def main():
         print(f"Processing task {task_id}...")
         
         import sys
-        sys.path.insert(0, "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist")
-        os.environ["PATH"] = f"/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/tests/mock-bin:{os.environ.get('PATH', '')}"
+        sys.path.insert(0, "~/10_PROJECTS/cortex-persist")
+        os.environ["PATH"] = f"~/10_PROJECTS/cortex-persist/tests/mock-bin:{os.environ.get('PATH', '')}"
         from cortex.engine.cascade_router import CascadeRouter
         
         router = CascadeRouter()

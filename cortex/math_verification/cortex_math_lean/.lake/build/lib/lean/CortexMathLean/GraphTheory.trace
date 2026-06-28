@@ -7,7 +7,7 @@
   "c": "34ec956ea3d248c7.c"},
  "log":
  [{"message":
-   ".> LEAN_PATH=/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean /Users/borjafernandezangulo/.elan/toolchains/leanprover--lean4---v4.31.0/bin/lean /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/CortexMathLean/GraphTheory.lean -o /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean/CortexMathLean/GraphTheory.olean -i /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean/CortexMathLean/GraphTheory.ilean -c /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/GraphTheory.c --setup /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/GraphTheory.setup.json --json",
+   ".> LEAN_PATH=~/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean ~/.elan/toolchains/leanprover--lean4---v4.31.0/bin/lean ~/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/CortexMathLean/GraphTheory.lean -o ~/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean/CortexMathLean/GraphTheory.olean -i ~/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean/CortexMathLean/GraphTheory.ilean -c ~/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/GraphTheory.c --setup ~/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/GraphTheory.setup.json --json",
    "level": "trace"}],
  "inputs":
  [["CortexMathLean.GraphTheory:deps",
@@ -22,7 +22,7 @@
       ["module plugins", "00000000000006bb"]]]]],
   ["Lean 4.31.0, commit 68218e876d2a38b1985b8590fff244a83c321783",
    "fc45ac412f28501c"],
-  ["/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/CortexMathLean/GraphTheory.lean",
+  ["~/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/CortexMathLean/GraphTheory.lean",
    "a8c41ca155141fdf"],
   ["options", "00000000000006bb"],
   ["isModule: false", "feefd2a0d3a1847e"],

@@ -16,7 +16,7 @@ El mecanismo propuesto implementará **Cascading Quarantine**:
 
 ## Proposed Changes
 
-### [MODIFY] [belief_engine.py](file:///Users/borjafernandezangulo/30_CORTEX/cortex/extensions/hypervisor/belief_engine.py)
+### [MODIFY] [belief_engine.py](file://~/30_CORTEX/cortex/extensions/hypervisor/belief_engine.py)
 - **Modificación:** Introducir el método `_cascade_quarantine(self, root_id: str, reason: str)` que se disparará automáticamente al final de `_quarantine_belief`.
 - **Mecanismo:** El motor buscará en la caché (y mediante llamadas al DB subyacente si la abstracción lo permite) cualquier creencia hija donde `root_id` esté presente en `supported_by`. Recursivamente aislará cada nodo encontrado.
 

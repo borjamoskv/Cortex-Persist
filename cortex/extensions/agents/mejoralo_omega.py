@@ -17,6 +17,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+from cortex.agents.mixins import EngineAwareMixin
 from cortex.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_TARGET_SCORE,
     STAGNATION_LIMIT,
@@ -33,7 +34,7 @@ ENTROPY_SCORE_WEIGHT = 0.6  # weight for scan score in priority
 ENTROPY_FINDINGS_WEIGHT = 0.4  # weight for findings count in priority
 
 
-class MejoraloOmegaAgent:
+class MejoraloOmegaAgent(EngineAwareMixin):
     """Autonomous continuous improvement agent for scripts and code.
 
     Loads its configuration from the YAML registry and runs
@@ -58,22 +59,15 @@ class MejoraloOmegaAgent:
         self._score_history: list[int] = []
 
         # Late-init engine (avoids import-time DB lock)
-        self._engine: Any = None
         self._mejoralo: Any = None
-        self._db_path = db_path
         self._agent_def: Any = None
 
     def _ensure_engine(self) -> None:
         """Lazy-initialize CortexEngine and MejoraloEngine."""
         if self._engine is not None:
             return
-
-        from cortex.cli import get_engine  # pyright: ignore
-        from cortex.config import DEFAULT_DB_PATH
+        super()._ensure_engine()
         from cortex.extensions.mejoralo.engine import MejoraloEngine
-
-        db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
-        self._engine = get_engine(db_val)
         self._mejoralo = MejoraloEngine(engine=self._engine)
 
     def _load_agent_definition(self) -> None:

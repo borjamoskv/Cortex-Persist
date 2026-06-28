@@ -30,7 +30,7 @@ async def run_audit():
 
     # Load chapter names from JSON
     chapters_json_path = (
-        "/Users/borjafernandezangulo/10_PROJECTS/remotion_saga_video/src/chapters.json"
+        "~/10_PROJECTS/remotion_saga_video/src/chapters.json"
     )
     if not os.path.exists(chapters_json_path):
         print(f"Error: Chapters JSON not found at {chapters_json_path}")
@@ -84,7 +84,7 @@ async def run_audit():
     # (audit_report metadata omitted as it was unused and replaced by direct artifact creation)
 
     # Save the report as an artifact
-    artifact_dir = "/Users/borjafernandezangulo/.gemini/antigravity/brain/2c8ee54e-09df-499e-8aef-db1f3cc7577c/artifacts"
+    artifact_dir = "~/.gemini/antigravity/brain/2c8ee54e-09df-499e-8aef-db1f3cc7577c/artifacts"
     os.makedirs(artifact_dir, exist_ok=True)
     report_md_path = os.path.join(artifact_dir, "swarm_audit_report.md")
 

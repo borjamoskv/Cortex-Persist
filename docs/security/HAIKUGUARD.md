@@ -9,4 +9,4 @@
 
 The HaikuGuard was an aesthetic integrity validator that enforced a 5-7-5 syllable structure for axioms. It has been removed because it introduced non-deterministic behavior into the consensus model (WBFT), which requires absolute cryptographic and structural determinism.
 
-Please refer to [LandauerGuard](file:///Users/borjafernandezangulo/30_CORTEX/docs/security/LANDAUERGUARD.md) for the new thermodynamic compression mechanism.
+Please refer to [LandauerGuard](file://~/30_CORTEX/docs/security/LANDAUERGUARD.md) for the new thermodynamic compression mechanism.

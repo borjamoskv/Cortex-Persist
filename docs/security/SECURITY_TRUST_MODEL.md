@@ -157,7 +157,7 @@ The guard layer includes 15+ specialized guards:
 
 #### ZK-Swarm Guard Integration (ZKSwarmGuard)
 
-The `ZKSwarmGuard` (implemented in [`cortex/guards/zk_guard.py`](file:///Users/borjafernandezangulo/30_CORTEX/cortex/guards/zk_guard.py)) validates cryptographic proofs of consensus on high-risk topological fact types: `decision`, `rule`, and `code`. 
+The `ZKSwarmGuard` (implemented in [`cortex/guards/zk_guard.py`](file://~/30_CORTEX/cortex/guards/zk_guard.py)) validates cryptographic proofs of consensus on high-risk topological fact types: `decision`, `rule`, and `code`. 
 
 To write/inject a fact of these types, the committing agent must sign the payload:
 1. **Key Generation / Identity:** The subagent loads its `ZKSwarmIdentity` public/private keypair.

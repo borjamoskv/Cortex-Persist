@@ -29,8 +29,8 @@ The LP is a living dissipative structure.
 - **Fase C (Mutación)**: Sortu-Apex JIT compiler adjusts future 21-EDO generative rules based on Exergy data.
 
 ## 4. EXECUTION VECTORS
-- **Audio Vector**: `/Users/borjafernandezangulo/Music/VISUALES/` (Requires Sortu-Apex stems).
-- **Web Vector**: `/Users/borjafernandezangulo/10_PROJECTS/borjamoskv-site/` (Astro/Vite + Vanilla CSS, zero Tailwind, deployed via Firebase).
+- **Audio Vector**: `~/Music/VISUALES/` (Requires Sortu-Apex stems).
+- **Web Vector**: `~/10_PROJECTS/borjamoskv-site/` (Astro/Vite + Vanilla CSS, zero Tailwind, deployed via Firebase).
 
 ## 5. STRUCTURAL ANATOMY
 ### 5.1 The Album

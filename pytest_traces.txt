@@ -683,35 +683,35 @@ ERROR    cortex.security.virgo:virgo.py:308 🛑 [VIRGO-ROLLBACK] Logos-Critique
     from pydantic.v1.fields import FieldInfo as FieldInfoV1
 
 tests/test_chaos_audit_stream.py:4
-  /Users/borjafernandezangulo/30_CORTEX/tests/test_chaos_audit_stream.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.chaos - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+  ~/30_CORTEX/tests/test_chaos_audit_stream.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.chaos - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     pytestmark = pytest.mark.chaos
 
 tests/test_hito_3_supervisor_architecture.py:13
-  /Users/borjafernandezangulo/30_CORTEX/tests/test_hito_3_supervisor_architecture.py:13: PytestCollectionWarning: cannot collect test class 'TestAgent' because it has a __init__ constructor (from: tests/test_hito_3_supervisor_architecture.py)
+  ~/30_CORTEX/tests/test_hito_3_supervisor_architecture.py:13: PytestCollectionWarning: cannot collect test class 'TestAgent' because it has a __init__ constructor (from: tests/test_hito_3_supervisor_architecture.py)
     class TestAgent(SwarmAgent):
 
 tests/test_llm_provider_status.py:4
-  /Users/borjafernandezangulo/30_CORTEX/tests/test_llm_provider_status.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+  ~/30_CORTEX/tests/test_llm_provider_status.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     pytestmark = pytest.mark.integration
 
 tests/test_llm_router_presets.py:4
-  /Users/borjafernandezangulo/30_CORTEX/tests/test_llm_router_presets.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+  ~/30_CORTEX/tests/test_llm_router_presets.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     pytestmark = pytest.mark.integration
 
 tests/test_metal_falsability.py:2
-  /Users/borjafernandezangulo/30_CORTEX/tests/test_metal_falsability.py:2: PytestUnknownMarkWarning: Unknown pytest.mark.chaos - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+  ~/30_CORTEX/tests/test_metal_falsability.py:2: PytestUnknownMarkWarning: Unknown pytest.mark.chaos - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     pytestmark = pytest.mark.chaos
 
 tests/test_postgres_integration.py:4
-  /Users/borjafernandezangulo/30_CORTEX/tests/test_postgres_integration.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+  ~/30_CORTEX/tests/test_postgres_integration.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     pytestmark = pytest.mark.integration
 
 tests/test_ttt_daemon.py:4
-  /Users/borjafernandezangulo/30_CORTEX/tests/test_ttt_daemon.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+  ~/30_CORTEX/tests/test_ttt_daemon.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     pytestmark = pytest.mark.integration
 
 tests/verification/test_adversarial_simulation.py:4
-  /Users/borjafernandezangulo/30_CORTEX/tests/verification/test_adversarial_simulation.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.chaos - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+  ~/30_CORTEX/tests/verification/test_adversarial_simulation.py:4: PytestUnknownMarkWarning: Unknown pytest.mark.chaos - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     pytestmark = pytest.mark.chaos
 
 tests/test_adk_agents.py::TestADKModuleImport::test_agents_module_import

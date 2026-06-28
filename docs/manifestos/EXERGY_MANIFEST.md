@@ -5,203 +5,203 @@
 
 ### Exergy 97.4
 - **[SKILL]** `accidental-data-loss-prevention`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/accidental-data-loss-prevention`
+  - Path: `~/.gemini/config/skills/accidental-data-loss-prevention`
 ### Exergy 96.2
 - **[SKILL]** `managing-python-dependencies`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/managing-python-dependencies`
+  - Path: `~/.gemini/config/skills/managing-python-dependencies`
 - **[SKILL]** `Browser-CDP-Automation-OMEGA`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Browser-CDP-Automation-OMEGA`
+  - Path: `~/.gemini/config/skills/Browser-CDP-Automation-OMEGA`
 ### Exergy 95.0
 - **[SKILL]** `Autodidact-Research-OMEGA`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Autodidact-Research-OMEGA`
+  - Path: `~/.gemini/config/skills/Autodidact-Research-OMEGA`
 - **[SKILL]** `Agent-Paper-RedTeam-OMEGA`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Agent-Paper-RedTeam-OMEGA`
+  - Path: `~/.gemini/config/skills/Agent-Paper-RedTeam-OMEGA`
 ### Exergy 94.6
 - **[SKILL]** `Antigravity-Github-Omega`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Antigravity-Github-Omega`
+  - Path: `~/.gemini/config/skills/Antigravity-Github-Omega`
 - **[SKILL]** `Autodidact-History-OMEGA`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Autodidact-History-OMEGA`
+  - Path: `~/.gemini/config/skills/Autodidact-History-OMEGA`
 ### Exergy 94.2
 - **[SKILL]** `Aesthetic-Foundry-Omega`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Aesthetic-Foundry-Omega`
+  - Path: `~/.gemini/config/skills/Aesthetic-Foundry-Omega`
 ### Exergy 93.8
 - **[SKILL]** `Autonomous-Audit-OMEGA`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Autonomous-Audit-OMEGA`
+  - Path: `~/.gemini/config/skills/Autonomous-Audit-OMEGA`
 - **[SKILL]** `Python-Extractor-OMEGA`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Python-Extractor-OMEGA`
+  - Path: `~/.gemini/config/skills/Python-Extractor-OMEGA`
 ### Exergy 93.4
 - **[SKILL]** `Estado-Del-Arte-OMEGA`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Estado-Del-Arte-OMEGA`
+  - Path: `~/.gemini/config/skills/Estado-Del-Arte-OMEGA`
 ### Exergy 92.6
 - **[SKILL]** `Exergy-Engine-OMEGA`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Exergy-Engine-OMEGA`
+  - Path: `~/.gemini/config/skills/Exergy-Engine-OMEGA`
 ### Exergy 92.2
 - **[SKILL]** `API-Provider-OMEGA`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/API-Provider-OMEGA`
+  - Path: `~/.gemini/config/skills/API-Provider-OMEGA`
 - **[SKILL]** `ouroboros-infinity`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/ouroboros-infinity`
+  - Path: `~/.gemini/config/skills/ouroboros-infinity`
 ### Exergy 91.8
 - **[SKILL]** `Mac-Control-OMEGA`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Mac-Control-OMEGA`
+  - Path: `~/.gemini/config/skills/Mac-Control-OMEGA`
 ### Exergy 89.0
 - **[SKILL]** `Sortu-APEX`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Sortu-APEX`
+  - Path: `~/.gemini/config/skills/Sortu-APEX`
 ### TBD
 - **[SKILL]** `Network-Security-L4-OMEGA`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/Network-Security-L4-OMEGA`
+  - Path: `~/.gemini/config/skills/Network-Security-L4-OMEGA`
 - **[SKILL]** `scripts`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/skills/scripts`
+  - Path: `~/.gemini/config/skills/scripts`
 - **[SKILL (Plugin)]** `google-antigravity-sdk`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/plugins/google-antigravity-sdk/skills/google-antigravity-sdk`
+  - Path: `~/.gemini/config/plugins/google-antigravity-sdk/skills/google-antigravity-sdk`
 - **[SKILL (Plugin)]** `debug-optimize-lcp`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/plugins/chrome-devtools-plugin/skills/debug-optimize-lcp`
+  - Path: `~/.gemini/config/plugins/chrome-devtools-plugin/skills/debug-optimize-lcp`
 - **[SKILL (Plugin)]** `troubleshooting`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/plugins/chrome-devtools-plugin/skills/troubleshooting`
+  - Path: `~/.gemini/config/plugins/chrome-devtools-plugin/skills/troubleshooting`
 - **[SKILL (Plugin)]** `chrome-devtools`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/plugins/chrome-devtools-plugin/skills/chrome-devtools`
+  - Path: `~/.gemini/config/plugins/chrome-devtools-plugin/skills/chrome-devtools`
 - **[SKILL (Plugin)]** `memory-leak-debugging`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/plugins/chrome-devtools-plugin/skills/memory-leak-debugging`
+  - Path: `~/.gemini/config/plugins/chrome-devtools-plugin/skills/memory-leak-debugging`
 - **[SKILL (Plugin)]** `a11y-debugging`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/plugins/chrome-devtools-plugin/skills/a11y-debugging`
+  - Path: `~/.gemini/config/plugins/chrome-devtools-plugin/skills/a11y-debugging`
 - **[SKILL (Plugin)]** `chrome-extensions`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/plugins/modern-web-guidance-plugin/skills/chrome-extensions`
+  - Path: `~/.gemini/config/plugins/modern-web-guidance-plugin/skills/chrome-extensions`
 - **[SKILL (Plugin)]** `modern-web-guidance`
-  - Path: `/Users/borjafernandezangulo/.gemini/config/plugins/modern-web-guidance-plugin/skills/modern-web-guidance`
+  - Path: `~/.gemini/config/plugins/modern-web-guidance-plugin/skills/modern-web-guidance`
 - **[SCRIPT]** `deploy_cortex_cloud.sh`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/deploy_cortex_cloud.sh`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/deploy_cortex_cloud.sh`
 - **[SCRIPT]** `zero_debt.sh`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/zero_debt.sh`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/zero_debt.sh`
 - **[SCRIPT]** `diagnose.sh`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/diagnose.sh`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/diagnose.sh`
 - **[SCRIPT]** `test_pruner.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/test_pruner.py`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/test_pruner.py`
 - **[SCRIPT]** `repo_health_changed.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/repo_health_changed.py`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/repo_health_changed.py`
 - **[SCRIPT]** `cortex-boot.sh`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/cortex-boot.sh`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/cortex-boot.sh`
 - **[SCRIPT]** `build_semantic_trees.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/build_semantic_trees.py`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/build_semantic_trees.py`
 - **[SCRIPT]** `test_osc.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/test_osc.py`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/test_osc.py`
 - **[SCRIPT]** `auto_radar.sh`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/auto_radar.sh`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/auto_radar.sh`
 - **[SCRIPT]** `sovereign_pre_commit.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/sovereign_pre_commit.py`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/sovereign_pre_commit.py`
 - **[SCRIPT]** `legion_strike.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/legion_strike.py`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/legion_strike.py`
 - **[SCRIPT]** `entropy_gate.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/entropy_gate.py`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/entropy_gate.py`
 - **[SCRIPT]** `README.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/README.md`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/README.md`
 - **[SCRIPT]** `extract_openapi.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/extract_openapi.py`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/extract_openapi.py`
 - **[SCRIPT]** `cortex_persist.sh`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/cortex_persist.sh`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/cortex_persist.sh`
 - **[SCRIPT]** `generate_telemetry.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/generate_telemetry.py`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/generate_telemetry.py`
 - **[SCRIPT]** `sovereign_pre_commit.sh`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/sovereign_pre_commit.sh`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/sovereign_pre_commit.sh`
 - **[SCRIPT]** `generate_sdks.sh`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/generate_sdks.sh`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/generate_sdks.sh`
 - **[SCRIPT]** `_changed_files.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/_changed_files.py`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/_changed_files.py`
 - **[SCRIPT]** `radar_cron.sh`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/radar_cron.sh`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/radar_cron.sh`
 - **[SCRIPT]** `ouroboros_prune.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/ouroboros_prune.py`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/ouroboros_prune.py`
 - **[SCRIPT]** `memory_bench.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scripts/memory_bench.py`
+  - Path: `~/10_PROJECTS/cortex-persist/scripts/memory_bench.py`
 - **[WORKFLOW]** `confluence-awwwards.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agents/workflows/confluence-awwwards.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/confluence-awwwards.md`
 - **[WORKFLOW]** `CORTEX-PERSIST-WHITEPAPER.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agents/workflows/CORTEX-PERSIST-WHITEPAPER.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/CORTEX-PERSIST-WHITEPAPER.md`
 - **[WORKFLOW]** `confluence-nightshift.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agents/workflows/confluence-nightshift.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/confluence-nightshift.md`
 - **[WORKFLOW]** `RFC-CORTEX-NATIVE-AI.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agents/workflows/RFC-CORTEX-NATIVE-AI.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/RFC-CORTEX-NATIVE-AI.md`
 - **[WORKFLOW]** `confluence-inmortal.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agents/workflows/confluence-inmortal.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/confluence-inmortal.md`
 - **[WORKFLOW]** `confluence-mmx.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agents/workflows/confluence-mmx.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/confluence-mmx.md`
 - **[WORKFLOW]** `CORTEX-NATIVE-AI-MANIFESTO.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agents/workflows/CORTEX-NATIVE-AI-MANIFESTO.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/CORTEX-NATIVE-AI-MANIFESTO.md`
 - **[WORKFLOW]** `confluence-sindicate.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agents/workflows/confluence-sindicate.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/confluence-sindicate.md`
 - **[WORKFLOW]** `confluence-black-swan.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agents/workflows/confluence-black-swan.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/confluence-black-swan.md`
 - **[WORKFLOW]** `browser-subagent.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/browser-subagent.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/browser-subagent.md`
 - **[WORKFLOW]** `musa_creativa.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/musa_creativa.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/musa_creativa.md`
 - **[WORKFLOW]** `idea.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/idea.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/idea.md`
 - **[WORKFLOW]** `omega_protocol.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/omega_protocol.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/omega_protocol.md`
 - **[WORKFLOW]** `flujo_glorioso_v2.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/flujo_glorioso_v2.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/flujo_glorioso_v2.md`
 - **[WORKFLOW]** `playground.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/playground.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/playground.md`
 - **[WORKFLOW]** `legion.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/legion.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/legion.md`
 - **[WORKFLOW]** `memory.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/memory.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/memory.md`
 - **[WORKFLOW]** `sentinel_seguridad.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/sentinel_seguridad.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/sentinel_seguridad.md`
 - **[WORKFLOW]** `build.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/build.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/build.md`
 - **[WORKFLOW]** `arquitecto_codigo.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/arquitecto_codigo.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/arquitecto_codigo.md`
 - **[WORKFLOW]** `comandante_despliegue.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/comandante_despliegue.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/comandante_despliegue.md`
 - **[WORKFLOW]** `ouroboros.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/ouroboros.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/ouroboros.md`
 - **[WORKFLOW]** `cooldown.md`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/.agent/workflows/cooldown.md`
+  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/cooldown.md`
 - **[AGENT]** `planner.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/planner.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/planner.py`
 - **[AGENT]** `neural.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/neural.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/neural.py`
 - **[AGENT]** `manifest.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/manifest.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/manifest.py`
 - **[AGENT]** `copilot_debounce.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/copilot_debounce.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/copilot_debounce.py`
 - **[AGENT]** `handoff.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/handoff.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/handoff.py`
 - **[AGENT]** `copilot_cache.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/copilot_cache.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/copilot_cache.py`
 - **[AGENT]** `supervisor.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/supervisor.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/supervisor.py`
 - **[AGENT]** `sovereign_e2e_swarm.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/sovereign_e2e_swarm.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/sovereign_e2e_swarm.py`
 - **[AGENT]** `tools.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/tools.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/tools.py`
 - **[AGENT]** `system_prompt.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/system_prompt.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/system_prompt.py`
 - **[AGENT]** `copilot_contracts.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/copilot_contracts.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/copilot_contracts.py`
 - **[AGENT]** `copilot_context.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/copilot_context.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/copilot_context.py`
 - **[AGENT]** `copilot_llm_strategy.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/copilot_llm_strategy.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/copilot_llm_strategy.py`
 - **[AGENT]** `bus.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/bus.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/bus.py`
 - **[AGENT]** `loader.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/loader.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/loader.py`
 - **[AGENT]** `autonomous.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/autonomous.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/autonomous.py`
 - **[AGENT]** `pitches.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/pitches.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/pitches.py`
 - **[AGENT]** `contracts.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/contracts.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/contracts.py`
 - **[AGENT]** `copilot_server.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/copilot_server.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/copilot_server.py`
 - **[AGENT]** `builtin_tools.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/builtin_tools.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/builtin_tools.py`
 - **[AGENT]** `base.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/base.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/base.py`
 - **[AGENT]** `message_schema.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/message_schema.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/message_schema.py`
 - **[AGENT]** `state.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/state.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/state.py`
 - **[AGENT]** `schema.py`
-  - Path: `/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/agents/schema.py`
+  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/schema.py`

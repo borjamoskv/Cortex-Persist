@@ -3,7 +3,7 @@
 # MODE: C5-REAL
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-export HOME="/Users/borjafernandezangulo"
+export HOME="~"
 
 cd "$HOME/10_PROJECTS/cortex-persist" || exit 1
 

@@ -21,7 +21,7 @@ async def distill_swarm():
         print("[○] No targets found in ledger for distillation.")
         return
 
-    report_dir = Path("/Users/borjafernandezangulo/10_PROJECTS/Cortex-Persist/swarm_reports")
+    report_dir = Path("~/10_PROJECTS/Cortex-Persist/swarm_reports")
     report_dir.mkdir(exist_ok=True)
 
     for i, t in enumerate(targets):

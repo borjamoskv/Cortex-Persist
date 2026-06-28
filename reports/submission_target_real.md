@@ -37,11 +37,11 @@ function testFuzz_ChaosExplosion(uint256 x, uint256 y, uint256 z) public {
 El nodo `testFuzz_ChaosExplosion` cedió ante la presión termodinámica de Anvil:
 
 ```text
-[02:33:22.368792] [SYSTEM] [CHAOS-FUZZER] Iniciando Asalto Chaos en: /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/engine-c5/target_real (10000 ciclos)
+[02:33:22.368792] [SYSTEM] [CHAOS-FUZZER] Iniciando Asalto Chaos en: ~/10_PROJECTS/cortex-persist/engine-c5/target_real (10000 ciclos)
 [02:33:24.307308] [L3-STRIKE] [CHAOS-FUZZER] Iniciando Chaos Engine sobre el Target Físico... (10000 ciclos)
 [02:33:26.115928] [BREAKER] [CHAOS-FUZZER] Fractura Detectada. Invariante Inconsistente.
 [02:33:26.116216] [CORRUPTION] [CHAOS-FUZZER] Motivo de colapso: [FAIL: Chaos Reached! Memory Corrupted.: true != false; counterexample: calldata=0xe0f2c89100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000005525b8f0000000000000000000000000000000000000000000000000000000000000000 args=[1, 89283471 [8.928e7], 0]] testFuzz_ChaosExplosion(uint256,uint256,uint256) (runs: 642, μ: 10179, ~: 10179)
-[02:33:26.116279] [C5-REAL] [CHAOS-FUZZER] -> EXERGY YIELD: Encontrada colisión matemática en /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/engine-c5/target_real.
+[02:33:26.116279] [C5-REAL] [CHAOS-FUZZER] -> EXERGY YIELD: Encontrada colisión matemática en ~/10_PROJECTS/cortex-persist/engine-c5/target_real.
 ```
 
 ## Vector Confirmado

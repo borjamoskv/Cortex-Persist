@@ -3,11 +3,11 @@
  "outputs": "929997f1216f1d80.o",
  "log":
  [{"message":
-   ".> /Users/borjafernandezangulo/.elan/toolchains/leanprover--lean4---v4.31.0/bin/clang -c -o /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/HardGraphChecker.c.o.export /Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/HardGraphChecker.c -I /Users/borjafernandezangulo/.elan/toolchains/leanprover--lean4---v4.31.0/include -fstack-clash-protection -fdata-sections -ffunction-sections -fvisibility=hidden -Wno-unused-command-line-argument --sysroot /Users/borjafernandezangulo/.elan/toolchains/leanprover--lean4---v4.31.0 -nostdinc -isystem /Users/borjafernandezangulo/.elan/toolchains/leanprover--lean4---v4.31.0/include/clang -O3 -DNDEBUG -DLEAN_EXPORTING",
+   ".> ~/.elan/toolchains/leanprover--lean4---v4.31.0/bin/clang -c -o ~/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/HardGraphChecker.c.o.export ~/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/HardGraphChecker.c -I ~/.elan/toolchains/leanprover--lean4---v4.31.0/include -fstack-clash-protection -fdata-sections -ffunction-sections -fvisibility=hidden -Wno-unused-command-line-argument --sysroot ~/.elan/toolchains/leanprover--lean4---v4.31.0 -nostdinc -isystem ~/.elan/toolchains/leanprover--lean4---v4.31.0/include/clang -O3 -DNDEBUG -DLEAN_EXPORTING",
    "level": "trace"}],
  "inputs":
  [["CortexMathLean.HardGraphChecker:c",
-   [["/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/HardGraphChecker.c",
+   [["~/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/ir/CortexMathLean/HardGraphChecker.c",
      "0dea25ef561b5d8c"],
     ["Lean 4.31.0, commit 68218e876d2a38b1985b8590fff244a83c321783",
      "fc45ac412f28501c"]]],

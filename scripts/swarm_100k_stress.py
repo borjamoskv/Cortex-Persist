@@ -26,7 +26,7 @@ async def run_stress_test():
 
     # Load chapters to obtain context
     chapters_json_path = (
-        "/Users/borjafernandezangulo/10_PROJECTS/remotion_saga_video/src/chapters.json"
+        "~/10_PROJECTS/remotion_saga_video/src/chapters.json"
     )
     with open(chapters_json_path, encoding="utf-8") as f:
         chapters = json.load(f)
@@ -70,7 +70,7 @@ async def run_stress_test():
     avg_exergy = sum(e for _, e in exergies) / len(exergies)
 
     # Write report artifact
-    artifact_dir = "/Users/borjafernandezangulo/.gemini/antigravity/brain/2c8ee54e-09df-499e-8aef-db1f3cc7577c/artifacts"
+    artifact_dir = "~/.gemini/antigravity/brain/2c8ee54e-09df-499e-8aef-db1f3cc7577c/artifacts"
     os.makedirs(artifact_dir, exist_ok=True)
     report_path = os.path.join(artifact_dir, "swarm_100k_stress_report.md")
 

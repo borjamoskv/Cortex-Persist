@@ -209,5 +209,5 @@ T_4.5 ;
 :file_names 4;
     "N/A";
     "<interactive>";
-    "/Users/borjafernandezangulo/10_PROJECTS/Cortex-Persist/engine/rtl/cortex_balance_tb.v";
-    "/Users/borjafernandezangulo/10_PROJECTS/Cortex-Persist/engine/rtl/cortex_balance_monitor.v";
+    "~/10_PROJECTS/Cortex-Persist/engine/rtl/cortex_balance_tb.v";
+    "~/10_PROJECTS/Cortex-Persist/engine/rtl/cortex_balance_monitor.v";

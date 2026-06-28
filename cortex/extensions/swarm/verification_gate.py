@@ -2,17 +2,11 @@
 
 import logging
 from dataclasses import dataclass
-from enum import Enum
 
 logger = logging.getLogger("cortex.swarm.verification")
 
 
-class RiskLevel(str, Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
-
+from cortex.security.types import RiskLevel
 
 RISK_PATH_MAP = {
     "cortex/engine": RiskLevel.CRITICAL,

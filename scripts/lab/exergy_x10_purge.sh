@@ -5,7 +5,7 @@ set -euo pipefail
 
 echo "[C5-REAL] Initiating Exergy x10 Deep Purge..."
 
-cd /Users/borjafernandezangulo/10_PROJECTS/cortex-persist
+cd ~/10_PROJECTS/cortex-persist
 
 # 1. Python Dead Weight Annihilation
 echo "[1/4] Purging PyCache & Test Entropy..."

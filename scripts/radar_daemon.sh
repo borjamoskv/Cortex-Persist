@@ -31,7 +31,7 @@ run_sync() {
     echo "[RADAR-Ω] Starting sync pass..."
 
     export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-    export HOME="/Users/borjafernandezangulo"
+    export HOME="~"
     local REPO="$HOME/10_PROJECTS/cortex-persist"
 
     cd "$REPO" || { echo "[ERROR] Repo not found: $REPO"; exit 1; }

@@ -205,7 +205,7 @@ def parse_iso(ts):
 def _load_workflow_metadata() -> dict[str, int]:
     """Load expected duration for workflows from metadata."""
     workflow_meta = {}
-    wf_dir = "/Users/borjafernandezangulo/.agents/workflows"
+    wf_dir = "~/.agents/workflows"
     if os.path.exists(wf_dir):
         files = glob.glob(os.path.join(wf_dir, "*.md"))
         for f in files:

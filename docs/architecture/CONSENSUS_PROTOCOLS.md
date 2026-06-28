@@ -16,7 +16,7 @@ The three core layers are:
 
 ## 2. WBFT: Weighted Byzantine Fault Tolerance
 
-Implemented in [`cortex/consensus/byzantine.py`](file:///Users/borjafernandezangulo/30_CORTEX/cortex/consensus/byzantine.py), WBFT assesses and filters $N$ parallel responses from LLM or subagent reasoning runs.
+Implemented in [`cortex/consensus/byzantine.py`](file://~/30_CORTEX/cortex/consensus/byzantine.py), WBFT assesses and filters $N$ parallel responses from LLM or subagent reasoning runs.
 
 ### A. Agreement Matrix (Pairwise Jaccard)
 For each pair of responses $(i, j)$, WBFT tokenizes the text contents and calculates their similarity using the Jaccard index:
@@ -39,7 +39,7 @@ Where:
 
 ## 3. RWA-BFT: Reputation-Weighted Asynchronous BFT
 
-Implemented in [`cortex/consensus/rwa_bft.py`](file:///Users/borjafernandezangulo/30_CORTEX/cortex/consensus/rwa_bft.py), RWA-BFT validates fact state changes and proposed rule modifications submitted by evolutionary agents.
+Implemented in [`cortex/consensus/rwa_bft.py`](file://~/30_CORTEX/cortex/consensus/rwa_bft.py), RWA-BFT validates fact state changes and proposed rule modifications submitted by evolutionary agents.
 
 ### A. Supermajority Condition
 For a fact or state modification to be accepted, the sum of reputations of the approving validators must constitute a supermajority of the total active reputation:
@@ -60,7 +60,7 @@ Where:
 
 ## 4. GEACL: Gossip-Enabled Async Consensus Ledger
 
-Implemented in [`cortex/consensus/geacl.py`](file:///Users/borjafernandezangulo/30_CORTEX/cortex/consensus/geacl.py), GEACL serves as the orchestration layer mapping local consensus decisions to distributed P2P topologies.
+Implemented in [`cortex/consensus/geacl.py`](file://~/30_CORTEX/cortex/consensus/geacl.py), GEACL serves as the orchestration layer mapping local consensus decisions to distributed P2P topologies.
 
 ```text
 [Node Local Proposal] 
@@ -75,4 +75,4 @@ Implemented in [`cortex/consensus/geacl.py`](file:///Users/borjafernandezangulo/
 When a peer node proposes a commit (e.g. tool execution, codebase modification):
 1. **Local Resolution:** The local `GEACLCoordinator` runs `WBFT.evaluate()` to identify the winning consensus response.
 2. **Digest Generation:** A semantic digest (SHA-256 hash) of the agreed action intent is generated.
-3. **P2P Gossip Broadcast:** The digest is broadcasted asynchronously to peer nodes via `GossipProtocol` ([gossip.py](file:///Users/borjafernandezangulo/30_CORTEX/cortex/extensions/ha/gossip.py)) to maintain a synchronized replicated state ledger across the Swarm.
+3. **P2P Gossip Broadcast:** The digest is broadcasted asynchronously to peer nodes via `GossipProtocol` ([gossip.py](file://~/30_CORTEX/cortex/extensions/ha/gossip.py)) to maintain a synchronized replicated state ledger across the Swarm.

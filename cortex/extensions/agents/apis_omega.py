@@ -15,6 +15,8 @@ from typing import Any
 
 import httpx
 
+from cortex.agents.mixins import EngineAwareMixin
+
 logger = logging.getLogger("cortex_extensions.agents.apis_omega")
 
 SIGNUP_URLS = {
@@ -31,7 +33,7 @@ SIGNUP_URLS = {
 }
 
 
-class ApisOmegaAgent:
+class ApisOmegaAgent(EngineAwareMixin):
     """Sovereign Agent for API Key Management."""
 
     def __init__(
@@ -46,15 +48,6 @@ class ApisOmegaAgent:
         self._engine: Any = None
         self._db_path = db_path
         self._agent_def: Any = None
-
-    def _ensure_engine(self) -> None:
-        if self._engine is not None:
-            return
-        from cortex.cli import get_engine  # pyright: ignore
-        from cortex.config import DEFAULT_DB_PATH
-
-        db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
-        self._engine = get_engine(db_val)
 
     def _load_agent_definition(self) -> None:
         if self._agent_def is not None:

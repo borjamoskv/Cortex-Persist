@@ -9,17 +9,12 @@ credential leaks, and malicious persistence.
 
 import logging
 import re
-from enum import IntEnum
 from typing import Any
 
 logger = logging.getLogger("cortex.security.firewall")
 
 
-class RiskLevel(IntEnum):
-    LOW = 0
-    MEDIUM = 1
-    HIGH = 2
-    CRITICAL = 3
+from cortex.security.types import RiskLevel
 
 
 class SecretRedactor:

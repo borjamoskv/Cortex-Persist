@@ -35,7 +35,7 @@ for root, _, files in os.walk("cortex"):
                         if base in deps_to_find:
                             mapping[base].append(path)
 
-out_path = "/Users/borjafernandezangulo/.gemini/antigravity/brain/485a969b-d38a-4d5b-afde-2d29ea95d0eb/dependency_map.md"
+out_path = "~/.gemini/antigravity/brain/485a969b-d38a-4d5b-afde-2d29ea95d0eb/dependency_map.md"
 with open(out_path, "w") as out:
     out.write("# Mapa de Dependencias a Eliminar (UltraThink Blast Radius)\n\n")
     for dep in sorted(deps_to_find):

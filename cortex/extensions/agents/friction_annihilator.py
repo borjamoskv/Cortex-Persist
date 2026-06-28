@@ -12,12 +12,13 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from cortex.agents.mixins import EngineAwareMixin
 from cortex.engine.smte.llm_mutator import LLMMutator  # pyright: ignore[reportAttributeAccessIssue]
 
 logger = logging.getLogger("cortex_extensions.agents.friction_annihilator")
 
 
-class FrictionAnnihilatorAgent:
+class FrictionAnnihilatorAgent(EngineAwareMixin):
     """Sovereign Agent that annihilates epistemic friction."""
 
     def __init__(self, db_path: str | Path | None = None):
@@ -25,14 +26,7 @@ class FrictionAnnihilatorAgent:
         self._engine: Any = None
         self.mutator = LLMMutator()
 
-    def _ensure_engine(self) -> None:
-        if self._engine is not None:
-            return
-        from cortex.cli import get_engine  # pyright: ignore[reportAttributeAccessIssue]
-        from cortex.config import DEFAULT_DB_PATH
 
-        db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
-        self._engine = get_engine(db_val)
 
     async def annihilate_friction(
         self, target_file: str, error_trace: str, context: str

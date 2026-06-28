@@ -116,6 +116,18 @@ class VirtualAgent:
                 if hasattr(result, "ok") and result.ok is not None:
                     return str(result.ok)
                 if hasattr(result, "err") and result.err is not None:
+                    # [C5-REAL] Sanedrín Soft-Fallback
+                    if hasattr(self, "formation") and getattr(self, "formation", None) == "SANEDRIN":
+                        logger.warning(
+                            "VirtualAgent %s: SANEDRIN cascade exhausted/404 for task %s. Reassigning role dynamically from %s to OSINT.",
+                            self.agent_id, task_idx, self.specialty
+                        )
+                        self.specialty = "OSINT"
+                        cortex_prompt.system_instruction = f"You are a sovereign {self.specialty} specialist agent (id={self.agent_id}). Answer concisely and deterministically."
+                        retry_result = await self._router.execute_resilient(cortex_prompt)
+                        if hasattr(retry_result, "ok") and retry_result.ok is not None:
+                            return str(retry_result.ok)
+                        
                     logger.warning(
                         "VirtualAgent %s: router returned error for task %s: %s - "
                         "falling back to C4-SIM stub.",
@@ -126,6 +138,21 @@ class VirtualAgent:
                 # Fallback: unwrap as string if Result type varies
                 return str(result.ok if hasattr(result, "ok") else result)
             except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
+                # [C5-REAL] Sanedrín Soft-Fallback on Exception
+                if hasattr(self, "formation") and getattr(self, "formation", None) == "SANEDRIN":
+                    logger.warning(
+                        "VirtualAgent %s: SANEDRIN exception %s for task %s. Reassigning role dynamically from %s to INTEL.",
+                        self.agent_id, exc, task_idx, self.specialty
+                    )
+                    self.specialty = "INTEL"
+                    try:
+                        cortex_prompt.system_instruction = f"You are a sovereign {self.specialty} specialist agent (id={self.agent_id}). Answer concisely and deterministically."
+                        retry_result = await self._router.execute_resilient(cortex_prompt)
+                        if hasattr(retry_result, "ok") and retry_result.ok is not None:
+                            return str(retry_result.ok)
+                    except Exception as fallback_exc:
+                        exc = fallback_exc
+                        
                 import logging
                 logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {exc}")
                 logger.warning(
@@ -188,6 +215,7 @@ class CentauroEngine:
             agent_id = f"legionnaire_{len(self.agents) + 1}"
             specialty = self._get_specialty(i, formation)
             agent = VirtualAgent(agent_id, specialty=specialty, router=self.router)
+            agent.formation = formation
             self.agents[agent_id] = agent
             self.consensus.register_node(agent_id, initial_reputation=1.0)
             squad[agent_id] = agent

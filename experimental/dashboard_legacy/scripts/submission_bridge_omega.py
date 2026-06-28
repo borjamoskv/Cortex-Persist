@@ -42,7 +42,7 @@ class SubmissionBridge:
             "verdict": "C5-REAL"
         }
         # Save to local ledger
-        ledger_path = "/Users/borjafernandezangulo/10_PROJECTS/Cortex-Persist/ledger/strikes.json"
+        ledger_path = "~/10_PROJECTS/Cortex-Persist/ledger/strikes.json"
         os.makedirs(os.path.dirname(ledger_path), exist_ok=True)
         
         try:
@@ -60,8 +60,8 @@ class SubmissionBridge:
 if __name__ == "__main__":
     bridge = SubmissionBridge(
         "Firedancer",
-        "/Users/borjafernandezangulo/10_PROJECTS/scouts/firedancer/reports/firedancer_critical_report.md",
-        "/Users/borjafernandezangulo/10_PROJECTS/scouts/firedancer/exploit_kit.zip"
+        "~/10_PROJECTS/scouts/firedancer/reports/firedancer_critical_report.md",
+        "~/10_PROJECTS/scouts/firedancer/exploit_kit.zip"
     )
     
     if bridge.verify_assets():

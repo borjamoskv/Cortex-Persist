@@ -23,7 +23,7 @@ async def optimize_durations():
 
     # Load raw chapters text to analyze exact word counts
     chapters_json_path = (
-        "/Users/borjafernandezangulo/10_PROJECTS/remotion_saga_video/src/chapters.json"
+        "~/10_PROJECTS/remotion_saga_video/src/chapters.json"
     )
     with open(chapters_json_path, encoding="utf-8") as f:
         chapters = json.load(f)

@@ -504,7 +504,7 @@ Proof:
 ---
 
 ### Hito 35: BFT Consensus & Bisimulation Proof (TLA+ Refinement)
-- **Target:** [auth_gateway.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/auth_gateway.py), [CortexByzantineRefinement.tla](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/docs/formal_specs/CortexByzantineRefinement.tla)
+- **Target:** [auth_gateway.py](file://~/10_PROJECTS/cortex-persist/cortex/engine/auth_gateway.py), [CortexByzantineRefinement.tla](file://~/10_PROJECTS/cortex-persist/docs/formal_specs/CortexByzantineRefinement.tla)
 - **Objective:** Refactorización de la seguridad de admisión a `QuorumGateway` (consenso BFT multi-firma $f < n/3$) y construcción de la prueba de refinamiento formal en TLA+ mapeando observables del Runtime contra el Kernel abstracto.
 - **Yield Target:** 100% de la suite de pruebas unitarias y adversariales en verde, con el adversario modelado formalmente como planificador del entorno no-determinista en TLA+.
 - **Reality Level:** `C6-FORMAL` (Math/Silicon)
@@ -764,7 +764,7 @@ Proof:
 ---
 
 ### Hito 46: PostgreSQL & pgvector Search Support
-- **Target:** [hybrid.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/search/hybrid.py), [text.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/search/text.py), [utils.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/search/utils.py), [vector.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/search/vector.py)
+- **Target:** [hybrid.py](file://~/10_PROJECTS/cortex-persist/cortex/search/hybrid.py), [text.py](file://~/10_PROJECTS/cortex-persist/cortex/search/text.py), [utils.py](file://~/10_PROJECTS/cortex-persist/cortex/search/utils.py), [vector.py](file://~/10_PROJECTS/cortex-persist/cortex/search/vector.py)
 - **Objective:** Add native support for PostgreSQL and pgvector cosine similarity search (`<=>`) for hybrid semantic-lexical queries. Ensure robust type handling for Postgres-deserialized JSONB/arrays (avoiding crashes on string vs dictionary/list inputs) and timezone-aware native datetimes during temporal decay computations.
 - **Yield Target:** Green test suite covering PostgreSQL-specific SQL parsing, mock connection execution, and row mapping.
 - **Reality Level:** `C5-REAL`
@@ -782,7 +782,7 @@ Proof:
 ---
 
 ### Hito 47: Dependency Hardening & FFI Re-compilation
-- **Target**: [pyproject.toml](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/pyproject.toml), [uv.lock](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/uv.lock)
+- **Target**: [pyproject.toml](file://~/10_PROJECTS/cortex-persist/pyproject.toml), [uv.lock](file://~/10_PROJECTS/cortex-persist/uv.lock)
 - **Objective**: Secure dependencies (`aiohttp` v3.14.0, `transformers` v5.10.2, `chromadb` v1.5.9) and re-compile the `cortex_rs` FFI bindings to resolve `AtmsGraph` attribute resolution.
 - **Yield Target**: 100% security coverage of flagged CVEs, zero regression over 2639 pytest cases.
 - **Reality Level**: `C5-REAL`
@@ -799,7 +799,7 @@ Proof:
 ---
 
 ### Hito 48: Cryptographic Migration & Auth Hardening (AUTH-01)
-- **Target**: [cortex/auth/manager.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/auth/manager.py), [cortex/auth/backends.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/auth/backends.py), [cortex/auth/schema.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/auth/schema.py)
+- **Target**: [cortex/auth/manager.py](file://~/10_PROJECTS/cortex-persist/cortex/auth/manager.py), [cortex/auth/backends.py](file://~/10_PROJECTS/cortex-persist/cortex/auth/backends.py), [cortex/auth/schema.py](file://~/10_PROJECTS/cortex-persist/cortex/auth/schema.py)
 - **Objective**: Implement progressive dual-stack Argon2id hashing with cryptographic pepper `AUTH_PEPPER`, mitigating static salt deterministic weaknesses and offline dictionary attacks without rotating existing active API keys.
 - **Yield Target**: 100% legacy login compatibility with background rehashing. Zero downtime.
 - **Reality Level**: `C5-REAL`

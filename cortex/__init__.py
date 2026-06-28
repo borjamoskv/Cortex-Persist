@@ -48,8 +48,8 @@ _original_get_message = logging.LogRecord.getMessage
 
 def _scrubbed_get_message(self):
     msg = _original_get_message(self)
-    if "borjafernandezangulo" in msg:
-        msg = msg.replace("/Users/borjafernandezangulo", "~").replace("borjafernandezangulo", "[REDACTED]")
+    if "[REDACTED_PII]" in msg:
+        msg = msg.replace("~", "~").replace("[REDACTED_PII]", "[REDACTED]")
     return msg
 
 logging.LogRecord.getMessage = _scrubbed_get_message

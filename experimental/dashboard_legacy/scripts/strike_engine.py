@@ -18,7 +18,7 @@ from native_paths import resolve_native_binary
 # Agente Kant-Ω Integration
 import sys
 from pathlib import Path
-kant_path = Path("/Users/borjafernandezangulo/.gemini/antigravity/skills/Agente-Kant-Omega")
+kant_path = Path("~/.gemini/antigravity/skills/Agente-Kant-Omega")
 if str(kant_path) not in sys.path:
     sys.path.append(str(kant_path))
 try:

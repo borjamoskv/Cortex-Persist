@@ -1,6 +1,6 @@
 import os
 
-base_dir = "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/audit"
+base_dir = "~/10_PROJECTS/cortex-persist/cortex/audit"
 input_file = os.path.join(base_dir, "cognitive_router.py")
 
 with open(input_file) as f:

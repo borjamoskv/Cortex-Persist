@@ -12,27 +12,19 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from cortex.agents.mixins import EngineAwareMixin
 from cortex.engine.smte.llm_mutator import call_qwen_mutator
 from cortex.engine.smte.weismann_barrier import enforce_weismann_barrier
 
 logger = logging.getLogger("cortex.engine.smte.ouroboros_compiler")
 
 
-class OuroborosCompiler:
+class OuroborosCompiler(EngineAwareMixin):
     """AOT Compiler that converts limerent agents into compressed minimal paths."""
 
     def __init__(self, db_path: str | Path | None = None):
         self._db_path = db_path
         self._engine: Any = None
-
-    def _ensure_engine(self) -> None:
-        if self._engine is not None:
-            return
-        from cortex.config import DEFAULT_DB_PATH
-        from cortex.engine import CortexEngine
-
-        db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
-        self._engine = CortexEngine(db_path=db_val)
 
     def analyze_limerence(self, source_code: str) -> dict[str, Any]:
         """Analyze code for high maintenance cost vs utility using L-EPI empirical metrics.

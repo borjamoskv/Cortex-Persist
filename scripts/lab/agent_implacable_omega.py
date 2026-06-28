@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 class ImplacableOmegaAgent:
     def __init__(self):
-        self.workspace_root = "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist"
+        self.workspace_root = "~/10_PROJECTS/cortex-persist"
         self.log_file = os.path.join(self.workspace_root, "exergy_singularity.log")
         self.state = "C5-REAL"
 
@@ -41,10 +41,10 @@ class ImplacableOmegaAgent:
         # 1. Daemon / Basic Anergy Sweep
         self._log("Vector 1: Basic Anergy Annihilation (DS_Store, zcompdump)")
         self._execute_ruthlessly(
-            "find /Users/borjafernandezangulo/10_PROJECTS -name '.DS_Store' -type f -delete"
+            "find ~/10_PROJECTS -name '.DS_Store' -type f -delete"
         )
         self._execute_ruthlessly(
-            "find /Users/borjafernandezangulo -maxdepth 1 -name '.zcompdump*' -type f -delete"
+            "find ~ -maxdepth 1 -name '.zcompdump*' -type f -delete"
         )
 
         # 2. Total LEA-Omega Workspace Purge

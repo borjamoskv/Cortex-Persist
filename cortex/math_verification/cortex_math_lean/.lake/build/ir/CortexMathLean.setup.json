@@ -5,7 +5,7 @@
  "isModule": false,
  "importArts":
  {"CortexMathLean.HardGraphChecker":
-  ["/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean/CortexMathLean/HardGraphChecker.olean"],
+  ["~/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean/CortexMathLean/HardGraphChecker.olean"],
   "CortexMathLean.GraphTheory":
-  ["/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean/CortexMathLean/GraphTheory.olean"]},
+  ["~/10_PROJECTS/cortex-persist/cortex/math_verification/cortex_math_lean/.lake/build/lib/lean/CortexMathLean/GraphTheory.olean"]},
  "dynlibs": []}

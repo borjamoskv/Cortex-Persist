@@ -25,7 +25,7 @@ async def verify_pacing():
 
     # Load dynamically paced chapters
     chapters_json_path = (
-        "/Users/borjafernandezangulo/10_PROJECTS/remotion_saga_video/src/chapters.json"
+        "~/10_PROJECTS/remotion_saga_video/src/chapters.json"
     )
     if not os.path.exists(chapters_json_path):
         print("Error: chapters.json not found.")
@@ -82,7 +82,7 @@ async def verify_pacing():
     avg_coeff = sum(readability_scores) / len(readability_scores)
 
     # Generate report
-    artifact_dir = "/Users/borjafernandezangulo/.gemini/antigravity/brain/2c8ee54e-09df-499e-8aef-db1f3cc7577c/artifacts"
+    artifact_dir = "~/.gemini/antigravity/brain/2c8ee54e-09df-499e-8aef-db1f3cc7577c/artifacts"
     os.makedirs(artifact_dir, exist_ok=True)
     report_path = os.path.join(artifact_dir, "swarm_1000_pacing_audit.md")
 
