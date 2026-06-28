@@ -29,11 +29,19 @@ class DuressGuard:
 
     @classmethod
     def execute_apoptosis(cls) -> None:
-        """Triggers the logical death protocol by locking the system."""
+        """Triggers the logical death protocol (P100). Scorches environment keys and locks down."""
         logger.critical("DURESS CODE ACTIVATED. Executing P100 Apoptosis Protocol.")
+        
+        # Scorched Earth: Destroy critical API keys in memory to physically halt exfiltration
+        for key in ["GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GITHUB_TOKEN"]:
+            if key in os.environ:
+                os.environ[key] = "PURGED_BY_APOPTOSIS_P100"
+
         try:
             with open(cls.LOCK_FILE, "w", encoding="utf-8") as f:
                 f.write("APOPTOSIS_LOCKED_P100")
+            # Harden lock file permissions (read-only for owner, none for others)
+            os.chmod(cls.LOCK_FILE, 0o400)
         except Exception as e:
             logger.error(f"Failed to execute apoptosis lock: {e}")
 
