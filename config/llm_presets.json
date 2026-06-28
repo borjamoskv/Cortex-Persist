@@ -327,7 +327,7 @@
     "intent_model_map": {
       "code":      "qwen2.5-coder:7b",
       "architect": "qwen2.5-coder:7b",
-      "reasoning": "cortex-8b-solver-pro:latest",
+      "reasoning": "qwen2.5-coder:7b",
       "creative":  "llama3.2:latest",
       "general":   "qwen2.5-coder:7b"
     }

@@ -17,14 +17,14 @@ pytestmark = pytest.mark.slow
 
 
 @pytest.fixture
-async def engine(tmp_path: Path):
+async def engine(tmp_path: Path, monkeypatch):
     """Create a CortexEngine with a temp database, close after test."""
     import os
 
     from cortex.engine import CortexEngine
 
     # Unblock tests from thermodynamic enforcement
-    os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
+    monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
 
     db = str(tmp_path / "test_store.db")
     e = CortexEngine(db_path=db, auto_embed=False)
@@ -39,10 +39,6 @@ async def engine(tmp_path: Path):
 
     yield e
     await e.close()
-
-    # Cleanup
-    if "CORTEX_SKIP_EXERGY_VALIDATION" in os.environ:
-        del os.environ["CORTEX_SKIP_EXERGY_VALIDATION"]
 
 
 # ─── Store ────────────────────────────────────────────────────────────

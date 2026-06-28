@@ -45,12 +45,12 @@ def mock_omega_auditor(monkeypatch):
 
 
 @pytest.fixture
-async def engine(tmp_path: Path):
+async def engine(tmp_path: Path, monkeypatch):
     """Initialize a clean test instance of the CortexEngine."""
     from cortex.engine import CortexEngine
 
-    os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
-    os.environ["CORTEX_STRICT_GUARDS"] = "1"
+    monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
+    monkeypatch.setenv("CORTEX_STRICT_GUARDS", "1")
 
     db = str(tmp_path / "test_adversarial.db")
     e = CortexEngine(db_path=db, auto_embed=False)
@@ -58,11 +58,6 @@ async def engine(tmp_path: Path):
 
     yield e
     await e.close()
-
-    if "CORTEX_SKIP_EXERGY_VALIDATION" in os.environ:
-        del os.environ["CORTEX_SKIP_EXERGY_VALIDATION"]
-    if "CORTEX_STRICT_GUARDS" in os.environ:
-        del os.environ["CORTEX_STRICT_GUARDS"]
 
 
 # ─── Vector 1: Hallucination Injection Verification ──────────────────

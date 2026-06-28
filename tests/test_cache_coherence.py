@@ -60,10 +60,10 @@ def mock_redis_client():
 
 
 @pytest.fixture
-async def engine(tmp_path: Path):
+async def engine(tmp_path: Path, monkeypatch):
     import os
 
-    os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
+    monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
     db = str(tmp_path / "test_cache.db")
     e = CortexEngine(db_path=db, auto_embed=False)
     await e.init_db()
@@ -76,8 +76,6 @@ async def engine(tmp_path: Path):
 
     yield e
     await e.close()
-    if "CORTEX_SKIP_EXERGY_VALIDATION" in os.environ:
-        del os.environ["CORTEX_SKIP_EXERGY_VALIDATION"]
 
 
 @pytest.mark.asyncio
