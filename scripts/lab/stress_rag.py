@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # stress_rag.py
-# Mide latencia real y degradación de RAM bajo carga del agente RAG
+# Measures real latency and RAM degradation under RAG agent load
 
 import subprocess
 import time
@@ -9,11 +9,11 @@ PYTHON = "/Library/Frameworks/Python.framework/Versions/3.14/bin/python3"
 AGENT  = "agent_with_tools.py"
 
 QUERIES = [
-    "Lista archivos .py en el directorio actual y cuenta cuántos hay.",
-    "Muestra git status.",
-    "Corre pytest --collect-only.",
-    "Lista los últimos 5 commits con git log --oneline.",
-    "Muestra el contenido de README.md con bash.",
+    "List .py files in current directory and count them.",
+    "Show git status.",
+    "Run pytest --collect-only.",
+    "List the last 5 commits with git log --oneline.",
+    "Show the content of README.md with bash.",
 ]
 
 def get_free_ram_mb() -> float:
@@ -69,31 +69,31 @@ def main():
         results.append(r)
         print(f"{r['elapsed_s']}s | RAM delta: -{r.get('ram_delta_mb', 0)} MB | {r['status']}")
 
-        # Parar si RAM cae por debajo de 200 MB
+        # Stop if RAM falls below 200 MB
         if r.get("ram_after_mb", 999) < 200:
-            print("\n⚠️  RAM CRÍTICA (<200 MB) — deteniendo stress test.")
+            print("\n⚠️  CRITICAL RAM (<200 MB) — stopping stress test.")
             break
 
-    # Resumen
+    # Summary
     ok = [r for r in results if r["status"] == "OK"]
     times = [r["elapsed_s"] for r in ok]
     ram_deltas = [r["ram_delta_mb"] for r in ok if "ram_delta_mb" in r]
 
     print(f"\n{'='*60}")
-    print("RESUMEN")
+    print("SUMMARY")
     print(f"{'='*60}")
-    print(f"Queries completadas:  {len(ok)}/{len(results)}")
+    print(f"Completed queries:    {len(ok)}/{len(results)}")
     if times:
-        print(f"Latencia media:       {sum(times)/len(times):.2f}s")
-        print(f"Latencia mínima:      {min(times):.2f}s")
-        print(f"Latencia máxima:      {max(times):.2f}s")
-        # Degradación: diferencia entre primera y última latencia
+        print(f"Average latency:      {sum(times)/len(times):.2f}s")
+        print(f"Minimum latency:      {min(times):.2f}s")
+        print(f"Maximum latency:      {max(times):.2f}s")
+        # Degradation: difference between first and last latency
         if len(times) >= 2:
-            degradacion = (times[-1] - times[0]) / times[0] * 100
-            print(f"Degradación total:    {degradacion:+.1f}%")
+            degradation = (times[-1] - times[0]) / times[0] * 100
+            print(f"Total degradation:    {degradation:+.1f}%")
     if ram_deltas:
-        print(f"RAM consumida total:  {sum(ram_deltas):.1f} MB")
-        print(f"RAM delta por query:  {sum(ram_deltas)/len(ram_deltas):.1f} MB")
+        print(f"Total RAM consumed:   {sum(ram_deltas):.1f} MB")
+        print(f"RAM delta per query:  {sum(ram_deltas)/len(ram_deltas):.1f} MB")
     print(f"{'='*60}\n")
 
 if __name__ == "__main__":
