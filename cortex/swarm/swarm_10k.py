@@ -246,7 +246,7 @@ class SwarmCommander:
     ):
         """P0 Singularity Authorization: Evaluates thermodynamic budget before granting Ultrathink access."""
         radius = UltrathinkPhysicsEngine.measure_blast_radius(deps_graph, epicenter)
-        authorized, msg = UltrathinkPhysicsEngine.authorize_ultrathink(
+        authorized, msg, formation = UltrathinkPhysicsEngine.authorize_ultrathink(
             stochastic_entropy, deterministic_output, duration, radius
         )
 
@@ -257,6 +257,8 @@ class SwarmCommander:
         legion = await self.get_or_create_legion(domain)
         original_state = legion._overclocked
         legion._overclocked = True
+        if formation:
+            logger.critical("Deploying LEGIØN-1 Formation: %s", formation.value)
         logger.critical(
             "✴️ ULTRATHINK HORIZON ACTIVATED on domain: %s (Blast Radius: %d) - %s",
             domain,

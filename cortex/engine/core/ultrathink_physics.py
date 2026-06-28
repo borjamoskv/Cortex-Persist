@@ -5,10 +5,19 @@ Calcula la exergía cognitiva y el Blast Radius para autorizar bifurcaciones mas
 """
 
 import logging
-from typing import Any
+from enum import Enum
+from typing import Any, Optional
 
 logger = logging.getLogger("cortex.engine.exergy_physics")
 
+class LegionFormation(str, Enum):
+    """Sovereign Swarm Formations (LEGIØN-1 Protocol)"""
+    HYDRA = "HYDRA"         # 10-20 agents: Parallel domain mutation
+    PHOENIX = "PHOENIX"     # 5-8 agents: Self-healing & technical debt
+    LEVIATHAN = "LEVIATHAN" # 20-50 agents: Total P0 singularity siege
+    ORACLE = "ORACLE"       # 3-5 agents: Strategic prediction
+    OUROBOROS = "OUROBOROS" # 3-7 agents: Recursive self-improvement
+    TESTUDO = "TESTUDO"     # 15 agents: Proactive infrastructure defense
 
 class UltrathinkPhysicsEngine:
     """
@@ -59,12 +68,27 @@ class UltrathinkPhysicsEngine:
         return radius
 
     @staticmethod
+    def calculate_legion_formation(epicenter_radius: int, exergy_yield: float) -> LegionFormation:
+        """
+        Collapses thermodynamic requirements into a specific LEGIØN-1 Swarm Formation.
+        """
+        if epicenter_radius >= 10 and exergy_yield > (UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * 0.5):
+            return LegionFormation.LEVIATHAN
+        if epicenter_radius >= 7:
+            return LegionFormation.HYDRA
+        if epicenter_radius >= 5:
+            return LegionFormation.TESTUDO
+        if exergy_yield > (UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * 0.3):
+            return LegionFormation.OUROBOROS
+        return LegionFormation.PHOENIX
+
+    @staticmethod
     def authorize_ultrathink(
         stochastic_entropy: float,
         deterministic_output: float,
         execution_time: float,
         epicenter_radius: int,
-    ) -> tuple[bool, str]:
+    ) -> tuple[bool, str, Optional[LegionFormation]]:
         """
         El colapso a 'Ultrathink' exige un rendimiento exergético masivo
         y un radio de explosión demostrable.
@@ -77,9 +101,15 @@ class UltrathinkPhysicsEngine:
             return (
                 False,
                 f"Blast radius ({epicenter_radius}) too small for Ultrathink. Use Deep Think.",
+                None
             )
 
         if exergy < (UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * 0.1):
-            return False, f"Insufficient Exergy Yield ({exergy:.2f}) for JIT structural collapse."
+            return (
+                False, 
+                f"Insufficient Exergy Yield ({exergy:.2f}) for JIT structural collapse.",
+                None
+            )
 
-        return True, "Ultrathink P0 Singularity Horizon Authorized."
+        formation = UltrathinkPhysicsEngine.calculate_legion_formation(epicenter_radius, exergy)
+        return True, f"Ultrathink P0 Singularity Horizon Authorized. Swarm: {formation.value}", formation

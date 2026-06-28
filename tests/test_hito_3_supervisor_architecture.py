@@ -121,17 +121,21 @@ async def test_supervisor_pipeline_end_to_end():
         assert dispatched == 5
 
         # Wait for processing
-        await asyncio.sleep(0.5)
+        completed = 0
+        for _ in range(30):
+            await asyncio.sleep(0.1)
+            verify_db = await aiosqlite.connect(db_path)
+            try:
+                async with verify_db.execute(
+                    "SELECT count(*) FROM system_hypotheses WHERE status = 'COMPLETED'"
+                ) as cur:
+                    completed = (await cur.fetchone())[0]
+            finally:
+                await verify_db.close()
+            if completed == 5:
+                break
 
-        # Verify State was mutated by StateStore
-        verify_db = await aiosqlite.connect(db_path)
-        async with verify_db.execute(
-            "SELECT count(*) FROM system_hypotheses WHERE status = 'COMPLETED'"
-        ) as cur:
-            completed = (await cur.fetchone())[0]
-
-        await verify_db.close()
-        assert completed == 5, "All 5 tasks should be COMPLETED"
+        assert completed == 5, f"All 5 tasks should be COMPLETED (got {completed})"
     finally:
         await supervisor.shutdown()
         if os.path.exists(db_path):

@@ -74,7 +74,7 @@ class LedgerCredibilityStack:
         )
 
         if use_ultrathink:
-            authorized, auth_msg = UltrathinkPhysicsEngine.authorize_ultrathink(
+            authorized, auth_msg, _formation = UltrathinkPhysicsEngine.authorize_ultrathink(
                 stochastic_entropy=stochastic_entropy,
                 deterministic_output=deterministic_output,
                 execution_time=execution_time,

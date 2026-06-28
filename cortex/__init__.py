@@ -62,7 +62,7 @@ def _scrubbed_get_message(self):
 
 logging.LogRecord.getMessage = _scrubbed_get_message
 
-__version__ = "1.0.0"
+__version__ = "1.0.2"
 __author__ = "by borjamoskv.com"
 
 # Lazy imports - CortexEngine and experimental modules load on first access

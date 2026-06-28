@@ -30,16 +30,17 @@ def test_blast_radius_measurement():
 def test_ultrathink_authorization():
     """Validates the P0 Horizon decision."""
     # Valid Ultrathink: Exergy > 10, Blast >= 3
-    auth, msg = UltrathinkPhysicsEngine.authorize_ultrathink(10.0, 200.0, 5.0, 4)
+    auth, msg, formation = UltrathinkPhysicsEngine.authorize_ultrathink(10.0, 200.0, 5.0, 4)
     assert auth is True
+    assert formation is not None
     assert "Authorized" in msg
 
     # Invalid: small blast radius
-    auth, msg = UltrathinkPhysicsEngine.authorize_ultrathink(10.0, 200.0, 5.0, 2)
+    auth, msg, formation = UltrathinkPhysicsEngine.authorize_ultrathink(10.0, 200.0, 5.0, 2)
     assert auth is False
     assert "small" in msg
 
     # Invalid: Low exergy yield
-    auth, msg = UltrathinkPhysicsEngine.authorize_ultrathink(50.0, 60.0, 10.0, 5)
+    auth, msg, formation = UltrathinkPhysicsEngine.authorize_ultrathink(50.0, 60.0, 10.0, 5)
     assert auth is False
     assert "Insufficient" in msg
