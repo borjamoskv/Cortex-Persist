@@ -142,5 +142,5 @@ class TestCognitiveHandoffInvariants:
         handoff = CognitiveHandoff(router=None)
         assert handoff._architect == "anthropic"
         assert handoff._auditor_premium == "anthropic"
-        assert handoff._auditor_economic == "gemini"
+        assert handoff._auditor_economic == "z_ai"
         assert handoff._infra == "gemini"

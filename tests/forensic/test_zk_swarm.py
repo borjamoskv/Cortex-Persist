@@ -74,10 +74,10 @@ async def test_zk_guard_enforcement_on_high_rigor_types(agent_keypair):
         fact_type="decision",
         meta={"agent_public_key": agent_keypair.public_key_b64, "zk_proof_signature": signature},
     )
-    assert result is None  # Should pass cleanly without raising
+    assert result is False  # Should pass cleanly without raising and return False (not fast path)
 
     # Validation 4: Passive memory ("knowledge") bypasses the guard constraint
     result_knowledge = await guard.verify_integrity(
         content="General background information", fact_type="knowledge", meta={}
     )
-    assert result_knowledge is None
+    assert result_knowledge is False

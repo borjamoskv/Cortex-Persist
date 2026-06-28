@@ -131,7 +131,7 @@ class EventLedgerL3:
                 event.tenant_id,
                 event.prev_hash,
                 event.signature,
-                json.dumps(event.metadata),
+                json.dumps(dict(event.metadata) if type(event.metadata).__name__ == "mappingproxy" else event.metadata),
             ),
         )
         await self._conn.commit()
@@ -259,6 +259,9 @@ class EventLedgerL3:
 
 
 def _canonical_metadata(metadata: dict[str, Any]) -> str:
+    from types import MappingProxyType
+    if isinstance(metadata, MappingProxyType):
+        metadata = dict(metadata)
     return json.dumps(metadata, sort_keys=True, separators=(",", ":"))
 
 

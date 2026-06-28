@@ -12,6 +12,7 @@ async def test_l2_drain_monitor_success():
     # Mocking rows: fact_id, tenant_id, embedding_blob
     # using a simple json string blob for the test
     conn_mock.execute.side_effect = [
+        AsyncMock(fetchone=AsyncMock(return_value=None)), # ouroboros hook
         AsyncMock(fetchall=AsyncMock(return_value=[(1, "tenant_a", b"[0.1, 0.2]")])),
         AsyncMock(fetchone=AsyncMock(return_value=("[0.1, 0.2]",))), # vec_to_json
         AsyncMock(), # delete fact_embeddings

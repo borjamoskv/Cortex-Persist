@@ -128,7 +128,7 @@ async def test_mcp_outbound_connection_failure():
     configs = [{"name": "bad-server", "transport": "stdio", "command": "nonexistent"}]
     client = MCPOutboundClient(configs)
 
-    with patch("cortex.pipeline.mcp_outbound.stdio_client", side_effect=Exception("Conn failed")):
+    with patch("cortex.pipeline.mcp_outbound.stdio_client", side_effect=RuntimeError("Conn failed")):
         await client.initialize()
         # Should not raise exception but log it and continue
         assert len(client.available_tools) == 0
@@ -138,7 +138,7 @@ async def test_mcp_outbound_connection_failure():
 async def test_mcp_outbound_error_during_call(mock_session):
     client = MCPOutboundClient()
     client._tools = [MCPToolSpec(name="err_tool", description="desc", server_name="server")]
-    mock_session.call_tool.side_effect = Exception("Tool crashed")
+    mock_session.call_tool.side_effect = RuntimeError("Tool crashed")
     client._sessions = {"server": mock_session}
 
     result = await client.call_tool("err_tool", {})
