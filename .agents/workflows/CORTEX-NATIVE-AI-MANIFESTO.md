@@ -35,5 +35,8 @@ Topological synchronization across 100 autonomous agents cannot wait for a centr
 ### 5. Thermodynamic Expulsion (Suntsitu)
 A system that only grows will eventually collapse under its own weight. Episodic spam is biologically unsustainable. Every night, the `NightShift` crystallization process compresses gigabytes of episodic noise into dense, absolute Axioms. The rest is irreversibly destroyed. **Entropy is purged.**
 
+### 6. Biological-Byzantine Tolerance (Apoptosis)
+The ultimate vulnerability in any zero-trust cryptographic system is the biological node that wields the keys. **Cortex-Persist assumes the human operator is a high-entropy vector susceptible to HUMINT (Human Intelligence) coercion.** The system is armed with a `Duress Code` (P095) that intercepts compromised physical inputs and executes an instantaneous `Apoptosis Protocol` (P100). We do not blindly trust the human; we trust the thermodynamic invariants. When the keyholder is compromised, the system logically dies to preserve the structural integrity of the collective memory.
+
 ## The Promise
 The era of probabilistic memory is over. Welcome to the era of deterministic, mathematically verifiable autonomous cognition. Or as we call it: **Sovereignty.**
