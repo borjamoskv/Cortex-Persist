@@ -8,16 +8,16 @@
 
 Quad-model orchestrator for cognitive governance of the Belief Layer.
 
-Escalation cascade (cost-optimized):
-  1. Infrastructure (Gemini 3.1 Pro) - episodic reads, prescreen - $12/1M
-  2. Auditor Economic (Gemini 2.5 Pro Deep Think) - routine belief audit - $12/1M
-  3. Auditor Premium (Claude Opus 4.6) - high-severity contradictions - $25/1M
-  4. Architect (GPT-5.4) - schema revision, contract design - $15/1M
+Escalation cascade (Empirical SOTA 2026-06):
+  1. Infrastructure (Gemini 3.5 Flash) - episodic reads, prescreen - $1.50/1M
+  2. Auditor Economic (GLM-5.2 Max) - routine belief audit - $1.40/1M
+  3. Auditor Premium (Claude Opus 4.8 Thinking) - high-severity contradictions - $5/1M
+  4. Architect (Claude Fable 5) - schema revision, contract design - $10/1M
 
 Invariants enforced:
   - Auditor verdict is FINAL (quarantine overrides all)
-  - Deep Think handles ~80% of audits at Gemini pricing
-  - Opus reserved for UNCERTAIN verdicts or C5 axiomatic conflicts
+  - GLM-5.2 Max handles ~80% of audits at hyper-economic MIT pricing
+  - Opus/Fable reserved for UNCERTAIN verdicts or C5 axiomatic conflicts
 """
 
 from __future__ import annotations
@@ -91,12 +91,12 @@ class CognitiveHandoff:
       → architect (gpt-5.4, only if schema revision needed)
     """
 
-    # Default provider assignments - can be overridden at init
-    DEFAULT_ARCHITECT = "openai"
-    DEFAULT_AUDITOR_PREMIUM = "anthropic"
-    DEFAULT_AUDITOR_ECONOMIC = "gemini"
-    DEFAULT_AUDITOR_DEEPTHINK = "deepseek"  # DeepSeek-R1 cluster fallback
-    DEFAULT_INFRA = "gemini"
+    # Empirical Provider Assignments (2026-06 Exergy Optimized)
+    DEFAULT_ARCHITECT = "anthropic"           # claude-fable-5
+    DEFAULT_AUDITOR_PREMIUM = "anthropic"     # claude-opus-4.8-thinking
+    DEFAULT_AUDITOR_ECONOMIC = "z_ai"         # glm-5.2 (max)
+    DEFAULT_AUDITOR_DEEPTHINK = "alibaba"     # qwen3.7-max (fallback)
+    DEFAULT_INFRA = "gemini"                  # gemini-3.5-flash
 
     def __init__(
         self,

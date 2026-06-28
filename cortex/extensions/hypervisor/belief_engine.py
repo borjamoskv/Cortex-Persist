@@ -34,26 +34,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# [C5-REAL] SOTA Routing Matrix (Autodidact Front-End 2026-06)
-# Compiled from empirical ingestion of multi-step reasoning capabilities.
-REASONING_MODE_MAP = {
-    "architecture":    "deep_think",
-    "tradeoff":        "deep_think",
-    "unknown_domain":  "deep_research",
-    "new_api":         "deep_research",
-    "p0_singularity":  "ultra_think",
-    "security_breach": "ultra_think",
-    "routine":         None,  # standard inference
-}
-
-# Empirical Physical Model Assignment (Exergy-Maximized)
-ROUTING_MODEL_ASSIGNMENT = {
-    "ultra_think":   "claude-fable-5",                 # P0 / Architectures
-    "deep_think":    "claude-opus-4.8-thinking",       # Variables & Tradeoffs (Alt: glm-5.2)
-    "deep_research": "kimi-k2.6",                      # Unknown / Context / Ingestion
-    "routine":       "gemini-3.5-flash",               # Execution / Sovereign Worker (Alt: mimo-v2.5-pro)
-}
-
 
 class BeliefEngine:
     """Cognitive governance layer for the Hypervisor.
