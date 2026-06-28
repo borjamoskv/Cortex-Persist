@@ -53,8 +53,8 @@ class CortexLLMRouter:
     def _apply_omega_zero_network_policy(self, provider: BaseProvider) -> BaseProvider:
         """[LOCAL-INFERENCE-OMEGA] Enforce Zero-Network Hard Boundary."""
         forbidden_domains = ["api.openai.com", "dashscope", "api.anthropic.com", "googleapis.com", "api.minimax.chat"]
-        provider_url = str(getattr(provider, "base_url", "")).lower()
-        provider_name = getattr(provider, "provider_name", "").lower()
+        provider_url = str(getattr(provider, "base_url", getattr(provider, "_base_url", ""))).lower()
+        provider_name = getattr(provider, "provider_name", getattr(provider, "_provider", "")).lower()
         
         is_external = any(ext in provider_url for ext in forbidden_domains) or \
                       any(ext in provider_name for ext in ["openai", "anthropic", "gemini", "dashscope", "minimax"])
@@ -225,8 +225,13 @@ class CortexLLMRouter:
 
         reasoning_mode = getattr(prompt, "reasoning_mode", None)
         if reasoning_mode == ReasoningMode.ULTRA_THINK:
-            if getattr(self._primary, "tier", None) != "frontier":
-                primary_valid = False
+            tier = getattr(self._primary, "tier", None)
+            if tier != "frontier":
+                # [LOCAL-INFERENCE-OMEGA] Bypass tier check if local autarchy is enforced
+                if getattr(self._primary, "provider_name", "") == "ollama":
+                    pass
+                else:
+                    primary_valid = False
 
         if self._primary.provider_name in self._evicted:
             primary_valid = False
