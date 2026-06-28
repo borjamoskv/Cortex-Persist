@@ -33,9 +33,12 @@ class MockEngine:
         
         self.facts.append(MockFact(content, fact_type, project, meta, confidence))
         
-    async def recall(self, query, project, limit):
+    async def recall(self, project, limit=None, tenant_id="default", fact_type=None, offset=0):
         # Return all belief facts for project
-        return [f for f in self.facts if f.fact_type == "belief" and f.project == project][:limit]
+        res = [f for f in self.facts if f.fact_type == "belief" and f.project == project]
+        if limit:
+            return res[:limit]
+        return res
 
 
 @pytest.mark.asyncio
