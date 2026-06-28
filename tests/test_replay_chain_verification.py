@@ -9,6 +9,10 @@ from cortex.audit.ledger import EnterpriseAuditLedger
 from cortex.engine.forensic.replay import ReplayEngine
 
 
+class MockLedgerConnection:
+    def __init__(self, rows):
+        self.rows = rows
+
     def execute(self, query, params=None):
         # Must return an awaitable or context manager wrapper
         return AioMockCursor(self.rows)
