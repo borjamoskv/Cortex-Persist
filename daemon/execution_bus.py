@@ -25,7 +25,7 @@ def _sign_artifact(event: EventV1, artifact: dict[str, Any]) -> dict[str, Any]:
         try:
             import keyring
             priv_b64 = keyring.get_password("cortex_v6", "ed25519_private_key")
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
     if not priv_b64:
