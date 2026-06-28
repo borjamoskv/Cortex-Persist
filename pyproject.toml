@@ -36,7 +36,6 @@ dependencies = [
     "pydantic>=2.7.0",
     "httpx>=0.27.0",
     "tenacity>=8.2.0",
-    "confluent-kafka>=2.1.0",
 ]
 
 [project.urls]
@@ -70,6 +69,9 @@ mcp = [
     "markdownify>=0.13",
     "watchdog>=6.0.0",
 ]
+distributed = [
+    "confluent-kafka>=2.1.0",
+]
 daemon = [
     "aiofiles",
     "aiohttp>=3.14.1",
@@ -91,7 +93,6 @@ dev = [
     "pytest-timeout>=2.3",
     "pytest-xdist>=3.8.0",
     "pytest-randomly>=3.15.0",
-    "httpx>=0.27",
     "ruff>=0.11.0",
     "z3-solver>=4.13.0",
     "hypothesis>=6.92.0",
@@ -144,7 +145,7 @@ audio = [
     "soundfile>=0.12.0",
 ]
 all = [
-    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality,llm_compat,audio]",
+    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality,llm_compat,audio,distributed]",
 ]
 
 [project.scripts]
