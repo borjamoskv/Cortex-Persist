@@ -11,11 +11,11 @@ logger = logging.getLogger("cortex_extensions.sync.gitops")
 
 
 def _locate_repo_root(project_name: str) -> Path | None:
-    """Intenta localizar la carpeta del proyecto en rutas estándar."""
+    """Attempts to locate the project folder in standard paths."""
     game_dir = Path.home() / "game" / project_name
     if game_dir.exists() and game_dir.is_dir():
         return game_dir
-    # Se podrían añadir más heurísticas aquí (e.g. buscar en ~/Developer, etc.)
+    # More heuristics could be added here (e.g. search in ~/Developer, etc.)
     return None
 
 
@@ -38,9 +38,9 @@ async def sync_fact_to_repo(
     project: str, fact_id: int, fact_data: dict[str, Any], action: str = "upsert"
 ) -> bool:
     """
-    Sincroniza un fact (creación, edición, borrado silente) con el JSON local del proyecto.
-    action puede ser 'upsert' o 'deprecate'.
-    Se asume que esto se llama *después* de que SQLite haya hecho commit (o se está seguro).
+    Synchronizes a fact (creation, edition, silent deletion) with the project's local JSON.
+    action can be 'upsert' or 'deprecate'.
+    It is assumed this is called *after* SQLite has committed (or if certain).
     """
     repo_path = _locate_repo_root(project)
     if not repo_path:
@@ -50,12 +50,12 @@ async def sync_fact_to_repo(
         cortex_dir = _get_cortex_dir(repo_path)
         json_path = cortex_dir / "knowledge.json"
 
-        # 1. Cargar el JSON actual o crear nuevo
+        # 1. Load the current JSON or create a new one
         knowledge = _load_knowledge(json_path)
 
         facts_list = knowledge.get("facts", [])
 
-        # 2. Modificar la lista
+        # 2. Modify the list
         existing_idx = next((i for i, f in enumerate(facts_list) if f.get("id") == fact_id), None)
 
         if action == "upsert":
@@ -70,10 +70,10 @@ async def sync_fact_to_repo(
 
         knowledge["facts"] = facts_list
 
-        # 3. Escribir JSON atómicamente (o casi, para nuestro caso de uso local es suficiente)
+        # 3. Write JSON atomically (or almost, sufficient for our local use case)
         json_path.write_text(json.dumps(knowledge, indent=2, ensure_ascii=False), encoding="utf-8")
 
-        # 4. Renderizar Markdown snapshot
+        # 4. Render Markdown snapshot
         _render_snapshot(cortex_dir, facts_list, project)
         return True
 
@@ -83,10 +83,10 @@ async def sync_fact_to_repo(
 
 
 def _render_snapshot(cortex_dir: Path, facts_list: list[dict[str, Any]], project: str) -> None:
-    """Genera un Markdown legible a partir del JSON de facts."""
+    """Generates a readable Markdown from the facts JSON."""
     md_path = cortex_dir / "context-snapshot.md"
 
-    # Filtrar activos y ordenar por fecha descendente
+    # Filter active and sort by descending date
     active_facts = [f for f in facts_list if not f.get("valid_until")]
     active_facts.sort(key=lambda x: x.get("created_at", ""), reverse=True)
 
@@ -94,13 +94,13 @@ def _render_snapshot(cortex_dir: Path, facts_list: list[dict[str, Any]], project
         f"# CORTEX Snapshot: {project}",
         "",
         "> **Sovereign GitOps Memory**",
-        "> Generado automáticamente a partir de `knowledge.json`. No editar a mano.",
+        "> Generated automatically from `knowledge.json`. Do not edit by hand.",
         "",
-        f"Total hechos activos: **{len(active_facts)}**",
+        f"Total active facts: **{len(active_facts)}**",
         "",
     ]
 
-    # Agrupar por type
+    # Group by type
     by_type = {}
     for fact in active_facts:
         ftype = fact.get("fact_type", "knowledge")
@@ -122,7 +122,7 @@ def _render_snapshot(cortex_dir: Path, facts_list: list[dict[str, Any]], project
 
 
 async def export_gitops_memory(engine, project: str) -> bool:
-    """Regenera la carpeta .cortex/ y los archivos knowledge.json y context-snapshot.md desde SQLite."""
+    """Regenerates the .cortex/ folder and the knowledge.json and context-snapshot.md files from SQLite."""
     repo_path = _locate_repo_root(project)
     if not repo_path:
         logger.error("Cannot export: project directory not found for %s", project)

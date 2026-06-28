@@ -23,7 +23,7 @@ def test_semantic_apoptosis_conversational_slop():
 
     # Conversational slop with no code must immediately raise exception
     slop_only = (
-        "Por supuesto, aquí tienes la explicación detallada de cómo optimizar el motor causal."
+        "Of course, here is the detailed explanation of how to optimize the causal engine."
     )
     with pytest.raises(SemanticApoptosisError, match="consists entirely of conversational slop"):
         guard.assess_payload(slop_only)
@@ -34,11 +34,11 @@ def test_semantic_apoptosis_mixed_payload():
 
     # Mixed content with high prose ratio and slop markers must be rejected
     mixed_bad = (
-        "Claro que sí, déjame ayudarte con el código que me has solicitado para SQLite.\n"
+        "Here is the code you requested for SQLite.\n"
         "```python\n"
         "import sqlite3\n"
         "```\n"
-        "Espero que este script te sea de gran utilidad para mitigar el caos."
+        "I hope this helps you mitigate chaos."
     )
     with pytest.raises(SemanticApoptosisError, match="exceeds strict boundary"):
         guard.assess_payload(mixed_bad)

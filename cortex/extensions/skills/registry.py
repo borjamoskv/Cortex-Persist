@@ -4,10 +4,10 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""SkillRegistry - Auto-registro y parsing de manifests.
+"""SkillRegistry - Auto-registration and parsing of manifests.
 
-Parsea el frontmatter YAML de cada SKILL.md y construye el catálogo de nodos
-del grafo cognitivo. Los skills se registran solos al ser descubiertos.
+Parses the YAML frontmatter of each SKILL.md and builds the catalog of nodes
+for the cognitive graph. Skills register themselves automatically when discovered.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ except ImportError:
     yaml = None
     YAMLError = Exception
 
-# ─── Constantes ──────────────────────────────────────────────────────────────
+# ─── Constants ──────────────────────────────────────────────────────────────
 from cortex.core.paths import SKILLS_DIR as SKILLS_BASE_DIR
 from cortex.extensions.skills.taxonomy import (
     is_transcendent_skill,
@@ -42,7 +42,7 @@ FRONTMATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
 
 @dataclass
 class CapabilityDeclaration:
-    """Capacidad declarada por un skill: lo que puede HACER."""
+    """Capability declared by a skill: what it can DO."""
 
     name: str  # e.g. "code_generation", "orchestration"
     description: str = ""
@@ -52,18 +52,18 @@ class CapabilityDeclaration:
 
 @dataclass
 class RequirementDeclaration:
-    """Requisito declarado por un skill: lo que NECESITA de otros."""
+    """Requirement declared by a skill: what it NEEDS from others."""
 
-    skill_name: str  # Nombre del skill dependencia
-    capability: str = ""  # Capacidad específica requerida
-    optional: bool = False  # Si es false, es hard dependency
+    skill_name: str  # Name of the dependency skill
+    capability: str = ""  # Specific required capability
+    optional: bool = False  # If false, it's a hard dependency
 
 
 @dataclass
 class SkillManifest:
-    """Representación completa de un skill parseado desde su SKILL.md."""
+    """Complete representation of a skill parsed from its SKILL.md."""
 
-    # ── Identidad ──
+    # ── Identity ──
     name: str
     path: Path
     description: str = ""
@@ -74,42 +74,42 @@ class SkillManifest:
     created: str = ""
     updated: str = ""
 
-    # ── Activación ──
+    # ── Activation ──
     trigger: str = ""
     aliases: list[str] = field(default_factory=list)
 
-    # ── Grafo ──
+    # ── Graph ──
     depends_on: list[str] = field(default_factory=list)
     capabilities: list[CapabilityDeclaration] = field(default_factory=list)
     requirements: list[RequirementDeclaration] = field(default_factory=list)
     tags: list[str] = field(default_factory=list)
 
-    # ── Composición ──
-    composable_with: list[str] = field(default_factory=list)  # afinidades positivas
-    incompatible_with: list[str] = field(default_factory=list)  # conflictos
-    amplifies: list[str] = field(default_factory=list)  # a quién potencia
-    amplified_by: list[str] = field(default_factory=list)  # quién le potencia
+    # ── Composition ──
+    composable_with: list[str] = field(default_factory=list)  # positive affinities
+    incompatible_with: list[str] = field(default_factory=list)  # conflicts
+    amplifies: list[str] = field(default_factory=list)  # whom it amplifies
+    amplified_by: list[str] = field(default_factory=list)  # who amplifies it
 
-    # ── Fitness (calculado en runtime por NOOSPHERE) ──
-    fitness_score: float = -1.0  # -1 = no calculado aún
+    # ── Fitness (calculated at runtime by NOOSPHERE) ──
+    fitness_score: float = -1.0  # -1 = not calculated yet
     usage_count: int = 0
 
-    # ── Metadata raw ──
+    # ── Raw metadata ──
     _raw_frontmatter: dict[str, Any] = field(default_factory=dict, repr=False)
 
     @property
     def slug(self) -> str:
-        """Identificador canónico del skill (nombre normalizado)."""
+        """Canonical skill identifier (normalized name)."""
         return self.name.lower().replace(" ", "-")
 
     @property
     def is_transcendent(self) -> bool:
-        """True si el skill es de nivel ontológico superior."""
+        """True if the skill is of a higher ontological level."""
         return is_transcendent_skill(self.category, self.classification)
 
     @property
     def primary_trigger(self) -> str:
-        """Trigger primario incluyendo el slash."""
+        """Primary trigger including the slash."""
         if self.trigger and not self.trigger.startswith("/"):
             return f"/{self.trigger}"
         return self.trigger or f"/{self.slug}"
@@ -127,13 +127,13 @@ class SkillManifest:
 
 
 class SkillRegistry:
-    """Auto-registro de skills desde el directorio de .md files.
+    """Auto-registration of skills from the directory of .md files.
 
-    El registry escanea SKILLS_BASE_DIR, parsea el frontmatter YAML de cada
-    SKILL.md y construye el catálogo interno. Los skills se «registran solos»
-    simplemente existiendo en el filesystem - sin ningún paso manual.
+    The registry scans SKILLS_BASE_DIR, parses the YAML frontmatter of each
+    SKILL.md and builds the internal catalog. Skills register themselves
+    simply by existing in the filesystem - without any manual step.
 
-    Uso:
+    Usage:
         registry = SkillRegistry()
         registry.load()
         manifest = registry.get("noosphere-omega")
@@ -145,12 +145,12 @@ class SkillRegistry:
         self._registry: dict[str, SkillManifest] = {}
         self._loaded = False
 
-    # ── Carga ──────────────────────────────────────────────────────────────
+    # ── Loading ────────────────────────────────────────────────────────────
 
     def load(self, force_reload: bool = False) -> SkillRegistry:
-        """Escanea el filesystem y construye el catálogo de manifests.
+        """Scans the filesystem and builds the catalog of manifests.
 
-        Idempotente: llamadas repetidas son no-op salvo force_reload=True.
+        Idempotent: repeated calls are no-op unless force_reload=True.
         """
         if self._loaded and not force_reload:
             return self
@@ -171,8 +171,8 @@ class SkillRegistry:
                 discovered += 1
             except (ValueError, YAMLError, KeyError):
                 failed += 1
-                # Skills con frontmatter malformado se registran con nombre
-                # derivado del directorio para no perder visibilidad
+                # Skills with malformed frontmatter are registered with a name
+                # derived from the directory to not lose visibility
                 fallback = SkillManifest(
                     name=skill_dir.name,
                     path=skill_file,
@@ -186,7 +186,7 @@ class SkillRegistry:
         return self
 
     async def aload(self, force_reload: bool = False) -> SkillRegistry:
-        """Carga asíncrona concurrente del catálogo para evitar bloqueos del Event Loop."""
+        """Concurrent asynchronous loading of the catalog to avoid Event Loop blocks."""
         import asyncio
 
         if self._loaded and not force_reload:
@@ -230,39 +230,39 @@ class SkillRegistry:
         return self
 
     def reload(self) -> SkillRegistry:
-        """Fuerza re-escaneo del filesystem (síncrono)."""
+        """Forces filesystem rescan (synchronous)."""
         return self.load(force_reload=True)
 
     async def areload(self) -> SkillRegistry:
-        """Fuerza re-escaneo del filesystem (asíncrono)."""
+        """Forces filesystem rescan (asynchronous)."""
         return await self.aload(force_reload=True)
 
-    # ── Acceso ─────────────────────────────────────────────────────────────
+    # ── Access ─────────────────────────────────────────────────────────────
 
     def get(self, name: str) -> SkillManifest | None:
-        """Obtiene un manifest por nombre (case-insensitive, slug-normalized)."""
+        """Gets a manifest by name (case-insensitive, slug-normalized)."""
         slug = name.lower().replace(" ", "-").replace("_", "-")
         return self._registry.get(slug)
 
     def all(self) -> list[SkillManifest]:
-        """Todos los manifests registrados, ordenados por nombre."""
+        """All registered manifests, ordered by name."""
         return sorted(self._registry.values(), key=lambda m: m.slug)
 
     def by_category(self, category: str) -> list[SkillManifest]:
-        """Filtra por categoría."""
+        """Filters by category."""
         normalized_category = normalize_skill_category(category)
         return [m for m in self.all() if m.category == normalized_category]
 
     def by_tag(self, tag: str) -> list[SkillManifest]:
-        """Filtra por tag."""
+        """Filters by tag."""
         return [m for m in self.all() if tag in m.tags]
 
     def by_capability(self, capability: str) -> list[SkillManifest]:
-        """Skills que declaran una capacidad específica."""
+        """Skills that declare a specific capability."""
         return [m for m in self.all() if any(c.name == capability for c in m.capabilities)]
 
     def search(self, query: str) -> list[SkillManifest]:
-        """Búsqueda full-text en nombre, descripción y tags."""
+        """Full-text search in name, description, and tags."""
         q = query.lower()
         results = []
         for m in self.all():
@@ -298,11 +298,11 @@ class SkillRegistry:
     # ── Parsing ────────────────────────────────────────────────────────────
 
     def _parse_skill_file(self, path: Path) -> SkillManifest:
-        """Parsea un SKILL.md y extrae el frontmatter YAML."""
+        """Parses a SKILL.md and extracts the YAML frontmatter."""
         content = path.read_text(encoding="utf-8")
         match = FRONTMATTER_PATTERN.match(content)
         if not match:
-            # Skill sin frontmatter - nombre derivado del directorio
+            # Skill without frontmatter - name derived from directory
             return SkillManifest(
                 name=path.parent.name,
                 path=path,
@@ -315,10 +315,10 @@ class SkillRegistry:
         return self._build_manifest(path, raw)
 
     def _build_manifest(self, path: Path, raw: dict[str, Any]) -> SkillManifest:
-        """Construye un SkillManifest desde el dict YAML parseado."""
+        """Builds a SkillManifest from the parsed YAML dict."""
         name = str(raw.get("name", path.parent.name))
 
-        # ── Capacidades declaradas ──
+        # ── Declared capabilities ──
         capabilities = []
         for cap in raw.get("capabilities", []):
             if isinstance(cap, str):
@@ -333,7 +333,7 @@ class SkillRegistry:
                     )
                 )
 
-        # ── Requisitos declarados ──
+        # ── Declared requirements ──
         requirements = []
         for req in raw.get("requires", []):
             if isinstance(req, str):
@@ -347,7 +347,7 @@ class SkillRegistry:
                     )
                 )
 
-        # ── Aliases normalizados ──
+        # ── Normalized aliases ──
         aliases_raw = raw.get("aliases", [])
         aliases = [str(a).lstrip("/") for a in aliases_raw]
 
