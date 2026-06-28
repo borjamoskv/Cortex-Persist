@@ -383,32 +383,70 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
             api_key = request.headers.get("x-api-key")
             if api_key and api_key.startswith("ctx_cloud_"):
                 # Non-blocking async usage reporting
-                asyncio.create_task(self._report_usage(api_key))
+                asyncio.create_task(self._report_usage(api_key, request))
 
         return response
 
-    async def _report_usage(self, api_key: str):
-        """Asynchronously reports usage to Stripe via background task."""
+    async def _report_usage(self, api_key: str, request: Request):
+        """Asynchronously reports usage to Stripe via background task with secure DB lookup."""
         try:
             import stripe  # pyright: ignore[reportMissingImports]
 
+            from cortex.auth.manager import get_auth_manager
             from cortex.core import config
+
+            auth_mgr = get_auth_manager()
+            result = await auth_mgr.authenticate_async(api_key)
+            if not result.authenticated:
+                logger.error("Stripe billing increment failed: API key invalid.")
+                return
+
+            pool = getattr(request.app.state, "pool", None)
+            if not pool:
+                logger.warning("Stripe billing increment failed: DB pool not available.")
+                return
+
+            stripe_subscription_item_id = None
+            async with pool.acquire() as conn:
+                async with conn.execute(
+                    "SELECT config FROM tenants WHERE id = ?", (result.tenant_id,)
+                ) as cursor:
+                    row = await cursor.fetchone()
+                    if row:
+                        try:
+                            config_data = json.loads(row[0])
+                            stripe_subscription_item_id = config_data.get("stripe_subscription_item_id")
+                        except Exception as e:
+                            logger.error("Failed to parse tenant config: %s", e)
+
+            # Fallback to mock item ID if in test/mock mode
+            if not stripe_subscription_item_id:
+                try:
+                    from stripe_config import load_stripe_billing_config
+                    stripe_config = load_stripe_billing_config()
+                    is_mock = not stripe_config.secret_key or stripe_config.secret_key.startswith("sk_test_mock")
+                except ImportError:
+                    is_mock = True
+
+                if is_mock:
+                    stripe_subscription_item_id = f"si_{api_key[-8:]}"
+                else:
+                    logger.error("Stripe billing failed: No subscription item configured for tenant %s", result.tenant_id)
+                    return
 
             stripe.api_key = getattr(config, "STRIPE_SECRET_KEY", None)
             if not stripe.api_key:
                 return
 
-            # Lookup via DB/cache. For C5-REAL MVP, use a mock ID derivation.
-            subscription_item_id = f"si_{api_key[-8:]}"
-
             # Run synchronous stripe call in a thread pool to avoid blocking event loop
             await asyncio.to_thread(
                 stripe.SubscriptionItem.create_usage_record,  # type: ignore
-                subscription_item_id,
+                stripe_subscription_item_id,
                 quantity=1,
                 timestamp="now",
                 action="increment",
             )
-            logger.info("Stripe usage reported for %s", api_key[:12])
-        except (ValueError, KeyError, OSError) as e:
+            logger.info("Stripe usage reported for tenant %s (item %s)", result.tenant_id, stripe_subscription_item_id[:12])
+        except Exception as e:
             logger.error("Stripe billing increment failed for %s: %s", api_key[:12], e)
+

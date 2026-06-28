@@ -93,11 +93,83 @@ def _apply_base_schema(conn: sqlite3.Connection) -> None:
     logger.info("Base schema applied.")
 
 
+class AiosqliteCursorStub:
+    def __init__(self, cursor: sqlite3.Cursor):
+        self._cursor = cursor
+
+    def __await__(self):
+        async def _async_self():
+            return self
+        return _async_self().__await__()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    async def fetchall(self) -> list:
+        return self._cursor.fetchall()
+
+    async def fetchone(self):
+        return self._cursor.fetchone()
+
+
+class SyncToAsyncConnectionAdapter:
+    def __init__(self, conn: sqlite3.Connection):
+        self._conn = conn
+
+    def execute(self, sql: str, parameters: tuple = ()) -> AiosqliteCursorStub:
+        cursor = self._conn.execute(sql, parameters)
+        return AiosqliteCursorStub(cursor)
+
+    async def commit(self) -> None:
+        self._conn.commit()
+
+    async def rollback(self) -> None:
+        self._conn.rollback()
+
+
+def run_coroutine_sync(coro):
+    import asyncio
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    if loop.is_running():
+        import threading
+        result = []
+        exception = []
+        def target():
+            try:
+                new_loop = asyncio.new_event_loop()
+                result.append(new_loop.run_until_complete(coro))
+            except Exception as e:
+                exception.append(e)
+        t = threading.Thread(target=target)
+        t.start()
+        t.join()
+        if exception:
+            raise exception[0]
+        return result[0]
+    else:
+        return loop.run_until_complete(coro)
+
+
 def _apply_migration_sync(conn: sqlite3.Connection, version: int, description: str, func) -> bool:
     """Apply a single migration synchronously."""
     logger.info("Applying migration %d: %s", version, description)
     try:
-        func(conn)
+        import inspect
+
+        if inspect.iscoroutinefunction(func):
+            adapter = SyncToAsyncConnectionAdapter(conn)
+            run_coroutine_sync(func(adapter))
+        else:
+            func(conn)
+
         conn.execute(
             "INSERT INTO schema_version (version, description) VALUES (?, ?)",
             (version, description),
@@ -171,8 +243,13 @@ async def _apply_migration_async(
     """Apply a single migration asynchronously."""
     logger.info("Applying async migration %d: %s", version, description)
     try:
-        # Run sync migration func on aiosqlite internal worker thread
-        await conn._execute(func, conn._conn)
+        import inspect
+
+        if inspect.iscoroutinefunction(func):
+            await func(conn)
+        else:
+            # Run sync migration func on aiosqlite internal worker thread
+            await conn._execute(func, conn._conn)
         await conn.execute(
             "INSERT INTO schema_version (version, description) VALUES (?, ?)",
             (version, description),

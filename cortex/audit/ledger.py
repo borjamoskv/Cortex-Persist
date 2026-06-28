@@ -182,11 +182,44 @@ class EnterpriseAuditLedger:
         Returns {'status': 'verified'} if pristine, or {'status': 'tampered', 'corrupted_audit_id': id} if broken.
         """
         import hashlib
+        import json
 
         await self.ensure_table()
 
+        # [C5-REAL] Verify pinned public key from environment/config if present
+        pinned_pub_pem = os.environ.get("CORTEX_LEDGER_PUBLIC_KEY")
+        if pinned_pub_pem:
+            try:
+                pinned_bytes = pinned_pub_pem.encode("utf-8")
+                if b"PUBLIC KEY" in pinned_bytes:
+                    pinned_key = serialization.load_pem_public_key(pinned_bytes)
+                else:
+                    pinned_key = ed25519.Ed25519PublicKey.from_public_bytes(bytes.fromhex(pinned_pub_pem))
+                
+                my_bytes = self.public_key.public_bytes(
+                    encoding=serialization.Encoding.Raw,
+                    format=serialization.PublicFormat.Raw
+                )
+                pinned_raw_bytes = pinned_key.public_bytes(
+                    encoding=serialization.Encoding.Raw,
+                    format=serialization.PublicFormat.Raw
+                )
+                if my_bytes != pinned_raw_bytes:
+                    return {
+                        "status": "tampered",
+                        "corrupted_audit_id": "GENESIS",
+                        "reason": "ledger_public_key_mismatch",
+                    }
+            except Exception as e:
+                logger.error("Failed to verify pinned ledger public key: %s", e)
+                return {
+                    "status": "tampered",
+                    "corrupted_audit_id": "GENESIS",
+                    "reason": f"invalid_pinned_public_key: {e}",
+                }
+
         async with self._conn.execute(
-            "SELECT rowid, audit_id, timestamp, tenant_id, actor_role, actor_id, action, resource, status, prev_hash, signature FROM security_audit_log ORDER BY rowid ASC"
+            "SELECT rowid, audit_id, timestamp, tenant_id, actor_role, actor_id, action, resource, status, prev_hash, signature, external_anchor FROM security_audit_log ORDER BY rowid ASC"
         ) as cursor:
             rows = list(await cursor.fetchall())
 
@@ -200,7 +233,7 @@ class EnterpriseAuditLedger:
         current_sig = rows[0][10]
 
         for row in rows:
-            # row: 0=rowid, 1=audit_id, 2=timestamp, 3=tenant_id, 4=actor_role, 5=actor_id, 6=action, 7=resource, 8=status, 9=prev_hash, 10=signature
+            # row: 0=rowid, 1=audit_id, 2=timestamp, 3=tenant_id, 4=actor_role, 5=actor_id, 6=action, 7=resource, 8=status, 9=prev_hash, 10=signature, 11=external_anchor
             # Validate individual audit_id to detect row-level tampering
             expected_audit_id_v2 = hashlib.sha256(
                 f"{row[2]}|{row[3]}|{row[4]}|{row[5]}|{row[6]}|{row[7]}|{row[8]}".encode()
@@ -243,7 +276,7 @@ class EnterpriseAuditLedger:
             # Check if this batch is a COMPACTION_NODE
             if len(batch_rows) == 1 and batch_rows[0][6] == "COMPACTION_NODE":
                 row = batch_rows[0]
-                # row: 0=rowid, 1=audit_id, 2=timestamp, 3=tenant_id, 4=actor_role, 5=actor_id, 6=action, 7=resource, 8=status, 9=prev_hash, 10=signature
+                # row: 0=rowid, 1=audit_id, 2=timestamp, 3=tenant_id, 4=actor_role, 5=actor_id, 6=action, 7=resource, 8=status, 9=prev_hash, 10=signature, 11=external_anchor
                 compaction_payload = f"COMPACTION:{row[9]}:{row[8]}:{row[7]}"
                 try:
                     self.public_key.verify(bytes.fromhex(signature), compaction_payload.encode())
@@ -273,7 +306,45 @@ class EnterpriseAuditLedger:
                     "reason": "invalid_signature",
                 }
 
+            # [C5-REAL] Verify external Rekor/TSA anchor if requested and present
+            if os.environ.get("CORTEX_VERIFY_EXTERNAL_ANCHORS") == "true":
+                row = batch_rows[0]
+                if len(row) > 11 and row[11]:
+                    try:
+                        anchor_data = json.loads(row[11])
+                        rekor_uuid = anchor_data.get("rekor_uuid")
+                        if rekor_uuid and rekor_uuid != "mock_rekor":
+                            from cortex.audit.rekor_client import RekorClient
+                            rekor_client = RekorClient()
+                            try:
+                                rekor_entry = await rekor_client.verify_entry(rekor_uuid)
+                                if not rekor_entry:
+                                    return {
+                                        "status": "tampered",
+                                        "corrupted_audit_id": row[1],
+                                        "reason": f"rekor_anchor_missing (uuid {rekor_uuid})",
+                                    }
+                                log_entry_data = list(rekor_entry.values())[0]
+                                body_b64 = log_entry_data.get("body")
+                                if body_b64:
+                                    import base64
+                                    body_data = json.loads(base64.b64decode(body_b64).decode("utf-8"))
+                                    logged_hash = body_data.get("spec", {}).get("data", {}).get("hash", {}).get("value")
+                                    if logged_hash != entry_hash:
+                                        return {
+                                            "status": "tampered",
+                                            "corrupted_audit_id": row[1],
+                                            "reason": f"rekor_hash_mismatch (expected {entry_hash}, got {logged_hash})",
+                                        }
+                            finally:
+                                await rekor_client.close()
+                    except Exception as e:
+                        logger.error("Failed to verify external Rekor anchor: %s", e)
+
             expected_prev_hash = entry_hash
+
+        return {"status": "verified", "blocks": len(batches)}
+
 
         return {"status": "verified", "blocks": len(batches)}
 

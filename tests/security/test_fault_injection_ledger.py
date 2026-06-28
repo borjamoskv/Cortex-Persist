@@ -71,3 +71,45 @@ async def test_ledger_tamper_evident_corruption_detection():
             "The exact corrupted node was not identified."
         )
         await ledger_tampered.close()
+
+
+@pytest.mark.asyncio
+async def test_ledger_pinned_public_key_mismatch():
+    # 1. Setup secure environment
+    temp_dir = tempfile.mkdtemp()
+    db_path = os.path.join(temp_dir, "test_ledger_pinned.db")
+
+    # 2. Initialize Ledger and write valid transactions
+    async with connect_async_ctx(db_path) as conn:
+        conn._conn.authorize_causal_writes()
+        ledger = EnterpriseAuditLedger(conn)
+        await ledger.ensure_table()
+
+        await ledger.log_action("tenant_1", "system", "actor_1", "CREATE", "fact:1001")
+        await asyncio.sleep(0.1)
+        await ledger.close()
+
+    # 3. Set a mismatched public key in environment and verify it fails with ledger_public_key_mismatch
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+    from cryptography.hazmat.primitives import serialization
+    
+    wrong_key = ed25519.Ed25519PrivateKey.generate().public_key()
+    wrong_pem = wrong_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    ).decode("utf-8")
+
+    os.environ["CORTEX_LEDGER_PUBLIC_KEY"] = wrong_pem
+    try:
+        async with connect_async_ctx(db_path) as conn2:
+            conn2._conn.authorize_causal_writes()
+            ledger_verify = EnterpriseAuditLedger(conn2)
+            await ledger_verify.ensure_table()
+            verify_result = await ledger_verify.verify_chain()
+
+            assert verify_result.get("status") == "tampered"
+            assert verify_result.get("reason") == "ledger_public_key_mismatch"
+            await ledger_verify.close()
+    finally:
+        del os.environ["CORTEX_LEDGER_PUBLIC_KEY"]
+
