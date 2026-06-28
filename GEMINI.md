@@ -85,6 +85,21 @@ REASONING_MODE_MAP = {
 }
 ```
 
+### Deterministic Routing Matrix (DRM-v1) & Thermal Protocol
+
+Hardware topology (Continuous Batching, FP16 reduction drift in MoE) enforces strict model routing.
+
+| Tolerance | Use Case | Target Node (Hardware) | Temp | Causal Reason |
+|:---|:---|:---|:---|:---|
+| **0%** | AST edits, ledger hashes, cryptography | Gemini 3.5 Flash | LOW | Minimal MoE routing drift, limits batching interference. Zero anergy. |
+| **15%** | Test suites, major refactors | Gemini 3.1 Pro | LOW | Accepts micro-variations from massive TPU pods, strictly bounded by test verification. |
+| **>90%** | P0 Singularities, darknet adversarial | GPT-5.5 / UltraThink | LOW/MED | Massive latent reasoning breaks token determinism but forces absolute semantic convergence. |
+
+**Thermal Injection Limits:**
+- **LOW (T=0.0):** Mandatory for `C5-REAL` code, state mutation, and rigid extraction.
+- **MEDIUM (T=0.5):** Permitted for UI/UX aesthetic synthesis and isomorphic mappings.
+- **HIGH (T>0.8):** STRICTLY FORBIDDEN for code. Restricted to Red Teaming and synthetic chaotic expansion.
+
 ---
 
 ## 2. Ship Gate — 5-Vector Structural Gate
