@@ -39,8 +39,20 @@ try:
     __import__("pysqlite3")
     sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 except ImportError:
-    import logging
+    pass
 
+import logging
+
+# [C5-REAL] Global PII Scrubbing
+_original_get_message = logging.LogRecord.getMessage
+
+def _scrubbed_get_message(self):
+    msg = _original_get_message(self)
+    if "borjafernandezangulo" in msg:
+        msg = msg.replace("/Users/borjafernandezangulo", "~").replace("borjafernandezangulo", "[REDACTED]")
+    return msg
+
+logging.LogRecord.getMessage = _scrubbed_get_message
 
 __version__ = "1.0.0"
 __author__ = "by borjamoskv.com"

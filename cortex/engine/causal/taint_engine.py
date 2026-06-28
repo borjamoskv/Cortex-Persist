@@ -247,6 +247,11 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     except ValueError as fw_err:
         raise TaintValidationError(f"SAGA-1 Rejection by Memory Firewall: {fw_err}")
 
+    # [C5-REAL] Host Identity Strict Containment (UltraThink P0)
+    if "borjafernandezangulo" in content.lower():
+        logger.error("[TaintEngine] P0 SINGULARITY: Host Identity Bleed detected in Taint payload.")
+        raise TaintValidationError("SAGA-1 Rejection: Payload contains prohibited Host Identity PII.")
+
     if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
         return
 
