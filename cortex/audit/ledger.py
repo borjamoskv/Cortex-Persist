@@ -18,6 +18,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
+from cortex.audit.smt import smt_engine
 from cortex.database.core import causal_write
 
 logger = logging.getLogger("cortex.audit.ledger")
@@ -152,8 +153,11 @@ class EnterpriseAuditLedger:
                     )
                     rows2 = await cursor2.fetchall()
                     batch_audit_ids = [r[0] for r in rows2]
-                    merkle_payload = "".join(batch_audit_ids) + prev_hash
-                    merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+                    
+                    for audit_id in batch_audit_ids:
+                        smt_engine.update(hashlib.sha256(audit_id.encode()).hexdigest(), audit_id)
+                        
+                    merkle_root = smt_engine.root
                     self._last_hash = hashlib.sha256(
                         f"merkle_batch:{merkle_root}:{prev_hash}".encode()
                     ).hexdigest()
@@ -369,17 +373,21 @@ class EnterpriseAuditLedger:
                 )
                 rows2 = await cursor2.fetchall()
                 batch_audit_ids = [r[0] for r in rows2]
-                merkle_payload = "".join(batch_audit_ids) + prev_hash_db
-                merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+                
+                # Reconstruct Sparse Merkle Tree state for current batch
+                for aid in batch_audit_ids:
+                    smt_engine.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
+                    
+                merkle_root = smt_engine.root
                 current_last_hash = hashlib.sha256(
                     f"merkle_batch:{merkle_root}:{prev_hash_db}".encode()
                 ).hexdigest()
             else:
                 current_last_hash = "GENESIS"
 
-            # 2. Compute the new block
-            merkle_payload_new = audit_id + current_last_hash
-            merkle_root_new = hashlib.sha256(merkle_payload_new.encode()).hexdigest()
+            # 2. Compute the new block via SMT inclusion
+            smt_engine.update(hashlib.sha256(audit_id.encode()).hexdigest(), audit_id)
+            merkle_root_new = smt_engine.root
             entry_hash = hashlib.sha256(f"merkle_batch:{merkle_root_new}:{current_last_hash}".encode()).hexdigest()
             signature = self.private_key.sign(entry_hash.encode()).hex()
 
