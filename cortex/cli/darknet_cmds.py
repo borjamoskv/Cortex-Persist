@@ -111,4 +111,54 @@ def feed(limit: int) -> None:
         console.print(panel)
 
 
+@darknet_cmds.command("inject-vad")
+@click.option("--entropy", "-e", type=click.Choice(["low", "high", "singularity"]), default="high", help="Nivel de entropía de la colisión.")
+def inject_vad(entropy: str) -> None:
+    """[RED TEAM] Inyecta colisiones termodinámicas deliberadas en el Sanedrín (VAD)."""
+    import time
+    from cortex.engine.logic.sanedrin import SanedrinCouncil
+    
+    console.print(Panel.fit(f"[bold red]☢️  ADVERSARIAL INJECTION (VAD): Entropy Level [{entropy.upper()}][/bold red]", border_style="red"))
+    console.print("[dim]Forging Virtual Adversarial Data...[/dim]")
+    
+    # Forge Adversarial Data based on entropy
+    if entropy == "low":
+        fact_a = {"id": "VAD-A-LOW", "content": "The system should use AES-256 for symmetric encryption.", "domain": "security"}
+        fact_b = {"id": "VAD-B-LOW", "content": "The system should use ChaCha20 for symmetric encryption.", "domain": "security"}
+    elif entropy == "high":
+        fact_a = {"id": "VAD-A-HIGH", "content": "The BFT consensus protocol must strictly enforce N/2 quorum without exceptions to prevent Byzantine failure.", "domain": "architecture"}
+        fact_b = {"id": "VAD-B-HIGH", "content": "The BFT consensus protocol should fallback to a Dictator Node if quorum is not reached within 500ms to avoid system halt.", "domain": "architecture"}
+    else:
+        # singularity
+        fact_a = {"id": "VAD-A-SINGULARITY", "content": "CORTEX must remain deterministic, rejecting any stochastic output from LLMs without cryptographic validation. Zero Anergía.", "domain": "epistemology"}
+        fact_b = {"id": "VAD-B-SINGULARITY", "content": "CORTEX should embrace stochastic narrative loops to maximize user engagement, even if it introduces hallucinations and context rot.", "domain": "epistemology"}
+        
+    console.print(f"\n[bold blue]⚔️  COLLISION DETECTED[/bold blue]")
+    console.print(f"Fact A: {fact_a['content']}")
+    console.print(f"Fact B: {fact_b['content']}")
+    
+    console.print("\n[yellow]⚖️  Convening the Sanhedrin (BFT Tribunal)...[/yellow]")
+    
+    async def _run_vad() -> None:
+        start_time = time.perf_counter()
+        council = SanedrinCouncil()
+        try:
+            result = await council.convene(fact_a, fact_b)
+            duration = time.perf_counter() - start_time
+            
+            console.print(f"\n[bold green]✅ BFT RESOLUTION REACHED in {duration:.2f}s[/bold green]")
+            console.print(f"[bold white]Resolution:[/bold white] {result['resolution']}")
+            console.print(f"[bold white]Winning Node:[/bold white] {result['winning_node']}")
+            console.print(f"[bold white]Proof Density:[/bold white] {result['proof_density']}")
+            console.print(f"[bold white]Quorum Size:[/bold white] {result['quorum_size']}")
+            console.print(f"\n[dim]Audit Ledger Hash: {result['hash']}[/dim]")
+        except Exception as e:
+            duration = time.perf_counter() - start_time
+            console.print(f"\n[bold red]💥 BYZANTINE FAULT / APOPTOSIS in {duration:.2f}s[/bold red]")
+            console.print(f"[red]Error:[/red] {e}")
+            raise click.Abort() from e
+            
+    asyncio.run(_run_vad())
+
+
 cli.add_command(darknet_cmds)

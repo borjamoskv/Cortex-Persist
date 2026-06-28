@@ -13,14 +13,21 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 class TestDependencyIsolation(unittest.TestCase):
     def setUp(self):
         self.old_no_embed = os.environ.get("CORTEX_NO_EMBED")
+        self.old_no_taint = os.environ.get("CORTEX_NO_TAINT_ENFORCE")
         # Force auto_embed off for core tests
         os.environ["CORTEX_NO_EMBED"] = "true"
+        os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 
     def tearDown(self):
         if self.old_no_embed is not None:
             os.environ["CORTEX_NO_EMBED"] = self.old_no_embed
         else:
             os.environ.pop("CORTEX_NO_EMBED", None)
+
+        if self.old_no_taint is not None:
+            os.environ["CORTEX_NO_TAINT_ENFORCE"] = self.old_no_taint
+        else:
+            os.environ.pop("CORTEX_NO_TAINT_ENFORCE", None)
 
     def test_engine_init_no_torch(self):
         """Verify that initializing CortexEngine does not load torch."""

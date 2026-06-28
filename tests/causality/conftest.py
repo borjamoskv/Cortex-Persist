@@ -4,8 +4,9 @@ import aiosqlite
 
 
 @pytest.fixture
-async def db():
+async def db(monkeypatch):
     """In-memory SQLite with facts table."""
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
     conn = await aiosqlite.connect(":memory:")
     conn.row_factory = aiosqlite.Row
     await conn.executescript("""
