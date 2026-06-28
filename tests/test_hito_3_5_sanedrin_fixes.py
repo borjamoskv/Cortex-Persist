@@ -149,6 +149,12 @@ async def test_2pc_atomic_commit():
 async def test_lease_locks_and_ghost_recovery():
     """Test SANEDRIN VECTOR 3: Lease locks and IN_FLIGHT recovery"""
     db_path = f"/tmp/supervisor_test_lease_{uuid.uuid4().hex}.db"
+    
+    from cortex.engine import CortexEngine
+    engine = CortexEngine(db_path=db_path, auto_embed=False)
+    await engine.init_db()
+    await engine.close()
+
     db = await setup_db(db_path)
 
     # Insert 1 IN_FLIGHT task belonging to an old supervisor

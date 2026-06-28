@@ -1,7 +1,19 @@
 ---
-import CanvasCore from '../components/brain/CanvasCore';
+import WebGLBackground from '../components/WebGLBackground';
+import AwwwardsHero from '../components/AwwwardsHero';
+import AwwwardsFadeIn from '../components/AwwwardsFadeIn';
+import CortexAuditLedger from '../components/CortexAuditLedger';
+import CheckoutModal from '../components/CheckoutModal';
 import LenisController from '../components/LenisController';
+
+// We manage modal state via a wrapper or vanilla JS if we want, but since Astro runs on the server,
+// we can create an island for the Checkout system, or use a tiny React wrapper. 
+// Let's create a ClientWrapper for the interactive parts that need React state at the top level, 
+// or simply keep CheckoutModal as an island and trigger it via custom events.
+// For simplicity and to follow Astro's islands architecture, we'll use a specific island for the Checkout Flow.
+import CheckoutFlow from '../components/CheckoutFlow';
 ---
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,12 +31,12 @@ import LenisController from '../components/LenisController';
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="/saas.css">
-    <!-- Cloudflare Web Analytics -->
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "CORTEX_CF_ANALYTICS_TOKEN"}'></script>
 </head>
 <body>
-    <CanvasCore client:load />
     <LenisController client:load />
+    <WebGLBackground client:load />
+
     <!-- Urgency Banner -->
     <div class="urgency-banner" id="urgency-banner">
         ⚠️ EU AI Act enforcement begins <strong>August 2026</strong> — Companies without audit trails face <strong>€30M fines</strong>.
@@ -47,202 +59,184 @@ import LenisController from '../components/LenisController';
                 <a href="blog/">BLOG</a>
                 <a href="https://github.com/borjamoskv/Cortex-Persist/tree/main/docs" class="nav-docs">Docs</a>
             </div>
-            <a href="#pricing" class="nav-cta">Get Started</a>
+            <button class="nav-cta" onclick="window.dispatchEvent(new CustomEvent('open-checkout', { detail: { plan: 'Pro Plan', price: '49' } }))">Get Started</button>
         </div>
     </nav>
 
-    
     <!-- Hero -->
-    <section id="hero" class="reveal">
-        <div class="hero-badge">OPEN SOURCE · EU AI ACT READY · ZERO CLOUD DEPENDENCY</div>
-        <h1>Your AI can act.<br><span style="background: linear-gradient(135deg, var(--accent), #54D62C); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Now make it accountable.</span></h1>
-        <p class="hero-sub">Persistent memory, tamper-evident lineage, and audit-ready history for systems that cannot afford amnesia.</p>
-        
-        <div class="hero-actions">
-            <a href="#demo" class="btn btn-primary" id="hero-cta-start">Get Started →</a>
-            <a href="#demo" class="btn btn-outline" id="hero-cta-demo">View Demo</a>
-        </div>
-    </section>
+    <AwwwardsHero client:load />
 
     <!-- Proof Strip -->
-    <div class="metrics-bar reveal delay-3" style="grid-template-columns: repeat(3, 1fr); max-width: 1000px; margin: 0 auto; text-align: left; padding: 2rem; gap: 20px;">
-        <div class="metric-item" style="align-items: flex-start; text-align: left;">
-            <div class="metric-value white" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Store structured facts</div>
-            <div class="metric-label" style="text-transform: none; letter-spacing: normal;">Capture decisions, errors, discoveries, and operational context as typed memory.</div>
+    <AwwwardsFadeIn client:visible delay={0.2} direction="up">
+        <div class="metrics-bar" style="grid-template-columns: repeat(3, 1fr); max-width: 1000px; margin: 0 auto; text-align: left; padding: 2rem; gap: 20px;">
+            <div class="metric-item" style="align-items: flex-start; text-align: left;">
+                <div class="metric-value white" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Store structured facts</div>
+                <div class="metric-label" style="text-transform: none; letter-spacing: normal;">Capture decisions, errors, discoveries, and operational context as typed memory.</div>
+            </div>
+            <div class="metric-item" style="align-items: flex-start; text-align: left;">
+                <div class="metric-value white" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Verify with lineage</div>
+                <div class="metric-label" style="text-transform: none; letter-spacing: normal;">Attach tamper-evident history to memory operations and decision flow.</div>
+            </div>
+            <div class="metric-item" style="align-items: flex-start; text-align: left;">
+                <div class="metric-value white" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Retrieve what matters</div>
+                <div class="metric-label" style="text-transform: none; letter-spacing: normal;">Use hybrid search to recover context without drowning in semantic landfill.</div>
+            </div>
         </div>
-        <div class="metric-item" style="align-items: flex-start; text-align: left;">
-            <div class="metric-value white" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Verify with lineage</div>
-            <div class="metric-label" style="text-transform: none; letter-spacing: normal;">Attach tamper-evident history to memory operations and decision flow.</div>
-        </div>
-        <div class="metric-item" style="align-items: flex-start; text-align: left;">
-            <div class="metric-value white" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Retrieve what matters</div>
-            <div class="metric-label" style="text-transform: none; letter-spacing: normal;">Use hybrid search to recover context without drowning in semantic landfill.</div>
-        </div>
-    </div>
+    </AwwwardsFadeIn>
 
     <!-- Problem -->
-    <section id="problem" class="reveal">
-        <h2>Most AI systems can generate output.<br>Few can justify their history.</h2>
-        <p class="section-sub">Agents are getting better at acting, calling tools, and producing plausible responses. What they still lack is durable operational memory with evidence.</p>
-        <p class="section-sub" style="margin-top: 1rem; color: #E0E0E0;">Without that layer, systems drift, repeat work, lose context, and leave weak audit trails.</p>
-        <p class="section-sub" style="margin-top: 1rem; color: var(--accent); font-weight: 500;">You do not have memory. You have fragments, logs, and optimism.</p>
-    </section>
+    <AwwwardsFadeIn client:visible direction="up" delay={0.1}>
+        <section id="problem">
+            <h2>Most AI systems can generate output.<br>Few can justify their history.</h2>
+            <p class="section-sub">Agents are getting better at acting, calling tools, and producing plausible responses. What they still lack is durable operational memory with evidence.</p>
+            <p class="section-sub" style="margin-top: 1rem; color: #E0E0E0;">Without that layer, systems drift, repeat work, lose context, and leave weak audit trails.</p>
+            <p class="section-sub" style="margin-top: 1rem; color: var(--accent); font-weight: 500;">You do not have memory. You have fragments, logs, and optimism.</p>
+        </section>
+    </AwwwardsFadeIn>
 
     <!-- Solution -->
-    <section id="solution" class="reveal" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 80px 0;">
-        <div class="compliance-grid">
-            <div class="compliance-content">
-                <h2>CORTEX-Persist adds the missing trust layer</h2>
-                <p>CORTEX-Persist is a local-first memory and verification substrate for AI systems that need to remember, retrieve, and prove what happened.</p>
-                <p style="margin-top: 1rem; color: var(--accent); font-weight: 500;">So your stack can do more than continue text. It can preserve operational truth under pressure.</p>
+    <AwwwardsFadeIn client:visible direction="up">
+        <section id="solution" style="background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 80px 0;">
+            <div class="compliance-grid">
+                <div class="compliance-content">
+                    <h2>CORTEX-Persist adds the missing trust layer</h2>
+                    <p>CORTEX-Persist is a local-first memory and verification substrate for AI systems that need to remember, retrieve, and prove what happened.</p>
+                    <p style="margin-top: 1rem; color: var(--accent); font-weight: 500;">So your stack can do more than continue text. It can preserve operational truth under pressure.</p>
+                </div>
+                <ul class="compliance-checklist">
+                    <li><span class="check-icon">✓</span><span class="check-text"><strong>Structured memory</strong></span></li>
+                    <li><span class="check-icon">✓</span><span class="check-text"><strong>Tamper-evident ledgering</strong></span></li>
+                    <li><span class="check-icon">✓</span><span class="check-text"><strong>Hybrid retrieval</strong></span></li>
+                    <li><span class="check-icon">✓</span><span class="check-text"><strong>Memory lifecycle governance</strong></span></li>
+                    <li><span class="check-icon">✓</span><span class="check-text"><strong>Audit-ready history</strong></span></li>
+                </ul>
             </div>
-            <ul class="compliance-checklist">
-                <li><span class="check-icon">✓</span><span class="check-text"><strong>Structured memory</strong></span></li>
-                <li><span class="check-icon">✓</span><span class="check-text"><strong>Tamper-evident ledgering</strong></span></li>
-                <li><span class="check-icon">✓</span><span class="check-text"><strong>Hybrid retrieval</strong></span></li>
-                <li><span class="check-icon">✓</span><span class="check-text"><strong>Memory lifecycle governance</strong></span></li>
-                <li><span class="check-icon">✓</span><span class="check-text"><strong>Audit-ready history</strong></span></li>
-            </ul>
-        </div>
-    </section>
+        </section>
+    </AwwwardsFadeIn>
 
-    <!-- Demo -->
-    <section id="demo" class="reveal">
-        <h2>From event to evidence in under a minute</h2>
-        
-        <div class="terminal-demo" style="margin: 40px auto; text-align: left; max-width: 800px;">
-            <div class="terminal-header">
-                <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-                <span class="code-lang">bash</span>
+    <!-- Live Telemetry / Audit Ledger -->
+    <AwwwardsFadeIn client:visible direction="up">
+        <section id="telemetry" style="padding: 80px 0;">
+            <div style="max-width: 1000px; margin: 0 auto; text-align: center; margin-bottom: 40px;">
+                <h2>Live Telemetry Stream</h2>
+                <p class="section-sub">Witness the cryptographic ledger operating in real-time. Every fact, decision, and anomaly is hash-chained and sealed into the CORTEX persistence substrate.</p>
             </div>
-            <div class="terminal-body" style="font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6;">
-                <span style="color: #888;"># 1. Store memory</span><br>
-                <span style="color: #54D62C;">$</span> cortex store "Vendor X failed compliance check" \<br>
-                  --type decision \<br>
-                  --project procurement \<br>
-                  --confidence C4 \<br>
-                  --source agent:reviewer<br><br>
-                  
-                <span style="color: #888;"># 2. Generate lineage</span><br>
-                <span style="color: #888;"># Each write is chained into a tamper-evident ledger</span><br>
-                <span style="color: #CCFF00;">✅ Stored fact #42 — SHA-256 hash-chained to ledger</span><br><br>
-
-                <span style="color: #888;"># 3. Retrieve context</span><br>
-                <span style="color: #54D62C;">$</span> cortex search "compliance vendor failure"<br><br>
-
-                <span style="color: #888;"># 4. Verify integrity</span><br>
-                <span style="color: #54D62C;">$</span> cortex verify-ledger<br>
-                <span style="color: #CCFF00;">✅ VERIFIED — Hash chain intact, Merkle sealed</span>
-            </div>
-        </div>
-        <div class="hero-actions">
-            <a href="https://github.com/borjamoskv/Cortex-Persist" class="btn btn-primary">Run the Demo</a>
-            <a href="https://github.com/borjamoskv/Cortex-Persist/tree/main/docs" class="btn btn-outline">Read the Docs</a>
-        </div>
-    </section>
+            <CortexAuditLedger client:visible />
+        </section>
+    </AwwwardsFadeIn>
 
     <!-- Features Grid -->
-    <section id="features" class="reveal">
-        <h2>Built for memory that has to survive contact with reality</h2>
-        <div class="features-grid">
-            <div class="feature">
-                <div class="feature-icon">🧩</div>
-                <h3>Structured Memory</h3>
-                <p>Store facts, decisions, discoveries, and errors as typed units with metadata, confidence, and temporal validity.</p>
+    <AwwwardsFadeIn client:visible direction="up">
+        <section id="features">
+            <h2>Built for memory that has to survive contact with reality</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">🧩</div>
+                    <h3>Structured Memory</h3>
+                    <p>Store facts, decisions, discoveries, and errors as typed units with metadata, confidence, and temporal validity.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔗</div>
+                    <h3>Tamper-Evident Ledger</h3>
+                    <p>Attach cryptographic lineage to memory operations so decision history is not left to interpretation.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Hybrid Retrieval</h3>
+                    <p>Combine semantic and lexical retrieval for context that is actually reusable in live systems.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚙️</div>
+                    <h3>Memory Governance</h3>
+                    <p>Promote, compact, decay, archive, or discard memory instead of turning context into a permanent landfill.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💻</div>
+                    <h3>Local-First Runtime</h3>
+                    <p>Start with SQLite and sqlite-vec locally. Extend to cloud backends when scale or deployment needs change.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📋</div>
+                    <h3>Audit-Ready History</h3>
+                    <p>Support internal review, compliance workflows, and postmortems with evidence instead of reconstruction theater.</p>
+                </div>
             </div>
-            <div class="feature">
-                <div class="feature-icon">🔗</div>
-                <h3>Tamper-Evident Ledger</h3>
-                <p>Attach cryptographic lineage to memory operations so decision history is not left to interpretation.</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🔍</div>
-                <h3>Hybrid Retrieval</h3>
-                <p>Combine semantic and lexical retrieval for context that is actually reusable in live systems.</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">⚙️</div>
-                <h3>Memory Governance</h3>
-                <p>Promote, compact, decay, archive, or discard memory instead of turning context into a permanent landfill.</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">💻</div>
-                <h3>Local-First Runtime</h3>
-                <p>Start with SQLite and sqlite-vec locally. Extend to cloud backends when scale or deployment needs change.</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">📋</div>
-                <h3>Audit-Ready History</h3>
-                <p>Support internal review, compliance workflows, and postmortems with evidence instead of reconstruction theater.</p>
-            </div>
-        </div>
-    </section>
+        </section>
+    </AwwwardsFadeIn>
 
     <!-- Use Cases -->
-    <section id="use-cases" class="reveal" style="background: rgba(255,255,255,0.02); padding: 80px 0;">
-        <h2>Where CORTEX-Persist hits hardest</h2>
-        <div class="audits-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-            <div class="audit-card">
-                <h4>🤖 AI agents with tools</h4>
-                <p>Keep reliable context across steps, sessions, and agent boundaries.</p>
+    <AwwwardsFadeIn client:visible direction="up">
+        <section id="use-cases" style="background: rgba(255,255,255,0.02); padding: 80px 0;">
+            <h2>Where CORTEX-Persist hits hardest</h2>
+            <div class="audits-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <div class="audit-card">
+                    <h4>🤖 AI agents with tools</h4>
+                    <p>Keep reliable context across steps, sessions, and agent boundaries.</p>
+                </div>
+                <div class="audit-card">
+                    <h4>🔄 Long-running automation</h4>
+                    <p>Reduce repetition, drift, and memory loss in workflows that operate over time.</p>
+                </div>
+                <div class="audit-card">
+                    <h4>⚖️ Compliance and audit</h4>
+                    <p>Maintain verifiable operational history for regulated or review-heavy environments.</p>
+                </div>
+                <div class="audit-card">
+                    <h4>🧠 Decision systems</h4>
+                    <p>Track not only the output, but the lineage behind how a system arrived there.</p>
+                </div>
             </div>
-            <div class="audit-card">
-                <h4>🔄 Long-running automation</h4>
-                <p>Reduce repetition, drift, and memory loss in workflows that operate over time.</p>
-            </div>
-            <div class="audit-card">
-                <h4>⚖️ Compliance and audit</h4>
-                <p>Maintain verifiable operational history for regulated or review-heavy environments.</p>
-            </div>
-            <div class="audit-card">
-                <h4>🧠 Decision systems</h4>
-                <p>Track not only the output, but the lineage behind how a system arrived there.</p>
-            </div>
-        </div>
-    </section>
+        </section>
+    </AwwwardsFadeIn>
 
-    <!-- Compare / Why not vector DB -->
-    <section id="compare" class="reveal">
-        <h2>Why not just use a vector database?</h2>
-        <p class="section-sub">Because similarity is not lineage. A vector database can retrieve related text. It does not tell you what was stored, when it changed, how it was derived, or whether the history was tampered with.</p>
-        <p class="section-sub" style="margin-top: 1.5rem; color: #fff;"><strong>CORTEX-Persist adds the missing layers:</strong></p>
-        <div class="proof-logos" style="opacity: 1; flex-wrap: wrap; justify-content: center; margin-top: 1rem;">
-            <span style="border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff;">Typed Memory</span>
-            <span style="border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff;">Temporal Validity</span>
-            <span style="border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff;">Confidence Levels</span>
-            <span style="border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff;">Cryptographic Lineage</span>
-            <span style="border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff;">Governed Lifecycle</span>
-            <span style="border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff;">Auditability</span>
-        </div>
-        <p class="section-sub" style="margin-top: 2rem; color: var(--accent); font-weight: 600; font-size: 1.2rem;">Memory without integrity is just plausible storage.</p>
-    </section>
+    <!-- Compare -->
+    <AwwwardsFadeIn client:visible direction="up">
+        <section id="compare">
+            <h2>Why not just use a vector database?</h2>
+            <p class="section-sub">Because similarity is not lineage. A vector database can retrieve related text. It does not tell you what was stored, when it changed, how it was derived, or whether the history was tampered with.</p>
+            <p class="section-sub" style="margin-top: 1.5rem; color: #fff;"><strong>CORTEX-Persist adds the missing layers:</strong></p>
+            <div class="proof-logos" style="opacity: 1; flex-wrap: wrap; justify-content: center; margin-top: 1rem;">
+                <span style="border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff;">Typed Memory</span>
+                <span style="border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff;">Temporal Validity</span>
+                <span style="border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff;">Confidence Levels</span>
+                <span style="border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff;">Cryptographic Lineage</span>
+                <span style="border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff;">Governed Lifecycle</span>
+                <span style="border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff;">Auditability</span>
+            </div>
+            <p class="section-sub" style="margin-top: 2rem; color: var(--accent); font-weight: 600; font-size: 1.2rem;">Memory without integrity is just plausible storage.</p>
+        </section>
+    </AwwwardsFadeIn>
 
     <!-- Technical Credibility -->
-    <section id="tech-cred" class="reveal" style="background: rgba(255,255,255,0.02); padding: 80px 0;">
-        <h2>Built for real systems, not benchmark cosplay</h2>
-        <ul class="compliance-checklist" style="max-width: 600px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <li><span class="check-icon">✓</span><span class="check-text">Python-first architecture</span></li>
-            <li><span class="check-icon">✓</span><span class="check-text">SQLite and sqlite-vec by default</span></li>
-            <li><span class="check-icon">✓</span><span class="check-text">Optional cloud extensions</span></li>
-            <li><span class="check-icon">✓</span><span class="check-text">Encryption at rest</span></li>
-            <li><span class="check-icon">✓</span><span class="check-text">Async-friendly design</span></li>
-            <li><span class="check-icon">✓</span><span class="check-text">CLI and API surfaces</span></li>
-            <li><span class="check-icon">✓</span><span class="check-text">Typed package support</span></li>
-            <li><span class="check-icon">✓</span><span class="check-text">Memory lifecycle controls</span></li>
-        </ul>
-        <p class="section-sub" style="margin-top: 2rem; color: #E0E0E0;">This is infrastructure for systems that operate repeatedly, not a one-shot prompt wrapper.</p>
-    </section>
+    <AwwwardsFadeIn client:visible direction="up">
+        <section id="tech-cred" style="background: rgba(255,255,255,0.02); padding: 80px 0;">
+            <h2>Built for real systems, not benchmark cosplay</h2>
+            <ul class="compliance-checklist" style="max-width: 600px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <li><span class="check-icon">✓</span><span class="check-text">Python-first architecture</span></li>
+                <li><span class="check-icon">✓</span><span class="check-text">SQLite and sqlite-vec by default</span></li>
+                <li><span class="check-icon">✓</span><span class="check-text">Optional cloud extensions</span></li>
+                <li><span class="check-icon">✓</span><span class="check-text">Encryption at rest</span></li>
+                <li><span class="check-icon">✓</span><span class="check-text">Async-friendly design</span></li>
+                <li><span class="check-icon">✓</span><span class="check-text">CLI and API surfaces</span></li>
+                <li><span class="check-icon">✓</span><span class="check-text">Typed package support</span></li>
+                <li><span class="check-icon">✓</span><span class="check-text">Memory lifecycle controls</span></li>
+            </ul>
+            <p class="section-sub" style="margin-top: 2rem; color: #E0E0E0;">This is infrastructure for systems that operate repeatedly, not a one-shot prompt wrapper.</p>
+        </section>
+    </AwwwardsFadeIn>
 
     <!-- CTA -->
-    <section id="cta" class="reveal">
-        <h2>Make your AI stack remember with evidence.</h2>
-        <p>Start with persistent memory. Add lineage when memory starts to matter. Keep both when accountability becomes non-negotiable.</p>
-        <div class="cta-actions">
-            <a href="https://github.com/borjamoskv/Cortex-Persist" class="btn btn-primary btn-lg">Get Started</a>
-            <a href="#demo" class="btn btn-outline btn-lg">View Demo</a>
-            <a href="https://github.com/borjamoskv/Cortex-Persist" class="btn btn-outline btn-lg" target="_blank" rel="noopener noreferrer">Explore GitHub</a>
-        </div>
-    </section>
+    <AwwwardsFadeIn client:visible direction="up">
+        <section id="cta">
+            <h2>Make your AI stack remember with evidence.</h2>
+            <p>Start with persistent memory. Add lineage when memory starts to matter. Keep both when accountability becomes non-negotiable.</p>
+            <div class="cta-actions">
+                <button class="btn btn-primary btn-lg" onclick="window.dispatchEvent(new CustomEvent('open-checkout', { detail: { plan: 'Enterprise', price: '99' } }))">Get Started</button>
+                <a href="#demo" class="btn btn-outline btn-lg">View Demo</a>
+                <a href="https://github.com/borjamoskv/Cortex-Persist" class="btn btn-outline btn-lg" target="_blank" rel="noopener noreferrer">Explore GitHub</a>
+            </div>
+        </section>
+    </AwwwardsFadeIn>
 
     <!-- Footer -->
     <footer id="footer">
@@ -261,255 +255,16 @@ import LenisController from '../components/LenisController';
         </div>
     </footer>
 
-    <!-- Fast Checkout Modal -->
-    <div class="checkout-overlay" id="checkout-overlay">
-        <div class="checkout-modal">
-            <div class="checkout-header">
-                <div class="checkout-title">Complete your Subscription</div>
-                <button class="checkout-close" id="checkout-close">&times;</button>
-            </div>
-            <div class="checkout-plan">
-                <div class="checkout-plan-name" id="checkout-plan-name">Pro Plan</div>
-                <div class="checkout-plan-price" id="checkout-plan-price">$49</div>
-            </div>
-            <div class="checkout-form">
-                <input type="email" class="checkout-input" placeholder="Email Address" required>
-                <input type="text" class="checkout-input" placeholder="Card Number" required>
-                <div style="display:flex; gap:16px;">
-                    <input type="text" class="checkout-input" placeholder="MM/YY" style="flex:1" required>
-                    <input type="text" class="checkout-input" placeholder="CVC" style="flex:1" required>
-                </div>
-            </div>
-            <button class="btn btn-primary checkout-btn" id="checkout-submit">Pay Securely →</button>
-            <div class="checkout-footer">
-                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:green; margin-right:4px;"></span>
-                Encrypted & Secured by CORTEX Privacy Shield
-            </div>
-        </div>
-    </div>
-
-    <!-- Payment Integration -->
+    <!-- Stripe Checkout Integration -->
     <script is:inline src="https://js.stripe.com/v3/"></script>
+    <CheckoutFlow client:load />
+
+    <!-- Nav scroll effect -->
     <script is:inline>
-        let stripeCheckoutInstance = null;
-        const checkoutOverlay = document.getElementById('checkout-overlay');
-        const checkoutClose = document.getElementById('checkout-close');
-        const checkoutName = document.getElementById('checkout-plan-name');
-        const checkoutPrice = document.getElementById('checkout-plan-price');
-        const checkoutSubmit = document.getElementById('checkout-submit');
-
-        document.querySelectorAll('[data-plan]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const plan = btn.dataset.plan;
-                const amount = plan === 'pro' ? '49' : '0';
-                const name = plan === 'pro' ? 'Pro Plan' : 'Custom';
-                
-                checkoutName.innerText = name;
-                checkoutPrice.innerText = '$' + amount;
-                checkoutOverlay.classList.add('active');
-            });
-        });
-
-        checkoutClose.addEventListener('click', () => {
-            checkoutOverlay.classList.remove('active');
-            setTimeout(() => {
-                if (stripeCheckoutInstance) {
-                    stripeCheckoutInstance.destroy();
-                    stripeCheckoutInstance = null;
-                }
-                document.querySelector('.checkout-form').style.display = 'block';
-                checkoutSubmit.style.display = 'block';
-                checkoutSubmit.innerText = "Pay Securely →";
-                checkoutSubmit.style.opacity = "1";
-                checkoutSubmit.style.pointerEvents = "auto";
-                document.querySelector('.checkout-footer').style.display = 'block';
-                const embedded = document.getElementById('stripe-checkout-container');
-                if (embedded) embedded.remove();
-            }, 300);
-        });
-
-        checkoutOverlay.addEventListener('click', (e) => {
-            if (e.target === checkoutOverlay) {
-                checkoutOverlay.classList.remove('active');
-            }
-        });
-
-        checkoutSubmit.addEventListener('click', async () => {
-            const emailInput = document.querySelector('.checkout-input[type="email"]');
-            const plan = checkoutName.innerText.toLowerCase().includes('pro') ? 'pro' : 'enterprise';
-            
-            if (!emailInput.value || !emailInput.checkValidity()) {
-                alert("Please enter a valid email address.");
-                return;
-            }
-
-            checkoutSubmit.innerHTML = "Processing... <span class='spinner'></span>";
-            checkoutSubmit.style.opacity = "0.7";
-            checkoutSubmit.style.pointerEvents = "none";
-            
-            try {
-                const response = await fetch('/v1/stripe/checkout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        plan: plan,
-                        customer_email: emailInput.value,
-                        success_url: globalThis.location.origin + "/docs/prototypes/success.html",
-                        cancel_url: globalThis.location.origin + "/docs/prototypes/cancel.html"
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Stripe initialization failed.');
-                }
-                
-                const data = await response.json();
-                if (data.client_secret) {
-                    const stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
-                    
-                    document.querySelector('.checkout-form').style.display = 'none';
-                    checkoutSubmit.style.display = 'none';
-                    document.querySelector('.checkout-footer').style.display = 'none';
-                    
-                    const checkoutContainer = document.createElement('div');
-                    checkoutContainer.id = 'stripe-checkout-container';
-                    document.querySelector('.checkout-modal').appendChild(checkoutContainer);
-                    
-                    stripeCheckoutInstance = await stripe.initEmbeddedCheckout({
-                        clientSecret: data.client_secret,
-                        appearance: {
-                            theme: 'night',
-                            variables: {
-                                colorPrimary: '#CCFF00',
-                                colorBackground: '#0F0F0F',
-                                colorText: '#E0E0E0',
-                                colorDanger: '#FF5252',
-                                fontFamily: 'Inter, system-ui, sans-serif',
-                                borderRadius: '12px'
-                            }
-                        }
-                    });
-                    
-                    stripeCheckoutInstance.mount('#stripe-checkout-container');
-                } else if (data.url) {
-                    globalThis.location.href = data.url;
-                } else {
-                    throw new Error('No checkout session received.');
-                }
-            } catch (error) {
-                console.error("Stripe Checkout Error:", error);
-                alert("Payment gateway connection failed. Error: " + error.message);
-                checkoutSubmit.innerText = "Pay Securely →";
-                checkoutSubmit.style.opacity = "1";
-                checkoutSubmit.style.pointerEvents = "auto";
-            }
-        });
-
-        // Nav scroll effect
         window.addEventListener('scroll', () => {
-            document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+            const nav = document.getElementById('nav');
+            if (nav) nav.classList.toggle('scrolled', window.scrollY > 50);
         });
     </script>
-
-    <!-- Terminal Typewriter Animation -->
-    <script is:inline>
-    (function() {
-        const lines = [
-            { type: 'prompt', text: '$ ', delay: 0 },
-            { type: 'cmd', text: 'pip install cortex-persist', delay: 40 },
-            { type: 'newline', delay: 600 },
-            { type: 'output', text: '✓ Installed cortex-persist 0.3.0b7', delay: 10 },
-            { type: 'newline', delay: 800 },
-            { type: 'prompt', text: '$ ', delay: 0 },
-            { type: 'cmd', text: 'cortex store --type decision "Chose OAuth2 PKCE for auth"', delay: 35 },
-            { type: 'newline', delay: 500 },
-            { type: 'success', text: '✅ Stored fact #42 — SHA-256 hash-chained to ledger', delay: 10 },
-            { type: 'newline', delay: 200 },
-            { type: 'hash', text: '   tx: a3f8c2...d91b → prev: 7e2b01...4fc3', delay: 10 },
-            { type: 'newline', delay: 800 },
-            { type: 'prompt', text: '$ ', delay: 0 },
-            { type: 'cmd', text: 'cortex verify 42', delay: 35 },
-            { type: 'newline', delay: 400 },
-            { type: 'success', text: '✅ VERIFIED — Hash chain intact, Merkle sealed', delay: 10 },
-            { type: 'newline', delay: 800 },
-            { type: 'prompt', text: '$ ', delay: 0 },
-            { type: 'cmd', text: 'cortex compliance-report', delay: 30 },
-            { type: 'newline', delay: 400 },
-            { type: 'success', text: '📋 Compliance Score: 5/5 — All Article 12 requirements met', delay: 10 },
-        ];
-
-        const output = document.getElementById('terminal-output');
-        let lineIndex = 0;
-        let charIndex = 0;
-        let currentSpan = null;
-
-        function typeNext() {
-            if (lineIndex >= lines.length) {
-                // Add blinking cursor at end
-                const cursor = document.createElement('span');
-                cursor.className = 'typing-cursor';
-                output.appendChild(cursor);
-                return;
-            }
-
-            const line = lines[lineIndex];
-
-            if (line.type === 'newline') {
-                output.appendChild(document.createElement('br'));
-                lineIndex++;
-                charIndex = 0;
-                currentSpan = null;
-                setTimeout(typeNext, line.delay);
-                return;
-            }
-
-            if (!currentSpan) {
-                currentSpan = document.createElement('span');
-                currentSpan.className = line.type;
-                output.appendChild(currentSpan);
-            }
-
-            if (charIndex < line.text.length) {
-                currentSpan.textContent += line.text[charIndex];
-                charIndex++;
-                setTimeout(typeNext, line.delay);
-            } else {
-                lineIndex++;
-                charIndex = 0;
-                currentSpan = null;
-                setTimeout(typeNext, 50);
-            }
-        }
-
-        // Start typewriter when element is in viewport
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    setTimeout(typeNext, 500);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.3 });
-
-        observer.observe(document.getElementById('terminal-demo'));
-    })();
-    </script>
-
-
-    <!-- Scroll Reveal Logic -->
-    <script is:inline>
-        const revealElements = document.querySelectorAll('.reveal');
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
-            });
-        }, { threshold: 0.1 });
-        revealElements.forEach(el => revealObserver.observe(el));
-    </script>
-
 </body>
 </html>

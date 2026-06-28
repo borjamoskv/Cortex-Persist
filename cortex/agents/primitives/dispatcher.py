@@ -77,6 +77,13 @@ class ApexDispatcher:
 
     def _op_git_sentinel(self, commit_msg: str, force: bool = False, path: str = ".") -> str:
         """OP_GIT_SENTINEL: Causal persistence via cryptographic commit."""
+        from cortex.engine.causal.taint_engine import check_anergy_and_green_theater, TaintValidationError
+        
+        try:
+            check_anergy_and_green_theater(commit_msg)
+        except TaintValidationError as e:
+            raise RuntimeError(f"[C5-REAL] FATAL: Green Theater detected in commit message: {e}")
+
         add_cmd = ["git", "add"]
         if force:
             add_cmd.append("-f")

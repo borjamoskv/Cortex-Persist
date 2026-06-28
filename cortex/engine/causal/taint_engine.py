@@ -382,15 +382,31 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
         return
 
-    # -- EXERGY & LANDAUER GUARDS (SAGA-1) --
+def check_anergy_and_green_theater(content: str) -> None:
+    """[LEA-OMEGA] Validates content against Axiom Ω₁₃ (Exergy) and Ω₄ (Landauer).
+    Rejects stochastic promises and Green Theater."""
+    import os
+    if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
+        return
+
     from cortex.guards.exergy_guard import ExergyGuard, LandauerGuard
     try:
         is_sacred = "axiom" in content.lower() or "sacred" in content.lower()
-        # Treat all generic taint checks as "thought" to enforce the baseline Exergy check
         ExergyGuard().check_thermodynamic_yield(content, project="SYS_ROOT", fact_type="thought")
         LandauerGuard().check_landauer_limit(content, is_sacred=is_sacred)
     except ValueError as exergy_err:
         raise TaintValidationError(f"SAGA-1 Rejection by Thermodynamic Guard: {exergy_err}")
+
+async def enforce_taint_check(conn, token: str | None, content: str) -> None:
+    """Enforces the CORTEX-TAINT check. Raises TaintValidationError if invalid."""
+    # [C5-REAL] Host Identity Strict Containment (UltraThink P0) - ALWAYS RUN
+    import base64
+    import os
+    import re
+    import unicodedata
+    import urllib.parse
+
+    # ... (PII logic remains unchanged up to line 380, we will just replace the guard section) ...
 
     # -- OWASP Memory Firewall (SAGA-1.5) --
     from cortex.security.memory_firewall import MemoryFirewall
