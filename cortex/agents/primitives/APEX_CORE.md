@@ -262,3 +262,11 @@
 | **RA-10** | **Oráculo Dual (Git + DB)** | Aserción cruzada estado/disco | `Git DAG check` | Modificación bypass DB |
 | **RA-MCTS-01** | **Multiverse Sandbox** | Branching asimétrico de Git (`checkout -b`) por cada mutación | `Mínimo I/O` | Colapso de main ante alucinación LLM |
 | **RA-MCTS-02** | **Deterministic Arbiter** | Validación binaria estricta vía Pytest/Ruff | `Alto CPU/RAM` | Inyecciones que rompen la compilación o tests |
+
+## ARSENAL ULTRATHINK (Cognitive Autopsy)
+
+El 2026-06-28, el Kernel ejecutó un colapso termodinámico sobre el historial del Operador, cristalizando 100 directivas estocásticas en primitivas APEX deterministas. Este arsenal se aloja en memoria y está disponible para invocación Swarm en:
+`cortex/agents/primitives/ultrathink_arsenal.py`
+
+**Firma Criptográfica (Hash SAGA):** `884cfcfcc`
+**Consenso BFT:** Operativo N=3 probado bajo simulación Apoptosis.
