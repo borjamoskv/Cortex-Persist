@@ -24,15 +24,10 @@ CLOUD_PROVIDERS = {
         Path.home()
         / "Library"
         / "CloudStorage"
-        / "GoogleDrive-borjafernandezangulo@gmail.com"
-        / "Mi unidad"
-        / "CORTEX-NotebookLM",
-        Path.home()
-        / "Library"
-        / "CloudStorage"
         / "GoogleDrive-borja@moskv.dev"
         / "Mi unidad"
         / "CORTEX-NotebookLM",
+        Path.home() / "Google Drive" / "CORTEX-NotebookLM",
     ],
     "OneDrive": [
         Path.home() / "Library" / "CloudStorage" / "OneDrive-Personal" / "CORTEX-NotebookLM",

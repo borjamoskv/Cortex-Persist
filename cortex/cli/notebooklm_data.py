@@ -25,7 +25,7 @@ CLOUD_PROVIDERS: dict[str, list[Path]] = {
         Path.home()
         / "Library"
         / "CloudStorage"
-        / "GoogleDrive-borjafernandezangulo@gmail.com"
+        / "GoogleDrive-borja@moskv.dev"
         / "Mi unidad"
         / "CORTEX-NotebookLM",
         Path.home() / "Google Drive" / "CORTEX-NotebookLM",
