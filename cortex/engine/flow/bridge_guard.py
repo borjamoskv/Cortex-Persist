@@ -149,12 +149,12 @@ class BridgeGuard:
         content: str,
         current_project: str,
         tenant_id: str = "default",
-    ) -> str | None:
+    ) -> tuple[str, str] | None:
         """
         Ω₁: Detect if this content already exists in another project.
 
         Used for prescriptive bridge elevation to prevent code duplication.
-        Returns the source project name if a duplicate is found outside current_project.
+        Returns (source_project, fact_hash) if a duplicate is found outside current_project.
         """
         from cortex.utils.canonical import compute_fact_hash
 
@@ -162,7 +162,7 @@ class BridgeGuard:
 
         # Search for the same hash in OTHER projects
         async with conn.execute(
-            "SELECT project FROM facts "
+            "SELECT project, hash FROM facts "
             "WHERE tenant_id = ? AND project != ? AND hash = ? "
             "AND valid_until IS NULL AND is_quarantined = 0 "
             "LIMIT 1",
@@ -170,7 +170,7 @@ class BridgeGuard:
         ) as cursor:
             row = await cursor.fetchone()
         if row:
-            return row[0]
+            return row[0], row[1]
         return None
 
     @staticmethod

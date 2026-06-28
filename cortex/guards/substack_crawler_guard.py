@@ -29,6 +29,12 @@ STOCHASTIC_NOISE_DOMAINS = frozenset({
 })
 
 
+# Sovereign Whitelist: Known Human Nodes (Top Organics) that bypass B2C Noise filters
+SOVEREIGN_WHITELIST = frozenset({
+    'hugopotxo@gmail.com',
+    'bradmarianioan@gmail.com'
+})
+
 class SubstackCrawlerGuard:
     """
     Evaluates raw metrics from SaaS platforms to purge Bot Inflation.
@@ -44,27 +50,23 @@ class SubstackCrawlerGuard:
     ) -> float:
         """
         Validates the causal integrity of an email interaction.
-        
-        Args:
-            email: Raw subscriber email.
-            opens: Raw open count from Substack.
-            clicks: Raw click count from Substack.
-            ts_delta_ms: Time difference in milliseconds between Send, Open, and Click.
-            
-        Returns:
-            float: Confidence score [1.0 for true SOTA Human, 0.0 for Noise].
-            
-        Raises:
-            ValueError: If the profile exhibits Crawler Inflation signatures.
         """
         if not email or '@' not in email:
             raise ValueError("[Axiom OUROBOROS-014] Epistemic Breach: Malformed identity format.")
             
-        local_part, domain = email.lower().split('@', 1)
+        email_lower = email.lower()
+        if email_lower in SOVEREIGN_WHITELIST:
+            return 1.0  # Bypass all noise filters for known SOTA humans
+            
+        local_part, domain = email_lower.split('@', 1)
         
         # 1. Reject B2C Stochastic Noise
         if domain in STOCHASTIC_NOISE_DOMAINS:
-            return 0.0  # Not a failure, just zero exergy (consumer noise)
+            logger.error("B2C Stochastic Noise detected for %s", email)
+            raise ValueError(
+                f"[Axiom OUROBOROS-094] Thermodynamic Violation: Epistemic Limerence detected. "
+                f"Email '{email}' belongs to a B2C Stochastic Noise domain ({domain})."
+            )
 
         # 2. Reject Firewall Dead Inboxes (Crawler Inflation)
         if local_part in CRAWLER_BOT_PREFIXES:

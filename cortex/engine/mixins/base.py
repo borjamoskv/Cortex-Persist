@@ -109,3 +109,37 @@ class EngineMixinBase:
             tenant_id = "default"
 
         return tenant_id
+
+    async def _resolve_symlinks_async(
+        self, facts: list[dict[str, Any]], conn: aiosqlite.Connection, tenant_id: str
+    ) -> list[dict[str, Any]]:
+        """Resolve NEXUS_SYMLINK pointers efficiently (O(1) query) for bridge facts."""
+        symlinks = [f for f in facts if str(f.get("content", "")).startswith("NEXUS_SYMLINK:")]
+        if not symlinks:
+            return facts
+
+        target_hashes = list({f["content"].split("NEXUS_SYMLINK:")[1] for f in symlinks})
+        
+        # We need the decrypted content of target facts. The easiest way is to fetch the raw rows and decrypt.
+        # But we don't have access to decrypt logic here easily unless we use self._row_to_fact.
+        placeholders = ",".join("?" for _ in target_hashes)
+        query = f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.tenant_id = ? AND f.hash IN ({placeholders}) AND f.is_tombstoned = 0"
+        
+        async with conn.execute(query, [tenant_id, *target_hashes]) as cursor:
+            rows = await cursor.fetchall()
+            
+        target_facts = {
+            f["hash"]: f 
+            for f in [self._row_to_fact(r, tenant_id) for r in rows]
+            if f.get("hash")
+        }
+        
+        for f in symlinks:
+            target_hash = f["content"].split("NEXUS_SYMLINK:")[1]
+            if target_hash in target_facts:
+                f["content"] = target_facts[target_hash]["content"]
+                # Also expose adaptation logic if it exists
+                if "bridge_adaptation" in f.get("meta", {}):
+                    f["content"] = f"{f['meta']['bridge_adaptation']} (Resolved from pointer)"
+        
+        return facts

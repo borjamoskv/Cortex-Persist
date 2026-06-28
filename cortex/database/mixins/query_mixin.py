@@ -65,7 +65,8 @@ class QueryMixin(EngineMixinBase):
             query += " ORDER BY f.project, f.fact_type, f.id"
             async with conn.execute(query, params) as cursor:
                 rows = await cursor.fetchall()
-            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+            facts = [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+            return await self._resolve_symlinks_async(facts, conn, tenant_id)
 
     # NOTE: search() is provided by SearchMixin, not QueryMixin.
     # This avoids duplication and ensures the canonical search path
@@ -157,7 +158,8 @@ class QueryMixin(EngineMixinBase):
 
             async with conn.execute(q, params) as cursor:
                 rows = await cursor.fetchall()
-            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+            facts = [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+            return await self._resolve_symlinks_async(facts, conn, tenant_id)
 
     async def history(
         self,
@@ -199,7 +201,8 @@ class QueryMixin(EngineMixinBase):
                 )
                 async with conn.execute(q, (tenant_id, project)) as cursor:
                     rows = await cursor.fetchall()
-            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+            facts = [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+            return await self._resolve_symlinks_async(facts, conn, tenant_id)
 
     async def reconstruct_state(
         self,
@@ -244,7 +247,8 @@ class QueryMixin(EngineMixinBase):
                 [tenant_id, project, tx_time, tx_time, tx_time],
             ) as cursor:
                 rows = await cursor.fetchall()
-            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+            facts = [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+            return await self._resolve_symlinks_async(facts, conn, tenant_id)
 
     async def time_travel(
         self,
@@ -281,7 +285,8 @@ class QueryMixin(EngineMixinBase):
                 )  # nosec B608 - parameterized via temporal builder
                 async with conn.execute(q, [tenant_id, *tparams]) as cursor:
                     rows = await cursor.fetchall()
-            return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+            facts = [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
+            return await self._resolve_symlinks_async(facts, conn, tenant_id)
 
     async def stats(self, tenant_id: str = "default") -> dict:
         tenant_id = self._resolve_tenant(tenant_id)
@@ -497,4 +502,4 @@ class QueryMixin(EngineMixinBase):
                 f["causal_depth"] = depth_map.get(f["id"], 0)
             facts.sort(key=lambda x: x["causal_depth"])
 
-            return facts
+            return await self._resolve_symlinks_async(facts, conn, tenant_id)

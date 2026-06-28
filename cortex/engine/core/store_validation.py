@@ -260,11 +260,25 @@ async def _enforce_cortex_taint(
 async def _apply_bridge_guard(conn, content, project, tenant_id, fact_type):
     from cortex.engine.flow.bridge_guard import BridgeGuard
 
-    source_proj = await BridgeGuard.detect_bridge_candidate(conn, content, project, tenant_id)
+    bridge_candidate = await BridgeGuard.detect_bridge_candidate(conn, content, project, tenant_id)
     bridge_result = None
-    if source_proj:
+    if bridge_candidate:
+        source_proj, source_hash = bridge_candidate
         fact_type = "bridge"
-        if "→" not in content and "->" not in content:
-            content = f"Pattern from {source_proj} → {project}. Adaptation: {content}"
-        bridge_result = await BridgeGuard.validate_bridge(conn, content, project, tenant_id)
+        adaptation = content
+        # Thermodynamic pointer (zero-entropy)
+        content = f"NEXUS_SYMLINK:{source_hash}"
+        
+        # Validar usando el contenido adaptado original (para no romper reglas de longitud y semántica)
+        bridge_eval_content = adaptation
+        if "→" not in adaptation and "->" not in adaptation:
+            bridge_eval_content = f"Pattern from {source_proj} → {project}. Adaptation: {adaptation}"
+            
+        bridge_result = await BridgeGuard.validate_bridge(conn, bridge_eval_content, project, tenant_id)
+        if bridge_result:
+            if "meta_flags" not in bridge_result:
+                bridge_result["meta_flags"] = {}
+            bridge_result["meta_flags"]["bridge_adaptation"] = adaptation
+            bridge_result["meta_flags"]["bridge_target_hash"] = source_hash
+            
     return content, fact_type, bridge_result
