@@ -156,24 +156,27 @@ class ContextInference:
         if self.conn is None:
             return
 
+        from cortex.database.core import causal_write
+
         try:
-            await self.conn.execute(
-                """
-                INSERT INTO context_snapshots
-                    (active_project, confidence, signals_used, summary,
-                     signals_json, projects_json)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    result.active_project,
-                    result.confidence,
-                    result.signals_used,
-                    result.summary,
-                    json.dumps([s.to_dict() for s in result.top_signals]),
-                    json.dumps([{"project": p, "score": s} for p, s in result.projects_ranked]),
-                ),
-            )
-            await self.conn.commit()
+            with causal_write(self.conn):
+                await self.conn.execute(
+                    """
+                    INSERT INTO context_snapshots
+                        (active_project, confidence, signals_used, summary,
+                         signals_json, projects_json)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        result.active_project,
+                        result.confidence,
+                        result.signals_used,
+                        result.summary,
+                        json.dumps([s.to_dict() for s in result.top_signals]),
+                        json.dumps([{"project": p, "score": s} for p, s in result.projects_ranked]),
+                    ),
+                )
+                await self.conn.commit()
             logger.debug("Context snapshot persisted (project=%s)", result.active_project)
         except (sqlite3.Error, OSError):
             logger.warning("Failed to persist context snapshot", exc_info=True)
