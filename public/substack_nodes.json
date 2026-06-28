@@ -21,7 +21,7 @@
     "date": "2026-01-25T09:31:13.328Z",
     "wordcount": 53,
     "exergy_score": 400,
-    "status": "APOPTOSIS_PENDING"
+    "status": "DELETED"
   },
   {
     "post_id": 186548882,
@@ -37,7 +37,7 @@
     "date": "2026-02-09T11:46:45.379Z",
     "wordcount": 3057,
     "exergy_score": 450,
-    "status": "APOPTOSIS_PENDING"
+    "status": "DELETED"
   },
   {
     "post_id": 187479477,
@@ -69,7 +69,7 @@
     "date": "2026-02-12T02:02:43.968Z",
     "wordcount": 6411,
     "exergy_score": 450,
-    "status": "APOPTOSIS_PENDING"
+    "status": "DELETED"
   },
   {
     "post_id": 188320201,
@@ -85,7 +85,7 @@
     "date": "2026-02-18T12:26:43.030Z",
     "wordcount": 7,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 188444700,
@@ -117,7 +117,7 @@
     "date": "2026-02-24T22:48:21.886Z",
     "wordcount": 10,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 189142829,
@@ -605,7 +605,7 @@
     "date": "2026-03-27T12:48:27.958Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 192347686,
@@ -637,7 +637,7 @@
     "date": "2026-03-28T04:14:27.714Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 192824537,
@@ -645,7 +645,7 @@
     "date": "2026-04-01T08:41:11.520Z",
     "wordcount": 4,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 192825569,
@@ -653,7 +653,7 @@
     "date": "2026-04-01T09:07:34.630Z",
     "wordcount": 5,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 192854902,
@@ -669,7 +669,7 @@
     "date": "2026-04-01T17:51:13.163Z",
     "wordcount": 11,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 192879888,
@@ -677,7 +677,7 @@
     "date": "2026-04-01T18:47:18.762Z",
     "wordcount": 3257,
     "exergy_score": 450,
-    "status": "APOPTOSIS_PENDING"
+    "status": "DELETED"
   },
   {
     "post_id": 192886939,
@@ -693,7 +693,7 @@
     "date": "2026-04-02T15:52:11.721Z",
     "wordcount": 12,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 193238623,
@@ -709,7 +709,7 @@
     "date": "2026-04-05T11:04:04.753Z",
     "wordcount": 16,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 193247365,
