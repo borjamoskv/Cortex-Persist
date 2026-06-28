@@ -148,11 +148,21 @@ class MCTSGitEnvironment:
     async def secure_checkout(self, node_id: str) -> None:
         """Removes the isolated worktree and cleans up the branch if needed."""
         wt_path = self._get_worktree_path(node_id)
-        logger.debug("Removing worktree: %s", wt_path)
+        branch_name = f"chronos/node-{node_id}"
+        logger.debug("Removing worktree: %s and branch: %s", wt_path, branch_name)
         
+        # 1. Remove worktree
         p1 = await asyncio.create_subprocess_shell(
             f"git worktree remove --force {shlex.quote(str(wt_path))}",
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
             cwd=str(self.repo_root)
         )
         await p1.communicate()
+        
+        # 2. Delete the temporary branch
+        p2 = await asyncio.create_subprocess_shell(
+            f"git branch -D {shlex.quote(branch_name)}",
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            cwd=str(self.repo_root)
+        )
+        await p2.communicate()
