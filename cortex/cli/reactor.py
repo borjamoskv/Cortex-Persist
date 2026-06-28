@@ -1,4 +1,3 @@
-import threading
 # [C5-REAL] Exergy-Maximized
 """
 CORTEX REACTOR (SYNAPSE-X) v1.0
@@ -9,6 +8,7 @@ Visualizes Synaptic Resonance and Entropy Eradication.
 from __future__ import annotations
 
 import random
+import threading
 import time
 
 from rich.console import Console

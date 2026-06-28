@@ -1,4 +1,3 @@
-import threading
 # [C5-REAL] Exergy-Maximized
 """Sovereign Dashboard (Industrial Noir).
 
@@ -15,6 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import sqlite3
+import threading
 import time
 from datetime import datetime, timezone
 

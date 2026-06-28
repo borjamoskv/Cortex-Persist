@@ -1,6 +1,29 @@
 # CORTEX ENGINE FACADE
 # Auto-generated to maintain compatibility after structural mitosis.
 
+from cortex.swarm import (
+    agent_mixin,
+    aleph_omega,
+    auth,
+    auth_gateway,
+    autocurative_agent,
+    autopoietic_agent,
+    enrichment_worker,
+    entropy_daemon,
+    exergy_agent,
+    exergy_daemon,
+    legion,
+    legion_vectors,
+    legion_vectors_plan,
+    nemesis_agent,
+    omega_daemon,
+    phoenix_omega,
+    squadrons,
+    swarm_10k,
+    test_autopoietic_agent,
+    trust_registry,
+)
+
 from .core import (
     _engine_connection,
     _engine_delegates,
@@ -84,26 +107,4 @@ from .meta import (
     right_brain,
     sovereign_arbiter,
     vision_reasoner,
-)
-from cortex.swarm import (
-    agent_mixin,
-    aleph_omega,
-    auth,
-    auth_gateway,
-    autocurative_agent,
-    autopoietic_agent,
-    enrichment_worker,
-    entropy_daemon,
-    exergy_agent,
-    exergy_daemon,
-    legion,
-    legion_vectors,
-    legion_vectors_plan,
-    nemesis_agent,
-    omega_daemon,
-    phoenix_omega,
-    squadrons,
-    swarm_10k,
-    test_autopoietic_agent,
-    trust_registry,
 )

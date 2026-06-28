@@ -13,7 +13,6 @@ from cortex.cli.errors import err_execution_failed, err_skill_not_found
 __all__ = [
     "auto_sync_cmd",
     "bind_cmd",
-    "init_cmd",
     "pulse",
     "run_nexus_skill",
 ]

@@ -10,6 +10,7 @@ cryptographic rejection to the CORTEX Master Ledger.
 
 import hashlib
 import logging
+import re
 from datetime import datetime, timezone
 
 # Import the existing router from the engine
@@ -23,8 +24,19 @@ class IHelpPurgeDaemon:
         self.agent_id = "t_cell_alpha_purge"
         self.mhc_router = mhc_router
 
+        # Import dynamically to avoid circular dependencies
+        from cortex.routes.telemetry import BASE_MAFIA_NODES
+
+        # Escape all regex characters in the nodes, and convert whitespace in nodes to \s+
+        escaped_nodes = []
+        for node in BASE_MAFIA_NODES:
+            escaped = re.escape(node)
+            cleaned = re.sub(r'(\\ )|\s+', r'\\s+', escaped)
+            escaped_nodes.append(cleaned)
+
         # Regex signature targeting the specific Anergy vectors
-        self.antigen_signature = r"(?i)\b(ihelp|david\s+dominguez)\b"
+        pattern = "|".join(escaped_nodes)
+        self.antigen_signature = rf"(?i)\b({pattern})\b"
 
         # Bind the daemon to the MHC router
         self.mhc_router.register_t_cell(self.agent_id, self.antigen_signature)

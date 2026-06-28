@@ -5,7 +5,8 @@ Consults the EnterpriseAuditLedger and yields a strictly ordered,
 cryptographically verified trajectory.
 """
 
-from typing import Any, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Any
 
 from cortex.audit.ledger import EnterpriseAuditLedger
 

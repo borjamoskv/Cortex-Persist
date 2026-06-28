@@ -1,4 +1,3 @@
-import threading
 # [C5-REAL] Exergy-Maximized
 """CORTEX CLI - Health command group.
 
@@ -7,6 +6,8 @@ Thin CLI wrapper; all logic lives in cortex_extensions.health.
 """
 
 from __future__ import annotations
+
+import threading
 
 import click
 
@@ -147,7 +148,6 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
 
     if live:
         # Live sampling mode
-        import time
 
         from rich.progress import track
 

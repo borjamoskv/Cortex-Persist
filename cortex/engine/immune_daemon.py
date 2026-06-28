@@ -9,7 +9,6 @@ import logging
 import random
 import sys
 import threading
-import time
 
 logger = logging.getLogger("cortex.engine.immune_daemon")
 

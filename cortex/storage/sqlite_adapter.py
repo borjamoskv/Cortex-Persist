@@ -136,7 +136,7 @@ class SQLiteAdapter:
         """
         try:
             await self._conn.close()
-        except (sqlite3.Error, OSError, ValueError):
+        except (Exception):
             logger.debug("SQLiteAdapter.close: connection already closed or error")
 
     async def health_check(self) -> bool:

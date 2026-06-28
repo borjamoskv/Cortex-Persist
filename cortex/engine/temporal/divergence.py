@@ -44,7 +44,7 @@ class DivergenceMap:
         seq_b = [str(node.get("action", "")) for node in trajectory_b]
         
         divergence_point = -1
-        for i, (a, b) in enumerate(zip(seq_a, seq_b)):
+        for i, (a, b) in enumerate(zip(seq_a, seq_b, strict=False)):
             if a != b:
                 divergence_point = i
                 break

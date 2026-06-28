@@ -1,4 +1,5 @@
 import threading
+
 # [C5-REAL] Exergy-Maximized
 """
 Fiat Oracle Sidecar (Operation Citadel).
@@ -10,7 +11,6 @@ import asyncio
 import hashlib
 import json
 import logging
-import time
 from pathlib import Path
 from typing import Any, Final
 

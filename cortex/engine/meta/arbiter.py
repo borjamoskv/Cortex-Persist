@@ -7,6 +7,7 @@ and selects the canonical path (the one with the lowest EntropyDrift).
 """
 
 from typing import Any
+
 from cortex.engine.temporal.divergence import DivergenceMap
 
 
