@@ -182,7 +182,7 @@ class ZKGuardAdapter:
         from cortex.guards.zk_guard import ZKSwarmGuard
 
         guard = ZKSwarmGuard()
-        await guard.verify_integrity(content, fact_type, meta)
+        await guard.verify_integrity(content, fact_type, meta, tenant_id=tenant_id)
 
 
 class VirgoGuardAdapter:
