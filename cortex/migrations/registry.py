@@ -6,6 +6,7 @@ from cortex.migrations.mig_base import (
     _migration_004_vector_index,
     _migration_005_fts5_setup,
 )
+from cortex.migrations.mig_bridge_thermodynamics import _migration_029_thermodynamic_bridges
 from cortex.migrations.mig_cognitive_layer import _migration_022_cognitive_layer
 from cortex.migrations.mig_consensus import (
     _migration_007_consensus_layer,
@@ -33,7 +34,6 @@ from cortex.migrations.mig_solid_state import _migration_021_solid_state
 from cortex.migrations.mig_temporal_kg import _migration_027_temporal_kg
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
 from cortex.migrations.mig_tombstone import _migration_020_tombstone
-from cortex.migrations.mig_bridge_thermodynamics import _migration_029_thermodynamic_bridges
 
 __all__ = ["MIGRATIONS"]
 

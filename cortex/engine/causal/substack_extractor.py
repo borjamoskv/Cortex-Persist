@@ -1,6 +1,5 @@
-import subprocess
 import logging
-from typing import Dict
+import subprocess
 
 logger = logging.getLogger("Cortex.SubstackExtractor")
 
@@ -13,7 +12,7 @@ class SubstackExtractor:
     def __init__(self, repo_path: str = "."):
         self.repo_path = repo_path
 
-    def extract_commit_payload(self, commit_hash: str) -> Dict[str, str]:
+    def extract_commit_payload(self, commit_hash: str) -> dict[str, str]:
         """
         Extrae el SSOT (Single Source of Truth) de un commit.
         """

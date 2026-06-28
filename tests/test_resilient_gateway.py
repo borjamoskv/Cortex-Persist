@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex.mcp.resilient_gateway import (
+from cortex.mcp_server.resilient_gateway import (
     _HAS_BS4,
     _HAS_MARKDOWNIFY,
     ResilientFetcher,

@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from cortex.swarm.supervisor import SwarmSupervisor
 from cortex.swarm.legion import SwarmAgent, SwarmSignal
 from cortex.swarm.state_store import CausalStateStore
+from cortex.database.schema import CREATE_FACTS
 
 # Mock Agent for testing
 class TestAgent(SwarmAgent):
@@ -19,7 +20,7 @@ class TestAgent(SwarmAgent):
             agent_id=self.agent_id,
             target=target,
             status="SUCCESS",
-            payload={"test_data": "ok"},
+            payload={"test_data": "ok", "exergy_seal": "C5_REAL_SOVEREIGN_ISOMORPHISM_PROVENANCE_LEVIATHAN_2026_XYZ_98765"},
             metrics={"exergy": 1.0}
         )
 
@@ -35,7 +36,9 @@ def mock_causal_guard(monkeypatch):
 async def setup_db(path: str):
     db = await aiosqlite.connect(path, isolation_level=None)
     await db.execute("PRAGMA journal_mode=WAL;")
+    await db.execute("PRAGMA busy_timeout=5000;")
     await db.execute("PRAGMA synchronous=NORMAL;")
+    await db.execute(CREATE_FACTS)
     await db.execute("""
         CREATE TABLE IF NOT EXISTS system_hypotheses (
             id UUID PRIMARY KEY,

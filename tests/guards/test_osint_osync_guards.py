@@ -9,7 +9,11 @@ import io
 import os
 import pytest
 from pathlib import Path
-from PIL import Image
+
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 from cortex.guards.osint_guard import OSINTGuard, OSINTViolationError
 from cortex.guards.osync_guard import OSYNCGuard, OSYNCViolationError
@@ -37,8 +41,10 @@ def test_osint_guard_mask_system_paths() -> None:
     assert clean_path == "$HOME/30_CORTEX/docs/epistemology/100_osync_osint.md"
 
 
+@pytest.mark.skipif(Image is None, reason="PIL/Pillow not installed")
 def test_osint_guard_verify_and_strip_image() -> None:
     # Generate 1x1 pixel image with dummy metadata
+    assert Image is not None
     img = Image.new("RGB", (1, 1), color="red")
     exif_data = img.getexif()
     exif_data[271] = "MakerTag" # Document name tag/make

@@ -85,6 +85,9 @@ build/
 *.db-shm
 *.db-wal
 *.db.bak
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
 file:*
 file:mem_*
 

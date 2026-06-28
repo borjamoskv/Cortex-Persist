@@ -12,7 +12,7 @@ import asyncio
 
 import click
 
-from cortex.cli.common import console, get_engine
+from cortex.cli.common import cli, console, get_engine
 from cortex.extensions.ui_control.maestro import MaestroUI
 from cortex.extensions.ui_control.models import AppTarget
 
@@ -334,3 +334,6 @@ def run_cmd(instruction: tuple[str, ...]):
             console.print(f"[red]✘ Error: {res.get('error') or res.get('stderr')}[/red]")
 
     asyncio.run(_run())
+
+
+cli.add_command(maestro)

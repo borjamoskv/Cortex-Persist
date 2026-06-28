@@ -19,6 +19,12 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
+from uuid import uuid4
+from collections.abc import AsyncGenerator, Sequence
+
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import ed25519
 
 try:
     import yaml
@@ -104,7 +110,7 @@ class CognitiveRouter:
         if isinstance(sensitivity, str):
             try:
                 sensitivity = json.loads(sensitivity)
-            except Exception as e:
+            except (ValueError, KeyError, RuntimeError) as e:
                 logger.warning("Failed to parse sensitivity: %s", e)
         if not isinstance(sensitivity, list):
             sensitivity = []
@@ -243,6 +249,6 @@ class CognitiveRouter:
 
             public_key.verify(bytes.fromhex(entry["signature"]), entry_hash.encode("utf-8"))
             return True
-        except Exception as e:
+        except (ValueError, KeyError, RuntimeError, InvalidSignature) as e:
             logger.warning("Cognitive router verify failed: %s", e)
             return False

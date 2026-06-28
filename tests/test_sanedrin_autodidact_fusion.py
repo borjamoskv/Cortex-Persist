@@ -84,31 +84,38 @@ async def test_epistemic_breaker_rejects_narrative(tmp_path):
             
     supervisor._topo = DummyTopo(supervisor._db)
     
+    class DummyQueue:
+        def full(self):
+            return False
+
     # We need a dummy worker pool so it doesn't actually process it
     class DummyWorkerPool:
-        async def dispatch(self, task_id):
+        def __init__(self):
+            self._queue = DummyQueue()
+        def dispatch_nowait(self, task_id):
             pass
         async def stop(self):
             pass
     supervisor.worker_pool = DummyWorkerPool()
 
-    # Execute
-    dispatched = await supervisor.dispatch_optimal_hypotheses(count=2)
-    
-    # It should only dispatch 1 valid task
-    assert dispatched == 1
-    
-    # Check DB status
-    db2 = await connect_async(db_path)
     try:
-        async with db2.execute("SELECT status FROM system_hypotheses WHERE id = 'hyp-slop'") as cur:
-            status_slop = (await cur.fetchone())[0]
-            assert status_slop == "INVALIDATED"
-            
-        async with db2.execute("SELECT status FROM system_hypotheses WHERE id = 'hyp-valid'") as cur:
-            status_valid = (await cur.fetchone())[0]
-            assert status_valid == "IN_FLIGHT"
+        # Execute
+        dispatched = await supervisor.dispatch_optimal_hypotheses(count=2)
+        
+        # It should only dispatch 1 valid task
+        assert dispatched == 1
+        
+        # Check DB status
+        db2 = await connect_async(db_path)
+        try:
+            async with db2.execute("SELECT status FROM system_hypotheses WHERE id = 'hyp-slop'") as cur:
+                status_slop = (await cur.fetchone())[0]
+                assert status_slop == "INVALIDATED"
+                
+            async with db2.execute("SELECT status FROM system_hypotheses WHERE id = 'hyp-valid'") as cur:
+                status_valid = (await cur.fetchone())[0]
+                assert status_valid == "IN_FLIGHT"
+        finally:
+            await db2.close()
     finally:
-        await db2.close()
-
-    await supervisor.shutdown()
+        await supervisor.shutdown()

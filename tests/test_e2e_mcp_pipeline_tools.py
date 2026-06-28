@@ -34,7 +34,7 @@ class TestMCPPipelineTools:
     """Test MCP pipeline tool serialization."""
 
     def test_result_to_dict_single_agent(self):
-        from cortex.mcp.pipeline_tools import _result_to_dict
+        from cortex.mcp_server.pipeline_tools import _result_to_dict
 
         result = PipelineResult(
             mission_id="m-test",
@@ -49,7 +49,7 @@ class TestMCPPipelineTools:
         assert d["status"] == "success"
 
     def test_result_to_dict_multi_agent(self):
-        from cortex.mcp.pipeline_tools import _result_to_dict
+        from cortex.mcp_server.pipeline_tools import _result_to_dict
 
         result = PipelineResult(
             mission_id="m-multi",
@@ -68,7 +68,7 @@ class TestMCPPipelineTools:
         assert "[a2]" in d["content"]
 
     def test_result_to_dict_error(self):
-        from cortex.mcp.pipeline_tools import _result_to_dict
+        from cortex.mcp_server.pipeline_tools import _result_to_dict
 
         result = PipelineResult(
             mission_id="m-err",

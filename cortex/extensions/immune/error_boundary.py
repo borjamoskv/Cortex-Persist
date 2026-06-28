@@ -102,7 +102,7 @@ class ErrorBoundary:
                 fact_id,
             )
             return fact_id
-        except Exception as persist_err:
+        except (OSError, RuntimeError, ValueError) as persist_err:
             logger.error("ErrorBoundary [%s] failed to persist: %s", self._source, persist_err)
             return None
 
@@ -118,7 +118,7 @@ class ErrorBoundary:
                 project=self._project,
                 extra_meta=self._extra_meta,
             )
-        except Exception as persist_err:
+        except (OSError, RuntimeError, ValueError) as persist_err:
             logger.error("ErrorBoundary [%s] sync persist failed: %s", self._source, persist_err)
 
 

@@ -5,8 +5,10 @@ Converts existing duplicated bridge facts into NEXUS_SYMLINK pointers
 to eradicate physical entropy in the storage layer.
 """
 
-import aiosqlite
 import json
+
+import aiosqlite
+
 
 async def _migration_029_thermodynamic_bridges(conn: aiosqlite.Connection) -> None:
     """Find bridge facts that duplicate knowledge and convert them to pointers."""

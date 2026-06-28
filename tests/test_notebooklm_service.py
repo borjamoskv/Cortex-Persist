@@ -179,7 +179,7 @@ class TestMCPToolRegistration:
     """Verify MCP tool registration doesn't error."""
 
     def test_register_creates_tools(self) -> None:
-        from cortex.mcp.notebooklm_tools import register_notebooklm_tools
+        from cortex.mcp_server.notebooklm_tools import register_notebooklm_tools
 
         mock_mcp = MagicMock()
         mock_mcp.tool.return_value = lambda fn: fn

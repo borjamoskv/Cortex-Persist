@@ -1,6 +1,6 @@
-import os
 import logging
-import json
+import os
+
 from google import genai
 
 logger = logging.getLogger("Cortex.SubstackCrystallizer")

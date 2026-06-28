@@ -1,5 +1,6 @@
 import asyncio
 import logging
+
 from playwright.async_api import async_playwright
 
 from cortex.extensions.daemon.gmail_magic_link import GmailMagicLinkExtractor

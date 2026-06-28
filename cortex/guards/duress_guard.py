@@ -9,8 +9,6 @@ from __future__ import annotations
 
 import logging
 import os
-import sys
-import ctypes
 from collections.abc import Mapping
 from typing import Any
 
@@ -44,8 +42,8 @@ class DuressGuard:
 
         # Emit synchronous Ledger event bypassing the async loop to guarantee recording
         try:
-            import sqlite3
             import hashlib
+            import sqlite3
             from datetime import datetime, timezone
             db_path = os.environ.get("CORTEX_DB_PATH", "cortex_ledger.db")
             if os.path.exists(db_path):

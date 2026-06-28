@@ -273,7 +273,7 @@ def test_mcp_package_import_is_lazy(tmp_path: Path) -> None:
             "\n".join(
                 [
                     "import sys",
-                    "import cortex.mcp",
+                    "import cortex.mcp_server",
                     "assert 'aiohttp' not in sys.modules",
                     "assert 'bs4' not in sys.modules",
                     "assert 'markdownify' not in sys.modules",

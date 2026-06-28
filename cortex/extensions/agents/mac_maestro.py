@@ -39,7 +39,7 @@ class MacMaestroAgent:
         self.engine = engine
         self.maestro = MaestroUI(engine)
         if engine and hasattr(engine, "llm_router"):
-            self.router = getattr(engine, "llm_router")
+            self.router = engine.llm_router
         else:
             try:
                 from cortex.pipeline.provider_factory import build_executor_stack

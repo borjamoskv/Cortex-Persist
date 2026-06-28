@@ -193,7 +193,7 @@ class GatewayRouter:
                 request_id=request.request_id,
                 latency_ms=latency,
             )
-        except Exception as exc:
+        except (ValueError, KeyError, ConnectionError, TimeoutError, RuntimeError) as exc:
             latency = (time.perf_counter() - t0) * 1000
             logger.exception(
                 "Gateway [%s] %s → error: %s",
@@ -212,7 +212,7 @@ class GatewayRouter:
                     extra_meta={"request_id": request.request_id, "source": request.source},
                 )
                 await boundary._persist(exc)
-            except Exception as exc:
+            except (ImportError, AttributeError, ValueError, RuntimeError) as exc:
                 logger.warning("Suppressed exception: %s", exc)
             return GatewayResponse(
                 ok=False,

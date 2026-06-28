@@ -6,7 +6,6 @@ newsletters to extract high-exergy pills (Notes) for organic exposure.
 """
 
 import logging
-from typing import List, Optional
 from dataclasses import dataclass
 
 logger = logging.getLogger("cortex.extensions.growth.kinetic_extractor")
@@ -67,7 +66,7 @@ class KineticExtractor:
             
         return round(base_score * penalty, 2)
 
-    def extract_notes(self, markdown_content: str) -> List[ExergyNote]:
+    def extract_notes(self, markdown_content: str) -> list[ExergyNote]:
         """
         Parses full newsletter content and returns a list of high-exergy notes.
         """
@@ -100,17 +99,17 @@ class KineticExtractor:
         logger.info("Extracted %d Exergy Notes from content.", len(notes))
         return notes
 
-def execute_extraction(filepath: str) -> List[ExergyNote]:
+def execute_extraction(filepath: str) -> list[ExergyNote]:
     """Helper entrypoint for the CLI/Agent bus."""
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, encoding='utf-8') as f:
         content = f.read()
     extractor = KineticExtractor()
     return extractor.extract_notes(content)
 
 if __name__ == "__main__":
     import argparse
-    import os
     import asyncio
+    import os
 
     async def main():
         parser = argparse.ArgumentParser(description="Kinetic Extractor: Exergy-Maximized Notes")
@@ -121,11 +120,11 @@ if __name__ == "__main__":
         notes = execute_extraction(args.filepath)
         os.makedirs(args.outdir, exist_ok=True)
         
-        from cortex.crypto.keys import KeyManager
-        from cortex.engine.causal.taint_engine import generate_secure_taint_token
         from cortex.audit.ledger import EnterpriseAuditLedger
-        from cortex.guards.saga_contract import SagaWriteProposal
+        from cortex.crypto.keys import KeyManager
         from cortex.database.core import connect_async_ctx
+        from cortex.engine.causal.taint_engine import generate_secure_taint_token
+        from cortex.guards.saga_contract import SagaWriteProposal
         
         # 1. Identity Provisioning
         km = KeyManager(service_name="cortex_agent_keys")

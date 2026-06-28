@@ -144,7 +144,7 @@ class BeliefEngine:
 
             # Epistemic Slashing (Axiom Ω₃) - Punish source if Supreme Court (Opus/Fable) confirmed quarantine
             has_source = bool(candidate.provenance.entries and candidate.provenance.entries[-1].source_id)
-            if verdict.model in ("opus", "fable", "architect") and has_source:
+            if verdict.model in ("opus", "fable", "architect", "o1-preview", "o1-mini") and has_source:
                 source_id = candidate.provenance.entries[-1].source_id
                 try:
                     from cortex.engine.forensic.slashing import SlashingEngine, SlashingPenalty

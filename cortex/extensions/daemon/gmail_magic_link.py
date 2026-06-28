@@ -1,8 +1,8 @@
-import imaplib
 import email
-import re
-import os
+import imaplib
 import logging
+import os
+import re
 from typing import Optional
 
 logger = logging.getLogger("Cortex.GmailMagicLink")
