@@ -13,6 +13,8 @@ import click
 from rich.console import Console
 
 from cortex.cli.main import cli
+from cortex.database.core import connect_async, connect_async_ctx
+
 
 console = Console()
 logger = logging.getLogger("cortex.cli.export")
@@ -44,7 +46,7 @@ def export_bundle(tenant_id: str, output: str) -> None:
 
         # 1. Export Audit Ledger for the tenant
         ledger_path = bundle_dir / "audit_ledger.json"
-        async with aiosqlite.connect(db_path) as conn:
+        async with connect_async_ctx(db_path) as conn:
             # We assume security_audit_log exists
             try:
                 cursor = await conn.execute(
@@ -87,7 +89,7 @@ def export_bundle(tenant_id: str, output: str) -> None:
             from cortex.audit.ledger import EnterpriseAuditLedger
 
             # Get public key from a temporary instance
-            async with aiosqlite.connect(db_path) as c:
+            async with connect_async_ctx(db_path) as c:
                 ledger = EnterpriseAuditLedger(c)
                 pub_pem = ledger.public_key.public_bytes(
                     encoding=serialization.Encoding.PEM,

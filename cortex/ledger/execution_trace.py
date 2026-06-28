@@ -12,6 +12,8 @@ import logging
 from typing import Any
 
 import aiosqlite
+from cortex.database.core import connect_async, connect_async_ctx
+
 
 logger = logging.getLogger("cortex.ledger.execution_trace")
 
@@ -61,7 +63,7 @@ class ExecutionTraceLedger:
         lineage_json = json.dumps(lineage)
 
         try:
-            async with aiosqlite.connect(self.db_path) as conn:
+            async with connect_async_ctx(self.db_path) as conn:
                 await conn.execute(
                     query,
                     (
@@ -93,7 +95,7 @@ class ExecutionTraceLedger:
     async def get_trace(self, trace_id: str, tenant_id: str = "default") -> dict[str, Any] | None:
         """Retrieves a trace from the ledger."""
         query = "SELECT * FROM execution_trace_ledger WHERE id = ? AND tenant_id = ?"
-        async with aiosqlite.connect(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             conn.row_factory = aiosqlite.Row
             cursor = await conn.execute(query, (trace_id, tenant_id))
             row = await cursor.fetchone()
@@ -116,7 +118,7 @@ class ExecutionTraceLedger:
     ) -> list[dict[str, Any]]:
         """Retrieves recent execution traces for feedback mapping."""
         query = "SELECT * FROM execution_trace_ledger WHERE tenant_id = ? ORDER BY id DESC LIMIT ?"
-        async with aiosqlite.connect(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             conn.row_factory = aiosqlite.Row
             cursor = await conn.execute(query, (tenant_id, limit))
             rows = await cursor.fetchall()
@@ -141,7 +143,7 @@ class ExecutionTraceLedger:
         """Busca todas las trazas que compartan un hash de linaje."""
         # Se busca el lineage_hash dentro del array JSON
         query = "SELECT * FROM execution_trace_ledger WHERE tenant_id = ? AND lineage LIKE ?"
-        async with aiosqlite.connect(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             conn.row_factory = aiosqlite.Row
             cursor = await conn.execute(query, (tenant_id, f"%{lineage_hash}%"))
             rows = await cursor.fetchall()

@@ -9,6 +9,8 @@ from cortex.config import DB_PATH
 from cortex.crypto.provider import HashProvider
 from cortex.swarm.tensor_glial import TensorGlialLegion
 from cortex_extensions.signals.bus import AsyncSignalBus
+from cortex.database.core import connect_async, connect_async_ctx
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cortex.swarm.autopulse")
@@ -194,7 +196,7 @@ async def _append_state_ledger(agent: str, payload: dict) -> None:
     try:
         import aiosqlite
 
-        async with aiosqlite.connect(DB_PATH) as conn:
+        async with connect_async_ctx(DB_PATH) as conn:
             bus = AsyncSignalBus(conn)
             await bus.emit(
                 "ledger_append",

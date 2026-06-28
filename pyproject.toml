@@ -211,6 +211,7 @@ ignore = ["E501", "E402", "B008", "W291", "W293", "S", "UP045", "TID251", "G004"
 [tool.pyright]
 pythonVersion = "3.10"
 typeCheckingMode = "basic"
+extraPaths = ["."]
 exclude = [
     "**/node_modules",
     "**/__pycache__",

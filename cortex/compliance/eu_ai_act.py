@@ -13,6 +13,8 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
+from cortex.database.core import connect_async, connect_async_ctx
+
 
 logger = logging.getLogger("cortex.compliance.eu_ai_act")
 
@@ -83,7 +85,7 @@ class HumanOversightGate:
 
     async def escalate(self, audit_id: str, tenant_id: str, reason: str) -> None:
         """Escalates a decision for human review."""
-        async with aiosqlite.connect(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             await self._init_db(conn)
             await conn.execute(
                 "INSERT OR REPLACE INTO oversight_gates (audit_id, tenant_id, status, comments) VALUES (?, ?, ?, ?)",
@@ -95,7 +97,7 @@ class HumanOversightGate:
     async def approve(self, audit_id: str, reviewer_id: str, comments: str = "") -> None:
         """Approves an escalated decision."""
         timestamp = datetime.now(timezone.utc).isoformat()
-        async with aiosqlite.connect(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             await self._init_db(conn)
             await conn.execute(
                 "UPDATE oversight_gates SET status = ?, reviewer_id = ?, review_timestamp = ?, comments = ? WHERE audit_id = ?",
@@ -107,7 +109,7 @@ class HumanOversightGate:
     async def reject(self, audit_id: str, reviewer_id: str, comments: str = "") -> None:
         """Rejects an escalated decision."""
         timestamp = datetime.now(timezone.utc).isoformat()
-        async with aiosqlite.connect(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             await self._init_db(conn)
             await conn.execute(
                 "UPDATE oversight_gates SET status = ?, reviewer_id = ?, review_timestamp = ?, comments = ? WHERE audit_id = ?",
@@ -118,7 +120,7 @@ class HumanOversightGate:
 
     async def get_status(self, audit_id: str) -> str | None:
         """Gets the status of an escalated decision."""
-        async with aiosqlite.connect(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             await self._init_db(conn)
             cursor = await conn.execute(
                 "SELECT status FROM oversight_gates WHERE audit_id = ?", (audit_id,)

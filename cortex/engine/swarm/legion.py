@@ -27,6 +27,8 @@ except ImportError:
     bicameral = BicameralStub()
 
 from cortex.engine.swarm.legion_vectors import RED_TEAM_SWARM, AttackVector
+from cortex.database.core import connect_async, connect_async_ctx
+
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +80,7 @@ class AsyncSignalBus:
                 
         if db_path:
             try:
-                async with aiosqlite.connect(db_path) as db:
+                async with connect_async_ctx(db_path) as db:
                     async with db.execute("SELECT status FROM system_hypotheses WHERE id = ?", (signal.target,)) as cursor:
                         row = await cursor.fetchone()
                         if row and row[0] == "INVALIDATED":

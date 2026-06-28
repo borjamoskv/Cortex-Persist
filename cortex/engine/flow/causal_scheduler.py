@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING, Any
+from cortex.database.core import connect_async, connect_async_ctx
+
 
 if TYPE_CHECKING:
     from cortex.engine.core.rollback_engine import CausalRollbackEngine
@@ -50,7 +52,7 @@ class CausalScheduler:
 
         # Se almacena en la db de trazas por conveniencia de este MVP
         init_query = "CREATE TABLE IF NOT EXISTS thermodynamics_state (tenant_id TEXT PRIMARY KEY, entropy_budget REAL)"
-        async with aiosqlite.connect(self.ledger.db_path) as conn:
+        async with connect_async_ctx(self.ledger.db_path) as conn:
             await conn.execute(init_query)
             cursor = await conn.execute(
                 "SELECT entropy_budget FROM thermodynamics_state WHERE tenant_id = ?", (tenant_id,)
@@ -68,7 +70,7 @@ class CausalScheduler:
     async def _update_entropy_budget(self, tenant_id: str, new_budget: float) -> None:
         import aiosqlite
 
-        async with aiosqlite.connect(self.ledger.db_path) as conn:
+        async with connect_async_ctx(self.ledger.db_path) as conn:
             await conn.execute(
                 "UPDATE thermodynamics_state SET entropy_budget = ? WHERE tenant_id = ?",
                 (new_budget, tenant_id),

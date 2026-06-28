@@ -10,6 +10,8 @@ from collections import deque
 from typing import Any
 
 import aiosqlite
+from cortex.database.core import connect_async, connect_async_ctx
+
 
 
 class CausalGraph:
@@ -25,7 +27,7 @@ class CausalGraph:
         affected = {}
         queue = deque([root_event_id])
 
-        async with aiosqlite.connect(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             conn.row_factory = aiosqlite.Row
 
             # Fetch the root event
@@ -60,7 +62,7 @@ class CausalGraph:
         query = "SELECT cost FROM execution_trace_ledger WHERE tenant_id = ? AND datetime(created_at) >= datetime('now', ?)"
         window_modifier = f"-{window_seconds} seconds"
 
-        async with aiosqlite.connect(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             cursor = await conn.execute(query, (tenant_id, window_modifier))
             rows = await cursor.fetchall()
             if not rows:
@@ -80,7 +82,7 @@ class CausalGraph:
         query = "SELECT id, cost, lineage FROM execution_trace_ledger WHERE tenant_id = ? AND outcome != 'rolled_back' AND datetime(created_at) >= datetime('now', ?)"
         window_modifier = f"-{window_seconds} seconds"
 
-        async with aiosqlite.connect(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             conn.row_factory = aiosqlite.Row
             cursor = await conn.execute(query, (tenant_id, window_modifier))
             rows = await cursor.fetchall()
@@ -136,7 +138,7 @@ class CausalGraph:
         query_active = "SELECT id, lineage FROM execution_trace_ledger WHERE tenant_id = ? AND outcome != 'rolled_back' AND datetime(created_at) >= datetime('now', ?)"
         window_modifier = f"-{window_seconds} seconds"
 
-        async with aiosqlite.connect(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             cursor = await conn.execute(query_active, (tenant_id, window_modifier))
             active_traces = await cursor.fetchall()
 

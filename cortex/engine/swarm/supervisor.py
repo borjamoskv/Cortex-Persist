@@ -17,6 +17,8 @@ from cortex.config import DB_PATH
 from cortex.engine.causal.topological_arbitrage import TopologyIndex
 from cortex.engine.swarm.legion import AsyncSignalBus, LegionPool, SwarmAgent, SwarmSignal
 from cortex.engine.swarm.state_store import CausalStateStore
+from cortex.database.core import connect_async, connect_async_ctx
+
 
 logger = logging.getLogger("cortex.engine.swarm.supervisor")
 
@@ -48,7 +50,7 @@ class SwarmSupervisor:
         
     async def initialize(self) -> None:
         """Starts the components and recovers ghost state."""
-        self._db = await aiosqlite.connect(self.db_path)
+        self._db = await connect_async(self.db_path)
         await self._db.execute("PRAGMA journal_mode=WAL;")
         self._topo = TopologyIndex(self._db)
         

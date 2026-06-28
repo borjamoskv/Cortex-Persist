@@ -15,6 +15,8 @@ import aiosqlite
 
 from cortex.config import DB_PATH
 from cortex.guards import CausalClosureGuard, SwarmProposal
+from cortex.database.core import connect_async, connect_async_ctx
+
 
 # Replace with correct import for Ledger if needed, but the old code emitted SwarmProposal.
 
@@ -30,7 +32,7 @@ class CausalStateStore:
         
     async def connect(self):
         if not self._db:
-            self._db = await aiosqlite.connect(self.db_path)
+            self._db = await connect_async(self.db_path)
             await self._db.execute("PRAGMA journal_mode=WAL;")
             await self._db.execute("PRAGMA synchronous=NORMAL;")
             

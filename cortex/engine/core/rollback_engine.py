@@ -13,6 +13,8 @@ from typing import TYPE_CHECKING, Any
 import aiosqlite
 
 from cortex.ledger.causal_graph import CausalGraph
+from cortex.database.core import connect_async, connect_async_ctx
+
 
 if TYPE_CHECKING:
     from cortex.ledger.cost_field import CostField
@@ -62,7 +64,7 @@ class CausalRollbackEngine:
         if not nodes:
             return {"status": "failed", "reason": "not_found", "details": sim}
 
-        async with aiosqlite.connect(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             # Mark all affected nodes as rolled_back
             placeholders = ",".join("?" * len(nodes))
             query = f"UPDATE execution_trace_ledger SET outcome = 'rolled_back' WHERE tenant_id = ? AND id IN ({placeholders})"
