@@ -66,13 +66,12 @@ class ZenohCRDTBridge:
             # Decode signatures
             signatures = {k: bytes.fromhex(v) for k, v in signatures_hex.items()}
             
-            # Validate BFT Quorum
-            # In a real swarm, this would hold the registry of Swarm peers.
-            # We initialize a standalone guard here that allows fallback if no peers are known.
+            # Validate BFT Quorum using the distributed Trust Matrix
             from cortex.consensus.bft_quorum import BFTQuorumGuard
-            # Try to get public keys of Swarm peers from KeyManager or peer registry
-            # Currently standalone mode allows parsing, but blocks known untrusted signatures.
-            bft_guard = BFTQuorumGuard({})
+            from cortex.consensus.pki import trust_matrix
+            
+            known_peers = trust_matrix.get_known_peers()
+            bft_guard = BFTQuorumGuard(known_peers)
             
             # The payload for BFT is the engram data without the signatures
             bft_payload_dict = {k: v for k, v in data.items() if k != "bft_signatures"}
