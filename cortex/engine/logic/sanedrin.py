@@ -46,7 +46,7 @@ class SanedrinNode:
             working_memory=[
                 {"role": "user", "content": f"Fact A (ID: {id_a}): {json.dumps(fact_a)}\nFact B (ID: {id_b}): {json.dumps(fact_b)}"}
             ],
-            intent=IntentProfile.ANALYTICAL,
+            intent=IntentProfile.REASONING,
             temperature=0.2,
             max_tokens=512,
         )
@@ -92,7 +92,7 @@ class SanedrinCouncil:
 
     def __init__(self, node_count: int = 3, router: CortexLLMRouter | None = None) -> None:
         from cortex.extensions.llm.provider import LLMProvider
-        self.router = router or CortexLLMRouter(primary=LLMProvider(provider="ollama"))
+        self.router = router or CortexLLMRouter(primary=LLMProvider(provider="gemini"))
         
         self.nodes = [
             SanedrinNode("N1-Synthesizer", "Claude-3.5-Simulation", self.router),
