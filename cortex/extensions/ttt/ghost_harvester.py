@@ -83,7 +83,7 @@ def format_for_lora(rows):
                     content = crypto.decrypt_str(content)
                 else:
                     continue  # Cannot decrypt without crypto
-            except Exception:
+            except (ValueError, TypeError, OSError, KeyError):
                 continue  # If we can't decrypt, skip this fact to not poison the model
 
         if f_type == "error":

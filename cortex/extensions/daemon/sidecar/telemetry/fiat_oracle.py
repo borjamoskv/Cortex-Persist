@@ -9,7 +9,6 @@ import asyncio
 import hashlib
 import json
 import logging
-import random
 import time
 from pathlib import Path
 from typing import Any, Final
@@ -27,7 +26,8 @@ class FiatOracle:
     """Monitors fiat flow and emits telemetry events. (Zero-Trust)"""
 
     def __init__(self, engine: Any, interval: float = 30.0):
-        # We accept both sync and async engine for flexibility
+        # We accept both sync and async engine for flexibility, 
+        # but execution logic is unified via sovereign_run.
         self.engine = engine
         self.interval = interval
         self.running = False
@@ -46,7 +46,7 @@ class FiatOracle:
         while self.running:
             try:
                 await self._check_signals()
-            except (OSError, ValueError, CortexError) as e:
+            except (ValueError, TypeError, OSError, KeyError, CortexError) as e:
                 logger.error("❌ [FIAT_ORACLE] Error: %s", e)
             await asyncio.sleep(self.interval)
 
@@ -54,13 +54,16 @@ class FiatOracle:
         """For running in MoskvDaemon separate thread."""
         logger.info("💸 [FIAT_ORACLE] (Thread) started.")
         self.running = True
+        
+        from cortex.events.loop import sovereign_run
+
         while self.running:
             try:
-                # We use sync checks here if called from a thread
-                self._check_signals_sync()
-            except (OSError, ValueError, CortexError) as e:
+                # Unify logic: run the async routine in the sync thread safely
+                sovereign_run(self._check_signals())
+            except (ValueError, TypeError, OSError, KeyError, CortexError) as e:
                 logger.error("❌ [FIAT_ORACLE] (Thread) Error: %s", e)
-            time.sleep(self.interval)
+            time.sleep(self.interval)  # noqa: TID251 # Threaded loop
 
     def _verify_signature(self, data: dict, signature: str) -> bool:
         """
@@ -118,50 +121,13 @@ class FiatOracle:
                 logger.error("❌ [FIAT_ORACLE] Payload corrupto en %s", tx_file.name)
                 try:
                     await asyncio.to_thread(tx_file.unlink)
-                except Exception as exc:
-                    logger.warning("Suppressed exception: %s", exc)
-            except (OSError, ValueError, CortexError, KeyError) as e:
-                logger.error("⚠️ [FIAT_ORACLE] Falla procesando %s: %s", tx_file.name, e)
-
-    def _check_signals_sync(self):
-        """Sync version for threaded execution."""
-        for tx_file in self.queue_dir.glob("*.json"):
-            try:
-                content = tx_file.read_text()
-                data = json.loads(content)
-
-                # 1. Zero-Trust Validation
-                signature = data.get("signature")
-                if not self._verify_signature(data, signature):
-                    logger.critical(
-                        "🚨 [FIAT_ORACLE] Firma inválida rechazada. Posible Spoofing: %s",
-                        tx_file.name,
-                    )
-                    tx_file.unlink()
-                    continue
-
-                # 2. Idempotency Check
-                tx_id = data.get("tx_id")
-                if tx_id in self.processed_txs:
-                    logger.warning("🛡️ [FIAT_ORACLE] Prevented replay attack para TX: %s", tx_id)
-                    tx_file.unlink()
-                    continue
-
-                # 3. Process & Commit
-                self._process_transaction_sync(data)
-
-                # 4. Finalize
-                self.processed_txs.add(tx_id)
-                tx_file.unlink()
-
-            except json.JSONDecodeError:
-                logger.error("❌ [FIAT_ORACLE] Payload corrupto en %s", tx_file.name)
-                tx_file.unlink()
-            except (OSError, ValueError, CortexError, KeyError) as e:
+                except (ValueError, TypeError, OSError, KeyError):
+                    logger.warning("Suppressed exception during unlink")
+            except (ValueError, TypeError, OSError, KeyError, CortexError) as e:
                 logger.error("⚠️ [FIAT_ORACLE] Falla procesando %s: %s", tx_file.name, e)
 
     async def _execute_with_backoff_async(self, payload: dict[str, Any]) -> None:
-        """Resilient storage with exponential backoff avoiding 'Database is locked' errors (Async)."""
+        """Resilient storage with exponential backoff avoiding 'Database is locked' errors."""
         amount = payload.get("amount", "0")
         currency = payload.get("currency", "EUR")
         source = payload.get("source", "BUNQ_REDIRECT")
@@ -190,7 +156,7 @@ class FiatOracle:
                         meta=meta,
                     )
                 return
-            except (OSError, ValueError, RuntimeError) as e:
+            except (ValueError, TypeError, OSError, KeyError, RuntimeError) as e:
                 import secrets
 
                 rng = secrets.SystemRandom()
@@ -212,62 +178,9 @@ class FiatOracle:
         )
         raise CortexError(f"FiatOracle DB Failure: {last_error}") from last_error
 
-    def _execute_with_backoff_sync(self, payload: dict[str, Any]) -> None:
-        """Resilient storage with exponential backoff avoiding 'Database is locked' errors (Sync)."""
-        amount = payload.get("amount", "0")
-        currency = payload.get("currency", "EUR")
-        source = payload.get("source", "BUNQ_REDIRECT")
-        tx_id = payload.get("tx_id", "UNKNOWN")
-
-        logger.info(
-            "💰 [FIAT_STREAM] Detected %s %s from %s [TX:%s]", amount, currency, source, tx_id
-        )
-
-        meta = {
-            "oracle": "fiat_oracle_v1.3.0",
-            "amount": amount,
-            "currency": currency,
-            "provider": "bunq",
-            "tx_id": tx_id,
-        }
-
-        last_error = None
-        for attempt in range(MAX_RETRIES):
-            try:
-                if hasattr(self.engine, "store"):
-                    self.engine.store(
-                        project="cortex-revenue",
-                        content=f"Received {amount} {currency} via {source}",
-                        fact_type="fiat_transaction",
-                        meta=meta,
-                    )
-                return
-            except (OSError, ValueError, RuntimeError) as e:
-                last_error = e
-                delay = (BASE_BACKOFF**attempt) + (random.uniform(0.1, 2.0) ** (attempt + 1))
-                logger.error(
-                    "⚙️ [FIAT_ORACLE] DB lock o error: %s. Reintento %s/%s en %.2fs",
-                    e,
-                    attempt + 1,
-                    MAX_RETRIES,
-                    delay,
-                )
-                time.sleep(delay)  # noqa: TID251 # Threaded sync loop
-
-        logger.critical(
-            "💀 [FIAT_ORACLE] Falla catastrófica almacenando TX %s tras %s intentos.",
-            tx_id,
-            MAX_RETRIES,
-        )
-        raise CortexError(f"FiatOracle DB Failure: {last_error}") from last_error
-
     async def _process_transaction(self, data: dict):
         """Store transaction in ledger (Async)."""
         await self._execute_with_backoff_async(data)
-
-    def _process_transaction_sync(self, data: dict):
-        """Store transaction in ledger (Sync)."""
-        self._execute_with_backoff_sync(data)
 
     def stop(self):
         self.running = False

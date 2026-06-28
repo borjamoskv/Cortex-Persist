@@ -105,7 +105,7 @@ class GenesisEnv(BinaryEnv):
                 info["success"] = True
 
             return StepResult(observation=response, reward=reward, done=done, info=info)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return StepResult(b"", -1.0, True, {"error": str(e)})
 
     async def _async_close_connection(self):
@@ -113,7 +113,7 @@ class GenesisEnv(BinaryEnv):
             self.writer.close()
             try:
                 await self.writer.wait_closed()
-            except Exception:
+            except (ValueError, TypeError, OSError, KeyError):
                 pass
             self.writer = None
         self.reader = None

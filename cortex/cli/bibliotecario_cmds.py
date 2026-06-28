@@ -57,7 +57,7 @@ async def _ingest_and_organize(path: Path) -> str:
     if path.is_file():
         try:
             content = path.read_text(encoding="utf-8")
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return f"Error reading file {path}: {e}"
     elif path.is_dir():
         for root, _, files in os.walk(path):

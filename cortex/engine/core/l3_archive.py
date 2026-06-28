@@ -11,9 +11,10 @@ the whole table into memory.
 
 import logging
 import os
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 try:
     import pyarrow as pa

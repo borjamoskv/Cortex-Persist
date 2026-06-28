@@ -79,7 +79,7 @@ class AetherAgent:
             plan = await self._planner.plan(task.description, toolkit)
             queue.update(task.id, plan=plan.to_prompt_str())
             logger.info("📋 Plan: %s - %d steps", plan.summary, len(plan.steps))
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return await self._fail(task, queue, f"Planner error: {e}")
 
         # ── 1.5 Ω₆ Siege-Verification (Pathogen Matching) ─────────────
@@ -112,7 +112,7 @@ class AetherAgent:
                     )
 
                 execute_result = await self._executor.execute(plan, instruction, toolkit)
-            except Exception as e:
+            except (ValueError, TypeError, OSError, KeyError) as e:
                 return await self._fail(task, queue, f"Executor error: {e}")
 
             # ── 3. Critique ───────────────────────────────────────────

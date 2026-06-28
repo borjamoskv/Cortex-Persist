@@ -162,7 +162,7 @@ def _do_malloc_trim() -> bool:
 
         malloc_trim(0)
         return True
-    except Exception:
+    except (ValueError, TypeError, OSError, KeyError):
         return False
 
 

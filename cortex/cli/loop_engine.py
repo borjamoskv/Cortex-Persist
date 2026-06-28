@@ -143,7 +143,7 @@ class ExecutionLoop:
             result.output = "Task cancelled by user"
             result.duration_ms = (time.monotonic() - t0) * 1000
 
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, KeyError) as exc:
             elapsed = (time.monotonic() - t0) * 1000
             result.status = TaskStatus.FAILED
             result.output = str(exc)

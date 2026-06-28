@@ -327,7 +327,7 @@ class OmegaDaemon:
                             if not priv_b64:
                                 try:
                                     priv_b64 = keyring.get_password("cortex_v6", "ed25519_private_key")
-                                except Exception:
+                                except (ValueError, TypeError, OSError, KeyError):
                                     pass
                             
                             ns = "cortex_omega_daemon"

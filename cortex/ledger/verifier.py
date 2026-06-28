@@ -62,7 +62,7 @@ class LedgerVerifier:
                         violations.append(
                             f"Hash mismatch at {event_id}: stored {c_hash}, recomputed {recomputed}"
                         )
-                except Exception as e:
+                except (ValueError, TypeError, OSError, KeyError) as e:
                     violations.append(f"Error parsing event {event_id}: {e}")
 
                 current_prev = c_hash
@@ -135,7 +135,7 @@ class LedgerVerifier:
                             with open(key_path, "wb") as key_file:
                                 key_file.write(seed)
                         os.chmod(key_path, 0o600)
-                except Exception:
+                except (ValueError, TypeError, OSError, KeyError):
                     pass
 
         # 3. If still not found, generate new key
@@ -148,7 +148,7 @@ class LedgerVerifier:
                 try:
                     seed_b64 = base64.b64encode(seed).decode("utf-8")
                     keyring.set_password("cortex_v6", "mldsa_sovereign_seed", seed_b64)
-                except Exception:
+                except (ValueError, TypeError, OSError, KeyError):
                     pass
 
             # Write to disk
@@ -321,7 +321,7 @@ class LedgerVerifier:
                     pubkey.verify(sig_bytes, sig_payload)
                 except InvalidSignature:
                     violations.append(f"Invalid ML-DSA signature for checkpoint {c_id}.")
-                except Exception as e:
+                except (ValueError, TypeError, OSError, KeyError) as e:
                     violations.append(f"Error validating checkpoint {c_id}: {e}")
 
         return {

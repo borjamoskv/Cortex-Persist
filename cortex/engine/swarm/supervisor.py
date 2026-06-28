@@ -61,8 +61,8 @@ class SwarmSupervisor:
         self.worker_pool = LegionPool(
             agent_factory=agent_factory, bus=self.bus, concurrency=concurrency
         )
-        from concurrent.futures import ProcessPoolExecutor
         import os
+        from concurrent.futures import ProcessPoolExecutor
         self._crypto_pool = ProcessPoolExecutor(max_workers=max(1, (os.cpu_count() or 2) // 2))
         
         from cortex.engine.causal.append_log import CrystallizerDaemon
@@ -206,7 +206,10 @@ class SwarmSupervisor:
                     
                     if self._embedder:
                         loop = asyncio.get_running_loop()
-                        from cortex.engine.core.semantic_hash import semantic_fingerprint, is_semantically_equivalent
+                        from cortex.engine.core.semantic_hash import (
+                            is_semantically_equivalent,
+                            semantic_fingerprint,
+                        )
                         try:
                             fp = await loop.run_in_executor(
                                 None,

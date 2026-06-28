@@ -147,7 +147,7 @@ class _LegacyVectorVerifier:
                 detail_json,
                 str(value["timestamp"]),
             )
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, KeyError) as exc:
             self.errors.append(f"legacy_vector_hash_error:{path.name}:{exc.__class__.__name__}")
             return
         self.hashes.append(actual_hash)

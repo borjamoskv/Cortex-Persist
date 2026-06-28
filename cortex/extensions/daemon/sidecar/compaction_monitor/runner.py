@@ -55,7 +55,7 @@ async def l2_drain_loop(engine: Any, interval: int = 28800) -> None:
             alerts = await monitor.check_async()
             for alert in alerts:
                 LOGGER.info("L2 Drain Alert: %s", alert.message)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             LOGGER.error("Error in L2 Drain Loop: %s", e)
         await asyncio.sleep(interval)
 
@@ -75,7 +75,7 @@ async def compaction_job(ctx: Any = None) -> None:
         LOGGER.info("MallInfo2 after trim: %s", info_after)
         # Call external compaction service (placeholder)
         await circuit_breaker.call_external_compact()  # type: ignore[reportAttributeAccessIssue]
-    except Exception as exc:
+    except (ValueError, TypeError, OSError, KeyError) as exc:
         LOGGER.exception("Compaction job failed: %s", exc)
 
 

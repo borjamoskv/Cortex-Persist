@@ -171,7 +171,7 @@ class AlertHandlerMixin:
                         f"{alert.project}: {alert.reduction} vectores migrados a Turbopuffer.",
                         sound="Glass",
                     )
-                except Exception:
+                except (ValueError, TypeError, OSError, KeyError):
                     pass
 
     def _dispatch_warm_repair(self, project: str, brutal: bool = False) -> None:

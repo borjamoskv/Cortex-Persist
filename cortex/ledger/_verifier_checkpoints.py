@@ -104,7 +104,7 @@ def _verify_single_checkpoint(
             if not valid_from <= created_at <= valid_until:
                 verifier.errors.append(f"checkpoint_key_outside_validity:{index}")
                 return False
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             verifier.errors.append(f"checkpoint_validity_parse_error:{index}:{e}")
             return False
 
@@ -135,7 +135,7 @@ def _verify_single_checkpoint(
     except InvalidSignature:
         verifier.errors.append(f"checkpoint_signature_invalid:{index}")
         return False
-    except Exception as e:
+    except (ValueError, TypeError, OSError, KeyError) as e:
         verifier.errors.append(f"checkpoint_verification_error:{index}:{e}")
         return False
 

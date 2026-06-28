@@ -410,7 +410,7 @@ class TursoAuthBackend(BaseAuthBackend):
                 "ALTER TABLE api_keys ADD COLUMN hash_algo TEXT NOT NULL DEFAULT 'sha256'"
             )
             await client.execute("ALTER TABLE api_keys ADD COLUMN migrated_at TEXT")
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             pass  # Columns already exist
 
     async def get_key_by_hash(self, key_hash: str) -> KeyData | None:

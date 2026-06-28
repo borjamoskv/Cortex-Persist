@@ -14,7 +14,6 @@ from cortex.integration.rustchain.judge import (
     PolicyJudge,
     TestRunnerJudge,
 )
-
 from cortex.integration.rustchain.mcp_tool import register_rustchain_tools
 from cortex.integration.rustchain.staking import (
     GateUnavailableError,

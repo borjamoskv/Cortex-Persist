@@ -70,7 +70,7 @@ class L2DrainMonitor:
             try:
                 from cortex.extensions.evolution.ouroboros_hook import get_dynamic_threshold
                 threshold_seconds = await get_dynamic_threshold(conn, project)
-            except Exception:
+            except (ValueError, TypeError, OSError, KeyError):
                 pass
             
             # Select facts that are HOT and updated_at is older than threshold

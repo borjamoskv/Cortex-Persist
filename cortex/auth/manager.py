@@ -210,7 +210,7 @@ class AuthManager:
         async def _wrapper() -> None:
             try:
                 res.append(await coro)
-            except Exception as e:
+            except (ValueError, TypeError, OSError, KeyError) as e:
                 err.append(e)
             finally:
                 event.set()
@@ -242,7 +242,7 @@ class AuthManager:
         async def _wrapper() -> None:
             try:
                 res.append(await self.authenticate_async(raw_key))
-            except Exception as e:
+            except (ValueError, TypeError, OSError, KeyError) as e:
                 err.append(e)
             finally:
                 event.set()

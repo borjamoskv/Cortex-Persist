@@ -93,7 +93,7 @@ class MacMaestroAgent:
             stdout = await self.maestro.run_applescript(script_code, require_success=True)
             success = True
             stderr = ""
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             success = False
             stdout = ""
             stderr = str(e)

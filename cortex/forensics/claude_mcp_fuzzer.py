@@ -47,7 +47,7 @@ class VulnerabilityReport:
             payload = f"{self.target_agent}:{self.vulnerability_type}:{self.severity}:{self.poc_payload}:{self.timestamp}".encode()
             pub.verify(sig, payload)
             return True
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             return False
 
 

@@ -150,7 +150,7 @@ class WindowEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return InteractionResult(success=False, error=str(e))
 
     async def resize(self, target: AppTarget, width: int, height: int) -> InteractionResult:
@@ -167,7 +167,7 @@ class WindowEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return InteractionResult(success=False, error=str(e))
 
     async def minimize(self, target: AppTarget) -> InteractionResult:
@@ -184,7 +184,7 @@ class WindowEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return InteractionResult(success=False, error=str(e))
 
     async def restore(self, target: AppTarget) -> InteractionResult:
@@ -200,7 +200,7 @@ class WindowEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return InteractionResult(success=False, error=str(e))
 
     async def fullscreen(self, target: AppTarget) -> InteractionResult:
@@ -218,7 +218,7 @@ class WindowEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return InteractionResult(success=False, error=str(e))
 
     async def close_window(self, target: AppTarget) -> InteractionResult:
@@ -233,5 +233,5 @@ class WindowEngine:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return InteractionResult(success=False, error=str(e))

@@ -1,6 +1,6 @@
+import asyncio
 import json
 import logging
-import asyncio
 from pathlib import Path
 from typing import Any
 
@@ -45,7 +45,7 @@ class CrystallizerDaemon:
             await self._task
 
     async def _loop(self):
-        from cortex.database.core import connect_async, causal_write
+        from cortex.database.core import causal_write, connect_async
         
         db = await connect_async(self.db_path)
         await db.execute("PRAGMA journal_mode=WAL;")
@@ -66,7 +66,7 @@ class CrystallizerDaemon:
                     continue
                 
                 mutations = []
-                with open(processing_file, "r", encoding="utf-8") as f:
+                with open(processing_file, encoding="utf-8") as f:
                     for line in f:
                         if line.strip():
                             mutations.append(json.loads(line))
@@ -122,7 +122,7 @@ class CrystallizerDaemon:
                 # Rollback file state safely
                 if 'processing_file' in locals() and processing_file.exists():
                     with open(AOL_FILE, "a", encoding="utf-8") as f_out:
-                        with open(processing_file, "r", encoding="utf-8") as f_in:
+                        with open(processing_file, encoding="utf-8") as f_in:
                             f_out.write(f_in.read())
                     processing_file.unlink()
                 await asyncio.sleep(5.0) # Backoff

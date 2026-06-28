@@ -52,5 +52,5 @@ def is_file_tainted(
     try:
         scars = engine.scars(project, file_path, limit=10)
         return any(TAINT_TAG in (s.get("content", "")) for s in scars)
-    except Exception:
+    except (ValueError, TypeError, OSError, KeyError):
         return False

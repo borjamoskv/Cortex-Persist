@@ -94,7 +94,7 @@ def try_decode_obfuscation(text: str) -> str:
             # Check if decoded looks like readable ASCII text
             if decoded and all(32 <= ord(c) < 127 or c in "\n\r\t" for c in decoded):
                 decoded_parts.append(decoded)
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             pass
 
     # 2. Check for base64 sequences (minimum 12 chars, valid base64 alphabet)
@@ -109,7 +109,7 @@ def try_decode_obfuscation(text: str) -> str:
             )
             if decoded and all(32 <= ord(c) < 127 or c in "\n\r\t" for c in decoded):
                 decoded_parts.append(decoded)
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             pass
 
     return " ".join(decoded_parts)

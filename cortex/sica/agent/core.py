@@ -246,7 +246,7 @@ class SICAAgent(BaseAgent):
         try:
             result = await self._run_object_level(task_input, objective)
             outcome = StepOutcome.SUCCESS
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, KeyError) as exc:
             self._object_level.record_step(
                 action="task_execution", outcome=StepOutcome.FAILURE, error=repr(exc)
             )

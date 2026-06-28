@@ -228,7 +228,10 @@ class CausalStateStore:
                             })
                             
                             try:
-                                from cortex.extensions.skills.autodidact.epistemology import EvidenceSource, RawEvidence
+                                from cortex.extensions.skills.autodidact.epistemology import (
+                                    EvidenceSource,
+                                    RawEvidence,
+                                )
                                 raw_ev = RawEvidence(
                                     source=EvidenceSource.KERNEL_EVENTS,
                                     raw_payload=s.payload,

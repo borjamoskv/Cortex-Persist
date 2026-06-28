@@ -40,7 +40,7 @@ def produce_cmd(title, concept, bpm, key):
             TrackContext,
             TrackState,
         )
-    except Exception as exc:
+    except (ValueError, TypeError, OSError, KeyError) as exc:
         console.print(f"[bold red]✗ GRAMMY-Ω no está disponible en este entorno:[/bold red] {exc}")
         return
 

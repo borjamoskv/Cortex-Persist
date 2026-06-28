@@ -70,5 +70,5 @@ def register_music_tools(mcp: FastMCP):
         try:
             evaluated_track = await orchestrator.evaluate_track_gri(track)
             return f"GRI Evaluation complete for {track_id}. Score: {evaluated_track.gri_score:.2f}"  # type: ignore[type-error]
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return f"Evaluation failed: {e!s}"

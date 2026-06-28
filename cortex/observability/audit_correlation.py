@@ -38,7 +38,7 @@ def audit_correlation(num_sessions=20):
         try:
             with open(t, encoding="utf-8") as fh:
                 lines = [json.loads(line) for line in fh if line.strip()]
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             continue
 
         i = 0

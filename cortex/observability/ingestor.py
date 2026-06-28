@@ -215,7 +215,7 @@ def _load_workflow_metadata() -> dict[str, int]:
                     content = fh.read()
                 match = re.search("expected_duration_min:\\s*(\\d+)", content)
                 workflow_meta[name] = int(match.group(1)) if match else 15
-            except Exception:
+            except (ValueError, TypeError, OSError, KeyError):
                 workflow_meta[name] = 15
     return workflow_meta
 
@@ -309,7 +309,7 @@ def _parse_single_transcript(t: str, workflow_meta: dict[str, int]) -> dict[str,
     try:
         with open(t, encoding="utf-8") as fh:
             lines = [json.loads(line) for line in fh if line.strip()]
-    except Exception:
+    except (ValueError, TypeError, OSError, KeyError):
         return None
     if not lines:
         return None

@@ -37,7 +37,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
             import keyring
 
             priv_b64 = keyring.get_password("cortex_v6", "ed25519_private_key")
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             pass
 
     if not priv_b64:
@@ -54,7 +54,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
                 private_key_b64=priv_b64,
             )
             meta["cortex_taint"] = token
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             from cortex.cli.common import console
 
             console.print(f"[yellow]Warning: Failed to generate taint token: {e}[/]")

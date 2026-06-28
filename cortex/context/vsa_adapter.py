@@ -188,7 +188,7 @@ class VSAContextAdapter:
             report = mem.diagnostics()
             report["available"] = True
             return report
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return {"available": True, "error": str(e)}
 
     @property

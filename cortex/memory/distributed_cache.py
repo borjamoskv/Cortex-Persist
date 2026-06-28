@@ -448,7 +448,7 @@ class DistributedSovereignCache:
             return {"tip": tip, "count": count, "status": "HYDRA_VALIDATED"}
         except (ValueError, TypeError, OSError):
             return {"status": "UNAVAILABLE"}
-        except Exception as e:
+        except (KeyError, RuntimeError) as e:
             ErrorGhostPipeline().capture_sync(
                 e, source="distributed_cache:prove", project="CORTEX_SYSTEM"
             )

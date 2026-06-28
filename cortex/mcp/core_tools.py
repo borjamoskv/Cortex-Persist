@@ -230,5 +230,5 @@ def _register_embed_status_tool(mcp, ctx: _MCPContext) -> None:
                 dim = cfg.get("native_dimension", "?")
                 lines.append(f"  {marker}{mm}{mrl} {name}: dim={dim}")
             return "\n".join(lines)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return f"❌ Error loading embed status: {e}"

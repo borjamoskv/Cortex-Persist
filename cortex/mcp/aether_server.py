@@ -166,7 +166,7 @@ def create_aether_server(
             return await asyncio.to_thread(_read)
         except UnicodeDecodeError:
             return f"❌ File {filepath} is binary or not UTF-8."
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return f"❌ Error reading file: {e}"
 
     @mcp.tool()
@@ -259,7 +259,7 @@ def create_aether_server(
                 res += f"STDERR:\n{err_output}\n"
 
             return res
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return f"❌ Subprocess error: {e}"
 
     return mcp

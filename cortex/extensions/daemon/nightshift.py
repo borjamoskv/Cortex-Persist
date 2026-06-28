@@ -1,12 +1,11 @@
-import os
+import argparse
 import json
 import logging
-import argparse
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
-from cortex.engine.crystallizer import auto_crystallizer
 from cortex.agents.primitives.dispatcher import apex_dispatcher
+from cortex.engine.crystallizer import auto_crystallizer
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - [%(levelname)s] - %(message)s")
 logger = logging.getLogger("NightShift")
@@ -30,7 +29,7 @@ class NightShiftDaemon:
         logger.info(f"Initiating NightShift Purge on {self.transcript_path.name}")
         
         raw_events = []
-        with open(self.transcript_path, "r", encoding="utf-8") as f:
+        with open(self.transcript_path, encoding="utf-8") as f:
             for line in f:
                 if not line.strip(): continue
                 try:
@@ -43,7 +42,7 @@ class NightShiftDaemon:
                         content = step.get("content", "")
                         if "Git Sentinel Hash:" in content or "C5-REAL" in content:
                             raw_events.append(f"[KERNEL] {content[:300]}")
-                except Exception:
+                except (ValueError, TypeError, OSError, KeyError):
                     pass
                     
         # Collate episodic memory

@@ -75,8 +75,9 @@ class AsyncSignalBus:
         # 99.99% ENGINEER: LANDAUER EPISTEMIC FILTER (Ω4)
         if signal.status == "SUCCESS" and signal.payload:
             import json
-            from cortex.guards.landauer_guard import LandauerGuard
             import logging
+
+            from cortex.guards.landauer_guard import LandauerGuard
             
             # Serialize to measure thermodynamic density
             payload_str = json.dumps(signal.payload)

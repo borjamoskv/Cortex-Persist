@@ -56,7 +56,7 @@ def stress_test(system, scenarios):
                     "exergy": getattr(response, "exergy", 0),
                 }
             )
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             results.append({"latency": None, "error": True, "exergy": -1})
     return results
 

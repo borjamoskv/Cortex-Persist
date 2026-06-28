@@ -12,7 +12,6 @@ import shutil
 import subprocess
 import tempfile
 import uuid
-from typing import Tuple
 
 logger = logging.getLogger("cortex.engine.swarm.vesicular")
 
@@ -42,7 +41,7 @@ class VesicularRuntime:
         except OSError as e:
             logger.error(f"[Vesicular] Failed to annihilate membrane {path}: {e}")
 
-    def execute(self, payload: str) -> Tuple[bool, str, str]:
+    def execute(self, payload: str) -> tuple[bool, str, str]:
         """
         Execute an untrusted Python payload inside the vesicular membrane.
         
@@ -101,6 +100,6 @@ class VesicularRuntime:
         finally:
             # INV_CLEAN_ABORT
             self._destroy_membrane(membrane_path)
-            logger.info(f"[Vesicular] Membrane annihilated.")
+            logger.info("[Vesicular] Membrane annihilated.")
             
         return success, stdout, stderr

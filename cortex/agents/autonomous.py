@@ -452,7 +452,7 @@ def _safe_serialize(obj: Any) -> Any:
         return [_safe_serialize(v) for v in obj]
     try:
         return str(obj)[:500]
-    except Exception:
+    except (ValueError, TypeError, OSError, KeyError):
         return "<unserializable>"
 
 

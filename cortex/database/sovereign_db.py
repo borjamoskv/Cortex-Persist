@@ -138,7 +138,7 @@ class SovereignDB:
             if conn:
                 try:
                     conn.close()
-                except Exception:
+                except (ValueError, TypeError, OSError, KeyError):
                     pass
             self._running = False
             self._drain_queue_with_error(e)
@@ -147,7 +147,7 @@ class SovereignDB:
         while True:
             try:
                 task = self._queue.get()
-            except Exception:
+            except (ValueError, TypeError, OSError, KeyError):
                 break
 
             op = task[0]
@@ -159,7 +159,7 @@ class SovereignDB:
                         self._conn.close()
                         self._conn = None
                     loop.call_soon_threadsafe(future.set_result, None)
-                except Exception as e:
+                except (ValueError, TypeError, OSError, KeyError) as e:
                     loop.call_soon_threadsafe(future.set_exception, e)
                 finally:
                     self._queue.task_done()
@@ -216,7 +216,7 @@ class SovereignDB:
                     self._queue.task_done()
                     break
 
-            except Exception as e:
+            except (ValueError, TypeError, OSError, KeyError) as e:
                 loop.call_soon_threadsafe(future.set_exception, e)
             finally:
                 self._queue.task_done()

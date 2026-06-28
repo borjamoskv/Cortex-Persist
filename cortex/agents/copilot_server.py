@@ -213,7 +213,7 @@ class CopilotServer:
         """Process context → generate suggestions → send back."""
         try:
             context = CopilotContextPayload(**payload)
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, KeyError) as exc:
             await self._send_error(session, f"Invalid context: {exc}")
             return
 
@@ -250,7 +250,7 @@ class CopilotServer:
         """Process human verdict on a suggestion."""
         try:
             verdict = SuggestionVerdict(**payload)
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, KeyError) as exc:
             await self._send_error(session, f"Invalid verdict: {exc}")
             return
 

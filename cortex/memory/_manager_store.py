@@ -4,7 +4,8 @@ import asyncio
 import logging
 import time
 import uuid
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 from cortex.memory.engrams import CortexSemanticEngram
 

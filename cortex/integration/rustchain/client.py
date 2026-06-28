@@ -39,7 +39,7 @@ class RustChainClient:
             client = await self.get_client()
             res = await client.get("/health")
             return res.json()
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return {"healthy": False, "error": str(e)}
 
     async def get_balance(self, address: str) -> dict[str, Any]:

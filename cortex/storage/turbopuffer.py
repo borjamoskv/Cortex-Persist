@@ -232,7 +232,7 @@ class TurbopufferVectorBackend(VectorBackend):
         try:
             resp = await self._client.get("/vectors")
             return resp.status_code == 200
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             return False
 
     async def close(self) -> None:

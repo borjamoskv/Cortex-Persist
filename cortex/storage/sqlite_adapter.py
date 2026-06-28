@@ -148,7 +148,7 @@ class SQLiteAdapter:
             async with self._conn.execute("SELECT 1") as cursor:
                 row = await cursor.fetchone()
                 return row is not None
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             return False
 
     def __repr__(self) -> str:

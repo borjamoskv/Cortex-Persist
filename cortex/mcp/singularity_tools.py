@@ -114,7 +114,7 @@ def register_singularity_tools(mcp) -> None:
                     f"Preview: {preview}...\n"
                 )
             return "\n".join(out)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return f"CORTEX-MCP SQLite-Vec Engine Error: {e!s}"
 
     @mcp.tool()
@@ -209,7 +209,7 @@ def register_singularity_tools(mcp) -> None:
 
             logging.info("🚀 [DISPATCH] Handed task to daemon: %s", command)
             return f"✅ Task dispatched to CORTEX Swarm. Agent [{agent_id}] is executing."
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return f"[ERROR] Dispatch Failure: {e!s}"
 
     @mcp.tool()
@@ -241,7 +241,7 @@ def register_singularity_tools(mcp) -> None:
             cmd = f"python3 {os.path.join(_CORTEX_CORE, 'ouroboros_engine.py')} --target {repo_url}"
             # Need to reference tools via self if inside class, or just call directly if helper
             return cortex_swarm_dispatch("SAGE_COUNCIL", cmd)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return f"[ERROR] Audit Dispatch Failure: {e!s}"
 
 

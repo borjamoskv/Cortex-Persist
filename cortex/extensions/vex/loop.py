@@ -177,7 +177,7 @@ class VEXRunner:
             output = ""
             error = f"Timeout after {step.timeout_seconds}s"
 
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, KeyError) as exc:
             elapsed_ms = int((time.monotonic() - t0) * 1000)
             success = False
             output = ""

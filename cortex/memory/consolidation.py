@@ -267,7 +267,7 @@ class SystemsConsolidator:
             
             if cursor.description:
                 columns = [col[0] for col in cursor.description]
-                doomed_facts = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                doomed_facts = [dict(zip(columns, row, strict=False)) for row in cursor.fetchall()]
                 if doomed_facts:
                     try:
                         from cortex.engine.core.l3_archive import l3_archiver

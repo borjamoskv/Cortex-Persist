@@ -5,7 +5,7 @@ Replaces stochastic LLM inferences with strict formal mathematical proofs for co
 """
 
 import logging
-from typing import Any, Dict
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.logic.z3")
 
@@ -23,7 +23,7 @@ class DeterministicSolver:
     """
     
     @staticmethod
-    def prove_contradiction(fact_a: Dict[str, Any], fact_b: Dict[str, Any]) -> bool:
+    def prove_contradiction(fact_a: dict[str, Any], fact_b: dict[str, Any]) -> bool:
         """
         Returns True if a formal logical contradiction exists between fact_a and fact_b.
         """
@@ -70,7 +70,7 @@ class DeterministicSolver:
         return False
         
     @staticmethod
-    def _heuristic_fallback(fact_a: Dict[str, Any], fact_b: Dict[str, Any]) -> bool:
+    def _heuristic_fallback(fact_a: dict[str, Any], fact_b: dict[str, Any]) -> bool:
         if fact_a.get("id") and fact_a.get("id") == fact_b.get("id"):
             if fact_a.get("content") != fact_b.get("content"):
                 return True

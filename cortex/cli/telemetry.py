@@ -2,9 +2,11 @@
 """Experimental CLI command for thermodynamic apoptosis telemetry."""
 
 import asyncio
-import click
+
 from rich.table import Table
-from cortex.cli.common import cli, console, _run_async
+
+from cortex.cli.common import _run_async, cli, console
+
 
 async def _render_telemetry():
     """Async function to simulate fetching and rendering telemetry."""

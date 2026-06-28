@@ -108,5 +108,5 @@ class EVMTopographyMapper:
                     await self.update_node_health(node.chain_id, node.url, latency, success=True)
                 else:
                     await self.update_node_health(node.chain_id, node.url, 0, success=False)
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             await self.update_node_health(node.chain_id, node.url, 0, success=False)

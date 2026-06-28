@@ -180,7 +180,7 @@ class LedgerAuditMixin:
                             "computed_hash": computed_hash,
                         }
                     )
-            except Exception as e:
+            except (ValueError, TypeError, OSError, KeyError) as e:
                 violations.append(
                     {"id": f_tx_id, "type": "FACT_DECRYPTION_FAILED", "error": str(e)}
                 )

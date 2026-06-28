@@ -129,7 +129,7 @@ def crawl(url: str):
         else:
             with open(url) as f:
                 text = f.read()
-    except Exception as e:
+    except (ValueError, TypeError, OSError, KeyError) as e:
         console.print(f"[bold red]✗ LIBRARIAN Error:[/bold red] {e}")
         return
 

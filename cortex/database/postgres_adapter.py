@@ -96,7 +96,7 @@ class PostgresConnectionAdapter:
             conn = self._get_active_conn()
             if hasattr(conn, "is_in_transaction"):
                 return bool(conn.is_in_transaction())
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             pass
         return self._in_transaction
 

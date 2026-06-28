@@ -33,7 +33,7 @@ async def get_dynamic_threshold(conn: Any, project: str) -> int:
             data = json.loads(row[0])
             if "threshold_seconds" in data:
                 return int(data["threshold_seconds"])
-    except Exception:
+    except (ValueError, TypeError, OSError, KeyError):
         pass
     
     return DEFAULT_MAX_AGE_SECONDS

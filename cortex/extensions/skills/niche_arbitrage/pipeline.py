@@ -80,7 +80,7 @@ class NicheArbitrageEngine:
             report.target_name = target_name
             return report
 
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             # Fallback report on error
             return MarketReport(
                 target_name=target_name, summary=f"LLM Synthesis Failed: {str(e)}", signals=[]

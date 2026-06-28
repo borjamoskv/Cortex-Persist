@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 import json
 import logging
-import urllib.request
 import urllib.error
-from typing import Any, Dict, List, Optional
+import urllib.request
+from typing import Optional
 
 logger = logging.getLogger("cortex.llm.raw_client")
 
@@ -39,7 +39,7 @@ class RawLLMClient:
             logger.error(f"[RawLLM] Error calling Ollama: {e}")
             raise RuntimeError(f"Ollama API error: {e}")
 
-    def chat(self, messages: List[Dict[str, str]], temperature: float = 0.0) -> str:
+    def chat(self, messages: list[dict[str, str]], temperature: float = 0.0) -> str:
         """Synchronous chat completion via Ollama."""
         url = f"{self.base_url}/chat"
         payload = {

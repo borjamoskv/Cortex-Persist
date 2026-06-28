@@ -67,7 +67,7 @@ async def stress_worker(client: httpx.AsyncClient, worker_id: int, semaphore: as
         )
         latency = time.perf_counter() - start_time
         return {"id": worker_id, "status": "success", "latency": latency, "result": result}
-    except Exception as e:
+    except (ValueError, TypeError, OSError, KeyError) as e:
         latency = time.perf_counter() - start_time
         return {"id": worker_id, "status": "error", "latency": latency, "error": str(e)}
 

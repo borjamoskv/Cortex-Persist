@@ -69,7 +69,7 @@ class Judge(ABC):
 
             pub_key.verify(signature, payload)
             return True
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             return False
 
 
@@ -184,7 +184,7 @@ class TestRunnerJudge(Judge):
                     return False, [f"pytest failed with exit status {res.returncode}", output.strip()]
             except subprocess.TimeoutExpired:
                 return False, [f"Test runner timed out after {timeout} seconds"]
-            except Exception as e:
+            except (ValueError, TypeError, OSError, KeyError) as e:
                 return False, [f"Test runner execution failed: {e}"]
 
 
@@ -230,7 +230,7 @@ class PolicyJudge(Judge):
                 for banned in banned_imports:
                     if imp == banned or imp.startswith(banned + "."):
                         reasons.append(f"Import of banned library: {imp}")
-        except Exception:
+        except (ValueError, TypeError, OSError, KeyError):
             # Fallback to text check if AST fails
             for banned in banned_imports:
                 for line in lines:

@@ -12,12 +12,13 @@ Tripartite Memory Architecture (KETER-∞ Frontera 2):
 from __future__ import annotations
 
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from types import MappingProxyType
-from typing import Any, Literal, Mapping
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, ValidationInfo, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 try:
     import numpy as np

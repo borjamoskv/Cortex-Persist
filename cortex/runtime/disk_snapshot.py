@@ -43,7 +43,7 @@ class DiskSnapshotManager:
                 with open(snap_path) as f:
                     data = json.load(f)
                 return RuntimeState(initial_state=data["data"], version=data["version"])
-            except Exception:
+            except (ValueError, TypeError, OSError, KeyError):
                 # Silent fallback on corrupted snapshot (handled by Chaos Harness)
                 continue
         return None

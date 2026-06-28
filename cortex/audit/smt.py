@@ -5,7 +5,7 @@ Provides O(log n) cryptographic tamper-evident verification for Swarm agents.
 """
 
 import hashlib
-from typing import Dict, List, Optional
+
 
 class SparseMerkleTree:
     """
@@ -16,10 +16,10 @@ class SparseMerkleTree:
     def __init__(self) -> None:
         self.depth = 256
         self._empty_hashes = self._precompute_empty_hashes()
-        self.db: Dict[str, str] = {}
+        self.db: dict[str, str] = {}
         self.root: str = self._empty_hashes[self.depth]
         
-    def _precompute_empty_hashes(self) -> List[str]:
+    def _precompute_empty_hashes(self) -> list[str]:
         """Precomputes the hashes for empty subtrees up to `depth`."""
         hashes = ["0" * 64]
         for _ in range(self.depth):
@@ -54,7 +54,7 @@ class SparseMerkleTree:
         self.root = current_hash
         return self.root
         
-    def verify(self, key_hash: str, value_hash: str, proof: List[str], expected_root: str) -> bool:
+    def verify(self, key_hash: str, value_hash: str, proof: list[str], expected_root: str) -> bool:
         """
         Verifies an SMT inclusion proof in O(log n).
         """

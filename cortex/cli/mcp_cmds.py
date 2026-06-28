@@ -89,7 +89,7 @@ def sovereign_mcp() -> None:
             response_json = host.process_request(line)  # pyright: ignore[reportAttributeAccessIssue]
             sys.stdout.write(response_json + "\n")
             sys.stdout.flush()
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             err = {"jsonrpc": "2.0", "error": {"code": -32603, "message": str(e)}, "id": None}
             sys.stdout.write(json.dumps(err) + "\n")
             sys.stdout.flush()

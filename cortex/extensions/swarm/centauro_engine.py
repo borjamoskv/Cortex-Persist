@@ -230,7 +230,7 @@ class CentauroEngine:
                     "127.0.0.1" in getattr(p, "_base_url", "")
                     for p in providers
                 )
-            except Exception:
+            except (ValueError, TypeError, OSError, KeyError):
                 is_local = True
 
         concurrency_limit = 4 if is_local else 50

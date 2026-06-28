@@ -118,7 +118,7 @@ class TrendsOracle:
             except Exception as e:
                 logger.error("❌ [TRENDS_ORACLE] (Thread) Error: %s", e)
 
-            time.sleep(15.0)  # noqa: TID251 # Threaded sync loop
+            time.sleep(15.0)  # noqa: TID251 # Threaded sync loop  # noqa: TID251 # Threaded sync loop
 
     def stop(self) -> None:
         """Gracefully stop the oracle loop."""

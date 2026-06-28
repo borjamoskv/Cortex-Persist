@@ -23,7 +23,7 @@ def get_obfuscation_key() -> bytes:
     )
     try:
         return base64.b64decode(key_str)
-    except Exception:
+    except (ValueError, TypeError, OSError, KeyError):
         return key_str.encode("utf-8")
 
 def derive_pad_vector(dimension: int, tenant_id: str = "default", project: str = "") -> np.ndarray:

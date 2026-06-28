@@ -6,7 +6,6 @@ unless at least N/3 nodes in the Swarm fabric have signed it.
 """
 
 import logging
-from typing import Dict, List, Set
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric import ed25519
@@ -16,7 +15,7 @@ logger = logging.getLogger("cortex.consensus.bft_quorum")
 class BFTQuorumGuard:
     """Enforces Byzantine Quorum (N/3) for Zenoh/Swarm mutations."""
     
-    def __init__(self, known_peers: Dict[str, ed25519.Ed25519PublicKey]):
+    def __init__(self, known_peers: dict[str, ed25519.Ed25519PublicKey]):
         """
         Initialize with a registry of known peer public keys.
         
@@ -25,7 +24,7 @@ class BFTQuorumGuard:
         """
         self.known_peers = known_peers
         
-    def authorize_payload(self, payload: bytes, signatures: Dict[str, bytes]) -> bool:
+    def authorize_payload(self, payload: bytes, signatures: dict[str, bytes]) -> bool:
         """
         Validates if a payload has enough valid signatures to meet the N/3 BFT quorum.
         
@@ -45,7 +44,7 @@ class BFTQuorumGuard:
         required_quorum = max(1, total_nodes // 3)
         
         valid_count = 0
-        valid_signers: Set[str] = set()
+        valid_signers: set[str] = set()
         
         for agent_id, sig_bytes in signatures.items():
             if agent_id not in self.known_peers:

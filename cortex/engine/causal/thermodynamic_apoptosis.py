@@ -14,8 +14,6 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 
-import aiosqlite
-
 from cortex.audit.ledger import EnterpriseAuditLedger
 
 logger = logging.getLogger("cortex.engine.causal.apoptosis")

@@ -128,7 +128,7 @@ class MaestroUI:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return InteractionResult(success=False, error=str(e))
 
     async def inject_keystroke(
@@ -157,7 +157,7 @@ class MaestroUI:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return InteractionResult(success=False, error=str(e))
 
     async def click_menu_item(
@@ -188,5 +188,5 @@ class MaestroUI:
         try:
             await run_applescript(script)
             return InteractionResult(success=True)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return InteractionResult(success=False, error=str(e))

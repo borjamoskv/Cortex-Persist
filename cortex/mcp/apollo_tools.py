@@ -91,7 +91,7 @@ def register_apollo_tools(mcp: FastMCP) -> None:  # pyright: ignore[reportInvali
         try:
             with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(extracted_leads, f, indent=2, ensure_ascii=False)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return f"❌ Failed to write JSON output: {e}"
 
         return f"✅ C5-REAL Lead Extraction complete. Extracted {len(extracted_leads)} leads to {output_path}"

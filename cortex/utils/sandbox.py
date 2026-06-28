@@ -409,7 +409,7 @@ class ASTSandbox:
                 stdout=captured.getvalue(),
                 duration_ms=(_time.monotonic() - start) * 1000,
             )
-        except Exception as e:
+        except (ValueError, TypeError, OSError, KeyError) as e:
             return ExecResult(
                 success=False,
                 error=f"{type(e).__name__}: {e}",

@@ -259,7 +259,7 @@ async def messages_endpoint(request: Request):
                             yield (
                                 f"event: content_block_delta\ndata: {json.dumps(event_data)}\n\n"
                             )
-                    except Exception:
+                    except (ValueError, TypeError, OSError, KeyError):
                         continue
 
                 yield 'event: message_stop\ndata: {"type": "message_stop"}\n\n'
