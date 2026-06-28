@@ -76,44 +76,50 @@ class MCTSEngine:
         for i in range(max_iterations):
             logger.debug("MCTS Iteration %d/%d", i + 1, max_iterations)
 
-            # 1. Selection & Expansion
+            # 1. Selection (OP_MCTS_SELECT)
             node = root
-            # Mock simplistic expansion logic for P0
-            if not node.children:
-                node.add_child(
-                    f"{base_branch}-{i}-A",
-                    "Refactor for pure thermodynamic efficiency and low memory overhead.",
-                )
-                node.add_child(
-                    f"{base_branch}-{i}-B",
-                    "Rewrite using modern Python 3.10+ async features strictly.",
-                )
-                node.add_child(
-                    f"{base_branch}-{i}-C",
-                    "Minimize line count without losing intent. O(1) mindset.",
-                )
+            while node.children and all(c.visits > 0 for c in node.children):
+                node = max(node.children, key=lambda n: n.uct())
 
-            # Pick best UCT child
-            node = max(node.children, key=lambda n: n.uct())
+            # 2. Expansion (OP_MCTS_EXPAND)
+            if not node.children and not node.is_terminal:
+                strategies = [
+                    f"{node.mutation_prompt} -> [Vector Alpha: Enforce O(1) time complexity and strict type boundaries]",
+                    f"{node.mutation_prompt} -> [Vector Beta: Optimize thermodynamic Exergy, purge redundant logic]",
+                    f"{node.mutation_prompt} -> [Vector Gamma: Maximize async resilience and fail-fast invariants]"
+                ]
+                for idx, strategy in enumerate(strategies):
+                    node.add_child(f"{node.state_id}-{idx}", strategy)
 
-            # 2. Emulate environment state
-            await self.env.branch_out(base_branch, node.state_id)
+            if node.children:
+                # Pick best UCT child (or an unvisited one, since uct() returns inf for visits=0)
+                node = max(node.children, key=lambda n: n.uct())
 
-            # 3. Simulation
+            # 3. Emulate environment state (OP_GIT_MULTIVERSE)
+            parent_branch = base_branch
+            if node.parent and node.parent != root:
+                parent_branch = f"chronos/node-{node.parent.state_id}"
+            
+            await self.env.branch_out(parent_branch, node.state_id)
+
+            # 4. Simulation (OP_DETERMINISTIC_SIM)
             mutated = await self.env.mutate(node.mutation_prompt)
             if mutated:
                 reward = await self.env.simulate()
+                if reward == 0.0:
+                    node.is_terminal = True
             else:
                 reward = 0.0
+                node.is_terminal = True
 
-            # 4. Backpropagation
-            node.visits += 1
-            node.value += reward
-            if node.parent:
-                node.parent.visits += 1
-                node.parent.value += reward
+            # 5. Backpropagation (OP_BACKPROPAGATE)
+            curr = node
+            while curr is not None:
+                curr.visits += 1
+                curr.value += reward
+                curr = curr.parent
 
-            # Restore main branch for the next state (Prevents destructive collapse)
+            # Restore main branch for the next state (OP_LOCAL_EXTINCTION)
             await self.env.secure_checkout(base_branch)
 
         # Select the optimal branch based on exploitation (average value)
