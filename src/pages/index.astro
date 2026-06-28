@@ -1,3 +1,7 @@
+---
+import CanvasCore from '../components/brain/CanvasCore';
+import LenisController from '../components/LenisController';
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,8 +23,8 @@
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "CORTEX_CF_ANALYTICS_TOKEN"}'></script>
 </head>
 <body>
-    <canvas id="cortex-particles"></canvas>
-
+    <CanvasCore client:load />
+    <LenisController client:load />
     <!-- Urgency Banner -->
     <div class="urgency-banner" id="urgency-banner">
         ⚠️ EU AI Act enforcement begins <strong>August 2026</strong> — Companies without audit trails face <strong>€30M fines</strong>.
@@ -493,93 +497,6 @@
     })();
     </script>
 
-    <!-- Cortex Particles (Fixed) -->
-    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script is:inline>
-    (function() {
-        const canvas = document.getElementById('cortex-particles');
-        if (!canvas) return;
-
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 70;
-
-        const count = 600;
-        const geometry = new THREE.IcosahedronGeometry(0.15, 0);
-        const material = new THREE.MeshBasicMaterial({
-            color: 0x2E5090,
-            wireframe: true,
-            transparent: true,
-            opacity: 0.6
-        });
-
-        const instancedMesh = new THREE.InstancedMesh(geometry, material, count);
-        scene.add(instancedMesh);
-
-        const dummy = new THREE.Object3D();
-        const particles = [];
-        for (let i = 0; i < count; i++) {
-            particles.push({
-                t: Math.random() * 100,
-                factor: 20 + Math.random() * 100,
-                speed: 0.005 + Math.random() / 400,
-                xFactor: -50 + Math.random() * 100,
-                yFactor: -50 + Math.random() * 100,
-                zFactor: -30 + Math.random() * 60,
-            });
-        }
-
-        let mouseX = 0, mouseY = 0;
-        document.addEventListener('mousemove', (e) => {
-            mouseX = (e.clientX - window.innerWidth / 2) * 0.001;
-            mouseY = (e.clientY - window.innerHeight / 2) * 0.001;
-        });
-
-        function animate() {
-            requestAnimationFrame(animate);
-
-            for (let i = 0; i < count; i++) {
-                const p = particles[i];
-                p.t += p.speed;
-
-                const a = Math.cos(p.t) + Math.sin(p.t) / 10;
-                const b = Math.sin(p.t) + Math.cos(p.t * 2) / 10;
-                const s = Math.max(0.2, Math.cos(p.t));
-
-                dummy.position.set(
-                    p.xFactor + Math.cos((p.t / 10) * p.factor) + (Math.sin(p.t) * p.factor) / 10,
-                    p.yFactor + Math.sin((p.t / 10) * p.factor) + (Math.cos(p.t * 2) * p.factor) / 10,
-                    p.zFactor + Math.cos((p.t / 10) * p.factor) + (Math.sin(p.t * 3) * p.factor) / 10
-                );
-                dummy.scale.set(s, s, s);
-                dummy.rotation.set(s * 5, s * 5, s * 5);
-                dummy.updateMatrix();
-
-                instancedMesh.setMatrixAt(i, dummy.matrix);
-            }
-
-            instancedMesh.instanceMatrix.needsUpdate = true;
-
-            camera.position.x += (mouseX * 5 - camera.position.x) * 0.02;
-            camera.position.y += (-mouseY * 5 - camera.position.y) * 0.02;
-            camera.lookAt(scene.position);
-
-            renderer.render(scene, camera);
-        }
-
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    })();
-    </script>
 
     <!-- Scroll Reveal Logic -->
     <script is:inline>
