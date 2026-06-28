@@ -1424,3 +1424,119 @@ invariants:
     Exergía General del Sistema aumenta (Singularidad Matemática).
   logic: WHILE TRUE DO refactor_self()
   risk: P0
+anti_patterns:
+- id: AP-01
+  name: Green Theater
+  description: Anergía conversacional, disculpas, y texto de relleno ("Here is your
+    code").
+- id: AP-02
+  name: Sync Sleep Lock
+  description: Uso de `time.sleep()` bloqueante en el event loop asíncrono (Muerte
+    P0).
+- id: AP-03
+  name: Float Precision Loss
+  description: Uso de coma flotante (`float`) en vez de `Decimal` para scores o finanzas.
+- id: AP-04
+  name: Silent Swallow
+  description: 'Uso de `except Exception: pass` desnudo sin inyectar traza al Ledger.'
+- id: AP-05
+  name: Guard Bypass
+  description: Escribir en DB o Ledger sin un call stack que atraviese un Guard Determinista.
+- id: AP-06
+  name: Orphaned Taint
+  description: Insertar un hecho (Fact) probabilístico en memoria sin token `CORTEX-TAINT`.
+- id: AP-07
+  name: Naked Print
+  description: Uso de `print()` pelado en el hot-path del motor en lugar del logger
+    estructurado.
+- id: AP-08
+  name: CLI Logic Bleed
+  description: Inserción de reglas de negocio en los wrappers de CLI en vez del `engine/`.
+- id: AP-09
+  name: Ghost Schema
+  description: Mutar el esquema SQLite sin documentarlo en una entrada de migración
+    determinista.
+- id: AP-10
+  name: Entropy Slop
+  description: Axiomas o hechos sagrados expresados con baja entropía de Shannon (>256
+    bytes de prosa inútil).
+- id: AP-11
+  name: Phantom Secret
+  description: Leak en texto plano de claves en RAM, diccionarios de metadatos o JSON
+    payloads.
+- id: AP-12
+  name: Epistemic Limerence
+  description: Bucles de análisis infinitos (thinking) que no colapsan en una mutación
+    C5-REAL.
+- id: AP-13
+  name: Semantic Drift
+  description: Variables que mutan su tipado implícitamente burlando el Pyright o
+    las aserciones.
+- id: AP-14
+  name: God Mode Context
+  description: Cargar el código fuente completo en vez de utilizar búsqueda RAG e
+    índices vectoriales.
+- id: AP-15
+  name: Zombie Reference
+  description: Documentar o depender de rutas/archivos (`NO`) que no existen en el
+    DAG de Git.
+- id: AP-16
+  name: Cross-Tenant Bleed
+  description: Mutación o lectura de la matriz de datos sin acotar estricto por `tenant_id`.
+- id: AP-17
+  name: Incomplete Saga
+  description: Avanzar en un paso de escritura SAGA sin disponer de una función de
+    rollback probada.
+- id: AP-18
+  name: UI Space Binding
+  description: Depender de coordenadas visuales (clicks estocásticos) en lugar de
+    topología DOM estricta.
+- id: AP-19
+  name: Physical Duplication
+  description: Copiar archivos arquitectónicos cruzados en lugar de utilizar Symlinks
+    (Falla de Nexus).
+- id: AP-20
+  name: Diplomatic Muting
+  description: Omitir un fallo arquitectónico severo del Operador por amabilidad,
+    rompiendo el C5.
+redundancies:
+- id: RA-01
+  name: SQLite WAL Mode
+  description: Tolerancia concurrente. Múltiples lecturas y escrituras asíncronas
+    aisladas de bloqueos.
+- id: RA-02
+  name: Saga Snapshot & Rollback
+  description: Copia de estado en RAM/Disco pre-mutación. Permite desenrollado a SAGA-1
+    en caso de error.
+- id: RA-03
+  name: Ledger Hash-Chaining
+  description: Historial criptográfico en cadena. Mutaciones corruptas o maliciosas
+    rompen el hash irremediablemente.
+- id: RA-04
+  name: CORTEX-TAINT Provenance
+  description: Rastreo de origen atómico. Si un modelo degrada, su progenie entera
+    puede purgarse.
+- id: RA-05
+  name: Quorum BFT (n/3)
+  description: Redundancia de decisión agéntica. Mínimo 3 aserciones para validar
+    verdades físicas cruzadas.
+- id: RA-06
+  name: Circuit Breakers & Jitter
+  description: Auto-mitigación de tormentas de red. Delay exponencial aleatorizado
+    y apertura térmica de circuitos.
+- id: RA-07
+  name: Nexus Symlinking
+  description: Redundancia lógica pero no física. Un solo nodo de verdad C5 sincroniza
+    todos los workspaces de forma instantánea.
+- id: RA-08
+  name: AES-GCM Authentication
+  description: Redundancia criptográfica. El payload no solo se oculta, se firma contra
+    alteraciones de bit-flip.
+- id: RA-09
+  name: Dead-Letter Quarantine
+  description: Estado de cuarentena forense (`ON_CORRUPT`). Las transacciones fallidas
+    no se borran, se aíslan para autopsia.
+- id: RA-10
+  name: Oráculo Dual (Git + DB)
+  description: Mutua aserción de la realidad. Si el Snapshot de Git no avala la base
+    de datos WAL, se detona alerta P0.
