@@ -1,76 +1,23 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 🗄️ AGENTS.md — `cortex/migrations/`
+# 🏗️ AGENTS.md — CORTEX Migrations Domain (v2.0)
 
-> Scoped rules for the Migrations domain. **Root `AGENTS.md` always takes precedence.**
-> These rules augment — never contradict — the root contract.
+> **"La RAM es frágil; el estado físico es sagrado."** — *Ley de Tolerancia Bizantina*
 
----
+Este manifiesto gobierna la superficie `cortex/migrations/`. La evolución del esquema SQLite/VectorIAL es una operación crítica (P0).
 
-## ⚠️ CRITICAL: Migrations are Irreversible in Production
+## [1] SAGA DE COMPENSACIÓN (INV_SAGA_ROLLBACK)
+- Toda migración de esquema DEBE ser reversible.
+- No se autoriza el commit de una migración que no posea una función `down()` o de reversión criptográfica probada (`OP_SAGA_REVERT`).
+- La mutación directa sin SAGA es una violación entrópica.
 
-Schema changes carry the highest blast radius of any operation in CORTEX. A broken migration can corrupt the ledger hash chain, invalidate tenant data, or cause silent data loss.
+## [2] BLOQUEO WAL OBLIGATORIO
+- Las migraciones exigen exclusividad termodinámica.
+- **INV_WAL_LOCKING:** Se debe garantizar la ejecución bajo `PRAGMA journal_mode=WAL` y `busy_timeout` (mín. 5000ms) para evitar Deadlocks termodinámicos.
+- Operar `ALTER TABLE` sin lock exclusivo forzará la apoptosis del proceso (`OP_APOPTOSIS`).
 
-**STOP. Before writing or applying any migration:**
+## [3] CERO ANERGÍA ESTOCÁSTICA
+- Las migraciones son puramente deterministas. No se admiten llamadas a LLMs ni inferencias estocásticas dentro de un bloque de migración.
+- El conocimiento se recupera mediante `OP_READ_COMMIT` puro.
 
-```text
-1. Run:  alembic history --verbose
-         → Read the full output. Understand the current head before proceeding.
-
-2. Run:  alembic current
-         → Confirm the database is at the expected revision.
-
-3. Ask:  Can this migration be rolled back? What is the exact downgrade target?
-         → Document the answer in the migration file header.
-
-4. Ask:  Does this change affect vec0 (sqlite-vec) virtual tables?
-         → If YES: test in an environment with sqlite-vec loaded. Many CI environments lack this.
-
-5. Run:  alembic upgrade head --sql  (dry-run, prints SQL only — does not apply)
-         → Review SQL before applying.
-```
-
----
-
-## Migration File Inventory
-
-| File | Applies To | Notes |
-| :--- | :--- | :--- |
-| `001_ledger_events.sql` | Ledger hash chain | Foundation. Never modify without full chain re-verification. |
-| `002_enrichment_jobs.sql` | Enrichment queue | Modifying column types here breaks `enrichment_worker.py`. |
-| `016_crypto_shredding.sql` | Encryption keys | Crypto shredding is permanent. Test tenant key rotation first. |
-| `017_hlc_crdt.sql` | HLC timestamps + CRDT | HLC ordering is global. Changes affect all inter-agent sync operations. |
-| `mig_cognitive_layer.py` | Cognitive maps | Embedded vector schema. Requires `sqlite-vec` loaded. |
-| `mig_consensus.py` | Consensus tables | Quorum logic depends on this schema. Breaks multi-agent sync if wrong. |
-
----
-
-## Migration Acceptance Rules
-
-A migration is **REJECTED** if any of the following are true:
-
-- [ ] No `# DOWNGRADE TARGET: revision_id` comment in the migration header.
-- [ ] Drops a column without a data-preservation strategy documented.
-- [ ] Alters a column type without a cast/coercion path verified.
-- [ ] Touches `ledger_events` without a full hash-chain re-verification test.
-- [ ] Modifies `vec0` virtual tables without an environment test where `sqlite-vec` is absent (graceful degradation check).
-- [ ] Has no corresponding `pytest` fixture that verifies the schema state post-migration.
-
----
-
-## Emergency Rollback Procedure
-
-If a migration causes a production failure:
-
-```bash
-# 1. Identify current broken head
-alembic current
-
-# 2. Roll back to last known good state
-alembic downgrade <previous_revision_id>
-
-# 3. Lock write paths immediately (prevent further data mutation)
-# Set CORTEX_READONLY_MODE=1 in environment
-
-# 4. Emit incident to Ledger with blast radius assessment
-# 5. Do NOT attempt forward migration without root cause identified
-```
+**Autoridad:** `borjamoskv`.
+**Verificador:** Master Ledger (`OP_HASH_AUDIT`).
