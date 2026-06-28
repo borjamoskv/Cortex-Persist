@@ -1,0 +1,16 @@
+M0_ORTOGONALES:
+- ID: ORT-001
+  Primitiva: EXERGÍA
+  Definición: El vector direccional. Lo que justifica el cómputo. Sin exergía, el mapeo es simulación (C4-SIM).
+- ID: ORT-002
+  Primitiva: ESTADO / LEDGER
+  Definición: El sumidero físico. Mapear sin mutar el disco (Git/SQLite) es un procesamiento estocástico inútil (Anergía).
+- ID: ORT-003
+  Primitiva: COLAPSO
+  Definición: La acción de destruir la onda de probabilidad semántica del lenguaje natural para fijar un AST determinista.
+- ID: ORT-004
+  Primitiva: INVARIANTE
+  Definición: La estructura matemática que el isomorfismo (mapeo) jura proteger de la degradación durante la mutación.
+- ID: ORT-005
+  Primitiva: ANERGÍA
+  Definición: El enemigo absoluto. La fricción, la prosa, la entropía del "Green Theater". Se mapea para erradicar la anergía.
