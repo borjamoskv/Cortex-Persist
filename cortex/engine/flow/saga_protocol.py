@@ -81,6 +81,15 @@ async def guard_exec(ctx: SagaContext):
     if not ctx.get("payload"):
         raise ValueError("Empty payload")
 
+    from cortex.engine.causal.taint_engine import check_anergy_and_green_theater
+    import json
+
+    payload_str = json.dumps(ctx["payload"]) if isinstance(ctx["payload"], dict) else str(ctx["payload"])
+    try:
+        check_anergy_and_green_theater(payload_str)
+    except ValueError as e:
+        raise ValueError(f"SAGA-1 Rejection: {e}") from e
+
 
 async def guard_comp(ctx: SagaContext):
     """Compensates the guard step by resetting the payload state."""
@@ -88,7 +97,19 @@ async def guard_comp(ctx: SagaContext):
 
 async def taint_exec(ctx: SagaContext):
     # Attribution
-    ctx["taint_token"] = f"taint:{ctx.get('agent_id')}:sha3_256_stub"
+    from cortex.engine.causal.taint_engine import canonicalize_content, _fast_sha3
+    import json
+    import datetime
+
+    agent_id = ctx.get("agent_id", "SYS_ROOT")
+    session_id = ctx.get("session_id", "default_session")
+    payload_str = json.dumps(ctx.get("payload", {}))
+    
+    canonical = canonicalize_content(payload_str)
+    content_hash = _fast_sha3(canonical)
+    timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    
+    ctx["taint_token"] = f"taint:{agent_id}:{session_id}:{timestamp}:hash:{content_hash}"
 
 
 async def taint_comp(ctx: SagaContext):
@@ -126,7 +147,13 @@ async def encrypt_comp(ctx: SagaContext):
 
 async def ledger_exec(ctx: SagaContext):
     # Audit trail
-    ctx["ledger_hash"] = "hash_stub"
+    from cortex.engine.causal.taint_engine import canonicalize_content, _fast_sha3
+    import json
+    
+    payload_str = json.dumps(ctx.get("payload", {}))
+    canonical = canonicalize_content(payload_str)
+    # Merkle stub replaced by structural sha3 hash
+    ctx["ledger_hash"] = _fast_sha3(canonical)
 
 
 async def ledger_comp(ctx: SagaContext):
