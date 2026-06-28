@@ -218,10 +218,11 @@ class ConnectionMixin:
 
         conn = connect(str(self._db_path), row_factory=sqlite3.Row)  # pyright: ignore[reportAttributeAccessIssue]
         try:
-            conn.enable_load_extension(True)
-            conn.load_extension(sqlite_vec.loadable_path())
-            conn.enable_load_extension(False)
-        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
+            if hasattr(conn, "enable_load_extension"):
+                conn.enable_load_extension(True)
+                conn.load_extension(sqlite_vec.loadable_path())
+                conn.enable_load_extension(False)
+        except (ValueError, TypeError, KeyError, OSError, RuntimeError, AttributeError, sqlite3.Error) as exc:
             logger.warning("Suppressed exception: %s", exc)
         if not hasattr(self, "_sync_conns"):
             self._sync_conns = []

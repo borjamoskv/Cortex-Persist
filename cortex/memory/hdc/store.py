@@ -83,7 +83,8 @@ class HDCVectorStoreL2:
 
             if sqlite_vec is not None:
                 try:
-                    self._conn.enable_load_extension(True)
+                    if hasattr(self._conn, "enable_load_extension"):
+                        self._conn.enable_load_extension(True)
                     sqlite_vec.load(self._conn)
                     self._vec_loaded = True
                 except (AttributeError, OSError, sqlite3.Error) as e:

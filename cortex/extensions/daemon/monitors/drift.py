@@ -120,7 +120,8 @@ class DriftMonitorDaemon:
 
             conn = db_connect(str(self.vectors_db_path), timeout=10)
             conn.execute("PRAGMA busy_timeout=10000")
-            conn.enable_load_extension(True)
+            if hasattr(conn, "enable_load_extension"):
+                conn.enable_load_extension(True)
             sqlite_vec.load(conn)
 
             # Check table exists
