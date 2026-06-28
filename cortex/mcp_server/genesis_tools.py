@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 __all__ = ["register_genesis_tools"]
 
-logger = logging.getLogger("cortex.mcp.genesis_tools")
+logger = logging.getLogger("cortex.mcp_server.genesis_tools")
 
 
 def register_genesis_tools(

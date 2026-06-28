@@ -12,9 +12,9 @@ from typing import TYPE_CHECKING
 from cortex.engine import CortexEngine
 
 if TYPE_CHECKING:
-    from cortex.mcp.server import _MCPContext
+    from cortex.mcp_server.server import _MCPContext
 
-logger = logging.getLogger("cortex.mcp.server")
+logger = logging.getLogger("cortex.mcp_server.server")
 
 
 def _register_trace_episode_tool(mcp, ctx: _MCPContext) -> None:

@@ -15,7 +15,7 @@ from typing import Any
 
 import requests
 
-logger = logging.getLogger("cortex.mcp.apollo_tools")
+logger = logging.getLogger("cortex.mcp_server.apollo_tools")
 
 # Attempt to load FastMCP from mcp.server.fastmcp
 try:

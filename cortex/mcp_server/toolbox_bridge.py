@@ -27,7 +27,7 @@ __all__ = [
     "toolbox_health_check",
 ]
 
-logger = logging.getLogger("cortex.mcp.toolbox_bridge")
+logger = logging.getLogger("cortex.mcp_server.toolbox_bridge")
 
 DEFAULT_SERVER_URL = "http://127.0.0.1:5050"
 

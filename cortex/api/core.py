@@ -34,7 +34,7 @@ from cortex.extensions.llm.quota import QuotaRejectedError
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.swarm.manager import get_swarm_manager
 from cortex.extensions.timing import TimingTracker
-from cortex.mcp.knowledge_watcher import start_knowledge_daemon
+from cortex.mcp_server.knowledge_watcher import start_knowledge_daemon
 from cortex.routes import api_router
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans

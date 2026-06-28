@@ -17,11 +17,11 @@ from cortex.ledger import ImmutableLedger
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
 
-    from cortex.mcp.server import _MCPContext
+    from cortex.mcp_server.server import _MCPContext
 
 __all__ = ["register_compliance_tools"]
 
-logger = logging.getLogger("cortex.mcp.trust")
+logger = logging.getLogger("cortex.mcp_server.trust")
 
 
 def register_compliance_tools(mcp: FastMCP, ctx: _MCPContext) -> None:

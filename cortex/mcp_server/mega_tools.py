@@ -21,11 +21,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
 
-    from cortex.mcp.server import _MCPContext
+    from cortex.mcp_server.server import _MCPContext
 
 __all__ = ["register_mega_tools"]
 
-logger = logging.getLogger("cortex.mcp.mega")
+logger = logging.getLogger("cortex.mcp_server.mega")
 
 # Safe base directories for entropy scanning
 # Include resolved tempdir for macOS (/var/folders/... symlinked from /tmp)

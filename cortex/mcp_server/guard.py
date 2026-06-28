@@ -23,7 +23,7 @@ from cortex.config import (
 
 __all__ = ["MCPGuard"]
 
-logger = logging.getLogger("cortex.mcp.guard")
+logger = logging.getLogger("cortex.mcp_server.guard")
 
 # ─── Poisoning Detection Patterns ─────────────────────────────────
 # Patterns are defined and evaluated in Rust core (`cortex_rs.detect_poisoning`)

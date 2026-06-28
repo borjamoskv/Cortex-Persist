@@ -5,7 +5,7 @@ from mcp.server.fastmcp import FastMCP
 
 from cortex.extensions.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext
 
-logger = logging.getLogger("cortex.mcp.music")
+logger = logging.getLogger("cortex.mcp_server.music")
 
 
 def register_music_tools(mcp: FastMCP):

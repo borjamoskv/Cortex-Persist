@@ -152,7 +152,7 @@ all = [
 cortex = "cortex.cli:cli"
 moskv-daemon = "cortex.daemon_cli:main"
 cortex-adk = "cortex.adk.runner:main"
-cortex-mcp = "cortex.mcp.server:run_server"
+cortex-mcp = "cortex.mcp_server.server:run_server"
 
 [build-system]
 requires = ["setuptools>=68.0"]

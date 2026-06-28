@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex.mcp.health")
+logger = logging.getLogger("cortex.mcp_server.health")
 
 
 def register_health_tools(mcp: Any, ctx: Any) -> None:

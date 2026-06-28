@@ -15,20 +15,20 @@ from cortex.extensions.immune.filters.base import Verdict
 from cortex.extensions.immune.membrane import ImmuneMembrane
 from cortex.integration.rustchain.mcp_tool import register_rustchain_tools
 from cortex.ledger import ImmutableLedger
-from cortex.mcp.apollo_tools import register_apollo_tools
-from cortex.mcp.core_tools import (
+from cortex.mcp_server.apollo_tools import register_apollo_tools
+from cortex.mcp_server.core_tools import (
     _register_embed_status_tool,
     _register_embed_tool,
 )
-from cortex.mcp.genesis_tools import register_genesis_tools
-from cortex.mcp.guard import MCPGuard
-from cortex.mcp.health_tools import register_health_tools
-from cortex.mcp.knowledge_watcher import start_knowledge_daemon
-from cortex.mcp.mega_tools import register_mega_tools
-from cortex.mcp.music_tools import register_music_tools
-from cortex.mcp.singularity_tools import register_singularity_tools
-from cortex.mcp.trust_tools import register_trust_tools
-from cortex.mcp.utils import (
+from cortex.mcp_server.genesis_tools import register_genesis_tools
+from cortex.mcp_server.guard import MCPGuard
+from cortex.mcp_server.health_tools import register_health_tools
+from cortex.mcp_server.knowledge_watcher import start_knowledge_daemon
+from cortex.mcp_server.mega_tools import register_mega_tools
+from cortex.mcp_server.music_tools import register_music_tools
+from cortex.mcp_server.singularity_tools import register_singularity_tools
+from cortex.mcp_server.trust_tools import register_trust_tools
+from cortex.mcp_server.utils import (
     AsyncConnectionPool,
     MCPMetrics,
     MCPServerConfig,
@@ -38,7 +38,7 @@ from cortex.swarm import start_swarm_daemon
 
 __all__ = ["create_mcp_server", "run_server"]
 
-logger = logging.getLogger("cortex.mcp.server")
+logger = logging.getLogger("cortex.mcp_server.server")
 
 _MCP_AVAILABLE = False
 try:
@@ -312,7 +312,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
         register_trust_tools(mcp, ctx)
         register_mega_tools(mcp, ctx)
 
-        from cortex.mcp.hilbert_tools import register_hilbert_tools
+        from cortex.mcp_server.hilbert_tools import register_hilbert_tools
 
         register_hilbert_tools(mcp, ctx)
 
@@ -322,7 +322,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
         register_singularity_tools(mcp)
         register_rustchain_tools(mcp)
 
-        from cortex.mcp.pipeline_tools import register_pipeline_tools
+        from cortex.mcp_server.pipeline_tools import register_pipeline_tools
 
         register_pipeline_tools(mcp, ctx)
 

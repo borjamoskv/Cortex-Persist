@@ -338,7 +338,7 @@ class ImmuneMiddleware(BaseHTTPMiddleware):
                 body = await request.body()
 
                 try:
-                    from cortex.mcp.guard import MCPGuard
+                    from cortex.mcp_server.guard import MCPGuard
 
                     if MCPGuard.detect_poisoning(body.decode(errors="ignore")):
                         logger.warning(

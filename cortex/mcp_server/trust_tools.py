@@ -25,14 +25,14 @@ __all__ = ["register_trust_tools"]
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
 
-    from cortex.mcp.server import _MCPContext
+    from cortex.mcp_server.server import _MCPContext
 
-logger = logging.getLogger("cortex.mcp.trust")
+logger = logging.getLogger("cortex.mcp_server.trust")
 
 
 def register_trust_tools(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register all Trust/Compliance tools on the MCP server."""
-    from cortex.mcp.trust_compliance import register_compliance_tools
+    from cortex.mcp_server.trust_compliance import register_compliance_tools
 
     _register_audit_trail(mcp, ctx)
     _register_verify_fact(mcp, ctx)

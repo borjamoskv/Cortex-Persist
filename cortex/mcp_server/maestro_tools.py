@@ -5,9 +5,9 @@ from mcp.server.fastmcp import FastMCP
 
 from cortex.extensions.ui_control.maestro import MaestroUI
 from cortex.extensions.ui_control.models import AppTarget
-from cortex.mcp.utils import get_engine  # type: ignore[reportAttributeAccessIssue]
+from cortex.mcp_server.utils import get_engine  # type: ignore[reportAttributeAccessIssue]
 
-logger = logging.getLogger("cortex.mcp.maestro")
+logger = logging.getLogger("cortex.mcp_server.maestro")
 
 
 def register_maestro_tools(mcp: FastMCP):

@@ -27,7 +27,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.mcp.toolbox_watchdog")
+logger = logging.getLogger("cortex.mcp_server.toolbox_watchdog")
 
 # ── Configuration ─────────────────────────────────────────────────
 
@@ -248,7 +248,7 @@ class ToolboxWatchdog:
                 return
 
             # HTTP health probe
-            from cortex.mcp.toolbox_bridge import (
+            from cortex.mcp_server.toolbox_bridge import (
                 toolbox_health_check,
             )
 

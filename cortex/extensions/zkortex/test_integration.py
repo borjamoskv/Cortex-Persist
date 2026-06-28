@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 # Asegurar que la raíz del proyecto esté en el path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 
 def test_full_sovereign_opacity_protocol() -> None:

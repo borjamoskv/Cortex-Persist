@@ -51,7 +51,7 @@ except ImportError:
 
 from cortex.utils.pulmones import CircuitBreaker, PulmonesQueue
 
-logger = logging.getLogger("cortex.mcp.resilient_gateway")
+logger = logging.getLogger("cortex.mcp_server.resilient_gateway")
 
 # ─── Configuration ───────────────────────────────────────────────────
 
@@ -238,7 +238,7 @@ class ResilientFetcher:
         # Total cascade failure - enqueue for deferred retry
         total_latency = (time.monotonic() - start) * 1000
         self._queue.enqueue(
-            "cortex.mcp.resilient_gateway.ResilientFetcher.fetch",
+            "cortex.mcp_server.resilient_gateway.ResilientFetcher.fetch",
             (url,),
             {"timeout": timeout},
             delay=120.0,

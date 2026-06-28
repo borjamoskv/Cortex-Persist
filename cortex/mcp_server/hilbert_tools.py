@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-logger = logging.getLogger("cortex.mcp.hilbert")
+logger = logging.getLogger("cortex.mcp_server.hilbert")
 
 
 def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore

@@ -12,9 +12,9 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.mcp.resilient_gateway import create_resilient_gateway, run_resilient_gateway
-    from cortex.mcp.server import create_mcp_server, run_server
-    from cortex.mcp.utils import MCPServerConfig
+    from cortex.mcp_server.resilient_gateway import create_resilient_gateway, run_resilient_gateway
+    from cortex.mcp_server.server import create_mcp_server, run_server
+    from cortex.mcp_server.utils import MCPServerConfig
 
 __all__ = [
     "MCPServerConfig",
@@ -25,11 +25,11 @@ __all__ = [
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "create_resilient_gateway": ("cortex.mcp.resilient_gateway", "create_resilient_gateway"),
-    "run_resilient_gateway": ("cortex.mcp.resilient_gateway", "run_resilient_gateway"),
-    "create_mcp_server": ("cortex.mcp.server", "create_mcp_server"),
-    "run_server": ("cortex.mcp.server", "run_server"),
-    "MCPServerConfig": ("cortex.mcp.utils", "MCPServerConfig"),
+    "create_resilient_gateway": ("cortex.mcp_server.resilient_gateway", "create_resilient_gateway"),
+    "run_resilient_gateway": ("cortex.mcp_server.resilient_gateway", "run_resilient_gateway"),
+    "create_mcp_server": ("cortex.mcp_server.server", "create_mcp_server"),
+    "run_server": ("cortex.mcp_server.server", "run_server"),
+    "MCPServerConfig": ("cortex.mcp_server.utils", "MCPServerConfig"),
 }
 
 

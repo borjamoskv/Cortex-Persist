@@ -17,7 +17,7 @@ from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.models import CortexFactModel
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
-logger = logging.getLogger("cortex.mcp.knowledge_watcher")
+logger = logging.getLogger("cortex.mcp_server.knowledge_watcher")
 
 KNOWLEDGE_DIR = os.path.expanduser("~/.gemini/antigravity/knowledge")
 

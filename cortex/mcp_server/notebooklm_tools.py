@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.mcp.notebooklm")
+logger = logging.getLogger("cortex.mcp_server.notebooklm")
 
 
 def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:

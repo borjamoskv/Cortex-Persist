@@ -22,9 +22,9 @@ from cortex.pipeline import (
 )
 
 if TYPE_CHECKING:
-    from cortex.mcp.server import _MCPContext
+    from cortex.mcp_server.server import _MCPContext
 
-logger = logging.getLogger("cortex.mcp.pipeline")
+logger = logging.getLogger("cortex.mcp_server.pipeline")
 
 # ── Shared pipeline bridge (singleton per server lifecycle) ──────────
 

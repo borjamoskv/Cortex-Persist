@@ -113,7 +113,7 @@ class JosuProactiveDaemon:
 
         # Co-launch Toolbox watchdog (Ω₀ self-reference)
         try:
-            from cortex.mcp.toolbox_watchdog import (
+            from cortex.mcp_server.toolbox_watchdog import (
                 ToolboxWatchdog,
             )
 

@@ -23,7 +23,7 @@ from cortex.extensions.mcp.claude_tool import run_claude_query
 from cortex.extensions.policy.jis_auditor import JISAuditor
 from cortex.memory.vsa import VSAPipelineBridge
 
-logger = logging.getLogger("cortex.mcp.server")
+logger = logging.getLogger("cortex.mcp_server.server")
 
 if MCP_AVAILABLE:
     app = Server("cortex-persist-mcp")
