@@ -17,6 +17,14 @@ logger = logging.getLogger("cortex.security.firewall")
 from cortex.security.types import RiskLevel
 
 
+RISK_WEIGHTS = {
+    RiskLevel.LOW: 0,
+    RiskLevel.MEDIUM: 1,
+    RiskLevel.HIGH: 2,
+    RiskLevel.CRITICAL: 3,
+}
+
+
 class SecretRedactor:
     """Deterministic Data Loss Prevention (DLP) for LLM Outputs."""
 
@@ -109,7 +117,7 @@ class RiskScoringEngine:
         for pattern in cls.PROMPT_INJECTION_PATTERNS:
             if pattern.search(text):
                 threats.append("prompt_injection_attempt")
-                risk_level = max(risk_level, RiskLevel.HIGH)
+                risk_level = max(risk_level, RiskLevel.HIGH, key=lambda r: RISK_WEIGHTS[r])
 
         for pattern in cls.MALWARE_URL_PATTERNS:
             if pattern.search(text):
@@ -120,7 +128,7 @@ class RiskScoringEngine:
         _, contains_secret = SecretRedactor.redact(text)
         if contains_secret:
             threats.append("secret_leak_prevented")
-            risk_level = max(risk_level, RiskLevel.HIGH)
+            risk_level = max(risk_level, RiskLevel.HIGH, key=lambda r: RISK_WEIGHTS[r])
 
         return risk_level, threats
 
@@ -160,7 +168,7 @@ class MemoryFirewall:
         eval_risk, eval_threats = RiskScoringEngine.evaluate(str_content)
 
         threats.extend(eval_threats)
-        risk_level = max(risk_level, eval_risk)
+        risk_level = max(risk_level, eval_risk, key=lambda r: RISK_WEIGHTS[r])
 
         # Deduplicate threats
         threats = list(set(threats))
