@@ -14,9 +14,9 @@ class TribunalEngine:
     def __init__(self) -> None:
         try:
             self.atms = AtmsAdapter()
-        except RuntimeError:
+        except Exception as e:
             self.atms = None
-            logger.warning("[Tribunal] Running without Rust ATMS backend. Orphaning will be emulated.")
+            logger.warning(f"[Tribunal] Running without Rust ATMS backend ({e}). Orphaning will be emulated.")
             
         self.suspended_nodes: Set[str] = set()
 
