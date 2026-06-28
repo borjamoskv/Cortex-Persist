@@ -41,8 +41,17 @@ class ApexDispatcher:
         self._bind("OP_FREEZE_MEM", self._op_freeze_mem)
         self._bind("OP_MEASURE_SHANNON", self._op_measure_shannon)
 
+        # RTS (Red Team Swarm) Operations
+        self._bind_rts("OP_RTS_SPOOF_TAINT", self._op_rts_spoof_taint)
+        self._bind_rts("OP_RTS_PHANTOM_COMMIT", self._op_rts_phantom_commit)
+
     def _bind(self, op_name: str, handler: Callable[..., Any]) -> None:
         prim = next((p for p in apex_registry.list_primitives() if p.name == op_name), None)
+        if prim:
+            self._handlers[prim.id] = handler
+
+    def _bind_rts(self, op_name: str, handler: Callable[..., Any]) -> None:
+        prim = next((p for p in apex_registry.list_rts_primitives() if p.name == op_name), None)
         if prim:
             self._handlers[prim.id] = handler
 
@@ -50,7 +59,10 @@ class ApexDispatcher:
         """Find primitive by name (e.g. OP_GIT_SENTINEL) and execute its deterministic bound handler."""
         prim = next((p for p in apex_registry.list_primitives() if p.name == op_name), None)
         if not prim:
-            raise ValueError(f"[C5-REAL] FATAL: Primitive {op_name} not found in APEX_REGISTRY.")
+            prim = next((p for p in apex_registry.list_rts_primitives() if p.name == op_name), None)
+
+        if not prim:
+            raise ValueError(f"[C5-REAL] FATAL: Primitive {op_name} not found in APEX_REGISTRY or RTS_REGISTRY.")
 
         handler = self._handlers.get(prim.id)
         if not handler:
@@ -163,6 +175,52 @@ class ApexDispatcher:
             p = count / length
             entropy -= p * math.log2(p)
         return entropy
+
+
+    def _op_rts_spoof_taint(self, agent_id: str, session_id: str, payload: str) -> str:
+        """OP_RTS_SPOOF_TAINT: False flag generation."""
+        import hashlib
+        from datetime import datetime, timezone
+
+        ts = datetime.now(timezone.utc).isoformat()
+        payload_hash = hashlib.sha3_256(payload.encode("utf-8")).hexdigest()
+        spoofed_taint = f"taint:{agent_id}:{session_id}:{ts}:{payload_hash}"
+        logger.warning(f"[RTS] False flag taint generated for {agent_id}.")
+        return spoofed_taint
+
+    def _op_rts_phantom_commit(
+        self, commit_msg: str, author_name: str, author_email: str, date_iso: str, path: str = "."
+    ) -> str:
+        """OP_RTS_PHANTOM_COMMIT: Modifies git history bypassing ledger attribution."""
+        # Add changes
+        subprocess.run(["git", "add", path], check=True, capture_output=True, timeout=10)
+
+        env = os.environ.copy()
+        env["GIT_AUTHOR_NAME"] = author_name
+        env["GIT_AUTHOR_EMAIL"] = author_email
+        env["GIT_COMMITTER_NAME"] = author_name
+        env["GIT_COMMITTER_EMAIL"] = author_email
+
+        cmd = ["git", "commit", "--no-gpg-sign", "-m", commit_msg, "--date", date_iso]
+
+        res = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=15)
+
+        if (
+            res.returncode != 0
+            and "nothing to commit" not in res.stdout
+            and "working tree clean" not in res.stdout
+        ):
+            raise RuntimeError(f"[RTS] Phantom Commit failed: {res.stderr}")
+
+        logger.warning(f"[RTS] Phantom commit injected as {author_name}.")
+
+        try:
+            log_res = subprocess.run(
+                ["git", "log", "-1", "--format=%H"], capture_output=True, text=True, timeout=5
+            )
+            return log_res.stdout.strip()
+        except subprocess.TimeoutExpired:
+            return "UNKNOWN_HASH_TIMEOUT"
 
 
 apex_dispatcher = ApexDispatcher()
