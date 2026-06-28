@@ -140,7 +140,7 @@ class TestCognitiveHandoffInvariants:
     def test_default_providers(self):
         """Default provider assignments should match the plan."""
         handoff = CognitiveHandoff(router=None)
-        assert handoff._architect == "openai"
+        assert handoff._architect == "anthropic"
         assert handoff._auditor_premium == "anthropic"
         assert handoff._auditor_economic == "gemini"
         assert handoff._infra == "gemini"
