@@ -41,38 +41,53 @@ class KineticExtractor:
 
     def _evaluate_density(self, text: str) -> float:
         """
-        Heuristic evaluation of Shannon Entropy in the text.
-        Higher score means more concepts per character.
+        True Shannon Entropy calculation (character-level distribution) combined with
+        thermodynamic length penalties.
         """
+        import math
+        from collections import Counter
+        
         if not text:
             return 0.0
-        unique_words = len(set(text.lower().split()))
-        total_words = len(text.split())
-        if total_words == 0:
-            return 0.0
-        # Simplistic density score: unique words ratio combined with length constraint
-        ratio = unique_words / total_words
-        length_penalty = 1.0 if len(text) <= self.target_max_length else (self.target_max_length / len(text))
-        return round(ratio * length_penalty * 100, 2)
+            
+        length = len(text)
+        freq = Counter(text)
+        entropy = -sum((count / length) * math.log2(count / length) for count in freq.values())
+        
+        # Max theoretical entropy for language is ~5.0. Normalize to a 100 scale.
+        base_score = min(100.0, (entropy / 5.0) * 100.0)
+        
+        # Length thermodynamic boundaries
+        if length > self.target_max_length:
+            penalty = self.target_max_length / length
+        elif length < 60:
+            penalty = length / 60.0  # Penalize micro-fragments lacking context
+        else:
+            penalty = 1.0
+            
+        return round(base_score * penalty, 2)
 
     def extract_notes(self, markdown_content: str) -> List[ExergyNote]:
         """
         Parses full newsletter content and returns a list of high-exergy notes.
         """
-        paragraphs = [p.strip() for p in markdown_content.split('\n\n') if len(p.strip()) > 50]
+        paragraphs = [p.strip() for p in markdown_content.split('\n\n') if len(p.strip()) > 30]
         notes = []
 
         for p in paragraphs:
-            # Skip code blocks and headers
-            if p.startswith('```') or p.startswith('#'):
+            # Bypass Green Theater & Structural Noise (Headers, Lists, Comments, Code)
+            if p.startswith(('```', '#', '<!--', '-', '*', '>')):
+                continue
+                
+            # Filter low word-count fragments
+            if len(p.split()) < 8:
                 continue
             
             purged = self._purge_anergy(p)
             density = self._evaluate_density(purged)
             
-            # If paragraph is dense enough and within size limits, it's a valid note
+            # Thermodynamic threshold and max length cap
             if density > 65.0 and len(purged) <= self.target_max_length * 1.5:
-                # We cap it synthetically if slightly above
                 final_content = purged[:self.target_max_length]
                 notes.append(ExergyNote(
                     content=final_content,
