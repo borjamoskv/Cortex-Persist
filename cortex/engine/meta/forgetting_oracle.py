@@ -19,8 +19,7 @@ from cortex.engine.temporal.forgetting_models import (
     OracleReport,
     PolicyRecommendation,
 )
-from cortex.services.notebooklm import NotebookLMService
-from cortex.services.trust import TrustService
+# Deferred imports below inside __init__ to prevent circular import
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine as AsyncCortexEngine
@@ -71,6 +70,8 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
         self._audit_count = 0
 
         # Ω₃/Ω₂: Integrated Services
+        from cortex.services.trust import TrustService
+        from cortex.services.notebooklm import NotebookLMService
         db_path = str(getattr(engine, "_db_path", ""))
         self._trust = TrustService(db_path) if db_path else None
         self._notebooklm = NotebookLMService(db_path) if db_path else None

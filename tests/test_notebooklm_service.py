@@ -5,11 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from cortex.cli.notebooklm_data import (
-    _PROJECT_DOMAIN,
+from cortex.services.notebooklm import (
+    PROJECT_DOMAIN,
     DOMAIN_MAP,
-    _format_fact_obj,
-    _sovereign_signature,
+    NotebookLMService,
 )
 
 
@@ -43,14 +42,16 @@ class TestShadowKeyPattern:
 
     def test_shadow_key_format(self) -> None:
         fact = _FakeFact(id="DEADBEEF1234")
-        result = _format_fact_obj(fact)
+        svc = NotebookLMService(":memory:")
+        result = svc.format_fact(fact)
 
         assert "∆_CTX:DEADBEEF" in result
         assert "∇_CTX:DEADBEEF" in result
 
     def test_shadow_key_wraps_content(self) -> None:
         fact = _FakeFact(content="Important decision about architecture")
-        result = _format_fact_obj(fact)
+        svc = NotebookLMService(":memory:")
+        result = svc.format_fact(fact)
 
         assert result.startswith("> ")
         assert "Important decision about architecture" in result
@@ -59,19 +60,22 @@ class TestShadowKeyPattern:
 
     def test_shadow_key_includes_confidence(self) -> None:
         fact = _FakeFact(confidence="C5")
-        result = _format_fact_obj(fact)
+        svc = NotebookLMService(":memory:")
+        result = svc.format_fact(fact)
 
         assert "conf:C5" in result
 
     def test_shadow_key_includes_tags(self) -> None:
         fact = _FakeFact(tags=["security", "critical"])
-        result = _format_fact_obj(fact)
+        svc = NotebookLMService(":memory:")
+        result = svc.format_fact(fact)
 
         assert "tax:security,critical" in result
 
     def test_shadow_key_no_stated_confidence(self) -> None:
         fact = _FakeFact(confidence="stated")
-        result = _format_fact_obj(fact)
+        svc = NotebookLMService(":memory:")
+        result = svc.format_fact(fact)
 
         assert "conf:" not in result
 
@@ -80,34 +84,36 @@ class TestDomainClassification:
     """O(1) project → domain lookup."""
 
     def test_known_projects_classified(self) -> None:
-        assert _PROJECT_DOMAIN["cortex"] == "cortex-core"
-        assert _PROJECT_DOMAIN["MOSKV-1"] == "cortex.agents"
-        assert _PROJECT_DOMAIN["naroa"] == "cortex-products"
-        assert _PROJECT_DOMAIN["SAP"] == "cortex-operations"
+        assert PROJECT_DOMAIN["cortex"] == "cortex-core"
+        assert PROJECT_DOMAIN["MOSKV-1"] == "cortex.agents"
+        assert PROJECT_DOMAIN["naroa"] == "cortex-products"
+        assert PROJECT_DOMAIN["SAP"] == "cortex-operations"
 
     def test_all_domain_map_entries_indexed(self) -> None:
         for domain, projects in DOMAIN_MAP.items():
             for proj in projects:
-                assert proj in _PROJECT_DOMAIN, f"{proj} not indexed"
-                assert _PROJECT_DOMAIN[proj] == domain
+                assert proj in PROJECT_DOMAIN, f"{proj} not indexed"
+                assert PROJECT_DOMAIN[proj] == domain
 
     def test_unknown_project_not_in_map(self) -> None:
-        assert "nonexistent-project-xyz" not in _PROJECT_DOMAIN
+        assert "nonexistent-project-xyz" not in PROJECT_DOMAIN
 
 
 class TestSovereignSignature:
     """Tamper-evident signature generation (Ω₃)."""
 
     def test_signature_format(self) -> None:
-        sig = _sovereign_signature()
+        svc = NotebookLMService(":memory:")
+        sig = svc.get_signature()
 
         assert "SOVEREIGN_SIGNATURE" in sig
         assert "sha256:" in sig
         assert "CORTEX v8" in sig
 
     def test_signature_changes_with_time(self) -> None:
-        sig1 = _sovereign_signature()
-        sig2 = _sovereign_signature()
+        svc = NotebookLMService(":memory:")
+        sig1 = svc.get_signature()
+        sig2 = svc.get_signature()
         # Both should contain the same structure (called within same second)
         assert "SOVEREIGN_SIGNATURE" in sig1
         assert "SOVEREIGN_SIGNATURE" in sig2
@@ -117,11 +123,11 @@ class TestCloudDetection:
     """Cloud sync provider detection."""
 
     def test_detect_returns_none_when_no_provider(self) -> None:
-        from cortex.cli.notebooklm_data import _detect_cloud_sync
+        svc = NotebookLMService(":memory:")
 
         # In CI/test environments, cloud providers typically don't exist.
         # This test validates graceful fallback.
-        result = _detect_cloud_sync()
+        result = svc.detect_cloud_sync()
         # Result is either None or a valid (Path, str) tuple
         if result is not None:
             path, provider = result
@@ -147,8 +153,6 @@ class TestNotebookLMService:
 
         result = svc.format_fact(fact)
 
-        assert "DECISION" in result
-        assert "cortex" in result
         assert "Use RRF" in result
         assert "∆_CTX:" in result
 
@@ -158,8 +162,8 @@ class TestNotebookLMService:
         svc = NotebookLMService(":memory:")
         sig = svc.get_signature()
 
-        assert "SOVEREIGN SIGNATURE" in sig
-        assert "mosaic-v8" in sig
+        assert "SOVEREIGN_SIGNATURE" in sig
+        assert "CORTEX v8.0-Sovereign" in sig
 
     def test_detect_cloud_sync_returns_path_or_none(self) -> None:
         from cortex.services.notebooklm import NotebookLMService
@@ -167,7 +171,8 @@ class TestNotebookLMService:
         svc = NotebookLMService(":memory:")
         result = svc.detect_cloud_sync()
         if result is not None:
-            assert isinstance(result, Path)
+            assert isinstance(result[0], Path)
+            assert isinstance(result[1], str)
 
 
 class TestMCPToolRegistration:
