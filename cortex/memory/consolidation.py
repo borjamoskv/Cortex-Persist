@@ -249,8 +249,8 @@ class SystemsConsolidator:
             # Step 2: Delete deceased engrams (failed maturation, contradictory)
             # Find engrams that are silent but have a contradiction count > 0 OR
             # are totally drained of energy via the decay curve.
-            deletion_sql = """
-                DELETE FROM facts_meta
+            
+            apoptosis_where_clause = """
                 WHERE tenant_id = ?
                   AND json_extract(metadata, '$.state') = 'silent'
                   AND (
@@ -260,6 +260,23 @@ class SystemsConsolidator:
                       )
                   )
             """
+            
+            # Extract doomed facts for Weaponized Forgetting (L3 Cold Storage)
+            select_sql = f"SELECT * FROM facts_meta {apoptosis_where_clause}"
+            cursor.execute(select_sql, (tenant_id, now))
+            
+            if cursor.description:
+                columns = [col[0] for col in cursor.description]
+                doomed_facts = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                if doomed_facts:
+                    try:
+                        from cortex.engine.core.l3_archive import l3_archiver
+                        l3_archiver.archive_facts(doomed_facts)
+                    except Exception as e:
+                        logger.warning("L3 Archival failed during Apoptosis: %s", e)
+
+            # Annihilate from active memory
+            deletion_sql = f"DELETE FROM facts_meta {apoptosis_where_clause}"
             cursor.execute(deletion_sql, (tenant_id, now))
             deceased_count = cursor.rowcount
 
