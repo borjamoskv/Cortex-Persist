@@ -111,6 +111,8 @@ class IHelpPurgeDaemon:
             # Generate secure CORTEX-TAINT signature token
             session_id = "session_" + uuid.uuid4().hex[:16]
             priv_key_b64 = km.get_private_key_b64(self.agent_id)
+            if not priv_key_b64:
+                raise ValueError(f"Private key for actor {self.agent_id} not found.")
             taint_token = generate_secure_taint_token(
                 agent_id=self.agent_id,
                 session_id=session_id,

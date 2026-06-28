@@ -5,7 +5,7 @@ import logging
 import os
 import time
 
-from cortex.config import DB_PATH
+from cortex.core.config import DB_PATH
 from cortex.crypto.provider import HashProvider
 from cortex.extensions.signals.bus import AsyncSignalBus
 from cortex.swarm.gossip_bus import GossipBus

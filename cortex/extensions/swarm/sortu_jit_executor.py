@@ -100,9 +100,18 @@ def _worker(source_code: str, global_ctx: dict, result_dict: dict):
         result_dict["locals"] = list(res.keys())
         result_dict["status"] = "success"
         result_dict["exec_time_ms"] = (time.perf_counter() - t0) * 1000
-    except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
+    except AssertionError as e:
+        if global_ctx.get("bounty_mode") is True:
+            result_dict["status"] = "poc_success"
+            result_dict["error"] = "AssertionError triggered successfully"
+            result_dict["locals"] = []
+            result_dict["exec_time_ms"] = (time.perf_counter() - t0) * 1000
+        else:
+            result_dict["status"] = "failed"
+            result_dict["error"] = f"AssertionError: {str(e)}"
+    except Exception as e:
         result_dict["status"] = "failed"
-        result_dict["error"] = str(e)
+        result_dict["error"] = f"{type(e).__name__}: {str(e)}"
 
 
 async def run_jit_sandbox(source_code: str, timeout_ms: int = 500, global_ctx: dict = None) -> Any:  # pyright: ignore[reportArgumentType]
@@ -112,6 +121,7 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 500, global_ctx: d
     """
     ctx = global_ctx or {}
     start_time = time.perf_counter()
+    res_dict: dict[Any, Any] = {}
 
     import multiprocessing
 
@@ -160,16 +170,17 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 500, global_ctx: d
 
     elapsed = (time.perf_counter() - start_time) * 1000
     res_dict = dict(result_dict)
-
-    if res_dict.get("status") == "success":
+    if res_dict.get("status") in ("success", "poc_success"):
         exec_time = res_dict.get("exec_time_ms", elapsed)
+        status = res_dict.get("status")
         logger.info(
-            "⚡ [SORTU-JIT] Sovereign AST execution complete. Yield Time: %.2fms (Process Lifetime: %.2fms)",
+            "⚡ [SORTU-JIT] Sovereign AST execution complete. Status: %s. Yield Time: %.2fms (Process Lifetime: %.2fms)",
+            status,
             exec_time,
             elapsed,
         )
         return {
-            "status": "success",
+            "status": status,
             "result": {"locals": res_dict["locals"]},
             "time_ms": exec_time,
         }

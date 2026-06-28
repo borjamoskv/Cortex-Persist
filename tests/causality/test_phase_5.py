@@ -40,7 +40,7 @@ class TestMCP:
                 "..",
                 "..",
                 "cortex",
-                "mcp",
+                "mcp_server",
                 "server.py",
             )
         ) as f:
@@ -54,7 +54,7 @@ class TestMCP:
                 "..",
                 "..",
                 "cortex",
-                "mcp",
+                "mcp_server",
                 "core_tools.py",
             )
         ) as f:

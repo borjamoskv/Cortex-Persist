@@ -71,6 +71,10 @@ class Judge(ABC):
             return True
         except (ValueError, TypeError, OSError, KeyError):
             return False
+        except Exception as e:
+            if "InvalidSignature" in type(e).__name__:
+                return False
+            raise
 
 
 class ASTLintJudge(Judge):

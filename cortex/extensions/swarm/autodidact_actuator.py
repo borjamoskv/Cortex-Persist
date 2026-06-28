@@ -16,9 +16,12 @@ async def autodidact_ingest(source_code: str, expected_yield_gain: float, metada
     """
     logger.info("🔥 [AUTODIDACT-Ω] Starting Thermodynamic Ingestion...")
 
+    is_bounty = metadata.get("intent") == "bounty_poc"
+    global_ctx = {"bounty_mode": is_bounty}
+
     # 1. AST Sandbox Execution
     try:
-        sandbox_res = await run_jit_sandbox(source_code, timeout_ms=500)
+        sandbox_res = await run_jit_sandbox(source_code, timeout_ms=500, global_ctx=global_ctx)
     except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
         # Purge -> Stigmergic / Cicatricial Tissue handling is 'silent purge' per rules
         logger.warning("🔥 [AUTODIDACT-Ω] PURGED. AST Execution Failed: %s", e)
@@ -27,6 +30,15 @@ async def autodidact_ingest(source_code: str, expected_yield_gain: float, metada
     if sandbox_res["status"] == "failed":
         logger.warning("🔥 [AUTODIDACT-Ω] PURGED. Epistemic Failure: %s", sandbox_res["error"])
         return {"action": "PURGE", "reason": "LOGIC_ERROR", "details": sandbox_res["error"]}
+
+    if sandbox_res["status"] == "poc_success":
+        logger.info("🔥 [AUTODIDACT-Ω] SUCCESS. PoC Validado. Massive Exergy Extracted.")
+        return {
+            "action": "CRYSTALLIZE",
+            "yield_time_ms": 0.0,
+            "resonance": expected_yield_gain * 1000.0,
+            "locals": str(list(sandbox_res["result"].keys())),
+        }
 
     # 2. Yield & Thermometer estimation
     exec_time = sandbox_res["time_ms"]
