@@ -16,14 +16,10 @@ from cortex.memory.models import MemoryEvent
 # ─── Fixtures ────────────────────────────────────────────────────────────
 
 
-@pytest.fixture(autouse=True)
-def disable_taint(monkeypatch):
-    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
-
-
 @pytest.fixture
-async def ledger():
+async def ledger(monkeypatch):
     """Provide a fresh in-memory ledger per test."""
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
     conn = await aiosqlite.connect(":memory:")
     ledger_inst = EventLedgerL3(conn)
     await ledger_inst.ensure_table()
