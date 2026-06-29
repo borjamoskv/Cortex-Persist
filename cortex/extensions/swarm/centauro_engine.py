@@ -144,7 +144,7 @@ class VirtualAgent:
                     )
                 # Fallback: unwrap as string if Result type varies
                 return str(result.ok if hasattr(result, "ok") else result)
-            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
+            except Exception as exc:  # noqa: BLE001
                 # [C5-REAL] Sanedrín Soft-Fallback on Exception
                 if hasattr(self, "formation") and getattr(self, "formation", None) == "SANEDRIN":
                     logger.warning(
@@ -271,7 +271,7 @@ class CentauroEngine:
                     or "127.0.0.1" in getattr(p, "_base_url", "")
                     for p in providers
                 )
-            except (ValueError, TypeError, OSError, KeyError):
+            except Exception:  # noqa: BLE001
                 is_local = True
 
         concurrency_limit = 4 if is_local else 50
@@ -281,7 +281,7 @@ class CentauroEngine:
             async with sem:
                 try:
                     return (a_id, await a.execute("M-01", mission))
-                except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
+                except Exception as exc:  # noqa: BLE001
                     import logging
 
                     logging.getLogger(__name__).exception(
@@ -376,7 +376,7 @@ class CentauroEngine:
                         "formation": f"{formation}+ALEPH",
                         "reason": f"Paradigm Shift: {leap['paradigm_shift']}",
                     }
-                except (ValueError, TypeError, KeyError, OSError, RuntimeError) as leap_e:
+                except Exception as leap_e:  # noqa: BLE001
                     import logging
 
                     logging.getLogger(__name__).exception(
@@ -395,7 +395,7 @@ class CentauroEngine:
             mission_future.set_result(result)
             return result
 
-        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
+        except Exception as e:  # noqa: BLE001
             import logging
 
             logging.getLogger(__name__).exception(
