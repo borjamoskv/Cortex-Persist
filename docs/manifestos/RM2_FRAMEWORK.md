@@ -47,30 +47,71 @@ Para evitar la convergencia estéril a un óptimo local del subespacio de hipót
 
 ---
 
-## 3. Álgebra de Colisiones y Compresión de Estado
-La interacción entre hipótesis en \(M_t\) no es pasiva. Se formaliza mediante una **primitiva de colisión** explícita, que evalúa la competencia por recursos o incompatibilidad epistémica:
+## 3. Primitivas de Colisión e Invariantes Operacionales
+
+### Definición 3.1 (Operador de Colisión)
+Sea \(M_t = \{H_1, \dots, H_n\} \subset \mathcal{M}_B\) el conjunto de hipótesis activas. Se define el operador de colisión:
+\[ \kappa : M_t \times M_t \rightarrow \mathbb{R}_{\ge0} \]
+como:
 \[ \kappa(H_i,H_j) = \lambda_1\,D_{\mathrm{KL}}(P_i\|P_j) + \lambda_2\,\mathrm{Contr}(H_i,H_j) + \lambda_3\,\mathrm{Overlap}(H_i,H_j) \]
+donde:
+- \(D_{\mathrm{KL}}\) cuantifica la divergencia informacional.
+- \(\mathrm{Contr}\) representa el grado de incompatibilidad lógica, semántica o predictiva.
+- \(\mathrm{Overlap}\) mide la redundancia estructural entre ambas hipótesis.
+- \(\lambda_k \ge 0\) son parámetros de ponderación del sistema.
 
-Si \(\kappa(H_i, H_j) > \tau\), la política activa una resolución forzosa a través del operador \(\Phi(H_i, H_j)\), garantizando que ninguna colisión quede ambigua:
-- **merge**: Fusionar hipótesis epistémicamente compatibles.
-- **branch**: Conservar ambas simultáneamente si la bifurcación predictiva justifica el coste.
-- **evict**: Expulsar la hipótesis de menor valor marginal.
-- **isolate**: Desplazar a archivo frío (fuera de \(B\)) si no amerita memoria activa pero posee valor residual.
-
-## 4. Invariantes Estructurales del Sistema
-Para que RM² funcione como un sistema dinámico demostrable, el operador de transición \(G\) y la política \(\pi\) deben preservar estrictamente los siguientes invariantes \(\forall t\):
-
-1. **Restricción de Capacidad**: \(C(M_t) \le B\). La capacidad de memoria nunca puede ser violada por ninguna transición de estado.
-2. **Conservación de Masa Posterior**: \(\sum_{H_i \in M_t} p_i = 1\). Tras cualquier operación del operador \(\Phi\) (como un *evict*), el sistema aplica una renormalización explícita sobre el subconjunto retenido.
-3. **Resolución Determinista**: Si \(\kappa(H_i, H_j) > \tau \implies \Phi(H_i, H_j) \in \{\text{merge, branch, evict, isolate}\}\).
-4. **Acotación de Dominancia**: La función de valor \(V_B^\pi\) no puede aumentar por la simple evicción de hipótesis estrictamente dominadas. El rendimiento no se mejora artificialmente vaciando la memoria.
-5. **Valor Umbral de Permanencia**: \(\forall H_i \in M_t, \quad p_i u_i \ge \eta \lor H_i \in \text{archive}\). Toda hipótesis activa debe justificar físicamente su presencia mediante un valor esperado mínimo, o debe abandonar el estado activo.
-
-Estas restricciones transforman formalmente a RM² de un simple administrador de memoria a un **sistema de control estocástico con compresión activa del estado interno**.
+Se dice que existe una **colisión activa** cuando \(\kappa(H_i,H_j) > \tau_\kappa\).
 
 ---
 
-## 5. Programa de Investigación Matemática (Teoremas Objetivo)
+### Definición 3.2 (Operador de Resolución)
+Sea \(\Phi : M_t \times M_t \rightarrow \mathcal{O}\), con \(\mathcal{O} = \{\texttt{merge}, \texttt{branch}, \texttt{evict}, \texttt{isolate}\}\).
+
+Para toda colisión activa (\(\kappa(H_i,H_j) > \tau_\kappa\)), debe existir exactamente una acción \(\Phi(H_i,H_j) \in \mathcal{O}\). La semántica operacional es:
+- **merge**: Reemplaza \(\{H_i, H_j\}\) por una hipótesis fusionada.
+- **branch**: Mantiene ambas hipótesis mediante bifurcación explícita del estado.
+- **evict**: Elimina irreversiblemente una hipótesis de la memoria activa.
+- **isolate**: Traslada una hipótesis al archivo frío (\(\mathcal{A}\)).
+
+---
+
+### Axioma 3.1 (Resolución Total)
+Todo conflicto detectado debe resolverse inequívocamente:
+\[ \forall (H_i,H_j) \in M_t, \quad \kappa(H_i,H_j) > \tau_\kappa \implies \exists! \Phi(H_i,H_j) \]
+
+---
+
+### Definición 3.3 (Dominancia)
+Sean \(H_i, H_j \in M_t\). Se dice que \(H_i\) está estrictamente dominada por \(H_j\) si \(p_i u_i \le p_j u_j\) y \(c_i \ge c_j\), con al menos una desigualdad estricta.
+En tal caso, \(H_i \prec H_j\). La relación \(\prec\) induce un orden parcial sobre el subespacio activo.
+
+---
+
+### Axioma 3.2 (Evicción Preferente)
+Toda hipótesis dominada constituye un candidato preferente para \(\texttt{evict}\) o \(\texttt{isolate}\), excepto cuando su retención garantice el presupuesto inamovible de exploración (\(\epsilon\)), aportando diversidad estructural o cobertura del espacio topológico.
+
+---
+
+### Invariantes del Sistema
+Para que la política induzca estabilidad asintótica, el sistema preserva estrictamente:
+
+- **Invariant I (Capacity)**: \( \sum_{i \in M_t} c_i \le B \)
+- **Invariant II (Probability Conservation)**: \( \sum_{i \in M_t} p_i = 1 \)
+- **Invariant III (Collision Completeness)**: \( \forall (H_i,H_j), \kappa(H_i,H_j) > \tau_\kappa \implies \Phi(H_i,H_j) \) está definida.
+- **Invariant IV (Minimum Utility)**: \( \forall H_i \in M_t, \quad p_i u_i \ge \eta \lor H_i \in \mathcal{A} \)
+- **Invariant V (Closure)**: \( M_{t+1} = G(M_t, O_t, a_t, a_{\mathrm{mem}}) \in \mathcal{M}_B \)
+
+---
+
+### Proposición 3.1 (Cierre Operacional)
+Bajo los invariantes anteriores, toda transición del sistema permanece dentro del espacio factible de memorias acotadas:
+\[ M_t \in \mathcal{M}_B \implies M_{t+1} \in \mathcal{M}_B \]
+
+**Esbozo de Demostración:** La actualización secuencial modifica únicamente los pesos probabilísticos \(p_i\). El operador de colisión garantiza que toda incompatibilidad induce una transformación bien definida (Axioma 3.1). Las operaciones \(\Phi\) (fusión, aislamiento, evicción) preservan la restricción de capacidad mediante construcción (Invariant I), mientras que la renormalización explícita mantiene la conservación de masa probabilística (Invariant II). Por tanto, el operador compuesto \(G\) preserva los invariantes de \(\mathcal{M}_B\), concluyendo el cierre.
+
+---
+
+## 4. Programa de Investigación Matemática (Teoremas Objetivo)
 La arquitectura RM² abandona su fase de propuesta y se establece como un marco a validar. El objetivo principal es demostrar formalmente la siguiente secuencia matemática:
 
 1. **Lema de Capacidad Fuerte**: Probar que el operador de gestión de memoria \(G\) preserva siempre la restricción dura \(C(M_{t+1}) = \sum_{i} c_i \le B\) bajo cualquier observación \(O_t\), garantizando la inmunidad a desbordamientos térmicos.
