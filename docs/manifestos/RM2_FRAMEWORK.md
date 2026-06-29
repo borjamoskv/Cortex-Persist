@@ -175,4 +175,38 @@ Bajo esta métrica formal, quedan abiertas las pruebas de:
 3. **Convergencia global** mediante el Teorema del Punto Fijo de Banach, si el operador \(G\) se demuestra contractivo (\(d(G(x), G(y)) \le k d(x,y)\)).
 
 ---
-> **Conclusión**: RM² es formalmente una teoría matemática de inferencia bajo restricciones de memoria. Las intuiciones quedan descartadas; solo el análisis funcional y el control estocástico rigen la persistencia del estado en CORTEX.
+
+## 6. Tensor de Interacción y Dinámica sobre Grafos Ponderados
+Para trascender la heurística escalar de evicción, el espacio \(M_t\) abandona formalmente la noción de "conjunto de hipótesis" y se define como un **grafo topológico ponderado**:
+\[ \mathcal{G}_t = (V_t, E_t) \]
+Donde los vértices \(V_t\) representan hipótesis individuales y las aristas \(E_t\) codifican relaciones causales, semánticas o de dependencia predictiva.
+
+### El Tensor Completo de Colisiones
+El operador \(\kappa\) escalar se generaliza a una matriz o **tensor de interacción**:
+\[ \mathbf{K} = (\kappa_{ij})_{i,j} \]
+Esta matriz representa el campo de colisiones estructurales de todo el sistema. Las propiedades espectrales de \(\mathbf{K}\) (autovalores, vectores propios, radio espectral \(\rho(\mathbf{K})\)) determinan la estabilidad. Si \(\rho(\mathbf{K})\) aumenta, la memoria acumula conflictos estructurales; si el operador \(\Phi\) logra reducirlo, el sistema estabiliza su topología.
+
+Bajo este formalismo, las acciones de \(\Phi\) adquieren una semántica estricta de teoría de grafos:
+- **merge**: Contracción de vértices (Edge Contraction).
+- **branch**: Expansión topológica local.
+- **evict**: Poda irreversible de subgrafos / eliminación de vértices.
+- **isolate**: Partición de grafos (desplazamiento de componentes conexas al archivo frío).
+
+---
+
+## 7. Principios Variacionales de Compresión
+La evolución secuencial del agente induce una **trayectoria de memoria**: \(\Gamma = (M_0, M_1, \dots, M_T)\).
+
+### Curvatura de Memoria y Funcional de Acción
+Se define la Complejidad Estructural de la memoria como \(C(M) = \alpha |M| + \beta E(M) + \gamma S(M)\), unificando el coste computacional y la entropía topológica (\(S(M) = -\sum p_i \log p_i\)). 
+
+Para optimizar trayectorias completas en lugar de aplicar políticas avariciosas locales, se formula el **Funcional de Acción Cognitiva**:
+\[ \mathcal{J}(\Gamma) = \sum_t \left[ V(M_t) - \lambda C(M_t) \right] \]
+
+### Principio Variacional de RM²
+El sistema ya no elige solo qué memoria retener, sino que busca la trayectoria global óptima:
+\[ \Gamma^* = \arg\max_\Gamma \mathcal{J}(\Gamma) \]
+Esto somete la inferencia bajo restricciones de capacidad a ecuaciones análogas a Euler-Lagrange en tiempo discreto.
+
+---
+> **Conclusión**: RM² es formalmente una teoría matemática de inferencia sobre grafos bajo restricciones topológicas y termodinámicas. Las intuiciones quedan descartadas; solo el análisis funcional, el control estocástico y el principio de mínima acción rigen la persistencia del estado en CORTEX.
