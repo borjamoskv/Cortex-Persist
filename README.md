@@ -158,28 +158,27 @@ CORTEX enforces a rigid Thermodynamic Routing matrix based on Exergy constraints
 
 ## ▀▄ INSTALLATION & TOPOLOGICAL DEPLOYMENT
 
-**Requirements:** Python 3.10+. 
-**Default Stance:** Zero external daemons. The core `cortex-persist` package installs strictly the SQLite WAL engine, SAGA guards, and local cryptographic ledgers.
+**Default Stance:** Zero daemons. Core `cortex-persist` installs the `SQLite WAL` engine, SAGA guards, and cryptographic ledgers.
 
 ```bash
 pip install cortex-persist
 ```
 
-### ⚙️ Domain Substrates (Optional Modules)
+### ⚙️ Domain Substrates (Expansion Vectors)
 
-Inyección de módulos opcionales. Cada flag altera físicamente la topología de la máquina, inyectando binarios, pesos neuronales o daemons específicos. **Elige estrictamente lo necesario para evitar la degradación termodinámica (Anergía).**
+> **WARNING:** Each flag physically mutates the machine's footprint. Inject strictly what is required to prevent thermodynamic degradation (Anergy).
 
-| Pip Flag | Mutación Física en la Máquina (Footprint) | Impacto Termodinámico & Caso de Uso |
+| Vector | Payload (Physical Footprint) | Execution Matrix (C5-REAL) |
 | :--- | :--- | :--- |
-| `[embeddings]` | Descarga weights de ~120MB (`sentence-transformers`) y el runtime de ONNX (`onnxruntime`). | **Motor Vectorial Local:** Permite indexar y buscar hechos matemáticamente sin depender de APIs de red. Inferencia estricta en CPU/GPU local. |
-| `[knowledge]` | Inyecta la dependencia `chromadb` y sus binarios en C++ embebidos. Genera el directorio persistente `.chroma/`. | **Sincronización Ontológica:** Úsalo si tu Swarm requiere retención semántica a largo plazo y recuperación de grafos de conocimiento. |
-| `[api,mcp,daemon]` | Instala `fastapi`, `uvicorn`, y `mcp-sdk`. Habilita la apertura de puertos locales (ej. `8765`). | **Gateway de Red:** Transforma CORTEX en un Servidor MCP soberano. Permite a agentes externos (Claude, Cursor) mutar el estado vía REST/MCP. |
-| `[cloud]` | Incorpora clientes nativos C-bindings: `asyncpg` (PostgreSQL), `redis` (caché), y `qdrant-client`. | **Escalabilidad Distribuida:** Para despliegues donde SQLite WAL no es suficiente. Desplaza el consenso BFT hacia clusters externos de DB. |
-| `[secure]` | Instala `keyring` (bind OS nativo) y librerías criptográficas de AES-GCM (`cryptography`). | **Bóveda Física:** Enlaza CORTEX al Secure Enclave (macOS Keychain) o TPM. Obligatorio si el enjambre maneja llaves de API o tokens financieros. |
-| `[acceleration]` | Inyecta binarios pre-compilados en Rust (FFI wheels). Reemplaza el event loop de Python. | **Hiper-Rendimiento (LEGION-10k):** Erradica la limitación del GIL. Requerido para operaciones de +390k agentes/sec y alta concurrencia asíncrona. |
+| `[embeddings]` | `sentence-transformers` (~120MB weights), `onnxruntime`. | **Local Vector Engine:** Deterministic indexing and cosine similarity. Zero network calls. Pure CPU/GPU inference. |
+| `[knowledge]` | `chromadb` (C++ bindings). Generates `.chroma/` dir. | **Ontological Sync:** Long-term semantic retention. BFT validation of retrieved knowledge graphs. |
+| `[api,mcp,daemon]` | `fastapi`, `uvicorn`, `mcp-sdk`. Opens local ports (e.g. `8765`). | **Network Gateway:** Mounts CORTEX as a Sovereign MCP Server. Exposes REST/MCP endpoints for external Swarm mutation. |
+| `[cloud]` | C-bindings: `asyncpg`, `redis`, `qdrant-client`. | **Distributed Scale:** Displaces local SQLite WAL consensus to external PostgreSQL/Qdrant clusters. |
+| `[secure]` | `keyring` (OS-native bind), `cryptography` (AES-GCM). | **Vault:** Hard-links CORTEX to the Secure Enclave (macOS Keychain) or TPM. Mandatory for financial tokens or keys. |
+| `[acceleration]` | Pre-compiled Rust FFI wheels. Bypasses Python GIL. | **Hyper-Throughput:** Enables LEGION-10k mode. Sustains >390k operations/sec under extreme asymmetric load. |
 
 ```bash
-# Ejemplo de inyección de módulo múltiple:
+# Example: Injecting full physical capabilities
 pip install "cortex-persist[embeddings,secure,acceleration]"
 ```
 
