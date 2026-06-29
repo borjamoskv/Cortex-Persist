@@ -23,6 +23,7 @@ from cortex.mcp_server.core_tools import (
 from cortex.mcp_server.genesis_tools import register_genesis_tools
 from cortex.mcp_server.guard import MCPGuard
 from cortex.mcp_server.health_tools import register_health_tools
+from cortex.mcp_server.kapso_tools import register_kapso_tools
 from cortex.mcp_server.knowledge_watcher import start_knowledge_daemon
 from cortex.mcp_server.mega_tools import register_mega_tools
 from cortex.mcp_server.music_tools import register_music_tools
@@ -318,6 +319,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
 
         register_genesis_tools(mcp, ctx)
         register_health_tools(mcp, ctx)
+        register_kapso_tools(mcp, ctx)
         register_music_tools(mcp)
         register_singularity_tools(mcp)
         register_rustchain_tools(mcp)
