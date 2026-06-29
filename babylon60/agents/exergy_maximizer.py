@@ -107,6 +107,7 @@ class ExergyMaximizerAgent(BaseAgent):
         self.active_subagents: dict[str, str] = {}  # task_id -> agent_id
         self.replan_count = 0
         self._execution_log: list[dict[str, Any]] = []
+        self._delegation_events: dict[str, asyncio.Event] = {}
 
     async def handle_message(self, message: AgentMessage) -> None:
         """Process messages including task delegation responses and replan triggers."""
@@ -154,6 +155,9 @@ class ExergyMaximizerAgent(BaseAgent):
         if correlation_id in self.memory.scratchpad:
             self.memory.scratchpad[correlation_id]["status"] = "COMPLETED"
             self.memory.scratchpad[correlation_id]["result"] = result
+        
+        if correlation_id in self._delegation_events:
+            self._delegation_events[correlation_id].set()
 
     async def _trigger_replan_flow(self, payload: dict[str, Any]) -> None:
         logger.info("[%s] Triggering meta-cognitive replanning flow", self.agent_id)
@@ -357,15 +361,18 @@ class ExergyMaximizerAgent(BaseAgent):
         )
         await self.bus.send(deleg_msg)
 
-        # Wait for result
-        start_wait = time.monotonic()
-        while time.monotonic() - start_wait < self.step_timeout_s:
+        event = asyncio.Event()
+        self._delegation_events[corr_id] = event
+        try:
+            await asyncio.wait_for(event.wait(), timeout=self.step_timeout_s)
             ctx = self.memory.scratchpad.get(corr_id)
             if ctx and ctx["status"] == "COMPLETED":
                 return ctx["result"]
-            await asyncio.sleep(0.5)
-
-        raise TimeoutError("Delegated subtask execution timed out")
+            raise RuntimeError("Delegated subtask failed to produce result")
+        except asyncio.TimeoutError:
+            raise TimeoutError("Delegated subtask execution timed out")
+        finally:
+            self._delegation_events.pop(corr_id, None)
 
     async def _report_failure(
         self,
