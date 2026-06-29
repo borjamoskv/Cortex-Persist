@@ -55,6 +55,9 @@ def __getattr__(name: str):
     if name in _LAZY_IMPORTS:
         import importlib
         mod = importlib.import_module(_LAZY_IMPORTS[name])
+        if _LAZY_IMPORTS[name] == f"babylon60.{name}":
+            globals()[name] = mod
+            return mod
         attr = getattr(mod, name)
         globals()[name] = attr  # Cache for subsequent access
         return attr
