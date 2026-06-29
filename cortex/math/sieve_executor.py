@@ -20,7 +20,7 @@ def generate_sieve_taint(n_index: int, t_fixed: str) -> str:
     agent_id = "OUROBOROS-SIEVE"
     session_id = "C5-RESURRECTION"
     now_utc = datetime.now(timezone.utc)
-    raw = f"{agent_id}:{session_id}:{n_index}:{t_fixed}".encode("utf-8")
+    raw = f"{agent_id}:{session_id}:{n_index}:{t_fixed}".encode()
     sha3 = hashlib.sha3_256(raw).hexdigest()
     return f"taint:{agent_id}:{session_id}:{now_utc.isoformat()}:{sha3}"
 

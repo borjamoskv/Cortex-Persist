@@ -1,15 +1,17 @@
+import asyncio
 import json
 import os
-import asyncio
+
 import edge_tts
 from mutagen.mp3 import MP3
+
 
 async def generate_audio():
     script_path = "script.json"
     audio_dir = "../cortex_video_engine/public/audio"
     os.makedirs(audio_dir, exist_ok=True)
     
-    with open(script_path, "r", encoding="utf-8") as f:
+    with open(script_path, encoding="utf-8") as f:
         script = json.load(f)
         
     durations = {}

@@ -81,8 +81,9 @@ async def guard_exec(ctx: SagaContext):
     if not ctx.get("payload"):
         raise ValueError("Empty payload")
 
-    from cortex.engine.causal.taint_engine import check_anergy_and_green_theater
     import json
+
+    from cortex.engine.causal.taint_engine import check_anergy_and_green_theater
 
     payload_str = json.dumps(ctx["payload"]) if isinstance(ctx["payload"], dict) else str(ctx["payload"])
     try:
@@ -97,9 +98,10 @@ async def guard_comp(ctx: SagaContext):
 
 async def taint_exec(ctx: SagaContext):
     # Attribution
-    from cortex.engine.causal.taint_engine import canonicalize_content, _fast_sha3
-    import json
     import datetime
+    import json
+
+    from cortex.engine.causal.taint_engine import _fast_sha3, canonicalize_content
 
     agent_id = ctx.get("agent_id", "SYS_ROOT")
     session_id = ctx.get("session_id", "default_session")
@@ -147,8 +149,9 @@ async def encrypt_comp(ctx: SagaContext):
 
 async def ledger_exec(ctx: SagaContext):
     # Audit trail
-    from cortex.engine.causal.taint_engine import canonicalize_content, _fast_sha3
     import json
+
+    from cortex.engine.causal.taint_engine import _fast_sha3, canonicalize_content
     
     payload_str = json.dumps(ctx.get("payload", {}))
     canonical = canonicalize_content(payload_str)

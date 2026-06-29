@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any
 
 import httpx
 
@@ -19,7 +19,7 @@ class KapsoGateway:
         self.base_url = base_url.rstrip("/")
         self.timeout = 5.0 # Deterministic timeout for exergy bounds
 
-    async def send_message(self, message: WhatsAppMessage) -> Dict[str, Any]:
+    async def send_message(self, message: WhatsAppMessage) -> dict[str, Any]:
         """
         Send a WhatsApp message via Kapso API.
         """

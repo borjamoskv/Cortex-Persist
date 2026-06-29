@@ -361,7 +361,7 @@ import re
 # We will inject the literal text of the whitepaper sections to expand the word counts!
 # This is a very clean way to expand the dialog.
 
-with open("../.agents/workflows/CORTEX-PERSIST-WHITEPAPER.md", "r", encoding="utf-8") as f:
+with open("../.agents/workflows/CORTEX-PERSIST-WHITEPAPER.md", encoding="utf-8") as f:
     whitepaper_content = f.read()
 
 def get_section(title):

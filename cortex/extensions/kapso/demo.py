@@ -10,7 +10,8 @@ import os
 import sys
 
 from cortex.extensions.kapso.gateway import KapsoGateway
-from cortex.extensions.kapso.types import WhatsAppMessage, TextMessage
+from cortex.extensions.kapso.types import TextMessage, WhatsAppMessage
+
 
 async def main():
     api_key = os.getenv("KAPSO_API_KEY")
