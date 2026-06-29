@@ -29,6 +29,7 @@ async def main():
             "GHOST",
             "TESTUDO",
             "SANEDRIN",
+            "CENTURIA",
         ],
         help="Tactical formation to deploy",
     )
