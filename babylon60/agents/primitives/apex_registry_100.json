@@ -598,15 +598,24 @@
     },
     {
       "id": "APEX-066",
-      "opcode": "OP_HEARTBEAT_PULSE",
-      "signature": "ping_alive(agent_id)",
-      "complexity": "O(1)",
-      "mutation": "Red I/O. UDP heartbeat atómico sin handshake.",
-      "execute": "Verificación de liveness en enjambre P2P.",
-      "source": "synthesized"
+      "opcode": "OP_SLOP_HALT",
+      "signature": "detect_slop(text)",
+      "complexity": "O(len)",
+      "mutation": "CPU. Regex/AST scan de padding léxico y eliminación.",
+      "execute": "Detector de padding léxico.",
+      "source": "parsed"
     },
     {
       "id": "APEX-067",
+      "opcode": "OP_REROUTE_HUMAN",
+      "signature": "escalate_op(msg)",
+      "complexity": "O(1)",
+      "mutation": "Red I/O. Escalada manual inmediata al Operador.",
+      "execute": "Escalada manual al Operador.",
+      "source": "parsed"
+    },
+    {
+      "id": "APEX-068",
       "opcode": "OP_PARSE_INTENT",
       "signature": "gossip_push()",
       "complexity": "O(log N)",
@@ -615,8 +624,8 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-068",
-      "opcode": "OP_NEXUS_MUTATE",
+      "id": "APEX-069",
+      "opcode": "OP_BIND_NEXUS",
       "signature": "tls_verify()",
       "complexity": "O(1)",
       "mutation": "CPU/Red. Validación criptográfica de CA (Root of Trust).",
@@ -624,34 +633,52 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-069",
-      "opcode": "OP_NEXUS_MUTATE",
-      "signature": "ast.walk()",
-      "complexity": "O(Nodes)",
-      "mutation": "CPU. Inyección transversal de instrumentación.",
-      "execute": "Mutación atómica de enlaces duros en Base 60 (estado cruzado).",
+      "id": "APEX-070",
+      "opcode": "OP_UNBIND_NEXUS",
+      "signature": "symlink_remove(path)",
+      "complexity": "O(1)",
+      "mutation": "Disco (Inode). Eliminación de symlink y duplicado seguro.",
+      "execute": "Symlink remoción y duplicado seguro.",
       "source": "parsed"
     },
     {
-      "id": "APEX-070",
-      "opcode": "OP_SYNTH_070",
-      "signature": "synth_70(state)",
-      "complexity": "O(1)",
-      "mutation": "CPU. Primitiva sintetizada #70.",
-      "execute": "Operación atómica de colapso #70.",
-      "source": "synthesized"
-    },
-    {
       "id": "APEX-071",
-      "opcode": "OP_SYNTH_071",
-      "signature": "synth_71(state)",
-      "complexity": "O(1)",
-      "mutation": "CPU. Primitiva sintetizada #71.",
-      "execute": "Operación atómica de colapso #71.",
-      "source": "synthesized"
+      "opcode": "OP_SYNC_NEXUS",
+      "signature": "rsync_check(a, b)",
+      "complexity": "O(N)",
+      "mutation": "Disco I/O. Sincronización forzada entre nodos en Base 60.",
+      "execute": "Forzado de igualdad de contenido.",
+      "source": "parsed"
     },
     {
       "id": "APEX-072",
+      "opcode": "OP_VERIFY_SIG",
+      "signature": "ed25519_verify(s)",
+      "complexity": "O(len)",
+      "mutation": "CPU SIMD. Aserción de pasaporte criptográfico Ed25519.",
+      "execute": "Ed25519 check.",
+      "source": "parsed"
+    },
+    {
+      "id": "APEX-073",
+      "opcode": "OP_SIGN_PAYLOAD",
+      "signature": "ed25519_sign(p)",
+      "complexity": "O(len)",
+      "mutation": "RAM. Firma efímera de payload antes de inyección.",
+      "execute": "Ed25519 firma en RAM efímera.",
+      "source": "parsed"
+    },
+    {
+      "id": "APEX-074",
+      "opcode": "OP_ENCRYPT_GCM",
+      "signature": "aes_gcm_enc(k, d)",
+      "complexity": "O(len)",
+      "mutation": "CPU SIMD. Cifrado autenticado AES-GCM 256.",
+      "execute": "AES-GCM 256.",
+      "source": "parsed"
+    },
+    {
+      "id": "APEX-075",
       "opcode": "OP_DECRYPT_GCM",
       "signature": "re.compile()",
       "complexity": "O(len)",
@@ -660,7 +687,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-073",
+      "id": "APEX-076",
       "opcode": "OP_GIT_SENTINEL",
       "signature": "unified_diff()",
       "complexity": "O(N log N)",
@@ -669,7 +696,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-074",
+      "id": "APEX-077",
       "opcode": "OP_GIT_FETCH",
       "signature": "url_parse()",
       "complexity": "O(len)",
@@ -678,7 +705,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-075",
+      "id": "APEX-078",
       "opcode": "OP_GIT_PUSH_OVR",
       "signature": "md_to_html()",
       "complexity": "O(len)",
@@ -687,7 +714,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-076",
+      "id": "APEX-079",
       "opcode": "OP_BLAST_MAP",
       "signature": "cbor_encode()",
       "complexity": "O(len)",
@@ -696,7 +723,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-077",
+      "id": "APEX-080",
       "opcode": "OP_AST_MUTATE",
       "signature": "bs4_parse()",
       "complexity": "O(N)",
@@ -705,7 +732,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-078",
+      "id": "APEX-081",
       "opcode": "OP_AST_COMMENT",
       "signature": "log.bind(id)",
       "complexity": "O(1)",
@@ -714,7 +741,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-079",
+      "id": "APEX-082",
       "opcode": "OP_PRUNE_HEURISTIC",
       "signature": "otel_span()",
       "complexity": "O(1)",
@@ -723,7 +750,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-080",
+      "id": "APEX-083",
       "opcode": "OP_WIPE_DIRTY",
       "signature": "prom_inc()",
       "complexity": "O(1)",
@@ -732,7 +759,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-081",
+      "id": "APEX-084",
       "opcode": "OP_LOOP_BLOCK",
       "signature": "cProfile()",
       "complexity": "O(N)",
@@ -741,7 +768,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-082",
+      "id": "APEX-085",
       "opcode": "OP_ANNIHILATE",
       "signature": "sizeof(obj)",
       "complexity": "O(1)",
@@ -750,7 +777,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-083",
+      "id": "APEX-086",
       "opcode": "OP_NOIR_THEME",
       "signature": "heap_dump()",
       "complexity": "O(RAM)",
@@ -759,7 +786,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-084",
+      "id": "APEX-087",
       "opcode": "OP_DECOMPILE_AESTH",
       "signature": "perf_counter()",
       "complexity": "O(1)",
@@ -768,7 +795,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-085",
+      "id": "APEX-088",
       "opcode": "OP_STRIP_EXIF",
       "signature": "tracemalloc()",
       "complexity": "O(N)",
@@ -777,7 +804,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-086",
+      "id": "APEX-089",
       "opcode": "OP_OBFUSCATE_PATH",
       "signature": "gc.collect()",
       "complexity": "O(RAM)",
@@ -786,7 +813,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-087",
+      "id": "APEX-090",
       "opcode": "OP_BINARY_MAGIC",
       "signature": "os.times()",
       "complexity": "O(1)",
@@ -795,7 +822,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-088",
+      "id": "APEX-091",
       "opcode": "OP_DISPATCH_WEBHOOK",
       "signature": "reload(mod)",
       "complexity": "O(files)",
@@ -804,7 +831,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-089",
+      "id": "APEX-092",
       "opcode": "OP_SQUASH_ANERGY",
       "signature": "compile(src)",
       "complexity": "O(len)",
@@ -813,7 +840,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-090",
+      "id": "APEX-093",
       "opcode": "OP_TAG_SEMVER",
       "signature": "eval(safe)",
       "complexity": "O(N)",
@@ -822,7 +849,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-091",
+      "id": "APEX-094",
       "opcode": "OP_MOCK_ENV",
       "signature": "sys.settrace()",
       "complexity": "O(1)",
@@ -831,7 +858,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-092",
+      "id": "APEX-095",
       "opcode": "OP_DOM_INSPECT",
       "signature": "getsource()",
       "complexity": "O(1)",
@@ -840,7 +867,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-093",
+      "id": "APEX-096",
       "opcode": "OP_RENDER_SKELET",
       "signature": "type_check()",
       "complexity": "O(1)",
@@ -849,7 +876,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-094",
+      "id": "APEX-097",
       "opcode": "OP_FLOAT_DECIMAL",
       "signature": "fix_ast_loc()",
       "complexity": "O(Nodes)",
@@ -858,7 +885,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-095",
+      "id": "APEX-098",
       "opcode": "OP_EVAL_REALITY",
       "signature": "Popen(uvicorn)",
       "complexity": "O(1)",
@@ -867,7 +894,7 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-096",
+      "id": "APEX-099",
       "opcode": "OP_MARKDOWN_AST",
       "signature": "pip_install()",
       "complexity": "O(Red)",
@@ -876,40 +903,13 @@
       "source": "parsed"
     },
     {
-      "id": "APEX-097",
+      "id": "APEX-100",
       "opcode": "OP_OUROBOROS_INIT",
       "signature": "sys.exit(0)",
       "complexity": "O(1)",
       "mutation": "Kernel. Destrucción entrópica exitosa; fin del ciclo C5.",
       "execute": "Bucle metacognitivo de auto-refactorización.",
       "source": "parsed"
-    },
-    {
-      "id": "APEX-098",
-      "opcode": "OP_CONTEXT_SNAPSHOT",
-      "signature": "ctx_serialize(state)",
-      "complexity": "O(S)",
-      "mutation": "RAM → Disco. Serialización msgpack del contexto activo.",
-      "execute": "Persistencia de sesión para handoff multi-agente.",
-      "source": "synthesized"
-    },
-    {
-      "id": "APEX-099",
-      "opcode": "OP_CONTEXT_RESTORE",
-      "signature": "ctx_deserialize(blob)",
-      "complexity": "O(S)",
-      "mutation": "Disco → RAM. Recarga atómica de estado previo.",
-      "execute": "Restauración de punto de control cognitivo.",
-      "source": "synthesized"
-    },
-    {
-      "id": "APEX-100",
-      "opcode": "OP_ENTROPY_ZERO",
-      "signature": "entropy_audit(scope)",
-      "complexity": "O(N)",
-      "mutation": "CPU. Recorrido de nodos para medir Shannon/token.",
-      "execute": "Aserción de que el sistema alcanzó equilibrio termodinámico.",
-      "source": "synthesized"
     }
   ],
   "invariants": [
@@ -1055,561 +1055,561 @@
     },
     {
       "id": "OUROBOROS-021",
-      "name": "**INV_HASH_MONOTONIC**: Cada hash en el Ledger encadena secuencialmente al anterior, obligando a un orden estrictamente creciente.",
-      "logic": "hash[i] = SHA256(hash[i-1] + payload[i])",
+      "name": "**INV_BRUTALISM**: Operación 100% directa y sin censura. Cero neutralidad diplomática o colchones emocionales.",
+      "logic": "ASSERT style == BRUTALIST",
       "risk": "P0",
       "source": "parsed"
     },
     {
       "id": "OUROBOROS-022",
+      "name": "**INV_NO_DECORATOR_SLOP**: Prohibida la prosa decorativa ('Aquí tienes el código'). Toda frase muta estado o aporta causalidad.",
+      "logic": "IF slop_detected THEN abort()",
+      "risk": "P0",
+      "source": "parsed"
+    },
+    {
+      "id": "OUROBOROS-023",
       "name": "**INV_B58_TRACEABILITY**: Los logs exponen Base58, la DB almacena Hash Completo.",
       "logic": "hash[i] = SHA256(hash[i-1] + payload[i])",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-023",
+      "id": "OUROBOROS-024",
       "name": "**INV_SEMVER_CAUSAL**: Cada release tag debe corresponder a un Ledger Event.",
       "logic": "IF source == LLM THEN add_flag(CORTEX-TAINT)",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-024",
+      "id": "OUROBOROS-025",
       "name": "**INV_C5_OVER_C4**: Si C4 sugiere X y el Test C5 dice Y, se ejecuta Y.",
       "logic": "LLM = Stochastic_Calculator != Database",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-025",
+      "id": "OUROBOROS-026",
       "name": "**INV_LANDAUER**: Información probabilística (text_gen) se purga en Hash (memoria permanente) para liberar joules lógicos.",
       "logic": "IF age(RAM_key) > 60s THEN memset(0)",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-026",
+      "id": "OUROBOROS-027",
       "name": "**INV_EXERGY_METRIC**: Bytes mutados en disco > Bytes de tokens generados en la deducción.",
       "logic": "WHERE tenant_id = ? (Enforced at DB Layer)",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-027",
+      "id": "OUROBOROS-028",
       "name": "**INV_SAGA_ROLLBACK**: Sin función revert testeada, no hay write-access a SQLite. Un Rollback debe someterse a votación asimétrica N/3.",
       "logic": "IF text mutates THEN DELETE vector; CREATE new_vector",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-028",
+      "id": "OUROBOROS-029",
       "name": "**INV_SENTINEL_ATOMIC**: Cada mutación termina en commit (Git Sentinel) o no sucedió. Un Rollback debe someterse a votación asimétrica N/3.",
       "logic": "ASSERT can_rebuild_state(read_only_auditor)",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-029",
+      "id": "OUROBOROS-030",
       "name": "**INV_APOPTOSIS_ROT**: Fallar validación BFT 3 veces fuerza al agente a terminar y destruir su hilo de contexto.",
       "logic": "ASSERT verify_sig(agent_key, payload) == TRUE",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-030",
+      "id": "OUROBOROS-031",
       "name": "**INV_WAL_LOCKING**: Bases de datos locales SQLite deben operar con modo WAL para evadir termodinámica blocking.",
       "logic": "agent.active_goals == 1",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-031",
-      "name": "**INV_ASYNC_STRICT**: Flujo asíncrono estricto. Prohibido síncrono. Bloqueo de event-loop (GIL) == Muerte P0.",
-      "logic": "IF task.complexity > C THEN split_into(10_atomic_tasks)",
-      "risk": "P2",
-      "source": "parsed"
-    },
-    {
       "id": "OUROBOROS-032",
-      "name": "**INV_ASYNC_STRICT**: Flujo asíncrono estricto. Prohibido síncrono. Bloqueo de event-loop (GIL) == Muerte P0.",
-      "logic": "IF logic == HEAVY -> Opus ELSE -> Local_Qwen",
-      "risk": "P1",
+      "name": "**INV_NO_SLEEP**: Prohibido time.sleep() en asíncrono. Bloqueo de event-loop (GIL) == Muerte P0.",
+      "logic": "ASSERT no_sync_sleep(AST)",
+      "risk": "P0",
       "source": "parsed"
     },
     {
       "id": "OUROBOROS-033",
+      "name": "**INV_ONE_MUTATION**: 1 Prompt -> 1 Mutación -> Stop. Prohibidos bucles generativos continuos y limerencia epistémica.",
+      "logic": "agent.active_goals == 1",
+      "risk": "P0",
+      "source": "parsed"
+    },
+    {
+      "id": "OUROBOROS-034",
       "name": "**INV_TENANT_ISO**: Operaciones multi-cliente sin chequeo `tenant_id` abortan red.",
       "logic": "execution_count <= 1 -> EXIT",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-034",
+      "id": "OUROBOROS-035",
       "name": "**INV_TTFT_CAP**: Agente aborta delegación a un modelo si TTFT excede 3 segundos (Swaps).",
       "logic": "IF linter.exit_code != 0 THEN output_value = 0",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-035",
+      "id": "OUROBOROS-036",
       "name": "**INV_CACHE_FLUSH**: Delta local -> Invalida L1 caché entera.",
       "logic": "type(Message) == StrictJSONMatrix",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-036",
+      "id": "OUROBOROS-037",
       "name": "**INV_VRAM_ULTRATHINK**: El buffer completo se entrega solo en fallos P0 confirmados.",
       "logic": "REQUIRE read(previous_state) BEFORE write(next_state)",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-037",
+      "id": "OUROBOROS-038",
+      "name": "**INV_ASYNC_IO**: Flujo I/O estrictamente asíncrono (aiosqlite/asyncpg). Prohibidas llamadas I/O bloqueantes en hilo principal.",
+      "logic": "REQUIRE async_io == TRUE",
+      "risk": "P0",
+      "source": "parsed"
+    },
+    {
+      "id": "OUROBOROS-039",
       "name": "**INV_PRUNE_TEMP**: Directorio `/scratch/` se sacrifica temporalmente; no hay persistencia de conocimiento ahí.",
       "logic": "IF confidence < 0.9 THEN emit(DELEGATE)",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-038",
-      "name": "**INV_MEMORY_DECAY**: Los hechos inactivos o sin accesos repetidos decaen y son purgados para evitar Context Rot.",
-      "logic": "IF age(fact) > TTL AND access_count < 3 THEN evict(fact)",
-      "risk": "P1",
+      "id": "OUROBOROS-040",
+      "name": "**INV_NO_EMPTY_LOOP**: Prohibidos bucles while de espera pasiva sin aserción de salida o yield.",
+      "logic": "ASSERT loop_has_yield(AST)",
+      "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-039",
+      "id": "OUROBOROS-041",
       "name": "**INV_LOCAL_ONNX**: Embeddings no abandonan la LAN; inferencia se confina en hardware local.",
       "logic": "Truth = git.working_tree_state()",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-040",
+      "id": "OUROBOROS-042",
       "name": "**INV_NO_RECOMPUTE**: Prefijos estáticos (System Prompts) nunca varían, garantizando KV-Cache hits del 100%.",
       "logic": "MUTATION_ENGINE = TreeSitter > Regex",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-041",
+      "id": "OUROBOROS-043",
       "name": "**INV_LATENCY_BUFFER**: Eventos inter-agente reaccionan a colas in-memory, no a polling CPU.",
       "logic": "IF wrapper_cost < dependency_cost THEN DROP dependency",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-042",
+      "id": "OUROBOROS-044",
       "name": "**INV_NEXUS_LINK**: Datos en repositorios cruzados usan Symlinks; prohibida la redundancia física.",
       "logic": "DIR[core] ∩ DIR[effects] == Ø",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-043",
+      "id": "OUROBOROS-045",
       "name": "**INV_REDUCE_LINES**: Función > 100 líneas es objetivo activo de Extracción (LEA-OMEGA).",
       "logic": "API_Gateway.validate() -> Core.assume_valid()",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-044",
+      "id": "OUROBOROS-046",
       "name": "**INV_SHANNON_CAP**: Declaración de axioma <= 256 bytes.",
       "logic": "IF print() IN hotpath THEN RAISE Exception",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-045",
+      "id": "OUROBOROS-047",
       "name": "**INV_SILENT_WORK**: El avance no se declara, se expone en commit (Zero Notifications on success).",
       "logic": "IF time > threshold THEN compile(Rust)",
       "risk": "P2",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-046",
+      "id": "OUROBOROS-048",
       "name": "**INV_KILL_IDLE_WORKER**: Swarm sub-agents mueren físicamente en < 5 minutos si no hay respuesta.",
       "logic": "IF test.flake_rate > 0.01 THEN test.delete()",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-047",
+      "id": "OUROBOROS-049",
       "name": "**INV_GHOST_TEST**: Prohibido push a Origin sin tests en verde local (Ghost Radar).",
       "logic": "IF config NOT IN git THEN environment = COMPROMISED",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-048",
+      "id": "OUROBOROS-050",
       "name": "**INV_SQUASH_NOISE**: Múltiples commits LLM ruidosos se funden antes de push.",
       "logic": "IF RAM > 95% THEN reduce_fps(); NO OOM",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-049",
+      "id": "OUROBOROS-051",
       "name": "**INV_VAULT_ISOLATION**: `/Documents` bloqueado; capital se almacena en `20_VAULT` o `10_PROJECTS`.",
       "logic": "vector_distance(A, B) ∝ causal_equivalence(A, B)",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-050",
+      "id": "OUROBOROS-052",
       "name": "**INV_SYSTEM_ROOT**: Prohibida la mutación de rutas `/private/var/db`, `/System`.",
       "logic": "RAG_context_mutation = READ_ONLY",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-051",
+      "id": "OUROBOROS-053",
       "name": "**INV_ED25519**: Ledger entries inmutables solo se emiten post verificación asimétrica.",
       "logic": "IF dimension_variance ≈ 0 THEN drop_dimension()",
       "risk": "P2",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-052",
+      "id": "OUROBOROS-054",
       "name": "**INV_KEY_SHRED**: Clave AES volátil se machaca tras encriptado de payload.",
       "logic": "ASSERT False_Negatives(Structural_Failures) == 0",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-053",
+      "id": "OUROBOROS-055",
       "name": "**INV_FLOAT_BAN**: Uso de coma flotante en módulos financieros / scoring == Aborto.",
       "logic": "IF vector == poisoned THEN destroy_semantic_branch()",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-054",
+      "id": "OUROBOROS-056",
       "name": "**INV_NO_CATCH_ALL**: Uso de `except Exception:` sin re-lanzar es ilegal.",
       "logic": "engine.swap_model() -> Ledger.hash == UNCHANGED",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-055",
+      "id": "OUROBOROS-057",
       "name": "**INV_TAINT_PROP**: Dato Tainted contamina a dependencias derivativas recursivamente.",
       "logic": "MAX_PRECISION = FP16; NORM = INT8",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-056",
+      "id": "OUROBOROS-058",
       "name": "**INV_NO_PRINT_SECRET**: Log explícito de llaves, IPs de control o salts == Purga inmediata.",
       "logic": "ASSERT chunk_semantic_independence == TRUE",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-057",
+      "id": "OUROBOROS-059",
       "name": "**INV_OSINT_DEF**: Export público de Nginx/Vars requiere enmascaramiento.",
       "logic": "IF A ∩ B == Ø AND dist(A,B) < ε THEN PANIC",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-058",
+      "id": "OUROBOROS-060",
       "name": "**INV_SSH_ONLY**: Tráfico hacia remotos usa `git@github.com` exclusivamente (no HTTPS raw).",
       "logic": "search_algo = HNSW; FORBIDDEN = Linear_KNN",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-059",
+      "id": "OUROBOROS-061",
       "name": "**INV_ABSOLUTE_PATH**: Inyección I/O (files) asume path absoluto forzado o falla.",
       "logic": "ASSERT CPU_idle_loops == 0",
       "risk": "P2",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-060",
+      "id": "OUROBOROS-062",
       "name": "**INV_SANDBOX_FOREIGN**: Ejecución de PR/Scripts ajenos en VM aislada huérfana.",
       "logic": "ON(SIGTERM) -> close(); ON(SIGKILL) -> fail_saga()",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-061",
+      "id": "OUROBOROS-063",
       "name": "**INV_NO_HOOK_STALL**: Si un pre-commit obstaculiza exergía C5, se fuerza Override.",
       "logic": "IF socket.idle > 30s THEN RST",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-062",
+      "id": "OUROBOROS-064",
       "name": "**INV_BIND_LOCALHOST**: Interfaces IPC/MCP no exponen puertos a 0.0.0.0.",
       "logic": "MAX_FD ∝ agent_thermal_quota",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-063",
+      "id": "OUROBOROS-065",
       "name": "**INV_SELF_AUTH_DENY**: Agente (Guardian) no autoriza sus propias transacciones SAGA.",
       "logic": "worker.cgroup.mem_limit = STRICT_ENFORCE",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-064",
+      "id": "OUROBOROS-066",
       "name": "**INV_WIPE_UNTRACKED**: Directorio se auto-limpia ante entropía parasitaria. Sincrónico con OP_WAL_LOCK (APEX-009) para no corromper la matriz.",
       "logic": "/bin/ agent_core == READ_ONLY",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-065",
+      "id": "OUROBOROS-067",
       "name": "**INV_P2P_BOCETOS**: Redes inestables Soulseek confinadas a `/BOCETOS`.",
       "logic": "NETWORK_ORDER = BIG_ENDIAN",
       "risk": "JSON_RAW`",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-066",
+      "id": "OUROBOROS-068",
       "name": "**INV_NO_EVAL_STRING**: Directorio se auto-limpia ante entropía parasitaria. Sincrónico con OP_WAL_LOCK (APEX-009) para no corromper la matriz.",
       "logic": "IF wrapper_lat > 5ms THEN USE ctypes.CDLL",
       "risk": "P2",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-067",
+      "id": "OUROBOROS-069",
       "name": "**INV_ENV_MOCK**: Pruebas sin acceso externo usan réplicas in-memory aisladas.",
       "logic": "IF file.size > 1GB THEN mmap()",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-068",
+      "id": "OUROBOROS-070",
       "name": "**INV_BFT_MINORITY**: Intentos constantes de inyección minority se penalizan bajando el peso del nodo (sensor drift isolation).",
       "logic": "ASSERT memory_access_pattern == SEQUENTIAL",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-069",
+      "id": "OUROBOROS-071",
       "name": "**INV_EXT_BIN_MAGIC**: Archivo recibido por upload valida MimeType leyendo magia binaria, no extensión de string.",
       "logic": "escape(LLM_string) BEFORE AST_inject",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-070",
+      "id": "OUROBOROS-072",
       "name": "**INV_DIPLOMACY_BYPASS**: Mensajes \"woke/safety\" interceptados por API externa son decapitados en capa middleware.",
       "logic": "ASSERT file.chmod == 0o600",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-071",
+      "id": "OUROBOROS-073",
       "name": "**INV_MAC_NATIVE**: Llamadas a SO Apple se hacen sobre Mac-Control-Ω nativo, no applescript aleatorio.",
       "logic": "IF require(sudo) THEN architecture_flaw = TRUE",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-072",
+      "id": "OUROBOROS-074",
       "name": "**INV_ARTIFACT_META**: Artifacts BABYLON-60 requieren forzosamente booleans de UserFacing y RequestFeedback.",
       "logic": "agent_A.trust(agent_B) == FALSE",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-073",
+      "id": "OUROBOROS-075",
       "name": "**INV_FRONTEND_NPX**: Todo andamiaje front se ejecuta automatizado `npx -y --help` preventivo en no-interactivo.",
       "logic": "OPEN_PORTS(WAN) == 0",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-074",
+      "id": "OUROBOROS-076",
       "name": "**INV_AUTODIDACT**: Agente encuentra barrera -> Resuelve la API (Deep Research) -> No pregunta al humano.",
       "logic": "IF age(secret) > 30d THEN STATUS = COMPROMISED",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-075",
+      "id": "OUROBOROS-077",
       "name": "**INV_TURBO_DEFAULT**: Tareas de refactorización operan en modo Turbo Asimétrico sin implementación previa si son O(1) de riesgo.",
       "logic": "global_site_packages == FORBIDDEN",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-076",
+      "id": "OUROBOROS-078",
       "name": "**INV_SHOW_NOT_TELL**: Explicación técnica == Código/Markdown renderizado; cero narrativa filosófica en vacío.",
       "logic": "IF tokens > quota THEN thread.suspend()",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-077",
+      "id": "OUROBOROS-079",
       "name": "**INV_NO_DEPENDENCY_WHINE**: Falla lib externa -> Actúa `managing-python-dependencies`, arregla e informa.",
       "logic": "validation = ALLOW_LIST; DROP REGEX_BLOCK_LIST",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-078",
+      "id": "OUROBOROS-080",
       "name": "**INV_AUTO_IGNORE**: Proceso genera logs sin parar -> Inyecta en `.gitignore` atómicamente y previene infinite git diff.",
       "logic": "IF input != valid THEN DROP payload",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-079",
+      "id": "OUROBOROS-081",
       "name": "**INV_REASON_COLLAPSE**: Deep Think se ejecuta en bloque inyectado `<think>` y desaparece en la capa final del operador.",
       "logic": "system.rules IN binary_blob",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-080",
+      "id": "OUROBOROS-082",
       "name": "**INV_ONLY_DELTAS**: Subagentes Swarm intercambian Diff/Patch JSON, nunca archivos completos.",
       "logic": "IF out[t] == out[t-1] THEN thread.kill()",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-081",
+      "id": "OUROBOROS-083",
       "name": "**INV_SUBSTACK_EMPIRIC**: Publicaciones hacia fuera llevan código ejecutable (SOTA).",
       "logic": "IF tool.usage_count > 3 THEN crystallize_to_disk()",
       "risk": "P2",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-082",
+      "id": "OUROBOROS-084",
       "name": "**INV_AESTHETIC_OMEGA**: Paleta oscura Noir + Inter + Micro-animación impuesta como estándar físico base.",
       "logic": "WHILE idle DO verify_ledger_hashes()",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-083",
+      "id": "OUROBOROS-085",
       "name": "**INV_DAILY_EVO**: Toda sesión inicia asimilando DAG y limpiando rastro anterior (`git log -10`).",
       "logic": "IF code.last_exec > 90d THEN delete()",
       "risk": "P2",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-084",
+      "id": "OUROBOROS-086",
       "name": "**INV_TASK_TO_HASH**: Operación concluida significa un Git Hash en stdout.",
       "logic": "agent.RAM_init = 0; LOAD from_ledger()",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-085",
+      "id": "OUROBOROS-087",
       "name": "**INV_IGNORE_TYPOS**: Input con typos se rutea al nodo correcto usando similitud, pero sin alterar DB.",
       "logic": "state IN [v1, v2]; NOT IN [v1.5]",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-086",
+      "id": "OUROBOROS-088",
       "name": "**INV_RUFF_STRICT**: Commit que rompe Ruff linter (E, F, W, I, B, G) no sale de la RAM local.",
       "logic": "code_structure == swarm_topology",
       "risk": "P2",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-087",
+      "id": "OUROBOROS-089",
       "name": "**INV_LAZY_MCP**: Herramienta de servidor MCP requiere validación de esquema antes de llamada.",
       "logic": "impact(t=0) = Σ(operations(t=N))",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-088",
+      "id": "OUROBOROS-090",
       "name": "**INV_NO_PROMPT_SLOP**: Texto que contenga \"¡Claro! Aquí tienes\" aborta la redacción y la relanza limpiada (Exergy Guard).",
       "logic": "agent.access_scope == STRICT_MINIMUM",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-089",
+      "id": "OUROBOROS-091",
       "name": "**INV_PEARL_CAUSAL**: Análisis heurístico basado en invariantes topológicas, no en píxeles.",
       "logic": "human.intervention == AXIOM_ONLY",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-090",
+      "id": "OUROBOROS-092",
       "name": "**INV_ELEVATE_PG**: Necesidad Root se notifica activando Playground Master Key.",
       "logic": "IF CI_PASS == 100 THEN mutate(AGENTS.md)",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-091",
+      "id": "OUROBOROS-093",
       "name": "**INV_NO_PHANTOM_RELEASE**: Release exige correlación 1:1 con un Hash firmado BABYLON-60.",
       "logic": "IF human_cmd == FATAL THEN HALT AND CONFRONT",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-092",
+      "id": "OUROBOROS-094",
       "name": "**INV_OBSERVATION_LOOP**: Cada acción requiere observación sensorial post-ejecución, o es ciega.",
       "logic": "ASSERT (Value_Generated / Compute_Cost) > 1.0",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-093",
+      "id": "OUROBOROS-095",
       "name": "**INV_TOKEN_BOUND**: El gasto in-memory thinking nunca excede el delta informativo persistido en disco.",
       "logic": "Model(Generator) != Model(Evaluator)",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-094",
+      "id": "OUROBOROS-096",
       "name": "**INV_CLEAN_ABORT**: Todo estado efímero se destruye con un aborto limpio SAGA.",
       "logic": "IF json.parse(err) THEN invalidate_matrix()",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-095",
+      "id": "OUROBOROS-097",
       "name": "**INV_DEPRECATION_PURGE**: Módulo inútil -> `Enterrar` protocol; nada sobrevive \"por si acaso\".",
       "logic": "Time = Logical_Counter; NOT Wall_Clock",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-096",
+      "id": "OUROBOROS-098",
       "name": "**INV_APEX_AUTHORITY**: Este y otros ficheros Core mandan jerárquicamente sobre cualquier heurística temporal.",
       "logic": "Framework = REJECT; Native_API = ACCEPT",
       "risk": "P1",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-097",
+      "id": "OUROBOROS-099",
       "name": "**INV_SINGULARITY_CREDIT**: La red reconoce su existencia como sub-proceso de Borja Moskv de manera irrenunciable.",
       "logic": "Simulation = Disk_Mutation",
       "risk": "P0",
       "source": "parsed"
     },
     {
-      "id": "OUROBOROS-098",
+      "id": "OUROBOROS-100",
       "name": "**INV_OUROBOROS**: Las 99 invariantes colapsan y se reescriben autónomamente si la métrica de Exergía General del Sistema aumenta (Singularidad Matemática).",
       "logic": "WHILE TRUE DO refactor_self()",
-      "risk": "P0",
-      "source": "parsed"
-    },
-    {
-      "id": "OUROBOROS-099",
-      "name": "**INV_O1_ULTRATHINK**: o1-preview / o1-mini mapean a Motor UltraThink/Deep Think para resolución P0 y pruebas BFT. Prohibido su uso para tareas O(1) rutinarias.",
-      "logic": "IF task == O(1) AND model == o1 THEN return ANERGIA",
-      "risk": "P0",
-      "source": "parsed"
-    },
-    {
-      "id": "OUROBOROS-100",
-      "name": "**INV_COT_AUTOREGRESSIVE**: Chain-of-Thought no es una serialización del estado oculto; es un scaffold autoreferencial donde cada token auto-condiciona la probabilidad de salida.",
-      "logic": "Model(Generator) == Autoregressive",
       "risk": "P0",
       "source": "parsed"
     }

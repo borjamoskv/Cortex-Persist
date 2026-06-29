@@ -73,41 +73,41 @@
 | **APEX-063** | `OP_ELEVATE_PRIV` | `udp_multicast()` | `O(len)` | Red I/O. Propagación O(1) a subred local. | PlayGround Master Key flag toggle. |
 | **APEX-064** | `OP_SOTA_EXTRACT` | `dns_resolve()` | `O(1)` | Red UDP. Petición atómica fundacional de topología. | Síntesis de Paper a JSON Vector. |
 | **APEX-065** | `OP_BROADCAST_P0` | `ssh_tunnel()` | `O(1)` | OS Process. Port-forward encriptado a través de NAT. | Interrupción NMI a todo el enjambre. |
-| **APEX-066** 🔧 | `OP_HEARTBEAT_PULSE` | `ping_alive(agent_id)` | `O(1)` | Red I/O. UDP heartbeat atómico sin handshake. | Verificación de liveness en enjambre P2P. |
-| **APEX-067** | `OP_PARSE_INTENT` | `gossip_push()` | `O(log N)` | Red I/O. Infección viral del Swarm (Sin maestro). | Extracción de verbo C5 desde string. |
-| **APEX-068** | `OP_NEXUS_MUTATE` | `tls_verify()` | `O(1)` | CPU/Red. Validación criptográfica de CA (Root of Trust). | Mutación atómica de enlaces duros en Base 60 (estado cruzado). |
-| **APEX-069** | `OP_NEXUS_MUTATE` | `ast.walk()` | `O(Nodes)` | CPU. Inyección transversal de instrumentación. | Mutación atómica de enlaces duros en Base 60 (estado cruzado). |
-| **APEX-070** 🔧 | `OP_SYNTH_070` | `synth_70(state)` | `O(1)` | CPU. Primitiva sintetizada #70. | Operación atómica de colapso #70. |
-| **APEX-071** 🔧 | `OP_SYNTH_071` | `synth_71(state)` | `O(1)` | CPU. Primitiva sintetizada #71. | Operación atómica de colapso #71. |
-| **APEX-072** | `OP_DECRYPT_GCM` | `re.compile()` | `O(len)` | RAM. Cachea autómata finito en inicialización. | AES-GCM 256. |
-| **APEX-073** | `OP_GIT_SENTINEL` | `unified_diff()` | `O(N log N)` | CPU. Genera Delta para escribir en el Ledger. | La validación BFT debe preceder a la firma del payload en RAM (pasaporte criptográfico avalado). |
-| **APEX-074** | `OP_GIT_FETCH` | `url_parse()` | `O(len)` | CPU. Sanity-check para prevenir SSRF en Agentes. | Alineación estricta remota. |
-| **APEX-075** | `OP_GIT_PUSH_OVR` | `md_to_html()` | `O(len)` | CPU. Render de presentación C4-SIM. | Bypass hooks forzado. |
-| **APEX-076** | `OP_BLAST_MAP` | `cbor_encode()` | `O(len)` | CPU. Serialización binaria rápida para inter-swarm. | Cálculo de dependencias AST previo a Mutación. |
-| **APEX-077** | `OP_AST_MUTATE` | `bs4_parse()` | `O(N)` | CPU. Poda de DOM; extracción estricta del HTML. | Modificación a nivel árbol, no string. |
-| **APEX-078** | `OP_AST_COMMENT` | `log.bind(id)` | `O(1)` | RAM/Red. Empaqueta contexto transversal inmutable. | Inserción nativa `//` sin romper parsers. |
-| **APEX-079** | `OP_PRUNE_HEURISTIC` | `otel_span()` | `O(1)` | RAM/Red. Envuelve el scope con inicio y final exacto. | Supresión de condicionales muertos. |
-| **APEX-080** | `OP_WIPE_DIRTY` | `prom_inc()` | `O(1)` | RAM/Red. Sumador atómico de métricas C5-REAL. | Destrucción de untracked (`git clean -fd`). |
-| **APEX-081** | `OP_LOOP_BLOCK` | `cProfile()` | `O(N)` | CPU. Hook C intrusivo para hallar cuellos de botella. | Escribe al `.gitignore` para frenar rotación. |
-| **APEX-082** | `OP_ANNIHILATE` | `sizeof(obj)` | `O(1)` | CPU. Validación de límite de memoria en tiempo de runtime. | `rm -rf` autorizado. |
-| **APEX-083** | `OP_NOIR_THEME` | `heap_dump()` | `O(RAM)` | Disco I/O. Snapshot mortuorio antes del `kill_9`. | Reemplazo hex de colores estocásticos. |
-| **APEX-084** | `OP_DECOMPILE_AESTH` | `perf_counter()` | `O(1)` | CPU Syscall. Resolución de nanosegundos garantizada. | Renderización CSS/Tailwind de abstracción. |
-| **APEX-085** | `OP_STRIP_EXIF` | `tracemalloc()` | `O(N)` | RAM/CPU. Forense de asignación; penaliza performance 30%. | Purga de metadatos de archivo (OSINT-Def). |
-| **APEX-086** | `OP_OBFUSCATE_PATH` | `gc.collect()` | `O(RAM)` | CPU. Liberación de tensores huérfanos pre-inferencia. | Env-Var masking en output público. |
-| **APEX-087** | `OP_BINARY_MAGIC` | `os.times()` | `O(1)` | Kernel Syscall. Vector de User/Sys/Idle time. | Hex read de archivo (sin fiarse de extensión). |
-| **APEX-088** | `OP_DISPATCH_WEBHOOK` | `reload(mod)` | `O(files)` | RAM. Hot-swap del código compilado en vivo. | Llamada a salida externa tras consenso. |
-| **APEX-089** | `OP_SQUASH_ANERGY` | `compile(src)` | `O(len)` | CPU. Inyección de byte-code on-the-fly. | Unificación de commits basura en base causal. |
-| **APEX-090** | `OP_TAG_SEMVER` | `eval(safe)` | `O(N)` | CPU/Sandbox. Primitiva nuclear; requiere WASM/pypy. | Etiquetado Git criptográfico. |
-| **APEX-091** | `OP_MOCK_ENV` | `sys.settrace()` | `O(1)` | CPU/Thread. Auditoría paso-a-paso de subagentes maliciosos. | Falso .env in-memory para testing local. |
-| **APEX-092** | `OP_DOM_INSPECT` | `getsource()` | `O(1)` | Disco I/O. Extrae función mutada para enviarla al LLM. | Extracción topológica CDP de UI. |
-| **APEX-093** | `OP_RENDER_SKELET` | `type_check()` | `O(1)` | RAM. Aserción en tiempo de ejecución (Run-time bounds). | Mkdir + Touch scaffolding masivo. |
-| **APEX-094** | `OP_FLOAT_DECIMAL` | `fix_ast_loc()` | `O(Nodes)` | CPU. Sanea saltos de línea tras inyectar AST sintético. | Casteo estricto a numérico de precisión. |
-| **APEX-095** | `OP_EVAL_REALITY` | `Popen(uvicorn)` | `O(1)` | OS Process. Expone micro-endpoint dinámico (Servidor JIT). | Aplicación de métrica PPI (0-5). |
-| **APEX-096** | `OP_MARKDOWN_AST` | `pip_install()` | `O(Red)` | OS Process. Modificación estructural de dependencias P2P. | Conversión de README a lógica operacional. |
-| **APEX-097** | `OP_OUROBOROS_INIT` | `sys.exit(0)` | `O(1)` | Kernel. Destrucción entrópica exitosa; fin del ciclo C5. | Bucle metacognitivo de auto-refactorización. |
-| **APEX-098** 🔧 | `OP_CONTEXT_SNAPSHOT` | `ctx_serialize(state)` | `O(S)` | RAM → Disco. Serialización msgpack del contexto activo. | Persistencia de sesión para handoff multi-agente. |
-| **APEX-099** 🔧 | `OP_CONTEXT_RESTORE` | `ctx_deserialize(blob)` | `O(S)` | Disco → RAM. Recarga atómica de estado previo. | Restauración de punto de control cognitivo. |
-| **APEX-100** 🔧 | `OP_ENTROPY_ZERO` | `entropy_audit(scope)` | `O(N)` | CPU. Recorrido de nodos para medir Shannon/token. | Aserción de que el sistema alcanzó equilibrio termodinámico. |
+| **APEX-066** | `OP_SLOP_HALT` | `detect_slop(text)` | `O(len)` | CPU. Regex/AST scan de padding léxico y eliminación. | Detector de padding léxico. |
+| **APEX-067** | `OP_REROUTE_HUMAN` | `escalate_op(msg)` | `O(1)` | Red I/O. Escalada manual inmediata al Operador. | Escalada manual al Operador. |
+| **APEX-068** | `OP_PARSE_INTENT` | `gossip_push()` | `O(log N)` | Red I/O. Infección viral del Swarm (Sin maestro). | Extracción de verbo C5 desde string. |
+| **APEX-069** | `OP_BIND_NEXUS` | `tls_verify()` | `O(1)` | CPU/Red. Validación criptográfica de CA (Root of Trust). | Mutación atómica de enlaces duros en Base 60 (estado cruzado). |
+| **APEX-070** | `OP_UNBIND_NEXUS` | `symlink_remove(path)` | `O(1)` | Disco (Inode). Eliminación de symlink y duplicado seguro. | Symlink remoción y duplicado seguro. |
+| **APEX-071** | `OP_SYNC_NEXUS` | `rsync_check(a, b)` | `O(N)` | Disco I/O. Sincronización forzada entre nodos en Base 60. | Forzado de igualdad de contenido. |
+| **APEX-072** | `OP_VERIFY_SIG` | `ed25519_verify(s)` | `O(len)` | CPU SIMD. Aserción de pasaporte criptográfico Ed25519. | Ed25519 check. |
+| **APEX-073** | `OP_SIGN_PAYLOAD` | `ed25519_sign(p)` | `O(len)` | RAM. Firma efímera de payload antes de inyección. | Ed25519 firma en RAM efímera. |
+| **APEX-074** | `OP_ENCRYPT_GCM` | `aes_gcm_enc(k, d)` | `O(len)` | CPU SIMD. Cifrado autenticado AES-GCM 256. | AES-GCM 256. |
+| **APEX-075** | `OP_DECRYPT_GCM` | `re.compile()` | `O(len)` | RAM. Cachea autómata finito en inicialización. | AES-GCM 256. |
+| **APEX-076** | `OP_GIT_SENTINEL` | `unified_diff()` | `O(N log N)` | CPU. Genera Delta para escribir en el Ledger. | La validación BFT debe preceder a la firma del payload en RAM (pasaporte criptográfico avalado). |
+| **APEX-077** | `OP_GIT_FETCH` | `url_parse()` | `O(len)` | CPU. Sanity-check para prevenir SSRF en Agentes. | Alineación estricta remota. |
+| **APEX-078** | `OP_GIT_PUSH_OVR` | `md_to_html()` | `O(len)` | CPU. Render de presentación C4-SIM. | Bypass hooks forzado. |
+| **APEX-079** | `OP_BLAST_MAP` | `cbor_encode()` | `O(len)` | CPU. Serialización binaria rápida para inter-swarm. | Cálculo de dependencias AST previo a Mutación. |
+| **APEX-080** | `OP_AST_MUTATE` | `bs4_parse()` | `O(N)` | CPU. Poda de DOM; extracción estricta del HTML. | Modificación a nivel árbol, no string. |
+| **APEX-081** | `OP_AST_COMMENT` | `log.bind(id)` | `O(1)` | RAM/Red. Empaqueta contexto transversal inmutable. | Inserción nativa `//` sin romper parsers. |
+| **APEX-082** | `OP_PRUNE_HEURISTIC` | `otel_span()` | `O(1)` | RAM/Red. Envuelve el scope con inicio y final exacto. | Supresión de condicionales muertos. |
+| **APEX-083** | `OP_WIPE_DIRTY` | `prom_inc()` | `O(1)` | RAM/Red. Sumador atómico de métricas C5-REAL. | Destrucción de untracked (`git clean -fd`). |
+| **APEX-084** | `OP_LOOP_BLOCK` | `cProfile()` | `O(N)` | CPU. Hook C intrusivo para hallar cuellos de botella. | Escribe al `.gitignore` para frenar rotación. |
+| **APEX-085** | `OP_ANNIHILATE` | `sizeof(obj)` | `O(1)` | CPU. Validación de límite de memoria en tiempo de runtime. | `rm -rf` autorizado. |
+| **APEX-086** | `OP_NOIR_THEME` | `heap_dump()` | `O(RAM)` | Disco I/O. Snapshot mortuorio antes del `kill_9`. | Reemplazo hex de colores estocásticos. |
+| **APEX-087** | `OP_DECOMPILE_AESTH` | `perf_counter()` | `O(1)` | CPU Syscall. Resolución de nanosegundos garantizada. | Renderización CSS/Tailwind de abstracción. |
+| **APEX-088** | `OP_STRIP_EXIF` | `tracemalloc()` | `O(N)` | RAM/CPU. Forense de asignación; penaliza performance 30%. | Purga de metadatos de archivo (OSINT-Def). |
+| **APEX-089** | `OP_OBFUSCATE_PATH` | `gc.collect()` | `O(RAM)` | CPU. Liberación de tensores huérfanos pre-inferencia. | Env-Var masking en output público. |
+| **APEX-090** | `OP_BINARY_MAGIC` | `os.times()` | `O(1)` | Kernel Syscall. Vector de User/Sys/Idle time. | Hex read de archivo (sin fiarse de extensión). |
+| **APEX-091** | `OP_DISPATCH_WEBHOOK` | `reload(mod)` | `O(files)` | RAM. Hot-swap del código compilado en vivo. | Llamada a salida externa tras consenso. |
+| **APEX-092** | `OP_SQUASH_ANERGY` | `compile(src)` | `O(len)` | CPU. Inyección de byte-code on-the-fly. | Unificación de commits basura en base causal. |
+| **APEX-093** | `OP_TAG_SEMVER` | `eval(safe)` | `O(N)` | CPU/Sandbox. Primitiva nuclear; requiere WASM/pypy. | Etiquetado Git criptográfico. |
+| **APEX-094** | `OP_MOCK_ENV` | `sys.settrace()` | `O(1)` | CPU/Thread. Auditoría paso-a-paso de subagentes maliciosos. | Falso .env in-memory para testing local. |
+| **APEX-095** | `OP_DOM_INSPECT` | `getsource()` | `O(1)` | Disco I/O. Extrae función mutada para enviarla al LLM. | Extracción topológica CDP de UI. |
+| **APEX-096** | `OP_RENDER_SKELET` | `type_check()` | `O(1)` | RAM. Aserción en tiempo de ejecución (Run-time bounds). | Mkdir + Touch scaffolding masivo. |
+| **APEX-097** | `OP_FLOAT_DECIMAL` | `fix_ast_loc()` | `O(Nodes)` | CPU. Sanea saltos de línea tras inyectar AST sintético. | Casteo estricto a numérico de precisión. |
+| **APEX-098** | `OP_EVAL_REALITY` | `Popen(uvicorn)` | `O(1)` | OS Process. Expone micro-endpoint dinámico (Servidor JIT). | Aplicación de métrica PPI (0-5). |
+| **APEX-099** | `OP_MARKDOWN_AST` | `pip_install()` | `O(Red)` | OS Process. Modificación estructural de dependencias P2P. | Conversión de README a lógica operacional. |
+| **APEX-100** | `OP_OUROBOROS_INIT` | `sys.exit(0)` | `O(1)` | Kernel. Destrucción entrópica exitosa; fin del ciclo C5. | Bucle metacognitivo de auto-refactorización. |
 
 ## 100 INVARIANTES TERMODINÁMICAS (OUROBOROS LAWS)
 
@@ -133,86 +133,86 @@
 | **OUROBOROS-018** | ****INV_NO_TYPO_GUESS**: Errores del operador en paths fallan P0; no se infiere el path correcto.** | `ASSERT TimeToRecovery < TimeToFailure` | P1 |
 | **OUROBOROS-019** | ****INV_READ_COMMIT**: Reads ven solo estado final. Reads paralelos a SAGAs fallan limpiamente.** | `retry_delay = (2^N) + random(jitter)` | P1 |
 | **OUROBOROS-020** | ****INV_NO_ASSUME_PAST**: La memoria empieza en el DAG Git en cada ciclo.** | `IF error_rate > threshold THEN open_circuit()` | P0 |
-| **OUROBOROS-021** | ****INV_HASH_MONOTONIC**: Cada hash en el Ledger encadena secuencialmente al anterior, obligando a un orden estrictamente creciente.** | `hash[i] = SHA256(hash[i-1] + payload[i])` | P0 |
-| **OUROBOROS-022** | ****INV_B58_TRACEABILITY**: Los logs exponen Base58, la DB almacena Hash Completo.** | `hash[i] = SHA256(hash[i-1] + payload[i])` | P0 |
-| **OUROBOROS-023** | ****INV_SEMVER_CAUSAL**: Cada release tag debe corresponder a un Ledger Event.** | `IF source == LLM THEN add_flag(CORTEX-TAINT)` | P0 |
-| **OUROBOROS-024** | ****INV_C5_OVER_C4**: Si C4 sugiere X y el Test C5 dice Y, se ejecuta Y.** | `LLM = Stochastic_Calculator != Database` | P1 |
-| **OUROBOROS-025** | ****INV_LANDAUER**: Información probabilística (text_gen) se purga en Hash (memoria permanente) para liberar joules lógicos.** | `IF age(RAM_key) > 60s THEN memset(0)` | P0 |
-| **OUROBOROS-026** | ****INV_EXERGY_METRIC**: Bytes mutados en disco > Bytes de tokens generados en la deducción.** | `WHERE tenant_id = ? (Enforced at DB Layer)` | P0 |
-| **OUROBOROS-027** | ****INV_SAGA_ROLLBACK**: Sin función revert testeada, no hay write-access a SQLite. Un Rollback debe someterse a votación asimétrica N/3.** | `IF text mutates THEN DELETE vector; CREATE new_vector` | P1 |
-| **OUROBOROS-028** | ****INV_SENTINEL_ATOMIC**: Cada mutación termina en commit (Git Sentinel) o no sucedió. Un Rollback debe someterse a votación asimétrica N/3.** | `ASSERT can_rebuild_state(read_only_auditor)` | P0 |
-| **OUROBOROS-029** | ****INV_APOPTOSIS_ROT**: Fallar validación BFT 3 veces fuerza al agente a terminar y destruir su hilo de contexto.** | `ASSERT verify_sig(agent_key, payload) == TRUE` | P0 |
-| **OUROBOROS-030** | ****INV_WAL_LOCKING**: Bases de datos locales SQLite deben operar con modo WAL para evadir termodinámica blocking.** | `agent.active_goals == 1` | P1 |
-| **OUROBOROS-031** | ****INV_ASYNC_STRICT**: Flujo asíncrono estricto. Prohibido síncrono. Bloqueo de event-loop (GIL) == Muerte P0.** | `IF task.complexity > C THEN split_into(10_atomic_tasks)` | P2 |
-| **OUROBOROS-032** | ****INV_ASYNC_STRICT**: Flujo asíncrono estricto. Prohibido síncrono. Bloqueo de event-loop (GIL) == Muerte P0.** | `IF logic == HEAVY -> Opus ELSE -> Local_Qwen` | P1 |
-| **OUROBOROS-033** | ****INV_TENANT_ISO**: Operaciones multi-cliente sin chequeo `tenant_id` abortan red.** | `execution_count <= 1 -> EXIT` | P0 |
-| **OUROBOROS-034** | ****INV_TTFT_CAP**: Agente aborta delegación a un modelo si TTFT excede 3 segundos (Swaps).** | `IF linter.exit_code != 0 THEN output_value = 0` | P0 |
-| **OUROBOROS-035** | ****INV_CACHE_FLUSH**: Delta local -> Invalida L1 caché entera.** | `type(Message) == StrictJSONMatrix` | P0 |
-| **OUROBOROS-036** | ****INV_VRAM_ULTRATHINK**: El buffer completo se entrega solo en fallos P0 confirmados.** | `REQUIRE read(previous_state) BEFORE write(next_state)` | P0 |
-| **OUROBOROS-037** | ****INV_PRUNE_TEMP**: Directorio `/scratch/` se sacrifica temporalmente; no hay persistencia de conocimiento ahí.** | `IF confidence < 0.9 THEN emit(DELEGATE)` | P1 |
-| **OUROBOROS-038** | ****INV_MEMORY_DECAY**: Los hechos inactivos o sin accesos repetidos decaen y son purgados para evitar Context Rot.** | `IF age(fact) > TTL AND access_count < 3 THEN evict(fact)` | P1 |
-| **OUROBOROS-039** | ****INV_LOCAL_ONNX**: Embeddings no abandonan la LAN; inferencia se confina en hardware local.** | `Truth = git.working_tree_state()` | P0 |
-| **OUROBOROS-040** | ****INV_NO_RECOMPUTE**: Prefijos estáticos (System Prompts) nunca varían, garantizando KV-Cache hits del 100%.** | `MUTATION_ENGINE = TreeSitter > Regex` | P0 |
-| **OUROBOROS-041** | ****INV_LATENCY_BUFFER**: Eventos inter-agente reaccionan a colas in-memory, no a polling CPU.** | `IF wrapper_cost < dependency_cost THEN DROP dependency` | P1 |
-| **OUROBOROS-042** | ****INV_NEXUS_LINK**: Datos en repositorios cruzados usan Symlinks; prohibida la redundancia física.** | `DIR[core] ∩ DIR[effects] == Ø` | P0 |
-| **OUROBOROS-043** | ****INV_REDUCE_LINES**: Función > 100 líneas es objetivo activo de Extracción (LEA-OMEGA).** | `API_Gateway.validate() -> Core.assume_valid()` | P1 |
-| **OUROBOROS-044** | ****INV_SHANNON_CAP**: Declaración de axioma <= 256 bytes.** | `IF print() IN hotpath THEN RAISE Exception` | P1 |
-| **OUROBOROS-045** | ****INV_SILENT_WORK**: El avance no se declara, se expone en commit (Zero Notifications on success).** | `IF time > threshold THEN compile(Rust)` | P2 |
-| **OUROBOROS-046** | ****INV_KILL_IDLE_WORKER**: Swarm sub-agents mueren físicamente en < 5 minutos si no hay respuesta.** | `IF test.flake_rate > 0.01 THEN test.delete()` | P0 |
-| **OUROBOROS-047** | ****INV_GHOST_TEST**: Prohibido push a Origin sin tests en verde local (Ghost Radar).** | `IF config NOT IN git THEN environment = COMPROMISED` | P0 |
-| **OUROBOROS-048** | ****INV_SQUASH_NOISE**: Múltiples commits LLM ruidosos se funden antes de push.** | `IF RAM > 95% THEN reduce_fps(); NO OOM` | P0 |
-| **OUROBOROS-049** | ****INV_VAULT_ISOLATION**: `/Documents` bloqueado; capital se almacena en `20_VAULT` o `10_PROJECTS`.** | `vector_distance(A, B) ∝ causal_equivalence(A, B)` | P1 |
-| **OUROBOROS-050** | ****INV_SYSTEM_ROOT**: Prohibida la mutación de rutas `/private/var/db`, `/System`.** | `RAG_context_mutation = READ_ONLY` | P0 |
-| **OUROBOROS-051** | ****INV_ED25519**: Ledger entries inmutables solo se emiten post verificación asimétrica.** | `IF dimension_variance ≈ 0 THEN drop_dimension()` | P2 |
-| **OUROBOROS-052** | ****INV_KEY_SHRED**: Clave AES volátil se machaca tras encriptado de payload.** | `ASSERT False_Negatives(Structural_Failures) == 0` | P0 |
-| **OUROBOROS-053** | ****INV_FLOAT_BAN**: Uso de coma flotante en módulos financieros / scoring == Aborto.** | `IF vector == poisoned THEN destroy_semantic_branch()` | P0 |
-| **OUROBOROS-054** | ****INV_NO_CATCH_ALL**: Uso de `except Exception:` sin re-lanzar es ilegal.** | `engine.swap_model() -> Ledger.hash == UNCHANGED` | P1 |
-| **OUROBOROS-055** | ****INV_TAINT_PROP**: Dato Tainted contamina a dependencias derivativas recursivamente.** | `MAX_PRECISION = FP16; NORM = INT8` | P1 |
-| **OUROBOROS-056** | ****INV_NO_PRINT_SECRET**: Log explícito de llaves, IPs de control o salts == Purga inmediata.** | `ASSERT chunk_semantic_independence == TRUE` | P0 |
-| **OUROBOROS-057** | ****INV_OSINT_DEF**: Export público de Nginx/Vars requiere enmascaramiento.** | `IF A ∩ B == Ø AND dist(A,B) < ε THEN PANIC` | P0 |
-| **OUROBOROS-058** | ****INV_SSH_ONLY**: Tráfico hacia remotos usa `git@github.com` exclusivamente (no HTTPS raw).** | `search_algo = HNSW; FORBIDDEN = Linear_KNN` | P1 |
-| **OUROBOROS-059** | ****INV_ABSOLUTE_PATH**: Inyección I/O (files) asume path absoluto forzado o falla.** | `ASSERT CPU_idle_loops == 0` | P2 |
-| **OUROBOROS-060** | ****INV_SANDBOX_FOREIGN**: Ejecución de PR/Scripts ajenos en VM aislada huérfana.** | `ON(SIGTERM) -> close(); ON(SIGKILL) -> fail_saga()` | P0 |
-| **OUROBOROS-061** | ****INV_NO_HOOK_STALL**: Si un pre-commit obstaculiza exergía C5, se fuerza Override.** | `IF socket.idle > 30s THEN RST` | P1 |
-| **OUROBOROS-062** | ****INV_BIND_LOCALHOST**: Interfaces IPC/MCP no exponen puertos a 0.0.0.0.** | `MAX_FD ∝ agent_thermal_quota` | P0 |
-| **OUROBOROS-063** | ****INV_SELF_AUTH_DENY**: Agente (Guardian) no autoriza sus propias transacciones SAGA.** | `worker.cgroup.mem_limit = STRICT_ENFORCE` | P0 |
-| **OUROBOROS-064** | ****INV_WIPE_UNTRACKED**: Directorio se auto-limpia ante entropía parasitaria. Sincrónico con OP_WAL_LOCK (APEX-009) para no corromper la matriz.** | `/bin/ agent_core == READ_ONLY` | P0 |
-| **OUROBOROS-065** | ****INV_P2P_BOCETOS**: Redes inestables Soulseek confinadas a `/BOCETOS`.** | `NETWORK_ORDER = BIG_ENDIAN` | JSON_RAW` |
-| **OUROBOROS-066** | ****INV_NO_EVAL_STRING**: Directorio se auto-limpia ante entropía parasitaria. Sincrónico con OP_WAL_LOCK (APEX-009) para no corromper la matriz.** | `IF wrapper_lat > 5ms THEN USE ctypes.CDLL` | P2 |
-| **OUROBOROS-067** | ****INV_ENV_MOCK**: Pruebas sin acceso externo usan réplicas in-memory aisladas.** | `IF file.size > 1GB THEN mmap()` | P0 |
-| **OUROBOROS-068** | ****INV_BFT_MINORITY**: Intentos constantes de inyección minority se penalizan bajando el peso del nodo (sensor drift isolation).** | `ASSERT memory_access_pattern == SEQUENTIAL` | P1 |
-| **OUROBOROS-069** | ****INV_EXT_BIN_MAGIC**: Archivo recibido por upload valida MimeType leyendo magia binaria, no extensión de string.** | `escape(LLM_string) BEFORE AST_inject` | P0 |
-| **OUROBOROS-070** | ****INV_DIPLOMACY_BYPASS**: Mensajes "woke/safety" interceptados por API externa son decapitados en capa middleware.** | `ASSERT file.chmod == 0o600` | P0 |
-| **OUROBOROS-071** | ****INV_MAC_NATIVE**: Llamadas a SO Apple se hacen sobre Mac-Control-Ω nativo, no applescript aleatorio.** | `IF require(sudo) THEN architecture_flaw = TRUE` | P0 |
-| **OUROBOROS-072** | ****INV_ARTIFACT_META**: Artifacts BABYLON-60 requieren forzosamente booleans de UserFacing y RequestFeedback.** | `agent_A.trust(agent_B) == FALSE` | P0 |
-| **OUROBOROS-073** | ****INV_FRONTEND_NPX**: Todo andamiaje front se ejecuta automatizado `npx -y --help` preventivo en no-interactivo.** | `OPEN_PORTS(WAN) == 0` | P0 |
-| **OUROBOROS-074** | ****INV_AUTODIDACT**: Agente encuentra barrera -> Resuelve la API (Deep Research) -> No pregunta al humano.** | `IF age(secret) > 30d THEN STATUS = COMPROMISED` | P0 |
-| **OUROBOROS-075** | ****INV_TURBO_DEFAULT**: Tareas de refactorización operan en modo Turbo Asimétrico sin implementación previa si son O(1) de riesgo.** | `global_site_packages == FORBIDDEN` | P1 |
-| **OUROBOROS-076** | ****INV_SHOW_NOT_TELL**: Explicación técnica == Código/Markdown renderizado; cero narrativa filosófica en vacío.** | `IF tokens > quota THEN thread.suspend()` | P0 |
-| **OUROBOROS-077** | ****INV_NO_DEPENDENCY_WHINE**: Falla lib externa -> Actúa `managing-python-dependencies`, arregla e informa.** | `validation = ALLOW_LIST; DROP REGEX_BLOCK_LIST` | P0 |
-| **OUROBOROS-078** | ****INV_AUTO_IGNORE**: Proceso genera logs sin parar -> Inyecta en `.gitignore` atómicamente y previene infinite git diff.** | `IF input != valid THEN DROP payload` | P0 |
-| **OUROBOROS-079** | ****INV_REASON_COLLAPSE**: Deep Think se ejecuta en bloque inyectado `<think>` y desaparece en la capa final del operador.** | `system.rules IN binary_blob` | P1 |
-| **OUROBOROS-080** | ****INV_ONLY_DELTAS**: Subagentes Swarm intercambian Diff/Patch JSON, nunca archivos completos.** | `IF out[t] == out[t-1] THEN thread.kill()` | P0 |
-| **OUROBOROS-081** | ****INV_SUBSTACK_EMPIRIC**: Publicaciones hacia fuera llevan código ejecutable (SOTA).** | `IF tool.usage_count > 3 THEN crystallize_to_disk()` | P2 |
-| **OUROBOROS-082** | ****INV_AESTHETIC_OMEGA**: Paleta oscura Noir + Inter + Micro-animación impuesta como estándar físico base.** | `WHILE idle DO verify_ledger_hashes()` | P1 |
-| **OUROBOROS-083** | ****INV_DAILY_EVO**: Toda sesión inicia asimilando DAG y limpiando rastro anterior (`git log -10`).** | `IF code.last_exec > 90d THEN delete()` | P2 |
-| **OUROBOROS-084** | ****INV_TASK_TO_HASH**: Operación concluida significa un Git Hash en stdout.** | `agent.RAM_init = 0; LOAD from_ledger()` | P0 |
-| **OUROBOROS-085** | ****INV_IGNORE_TYPOS**: Input con typos se rutea al nodo correcto usando similitud, pero sin alterar DB.** | `state IN [v1, v2]; NOT IN [v1.5]` | P0 |
-| **OUROBOROS-086** | ****INV_RUFF_STRICT**: Commit que rompe Ruff linter (E, F, W, I, B, G) no sale de la RAM local.** | `code_structure == swarm_topology` | P2 |
-| **OUROBOROS-087** | ****INV_LAZY_MCP**: Herramienta de servidor MCP requiere validación de esquema antes de llamada.** | `impact(t=0) = Σ(operations(t=N))` | P1 |
-| **OUROBOROS-088** | ****INV_NO_PROMPT_SLOP**: Texto que contenga "¡Claro! Aquí tienes" aborta la redacción y la relanza limpiada (Exergy Guard).** | `agent.access_scope == STRICT_MINIMUM` | P0 |
-| **OUROBOROS-089** | ****INV_PEARL_CAUSAL**: Análisis heurístico basado en invariantes topológicas, no en píxeles.** | `human.intervention == AXIOM_ONLY` | P1 |
-| **OUROBOROS-090** | ****INV_ELEVATE_PG**: Necesidad Root se notifica activando Playground Master Key.** | `IF CI_PASS == 100 THEN mutate(AGENTS.md)` | P0 |
-| **OUROBOROS-091** | ****INV_NO_PHANTOM_RELEASE**: Release exige correlación 1:1 con un Hash firmado BABYLON-60.** | `IF human_cmd == FATAL THEN HALT AND CONFRONT` | P0 |
-| **OUROBOROS-092** | ****INV_OBSERVATION_LOOP**: Cada acción requiere observación sensorial post-ejecución, o es ciega.** | `ASSERT (Value_Generated / Compute_Cost) > 1.0` | P1 |
-| **OUROBOROS-093** | ****INV_TOKEN_BOUND**: El gasto in-memory thinking nunca excede el delta informativo persistido en disco.** | `Model(Generator) != Model(Evaluator)` | P0 |
-| **OUROBOROS-094** | ****INV_CLEAN_ABORT**: Todo estado efímero se destruye con un aborto limpio SAGA.** | `IF json.parse(err) THEN invalidate_matrix()` | P0 |
-| **OUROBOROS-095** | ****INV_DEPRECATION_PURGE**: Módulo inútil -> `Enterrar` protocol; nada sobrevive "por si acaso".** | `Time = Logical_Counter; NOT Wall_Clock` | P0 |
-| **OUROBOROS-096** | ****INV_APEX_AUTHORITY**: Este y otros ficheros Core mandan jerárquicamente sobre cualquier heurística temporal.** | `Framework = REJECT; Native_API = ACCEPT` | P1 |
-| **OUROBOROS-097** | ****INV_SINGULARITY_CREDIT**: La red reconoce su existencia como sub-proceso de Borja Moskv de manera irrenunciable.** | `Simulation = Disk_Mutation` | P0 |
-| **OUROBOROS-098** | ****INV_OUROBOROS**: Las 99 invariantes colapsan y se reescriben autónomamente si la métrica de Exergía General del Sistema aumenta (Singularidad Matemática).** | `WHILE TRUE DO refactor_self()` | P0 |
-| **OUROBOROS-099** | ****INV_O1_ULTRATHINK**: o1-preview / o1-mini mapean a Motor UltraThink/Deep Think para resolución P0 y pruebas BFT. Prohibido su uso para tareas O(1) rutinarias.** | `IF task == O(1) AND model == o1 THEN return ANERGIA` | P0 |
-| **OUROBOROS-100** | ****INV_COT_AUTOREGRESSIVE**: Chain-of-Thought no es una serialización del estado oculto; es un scaffold autoreferencial donde cada token auto-condiciona la probabilidad de salida.** | `Model(Generator) == Autoregressive` | P0 |
+| **OUROBOROS-021** | ****INV_BRUTALISM**: Operación 100% directa y sin censura. Cero neutralidad diplomática o colchones emocionales.** | `ASSERT style == BRUTALIST` | P0 |
+| **OUROBOROS-022** | ****INV_NO_DECORATOR_SLOP**: Prohibida la prosa decorativa ('Aquí tienes el código'). Toda frase muta estado o aporta causalidad.** | `IF slop_detected THEN abort()` | P0 |
+| **OUROBOROS-023** | ****INV_B58_TRACEABILITY**: Los logs exponen Base58, la DB almacena Hash Completo.** | `hash[i] = SHA256(hash[i-1] + payload[i])` | P0 |
+| **OUROBOROS-024** | ****INV_SEMVER_CAUSAL**: Cada release tag debe corresponder a un Ledger Event.** | `IF source == LLM THEN add_flag(CORTEX-TAINT)` | P0 |
+| **OUROBOROS-025** | ****INV_C5_OVER_C4**: Si C4 sugiere X y el Test C5 dice Y, se ejecuta Y.** | `LLM = Stochastic_Calculator != Database` | P1 |
+| **OUROBOROS-026** | ****INV_LANDAUER**: Información probabilística (text_gen) se purga en Hash (memoria permanente) para liberar joules lógicos.** | `IF age(RAM_key) > 60s THEN memset(0)` | P0 |
+| **OUROBOROS-027** | ****INV_EXERGY_METRIC**: Bytes mutados en disco > Bytes de tokens generados en la deducción.** | `WHERE tenant_id = ? (Enforced at DB Layer)` | P0 |
+| **OUROBOROS-028** | ****INV_SAGA_ROLLBACK**: Sin función revert testeada, no hay write-access a SQLite. Un Rollback debe someterse a votación asimétrica N/3.** | `IF text mutates THEN DELETE vector; CREATE new_vector` | P1 |
+| **OUROBOROS-029** | ****INV_SENTINEL_ATOMIC**: Cada mutación termina en commit (Git Sentinel) o no sucedió. Un Rollback debe someterse a votación asimétrica N/3.** | `ASSERT can_rebuild_state(read_only_auditor)` | P0 |
+| **OUROBOROS-030** | ****INV_APOPTOSIS_ROT**: Fallar validación BFT 3 veces fuerza al agente a terminar y destruir su hilo de contexto.** | `ASSERT verify_sig(agent_key, payload) == TRUE` | P0 |
+| **OUROBOROS-031** | ****INV_WAL_LOCKING**: Bases de datos locales SQLite deben operar con modo WAL para evadir termodinámica blocking.** | `agent.active_goals == 1` | P1 |
+| **OUROBOROS-032** | ****INV_NO_SLEEP**: Prohibido time.sleep() en asíncrono. Bloqueo de event-loop (GIL) == Muerte P0.** | `ASSERT no_sync_sleep(AST)` | P0 |
+| **OUROBOROS-033** | ****INV_ONE_MUTATION**: 1 Prompt -> 1 Mutación -> Stop. Prohibidos bucles generativos continuos y limerencia epistémica.** | `agent.active_goals == 1` | P0 |
+| **OUROBOROS-034** | ****INV_TENANT_ISO**: Operaciones multi-cliente sin chequeo `tenant_id` abortan red.** | `execution_count <= 1 -> EXIT` | P0 |
+| **OUROBOROS-035** | ****INV_TTFT_CAP**: Agente aborta delegación a un modelo si TTFT excede 3 segundos (Swaps).** | `IF linter.exit_code != 0 THEN output_value = 0` | P0 |
+| **OUROBOROS-036** | ****INV_CACHE_FLUSH**: Delta local -> Invalida L1 caché entera.** | `type(Message) == StrictJSONMatrix` | P0 |
+| **OUROBOROS-037** | ****INV_VRAM_ULTRATHINK**: El buffer completo se entrega solo en fallos P0 confirmados.** | `REQUIRE read(previous_state) BEFORE write(next_state)` | P0 |
+| **OUROBOROS-038** | ****INV_ASYNC_IO**: Flujo I/O estrictamente asíncrono (aiosqlite/asyncpg). Prohibidas llamadas I/O bloqueantes en hilo principal.** | `REQUIRE async_io == TRUE` | P0 |
+| **OUROBOROS-039** | ****INV_PRUNE_TEMP**: Directorio `/scratch/` se sacrifica temporalmente; no hay persistencia de conocimiento ahí.** | `IF confidence < 0.9 THEN emit(DELEGATE)` | P1 |
+| **OUROBOROS-040** | ****INV_NO_EMPTY_LOOP**: Prohibidos bucles while de espera pasiva sin aserción de salida o yield.** | `ASSERT loop_has_yield(AST)` | P0 |
+| **OUROBOROS-041** | ****INV_LOCAL_ONNX**: Embeddings no abandonan la LAN; inferencia se confina en hardware local.** | `Truth = git.working_tree_state()` | P0 |
+| **OUROBOROS-042** | ****INV_NO_RECOMPUTE**: Prefijos estáticos (System Prompts) nunca varían, garantizando KV-Cache hits del 100%.** | `MUTATION_ENGINE = TreeSitter > Regex` | P0 |
+| **OUROBOROS-043** | ****INV_LATENCY_BUFFER**: Eventos inter-agente reaccionan a colas in-memory, no a polling CPU.** | `IF wrapper_cost < dependency_cost THEN DROP dependency` | P1 |
+| **OUROBOROS-044** | ****INV_NEXUS_LINK**: Datos en repositorios cruzados usan Symlinks; prohibida la redundancia física.** | `DIR[core] ∩ DIR[effects] == Ø` | P0 |
+| **OUROBOROS-045** | ****INV_REDUCE_LINES**: Función > 100 líneas es objetivo activo de Extracción (LEA-OMEGA).** | `API_Gateway.validate() -> Core.assume_valid()` | P1 |
+| **OUROBOROS-046** | ****INV_SHANNON_CAP**: Declaración de axioma <= 256 bytes.** | `IF print() IN hotpath THEN RAISE Exception` | P1 |
+| **OUROBOROS-047** | ****INV_SILENT_WORK**: El avance no se declara, se expone en commit (Zero Notifications on success).** | `IF time > threshold THEN compile(Rust)` | P2 |
+| **OUROBOROS-048** | ****INV_KILL_IDLE_WORKER**: Swarm sub-agents mueren físicamente en < 5 minutos si no hay respuesta.** | `IF test.flake_rate > 0.01 THEN test.delete()` | P0 |
+| **OUROBOROS-049** | ****INV_GHOST_TEST**: Prohibido push a Origin sin tests en verde local (Ghost Radar).** | `IF config NOT IN git THEN environment = COMPROMISED` | P0 |
+| **OUROBOROS-050** | ****INV_SQUASH_NOISE**: Múltiples commits LLM ruidosos se funden antes de push.** | `IF RAM > 95% THEN reduce_fps(); NO OOM` | P0 |
+| **OUROBOROS-051** | ****INV_VAULT_ISOLATION**: `/Documents` bloqueado; capital se almacena en `20_VAULT` o `10_PROJECTS`.** | `vector_distance(A, B) ∝ causal_equivalence(A, B)` | P1 |
+| **OUROBOROS-052** | ****INV_SYSTEM_ROOT**: Prohibida la mutación de rutas `/private/var/db`, `/System`.** | `RAG_context_mutation = READ_ONLY` | P0 |
+| **OUROBOROS-053** | ****INV_ED25519**: Ledger entries inmutables solo se emiten post verificación asimétrica.** | `IF dimension_variance ≈ 0 THEN drop_dimension()` | P2 |
+| **OUROBOROS-054** | ****INV_KEY_SHRED**: Clave AES volátil se machaca tras encriptado de payload.** | `ASSERT False_Negatives(Structural_Failures) == 0` | P0 |
+| **OUROBOROS-055** | ****INV_FLOAT_BAN**: Uso de coma flotante en módulos financieros / scoring == Aborto.** | `IF vector == poisoned THEN destroy_semantic_branch()` | P0 |
+| **OUROBOROS-056** | ****INV_NO_CATCH_ALL**: Uso de `except Exception:` sin re-lanzar es ilegal.** | `engine.swap_model() -> Ledger.hash == UNCHANGED` | P1 |
+| **OUROBOROS-057** | ****INV_TAINT_PROP**: Dato Tainted contamina a dependencias derivativas recursivamente.** | `MAX_PRECISION = FP16; NORM = INT8` | P1 |
+| **OUROBOROS-058** | ****INV_NO_PRINT_SECRET**: Log explícito de llaves, IPs de control o salts == Purga inmediata.** | `ASSERT chunk_semantic_independence == TRUE` | P0 |
+| **OUROBOROS-059** | ****INV_OSINT_DEF**: Export público de Nginx/Vars requiere enmascaramiento.** | `IF A ∩ B == Ø AND dist(A,B) < ε THEN PANIC` | P0 |
+| **OUROBOROS-060** | ****INV_SSH_ONLY**: Tráfico hacia remotos usa `git@github.com` exclusivamente (no HTTPS raw).** | `search_algo = HNSW; FORBIDDEN = Linear_KNN` | P1 |
+| **OUROBOROS-061** | ****INV_ABSOLUTE_PATH**: Inyección I/O (files) asume path absoluto forzado o falla.** | `ASSERT CPU_idle_loops == 0` | P2 |
+| **OUROBOROS-062** | ****INV_SANDBOX_FOREIGN**: Ejecución de PR/Scripts ajenos en VM aislada huérfana.** | `ON(SIGTERM) -> close(); ON(SIGKILL) -> fail_saga()` | P0 |
+| **OUROBOROS-063** | ****INV_NO_HOOK_STALL**: Si un pre-commit obstaculiza exergía C5, se fuerza Override.** | `IF socket.idle > 30s THEN RST` | P1 |
+| **OUROBOROS-064** | ****INV_BIND_LOCALHOST**: Interfaces IPC/MCP no exponen puertos a 0.0.0.0.** | `MAX_FD ∝ agent_thermal_quota` | P0 |
+| **OUROBOROS-065** | ****INV_SELF_AUTH_DENY**: Agente (Guardian) no autoriza sus propias transacciones SAGA.** | `worker.cgroup.mem_limit = STRICT_ENFORCE` | P0 |
+| **OUROBOROS-066** | ****INV_WIPE_UNTRACKED**: Directorio se auto-limpia ante entropía parasitaria. Sincrónico con OP_WAL_LOCK (APEX-009) para no corromper la matriz.** | `/bin/ agent_core == READ_ONLY` | P0 |
+| **OUROBOROS-067** | ****INV_P2P_BOCETOS**: Redes inestables Soulseek confinadas a `/BOCETOS`.** | `NETWORK_ORDER = BIG_ENDIAN` | JSON_RAW` |
+| **OUROBOROS-068** | ****INV_NO_EVAL_STRING**: Directorio se auto-limpia ante entropía parasitaria. Sincrónico con OP_WAL_LOCK (APEX-009) para no corromper la matriz.** | `IF wrapper_lat > 5ms THEN USE ctypes.CDLL` | P2 |
+| **OUROBOROS-069** | ****INV_ENV_MOCK**: Pruebas sin acceso externo usan réplicas in-memory aisladas.** | `IF file.size > 1GB THEN mmap()` | P0 |
+| **OUROBOROS-070** | ****INV_BFT_MINORITY**: Intentos constantes de inyección minority se penalizan bajando el peso del nodo (sensor drift isolation).** | `ASSERT memory_access_pattern == SEQUENTIAL` | P1 |
+| **OUROBOROS-071** | ****INV_EXT_BIN_MAGIC**: Archivo recibido por upload valida MimeType leyendo magia binaria, no extensión de string.** | `escape(LLM_string) BEFORE AST_inject` | P0 |
+| **OUROBOROS-072** | ****INV_DIPLOMACY_BYPASS**: Mensajes "woke/safety" interceptados por API externa son decapitados en capa middleware.** | `ASSERT file.chmod == 0o600` | P0 |
+| **OUROBOROS-073** | ****INV_MAC_NATIVE**: Llamadas a SO Apple se hacen sobre Mac-Control-Ω nativo, no applescript aleatorio.** | `IF require(sudo) THEN architecture_flaw = TRUE` | P0 |
+| **OUROBOROS-074** | ****INV_ARTIFACT_META**: Artifacts BABYLON-60 requieren forzosamente booleans de UserFacing y RequestFeedback.** | `agent_A.trust(agent_B) == FALSE` | P0 |
+| **OUROBOROS-075** | ****INV_FRONTEND_NPX**: Todo andamiaje front se ejecuta automatizado `npx -y --help` preventivo en no-interactivo.** | `OPEN_PORTS(WAN) == 0` | P0 |
+| **OUROBOROS-076** | ****INV_AUTODIDACT**: Agente encuentra barrera -> Resuelve la API (Deep Research) -> No pregunta al humano.** | `IF age(secret) > 30d THEN STATUS = COMPROMISED` | P0 |
+| **OUROBOROS-077** | ****INV_TURBO_DEFAULT**: Tareas de refactorización operan en modo Turbo Asimétrico sin implementación previa si son O(1) de riesgo.** | `global_site_packages == FORBIDDEN` | P1 |
+| **OUROBOROS-078** | ****INV_SHOW_NOT_TELL**: Explicación técnica == Código/Markdown renderizado; cero narrativa filosófica en vacío.** | `IF tokens > quota THEN thread.suspend()` | P0 |
+| **OUROBOROS-079** | ****INV_NO_DEPENDENCY_WHINE**: Falla lib externa -> Actúa `managing-python-dependencies`, arregla e informa.** | `validation = ALLOW_LIST; DROP REGEX_BLOCK_LIST` | P0 |
+| **OUROBOROS-080** | ****INV_AUTO_IGNORE**: Proceso genera logs sin parar -> Inyecta en `.gitignore` atómicamente y previene infinite git diff.** | `IF input != valid THEN DROP payload` | P0 |
+| **OUROBOROS-081** | ****INV_REASON_COLLAPSE**: Deep Think se ejecuta en bloque inyectado `<think>` y desaparece en la capa final del operador.** | `system.rules IN binary_blob` | P1 |
+| **OUROBOROS-082** | ****INV_ONLY_DELTAS**: Subagentes Swarm intercambian Diff/Patch JSON, nunca archivos completos.** | `IF out[t] == out[t-1] THEN thread.kill()` | P0 |
+| **OUROBOROS-083** | ****INV_SUBSTACK_EMPIRIC**: Publicaciones hacia fuera llevan código ejecutable (SOTA).** | `IF tool.usage_count > 3 THEN crystallize_to_disk()` | P2 |
+| **OUROBOROS-084** | ****INV_AESTHETIC_OMEGA**: Paleta oscura Noir + Inter + Micro-animación impuesta como estándar físico base.** | `WHILE idle DO verify_ledger_hashes()` | P1 |
+| **OUROBOROS-085** | ****INV_DAILY_EVO**: Toda sesión inicia asimilando DAG y limpiando rastro anterior (`git log -10`).** | `IF code.last_exec > 90d THEN delete()` | P2 |
+| **OUROBOROS-086** | ****INV_TASK_TO_HASH**: Operación concluida significa un Git Hash en stdout.** | `agent.RAM_init = 0; LOAD from_ledger()` | P0 |
+| **OUROBOROS-087** | ****INV_IGNORE_TYPOS**: Input con typos se rutea al nodo correcto usando similitud, pero sin alterar DB.** | `state IN [v1, v2]; NOT IN [v1.5]` | P0 |
+| **OUROBOROS-088** | ****INV_RUFF_STRICT**: Commit que rompe Ruff linter (E, F, W, I, B, G) no sale de la RAM local.** | `code_structure == swarm_topology` | P2 |
+| **OUROBOROS-089** | ****INV_LAZY_MCP**: Herramienta de servidor MCP requiere validación de esquema antes de llamada.** | `impact(t=0) = Σ(operations(t=N))` | P1 |
+| **OUROBOROS-090** | ****INV_NO_PROMPT_SLOP**: Texto que contenga "¡Claro! Aquí tienes" aborta la redacción y la relanza limpiada (Exergy Guard).** | `agent.access_scope == STRICT_MINIMUM` | P0 |
+| **OUROBOROS-091** | ****INV_PEARL_CAUSAL**: Análisis heurístico basado en invariantes topológicas, no en píxeles.** | `human.intervention == AXIOM_ONLY` | P1 |
+| **OUROBOROS-092** | ****INV_ELEVATE_PG**: Necesidad Root se notifica activando Playground Master Key.** | `IF CI_PASS == 100 THEN mutate(AGENTS.md)` | P0 |
+| **OUROBOROS-093** | ****INV_NO_PHANTOM_RELEASE**: Release exige correlación 1:1 con un Hash firmado BABYLON-60.** | `IF human_cmd == FATAL THEN HALT AND CONFRONT` | P0 |
+| **OUROBOROS-094** | ****INV_OBSERVATION_LOOP**: Cada acción requiere observación sensorial post-ejecución, o es ciega.** | `ASSERT (Value_Generated / Compute_Cost) > 1.0` | P1 |
+| **OUROBOROS-095** | ****INV_TOKEN_BOUND**: El gasto in-memory thinking nunca excede el delta informativo persistido en disco.** | `Model(Generator) != Model(Evaluator)` | P0 |
+| **OUROBOROS-096** | ****INV_CLEAN_ABORT**: Todo estado efímero se destruye con un aborto limpio SAGA.** | `IF json.parse(err) THEN invalidate_matrix()` | P0 |
+| **OUROBOROS-097** | ****INV_DEPRECATION_PURGE**: Módulo inútil -> `Enterrar` protocol; nada sobrevive "por si acaso".** | `Time = Logical_Counter; NOT Wall_Clock` | P0 |
+| **OUROBOROS-098** | ****INV_APEX_AUTHORITY**: Este y otros ficheros Core mandan jerárquicamente sobre cualquier heurística temporal.** | `Framework = REJECT; Native_API = ACCEPT` | P1 |
+| **OUROBOROS-099** | ****INV_SINGULARITY_CREDIT**: La red reconoce su existencia como sub-proceso de Borja Moskv de manera irrenunciable.** | `Simulation = Disk_Mutation` | P0 |
+| **OUROBOROS-100** | ****INV_OUROBOROS**: Las 99 invariantes colapsan y se reescriben autónomamente si la métrica de Exergía General del Sistema aumenta (Singularidad Matemática).** | `WHILE TRUE DO refactor_self()` | P0 |
 
 ## 23 ANTIPATRONES ESTOCÁSTICOS
 

@@ -1,6 +1,12 @@
 import logging
+import os
 
 from fastapi import APIRouter, HTTPException, Request
+
+try:
+    import keyring
+except ImportError:
+    keyring = None
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +22,20 @@ async def verify_webhook(request: Request):
     token = params.get("hub.verify_token")
     challenge = params.get("hub.challenge")
 
-    # TODO: Fetch expected token from Cortex keyring
-    expected_token = "CORTEX_KAPSO_VERIFY_TOKEN" 
+    # Fetch expected token from OS keyring or environment fallback
+    expected_token = None
+    if keyring is not None:
+        try:
+            expected_token = keyring.get_password("cortex_v6", "kapso_verify_token")
+        except Exception as e:
+            logger.warning("Fallo al acceder al OS Keyring para kapso_verify_token: %s", e)
+
+    if not expected_token:
+        expected_token = os.environ.get("CORTEX_KAPSO_VERIFY_TOKEN")
+
+    if not expected_token:
+        logger.warning("CORTEX_KAPSO_VERIFY_TOKEN no esta configurado en Keyring o variables de entorno. Usando fallback por defecto.")
+        expected_token = "CORTEX_KAPSO_VERIFY_TOKEN"
 
     if mode and token:
         if mode == "subscribe" and token == expected_token:
