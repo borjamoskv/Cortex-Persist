@@ -12,13 +12,16 @@ from __future__ import annotations
 
 import logging
 import os
+from pathlib import Path
 from typing import Any
 
 from cortex.pipeline import ContextPacket
 
 logger = logging.getLogger("cortex.context.assembler")
 
-KNOWLEDGE_DIR = os.path.expanduser("~/.gemini/antigravity/knowledge")
+KNOWLEDGE_DIR = os.environ.get(
+    "CORTEX_KNOWLEDGE_DIR", os.path.expanduser("~/.gemini/antigravity/knowledge")
+)
 MAX_CONTEXT_TOKENS = 8000  # Hard limit to prevent context overflow
 
 
@@ -36,9 +39,11 @@ class ContextAssembler:
         self,
         fact_store: Any | None = None,
         vsa_adapter: Any | None = None,
+        knowledge_dir: str | Path | None = None,
     ):
         self._facts = fact_store
         self._vsa = vsa_adapter
+        self._knowledge_dir = str(knowledge_dir) if knowledge_dir else KNOWLEDGE_DIR
 
     def assemble(
         self,
@@ -69,6 +74,10 @@ class ContextAssembler:
         if self._vsa and token_budget > 500:
             token_budget = self._search_vsa(intent, packet, token_budget)
 
+        # ── Phase 3: Knowledge Item file system scan ──
+        if token_budget > 300:
+            token_budget = self._scan_knowledge_dir(intent, packet, token_budget)
+
         # ── Phase 4: FactStore temporal query ──
         if self._facts and token_budget > 200:
             self._query_facts(intent, packet, tenant_id)
@@ -82,10 +91,71 @@ class ContextAssembler:
         )
         return packet
 
+    def _scan_knowledge_dir(self, intent: str, packet: ContextPacket, budget: int) -> int:
+        """Scan the local self._knowledge_dir for relevant files matching query terms."""
+        if not os.path.exists(self._knowledge_dir) or budget <= 100:
+            return budget
+
+        try:
+            # Tokenize intent into lowercase keywords for simple scanning
+            query_terms = [t.lower() for t in intent.split() if len(t) > 3]
+            if not query_terms:
+                return budget
+
+            # Scan files recursively
+            for root, _, files in os.walk(self._knowledge_dir):
+                for file in files:
+                    if file.endswith(".md") or file.endswith(".txt"):
+                        path = os.path.join(root, file)
+                        # Check if file name or path contains query terms
+                        path_lower = path.lower()
+                        match_count = sum(1 for term in query_terms if term in path_lower)
+
+                        if match_count > 0:
+                            try:
+                                with open(path, encoding="utf-8") as f:
+                                    content = f.read()
+
+                                token_cost = len(content) // 4
+                                if token_cost > budget:
+                                    content = content[: budget * 4]
+                                    token_cost = budget
+
+                                relative_name = os.path.relpath(path, self._knowledge_dir)
+
+                                # Avoid duplicating hints
+                                if any(ki["source"] == relative_name for ki in packet.knowledge_items):
+                                    continue
+
+                                packet.knowledge_items.append(
+                                    {
+                                        "source": relative_name,
+                                        "content": content,
+                                        "method": "fs_scan",
+                                        "tokens": token_cost,
+                                    }
+                                )
+                                packet.relevance_scores[relative_name] = 0.5 + (0.1 * match_count)
+                                budget -= token_cost
+                                logger.debug(
+                                    "  [FS_SCAN] Loaded KI '%s' (%d tokens)",
+                                    relative_name,
+                                    token_cost,
+                                )
+
+                                if budget <= 0:
+                                    return 0
+                            except OSError:
+                                continue
+        except Exception as e:
+            logger.warning("  [FS_SCAN] Scan failed: %s", e)
+
+        return budget
+
     def _resolve_hints(self, hints: list[str], packet: ContextPacket, budget: int) -> int:
         """Force-include specified Knowledge Items by name."""
         for hint in hints:
-            ki_path = os.path.join(KNOWLEDGE_DIR, hint, "artifacts", "overview.md")
+            ki_path = os.path.join(self._knowledge_dir, hint, "artifacts", "overview.md")
             if os.path.exists(ki_path):
                 try:
                     with open(ki_path, encoding="utf-8") as f:

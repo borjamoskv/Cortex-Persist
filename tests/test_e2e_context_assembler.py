@@ -33,13 +33,39 @@ from cortex.delivery.manager import DeliveryManager
 class TestContextAssembler:
     """Test the unified context assembler."""
 
-    def test_empty_assembly(self):
-        assembler = ContextAssembler()
+    def test_empty_assembly(self, tmp_path):
+        assembler = ContextAssembler(knowledge_dir=tmp_path)
         ctx = assembler.assemble(intent="test query")
         assert isinstance(ctx, ContextPacket)
         assert ctx.total_tokens == 0
 
-    def test_hint_resolution_missing_ki(self):
-        assembler = ContextAssembler()
+    def test_hint_resolution_missing_ki(self, tmp_path):
+        assembler = ContextAssembler(knowledge_dir=tmp_path)
         ctx = assembler.assemble(intent="test", hints=["nonexistent_ki_12345"])
         assert len(ctx.knowledge_items) == 0  # Should not crash
+
+    def test_filesystem_knowledge_scan(self, tmp_path, monkeypatch):
+        ki_dir = tmp_path / "knowledge"
+        ki_dir.mkdir()
+
+        # Create matching file
+        matching_file = ki_dir / "quantum_computing.md"
+        matching_file.write_text("Quantum computers use qubits instead of bits.", encoding="utf-8")
+
+        # Create non-matching file
+        non_matching_file = ki_dir / "baking_bread.txt"
+        non_matching_file.write_text("To bake sourdough bread, you need flour, water, and salt.", encoding="utf-8")
+
+        # Monkeypatch KNOWLEDGE_DIR attribute
+        import cortex.context.assembler as assembler_mod
+        monkeypatch.setattr(assembler_mod, "KNOWLEDGE_DIR", str(ki_dir))
+
+        assembler = ContextAssembler()
+        ctx = assembler.assemble(intent="tell me about quantum computing")
+
+        # Verify quantum file matched
+        assert len(ctx.knowledge_items) == 1
+        assert ctx.knowledge_items[0]["source"] == "quantum_computing.md"
+        assert "qubits" in ctx.knowledge_items[0]["content"]
+        assert ctx.relevance_scores["quantum_computing.md"] > 0.0
+
