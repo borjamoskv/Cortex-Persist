@@ -1083,6 +1083,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 64: Motor de Creencias e Infraestructura de Consolidación Cognitiva (Belief Engine & Consolidation Substrate)
+- **Target**: `cortex/extensions/hypervisor/belief_engine.py`, `babylon60/compaction/consolidator.py`, `babylon60/engine/logic/tribunal.py`
+- **Objective**: Codificación e integración nativa del `BeliefEngine` y el `BeliefConsolidator` (el ciclo de "sueño" de la IA). Este substrato intercepta la ingesta de hechos, gestiona la máquina de estados de los `BeliefObjects` (Active, Contested, Discarded) y delega contradicciones y dependencias estructurales al `Tribunal` (System 2) para anular la entropía del conocimiento.
+- **Yield Target**: Consolidación atómica de eventos en hechos de creencia y aislamiento de subgrafos de dependencias contradictorias en O(1).
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Código en `cortex/extensions/hypervisor/belief_engine.py` y consolidadores asíncronos en `babylon60/compaction/consolidator.py`.
+```yaml
+Claim: Belief engine and sleep cycle consolidation engine validated.
+Proof:
+  Base: "pytest verifies belief state transitions (Active->Contested->Discarded) and consolidator pipeline."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
