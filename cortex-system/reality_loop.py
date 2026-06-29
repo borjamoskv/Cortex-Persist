@@ -504,6 +504,17 @@ async def run_reality_cycle(metric: Dict[str, Any], bus: DistributedEventBus) ->
 
     save_json(STATE_PATH, state)
 
+    # M5: Thermodynamic Expulsion (Suntsitu)
+    pruned_count = 0
+    try:
+        from babylon60.extensions.artist_cortex.artist_cortex import ArtistCortexEngine
+        engine = ArtistCortexEngine(db_path="artist_cortex.db")
+        pruned_count = engine.suntsitu_prune(attention_threshold=0.2, originality_threshold=0.1)
+        engine.close()
+    except Exception as e:
+        # Failsafe for missing sqlite-vec or DB lock
+        pass
+
     event = await emit_event(
         source="reality_loop",
         event_type="reality_cycle_completed",
@@ -512,6 +523,7 @@ async def run_reality_cycle(metric: Dict[str, Any], bus: DistributedEventBus) ->
             "action": action,
             "job_path": str(job_path),
             "state_path": str(STATE_PATH),
+            "suntsitu_pruned_count": pruned_count,
         },
         bus=bus
     )
