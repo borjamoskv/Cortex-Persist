@@ -10,7 +10,7 @@ from cortex.agents.landauer_daemon import create_landauer_daemon
 async def test_landauer_daemon_lifecycle():
     agent = create_landauer_daemon("landauer-test", SqliteMessageBus(db_path=_uid()), compaction_interval_seconds=0.1)
     
-    assert agent.name == "landauer-test"
+    assert agent.manifest.agent_id == "landauer-test"
     assert agent._daemon_task is None
     
     await agent.start()

@@ -23,7 +23,7 @@ async def test_maxwell_entropy_calculation():
 async def test_maxwell_routing():
     bus = SqliteMessageBus(db_path=_uid())
     agent = create_maxwell_router("maxwell-test", bus, entropy_threshold=0.8)
-    await agent.bind_bus(bus)
+    # bus is already bound
     
     # Since it's a test, we just verify initialization and binding
-    assert agent.name == "maxwell-test"
+    assert agent.manifest.agent_id == "maxwell-test"

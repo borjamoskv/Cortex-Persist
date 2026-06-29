@@ -45,16 +45,16 @@ class LandauerDaemonAgent(BaseAgent):
 
     async def _compaction_loop(self) -> None:
         """Continuous background loop for Context Compaction."""
-        logger.info(f"[{self.name}] Landauer Daemon started. Interval: {self.compaction_interval_seconds}s")
+        logger.info(f"[{self.manifest.agent_id}] Landauer Daemon started. Interval: {self.compaction_interval_seconds}s")
         while True:
             try:
                 await asyncio.sleep(self.compaction_interval_seconds)
                 await self._compact_memory()
             except asyncio.CancelledError:
-                logger.info(f"[{self.name}] Landauer Daemon stopped.")
+                logger.info(f"[{self.manifest.agent_id}] Landauer Daemon stopped.")
                 break
             except Exception as e:
-                logger.error(f"[{self.name}] Landauer Daemon error: {e}")
+                logger.error(f"[{self.manifest.agent_id}] Landauer Daemon error: {e}")
                 # Prevent silent thread death # noqa: BLE001
 
     async def _compact_memory(self) -> None:
@@ -64,7 +64,7 @@ class LandauerDaemonAgent(BaseAgent):
 
         # Here we would interface with `WorkingMemory` or `MessageBus` to purge old items.
         # For now, it's a simulated logging of the thermodynamic cost.
-        logger.info(f"[{self.name}] Executing Context Compaction (Landauer erasure cost applied).")
+        logger.info(f"[{self.manifest.agent_id}] Executing Context Compaction (Landauer erasure cost applied).")
         # In a real C5-REAL implementation, we would query the bus:
         # obsolete_messages = await self.bus.query(older_than=...)
         # await self.bus.delete(obsolete_messages)
@@ -73,10 +73,11 @@ class LandauerDaemonAgent(BaseAgent):
 def create_landauer_daemon(name: str, bus: MessageBus, compaction_interval_seconds: float = 60.0) -> LandauerDaemonAgent:
     """Factory for LandauerDaemonAgent."""
     manifest = AgentManifest(
-        name=name,
-        role=AgentRole.WORKER,
-        description="Background daemon for pruning context and preventing Context Rot.",
-        can_delegate=False
+        agent_id=name,
+        
+        purpose="Background daemon for pruning context and preventing Context Rot.",
+        can_delegate=False,
+        daemon=True
     )
     agent = LandauerDaemonAgent(manifest, bus, compaction_interval_seconds)
     return agent

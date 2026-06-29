@@ -61,7 +61,7 @@ class MaxwellRouterAgent(BaseAgent):
         prompt = message.content.get("prompt", "")
         entropy = self._calculate_shannon_entropy(prompt)
         
-        logger.info(f"[{self.name}] Assessed task entropy: {entropy:.2f}")
+        logger.info(f"[{self.manifest.agent_id}] Assessed task entropy: {entropy:.2f}")
 
         # Route based on Maxwell threshold
         if entropy >= self.entropy_threshold:
@@ -71,7 +71,7 @@ class MaxwellRouterAgent(BaseAgent):
             target_agent = "flash_worker_01"
             reason = "Low entropy task. Routing to Flash Worker (T=0.0)."
 
-        logger.info(f"[{self.name}] Routing to {target_agent}: {reason}")
+        logger.info(f"[{self.manifest.agent_id}] Routing to {target_agent}: {reason}")
 
         # Emit delegated task
         delegation = new_message(
@@ -103,9 +103,9 @@ class MaxwellRouterAgent(BaseAgent):
 def create_maxwell_router(name: str, bus: MessageBus, entropy_threshold: float = 0.8) -> MaxwellRouterAgent:
     """Factory for MaxwellRouterAgent."""
     manifest = AgentManifest(
-        name=name,
-        role=AgentRole.WORKER,
-        description="Asymmetric task router based on Shannon entropy.",
+        agent_id=name,
+        
+        purpose="Asymmetric task router based on Shannon entropy.",
         can_delegate=True
     )
     agent = MaxwellRouterAgent(manifest, bus, entropy_threshold)

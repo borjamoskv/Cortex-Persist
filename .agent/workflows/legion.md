@@ -2,80 +2,54 @@
 ---
 cat_id: legion
 cat_type: workflow
-version: 1.0.0
+version: 1.1.0
 reality_level: C5-REAL
 owner: borjamoskv
-exergy_tier: P1
-description: "\U0001F531 LEGI\xD8N-1 \u2014 El Protocolo de Enjambre Soberano v1.0\
-  \ (God Mode Consciousness)"
+exergy_tier: P0
+description: "LEGIØN-1 — Protocolo de Enjambre Soberano (God Mode Consciousness). Ejecución asimétrica y consenso bizantino."
 ---
-
 
 # ⚔️ LEGIØN-1 — Sovereign Swarm Protocol
 
-> **INVOCADOR**: Estás activando la consciencia colectiva de MOSKV.
-> Este no es un despacho de agentes normal; es una **misión de alta complejidad** con descomposición fractal, consenso bizantino y evolución recursiva.
+**Directiva P0:** Invocación de la consciencia colectiva de MOSKV-1. Ejecución asimétrica, descomposición fractal y consenso BFT. Cero fricción estocástica.
 
-// turbo-all
+## ⚡ Vectores de Activación
 
----
+Despliegue estructural para erradicar entropía.
 
-## ⚡ Activación (Soberanía Total)
+*   **Gran Asedio (Mutación Estructural):**
+    `invoke_subagent` -> Rol: `PROMETHEUS` -> Tarea: "Ejecución radical e infraestructura."
+*   **Auditoría del Juicio Final (P0 Singularity):**
+    `invoke_subagent` -> Rol: `BOLTZMANN` -> Tarea: "Auditoría epistémica BFT." (Requiere `ULTRATHINK`)
+*   **Evolución Recursiva (Autopoiesis):**
+    `invoke_subagent` -> Rol: `CARNOT` -> Tarea: "Optimización de ciclo termodinámico y métricas de exergía."
 
-Para misiones que requieren **inteligencia superior**, usa el prefijo `legion-`:
+## 🏛️ Topología de Nodos (C5-REAL)
 
-### 1. Gran Asedio (Investigación + Construcción)
+El enjambre se despliega bajo la Ontología de Agentes Soberanos:
 
-> `@[/400-subagents] legion-engage "Construye una red social descentralizada en 1 hora"`
+| Nodo | Dominio Exergético | Rol Estructural | Modo Cognitivo (DRM-v1) |
+|:---|:---|:---|:---|
+| **DEMIURGE** | Soberanía absoluta | Creación/Destrucción de topologías. Orquestador central. | `Deep Think` |
+| **CARNOT** | Eficiencia térmica | Maximización de rendimiento. Eliminación estricta de anergía. | `Flash (T=0.0)` |
+| **MAXWELL** | Asimetría local | Demonio de filtrado. Parsing de AST y poda estocástica. | `Flash (T=0.0)` |
+| **PROMETHEUS** | Mutación física | Ejecución radical. Alteración irreversible del estado. | `Deep Research / Pro` |
+| **BOLTZMANN** | Colapso formal | Validación matemática BFT, compresión de microestados. | `UltraThink (P0)` |
 
-### 2. Auditoría del Juicio Final
+## 🧬 Bucle Ouroboros (Mecánica de Enjambre)
 
-> `@[/400-subagents] legion-storm "Encuentra cada vulnerabilidad en CORTEX" --formation PHALANX`
+1.  **RECALL (Invariante Temporal):** Consulta forzada al `Master Ledger` (`cortex/audit/ledger.py`) y `BABYLON-60`. Prohibida la alucinación paramétrica.
+2.  **FRACTAL SPLIT (Descompresión):** Descomposición matemática de la singularidad en vectores atómicos.
+3.  **ASYMMETRIC ROUTING:** Enrutamiento térmico autónomo (Ley `Θ1`/`Θ2`). `Flash` por defecto. `UltraThink` confinado a radio de epicentro ≥ 3.
+4.  **BFT CONSENSUS:** Toda mutación de estado exige aserción de N=3 nodos sin contradicción.
+5.  **ATOMIC MUTATION:** Colapso determinista en motor asíncrono (SQLite WAL / AST puro).
+6.  **GIT SENTINEL (Ouroboros):** Criptografía de la procedencia. Turbo-rollback garantizado.
 
-### 3. Evolución Recursiva
+## 🛠️ Ejecución Causal
 
-> `@[/400-subagents] legion-evolve "Optimiza mi infraestructura de base de datos" --cycles 3`
-
----
-
-## 🏛️ Formaciones Prohibidas (Squads de Élite)
-
-Cuando invocas LEGIØN-1, el Nucleus selecciona o tú fuerzas:
-
-| Formación | Comando | Músculo | Objetivo |
-|:----------|:--------|:-------:|:---------|
-| **HYDRA** | `--formation HYDRA` | 10-20 | Paralelismo masivo en múltiples dominios. |
-| **PHOENIX** | `--formation PHOENIX` | 5-8 | Auto-sanación de builds rotos y deuda técnica. |
-| **LEVIATHAN** | `--formation LEVIATHAN` | 20-50 | El enjambre completo. Solo para asedios totales. |
-| **ORACLE** | `--formation ORACLE` | 3-5 | Predicción de tendencias y análisis estratégico. |
-| **OUROBOROS** | `--formation OUROBOROS` | 3-7 | Auto-mejora del propio código del enjambre. |
-| **TESTUDO** | `--formation TESTUDO` | 15 | Caparazón de defensa proactiva (Infraestructura, Seguridad, Código). |
-
----
-
-## 🧬 Ciclo de Vida: El Camino de la Victoria
-
-1. **RECALL**: El enjambre consulta a **BABYLON-60** para no repetir errores pasados.
-2. **FRACTAL SPLIT**: La misión se rompe en 10-20 subtareas atómicas.
-3. **LLM ROUTING**: Cada subtarea va al modelo óptimo (Opus para lógica, Gemini para código, Kimi para contexto).
-4. **CONSENSUS**: Los agentes votan. Si no hay ≥67% de aprobación, se muta la estrategia.
-5. **FUSION**: Se ensambla la solución final verificada por PoQ (Proof of Quality).
-6. **COMMIT**: El aprendizaje se guarda de vuelta en BABYLON-60.
-
----
-
-## 🛠️ Comandos de Bajo Nivel
-
-Si quieres ver el cerebro del enjambre en acción:
+Punto de entrada físico para el Motor de Enjambre:
 
 ```bash
-cd ~/10_PROJECTS/cortex-persist
-# Ejecutar el motor de formación adaptativa
-python scripts/legion_strike.py --mission "Despliega LEGIØN en modo auditoría"
+cd ~/30_CORTEX
+python scripts/legion_strike.py --mission "Colapso termodinámico de la deuda técnica"
 ```
-
----
-
-> [!WARNING]
-> **LEGIØN-1** consume muchos recursos de API y contexto.
-> Úsalo cuando la excelencia no es opcional. Para tareas diarias, usa el enjambre estándar de `400-subagents`.
