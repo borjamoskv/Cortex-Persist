@@ -132,7 +132,13 @@ class AsyncAgenticEvaluator:
             logger.error(f"Transcript not found: {transcript_path}")
             return
 
-        session_events = [json.loads(line) for line in lines if line.strip()]
+        session_events = []
+        for line_idx, line in enumerate(lines, 1):
+            if line.strip():
+                try:
+                    session_events.append(json.loads(line))
+                except json.JSONDecodeError as e:
+                    logger.warning(f"Skipping malformed JSON line in {transcript_path}:{line_idx} -> {e}")
 
         local_state = {
             "user_msgs": 0,
