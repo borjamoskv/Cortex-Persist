@@ -1263,6 +1263,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 74: Depreciación de Módulos Legados y Purga Causal de LEA-Ω (Legacy Deprecation & LEA-Ω Purge Protocol)
+- **Target**: `api/server.py`, `cortex/extensions/evolution/`, `cortex/swarm/`
+- **Objective**: Depreciación formal y eliminación física de módulos legados (tales como `api/server.py`, `ouroboros_daily.py`, despachadores legados de enjambres y skills obsoletas) de acuerdo con ADR-0003, delegando el ciclo a la purga de exergía de LEA-Ω y a la consolidación de demonios asíncronos continuos en Rust.
+- **Yield Target**: Erradicación absoluta de dependencias fantasma y código obsoleto sin cobertura de tests para recuperarJoules de procesamiento.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits `815f98fe7` (API server deprecation), `fa88b055e` (ouroboros_daily purge), y `cfe3ecfd2` (swarm dispatcher merge).
+```yaml
+Claim: Legacy modules purged from codebase, imports restructured, and test coverage remains green.
+Proof:
+  Base: "pytest runs successfully with zero ImportErrors after removing deprecated server and scripts."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
