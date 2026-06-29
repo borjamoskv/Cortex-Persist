@@ -1,49 +1,103 @@
-# FINAL_AUDIT.md — BABYLON-60 / CORTEX
+# FINAL_AUDIT.md
 
-Este documento registra la demarcación formal de niveles de realidad y el estado del código tras la sesión de refactorización del `ProvenanceAuditor`.
+## Babylon-60 / Cortex — Session Audit
 
----
+### Commit
 
-## 1. Demarcación Epistémica de la Sesión
+- Hash: `506b7a320`
+- Scope: ProvenanceAuditor opacification, softmax stabilization, dimensional scale normalization
 
-De acuerdo con las leyes físicas de ejecución del monorepo, se establece la separación estricta entre hechos reproducibles (C5), inferencias empíricas (C4) y valoraciones conceptuales/narrativas (C2-C3):
+### Reality Classification
 
+#### C5-REAL — Reproducible / Verifiable
+
+These claims are externally inspectable or reproducible:
+
+- Commit `506b7a320` exists in the repository.
+- Test results are C5-REAL if executed and recorded.
+- Opaque baselines are present in source if the code contains no provider/model-name coupling.
+- ProvenanceAuditor explicitly avoids exact identity attribution.
+
+#### C5-FORMAL — Deterministic by Construction
+These claims hold for fixed inputs and fixed code:
+
+- Feature extraction is deterministic for fixed harness outputs.
+- Distance computation is deterministic for fixed observed vectors and fixed baselines.
+- Softmax/similarity computation is deterministic for fixed distances.
+- Dimensional scale normalization is deterministic.
+- `identity_attribution: not_supported` or equivalent is an explicit design property.
+
+#### C4 — Plausible / Useful but Empirically Unvalidated
+These claims are engineering-plausible but require data for stronger status:
+
+- The passive signature module can support drift detection.
+- The module can support endpoint consistency auditing.
+- The module can support anonymous clustering.
+- The module may help detect behavioral changes over time.
+
+These do not prove:
+- exact model identity;
+- provider attribution;
+- checkpoint identity;
+- claimed accuracy without labeled validation.
+
+#### C2-C3 — Rhetorical / Subjective / Session Framing
+These are useful interpretive framings, not reproducible facts:
+
+- "Model X response was superior."
+- "This answer won the comparison."
+- "Exergy," "dialectic closure," "atomic turn," or similar session metaphors.
+- Any judgement about which assistant handled the epistemic demarcation better.
+- This audit's own value judgements about conversational quality.
+
+### Open Scientific Debt
+The following remains unvalidated:
+
+- Passive attribution accuracy.
+- Robustness across regions, network conditions, prompt families, and provider load.
+- Calibration stability over time.
+- Confusion matrix against labeled endpoints.
+- Brier score / ECE for any claimed probabilistic confidence.
+- Double-blind isolation of variables for response-quality comparisons.
+
+### Required Evidence for Future Accuracy Claims
+Any future claim such as "the auditor identifies hidden model families with X% accuracy" requires:
+
+- labeled dataset;
+- controlled prompt suite;
+- fixed evaluation protocol;
+- train/validation/test split or cross-validation;
+- confusion matrix;
+- calibration metrics;
+- robustness analysis by region, load, and prompt type;
+- explicit distinction between clustering, family inference, and exact identity.
+
+### Final Status
 ```yaml
-Epistemic_Demarcation:
-  C5_REAL (Hechos físicos reproducibles):
-    - "Existencia del commit 506b7a320 en el repositorio local"
-    - "Ejecución exitosa de la suite de pruebas mediante pytest"
-    - "Inspección directa de los baselines numéricos opacos en blackbox_harness.py"
+Engineering:
+  Status: "Complete for current scope"
+  Notes:
+    - "BlackBoxHarness async/streaming issues addressed"
+    - "ProvenanceAuditor baselines opacified"
+    - "Softmax and dimensional scaling stabilized"
+    - "Identity attribution claims removed or marked unsupported"
 
-  C5_FORMAL (Propiedades matemáticas y de diseño deterministas):
-    - "El cálculo de distancia euclidiana ponderada sobre características normalizadas"
-    - "El comportamiento determinista de la función de similitud (softmax con traslación log-sum-exp)"
-    - "La exclusión de nombres comerciales en variables y comentarios"
-    - "La salida explícita de identity_claim: not_supported"
+Science:
+  Status: "Open"
+  Notes:
+    - "Passive attribution remains unvalidated"
+    - "Accuracy claims require labeled empirical validation"
 
-  C4_HONESTO (Inferencia empírica útil sobre variables no controladas):
-    - "Uso del auditor para la detección de drift y consistencia del endpoint"
-    - "Uso de similitudes como métricas de clustering anónimo"
-    - "Invalidez del módulo para la atribución de identidad exacta sin un conjunto de datos etiquetado previo"
-
-  C2_C3 (Constructos narrativos y juicios de valor de la sesión):
-    - "La declaración de superioridad de una respuesta de modelo sobre otra"
-    - "Los términos de 'exergía dialéctica', 'cierre metodológico' o 'anergía'"
-    - "La valoración subjetiva del flujo de interacción de los agentes"
+Rhetoric:
+  Status: "Demarcated"
+  Notes:
+    - "Session metaphors remain useful but non-C5"
+    - "Judgements of response superiority are C2-C3"
 ```
 
----
+### Closing Principle
+Do not promote rhetorical clarity, conversational force, or perceived model superiority to C5-REAL.
 
-## 2. Invariantes del Código Consolidadas
-
-* **Opacidad Absoluta:** Se eliminaron todas las referencias y comentarios a proveedores o modelos comerciales en el código y centroides de calibración de [blackbox_harness.py](file:///Users/borjafernandezangulo/30_CORTEX/babylon60/tools/blackbox_harness.py).
-* **Normalización de Escalas:** Se incorporó `DIMENSION_SCALES` para evitar que la variable `itl_ms` domine artificialmente la distancia euclidiana debido a diferencias de orden de magnitud física.
-* **Estabilización de Softmax:** Se implementó el ajuste de traslación por distancia mínima en `analyze()` para neutralizar el subdesbordamiento de punto flotante.
-* **Aislamiento de Atribución:** Se estableció la propiedad inmutable `"identity_claim": "not_supported"` por diseño en todas las salidas del análisis.
-
----
-
-## 3. Estado de Ejecución del Sistema
-
-* **Harness de Pruebas:** Ejecutado y verificado mediante `pytest tests/test_blackbox_harness.py` con 4/4 casos exitosos.
-* **Causal Ledger:** Sincronizado en el commit local `506b7a320`.
+C5-REAL is reserved for reproducible, inspectable, externally verifiable facts.
+C5-FORMAL is reserved for deterministic properties of fixed algorithms.
+Everything else must remain explicitly marked as empirical, provisional, subjective, or rhetorical.
