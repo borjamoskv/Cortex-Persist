@@ -13,11 +13,11 @@ It is **not** an implementation specification. Its purpose is to define the prop
 
 # Design Goal
 
-CORTEX is an architecture for governing computational knowledge under explicit uncertainty.
+CORTEX v1.0 is not a theory of truth, nor is it a complete theory of trust. 
 
-Its objective is not to maximize the probability of producing correct answers, but to maximize the traceability, reproducibility and auditability of every inference performed by the system.
+It is an architectural proposal designed to make the epistemological decisions of a computational system explicit, typed, traceable, and auditable. 
 
-The architecture therefore specifies invariants over the reasoning process rather than guarantees about empirical correctness.
+Its primary contribution is not to solve the problem of trust, but to prevent that problem from remaining implicit. The architecture therefore specifies invariants over the reasoning process, shifting the burden from implicit narrative generation to explicit epistemic governance.
 
 ---
 
@@ -89,11 +89,11 @@ Each layer communicates exclusively through typed intermediate representations.
 
 The following components remain active research problems and are intentionally left unspecified in this document.
 
-* Trust Algebra
+* Parameterizable Trust Algebra (Domain-specific frameworks)
 * Independence Metrics
 * Formal Semantics of CPG
 * Verification Cost Functions
-* Trust Calibration
+* Second-Order Calibration (Validation of the epistemological model)
 * Constraint Optimization Strategy
 
 Future specifications shall define these components independently while preserving the invariants defined above.
@@ -108,10 +108,10 @@ Performance, implementation language, hardware architecture and underlying langu
 
 ---
 
-# Taxonomy of Specifications
+# Taxonomy of Project State
 
-* **Blueprint (v1.0):** Defines principles, invariants, and abstract architecture. (Frozen)
-* **CEP (CORTEX Engineering Proposals):** Refines and formalizes specific components (Trust Algebra, EDL, CPG, etc.).
-* **Core Specification:** Consolidates approved CEPs into a single normative standard.
-* **Reference Kernel:** Canonical implementation demonstrating the specification is executable.
-* **Conformance Test Suite:** Independent test suite that any implementation must pass to declare itself conforming.
+The project lifecycle acknowledges three distinct levels of maturity:
+
+* **Blueprint (v1.0):** Defines principles, invariants, and abstract architecture. (Status: FROZEN).
+* **CEP (CORTEX Engineering Proposals):** Refines and formalizes specific components like the parameterizable Trust Algebra. (Status: OPEN SPECIFICATION).
+* **Reference Kernel & Test Suite:** Canonical implementation and conformance testing. (Status: NON-EXISTENT).
