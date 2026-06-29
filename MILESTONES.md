@@ -1191,6 +1191,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 70: Integración de HUD de Notificaciones y Sentinel macOS (LiveNotch Swift HUD & Parallax Face Sentinel)
+- **Target**: `~/notch-live`, `.agent/workflows/build.md`
+- **Objective**: Desarrollo y acoplamiento de `LiveNotch`, una aplicación nativa macOS en Swift que actúa como HUD visual del hipervisor en el Notch de la pantalla. Integra un cliente WebSocket para reaccionar al estado de pensamiento del agente (efecto de brillo/halo cognitivo) y un Face Sentinel usando Apple Vision para inducir un efecto 3D Parallax en la UI basado en la posición facial del operador.
+- **Yield Target**: Visualización de actividad del agente en tiempo real y tracker biométrico de presencia activo sobre la webcam local.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Código Swift en `notch-live/` y flujo de compilación local en `.agent/workflows/build.md`.
+```yaml
+Claim: LiveNotch application compiles and connects to the websocket daemon displaying reactive state updates.
+Proof:
+  Base: "swift build compiles the Notch executable target successfully under macOS v14 platform."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
