@@ -9,7 +9,7 @@ import os
 import time
 from pathlib import Path
 
-from cortex.engine.swarm.swarm_10k import SwarmCommander
+from cortex.swarm.swarm_10k import SwarmCommander
 
 
 async def run_consolidation():

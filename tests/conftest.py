@@ -34,7 +34,7 @@ class CortexExtensionsRedirector(importlib.abc.MetaPathFinder):
                 return None
         
         # Redirect legacy cortex submodules to physical babylon60 locations
-        for prefix in ("cortex.crypto", "cortex.guards", "cortex.ledger", "cortex.engine", "cortex.audit"):
+        for prefix in ("cortex.crypto", "cortex.guards", "cortex.ledger", "cortex.engine", "cortex.audit", "cortex.api"):
             if fullname == prefix or fullname.startswith(prefix + "."):
                 target_name = fullname.replace("cortex", "babylon60", 1)
                 try:

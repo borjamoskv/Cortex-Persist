@@ -63,3 +63,38 @@ def test_ultrathink_critical_authorization():
     assert auth is True
     assert "Authorized" in msg
 
+
+def test_exergy_yield_calculation_overflow_handling():
+    """Verify that extreme execution times do not trigger OverflowError (VM-03)."""
+    # 1.05 ** 10000 will overflow standard floats
+    exergy = UltrathinkPhysicsEngine.calculate_exergy_yield(10.0, 100.0, 10000.0)
+    assert exergy == 0.0
+
+
+def test_blast_radius_type_safety():
+    """Verify that non-dict graphs are coerced safely (VM-05)."""
+    assert UltrathinkPhysicsEngine.measure_blast_radius("not_a_dict", "A") == 1
+    # Check sets/tuples are parsed correctly
+    deps_with_sets = {"A": {"B", "C"}, "B": ("D",), "C": set()}
+    assert UltrathinkPhysicsEngine.measure_blast_radius(deps_with_sets, "A") == 4
+
+
+def test_ultrathink_arsenal_path_resolution():
+    """Verify that SYS_OPERATOR placeholders are resolved dynamically at runtime (VM-04)."""
+    from cortex.agents.primitives.ultrathink_arsenal import get_ultrathink_arsenal
+    import getpass
+    
+    current_user = getpass.getuser()
+    resolved_directives = get_ultrathink_arsenal()
+    
+    # Locate a target that originally had SYS_OPERATOR
+    found_target = False
+    for directive in resolved_directives:
+        if "Users" in directive.target:
+            assert "SYS_OPERATOR" not in directive.target
+            assert current_user in directive.target
+            found_target = True
+            
+    assert found_target is True
+
+

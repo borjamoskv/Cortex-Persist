@@ -21,7 +21,11 @@ import pytest
 # ---------------------------------------------------------------------------
 
 _REPO_ROOT = Path(__file__).parent.parent.parent
-_ENGINE_DIR = _REPO_ROOT / "cortex" / "engine"
+_ENGINE_DIR = (
+    _REPO_ROOT / "babylon60" / "engine"
+    if (_REPO_ROOT / "babylon60" / "engine").is_dir()
+    else _REPO_ROOT / "cortex" / "engine"
+)
 
 
 # ---------------------------------------------------------------------------
@@ -29,11 +33,13 @@ _ENGINE_DIR = _REPO_ROOT / "cortex" / "engine"
 # ---------------------------------------------------------------------------
 
 
+if not _ENGINE_DIR.is_dir():
+    pytest.skip("cortex/engine directory not found; skipping engine tests.", allow_module_level=True)
+
+
 def _collect_engine_modules() -> list[str]:
     """Return dotted module names for all .py files under cortex/engine/."""
     modules: list[str] = []
-    if not _ENGINE_DIR.is_dir():
-        pytest.skip("cortex/engine directory not found; skipping engine tests.")
     for py_file in sorted(_ENGINE_DIR.rglob("*.py")):
         if py_file.name.startswith("_") and py_file.name != "__init__.py":
             continue
