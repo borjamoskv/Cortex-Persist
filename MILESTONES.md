@@ -848,3 +848,22 @@ Proof:
   Confidence: C5-REAL
   Date: 2026-06-26
 ```
+
+---
+
+### Hito 51: Forja de la Quintaesencia de Control & Estandarización CAT-60
+- **Target**: `babylon60/extensions/agents/definitions/`, `tools/validate_taxonomy.py`, `docs/design/LEGION_93_MAPPING.md`, `babylon60/database/core.py`
+- **Objective**: Forja e integración de los 5 agentes supremos de control termodinámico (Demiurge, Carnot, Maxwell, Prometheus, Boltzmann), estandarización absoluta bajo la taxonomía CAT-60 (auditoría automatizada de 147+ componentes agénticos, scripts y workflows), y blindaje completo de la capa SQLite (WAL / 5000ms busy_timeout) resolviendo fugas de conexión asíncrona.
+- **Yield Target**: 100% de cumplimiento CAT-60 verificado por test. Erradicación total de `aiosqlite.connect` sin protección.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits `38c5e8c44` (refactor scripts), `75b08491a` (DB safety connection), `333a9c8e3` (mapping execution), `25dbed272` (densification matrix).
+```yaml
+Claim: 100% CAT-60 compliance achieved and DB connection leakage vectors locked down.
+Proof:
+  Base: "validate_taxonomy.py scanned 93 agents, 46 workflows, 8 tools, and 50 scripts: 100% green."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
