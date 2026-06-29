@@ -2,6 +2,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Any, Dict
+import jsonschema
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +13,16 @@ class L0L6SchemaValidator:
     """
     
     def __init__(self, schemas_dir: str = "schema"):
-        self.schemas_dir = Path(schemas_dir)
+        if schemas_dir == "schema":
+            # Dynamic lookup relative to this file to prevent CWD dependency
+            possible_path = Path(__file__).resolve().parent.parent.parent.parent / "schema"
+            if possible_path.exists() and possible_path.is_dir():
+                self.schemas_dir = possible_path
+            else:
+                self.schemas_dir = Path(schemas_dir)
+        else:
+            self.schemas_dir = Path(schemas_dir)
+
         self._schemas: Dict[str, Dict[str, Any]] = {}
         self._load_schemas()
         
@@ -30,7 +40,7 @@ class L0L6SchemaValidator:
 
     def validate_payload(self, level: str, payload: Dict[str, Any]) -> bool:
         """
-        Validates a payload against the strict JSON schema.
+        Validates a payload against the strict JSON schema using the jsonschema library.
         :param level: The exact schema stem (e.g., 'evidence.schema')
         :param payload: The dictionary payload to validate.
         """
@@ -38,15 +48,14 @@ class L0L6SchemaValidator:
             logger.error(f"Schema for level '{level}' not found in registry.")
             return False
             
-        # Implementation depends on `jsonschema` library. 
-        # In this C5-REAL isolated execution, we perform a deterministic key check.
         schema = self._schemas[level]
-        required_keys = schema.get("required", [])
-        
-        for key in required_keys:
-            if key not in payload:
-                logger.error(f"Validation failed for {level}: Missing required key '{key}'")
-                return False
-                
-        # If we reach here, the deterministic minimal subset is validated.
-        return True
+        try:
+            jsonschema.validate(instance=payload, schema=schema, format_checker=jsonschema.FormatChecker())
+            return True
+        except jsonschema.ValidationError as e:
+            logger.error(f"Validation failed for {level}: {e.message}")
+            return False
+        except jsonschema.SchemaError as e:
+            logger.error(f"Invalid schema definition for {level}: {e.message}")
+            return False
+
