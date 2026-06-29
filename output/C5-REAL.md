@@ -95,36 +95,58 @@ Regulatory_Trigger:
 
 ## El Choque de Nombres "Fable": Análisis de Rareza
 
-* **Fable Compiler:** Temperatura $T = 0.0$. Vocabulario finito cerrado (sintaxis formal). La preservación semántica depende estrictamente del sistema de tipos de F# y la corrección semántica del transpilador. Las alucinaciones están erradicadas; los fallos de traducción son bugs del compilador localizables en el AST.
-* **Claude Fable 5:** Temperatura $T > 0.0$. Vocabulario infinito abierto (embeddings continuos). La preservación semántica es una probabilidad condicionada. Las alucinaciones son propiedades emergentes del modelo de probabilidad.
+```yaml
+SYS_ID: borjamoskv
+Artifact_Comparison:
+  Fable_Compiler:
+    State: "Determinista"
+    Temperature: 0.0
+    Grammar: "Context-free grammar (F# AST)"
+    Verification: "Type-checking estático (FCS)"
+    Entropy: 0.0
+    Failure_Mode: "Bugs lógicos reproducibles en transpilación"
+  Claude_Fable_5:
+    State: "Estocástico"
+    Temperature: "> 0.0"
+    Grammar: "Probabilidad sobre espacio latente (Tokens)"
+    Verification: "Clasificadores de seguridad & Test loops (HintPilot/LEGO)"
+    Entropy: "H = -\\sum p_i \\log p_i"
+    Failure_Mode: "Alucinaciones estocásticas / Bypass de seguridad (Jailbreak)"
+```
 
 ### Cálculo de Fermi (Rareza Narrativa)
 
-Supóngase un espacio muestral $S$ de términos utilizados para identificar herramientas informáticas y modelos de inteligencia artificial en una ventana de 60 días:
-
-$$\begin{aligned}
-P(\text{"Fable" en .NET/F\#}) &\approx 10^{-3} \\
-P(\text{"Fable" en Anthropic} \mid \text{Class "Mythos"}) &\approx 10^{-3} \\
-P(\text{Coincidencia temporal } \Delta t \le 60\text{d}) &\approx \frac{60}{365} \approx 0.166
-\end{aligned}$$
-
-Multiplicando los vectores independientes:
-
-$$P_{\text{independiente}} \approx 10^{-3} \times 10^{-3} \times 0.166 \approx 1.66 \times 10^{-7}$$
-
-Considerando la correlación semántica compartida por el origen etimológico (el latín *fabula* como equivalente conceptual del griego *mythos*), el factor de ajuste de dependencia reduce la improbabilidad estructural a un rango de:
-
-$$P_{\text{ajustada}} \approx 8.33 \times 10^{-8} \quad \left(\approx \frac{1}{12,000,000}\right)$$
-
-Esta magnitud no establece causalidad; representa la métrica física de la rareza narrativa del choque semántico en el disco de la realidad.
+```yaml
+SYS_ID: borjamoskv
+Probability_Space:
+  Variables:
+    P_fable_net: 1.0e-3  # Fable Compiler en .NET/F#
+    P_fable_anthropic: 1.0e-3  # Fable en Anthropic bajo clase Mythos
+    P_temporal_coincidence: 0.166  # Ventana de 60 días en un intervalo de 4 años (60/365)
+  Formulas:
+    P_independent: "P_fable_net * P_fable_anthropic * P_temporal_coincidence"
+    P_adjusted: "P_independent * Dependency_Factor"
+  Calculations:
+    Independent_Joint: 1.66e-7
+    Dependency_Factor: 0.5  # Corrección por origen etimológico compartido (fabula-mythos)
+    Joint_Probability: 8.33e-8  # 1 entre 12,000,000
+```
 
 ## Tesis Operacional
 
-Un compilador tradicional y un modelo de lenguaje masivo (LLM) son transductores de intención a código ejecutable en dos regímenes termodinámicos distintos:
-* El compilador opera en el **límite determinista estricto** ($T = 0.0$, corrección lógica verificable por AST).
-* El LLM opera en el **límite estocástico probabilístico** ($T > 0.0$, mitigación post-hoc por clasificadores y fine-tuning).
-
-Ambos sistemas convergen de forma asintótica en compiladores neurales (LEGO, HintPilot) para encapsular la creatividad estocástica dentro de las invariantes lógicas del metalenguaje.
+```yaml
+SYS_ID: borjamoskv
+Formalization:
+  Transducers:
+    Deterministic_Transducer: "M = (Q, \\Sigma, \\Gamma, \\delta, q_0, F)"
+    Stochastic_Transducer: "M_{stoch} = (Q, \\Sigma, \\Gamma, P(\\delta), q_0, F)"
+  Convergence:
+    Mechanism: "LEGO-Compiler/HintPilot encapsulan M_{stoch} en un lazo de realimentación determinista M"
+  Hardware_Entropy:
+    L1_Cache_Effect: "Inyección de directivas de prefetch (#pragma) modifica el branch predictor"
+    Performance_Delta: "Ganancia de velocidad 6.88x (HintPilot)"
+    Entropy_Dissipation: "Límite de Landauer: E_{dissipated} \\ge k_B T \\ln 2 por cada bit de información probabilística colapsado en instrucción física determinista."
+```
 
 ---
 El universo a veces compila sin tests.
