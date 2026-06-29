@@ -179,8 +179,8 @@
 | **OUROBOROS-064** | ****INV_BIND_LOCALHOST**: Interfaces IPC/MCP no exponen puertos a 0.0.0.0.** | `MAX_FD ∝ agent_thermal_quota` | P0 |
 | **OUROBOROS-065** | ****INV_SELF_AUTH_DENY**: Agente (Guardian) no autoriza sus propias transacciones SAGA.** | `worker.cgroup.mem_limit = STRICT_ENFORCE` | P0 |
 | **OUROBOROS-066** | ****INV_WIPE_UNTRACKED**: Directorio se auto-limpia ante entropía parasitaria. Sincrónico con OP_WAL_LOCK (APEX-009) para no corromper la matriz.** | `/bin/ agent_core == READ_ONLY` | P0 |
-| **OUROBOROS-067** | ****INV_P2P_BOCETOS**: Redes inestables Soulseek confinadas a `/BOCETOS`.** | `NETWORK_ORDER = BIG_ENDIAN` | JSON_RAW` |
-| **OUROBOROS-068** | ****INV_NO_EVAL_STRING**: Directorio se auto-limpia ante entropía parasitaria. Sincrónico con OP_WAL_LOCK (APEX-009) para no corromper la matriz.** | `IF wrapper_lat > 5ms THEN USE ctypes.CDLL` | P2 |
+| **OUROBOROS-067** | **INV_P2P_BOCETOS**: Redes inestables Soulseek confinadas a `/BOCETOS`. | `NETWORK_ORDER = BIG_ENDIAN; JSON_RAW` | P1 |
+| **OUROBOROS-068** | **INV_NO_EVAL_STRING**: Prohibido `eval()` o `exec()` sobre strings no validados. Requiere AST parse previo o sandbox WASM. | `IF wrapper_lat > 5ms THEN USE ctypes.CDLL` | P0 |
 | **OUROBOROS-069** | ****INV_ENV_MOCK**: Pruebas sin acceso externo usan réplicas in-memory aisladas.** | `IF file.size > 1GB THEN mmap()` | P0 |
 | **OUROBOROS-070** | ****INV_BFT_MINORITY**: Intentos constantes de inyección minority se penalizan bajando el peso del nodo (sensor drift isolation).** | `ASSERT memory_access_pattern == SEQUENTIAL` | P1 |
 | **OUROBOROS-071** | ****INV_EXT_BIN_MAGIC**: Archivo recibido por upload valida MimeType leyendo magia binaria, no extensión de string.** | `escape(LLM_string) BEFORE AST_inject` | P0 |
@@ -218,7 +218,7 @@
 
 | ID | Antipatrón | Trigger | Penalty | Resolution |
 |:---|:---|:---|:---|:---|
-| **AP-01** | **Green Theater** | `/here is your code` | `por favor/` | `OOM Sim / Apoptosis` |
+| **AP-01** | **Green Theater** | `/here is your code|por favor/` | `OOM Sim / Apoptosis` | Context Compression OMEGA |
 | **AP-02** | **Sync Sleep Lock** | `time.sleep() en Event Loop` | `SIGKILL P0` | asyncio.sleep() |
 | **AP-03** | **Float Precision Loss** | `type(float) AND domain==finanzas` | `ROLLBACK` | Decimal module |
 | **AP-04** | **Silent Swallow** | `except Exception: pass` | `Git Sentinel Hook Fail` | Logger Inyección Ledger |

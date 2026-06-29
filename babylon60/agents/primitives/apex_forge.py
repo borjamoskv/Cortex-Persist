@@ -17,6 +17,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -148,7 +149,7 @@ def parse_apex_core(path: Path) -> ForgeReport:
                 continue
             report.invariants.append(Invariant(
                 id=iid,
-                name=_strip_backtick(cells[1]),
+                name=_strip_backtick(cells[1]).strip('*').strip(),
                 logic=_strip_backtick(cells[2]),
                 risk=cells[3].strip(),
             ))
@@ -363,13 +364,13 @@ def synthesize_missing(report: ForgeReport) -> ForgeReport:
 # ── Filter & Select ──────────────────────────────────────────────────
 
 def select_canonical(report: ForgeReport) -> ForgeReport:
-    """Select exactly 100P + 100I + 20AP + 10RA.
+    """Select exactly 100P + 100I + 23AP + 11RA.
 
     Strategy:
     - Primitives: keep APEX-001..APEX-100, discard APEX-101+
     - Invariants: keep OUROBOROS-001..OUROBOROS-100, discard 101+
-    - Antipatterns: keep AP-01..AP-20, discard AP-MCTS-*
-    - Redundancies: keep RA-01..RA-10, discard RA-MCTS-*
+    - Antipatterns: keep AP-01..AP-23, discard AP-MCTS-*
+    - Redundancies: keep RA-01..RA-11, discard RA-MCTS-*
     """
     canonical = ForgeReport()
 
@@ -574,12 +575,27 @@ def main() -> None:
         f"Expected 11 redundancies, got {len(canonical.redundancies)}"
     )
 
+    # Uniqueness checks
+    opcodes = [p.opcode for p in canonical.primitives]
+    dupes = [o for o in set(opcodes) if opcodes.count(o) > 1]
+    assert not dupes, f"Duplicate opcodes: {dupes}"
+
+    inv_names = []
+    for inv in canonical.invariants:
+        base = inv.name.split(':')[0].strip() if ':' in inv.name else inv.name
+        inv_names.append(base)
+    inv_dupes = [n for n in set(inv_names) if inv_names.count(n) > 1]
+    assert not inv_dupes, f"Duplicate invariant names: {inv_dupes}"
+
     # Phase 5: Emit
     print("\n[PHASE-5] Emitting outputs...")
     json_path = emit_json(canonical, args.out_dir)
     md_path = emit_markdown(canonical, args.out_dir)
     print(f"  JSON:     {json_path}")
     print(f"  Markdown: {md_path}")
+    json_content = json_path.read_bytes()
+    sha = hashlib.sha256(json_content).hexdigest()[:16]
+    print(f"  SHA-256: {sha}")
 
     # Summary
     synth_p = sum(1 for p in canonical.primitives if p.source == "synthesized")

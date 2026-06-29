@@ -260,3 +260,89 @@ class ExergyPlanner:
             prev_id = step.step_id
 
         return plan
+
+    @staticmethod
+    def replan(
+        original_plan: ExecutionPlan,
+        observations: dict[str, Any],
+        replacement_steps: list[dict[str, Any]] | None = None,
+    ) -> ExecutionPlan:
+        """Level 5 Replanning: generate a new plan from a failed plan's state.
+
+        Preserves COMPLETED steps as context. Discards FAILED/SKIPPED steps.
+        Inserts replacement_steps to route around the failure point.
+
+        Args:
+            original_plan: The plan that triggered replanning.
+            observations: Post-execution observations (environment delta, error details).
+            replacement_steps: Optional explicit steps to replace the failed portion.
+                              If None, creates a diagnostic step.
+
+        Returns:
+            A new ExecutionPlan with preserved completed work and new steps.
+        """
+        new_plan = ExecutionPlan(
+            objective=f"[REPLAN] {original_plan.objective}",
+        )
+
+        # Carry forward completed exergy accounting
+        new_plan.total_exergy_produced = original_plan.total_exergy_produced
+        new_plan.total_entropy_paid = original_plan.total_entropy_paid
+
+        # Preserve completed steps as immutable context (read-only record)
+        completed_ids: list[str] = []
+        for step in original_plan.steps:
+            if step.status == StepStatus.COMPLETED:
+                # Clone as a completed record — these won't re-execute
+                preserved = PlanStep(
+                    step_id=step.step_id,
+                    tool_name=step.tool_name,
+                    arguments=step.arguments,
+                    description=f"[PRESERVED] {step.description}",
+                    exergy_estimate=step.exergy_estimate,
+                    entropy_cost=Decimal("0"),  # Already paid
+                    status=StepStatus.COMPLETED,
+                    result=step.result,
+                    started_at=step.started_at,
+                    completed_at=step.completed_at,
+                )
+                new_plan.steps.append(preserved)
+                completed_ids.append(step.step_id)
+
+        # Insert replacement steps
+        if replacement_steps:
+            for step_def in replacement_steps:
+                new_step = PlanStep(
+                    tool_name=step_def.get("tool_name", "noop"),
+                    arguments=step_def.get("arguments", {}),
+                    description=step_def.get("description", "Replanned step"),
+                    exergy_estimate=Decimal(str(step_def.get("exergy_estimate", "0.5"))),
+                    entropy_cost=Decimal(str(step_def.get("entropy_cost", "0.1"))),
+                    retry_budget=step_def.get("retry_budget", 2),
+                    depends_on=step_def.get("depends_on", completed_ids[-1:]),
+                )
+                new_plan.steps.append(new_step)
+        else:
+            # Default: create a diagnostic step
+            diag_step = PlanStep(
+                tool_name="exergy_audit",
+                arguments={
+                    "plan_summary": original_plan.summary(),
+                    "observations": observations,
+                },
+                description="[REPLAN] Diagnostic audit after plan failure",
+                exergy_estimate=Decimal("0.3"),
+                entropy_cost=Decimal("0.05"),
+                depends_on=completed_ids[-1:],
+            )
+            new_plan.steps.append(diag_step)
+
+        logger.info(
+            "[PLANNER] REPLAN generated '%s' with %d steps (%d preserved, %d new) for: %s",
+            new_plan.plan_id[:8],
+            len(new_plan.steps),
+            len(completed_ids),
+            len(new_plan.steps) - len(completed_ids),
+            new_plan.objective,
+        )
+        return new_plan

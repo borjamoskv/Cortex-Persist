@@ -43,6 +43,13 @@ class MessageKind(str, Enum):
     HEARTBEAT = "heartbeat"
     SHUTDOWN = "shutdown"
 
+    # Level 5 (Demiurge) meta-cognitive messages
+    REPLAN_TRIGGER = "replan.trigger"
+    APOPTOSIS = "apoptosis"
+    DELEGATION_REQUEST = "delegation.request"
+    DELEGATION_RESULT = "delegation.result"
+    CRITIQUE_REPORT = "critique.report"
+
 
 class AgentMessage(BaseModel):
     message_id: str = Field(default_factory=lambda: str(uuid4()))
