@@ -99,9 +99,11 @@ async def guard_exec(ctx: SagaContext):
     import json
 
     from cortex.engine.causal.taint_engine import check_anergy_and_green_theater
+    from babylon60.guards.uptimebolt_guard import enforce_deploy_safety
 
     payload_str = json.dumps(ctx["payload"]) if isinstance(ctx["payload"], dict) else str(ctx["payload"])
     try:
+        enforce_deploy_safety(payload_str)
         check_anergy_and_green_theater(payload_str)
     except ValueError as e:
         raise ValueError(f"SAGA-1 Rejection: {e}") from e
