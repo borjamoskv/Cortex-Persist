@@ -10,8 +10,10 @@ from __future__ import annotations
 from cortex.agents.base import BaseAgent, ReactiveTaskAgent
 from cortex.agents.bus import MessageBus, SqliteMessageBus
 from cortex.agents.consolidator import ConsolidatorAgent
-from cortex.agents.exergy_maximizer import ExergyMaximizerAgent, create_exergy_maximizer
+from cortex.agents.boltzmann_engine import BoltzmannEngineAgent, create_boltzmann_engine
+from cortex.agents.landauer_daemon import LandauerDaemonAgent, create_landauer_daemon
 from cortex.agents.manifest import AgentManifest
+from cortex.agents.maxwell_router import MaxwellRouterAgent, create_maxwell_router
 from cortex.agents.message_schema import (
     AgentMessage,
     MessageKind,
@@ -28,8 +30,12 @@ __all__ = [
     "BaseAgent",
     "ReactiveTaskAgent",
     "ConsolidatorAgent",
-    "ExergyMaximizerAgent",
-    "create_exergy_maximizer",
+    "BoltzmannEngineAgent",
+    "create_boltzmann_engine",
+    "MaxwellRouterAgent",
+    "create_maxwell_router",
+    "LandauerDaemonAgent",
+    "create_landauer_daemon",
     "Supervisor",
     # Manifest & schema
     "AgentManifest",

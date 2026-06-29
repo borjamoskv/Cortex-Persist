@@ -21,14 +21,14 @@ class NodeTelemetry:
         self.max_capacity = int(context.get("max_capacity", 100))
 
 
-class ExergyMaximizerAgent:
+class BoltzmannEngineAgent:
     """
     Agente C5-REAL: Maximiza Exergía (Structure × Information - Entropy_paid).
     Aplica heurísticas O(1) para evaluar densidad del enjambre, latencia e incertidumbre.
     Inyecta shocks metabólicos proporcionales a la fricción detectada y bifurca el estado.
     """
 
-    name = "exergy_maximizer_omega"
+    name = "boltzmann_engine_omega"
 
     async def optimize(self, target: str, context: Mapping[str, Any]) -> tuple[list[str], str]:
         findings = []
@@ -94,12 +94,12 @@ class ExergyMaximizerAgent:
 
 class ExergyAgentAdapter(SwarmAgent):
     """
-    Wraps the ExergyMaximizerAgent into a SwarmAgent para el ecosistema CORTEX.
+    Wraps the BoltzmannEngineAgent into a SwarmAgent para el ecosistema CORTEX.
     """
 
     def __init__(self, agent_id: str, bus: AsyncSignalBus, engine: Any = None):
         super().__init__(agent_id, bus, engine)
-        self.specialist = ExergyMaximizerAgent()
+        self.specialist = BoltzmannEngineAgent()
 
     async def execute(self, target: str) -> SwarmSignal:
         logger.warning("🔋 [EXERGY-MAXIMIZER] %s desplegado sobre: %s", self.agent_id, target)

@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """CORTEX Agent Runtime - Level 5 Demiurge Exergy Maximizer.
 
-The ExergyMaximizerAgent is a Level 5 agent that implements:
+The BoltzmannEngineAgent is a Level 5 agent that implements:
 1. Cognitive OODA Loop: Perceive -> Orient -> Decide -> Act -> Observe -> Critique.
 2. Meta-cognitive Replanning: Dynamically route around failures.
 3. Exergy Gradient Descent: Measures net exergy over time to detect state degradation.
@@ -25,7 +25,7 @@ from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
 from cortex.agents.planner import ExecutionPlan, ExergyPlanner, PlanStep
 from cortex.agents.tools import ToolRegistry
 
-logger = logging.getLogger("cortex.agents.exergy_maximizer")
+logger = logging.getLogger("cortex.agents.boltzmann_engine")
 
 
 class OODAState(str, Enum):
@@ -85,7 +85,7 @@ class ExergyGradient:
         return degrading_count >= (self.patience_steps - 1)
 
 
-class ExergyMaximizerAgent(BaseAgent):
+class BoltzmannEngineAgent(BaseAgent):
     """Level 5 Sovereign Exergy Maximizer (Demiurge)."""
 
     def __init__(
@@ -390,7 +390,7 @@ class ExergyMaximizerAgent(BaseAgent):
         await self.bus.send(msg)
 
 
-def create_exergy_maximizer(
+def create_boltzmann_engine(
     agent_id: str,
     bus: Any,
     tool_registry: ToolRegistry | None = None,
@@ -399,7 +399,7 @@ def create_exergy_maximizer(
     tools_allowed: list[str] | None = None,
     max_swarm_size: int = 5,
     step_timeout_s: float = 45.0,
-) -> ExergyMaximizerAgent:
+) -> BoltzmannEngineAgent:
     manifest = AgentManifest(
         agent_id=agent_id,
         purpose=purpose,
@@ -412,7 +412,7 @@ def create_exergy_maximizer(
         confidence_floor="C5",
         trust_level="C5",
     )
-    return ExergyMaximizerAgent(
+    return BoltzmannEngineAgent(
         manifest=manifest,
         bus=bus,
         tool_registry=tool_registry,

@@ -10,10 +10,10 @@ from decimal import Decimal
 import pytest
 
 from cortex.agents.bus import SqliteMessageBus
-from cortex.agents.exergy_maximizer import (
+from cortex.agents.boltzmann_engine import (
     ExergyGradient,
-    ExergyMaximizerAgent,
-    create_exergy_maximizer,
+    BoltzmannEngineAgent,
+    create_boltzmann_engine,
 )
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import MessageKind, new_message
@@ -75,7 +75,7 @@ class TestExergyGradient:
         assert grad.is_degrading() is True
 
 
-class TestExergyMaximizerAgent:
+class TestBoltzmannEngineAgent:
     @pytest.fixture
     async def bus(self):
         b = SqliteMessageBus(db_path=_unique_db())
@@ -88,7 +88,7 @@ class TestExergyMaximizerAgent:
         registry = ToolRegistry()
         registry.register(DummyTool("exergy_audit", "optimal"))
         
-        agent = ExergyMaximizerAgent(manifest, bus, registry)
+        agent = BoltzmannEngineAgent(manifest, bus, registry)
         
         result = await agent.execute_objective("Perform diagnostic scan")
         assert result["status"] == "SUCCESS"
@@ -101,7 +101,7 @@ class TestExergyMaximizerAgent:
         registry.register(ErrorTool("exergy_audit"))  # failing step 1
         registry.register(DummyTool("noop", "recovered"))  # successful step 2 (fallback)
 
-        agent = ExergyMaximizerAgent(manifest, bus, registry)
+        agent = BoltzmannEngineAgent(manifest, bus, registry)
         
         result = await agent.execute_objective("Objective that will fail")
         assert result["status"] == "SUCCESS"
@@ -114,7 +114,7 @@ class TestExergyMaximizerAgent:
         registry = ToolRegistry()
         registry.register(DummyTool("exergy_audit", "optimal"))
 
-        agent = ExergyMaximizerAgent(manifest, bus, registry, step_timeout_s=5.0)
+        agent = BoltzmannEngineAgent(manifest, bus, registry, step_timeout_s=5.0)
 
         # Background task that simulates the worker responding to delegation message
         async def simulate_l4_worker():
@@ -143,7 +143,7 @@ class TestExergyMaximizerAgent:
 
     @pytest.mark.asyncio
     async def test_factory_creation(self, bus):
-        agent = create_exergy_maximizer("demiurge-01", bus)
+        agent = create_boltzmann_engine("demiurge-01", bus)
         assert agent.agent_id == "demiurge-01"
         assert agent.manifest.can_delegate is True
         assert agent.manifest.daemon is True
