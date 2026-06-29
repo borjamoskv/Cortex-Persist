@@ -1101,6 +1101,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 65: Registro de Primitivas y Leyes Soberanas APEX CORE (APEX Core Registry Formalization)
+- **Target**: `cortex/agents/primitives/APEX_CORE.md`, `tools/validate_taxonomy.py`
+- **Objective**: Consolidación e inyección formal del registro canónico `APEX_CORE.md` conteniendo las 100 Primitivas Operacionales (Opcodes de Asalto como `OP_COLLAPSE`, `OP_GIT_SENTINEL`) y las 100 Invariantes Termodinámicas (Ouroboros Laws) para regir el comportamiento del enjambre y mitigar la entropía estocástica.
+- **Yield Target**: Coherencia absoluta en la definición de 100 primitives + 100 invariants, eliminando conjeturas en el control del swarm.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commit `53e6e3480` (APEX core alignment) y archivo `cortex/agents/primitives/APEX_CORE.md`.
+```yaml
+Claim: APEX Core registry consolidated with 100 primitives and 100 invariants defined.
+Proof:
+  Base: "APEX_CORE.md verified on disk containing strict CAS, BFT, and OS-level operations."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
