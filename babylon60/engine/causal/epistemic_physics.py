@@ -24,21 +24,22 @@ class SemanticParticle:
             self.mass = 0.5
             
         # Determinar posición semántica (embedding). Intentar leer de metadatos o crear dummy bidimensional.
-        self.position = [0.0, 0.0]
+        self.position = None
         
         # Buscar en metadatos de las evidencias
         for e in claim.evidence_list:
-            if e.metadata and "embedding" in e.metadata:
+            if e.metadata and "embedding" in e.metadata and e.metadata["embedding"] is not None:
                 self.position = list(e.metadata["embedding"])
                 break
         
         # Si no hay, usar un hash reproducible para asignar coordenadas fijas bidimensionales
-        if self.position == [0.0, 0.0]:
+        if self.position is None:
             h = hash(claim.id)
             # Normalizar entre -1.0 y 1.0
             x = (h % 1000) / 500.0 - 1.0
             y = ((h // 1000) % 1000) / 500.0 - 1.0
             self.position = [x, y]
+
             
         self.velocity = [0.0] * len(self.position)
         self.active = True

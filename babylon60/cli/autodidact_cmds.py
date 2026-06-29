@@ -79,10 +79,10 @@ def audit():
     engine = get_engine()
 
     async def _audit():
-        from cortex.database.core import connect
-
-        conn = connect(engine._db_path)  # pyright: ignore[reportArgumentType]
-        return await scan_all_crystals(conn, project="autodidact_knowledge")
+        if not hasattr(engine, "_memory_manager") or not engine._memory_manager or not engine._memory_manager._l2:
+            raise click.ClickException("L2 vector memory subsystem is not initialized or unavailable.")
+        l2_store = engine._memory_manager._l2
+        return await scan_all_crystals(l2_store, project="autodidact_knowledge")
 
     vitals = _run_async(_audit())
 

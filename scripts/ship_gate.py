@@ -143,6 +143,90 @@ def check_neural_connectivity() -> CheckResult:
     )
 
 
+def check_vercel_ban() -> CheckResult:
+    """Verify absolute ban of Vercel dependencies/references in source code."""
+    t0 = time.monotonic()
+    
+    # 1. Check package.json for '@vercel/' under dependencies or devDependencies
+    pkg_json_path = REPO_ROOT / "package.json"
+    if pkg_json_path.exists():
+        try:
+            with open(pkg_json_path, "r", encoding="utf-8") as f:
+                pkg_data = json.load(f)
+            deps = pkg_data.get("dependencies", {})
+            dev_deps = pkg_data.get("devDependencies", {})
+            for d in list(deps.keys()) + list(dev_deps.keys()):
+                if "@vercel" in d or d == "vercel":
+                    ms = (time.monotonic() - t0) * 1000
+                    return CheckResult(
+                        name="vercel_shield",
+                        passed=False,
+                        duration_ms=round(ms, 1),
+                        detail=f"Forbidden Vercel dependency found in package.json: {d}",
+                    )
+        except Exception as e:
+            ms = (time.monotonic() - t0) * 1000
+            return CheckResult(
+                name="vercel_shield",
+                passed=False,
+                duration_ms=round(ms, 1),
+                detail=f"Failed to read package.json: {e}",
+            )
+            
+    # 2. Check for vercel.json in the repository
+    for path in REPO_ROOT.rglob("vercel.json"):
+        if any(p in path.parts for p in ("node_modules", ".venv", ".git")):
+            continue
+        ms = (time.monotonic() - t0) * 1000
+        return CheckResult(
+            name="vercel_shield",
+            passed=False,
+            duration_ms=round(ms, 1),
+            detail=f"Forbidden vercel.json file found: {path.relative_to(REPO_ROOT)}",
+        )
+
+    # 3. Check for .vercel/ folders in the repository
+    for path in REPO_ROOT.rglob(".vercel"):
+        if any(p in path.parts for p in ("node_modules", ".venv", ".git")):
+            continue
+        ms = (time.monotonic() - t0) * 1000
+        return CheckResult(
+            name="vercel_shield",
+            passed=False,
+            duration_ms=round(ms, 1),
+            detail="Forbidden .vercel directory found",
+        )
+
+    # 4. Check imports in JS/TS/Astro/Python code files (excluding node_modules, etc.)
+    forbidden_import_pattern = re.compile(
+        r"from\s+['\"]@vercel/|import\s+.*?\s+from\s+['\"]@vercel/|import\(['\"]@vercel/|import\s+['\"]@vercel/"
+    )
+    for ext in ("*.js", "*.ts", "*.jsx", "*.tsx", "*.astro", "*.py"):
+        for path in REPO_ROOT.rglob(ext):
+            if any(p in path.parts for p in ("node_modules", ".venv", ".git", ".astro", ".wrangler", "dist", "build")):
+                continue
+            try:
+                content = path.read_text(encoding="utf-8")
+                if forbidden_import_pattern.search(content):
+                    ms = (time.monotonic() - t0) * 1000
+                    return CheckResult(
+                        name="vercel_shield",
+                        passed=False,
+                        duration_ms=round(ms, 1),
+                        detail=f"Forbidden Vercel import in: {path.relative_to(REPO_ROOT)}",
+                    )
+            except Exception:
+                continue
+
+    ms = (time.monotonic() - t0) * 1000
+    return CheckResult(
+        name="vercel_shield",
+        passed=True,
+        duration_ms=round(ms, 1),
+        detail="No Vercel dependencies, configs, or imports found. Cloudflare-native confirmed.",
+    )
+
+
 def check_tests(fast: bool = False) -> CheckResult:
     """Run pytest suite."""
     t0 = time.monotonic()
@@ -293,6 +377,7 @@ def main() -> None:
         ("Complexity", check_radon_cc),
         ("Quality", check_mejoralo),
         ("Neural Conn", check_neural_connectivity),
+        ("Vercel Shield", check_vercel_ban),
     ]
 
     for label, fn in checks:

@@ -264,7 +264,7 @@ class AdaptiveResonanceGate:
             traces = physics_arbiter.resolve_collisions(claims_to_resolve)
 
             # Analyze trace of the candidate claim
-            candidate_trace = next(t for t in traces if t.trace_steps[0].endswith(candidate.id))
+            candidate_trace = next(t for t in traces if candidate.id in t.trace_steps[0])
 
             # If candidate collapses, block ingestion
             if candidate_trace.verdict == EpistemicStatus.CONTRADICTED:
@@ -273,11 +273,16 @@ class AdaptiveResonanceGate:
 
             # Update neighbors affected by the collision
             for trace in traces:
-                trace_id = trace.trace_steps[0].split()[-3]
-                if trace_id in neighbor_map:
-                    n_engram = neighbor_map[trace_id]
+                matched_neighbor_id = None
+                for n_id in neighbor_map:
+                    if n_id in trace.trace_steps[0]:
+                        matched_neighbor_id = n_id
+                        break
+
+                if matched_neighbor_id:
+                    n_engram = neighbor_map[matched_neighbor_id]
                     if trace.verdict == EpistemicStatus.CONTRADICTED:
-                        logger.info("ART GATE: Neighbor %s collapsed in physics collision.", trace_id)
+                        logger.info("ART GATE: Neighbor %s collapsed in physics collision.", matched_neighbor_id)
                         n_engram = n_engram.model_copy(
                             update={
                                 "energy_level": 0.0,
@@ -286,7 +291,7 @@ class AdaptiveResonanceGate:
                         )
                     else:
                         new_energy = max(0.1, trace.truth_score.value)
-                        logger.info("ART GATE: Neighbor %s energy updated to %.4f.", trace_id, new_energy)
+                        logger.info("ART GATE: Neighbor %s energy updated to %.4f.", matched_neighbor_id, new_energy)
                         n_engram = n_engram.model_copy(
                             update={
                                 "energy_level": new_energy,
@@ -298,6 +303,7 @@ class AdaptiveResonanceGate:
                         )
                     if hasattr(self._vs, "upsert"):
                         await self._vs.upsert(n_engram)
+
 
         # RESET → Insert new engram category
         if hasattr(self._vs, "upsert"):
