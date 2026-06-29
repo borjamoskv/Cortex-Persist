@@ -9,6 +9,9 @@ from pathlib import Path
 from typing import Any, Optional
 
 import jsonschema
+from pydantic import ValidationError
+
+from babylon60.engine.causal.pydantic_schemas import ExperimentSchemaL4, PredictionSchemaL3
 
 logger = logging.getLogger(__name__)
 
@@ -124,6 +127,28 @@ class L0L6SchemaValidator:
                 errors=[f"Schema for level '{level}' not found in registry."],
                 schema_level=level,
             )
+
+        # Intercept L3 and L4 for Pydantic strict validation
+        if resolved == "prediction.schema":
+            try:
+                PredictionSchemaL3.model_validate(payload)
+                return ValidationResult(valid=True, schema_level=resolved)
+            except ValidationError as e:
+                return ValidationResult(
+                    valid=False,
+                    errors=[f"[{err['loc']}] {err['msg']}" for err in e.errors()],
+                    schema_level=resolved,
+                )
+        elif resolved == "experiment.schema":
+            try:
+                ExperimentSchemaL4.model_validate(payload)
+                return ValidationResult(valid=True, schema_level=resolved)
+            except ValidationError as e:
+                return ValidationResult(
+                    valid=False,
+                    errors=[f"[{err['loc']}] {err['msg']}" for err in e.errors()],
+                    schema_level=resolved,
+                )
 
         schema = self._schemas[resolved]
         validator = jsonschema.Draft7Validator(schema, format_checker=_FORMAT_CHECKER)
