@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import asyncio
-import hashlib
 import json
 import time
 from collections.abc import Awaitable, Callable
@@ -53,7 +53,7 @@ class AgentCapability:
             "meta": dict(sorted(self.meta.items())),
         }
         payload = json.dumps(cap_dict, sort_keys=True).encode()
-        self.agent_id = hashlib.sha256(payload).hexdigest()[:16]
+        self.agent_id = cortex_hash_truncated(payload, length=16)
 
 
 @dataclass(slots=True)

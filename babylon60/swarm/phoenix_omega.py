@@ -4,9 +4,9 @@ PHOENIX-OMEGA: Motor de Transformación Atómica y Escalado Estructural
 Protocolo CORTEX: Analysis -> Extraction -> Reconstruction -> Scaling -> Verification
 """
 
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import ast
 import asyncio
-import hashlib
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -54,7 +54,7 @@ class StructuralAtom:
     def compute_signature(self) -> str:
         """Genera fingerprint inmutable del comportamiento"""
         source = ast.unparse(self.ast_node)
-        return hashlib.sha256(source.encode()).hexdigest()[:16]
+        return cortex_hash_truncated(source.encode(), length=16)
 
 
 @dataclass

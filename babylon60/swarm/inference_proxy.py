@@ -6,8 +6,8 @@ Agents must sign their LLM requests. The Proxy verifies their identity
 against the TrustMatrix before forwarding the request to the frontier model.
 """
 
+from babylon60.crypto.hash_registry import cortex_hash_raw
 import base64
-import hashlib
 import logging
 import os
 import threading
@@ -49,7 +49,7 @@ async def proxy_inference(req: InferenceRequest):
     # 2. Verify Signature
     try:
         sig_bytes = base64.b64decode(req.signature_b64)
-        prompt_hash = hashlib.sha256(req.prompt.encode("utf-8")).digest()
+        prompt_hash = cortex_hash_raw(req.prompt.encode("utf-8"))
         public_key.verify(sig_bytes, prompt_hash)
     except Exception as e:
         logger.critical(

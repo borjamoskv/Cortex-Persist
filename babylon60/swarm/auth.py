@@ -10,8 +10,8 @@ reaches a 100% unanimous Zenith Consensus rating.
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
-import hashlib
 import json
 import logging
 import time
@@ -45,7 +45,7 @@ class ByzantineAuthLayer:
         If Zenith score is 1.0 (unanimous Swarm certainty), auto-approve.
         Otherwise, drop a challenge file and wait for the operator to sign it.
         """
-        action_hash = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+        action_hash = cortex_hash(json.dumps(payload, sort_keys=True).encode())
 
         # Ouroboros-Omega loop exception (100% certainty)
         if zenith_score >= 1.0:

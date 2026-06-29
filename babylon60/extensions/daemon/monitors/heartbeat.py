@@ -5,7 +5,7 @@ A true heartbeat should calculate the hash of the entropy on each poll
 and alert solely when the semantic asymmetry deviates from the given threshold.
 """
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import time
 from datetime import datetime, timezone
@@ -33,7 +33,7 @@ class TrueHeartbeatMonitor:
 
     def _hash_entropy(self, payload: str) -> str:
         """Calculate the hash of the entropy payload."""
-        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        return cortex_hash(payload.encode("utf-8"))
 
     def semantic_drift(self, current: str, past: str) -> float:
         """Calculate the semantic asymmetry (drift) between two entropy hashes."""

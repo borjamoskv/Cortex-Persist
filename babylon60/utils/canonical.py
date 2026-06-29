@@ -13,8 +13,8 @@ Hash Scheme Versions:
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import datetime
-import hashlib
 import json
 import time
 from typing import Any
@@ -96,7 +96,7 @@ def compute_tx_hash(
             f"v3\x00{tenant_id}\x00{prev_hash}\x00{project}"
             f"\x00{action}\x00{detail_json}\x00{timestamp}"
         )
-    return hashlib.sha256(h_input.encode("utf-8")).hexdigest()
+    return cortex_hash(h_input.encode("utf-8"))
 
 
 def compute_tx_hash_v1(
@@ -112,9 +112,9 @@ def compute_tx_hash_v1(
     created before the canonical hash migration.
     """
     h_input = f"{prev_hash}:{project}:{action}:{detail_json}:{timestamp}"
-    return hashlib.sha256(h_input.encode("utf-8")).hexdigest()
+    return cortex_hash(h_input.encode("utf-8"))
 
 
 def compute_fact_hash(content: str) -> str:
     """Compute deterministic SHA-256 hash for fact content."""
-    return hashlib.sha256(content.encode("utf-8")).hexdigest()
+    return cortex_hash(content.encode("utf-8"))

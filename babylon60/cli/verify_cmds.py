@@ -6,6 +6,7 @@ Allows external third-party auditors to verify the cryptographic
 integrity of a CORTEX Compliance Bundle.
 """
 
+from babylon60.crypto.hash_registry import cortex_hash
 import base64
 import hashlib
 import json
@@ -105,10 +106,10 @@ def verify_bundle(bundle_path: str) -> None:
                 # 3. Batch Merkle Root
                 batch_audit_ids = [r["audit_id"] for r in batch_rows]
                 merkle_payload = "".join(batch_audit_ids) + prev_hash
-                merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+                merkle_root = cortex_hash(merkle_payload.encode())
                 
                 entry_hash_payload = f"merkle_batch:{merkle_root}:{prev_hash}"
-                entry_hash = hashlib.sha256(entry_hash_payload.encode()).hexdigest()
+                entry_hash = cortex_hash(entry_hash_payload.encode())
                 
                 # 4. Ed25519 Signature
                 try:

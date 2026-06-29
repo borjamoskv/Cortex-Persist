@@ -1,5 +1,5 @@
 # C5-REAL
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 from pydantic import BaseModel, Field
 
@@ -25,4 +25,4 @@ class RiemannZeroNode(BaseModel):
 
     def compute_hash(self) -> str:
         payload = f"{self.id}|{self.n_index}|{self.imaginary_part_scaled}|{self.real_part_scaled}|{self.taint_signature}".encode()
-        return hashlib.sha256(payload).hexdigest()[:16]
+        return cortex_hash_truncated(payload, length=16)

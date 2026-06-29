@@ -9,7 +9,7 @@ and detects orphaned/tampered facts.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import time
 from dataclasses import dataclass, field
@@ -220,7 +220,7 @@ class IntegrityAuditor:
         stored_prev = fact["prev_hash"] or ""
 
         # Compute expected hash
-        expected_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        expected_hash = cortex_hash(content.encode("utf-8"))
 
         # Check hash integrity
         if stored_hash and stored_hash != expected_hash:

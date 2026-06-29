@@ -6,8 +6,8 @@ Pydantic-validated schemas for requests, results, and batch jobs.
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import enum
-import hashlib
 import time
 from dataclasses import dataclass, field
 
@@ -65,7 +65,7 @@ class ScrapeResult:
     @staticmethod
     def compute_hash(content: str) -> str:
         """SHA-256 content hash for deduplication."""
-        return hashlib.sha256(content.encode("utf-8")).hexdigest()[:16]
+        return cortex_hash_truncated(content.encode("utf-8"), length=16)
 
     @classmethod
     def from_extraction(

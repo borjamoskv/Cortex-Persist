@@ -10,8 +10,8 @@ Axiom: Ω₂ (Entropic Asymmetry) - memory is finite; audit trails are infinite.
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
-import hashlib
 import logging
 import time
 from collections import OrderedDict
@@ -76,7 +76,7 @@ class SovereignCache(Generic[T]):
         self._eviction_tasks: set[asyncio.Task[Any]] = set()
 
         # Sovereign Evidence Chain (Ω₀)
-        self._evidence_hash = hashlib.sha256(b"CORTEX_GENESIS_VOID").hexdigest()
+        self._evidence_hash = cortex_hash(b"CORTEX_GENESIS_VOID")
         self._eviction_count = 0
 
     async def get(self, key: str, default: T | None = None) -> T | None:
@@ -118,10 +118,10 @@ class SovereignCache(Generic[T]):
 
         # 130/100: Mathematical proof of what was forgotten
         # H(prev | k_hash | v_hash | reason)
-        k_hash = hashlib.sha256(str(key).encode()).hexdigest()
-        v_hash = hashlib.sha256(str(value).encode()).hexdigest()
+        k_hash = cortex_hash(str(key).encode())
+        v_hash = cortex_hash(str(value).encode())
         proof_payload = f"{self._evidence_hash}|{k_hash}|{v_hash}|{reason.value}"
-        self._evidence_hash = hashlib.sha256(proof_payload.encode()).hexdigest()
+        self._evidence_hash = cortex_hash(proof_payload.encode())
 
         if not self._on_evict:
             return

@@ -5,7 +5,7 @@ Implements algorithms inspired by arXiv:2605.30351v1 for memory-efficient video 
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_raw
 import logging
 from dataclasses import dataclass
 
@@ -35,10 +35,10 @@ class VideoMLACache:
         Simulates latent compression of a KV pair and stores it in the cache.
         """
         # C5-REAL deterministic compression simulation
-        k_hash = hashlib.sha256(f"{frame_idx}_{key_tensor}".encode()).hexdigest()
+        k_hash = cortex_hash(f"{frame_idx}_{key_tensor}".encode())
 
         # Compress by hashing the value to a byte array
-        v_hash = hashlib.sha256(value_tensor.encode()).digest()
+        v_hash = cortex_hash_raw(value_tensor.encode())
         compressed_len = max(1, len(value_tensor) // self.compression_factor)
 
         # Simulate byte truncation
@@ -55,7 +55,7 @@ class VideoMLACache:
         """
         Retrieves a compressed KV pair based on the frame index and key.
         """
-        k_hash = hashlib.sha256(f"{frame_idx}_{key_tensor}".encode()).hexdigest()
+        k_hash = cortex_hash(f"{frame_idx}_{key_tensor}".encode())
         if k_hash in self._cache:
             return self._cache[k_hash]
 

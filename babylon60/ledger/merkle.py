@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 from dataclasses import dataclass
 from typing import Any
 
@@ -31,7 +31,7 @@ class MerkleTree:
         self.root = self._build_recursive(nodes)
 
     def _hash_pair(self, left: str, right: str) -> str:
-        return hashlib.sha256((left + right).encode()).hexdigest()
+        return cortex_hash((left + right).encode())
 
     def _build_recursive(self, nodes: list[MerkleNode]) -> MerkleNode:
         self.layers.append(nodes)
@@ -74,9 +74,9 @@ class MerkleTree:
         current = leaf_hash
         for sibling_hash, direction in proof:
             if direction == "L":
-                current = hashlib.sha256((sibling_hash + current).encode()).hexdigest()
+                current = cortex_hash((sibling_hash + current).encode())
             else:
-                current = hashlib.sha256((current + sibling_hash).encode()).hexdigest()
+                current = cortex_hash((current + sibling_hash).encode())
         return current == root_hash
 
 

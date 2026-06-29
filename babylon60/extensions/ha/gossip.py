@@ -8,8 +8,8 @@ Implements Semantic Digests and Vector Clocks to ensure eventual consistency.
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
-import hashlib
 import json
 import logging
 import time
@@ -35,7 +35,7 @@ class StateRecord:
         """Compute semantic digest of the value."""
         # Sort keys to ensure deterministic hashing
         canonical_json = json.dumps(self.value, sort_keys=True)
-        return hashlib.sha256(f"{self.key}:{self.version}:{canonical_json}".encode()).hexdigest()
+        return cortex_hash(f"{self.key}:{self.version}:{canonical_json}".encode())
 
 
 @dataclass()

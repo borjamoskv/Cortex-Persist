@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
-import hashlib
 import json
 import logging
 import secrets
@@ -108,7 +108,7 @@ class AuthManager:
 
     @staticmethod
     def hash_key_legacy_sha256(key: str) -> str:
-        return hashlib.sha256(key.encode()).hexdigest()
+        return cortex_hash(key.encode())
 
     async def hash_key_argon2id_async(self, key: str) -> str:
         from cortex.config import AUTH_PEPPER

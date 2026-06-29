@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 from collections.abc import Mapping
 from typing import Any
 
@@ -14,7 +14,7 @@ def canonical_json_bytes(payload: Any) -> bytes:
 
 def sha256_hex(data: bytes) -> str:
     """Return a SHA-256 hex digest for already-canonicalized bytes."""
-    return hashlib.sha256(data).hexdigest()
+    return cortex_hash(data)
 
 
 def manifest_sha256(manifest: Mapping[str, Any]) -> str:

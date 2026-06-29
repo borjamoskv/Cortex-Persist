@@ -10,7 +10,7 @@ Implements rigorous experimental isolation:
 - Capacity vs. Policy disassociation
 """
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_raw
 import math
 from dataclasses import dataclass
 from typing import Any
@@ -45,7 +45,7 @@ class ExperimentalProfiler:
     def _get_embedding(self, text: str) -> np.ndarray:
         if self.embedding_provider:
             return np.array(self.embedding_provider(text))
-        h = hashlib.sha256(text.encode("utf-8")).digest()
+        h = cortex_hash_raw(text.encode("utf-8"))
         return np.array([float(b) for b in h]) / 255.0
 
     def compute_lexical_entropy(self, text: str) -> float:

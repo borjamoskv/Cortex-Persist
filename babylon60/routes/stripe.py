@@ -14,7 +14,7 @@ Environment variables:
     STRIPE_PRICE_TABLE - JSON mapping plan names to Stripe Price IDs
 """
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import os
 import time
@@ -93,7 +93,7 @@ def _get_stripe():
 def _generate_api_key(email: str, plan: str) -> str:
     """Generate a unique API key with ctx_ prefix."""
     seed = f"{email}:{plan}:{time.monotonic()}:{os.urandom(16).hex()}"
-    return "ctx_" + hashlib.sha256(seed.encode()).hexdigest()[:48]
+    return "ctx_" + cortex_hash_truncated(seed.encode(), length=48)
 
 
 # ─── Routes ──────────────────────────────────────────────────────────

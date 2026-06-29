@@ -9,8 +9,8 @@ the agent/user that created it, proving provenance beyond hash chains.
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import base64
-import hashlib
 import logging
 import os
 from typing import Any
@@ -63,7 +63,7 @@ def _canonical_payload(content: str, fact_hash: str) -> bytes:
     Combines content hash with the fact hash to ensure
     both the content and its position in the chain are signed.
     """
-    content_digest = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    content_digest = cortex_hash(content.encode("utf-8"))
     canonical = f"{content_digest}:{fact_hash}"
     return canonical.encode("utf-8")
 

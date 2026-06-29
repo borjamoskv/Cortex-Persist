@@ -9,8 +9,8 @@ Derivation: Ω₃ (Byzantine Default) - every model is self-verifiable.
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import enum
-import hashlib
 import json
 import time
 from dataclasses import dataclass, field
@@ -33,7 +33,7 @@ def _now_iso() -> str:
 
 def _sha256(data: str) -> str:
     """Deterministic SHA-256 hash."""
-    return hashlib.sha256(data.encode("utf-8")).hexdigest()
+    return cortex_hash(data.encode("utf-8"))
 
 
 class VEXStatus(str, enum.Enum):

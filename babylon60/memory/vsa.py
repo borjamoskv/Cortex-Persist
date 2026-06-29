@@ -12,7 +12,7 @@ Law Ω₀: Zero external dependencies. Pure Python list comprehensions.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_truncated
 import json
 import logging
 import os
@@ -287,7 +287,7 @@ class SwarmMemory:
         """Encode and store a memory.
         Returns the record ID.
         """
-        rid = record_id or hashlib.sha256(content.encode()).hexdigest()[:12]
+        rid = record_id or cortex_hash_truncated(content.encode(), length=12)
         vector = self._encoder.encode(content)
         # Store in SDM
         self._sdm.write(vector, vector)
@@ -379,7 +379,7 @@ class SwarmMemory:
             "saved_at": time.monotonic(),
         }
         payload = json.dumps(data, ensure_ascii=False, indent=2)
-        integrity_hash = hashlib.sha256(payload.encode()).hexdigest()
+        integrity_hash = cortex_hash(payload.encode())
         data["integrity_hash"] = integrity_hash
         with open(self._persistence_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)

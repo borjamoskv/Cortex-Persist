@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_raw
 import logging
 import math
 import os
@@ -29,7 +29,7 @@ def _hash_to_unit_vector(text: str, dimension: int = EMBEDDING_DIM) -> list[floa
     raw = bytearray()
     counter = 0
     while len(raw) < dimension:
-        raw.extend(hashlib.sha256(seed + counter.to_bytes(4, "big")).digest())
+        raw.extend(cortex_hash_raw(seed + counter.to_bytes(4, "big")))
         counter += 1
 
     vector = [((byte / 255.0) * 2.0) - 1.0 for byte in raw[:dimension]]
@@ -144,7 +144,7 @@ class LocalEmbedder:
         model_name = self._resolve_model_name(self._model_name_override)
         no_embed = os.environ.get("CORTEX_NO_EMBED", "0")
         payload = f"{model_name}:{EMBEDDING_DIM}:{self._device}:{no_embed}"
-        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        return cortex_hash(payload.encode("utf-8"))
 
     def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
         if isinstance(text, list):

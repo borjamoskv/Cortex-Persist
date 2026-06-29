@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import datetime
-import hashlib
 import json
 import time
 from collections.abc import Mapping
@@ -160,7 +160,7 @@ def seal_artifact(artifact: ImmuneArtifact) -> SealRecord:
     if artifact.state != ImmunityState.PROMOTABLE:
         raise SealViolation("Artifact must be promotable to be sealed.")
 
-    content_hash = hashlib.sha256(json.dumps(artifact.payload, sort_keys=True).encode()).hexdigest()
+    content_hash = cortex_hash(json.dumps(artifact.payload, sort_keys=True).encode())
     sealed_at = datetime.datetime.fromtimestamp(
         time.monotonic(), tz=datetime.timezone.utc
     ).isoformat()
@@ -178,7 +178,7 @@ def seal_artifact(artifact: ImmuneArtifact) -> SealRecord:
 
 
 def assert_not_mutated(seal: SealRecord, payload: Mapping[str, Any]) -> None:
-    content_hash = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+    content_hash = cortex_hash(json.dumps(payload, sort_keys=True).encode())
     if content_hash != seal.content_hash:
         raise SealViolation(f"Sealed artifact {seal.artifact_id} has been mutated.")
 

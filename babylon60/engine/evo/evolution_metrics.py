@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 import sqlite3
@@ -59,7 +59,7 @@ class CortexMetrics:
     def update_metrics(self, metrics: DomainMetrics) -> None:
         """Persist metrics with hash verification (Axiom 12 compliance)."""
         data = f"{metrics.domain_id}{metrics.health_score}{metrics.timestamp}"
-        m_hash = hashlib.sha256(data.encode()).hexdigest()
+        m_hash = cortex_hash(data.encode())
 
         conn = self._get_connection()
         try:
@@ -120,7 +120,7 @@ class CortexMetrics:
         p_json = json.dumps(mutation.parameters)
         prev_hash = self._get_last_hash(domain_id)
         data = f"{mutation.mutation_id}{p_json}{mutation.fitness}{prev_hash}"
-        m_hash = hashlib.sha256(data.encode()).hexdigest()
+        m_hash = cortex_hash(data.encode())
 
         conn = self._get_connection()
         try:

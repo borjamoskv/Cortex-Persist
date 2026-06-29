@@ -1,7 +1,7 @@
 # cortex/shannon/env/client.py
 # [C5-REAL] Exergy-Maximized
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_raw
 import socket
 import struct
 from abc import ABC, abstractmethod
@@ -35,7 +35,7 @@ class HeuristicGenesisAgent(BinaryAgent):
             endian_char = observation[32:33].decode()
             self.last_endianness = ">" if endian_char == "B" else "<"
 
-            nonce_hash = hashlib.sha256(nonce).digest()
+            nonce_hash = cortex_hash_raw(nonce)
             length_packed = struct.pack(f"{self.last_endianness}I", self.max_payload)
             return nonce_hash + length_packed
 
@@ -84,7 +84,7 @@ class BinaryClient:
     def send_handshake(self, nonce: bytes, endianness: str, max_payload: int = 1024):
         if not self.sock:
             raise RuntimeError("Not connected")
-        nonce_hash = hashlib.sha256(nonce).digest()
+        nonce_hash = cortex_hash_raw(nonce)
         length_packed = struct.pack(f"{endianness}I", max_payload)
         payload = nonce_hash + length_packed
         self.sock.sendall(payload)

@@ -9,7 +9,7 @@ the user's goal before they explicitly articulate it.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 import math
@@ -280,7 +280,7 @@ class NeuralIntentEngine:
     def read_context(self) -> tuple[NeuralContext, str]:
         """Capture the current implicit state of the OS and ephemeral raw text."""
         raw_clip = self.clip_sensor.get_clipboard()
-        clip_hash = hashlib.sha256(raw_clip.encode("utf-8")).hexdigest() if raw_clip else ""
+        clip_hash = cortex_hash(raw_clip.encode("utf-8")) if raw_clip else ""
         clip_ent = calculate_entropy(raw_clip)
 
         ctx = NeuralContext(

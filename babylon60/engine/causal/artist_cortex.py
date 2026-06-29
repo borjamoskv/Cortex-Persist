@@ -5,6 +5,7 @@ Transforms the operator's psychological entropy into executable topology.
 Implements the 8 vectors of epistemic friction as strict physical invariants.
 """
 
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import hashlib
 import logging
 import os
@@ -81,6 +82,6 @@ class CortexSwarmNode:
     @staticmethod
     def force_oblique_constraint(operator_input: str, noise_seed: str) -> str:
         """Breaks the operator's creative pattern by injecting deterministic noise."""
-        constraint_hash = hashlib.sha256(noise_seed.encode()).hexdigest()[:8]
+        constraint_hash = cortex_hash_truncated(noise_seed.encode(), length=8)
         logger.info(f"Injecting structural constraint [{constraint_hash}]")
         return f"MUTATION_{constraint_hash}::{operator_input}"

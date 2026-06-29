@@ -7,8 +7,8 @@ and adaptive agent formations for Zero-Trust problem solving.
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
-import hashlib
 import logging
 from typing import Any, TypedDict, cast
 
@@ -315,7 +315,7 @@ class CentauroEngine:
 
     async def engage(self, mission: str, formation: str = Formation.BLITZ) -> CentauroMissionResult:
         """Activate the Centauro protocol for a mission. (Axiom Ω₂: Multiplexed Execution)"""
-        mission_hash = hashlib.sha256(f"{mission}:{formation}".encode()).hexdigest()
+        mission_hash = cortex_hash(f"{mission}:{formation}".encode())
 
         # --- Thermal Heat-Sink (Multiplexing) ---
         mission_hash_str = str(mission_hash)

@@ -5,7 +5,7 @@ Shared utilities for compaction strategies.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 from difflib import SequenceMatcher
 
 __all__ = [
@@ -23,7 +23,7 @@ def normalize_content(text: str) -> str:
 
 def content_hash(text: str) -> str:
     """SHA-256 hash of normalized content."""
-    return hashlib.sha256(normalize_content(text).encode("utf-8")).hexdigest()
+    return cortex_hash(normalize_content(text).encode("utf-8"))
 
 
 def similarity(a: str, b: str) -> float:

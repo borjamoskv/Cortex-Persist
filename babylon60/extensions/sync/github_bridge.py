@@ -8,7 +8,7 @@ Dedup via SHA256 of `{repo}/{number}` stored in `meta.github_key`.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -43,7 +43,7 @@ class SyncResult:
 def _github_key(repo: str, number: int) -> str:
     """Deterministic dedup key: SHA256(`owner/repo#number`)."""
     raw = f"{repo}#{number}"
-    return hashlib.sha256(raw.encode()).hexdigest()[:16]
+    return cortex_hash_truncated(raw.encode(), length=16)
 
 
 class GitHubCortexBridge:

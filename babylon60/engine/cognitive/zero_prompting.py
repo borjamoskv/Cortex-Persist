@@ -18,7 +18,7 @@ Thermodynamic Model:
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import time
 from dataclasses import dataclass, field
@@ -92,7 +92,7 @@ class ResolutionReport:
             f"{self.entropy_after:.6f}|{self.ghosts_purged}|"
             f"{len(self.mutations_applied)}|{self.fitness_delta:.4f}"
         )
-        self.hash = hashlib.sha256(payload.encode()).hexdigest()
+        self.hash = cortex_hash(payload.encode())
         return self.hash
 
 

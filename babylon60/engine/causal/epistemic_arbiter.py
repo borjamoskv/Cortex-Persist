@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 from collections.abc import Callable
 
@@ -138,7 +138,7 @@ class EpistemicCompiler:
     ) -> DecisionTrace:
         # Cryptographic Hash of the decision path
         raw_trace = "\n".join(trace_steps)
-        trace_hash = hashlib.sha256(raw_trace.encode("utf-8")).hexdigest()
+        trace_hash = cortex_hash(raw_trace.encode("utf-8"))
         
         return DecisionTrace(
             verdict=verdict,

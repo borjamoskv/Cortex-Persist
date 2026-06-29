@@ -8,6 +8,7 @@ Axioms: Ω₀ (Self-Reference), Ω₂ (Entropic Asymmetry), Ω₃ (Byzantine Def
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import hashlib
 import logging
 import time
@@ -145,7 +146,7 @@ class KGVTracker:
 
     def record(self, file_path: str, content: str, commit_hash: str) -> None:
         """Record a new Known Good Version."""
-        content_hash = hashlib.sha256(content.encode()).hexdigest()
+        content_hash = cortex_hash(content.encode())
         self._versions[file_path] = KnownGoodVersion(
             file_path=file_path,
             content_hash=content_hash,

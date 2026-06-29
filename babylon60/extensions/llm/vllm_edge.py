@@ -9,8 +9,8 @@ TurboQuant compression (arXiv:2504.19874) of PagedAttention Context Windows
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_truncated
 import asyncio
-import hashlib
 import json
 import logging
 import os
@@ -124,7 +124,7 @@ class NativeVLLMProvider(BaseProvider):
         """Sovereign In-Process Completion."""
         from vllm import SamplingParams  # pyright: ignore[reportMissingImports]
 
-        request_id = hashlib.sha256(f"{time.monotonic()}_{prompt[:20]}".encode()).hexdigest()[:16]
+        request_id = cortex_hash_truncated(f"{time.monotonic()}_{prompt[:20]}".encode(), length=16)
 
         sp = SamplingParams(
             temperature=temperature,
@@ -170,7 +170,7 @@ class NativeVLLMProvider(BaseProvider):
 
         # Hook interception for TurboQuant KV Cache extraction (Axiom Ω₄/Ω₂)
         # Extract logic directly to KV Manager mapping
-        system_hash = hashlib.sha256(system.encode()).hexdigest()[:16]  # Parent base prompt
+        system_hash = cortex_hash_truncated(system.encode(), length=16)  # Parent base prompt
         await self._extract_and_persist_kv_cache(request_id, parent_cache_id=system_hash)
 
         return final_output
@@ -234,7 +234,7 @@ class NativeVLLMProvider(BaseProvider):
         """Stream output natively directly from vLLM AsyncEngine."""
         from vllm import SamplingParams  # pyright: ignore[reportMissingImports]
 
-        request_id = hashlib.sha256(f"str_{time.monotonic()}_{prompt[:20]}".encode()).hexdigest()[
+        request_id = cortex_hash(f"str_{time.monotonic()}_{prompt[:20]}".encode())[
             :16
         ]
 

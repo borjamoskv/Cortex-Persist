@@ -13,6 +13,7 @@ Características:
 - Evaluación estructural combinada (descendants, fan-out, fan-in, depth)
 """
 
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 from collections import defaultdict, deque
 from decimal import Decimal
@@ -365,4 +366,4 @@ class TopologyIndex:
             state_repr.append(node_state)
 
         serialized = json.dumps(state_repr, sort_keys=True)
-        return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+        return cortex_hash(serialized.encode("utf-8"))

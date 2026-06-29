@@ -8,7 +8,7 @@ zone classifications, coordinates, risk scores, and blind-spot reports.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import time
 from dataclasses import dataclass, field
 from enum import Enum
@@ -172,7 +172,7 @@ class CadastralReport:
             f"{self.forbidden_zones_found}|{self.entropy_reduced}|"
             f"{len(self.assessments)}|{len(self.blind_spots)}"
         )
-        self.hash = hashlib.sha256(payload.encode()).hexdigest()
+        self.hash = cortex_hash(payload.encode())
         return self.hash
 
     @property

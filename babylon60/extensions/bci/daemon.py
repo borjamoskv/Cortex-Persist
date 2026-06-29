@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
-import hashlib
 import json
 import os
 import time
@@ -53,7 +53,7 @@ class BCI_Daemon:
             )  # In actual BCI, this would be raw bytes. Here we encode via b64 or text
 
             test_str = f"{derivation}:{action}:{instruction}:{raw_cargo}".encode()
-            calculated_hash = hashlib.sha256(test_str).hexdigest()
+            calculated_hash = cortex_hash(test_str)
 
             if expected_hash and calculated_hash != expected_hash:
                 raise SovereignIntentError(
@@ -103,7 +103,7 @@ class BCI_Transmitter:
     @staticmethod
     async def send_intent(derivation: str, action: int, instruction: str, payload: str):
         test_str = f"{derivation}:{action}:{instruction}:{payload}".encode()
-        calculated_hash = hashlib.sha256(test_str).hexdigest()
+        calculated_hash = cortex_hash(test_str)
 
         packet = {
             "derivation": derivation,

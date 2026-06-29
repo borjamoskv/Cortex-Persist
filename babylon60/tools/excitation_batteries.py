@@ -1,4 +1,4 @@
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
@@ -24,7 +24,7 @@ class ExcitationPrompt:
 
     def __post_init__(self):
         if not self.id:
-            h = hashlib.sha256(self.prompt_text.encode("utf-8")).hexdigest()
+            h = cortex_hash(self.prompt_text.encode("utf-8"))
             self.id = h[:12]
 
 
@@ -47,7 +47,7 @@ class BatteryManager:
         # Sort prompts by ID to ensure deterministic hash
         sorted_prompts = sorted(self.prompts, key=lambda x: x.id)
         combined = "".join(p.prompt_text for p in sorted_prompts)
-        return hashlib.sha256(combined.encode("utf-8")).hexdigest()
+        return cortex_hash(combined.encode("utf-8"))
 
     def export_jsonl(self, path: str) -> None:
         with open(path, "w", encoding="utf-8") as f:

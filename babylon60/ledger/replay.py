@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import sqlite3
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -134,7 +134,7 @@ def replay_request_hash(event: LedgerEvent) -> str:
     payload = event.to_payload()
     payload.pop("hash", None)
     payload.pop("prev_hash", None)
-    return hashlib.sha256(_canonical_public_json(payload).encode("utf-8")).hexdigest()
+    return cortex_hash(_canonical_public_json(payload).encode("utf-8"))
 
 
 def validate_batch_import_manifest(export_dir: str | Path) -> dict[str, Any]:

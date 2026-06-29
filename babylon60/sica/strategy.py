@@ -19,8 +19,8 @@ The evolutionary loop:
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import copy
-import hashlib
 import json
 import logging
 import time
@@ -114,7 +114,7 @@ class StrategyGenome:
             "error_recovery_mode": self.error_recovery_mode,
             "generation": self.generation,
         }
-        return hashlib.sha256(json.dumps(state, sort_keys=True).encode()).hexdigest()[:16]
+        return cortex_hash_truncated(json.dumps(state, sort_keys=True).encode(), length=16)
 
     @property
     def active_heuristics(self) -> list[Heuristic]:

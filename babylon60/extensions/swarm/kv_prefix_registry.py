@@ -8,6 +8,7 @@ AGENTS.md Tenant Isolation: cache_key always includes tenant_id.
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import hashlib
 import time
 from dataclasses import dataclass, field
@@ -19,7 +20,7 @@ from typing import Any
 @lru_cache(maxsize=1024)
 def hash_prompt(system_prompt: str) -> str:
     """O(1) SHA-256 for recurring prompts (Azkartu Optimization)."""
-    return hashlib.sha256(system_prompt.encode()).hexdigest()
+    return cortex_hash(system_prompt.encode())
 
 
 @dataclass
@@ -89,7 +90,7 @@ class KVPrefixRegistry:
     def get_slot(self, mission_id: str, tenant_id: str, system_prompt: str) -> PrefixSlot | None:
         """Retrieves existing slot (cache hit) or None (cache miss)."""
         prefix_hash = hash_prompt(system_prompt)
-        key = hashlib.sha256(f"{tenant_id}:{mission_id}:{prefix_hash}".encode()).hexdigest()
+        key = cortex_hash(f"{tenant_id}:{mission_id}:{prefix_hash}".encode())
         slot = self._slots.get(key)
         if slot:
             slot.hits += 1

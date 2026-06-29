@@ -8,8 +8,8 @@ Silence is NOT compliance.
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import dataclasses
-import hashlib
 import logging
 import sqlite3
 import time
@@ -141,7 +141,7 @@ class TrustService:
                 violation="NULL_HASH - Fact was never signed. Chain trust invalidated.",
             )
 
-        recomputed = hashlib.sha256(content.encode()).hexdigest()
+        recomputed = cortex_hash(content.encode())
         valid = recomputed == stored_hash
 
         violation: str | None = None
@@ -230,7 +230,7 @@ class TrustService:
                 )
                 continue
 
-            recomputed = hashlib.sha256(content.encode()).hexdigest()
+            recomputed = cortex_hash(content.encode())
             valid = recomputed == stored_hash
             violation = f"HASH_MISMATCH - stored={stored_hash[:16]}…" if not valid else None
             results.append(FactVerification(**common, valid=valid, violation=violation))
@@ -363,7 +363,7 @@ class TrustService:
                 vulnerabilities.append(f"fact#{row['id']}: EMPTY_CONTENT")
                 continue
 
-            recomputed = hashlib.sha256(content.encode()).hexdigest()
+            recomputed = cortex_hash(content.encode())
             if recomputed != stored_hash:
                 vulnerabilities.append(f"fact#{row['id']}: HASH_MISMATCH")
 

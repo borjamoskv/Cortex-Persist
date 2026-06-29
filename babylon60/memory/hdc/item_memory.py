@@ -15,7 +15,7 @@ Architecture:
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_raw
 import json
 import logging
 from pathlib import Path
@@ -54,7 +54,7 @@ CORTEX_ROLES: Final[tuple[str, ...]] = (
 
 def _deterministic_seed(symbol: str) -> int:
     """Derive a deterministic integer seed from a symbol string."""
-    digest = hashlib.sha256(symbol.encode("utf-8")).digest()
+    digest = cortex_hash_raw(symbol.encode("utf-8"))
     return int.from_bytes(digest[:8], byteorder="big")
 
 

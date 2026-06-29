@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
+from babylon60.crypto.hash_registry import cortex_hash
 import functools
-import hashlib
 import json
 import logging
 import os
@@ -147,7 +147,7 @@ def register_singularity_tools(mcp) -> None:
         prev_hash = ledgers[-1]["hash"] if ledgers else "GENESIS_BLOCK"
 
         payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
-        block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        block_hash = cortex_hash(payload.encode("utf-8"))
 
         _LEDGER_STATE["ledgers"].append(
             {

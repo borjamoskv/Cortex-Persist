@@ -1,4 +1,5 @@
 # [C5-REAL] Exergy-Maximized
+from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_raw
 import hashlib
 import time
 
@@ -19,13 +20,13 @@ class MerkleLedger:
 
     def __init__(self):
         self.leaves = []  # (hv_hash, hv_binary, metadata)
-        self.current_root = hashlib.sha256(b"genesis").hexdigest()
+        self.current_root = cortex_hash(b"genesis")
 
     def hash_hv(self, hv: torch.Tensor) -> bytes:
         """Deterministic and compact hashing of a hypervector."""
         # Convert to binary representation for compact hashing
         binary = (hv > 0).cpu().numpy().astype(np.int8).tobytes()
-        return hashlib.sha256(binary).digest()
+        return cortex_hash_raw(binary)
 
     def append(self, hv: torch.Tensor, membrane_result: dict, source_llm_hash: str = None) -> str:  # pyright: ignore[reportArgumentType]
         """Appends a new verified leaf to the ledger."""

@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_raw
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
@@ -18,7 +18,7 @@ class SystemState:
 
 def fast_pseudo_embed(text: str, dim: int = 64) -> np.ndarray:
     """A deterministic pseudo-embedding to simulate an LLM embedder for bootstrapping."""
-    h = hashlib.sha256(text.encode("utf-8")).digest()
+    h = cortex_hash_raw(text.encode("utf-8"))
     vec = np.array([float(x) for x in h[:dim]])
     # Normalize
     norm = np.linalg.norm(vec)

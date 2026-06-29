@@ -4,7 +4,7 @@ Zero-Knowledge Gatekeeper (Fase 7).
 Acts as the ultimate Execution Firewall between Swarm consensus and the Host OS.
 """
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 from typing import Any
 
@@ -60,7 +60,7 @@ class ZeroKnowledgeGatekeeper:
             raise SecurityViolationError(f"Gatekeeper blocked execution: Unknown Judge {judge_id}.")
 
         # 2. Cryptographic Verification
-        payload_hash = hashlib.sha256(ast_code.encode("utf-8")).hexdigest()  # type: ignore
+        payload_hash = cortex_hash(ast_code.encode("utf-8"))  # type: ignore
         try:
             is_valid = Verifier.verify_signature(
                 judge_pub_key_b64, payload_hash, timestamp, signature_b64

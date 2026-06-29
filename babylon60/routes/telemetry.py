@@ -4,6 +4,7 @@ Sovereign Telemetry Routes (AST Oracle WebSocket API)
 Exposes realtime stream of code mutations detected by AST Oracle.
 """
 
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 import logging
 from typing import Any
@@ -54,7 +55,7 @@ async def ingest_telemetry(
     # Virgo expects: sha256(content + nonce + project) where nonce defaults to ""
     import hashlib
 
-    logos_sig = hashlib.sha256(f"{content}{project}".encode()).hexdigest()
+    logos_sig = cortex_hash(f"{content}{project}".encode())
 
     meta = data.model_dump()
     meta["logos_signature"] = logos_sig
@@ -445,7 +446,7 @@ async def telemetry_nodes_ws(websocket: WebSocket):
 
                     content = f"Telemetry batch from {agent_id} at {timestamp}"
                     project = "smoke-detector"
-                    logos_sig = hashlib.sha256(f"{content}{project}".encode()).hexdigest()
+                    logos_sig = cortex_hash(f"{content}{project}".encode())
 
                     meta = {
                         "timestamp": timestamp,

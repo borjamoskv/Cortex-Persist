@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
-import hashlib
 from collections import deque
 from enum import Enum
 from typing import Any
@@ -68,7 +68,7 @@ class MemoryOS:
         if tier == MemoryTier.EPISODIC:
             # Map & Bind context into fixed-size VSA tensor (O(1) memory footprint)
             ctx_string = f"{key}:{value}"
-            idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
+            idx = int(cortex_hash(ctx_string.encode("utf-8")), 16) % VSA_DIMENSION
             self._episodic_vsa_tensor[idx] += 1.0
             # Also record in bounded trace log for test observability
             self._episodic_traces.append({"key": key, "value": value})

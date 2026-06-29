@@ -15,7 +15,7 @@ Author: Borja Moskv (SYS_ID: borjamoskv)
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated, cortex_hash_raw
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -45,7 +45,7 @@ class EmbeddingMetadata:
     @classmethod
     def compute_version_hash(cls, backend_id: str, model_name: str, dimensions: int) -> str:
         payload = f"{backend_id}:{model_name}:{dimensions}"
-        return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+        return cortex_hash_truncated(payload.encode("utf-8"), length=16)
 
 
 class EmbeddingBackend(ABC):
@@ -150,7 +150,7 @@ class HashFallbackBackend(EmbeddingBackend):
         raw = bytearray()
         counter = 0
         while len(raw) < self._dimensions:
-            raw.extend(hashlib.sha256(seed + counter.to_bytes(4, "big")).digest())
+            raw.extend(cortex_hash_raw(seed + counter.to_bytes(4, "big")))
             counter += 1
         vector = [((byte / 255.0) * 2.0) - 1.0 for byte in raw[: self._dimensions]]
         return self._normalize(vector)

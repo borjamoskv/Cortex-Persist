@@ -1,7 +1,7 @@
 # cortex/shannon/env/protocol.py
 # [C5-REAL] Exergy-Maximized
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_raw
 import random
 import struct
 from abc import ABC, abstractmethod
@@ -50,7 +50,7 @@ class GenesisProtocol(BinaryProtocol):
             return b"ERR: INCOMPLETE_PAYLOAD", -1.0, True, {"error": "incomplete_payload"}
 
         client_hash = data[:32]
-        expected_hash = hashlib.sha256(self.nonce).digest()
+        expected_hash = cortex_hash_raw(self.nonce)
         if client_hash != expected_hash:
             return b"ERR: INVALID_HASH", -10.0, True, {"error": "invalid_hash"}
 

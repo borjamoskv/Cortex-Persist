@@ -12,7 +12,7 @@ DERIVATION: Axiom Ω₂ (Entropic Asymmetry) - reduce noise in the signal.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import random
 import re
@@ -477,6 +477,6 @@ def generate_candidates(
     """
     poet = CommitPoet()
     # Use a hash of the diff as seed for session-level consistency
-    seed_val = int(hashlib.sha256(diff_summary.encode()).hexdigest()[:8], 16)
+    seed_val = int(cortex_hash_truncated(diff_summary.encode(), length=8), 16)
     poet.seed(seed_val)
     return poet.compose_batch(diff_summary, files, count=count)

@@ -16,7 +16,7 @@ C5-REAL - Zero disk overflow guaranteed.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import os
 import time
@@ -128,7 +128,7 @@ def execute_staged_reverse_engineering(
     global_consensus = vsa.normalize(global_consensus)
 
     # Global integrity = SHA256 of the concatenated centurion hashes
-    global_hash = hashlib.sha256("|".join(wave_hashes).encode()).hexdigest()
+    global_hash = cortex_hash("|".join(wave_hashes).encode())
 
     elapsed = time.monotonic() - t0
 

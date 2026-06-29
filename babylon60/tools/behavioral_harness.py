@@ -1,4 +1,4 @@
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import statistics
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -158,7 +158,7 @@ class BehavioralHarness:
 
         # Profile hash for serialization check
         hash_str = f"{self.blackbox.model_id}:{h_cov:.4f}:{len(states)}"
-        profile_hash = hashlib.sha256(hash_str.encode("utf-8")).hexdigest()
+        profile_hash = cortex_hash(hash_str.encode("utf-8"))
 
         return BehavioralProfile(
             model_id=self.blackbox.model_id,

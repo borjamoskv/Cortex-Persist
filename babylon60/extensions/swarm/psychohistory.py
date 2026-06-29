@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import asyncio
-import hashlib
 import logging
 from typing import Any
 
@@ -185,7 +185,7 @@ class PsychohistoryOrchestrator:
         )
 
         # Persist the Crystal to the Master Ledger
-        crystal_hash = hashlib.sha256(final_crystal.encode()).hexdigest()[:16]
+        crystal_hash = cortex_hash_truncated(final_crystal.encode(), length=16)
 
         await self.engine.store(
             project=project,

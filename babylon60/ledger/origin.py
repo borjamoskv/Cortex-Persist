@@ -1,10 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import base64
 import binascii
 import dataclasses
-import hashlib
 import secrets
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -195,7 +195,7 @@ def origin_payload_hash(event: LedgerEvent) -> str:
     payload.pop("hash", None)
     payload.pop("prev_hash", None)
     payload.pop("origin", None)
-    return hashlib.sha256(_canonical_public_json(payload).encode("utf-8")).hexdigest()
+    return cortex_hash(_canonical_public_json(payload).encode("utf-8"))
 
 
 def origin_signature_scope(event: LedgerEvent) -> bytes:

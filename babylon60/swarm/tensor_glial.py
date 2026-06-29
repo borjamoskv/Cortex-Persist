@@ -6,7 +6,7 @@ Zero-Copy `mmap` tensor map mapped across 10,000 swarm agents representing High-
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import os
 import threading
@@ -165,7 +165,7 @@ class TensorGlialLegion:
         self.agents_tensor.flush()
         with open(self.file_path, "rb") as f:
             content = f.read()
-            return hashlib.sha256(content).hexdigest()
+            return cortex_hash(content)
 
 
 if __name__ == "__main__":

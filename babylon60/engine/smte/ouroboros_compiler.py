@@ -7,6 +7,7 @@ into deterministic, minimal paths (pure functions).
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import ast
 import logging
 from pathlib import Path
@@ -102,7 +103,7 @@ class OuroborosCompiler(EngineAwareMixin):
             )
             import hashlib
 
-            logos_sig = hashlib.sha256(f"{content_val}SYSTEM".encode()).hexdigest()
+            logos_sig = cortex_hash(f"{content_val}SYSTEM".encode())
 
             await self._engine.store(
                 project="SYSTEM",
@@ -173,7 +174,7 @@ class OuroborosCompiler(EngineAwareMixin):
             content_val = f"Ouroboros compiled {target_path.name}. Cost reduced from {analysis['maintenance_cost']}."
             import hashlib
 
-            logos_sig = hashlib.sha256(f"{content_val}SYSTEM".encode()).hexdigest()
+            logos_sig = cortex_hash(f"{content_val}SYSTEM".encode())
 
             await self._engine.store(
                 project="SYSTEM",

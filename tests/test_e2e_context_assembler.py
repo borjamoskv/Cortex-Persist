@@ -69,3 +69,40 @@ class TestContextAssembler:
         assert "qubits" in ctx.knowledge_items[0]["content"]
         assert ctx.relevance_scores["quantum_computing.md"] > 0.0
 
+    @pytest.mark.asyncio
+    async def test_assemble_async(self, tmp_path):
+        assembler = ContextAssembler(knowledge_dir=tmp_path)
+        ctx = await assembler.assemble_async(intent="test query")
+        assert isinstance(ctx, ContextPacket)
+        assert ctx.total_tokens == 0
+
+    def test_deduplication(self, tmp_path):
+        assembler = ContextAssembler(knowledge_dir=tmp_path)
+        ctx = ContextPacket()
+        
+        # Test adding duplicate source
+        added1 = assembler._add_knowledge_item(ctx, "file.md", "hello world", "hint", 3, 1.0)
+        added2 = assembler._add_knowledge_item(ctx, "file.md", "different content", "hint", 4, 1.0)
+        assert added1 is True
+        assert added2 is False
+        assert len(ctx.knowledge_items) == 1
+
+        # Test adding duplicate content
+        added3 = assembler._add_knowledge_item(ctx, "other.md", "hello world", "hint", 3, 1.0)
+        assert added3 is False
+        assert len(ctx.knowledge_items) == 1
+
+    def test_hint_direct_file(self, tmp_path):
+        # Create a direct file under knowledge_dir
+        direct_file = tmp_path / "my_direct_info.md"
+        direct_file.write_text("Sovereign execution details", encoding="utf-8")
+
+        assembler = ContextAssembler(knowledge_dir=tmp_path)
+        ctx = assembler.assemble(intent="test", hints=["my_direct_info.md"])
+
+        assert len(ctx.knowledge_items) == 1
+        assert ctx.knowledge_items[0]["source"] == "my_direct_info.md"
+        assert ctx.knowledge_items[0]["content"] == "Sovereign execution details"
+        assert ctx.relevance_scores["my_direct_info.md"] == 1.0
+
+

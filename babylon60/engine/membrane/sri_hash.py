@@ -1,4 +1,5 @@
 # [C5-REAL] Exergy-Maximized
+from babylon60.crypto.hash_registry import cortex_hash_raw
 import base64
 import hashlib
 import re
@@ -40,7 +41,7 @@ def generate_sri_hash(url: str, algo: str = "sha384") -> str:
             data = response.read()
 
             if algo == "sha256":
-                digest = hashlib.sha256(data).digest()
+                digest = cortex_hash_raw(data)
             elif algo == "sha512":
                 digest = hashlib.sha512(data).digest()
             else:

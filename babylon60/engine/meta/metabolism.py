@@ -11,7 +11,7 @@ Zero signal  → flatline → graceful death
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 from dataclasses import dataclass
 from typing import Any
 
@@ -61,7 +61,7 @@ class Metabolism:
         return "🔴 FLATLINE"
 
     def _hash_state(self, state: str) -> str:
-        return hashlib.sha256(state.encode("utf-8")).hexdigest()[:12]
+        return cortex_hash_truncated(state.encode("utf-8"), length=12)
 
     def metabolize(self, observation: str, action_type: str = "action") -> dict[str, Any]:
         """The core metabolic cycle. Called after every action.

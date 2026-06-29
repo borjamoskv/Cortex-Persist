@@ -1,4 +1,4 @@
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -12,7 +12,7 @@ def default_serializer(obj):
 
 def sha256(obj: dict) -> str:
     payload = json.dumps(obj, sort_keys=True, default=default_serializer).encode()
-    return hashlib.sha256(payload).hexdigest()
+    return cortex_hash(payload)
 
 
 @dataclass

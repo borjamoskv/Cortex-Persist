@@ -1,5 +1,5 @@
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import atexit
-import hashlib
 import logging
 import mmap
 import os
@@ -204,7 +204,7 @@ class UltramapSubstrate:
         x, y, z = struct.unpack_from("ddd", self._buffer, offset)  # pyright: ignore[reportArgumentType]
         current_entropy = struct.unpack_from("d", self._buffer, offset + 88)[0]  # pyright: ignore[reportArgumentType]
 
-        target_int = int(hashlib.sha256(target_hash.encode()).hexdigest()[:16], 16)
+        target_int = int(cortex_hash_truncated(target_hash.encode(), length=16), 16)
         tx = (target_int % 1000) / 10.0
         ty = ((target_int >> 4) % 1000) / 10.0
         tz = ((target_int >> 8) % 1000) / 10.0

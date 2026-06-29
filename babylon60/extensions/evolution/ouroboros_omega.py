@@ -6,9 +6,9 @@ Implements Darwinian Code Mutation (Axiom Ω₂) with fully atomic rollback.
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import ast
 import copy
-import hashlib
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -62,7 +62,7 @@ class OuroborosOmega:
         with open(self.target_path, encoding="utf-8") as f:
             self.original_source = f.read()
 
-        self.original_hash = hashlib.sha256(self.original_source.encode()).hexdigest()
+        self.original_hash = cortex_hash(self.original_source.encode())
 
     async def diagnose(self, source_code: str | None = None) -> DiagnosisMatrix:
         """Phase 1: Analysis (Topological Mapping)"""
@@ -262,7 +262,7 @@ class OuroborosOmega:
                         "type": "AST_MUTATION",
                         "target_file": str(self.target_path.resolve()),
                         "new_source": mutated_source,
-                        "signature": hashlib.sha256(mutated_source.encode()).hexdigest(),
+                        "signature": cortex_hash(mutated_source.encode()),
                         "entropy_delta": entropy_delta,
                     }
                     enqueue_swarm_task("ouroboros_omega", payload)
@@ -278,7 +278,7 @@ class OuroborosOmega:
             if self.dry_run:
                 return {"status": "DRY_RUN", "delta": entropy_delta, "new_code": mutated_source}
 
-            current_hash = hashlib.sha256(self.target_path.read_bytes()).hexdigest()
+            current_hash = cortex_hash(self.target_path.read_bytes())
             if current_hash != self.original_hash:
                 logger.error("Concurrency exception: File modified externally during cycle.")
                 return {"status": "ROLLED_BACK", "reason": "Concurrent modification detected."}

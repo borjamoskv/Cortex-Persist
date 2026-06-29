@@ -5,8 +5,8 @@
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
-import hashlib
 import logging
 import os
 import time
@@ -47,7 +47,7 @@ class SovereignTLRUCache:
         self.on_evict = on_evict
 
         # 🔗 Sovereign Evidence Chain (Ω₀)
-        self._chain_tip = hashlib.sha256(b"CORTEX_CACHE_GENESIS").hexdigest()
+        self._chain_tip = cortex_hash(b"CORTEX_CACHE_GENESIS")
         self._eviction_count = 0
 
     def get(self, key: str) -> Any | None:
@@ -91,9 +91,9 @@ class SovereignTLRUCache:
         prev_tip = self._chain_tip
 
         # Crypographic commitment to forgotten data
-        v_repr = hashlib.sha256(str(value).encode()).hexdigest()
+        v_repr = cortex_hash(str(value).encode())
         proof_material = f"{prev_tip}|{key}|{v_repr}|{reason.value}"
-        self._chain_tip = hashlib.sha256(proof_material.encode()).hexdigest()
+        self._chain_tip = cortex_hash(proof_material.encode())
 
         if self.on_evict:
             audit = {

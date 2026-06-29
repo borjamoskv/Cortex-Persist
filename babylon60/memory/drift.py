@@ -16,7 +16,7 @@ Stratified anchoring: different stability thresholds per fact_type.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import json
 import logging
 import time
@@ -394,4 +394,4 @@ class DriftMonitor:
 
 def model_hash_from_name(model_name: str) -> str:
     """Derive a stable hash from a model identifier string."""
-    return hashlib.sha256(model_name.encode("utf-8")).hexdigest()[:16]
+    return cortex_hash_truncated(model_name.encode("utf-8"), length=16)

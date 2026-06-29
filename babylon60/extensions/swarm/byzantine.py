@@ -4,8 +4,8 @@ Byzantine Consensus (LEGION-Ω)
 Byzantine Fault Tolerance / Zero-Trust Mathematics: Axiom 4.
 """
 
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
-import hashlib
 import json
 import math
 from typing import Any, TypeVar
@@ -40,7 +40,7 @@ class ByzantineConsensus:
             serialized = json.dumps(proposal, sort_keys=True, default=str)
         except (TypeError, ValueError):
             serialized = str(proposal)
-        return hashlib.sha256(serialized.encode()).hexdigest()
+        return cortex_hash(serialized.encode())
 
     async def _get_proposal_hash(self, proposal: Any) -> str:
         """Hash a proposal in a background thread."""

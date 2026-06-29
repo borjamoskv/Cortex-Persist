@@ -15,7 +15,7 @@ Author: Borja Moskv (SYS_ID: borjamoskv)
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -197,7 +197,7 @@ class CanonicalExporter:
 
         # Compute integrity hash over all record lines (excluding schema and metadata)
         payload_text = "\n".join(lines[1:])
-        integrity_hash = hashlib.sha256(payload_text.encode("utf-8")).hexdigest()
+        integrity_hash = cortex_hash(payload_text.encode("utf-8"))
 
         # Last line: Metadata footer
         metadata = CanonicalRecord(

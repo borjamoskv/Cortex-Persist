@@ -3,7 +3,7 @@
 CORTEX Nexus Domain Types (Zero-Trust).
 """
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import json
 import time
 from dataclasses import dataclass, field
@@ -98,7 +98,7 @@ class WorldMutation:
         """SHA-256 hash of the mutation's semantic content for dedup."""
         payload_repr = json.dumps(self.payload, sort_keys=True, default=str)
         raw = f"{self.origin.name}:{self.intent.name}:{self.project}:{payload_repr}"
-        return hashlib.sha256(raw.encode()).hexdigest()[:16]
+        return cortex_hash_truncated(raw.encode(), length=16)
 
     def __lt__(self, other: "WorldMutation") -> bool:
         """For PriorityQueue ordering: lower priority value = higher urgency."""

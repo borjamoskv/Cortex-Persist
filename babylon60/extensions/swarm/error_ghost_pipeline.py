@@ -15,7 +15,7 @@ Architecture:
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import threading
 import time
@@ -158,7 +158,7 @@ class ErrorGhostPipeline:
             f"AUTO-GHOST [{source}] {error_type}: {error}\nTraceback (last 3 frames):\n{tb_str}"
         )
 
-        content_hash = hashlib.sha256(f"{source}:{error_type}:{error}".encode()).hexdigest()[:16]
+        content_hash = cortex_hash_truncated(f"{source}:{error_type}:{error}".encode(), length=16)
 
         meta: dict[str, Any] = {
             "error_type": error_type,

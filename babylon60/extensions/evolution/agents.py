@@ -8,7 +8,7 @@ Each agent has a domain, fitness score, and mutation history.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import time
 import uuid
@@ -113,7 +113,7 @@ class EnneagramSubAgent:
     def state_hash(self) -> str:
         """Cryptographic hash of the current agent state (Phase 2 v3)."""
         payload = f"{self.id}:{self.fitness}:{self.generation}:{self.parameters}"
-        return hashlib.sha256(payload.encode()).hexdigest()
+        return cortex_hash(payload.encode())
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -189,7 +189,7 @@ class EnneagramSovereign:
         """Aggregated state hash of the sovereign domain."""
         sub_hashes = "".join(s.state_hash for s in self.subagents)
         payload = f"{self.id}:{self.fitness}:{self.generation}:{sub_hashes}"
-        return hashlib.sha256(payload.encode()).hexdigest()
+        return cortex_hash(payload.encode())
 
     def increment_cycle(self) -> None:
         self._cycle_count += 1

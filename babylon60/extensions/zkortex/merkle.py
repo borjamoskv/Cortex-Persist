@@ -16,12 +16,12 @@ Uso soberano:
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_raw
 from dataclasses import dataclass
 
 
 def _sha256(data: bytes) -> bytes:
-    return hashlib.sha256(data).digest()
+    return cortex_hash_raw(data)
 
 
 def _hash_pair(left: bytes, right: bytes) -> bytes:

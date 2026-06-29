@@ -18,7 +18,7 @@ Edge-compatible: Falls back to CPU. Fingerprint comparison is O(D) where D=384.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import struct
 from typing import Any
@@ -114,7 +114,7 @@ def _hash_quantized(quantized: list[float]) -> str:
     to minimize hash computation time on edge devices.
     """
     packed = struct.pack(f"<{len(quantized)}f", *quantized)
-    return hashlib.sha256(packed).hexdigest()
+    return cortex_hash(packed)
 
 
 def semantic_fingerprint(

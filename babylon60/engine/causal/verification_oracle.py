@@ -1,4 +1,5 @@
 # [C5-REAL] Exergy-Maximized
+from babylon60.crypto.hash_registry import cortex_hash
 import base64
 import logging
 
@@ -106,7 +107,7 @@ async def verify_approved_auth_signatures(conn) -> bool:
                 # Verification payload in Ed25519Signer._canonical_payload is (sha256(content):fact_hash)
                 import hashlib
 
-                content_digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+                content_digest = cortex_hash(payload.encode("utf-8"))
                 canonical_msg = f"{content_digest}:{req_id}".encode()
 
                 pub_key.verify(sig_bytes, canonical_msg)

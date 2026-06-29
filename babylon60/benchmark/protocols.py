@@ -21,7 +21,7 @@ License: Apache-2.0
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import math
 import re
@@ -95,7 +95,7 @@ class Probe:
     @staticmethod
     def make_id(family: ExcitationFamily, prompt: str) -> str:
         payload = f"{family.name}:{prompt}"
-        return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+        return cortex_hash_truncated(payload.encode("utf-8"), length=16)
 
 
 class ProbeBank:

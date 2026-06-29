@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import base64
 import binascii
-import hashlib
 import json
 from collections.abc import Mapping, Sequence
 from datetime import datetime
@@ -74,7 +74,7 @@ def _canonical_public_json(value: Any) -> str:
 
 
 def _sha256_bytes(value: bytes) -> str:
-    return hashlib.sha256(value).hexdigest()
+    return cortex_hash(value)
 
 
 def _sha256_file(path: Path) -> str:

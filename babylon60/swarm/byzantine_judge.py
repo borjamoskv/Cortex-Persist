@@ -3,7 +3,7 @@
 Uses the SandboxJIT and Exergy economics to reach consensus on proposed code mutations.
 """
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 from typing import Any
 
@@ -67,7 +67,7 @@ class ByzantineJudge:
                 # In a real spoofing test, the signature won't match this newly generated key anyway.
 
             # Cryptographic Verification (PoQC)
-            payload_hash = hashlib.sha256(code.encode("utf-8")).hexdigest()  # type: ignore
+            payload_hash = cortex_hash(code.encode("utf-8"))  # type: ignore
             try:
                 is_valid = Verifier.verify_signature(
                     pub_key_b64, payload_hash, timestamp, signature_b64
@@ -122,7 +122,7 @@ class ByzantineJudge:
             from datetime import datetime, timezone
 
             consensus_timestamp = datetime.now(timezone.utc).isoformat()
-            consensus_hash = hashlib.sha256(winning_ast.encode("utf-8")).hexdigest()  # type: ignore
+            consensus_hash = cortex_hash(winning_ast.encode("utf-8"))  # type: ignore
             judge_priv = self.km.get_private_key_b64(self.judge_id)
             consensus_sig = Signer.sign_payload(judge_priv, consensus_hash, consensus_timestamp)  # type: ignore
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import hashlib
 import json
 import logging
@@ -117,7 +118,7 @@ def file_hash(path: Path) -> str:
     """Calculates SHA-256 of a file to detect changes."""
     if not path.exists():
         return ""
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return cortex_hash(path.read_bytes())
 
 
 def atomic_write(path: Path, content: str) -> None:

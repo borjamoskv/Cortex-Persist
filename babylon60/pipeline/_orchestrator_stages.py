@@ -6,7 +6,7 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 from typing import Any
@@ -117,7 +117,7 @@ class StagesMixin:
     def _persist(self, request: PipelineRequest, output: Any) -> str:
         """Hash-chain the result into the audit ledger."""
         output_bytes = json.dumps(output, sort_keys=True, default=str).encode()
-        result_hash = hashlib.sha256(output_bytes).hexdigest()
+        result_hash = cortex_hash(output_bytes)
 
         if self.engine is not None:  # pyright: ignore[reportAttributeAccessIssue]
             try:

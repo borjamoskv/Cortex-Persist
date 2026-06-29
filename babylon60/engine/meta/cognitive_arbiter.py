@@ -9,7 +9,7 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 from typing import Final
@@ -251,4 +251,4 @@ class MetaArbiter:
             {"scores": score_map, "context": context},
             sort_keys=True,
         )
-        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        return cortex_hash(payload.encode("utf-8"))

@@ -5,6 +5,7 @@ Metasistema de Invocacion Fractal. KETER auto-determina skills,
 secuencia, modelos. Invoca, ejecuta, entrega.
 """
 
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 import logging
 import os
@@ -306,7 +307,7 @@ class KeterEngine:
     ) -> tuple[str, KeterPayload | None]:
         import hashlib
 
-        mission_id = hashlib.sha256(f"{intent}:{formation}".encode()).hexdigest()
+        mission_id = cortex_hash(f"{intent}:{formation}".encode())
         cached_payload = self._reservoir.get(mission_id)
         if cached_payload and cached_payload.get("status") == "SINGULARITY_REACHED":
             if thermal_audit:

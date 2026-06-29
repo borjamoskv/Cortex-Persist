@@ -6,7 +6,7 @@ Matches the Ed25519-based RustChainWallet SDK interface.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_raw
 import time
 from typing import Any
 
@@ -27,8 +27,8 @@ class RustChainWallet:
         pub_bytes = self._public_key.public_bytes(
             encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
         )
-        h1 = hashlib.sha256(b"address" + pub_bytes).digest()
-        h2 = hashlib.sha256(h1).digest()
+        h1 = cortex_hash_raw(b"address" + pub_bytes)
+        h2 = cortex_hash_raw(h1)
         self._address = self.ADDRESS_PREFIX + h2[:20].hex()
 
     @classmethod

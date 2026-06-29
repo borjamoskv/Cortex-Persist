@@ -1,4 +1,4 @@
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_raw
 from dataclasses import dataclass
 from typing import Any
 
@@ -17,7 +17,7 @@ def _hash_to_vector(trace: dict | None, dim: int = 64) -> list[float]:
     """Generates a deterministic directional vector from the solver trace."""
     if not trace:
         return [0.0] * dim
-    h = hashlib.sha256(str(trace).encode()).digest()
+    h = cortex_hash_raw(str(trace).encode())
     # Normalize between -0.5 and 0.5
     return [(b / 255.0) - 0.5 for b in h[:dim]]
 

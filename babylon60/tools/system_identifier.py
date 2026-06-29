@@ -10,7 +10,7 @@ Implements:
 - Excitations suite definition
 """
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_raw
 import math
 import re
 import statistics
@@ -92,7 +92,7 @@ class SystemIdentifier:
         if self.embedding_provider:
             return np.array(self.embedding_provider(text))
         # Deterministic 32-dim mock vector from hash to maintain isolated test execution
-        h = hashlib.sha256(text.encode("utf-8")).digest()
+        h = cortex_hash_raw(text.encode("utf-8"))
         raw = np.array([float(b) for b in h]) / 255.0
         # Reduce to 32 dimensions for trajectory efficiency
         return np.mean(raw.reshape(8, 4), axis=1)

@@ -5,8 +5,8 @@ Tool Genesis Benchmark (ASI-1)
 A C5-REAL adversarial protocol measurement harness to test autonomous tool synthesis.
 """
 
+from babylon60.crypto.hash_registry import cortex_hash_raw
 import asyncio
-import hashlib
 import logging
 import random
 import secrets
@@ -63,7 +63,7 @@ class MutantServer:
 
             client_hash = response[:32]
 
-            expected_hash = hashlib.sha256(self.mutation.nonce).digest()
+            expected_hash = cortex_hash_raw(self.mutation.nonce)
             if client_hash != expected_hash:
                 writer.write(b"ERR: INVALID_HASH")
                 await writer.drain()

@@ -6,7 +6,7 @@ Embeds hyperdimensional ghost traces into the file system.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import json
 import logging
 import os
@@ -38,7 +38,7 @@ class ResonanceEmitter:
             return
 
         hv = self.encoder.encode_fact(intent, fact_type="ghost", project_id=project)
-        ghost_id = hashlib.sha256(intent.encode()).hexdigest()[:16]
+        ghost_id = cortex_hash_truncated(intent.encode(), length=16)
         payload = {
             "id": ghost_id,
             "intent": intent,

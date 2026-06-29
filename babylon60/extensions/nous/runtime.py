@@ -4,6 +4,7 @@
 Reality Level: C5-REAL
 """
 
+from babylon60.crypto.hash_registry import cortex_hash
 import hashlib
 import logging
 from datetime import datetime, timezone
@@ -46,8 +47,8 @@ class NousRuntime:
             )
 
         # 1. Crystallize Taint
-        manifest_hash = hashlib.sha256(ast.model_dump_json().encode()).hexdigest()
-        dry_run_hash = hashlib.sha256(dry_run_result.model_dump_json().encode()).hexdigest()
+        manifest_hash = cortex_hash(ast.model_dump_json().encode())
+        dry_run_hash = cortex_hash(dry_run_result.model_dump_json().encode())
         predicted_state_hash = hashlib.sha256(
             str(dry_run_result.predicted_state).encode()
         ).hexdigest()

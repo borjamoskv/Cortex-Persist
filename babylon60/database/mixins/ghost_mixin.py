@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import json
 import logging
 from pathlib import Path
@@ -86,7 +86,7 @@ class GhostMixin(EngineMixinBase):
             emitter.embed_ghost(target_file=target_file, intent=content_for_id, project=project)
 
             # Return the same hash-based ghost ID used by the emitter
-            return hashlib.sha256(content_for_id.encode()).hexdigest()[:16]
+            return cortex_hash_truncated(content_for_id.encode(), length=16)
 
         return await asyncio.to_thread(_do_register)
 

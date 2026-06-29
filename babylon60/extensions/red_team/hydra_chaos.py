@@ -9,8 +9,8 @@ Refactored to use the generalized ChaosGate system.
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
-import hashlib
 import logging
 import time
 from dataclasses import dataclass, field
@@ -102,9 +102,9 @@ class MockRedisClient:
             prev_tip = self._store.get(keys[0], genesis)
             count = int(self._store.get(keys[1], "0")) + 1
 
-            key_hex = hashlib.sha256(agent_key.encode()).hexdigest()
+            key_hex = cortex_hash(agent_key.encode())
             proof_material = f"{prev_tip}|{key_hex}|{payload_hash}"
-            new_tip = hashlib.sha256(proof_material.encode()).hexdigest()
+            new_tip = cortex_hash(proof_material.encode())
 
             self._store[keys[0]] = new_tip
             self._store[keys[1]] = str(count)

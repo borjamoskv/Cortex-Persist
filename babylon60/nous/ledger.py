@@ -4,7 +4,7 @@ Sells the state mutation cryptographically.
 Reality Level: C5-REAL
 """
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 import time
 
@@ -21,7 +21,7 @@ class LedgerEntry(BaseModel):
 
     def calculate_hash(self) -> str:
         record = f"{self.index}{self.timestamp}{self.previous_hash}{self.intent_description}{json.dumps(self.applied_ast, sort_keys=True)}"
-        return hashlib.sha256(record.encode("utf-8")).hexdigest()
+        return cortex_hash(record.encode("utf-8"))
 
 
 class MutationLedger:

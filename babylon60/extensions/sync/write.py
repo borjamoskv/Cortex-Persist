@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 import sqlite3
@@ -102,7 +102,7 @@ async def export_to_json(engine: CortexEngine) -> WritebackResult:
     try:
         k_hash = await db_content_hash(engine, "knowledge")
         d_hash = await db_content_hash(engine, "decision")
-        combined = hashlib.sha256(f"{k_hash}:{d_hash}".encode()).hexdigest()
+        combined = cortex_hash(f"{k_hash}:{d_hash}".encode())
     except (sqlite3.Error, OSError):
         combined = None
     await _writeback_if_changed(

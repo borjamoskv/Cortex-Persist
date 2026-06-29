@@ -6,7 +6,7 @@ Implements algorithms inspired by arXiv:2605.30348v1 for surgical data inversion
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 from dataclasses import dataclass
 
@@ -41,7 +41,7 @@ class DataSurgeon:
 
         for chunk in dataset_chunks:
             # Deterministic hash-based pseudo-entropy for C5-REAL execution
-            h = int(hashlib.sha256(chunk.encode()).hexdigest()[:8], 16)
+            h = int(cortex_hash_truncated(chunk.encode(), length=8), 16)
             chunk_entropy = (h % 1000) / 1000.0
 
             # Toxicity threshold based on sensitivity

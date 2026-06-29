@@ -20,9 +20,9 @@ Hydra-Log Architecture:
 
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 import contextlib
-import hashlib
 import json
 import logging
 import os
@@ -67,7 +67,7 @@ _CHAIN_TIP_KEY = "cortex:audit:chain_tip"
 _CHAIN_COUNT_KEY = "cortex:audit:eviction_count"
 _AUDIT_STREAM_KEY = "cortex:audit:stream"
 _AUDIT_GROUP_NAME = "cortex-audit-group"
-_GENESIS_HASH = hashlib.sha256(b"CORTEX_GENESIS_VOID").hexdigest()
+_GENESIS_HASH = cortex_hash(b"CORTEX_GENESIS_VOID")
 
 _TRIGGER_KEY_PREFIX = "cortex:trigger:"
 _SHADOW_KEY_PREFIX = "cortex:shadow:"
@@ -131,7 +131,7 @@ return {prev_tip, new_tip, count}
 
 def _payload_hash(data: dict[str, Any]) -> str:
     """Deterministic SHA-256 of a JSON payload."""
-    return hashlib.sha256(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()
+    return cortex_hash(json.dumps(data, sort_keys=True).encode("utf-8"))
 
 
 class DistributedSovereignCache:

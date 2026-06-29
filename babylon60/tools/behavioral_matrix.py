@@ -14,7 +14,7 @@ Enforces evaluation of model behavior along dimensions 9 to 16:
 - Metacognitive Coherence
 """
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_raw
 import math
 import re
 import statistics
@@ -43,7 +43,7 @@ class BehavioralAnalyzer:
             return np.array(self.embedding_provider(text))
         # Fallback determinista simple si no hay embedding model en local
         # Basado en hashing acumulativo para no romper la ejecución de pruebas
-        h = hashlib.sha256(text.encode("utf-8")).digest()
+        h = cortex_hash_raw(text.encode("utf-8"))
         return np.array([float(b) for b in h]) / 255.0
 
     def compute_shannon_entropy(self, text: str) -> float:

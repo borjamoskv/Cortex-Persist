@@ -1,3 +1,4 @@
+from babylon60.crypto.hash_registry import cortex_hash
 import threading
 
 # [C5-REAL] Exergy-Maximized
@@ -8,7 +9,6 @@ Sovereign Standard (130/100): Zero-Trust inputs, Backoff, Persistent Queues, Ide
 """
 
 import asyncio
-import hashlib
 import json
 import logging
 from pathlib import Path
@@ -79,7 +79,7 @@ class FiatOracle:
         payload_copy = {k: v for k, v in data.items() if k != "signature"}
         payload_str = json.dumps(payload_copy)
 
-        expected_hash = hashlib.sha256((payload_str + "SOVEREIGN_KEY_MOCK").encode()).hexdigest()
+        expected_hash = cortex_hash((payload_str + "SOVEREIGN_KEY_MOCK").encode())
         return signature == expected_hash
 
     async def _check_signals(self):

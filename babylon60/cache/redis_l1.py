@@ -10,7 +10,7 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import os
 import threading
@@ -211,4 +211,4 @@ class RedisL1Cache:
     def cache_key_hash(self, *parts: str) -> str:
         """Generate a deterministic cache key from parts."""
         raw = ":".join(parts)
-        return hashlib.sha256(raw.encode()).hexdigest()[:16]
+        return cortex_hash_truncated(raw.encode(), length=16)

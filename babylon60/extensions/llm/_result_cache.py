@@ -8,7 +8,7 @@ Uses SQLite WAL for zero-latency cross-process synchronization (Ω₂).
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 import sqlite3
@@ -97,7 +97,7 @@ class ResultCache:
         """Deterministic SHA256 of the prompt components."""
         # Sort keys to ensure stability
         canonical = json.dumps(prompt, sort_keys=True)
-        return hashlib.sha256(canonical.encode()).hexdigest()
+        return cortex_hash(canonical.encode())
 
     def get(self, prompt: dict[str, Any]) -> str | None:
         """Retrieve cached response if it exists and hasn't expired."""

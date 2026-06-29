@@ -7,7 +7,7 @@ based on hash(sender/receiver) mod NUM_SHARDS.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 import time
@@ -47,7 +47,7 @@ class ShardedAsyncSignalBus:
         self.num_shards = num_shards
 
     def _get_shard_index(self, routing_key: str) -> int:
-        h = hashlib.sha256(routing_key.encode("utf-8")).hexdigest()
+        h = cortex_hash(routing_key.encode("utf-8"))
         return int(h, 16) % self.num_shards
 
     async def initialize(self) -> None:

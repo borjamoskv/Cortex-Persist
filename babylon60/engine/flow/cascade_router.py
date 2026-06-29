@@ -5,8 +5,8 @@ Tactical routing logic to delegate heavy LLM tasks to local CLI engines:
 Gemini (Antigravity), Claude Code, and Codex.
 """
 
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import asyncio
-import hashlib
 import logging
 import os
 import sqlite3
@@ -150,7 +150,7 @@ class CascadeRouter:
                         ).expanduser()
                         if db_path.exists():
                             conn = sqlite3.connect(db_path)
-                            digest = hashlib.sha256(output_content.encode("utf-8")).hexdigest()[:16]
+                            digest = cortex_hash_truncated(output_content.encode("utf-8"), length=16)
                             # Escribir en la tabla de episodios/BM25
                             conn.execute(
                                 "INSERT INTO episodes (session_id, event_type, project, content) VALUES (?, ?, ?, ?)",

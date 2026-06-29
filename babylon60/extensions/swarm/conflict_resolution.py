@@ -7,7 +7,7 @@ Axioms: Ω₃ (Byzantine), Ω₂ (Entropic Asymmetry), Ω₅ (Antifragile).
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import time
 from dataclasses import dataclass, field
@@ -452,7 +452,7 @@ class ConflictResolver:
 
     def _generate_id(self) -> str:
         """Generate a deterministic, ordered conflict ID."""
-        ts_hex = hashlib.sha256(str(time.monotonic()).encode()).hexdigest()[:6]
+        ts_hex = cortex_hash_truncated(str(time.monotonic()).encode(), length=6)
         return f"CR-{self._conflict_counter:04d}-{ts_hex}"
 
     @property

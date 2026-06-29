@@ -22,7 +22,7 @@ portability and crash-safety (each line is atomic on POSIX fsync).
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 import os
@@ -185,7 +185,7 @@ def _compute_mutation_hash(
         )
     else:
         raise ValueError(f"Unsupported hash version: {hash_version}")
-    return hashlib.sha256(h_input.encode("utf-8")).hexdigest()
+    return cortex_hash(h_input.encode("utf-8"))
 
 
 # ─── Evolution Ledger ─────────────────────────────────────────────

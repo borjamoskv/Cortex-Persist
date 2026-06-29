@@ -8,8 +8,8 @@ C5 rules:
 - No internal inference claims.
 """
 
+from babylon60.crypto.hash_registry import cortex_hash
 import argparse
-import hashlib
 import json
 import math
 import os
@@ -74,7 +74,7 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 def sha256_hex(s: str) -> str:
-    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+    return cortex_hash(s.encode("utf-8"))
 
 def safe_mkdir(path: str) -> None:
     os.makedirs(path, exist_ok=True)
@@ -570,7 +570,7 @@ def main():
     }
 
     blob = json.dumps(final, sort_keys=True, ensure_ascii=False).encode("utf-8")
-    final["report_sha256"] = hashlib.sha256(blob).hexdigest()
+    final["report_sha256"] = cortex_hash(blob)
 
     with open(args.output, "w", encoding="utf-8") as f:
         json.dump(final, f, indent=2, ensure_ascii=False)

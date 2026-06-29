@@ -8,7 +8,7 @@ between system health states.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 from typing import Any
@@ -33,7 +33,7 @@ class SemanticHeartbeat:
             normalized["load_average"] = [round(x, 1) for x in normalized["load_average"]]  # type: ignore[reportGeneralTypeIssues]
 
         dump = json.dumps(normalized, sort_keys=True)
-        return hashlib.sha256(dump.encode()).hexdigest()
+        return cortex_hash(dump.encode())
 
     def calculate_drift(self, current_report: dict[str, Any]) -> float:
         """

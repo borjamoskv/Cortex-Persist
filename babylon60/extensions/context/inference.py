@@ -15,7 +15,7 @@ import sqlite3
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from cortex.extensions.context.signals import InferenceResult, Signal
+from babylon60.extensions.context.signals import InferenceResult, Signal
 
 __all__ = ["ContextInference"]
 
@@ -156,7 +156,7 @@ class ContextInference:
         if self.conn is None:
             return
 
-        from cortex.database.core import causal_write
+        from babylon60.database.core import causal_write
 
         try:
             with causal_write(self.conn):

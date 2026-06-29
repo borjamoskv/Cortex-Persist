@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 from typing import Any
 
@@ -14,7 +14,7 @@ class RuntimeState:
 
     def _compute_hash(self) -> str:
         state_str = json.dumps(self.data, sort_keys=True)
-        return hashlib.sha256(f"{self.version}:{state_str}".encode()).hexdigest()
+        return cortex_hash(f"{self.version}:{state_str}".encode())
 
     def apply_event(self, event: dict[str, Any]) -> "RuntimeState":
         """Deterministic state evolution with semantic physics validation."""

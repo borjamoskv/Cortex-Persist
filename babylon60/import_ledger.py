@@ -6,8 +6,8 @@ and cryptographic verification (Merkle Tree Root + Ed25519 signatures).
 Conforms to BABYLON60-NATIVE-AI-MANIFESTO (Axiom Ω3) enforcing Tenant and Agent isolation.
 """
 
+from babylon60.crypto.hash_registry import cortex_hash
 import fcntl
-import hashlib
 import json
 import os
 import sys
@@ -52,7 +52,7 @@ class ImportResolutionLedger:
     def _compute_merkle_root(cls, leaves: list[str]) -> str:
         """Computes a deterministic Merkle Root from a list of leaf hashes."""
         if not leaves:
-            return hashlib.sha256(b"EMPTY_TREE").hexdigest()
+            return cortex_hash(b"EMPTY_TREE")
         
         current_level = leaves
         while len(current_level) > 1:
@@ -60,7 +60,7 @@ class ImportResolutionLedger:
             for i in range(0, len(current_level), 2):
                 left = current_level[i]
                 right = current_level[i + 1] if i + 1 < len(current_level) else left
-                combined = hashlib.sha256((left + right).encode("utf-8")).hexdigest()
+                combined = cortex_hash((left + right).encode("utf-8"))
                 next_level.append(combined)
             current_level = next_level
         return current_level[0]
@@ -104,7 +104,7 @@ class ImportResolutionLedger:
                     elif entry["event"] == "SESSION_START":
                         payload += f"|{entry.get('public_key_pem')}"
                     
-                    entry_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+                    entry_hash = cortex_hash(payload.encode("utf-8"))
                     entry["entry_hash"] = entry_hash
 
                     # If ending the session, compute the Merkle root of all hashes in this session
@@ -128,7 +128,7 @@ class ImportResolutionLedger:
                         
                         # Recalculate hash with merkle_root and signature for absolute integrity
                         payload_end = f"{payload}|{m_root}|{signature}"
-                        entry["entry_hash"] = hashlib.sha256(payload_end.encode("utf-8")).hexdigest()
+                        entry["entry_hash"] = cortex_hash(payload_end.encode("utf-8"))
 
                     # Write to file
                     f.seek(0, 2)  # Ensure we are at the end
@@ -234,13 +234,13 @@ class ImportResolutionLedger:
                         pub_pem = entry.get("public_key_pem")
                         session_keys[session_id] = serialization.load_pem_public_key(pub_pem.encode("utf-8"))
                         payload += f"|{pub_pem}"
-                        recomputed_payload_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+                        recomputed_payload_hash = cortex_hash(payload.encode("utf-8"))
                         recomputed = recomputed_payload_hash
                         session_leaves[session_id].append(recomputed_payload_hash)
                         
                     elif event == "RESOLUTION":
                         payload += f"|{entry.get('caller')}|{entry.get('source')}|{entry.get('type')}|{entry.get('target')}"
-                        recomputed_payload_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+                        recomputed_payload_hash = cortex_hash(payload.encode("utf-8"))
                         recomputed = recomputed_payload_hash
                         session_leaves[session_id].append(recomputed_payload_hash)
                         
@@ -249,7 +249,7 @@ class ImportResolutionLedger:
                         signature = entry.get("signature")
                         
                         # Recompute payload hash for this event
-                        recomputed_payload_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+                        recomputed_payload_hash = cortex_hash(payload.encode("utf-8"))
                         session_leaves[session_id].append(recomputed_payload_hash)
                         
                         # Verify Merkle Root
@@ -267,7 +267,7 @@ class ImportResolutionLedger:
                             return {"status": "failed", "line": line_num, "reason": "invalid_session_signature"}
                         
                         payload_end = f"{payload}|{m_root}|{signature}"
-                        recomputed = hashlib.sha256(payload_end.encode("utf-8")).hexdigest()
+                        recomputed = cortex_hash(payload_end.encode("utf-8"))
                     else:
                         return {"status": "failed", "line": line_num, "reason": f"unknown_event: {event}"}
 

@@ -5,6 +5,7 @@ Consolidates old facts into cryptographically sealed Snapshots to prevent
 ledger bloat, maintaining C5-REAL audibility via continuous hash chains.
 """
 
+from babylon60.crypto.hash_registry import cortex_hash
 import hashlib
 import logging
 from typing import TypedDict
@@ -37,7 +38,7 @@ class MerklePruner:
     def _compute_merkle_root(self, hashes: list[str]) -> str:
         """Computes a deterministic Merkle Root from a list of SHA-256 hashes."""
         if not hashes:
-            return hashlib.sha256(b"empty").hexdigest()
+            return cortex_hash(b"empty")
 
         current_level = hashes
         while len(current_level) > 1:
@@ -45,7 +46,7 @@ class MerklePruner:
             for i in range(0, len(current_level), 2):
                 h1 = current_level[i]
                 h2 = current_level[i + 1] if i + 1 < len(current_level) else h1
-                combined = hashlib.sha256(f"{h1}{h2}".encode()).hexdigest()
+                combined = cortex_hash(f"{h1}{h2}".encode())
                 next_level.append(combined)
             current_level = next_level
 

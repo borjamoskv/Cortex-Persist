@@ -7,7 +7,7 @@ Rejects click-tracking in favor of thermodynamic cognitive effort:
 Resolution Time vs. Problem Cyclomatic Complexity.
 """
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 import time
 from typing import Any
@@ -62,12 +62,12 @@ class EDGTelemetryAggregator:
     def _generate_ledger_hash(self, event: dict[str, Any]) -> str:
         """Produce an immutable hash of the student's progress for the Master Ledger."""
         payload = json.dumps(event, sort_keys=True).encode("utf-8")
-        return hashlib.sha256(payload).hexdigest()
+        return cortex_hash(payload)
 
     def get_progress_hash(self) -> str:
         """Returns the cumulative hash chain of all recorded effort."""
         chain_hash = "0000000000000000000000000000000000000000000000000000000000000000"
         for event in self._history:
             combined = chain_hash + json.dumps(event, sort_keys=True)
-            chain_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()
+            chain_hash = cortex_hash(combined.encode("utf-8"))
         return chain_hash

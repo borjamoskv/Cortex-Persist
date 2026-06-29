@@ -7,7 +7,7 @@ and triggers physical snapshots.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import json
 import time
 from datetime import datetime, timezone
@@ -47,7 +47,7 @@ class LedgerCredibilityStack:
         rows = await self._fetch_facts(project)
 
         leaf_hashes = [
-            hashlib.sha256(json.dumps(row, sort_keys=True, default=str).encode("utf-8")).hexdigest()
+            cortex_hash(json.dumps(row, sort_keys=True, default=str).encode("utf-8"))
             for row in rows
         ]
         merkle_root = self._construct_merkle_root(leaf_hashes)
@@ -175,7 +175,7 @@ class LedgerCredibilityStack:
     def _construct_merkle_root(self, leaves: list[str]) -> str:
         """Compute Merkle Root via pairwise hashing."""
         if not leaves:
-            return hashlib.sha256(b"").hexdigest()
+            return cortex_hash(b"")
 
         current_level = list(leaves)
         while len(current_level) > 1:
@@ -185,7 +185,7 @@ class LedgerCredibilityStack:
 
             for i in range(0, len(current_level), 2):
                 combined = current_level[i] + current_level[i + 1]
-                parent_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()
+                parent_hash = cortex_hash(combined.encode("utf-8"))
                 next_level.append(parent_hash)
             current_level = next_level
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from babylon60.crypto.hash_registry import cortex_hash
 import copy
-import hashlib
 import json
 
 from cortex.swarm.graph_source import GraphSource
@@ -79,7 +79,7 @@ class SwarmRouter:
         safe_selected = _deep_sorted({k: v for k, v in selected.items() if not k.startswith("_")})
 
         state_str = json.dumps(safe_selected, sort_keys=True)
-        routing_hash = hashlib.sha256(state_str.encode()).hexdigest()
+        routing_hash = cortex_hash(state_str.encode())
         selected["routing_hash"] = routing_hash
 
         selected_agent = selected.get("agent_id", "unknown")
@@ -102,7 +102,7 @@ class SwarmRouter:
         """Stable hash of the registry configuration."""
         snap = self._frozen_snapshot()
         state_str = json.dumps(snap, sort_keys=True)
-        return hashlib.sha256(state_str.encode()).hexdigest()
+        return cortex_hash(state_str.encode())
 
     # ------------------------------------------------------------------
     # Internal helpers

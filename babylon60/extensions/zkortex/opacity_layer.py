@@ -23,7 +23,7 @@ Caso de uso soberano:
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import time
 from typing import Any
@@ -82,7 +82,7 @@ class SovereignOpacityLayer:
         # Fingerprinting: H("zkortex:fact:" || content)
         fingerprints = []
         for fact in facts:
-            fp = hashlib.sha256(b"zkortex:fact:" + fact.encode()).hexdigest()
+            fp = cortex_hash(b"zkortex:fact:" + fact.encode())
             self._fingerprint_to_original[fp] = fact  # mapa inverso, solo en memoria
             fingerprints.append(fp)
 
@@ -101,7 +101,7 @@ class SovereignOpacityLayer:
         En HIGH strategy: Solo emite la proof, nunca el contenido.
         Retorna None si el hecho no está en el árbol.
         """
-        fp = hashlib.sha256(b"zkortex:fact:" + fact_content.encode()).hexdigest()
+        fp = cortex_hash(b"zkortex:fact:" + fact_content.encode())
 
         try:
             proof = self._prover.prove_knows(fp)

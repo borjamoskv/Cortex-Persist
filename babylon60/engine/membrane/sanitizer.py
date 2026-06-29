@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import re
 from typing import Any
 
@@ -40,7 +40,7 @@ class SovereignSanitizer:
         # 1. Capture Original State
         raw_str = str(raw_engram)
         original_size = len(raw_str.encode("utf-8"))
-        raw_hash = hashlib.sha256(raw_str.encode("utf-8")).hexdigest()
+        raw_hash = cortex_hash(raw_str.encode("utf-8"))
 
         log = MembraneLog(original_size_bytes=original_size)
 

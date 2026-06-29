@@ -1,4 +1,5 @@
 # [C5-REAL] Exergy-Maximized
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import asyncio
 import logging
 from typing import Any
@@ -158,7 +159,7 @@ class DeepThinkOrchestrator:
 
         import hashlib
 
-        hv_signature = hashlib.sha256(collapsed_hv.tobytes()).hexdigest()[:16]
+        hv_signature = cortex_hash_truncated(collapsed_hv.tobytes(), length=16)
 
         # Resonancia Bizantina (Consensus Calculation)
         from cortex.memory.hdc.algebra import similarity  # type: ignore[reportAttributeAccessIssue]
