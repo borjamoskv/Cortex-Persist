@@ -85,23 +85,31 @@ class LLMProvider(BaseProvider):
             for ext in ["openai", "anthropic", "gemini", "dashscope", "minimax", "vllm"]
         )
 
+        is_hybrid_bft = os.environ.get("CORTEX_HYBRID_BFT") == "1"
+        is_subagent = os.environ.get("CORTEX_SUBAGENT") == "1" or os.environ.get("CORTEX_DAEMON") == "1"
+
         if is_external and "localhost" not in prov_url and "127.0.0.1" not in prov_url:
-            logger.warning(
-                "🛑 [ZERO-NETWORK] Core LLMProvider trapped external instantiation of %s. Forcing local autarchy (Ollama).",
-                prov_name,
-            )
-            cfg["provider"] = "ollama"
-            cfg["base_url"] = "http://127.0.0.1:11434/v1"
-            cfg["model"] = (
-                "qwen2.5-coder:7b"
-                if "claude" in prov_name or "gemini" in prov_name
-                else "llama3:latest"
-            )
-            cfg["api_key"] = None
-            cfg["tier"] = "frontier"  # Elevate tier to satisfy ULTRA_THINK routing
-            cfg[
-                "intent_model_map"
-            ] = {}  # C5-REAL: Clear upstream model maps to prevent 404s in local inference
+            if is_hybrid_bft and prov_name == "gemini" and not is_subagent:
+                logger.info(
+                    "⚡ [HYBRID-BFT] Allowing external Gemini instantiation for primary node."
+                )
+            else:
+                logger.warning(
+                    "🛑 [ZERO-NETWORK] Core LLMProvider trapped external instantiation of %s. Forcing local autarchy (Ollama).",
+                    prov_name,
+                )
+                cfg["provider"] = "ollama"
+                cfg["base_url"] = "http://127.0.0.1:11434/v1"
+                cfg["model"] = (
+                    "qwen2.5-coder:7b"
+                    if "claude" in prov_name or "gemini" in prov_name
+                    else "llama3:latest"
+                )
+                cfg["api_key"] = None
+                cfg["tier"] = "frontier"  # Elevate tier to satisfy ULTRA_THINK routing
+                cfg[
+                    "intent_model_map"
+                ] = {}  # C5-REAL: Clear upstream model maps to prevent 404s in local inference
 
         self._provider = cfg["provider"]
         self._base_url = cfg["base_url"]
@@ -115,7 +123,10 @@ class LLMProvider(BaseProvider):
         self._cost_class = cfg["cost_class"]
         self._gemini_gateway = None
 
-        timeout_val = float(os.environ.get("CORTEX_LLM_TIMEOUT", "120.0"))
+        if self._provider == "ollama" and "CORTEX_LLM_TIMEOUT" not in os.environ:
+            timeout_val = 15.0
+        else:
+            timeout_val = float(os.environ.get("CORTEX_LLM_TIMEOUT", "120.0"))
         self._client = httpx.AsyncClient(timeout=timeout_val)
         self._semaphore = asyncio.Semaphore(100)
         self._circuit_breaker = CircuitBreaker(provider_name=self._provider)
