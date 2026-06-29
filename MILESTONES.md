@@ -1155,6 +1155,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 68: Protocolo de Handoff Cognitivo e Integración DRM (Cognitive Handoff Protocol & DRM Routing)
+- **Target**: `babylon60/agents/handoff.py`, `babylon60/agents/builtins/handoff_agent.py`, `cortex_extensions/agents/handoff/`
+- **Objective**: Refactorización y cristalización del protocolo de Handoff Cognitivo de Sesiones (Handoff v1.3) y enrutamiento dinámico DRM (Deterministic Routing Matrix). Integra salvaguardas BFT contra alucinaciones de nivel 2 e inyecta soporte in-memory para transiciones asíncronas entre el enjambre de agentes y el operador.
+- **Yield Target**: Aislamiento y transferencia segura de contextos de sesión y enrutamiento dinámico según niveles de tolerancia.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits `1f618aef4` (SOTA routing), `690e51c89` (BFT Guard) y `d5bc4d3f3` (DRM integration).
+```yaml
+Claim: Cognitive handoff and DRM routing subsystem behaves deterministically under variable tolerance limits.
+Proof:
+  Base: "pytest verifies get_drm_route returns correct models and BFT guard blocks invalid handoffs."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
