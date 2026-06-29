@@ -1335,6 +1335,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 78: Servidores de Integración MCP Nativos y Rust-Sovereign (Sovereign & Aether MCP Servers Substrate)
+- **Target**: `babylon60/cli/mcp_cmds.py`, `cortex/mcp_server/`
+- **Objective**: Desarrollo y acoplamiento de la suite de servidores MCP (`cortex mcp`). Permite el arranque del servidor estándar Trust, el servidor Aether (SSE) y el servidor nativo Rust `McpSovereignHost` con integración de políticas `JISAuditor` y puente de memoria `VSAPipelineBridge`.
+- **Yield Target**: Interoperabilidad segura de herramientas agénticas a través del protocolo unificado MCP.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Comandos CLI registrados en `babylon60/cli/mcp_cmds.py` e integración con bindings FFI de `cortex_rs` (`McpSovereignHost`).
+```yaml
+Claim: MCP integration servers launch and listen to requests under standardized JSON-RPC protocols.
+Proof:
+  Base: "mcp_cmds.py successfully loads endpoints and boots subprocesses via standard transport adapters."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
