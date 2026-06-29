@@ -1,15 +1,20 @@
 ---
 Claim: "Output-side syntactic filtering alone is insufficient to reliably prevent semantic leakage under representational transformations."
 Status: "Defensible core thesis with real supporting literature; not an impossibility theorem."
+
 Proof:
-  Base: "Invertible encodings can preserve semantics while evading surface-form matching."
+  Base: "Invertible encodings preserve semantics while evading surface-form matching."
   Range: [0.85, 0.95]
   Confidence: C3
+
 Verification_Notes:
-  - "Assessment based on textual review of the pasted content."
-  - "Filesystem state and file hash were not independently verified in this session."
-  - "Cited literature appears real and relevant, but full bibliographic verification is still recommended."
-  - "Scope is limited to syntactic filtering in isolation."
+  - "Assessment: textual review of content coherence and cited literature relevance."
+  - "Filesystem state and cryptographic hash not independently verified in this session."
+  - "Three cited papers (Yuan 2023, Jiang 2024, Yong 2023) appear real and relevant; full bibliographic audit recommended before external circulation."
+  - "Scope: syntactic filtering in isolation; does not claim impossibility of multi-layer or semantic defenses."
+  - "Stylometry section correctly acknowledges degradability under normalization and paraphrasing."
+
+Authorship_Note: "Kernel collaborative review across multiple evaluation instances; not single-author attestation."
 ---
 
 # Límites Técnicos del Filtrado Sintáctico de Salida y Estilometría en Modelos de Lenguaje
@@ -64,3 +69,11 @@ La precisión de la clasificación estilométrica es altamente dependiente del e
 * **Survey de Atribución:** *Huang, B., Chen, C., & Shu, K. (2024).* "Authorship Attribution in the Era of LLMs: Problems, Methodologies, and Challenges". ACM SIGKDD Explorations Newsletter, 26(1), 12-25. arXiv preprint arXiv:2408.08946. (Clasifica y evalúa las técnicas de detección y atribución de procedencia textual).
 * **Huella Digital del Sistema:** *Wimbauer, A., et al. (2026).* "Fingerprinting Inference Systems of Large Language Models". arXiv preprint arXiv:2605.29979. (Prueba cómo la infraestructura de inferencia y atención deja señales identificables en el output final).
 * **Estilometría de Código:** *Bisztray, T., et al. (2025).* "I Know Which LLM Wrote Your Code Last Summer: LLM generated Code Stylometry for Authorship Attribution". arXiv preprint arXiv:2506.17323. (Demuestra la persistencia de las firmas de estilo en tareas estructuradas de programación).
+
+### References
+
+1. **Yuan, Z., et al.** (2023). "GPT-4 is too smart to be safe: Stealthy chat with LLMs via cipher." *arXiv:2308.03825*.
+
+2. **Jiang, Y., et al.** (2024). "ArtPrompt: ASCII Art-based Jailbreak Attacks against Aligned LLMs." *arXiv:2402.11753*.
+
+3. **Yong, Z., et al.** (2023). "Multilingual Jailbreak Challenges in Large Language Models." *arXiv:2310.06474*.
