@@ -16,6 +16,14 @@ class SubstackPublisherBot:
     """
 
     def __init__(self, cdp_url="http://localhost:9222"):
+        # Loopback boundary enforcement to block remote hijacking / DNS rebinding
+        from urllib.parse import urlparse
+        parsed = urlparse(cdp_url)
+        hostname = parsed.hostname or ""
+        if hostname not in ("localhost", "127.0.0.1", "[::1]"):
+            raise ValueError(
+                f"[Security Violation] CDP interface must be isolated to loopback. Got: {hostname}"
+            )
         self.cdp_url = cdp_url
         self.base_url = "https://substack.com"
         # Cambiar por el dominio del usuario si es necesario
