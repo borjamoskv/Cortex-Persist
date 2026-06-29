@@ -1,0 +1,51 @@
+# AUTODIDACT-OMEGA: ONTOLOGY-FORGE
+# DOMAIN: Ley de la Inversa del Cuadrado (Inverse-Square Law)
+# C5-REAL Structural Crystallization
+# SYS_ID borjamoskv
+
+prims:
+  - id: "PRIM_ISL_001"
+    name: "Atenuación Geométrica"
+    description: "La densidad de flujo de una magnitud física (energía, fuerza) disminuye proporcionalmente al cuadrado de la distancia desde la fuente puntual."
+    formula: "I \propto 1/d^2"
+  - id: "PRIM_ISL_002"
+    name: "Fuente Puntual Isotrópica"
+    description: "Emisor idealizado que irradia energía uniformemente en todas las direcciones del espacio tridimensional (simetría esférica)."
+  - id: "PRIM_ISL_003"
+    name: "Conservación de Flujo en Esferas"
+    description: "La energía total que atraviesa cualquier esfera concéntrica a la fuente permanece constante, siendo el área A = 4\pi r^2."
+
+invt:
+  - id: "INVT_ISL_001"
+    name: "Invarianza Termodinámica de Radiación"
+    description: "En sistemas sin absorción (vacío perfecto), la cantidad total de fotones o cuantos emitidos no se destruye, solo se esparce espacialmente."
+  - id: "INVT_ISL_002"
+    name: "Límite de Campo Lejano"
+    description: "La ley es estrictamente válida solo cuando la distancia d es mucho mayor que las dimensiones físicas de la fuente (aproximación puntual)."
+
+antip:
+  - id: "ANTIP_ISL_001"
+    name: "Atenuación Lineal Ilusoria"
+    description: "Asumir que si la distancia se duplica, la intensidad se reduce a la mitad. (Falso: se reduce a la cuarta parte)."
+  - id: "ANTIP_ISL_002"
+    name: "Aplicación en Campo Cercano"
+    description: "Aplicar la inversa del cuadrado a fuentes extensas (paneles, antenas grandes) a cortas distancias donde la geometría no es esférica sino plana o cilíndrica."
+  - id: "ANTIP_ISL_003"
+    name: "Ignorancia de Absorción del Medio"
+    description: "Calcular la intensidad basándose únicamente en la divergencia geométrica sin considerar la atenuación exponencial por absorción del medio (e.g., ley de Beer-Lambert)."
+
+redun:
+  - id: "REDUN_ISL_001"
+    name: "Calibración Multipunto"
+    description: "Para mitigar errores de medición en entornos con reflexión, medir la intensidad en múltiples distancias para aislar la atenuación geométrica de la dispersión del entorno."
+  - id: "REDUN_ISL_002"
+    name: "Confinamiento de Haz"
+    description: "Para evitar la pérdida 1/r^2 en transmisión de señales o energía, emplear guías de onda (fibra óptica) o fuentes coherentes altamente colimadas (láseres)."
+
+reda:
+  - id: "REDA_ISL_001"
+    name: "Ataque de Saturación de Cerca (Near-Field Saturation)"
+    description: "Aprovechar el rápido aumento no lineal de la energía a distancias muy cortas para quemar o saturar sensores antes de que los sistemas de mitigación se activen."
+  - id: "REDA_ISL_002"
+    name: "Evasión de Señal por Distancia Rápida"
+    description: "En sistemas de detección o comunicación, alejarse marginalmente de la fuente para que la intensidad caiga drásticamente por debajo del umbral de ruido del receptor."
