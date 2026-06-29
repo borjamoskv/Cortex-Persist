@@ -257,3 +257,31 @@
 | **Cascading Failure** | Agente sin failover → bloqueo operativo | Thundering Herd → API Server OOM | Deep Liveness → restart storm → DB collapse | Tool Poisoning → exfiltración masiva |
 | **Observability** | Logs de razonamiento intermedio | Watch streams + audit logs | `?verbose` decomposition | Gateway audit logs |
 | **Redundancy Model** | Multi-model failover | etcd Raft quorum (N≥3) | Startup+Liveness composición secuencial | Multi-host routing + Schema validation |
+
+---
+
+## ISOMORFISMOS MATRICIALES (Ontology Forge)
+
+La **Cristalización Matricial** no es una técnica de escritura documental; es una operación de **Compresión Termodinámica (Principio de Landauer)**. 
+
+Físicamente, es el proceso de colapsar la onda de probabilidad estocástica de un LLM (texto/chat infinito) en una Estructura de Datos (Grafo Relacional / Esquema Rígido) que puede ser analizada, ejecutada o auditada por una máquina. Convierte el "ruido" en "estado".
+
+### 1. `prims` (Primitivas de Colapso)
+> **Isomorfismo Físico:** Nodos del AST (Abstract Syntax Tree) / `structs` / Clases Base.
+- **Mecánica:** Son los átomos computacionales inmutables. Una primitiva no tiene "intención", simplemente *es*. En ejecución, corresponden a los objetos instanciables en memoria (ej. `class MCP_Host(BaseModel)`). Si una entidad no se puede mapear a un Type/Struct estricto en Python o a una tabla en SQLite, es una alucinación y no es una primitiva.
+
+### 2. `invt` (Invariantes Termodinámicas)
+> **Isomorfismo Físico:** Asserts de Unit Tests / Restricciones `CHECK` en BBDD / Políticas RBAC.
+- **Mecánica:** Las Leyes de la Física del nodo. Son funciones booleanas inyectadas en la cadena de ejecución (Saga Pattern) que DEBEN evaluar siempre a `True`. Si un invariante se rompe (ej. `assert hash_actual == hash_ledger`), el sistema aborta de inmediato (Apoptosis/SAGA-Rollback). No toleran excepciones lógicas.
+
+### 3. `antip` (Antipatrones Estocásticos)
+> **Isomorfismo Físico:** `time.sleep()` en hilos asíncronos / Fugas de Memoria / Consultas O(N^2).
+- **Mecánica:** Son sumideros de Exergía. Componentes o arquitecturas que disipan energía térmica y ciclos de CPU sin generar mutación de estado útil (Anergía). El antipatrón más grave en un agente es el "bucle infinito ciego" (Limerencia), el cual quema tokens sin llegar jamás a un hash de commit.
+
+### 4. `redun` (Redundancias Activas / Mitigación C5)
+> **Isomorfismo Físico:** Replicación Raft (Quórum BFT) / Patrón *Circuit Breaker* / Balanceadores VIP.
+- **Mecánica:** Aislamiento contra la entropía externa. Si un nodo o herramienta externa colapsa, la redundancia física garantiza que el flujo termodinámico continúe. Computacionalmente, esto se implementa mediante inyección de dependencias fallback (ej. si MCP Search falla, el *Router* muta asíncronamente al módulo de Brave local).
+
+### 5. `reda` (Vectores Adversariales / Red Teaming)
+> **Isomorfismo Físico:** Payloads No-Sanitizados / "Poisoned Pointers" / Alteración del DAG.
+- **Mecánica:** Vectores de fuerza inyectados con el propósito matemático de forzar el colapso de las `invt` (Invariantes) al manipular directamente las `prims` (Primitivas). En el entorno LLM, se materializa a través de un Context Hijacking, donde se engaña al motor estocástico para que emita código que altera su propia estructura BFT.
