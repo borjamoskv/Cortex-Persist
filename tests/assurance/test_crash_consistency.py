@@ -22,6 +22,7 @@ def _writer_process_target(db_path: Path, sync_event: multiprocessing.Event, fau
     os.environ["CORTEX_MASTER_KEY"] = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
     os.environ["CORTEX_NO_EMBED"] = "1"
     os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
+    os.environ["CORTEX_TESTING"] = "1"
 
     async def _run():
         try:
@@ -81,60 +82,67 @@ async def test_sigkill_crash_consistency(tmp_path: Path, fault_point: str, monke
     SQLite WAL recovery should cleanly discard uncommitted transactions.
     """
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
-    db_path = tmp_path / "cortex_assurance.db"
+    monkeypatch.setenv("CORTEX_TESTING", "1")
+    from cortex.crypto.aes import reset_default_encrypter
+    reset_default_encrypter()
 
-    # 1. Initialize schema
-    engine = CortexEngine(db_path=str(db_path))
-    engine._synthesize_skill("optimization")
-    await engine.start()
-    await engine.close()
+    try:
+        db_path = tmp_path / "cortex_assurance.db"
 
-    # 2. Spawn worker
-    sync_event = multiprocessing.Event()
-    p = multiprocessing.Process(
-        target=_writer_process_target, args=(db_path, sync_event, fault_point)
-    )
-    p.start()
+        # 1. Initialize schema
+        engine = CortexEngine(db_path=str(db_path))
+        engine._synthesize_skill("optimization")
+        await engine.start()
+        await engine.close()
 
-    # 3. Wait for worker to reach the vulnerability window
-    reached = sync_event.wait(timeout=30.0)
-    assert reached, f"Worker did not reach {fault_point}"
-
-    # 4. Annihilate worker abruptly (SIGKILL cannot be caught by try/finally or signal handlers)
-    os.kill(p.pid, signal.SIGKILL)
-    p.join()
-
-    # 5. Verify integrity (Recovery)
-    engine_verify = CortexEngine(db_path=str(db_path))
-    engine_verify._synthesize_skill("optimization")
-    await engine_verify.start()
-
-    # Execute raw query to bypass cache
-    async with engine_verify.session() as conn:
-        cursor = await conn.execute("SELECT content FROM facts WHERE tenant_id='test_tenant'")
-        rows = await cursor.fetchall()
-
-    # Consistency Assertions
-    if fault_point in ("before_sqlite", "after_sqlite_before_ledger"):
-        # The transaction was never fully committed, WAL should discard it
-        assert len(rows) == 0, (
-            f"Integrity Breach: Fact leaked into DB despite SIGKILL at {fault_point}"
+        # 2. Spawn worker
+        sync_event = multiprocessing.Event()
+        p = multiprocessing.Process(
+            target=_writer_process_target, args=(db_path, sync_event, fault_point)
         )
-    elif fault_point == "after_commit":
-        # The transaction committed completely
-        assert len(rows) == 1, "Integrity Breach: Fact lost despite completing commit"
+        p.start()
 
-        # Verify via engine to test decryption
-        facts = await engine_verify.facts.search(
-            query="crash_test_payload", tenant_id="test_tenant"
-        )
-        assert len(facts) > 0, "Failed to decrypt/retrieve fact from engine"
-        assert facts[0].content == "crash_test_payload"
+        # 3. Wait for worker to reach the vulnerability window
+        reached = sync_event.wait(timeout=30.0)
+        assert reached, f"Worker did not reach {fault_point}"
 
-    # 6. Verify SQLite integrity PRAGMA
-    async with engine_verify.session() as conn:
-        cursor = await conn.execute("PRAGMA integrity_check;")
-        integrity = await cursor.fetchone()
-        assert integrity[0] == "ok", "Database corruption detected after SIGKILL"
+        # 4. Annihilate worker abruptly (SIGKILL cannot be caught by try/finally or signal handlers)
+        os.kill(p.pid, signal.SIGKILL)
+        p.join()
 
-    await engine_verify.close()
+        # 5. Verify integrity (Recovery)
+        engine_verify = CortexEngine(db_path=str(db_path))
+        engine_verify._synthesize_skill("optimization")
+        await engine_verify.start()
+
+        # Execute raw query to bypass cache
+        async with engine_verify.session() as conn:
+            cursor = await conn.execute("SELECT content FROM facts WHERE tenant_id='test_tenant'")
+            rows = await cursor.fetchall()
+
+        # Consistency Assertions
+        if fault_point in ("before_sqlite", "after_sqlite_before_ledger"):
+            # The transaction was never fully committed, WAL should discard it
+            assert len(rows) == 0, (
+                f"Integrity Breach: Fact leaked into DB despite SIGKILL at {fault_point}"
+            )
+        elif fault_point == "after_commit":
+            # The transaction committed completely
+            assert len(rows) == 1, "Integrity Breach: Fact lost despite completing commit"
+
+            # Verify via engine to test decryption
+            facts = await engine_verify.facts.search(
+                query="crash_test_payload", tenant_id="test_tenant"
+            )
+            assert len(facts) > 0, "Failed to decrypt/retrieve fact from engine"
+            assert facts[0].content == "crash_test_payload"
+
+        # 6. Verify SQLite integrity PRAGMA
+        async with engine_verify.session() as conn:
+            cursor = await conn.execute("PRAGMA integrity_check;")
+            integrity = await cursor.fetchone()
+            assert integrity[0] == "ok", "Database corruption detected after SIGKILL"
+
+        await engine_verify.close()
+    finally:
+        reset_default_encrypter()
