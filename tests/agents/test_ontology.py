@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-ONTOLOGY_DIR = Path(__file__).resolve().parent.parent.parent / "babylon60" / "agents" / "ontology"
+ONTOLOGY_DIR = Path(__file__).resolve().parent.parent.parent / "cortex" / "agents" / "ontology"
 
 
 def get_ontology_files() -> list[Path]:
