@@ -25,6 +25,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from ollama_connector import generate as ollama_generate
 
 
 # =============================================================================
@@ -82,75 +83,42 @@ class GeneratorAgent(Agent):
 
     def run(self, artifact: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         bias = context.get("output_bias", "novelty_over_polish")
-        prompt = context.get("prompt", "Generate an oblique artistic concept.")
+        core_vector = context.get("core_vector", "ARTE_PURO")
+        forbidden = context.get("forbidden_move", "none")
         
-        # System instructions to shape output format
-        model_prompt = (
-            f"You are a C5-REAL swarm creative generator. "
-            f"Process input: '{prompt}' with bias: '{bias}'. "
-            f"Output only the raw aesthetic concept description, compressed, dense. No preambles, no apologies."
+        # Construcción determinista del prompt de colisión
+        prompt = (
+            f"Core Vector: {core_vector}\n"
+            f"Output Bias: {bias}\n"
+            f"Forbidden Move: {forbidden}\n\n"
+            f"Generate a raw creative artifact. "
+            f"Output as a structured concept, code snippet, or manifesto:"
         )
 
-        ollama_url = "http://localhost:11434/api/generate"
-        payload = {
-            "model": "llama3",
-            "prompt": model_prompt,
-            "stream": False,
-            "options": {
-                "temperature": 0.85
-            }
-        }
+        # Llamada al metabolismo local
+        content = ollama_generate(prompt)
         
-        content = None
-        entropy_score = 0.5
-        
-        import urllib.request
-        import urllib.error
-
-        try:
-            # Check available models first
-            req_tags = urllib.request.Request("http://localhost:11434/api/tags")
-            with urllib.request.urlopen(req_tags, timeout=1.0) as response:
-                tags_data = json.loads(response.read().decode("utf-8"))
-                models = [m["name"] for m in tags_data.get("models", [])]
-                if models:
-                    payload["model"] = models[0]
-                    
-            # Make the actual generation request
-            data = json.dumps(payload).encode("utf-8")
-            req = urllib.request.Request(
-                ollama_url,
-                data=data,
-                headers={"Content-Type": "application/json"}
-            )
-            with urllib.request.urlopen(req, timeout=5.0) as response:
-                res_data = json.loads(response.read().decode("utf-8"))
-                content = res_data.get("response", "").strip()
-                
-            if content:
-                words = content.lower().split()
-                unique_words = set(words)
-                if words:
-                    entropy_score = min(0.95, max(0.10, len(unique_words) / len(words)))
-                    
-        except Exception as e:
-            # Fallback silently to stub
-            pass
-            
-        if not content:
-            content = f"raw_output_{bias}_{uuid.uuid4().hex[:6]}"
-            entropy_score = 0.7 if "rupture" in bias or "novelty" in bias else 0.5
+        is_error = content.startswith("ERROR_OLLAMA")
 
         raw = {
             "seed": uuid.uuid4().hex[:8],
             "bias": bias,
-            "form": "unstructured",
+            "form": "llm_structured" if not is_error else "error_fallback",
             "content": content,
-            "entropy_target": round(entropy_score, 3),
+            "entropy_target": 0.7 if "rupture" in bias else 0.5,
+            "model_used": "llama3"
         }
 
         artifact["generator"] = raw
-        artifact["status"] = "generated"
+        artifact["status"] = "generated_error" if is_error else "generated"
+
+        # Persistencia dual: guardar crudo a disco además del artifact en memoria
+        if not is_error:
+            raw_filename = f"raw_{artifact.get('job_id', 'unknown')}.md"
+            raw_path = OUTBOX / raw_filename
+            with raw_path.open("w", encoding="utf-8") as f:
+                f.write(content)
+
         return artifact
 
 
@@ -298,7 +266,7 @@ class SwarmWorker:
         agent_chain: List[str] = job.get("agent_chain", [])
         constraints: Dict[str, Any] = job.get("constraints", {})
 
-        artifact: Dict[str, Any] = {"status": "init"}
+        artifact: Dict[str, Any] = {"status": "init", "job_id": job.get("job_id")}
 
         print(f"[WORKER] Job {job.get('job_id')} | chain: {agent_chain}")
 
