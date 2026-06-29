@@ -4,8 +4,8 @@ Author: Borja Moskv / borjamoskv
 """
 from typing import Dict, Any
 MUTATION_RATE = 0.05
-ORIGINALITY_THRESHOLD = 0.34
-DISTRIBUTION_THRESHOLD = 0.26
+ORIGINALITY_THRESHOLD = 0.389
+DISTRIBUTION_THRESHOLD = 0.161
 
 def reinforcement_cycle(metric: Dict[str, Any], decision: str) -> str:
     """
