@@ -119,6 +119,7 @@ class MejoraloEngine:
             content=f"[MEJORAlo SCAR] {file_path}: {reason}",
             fact_type="error",
             tags=["mejoralo", "scar", "investigation"],
+            source="agent:mejoralo",
             meta={"file_path": file_path, "reason": reason},
         )
 
