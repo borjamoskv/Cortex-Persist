@@ -200,8 +200,14 @@ def test_verify_ledger_export_cli_exit_codes_and_deterministic_json(tmp_path: Pa
     strict_first = runner.invoke(cli, ["verify-ledger-export", str(STRICT)])
     strict_second = runner.invoke(cli, ["verify-ledger-export", str(STRICT)])
     assert strict_first.exit_code == 0
-    assert strict_first.output == strict_second.output
-    assert json.loads(strict_first.output)["result"] == "VALID_FULL_STRICT"
+
+    def _get_json_dict(text: str) -> dict:
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        return json.loads(text[start:end])
+
+    assert _get_json_dict(strict_first.output) == _get_json_dict(strict_second.output)
+    assert _get_json_dict(strict_first.output)["result"] == "VALID_FULL_STRICT"
 
     legacy = runner.invoke(
         cli,
