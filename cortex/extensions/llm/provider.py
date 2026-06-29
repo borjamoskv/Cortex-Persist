@@ -40,6 +40,16 @@ _RESULT_CACHE: ResultCache | None = None
 _HUD: Console | None = None
 
 
+def _get_provider_color(provider: str) -> str:
+    p = provider.lower()
+    if "gemini" in p: return "#1A73E8"
+    if "claude" in p or "anthropic" in p: return "#D97757"
+    if "ollama" in p or "mlx" in p: return "#FF3333"
+    if "openai" in p or "o1" in p or "o3" in p: return "#10A37F"
+    if "minimax" in p: return "#9C27B0"
+    return "#FFFFFF"
+
+
 def _get_hud() -> Console:
     global _HUD
     if _HUD is None:
@@ -304,20 +314,34 @@ class LLMProvider(BaseProvider):
         payload: dict[str, Any],
         prompt: CortexPrompt | None = None,
     ) -> str:
-        await apply_causal_jitter(tokens_estimate=len(payload.get("messages", [])) * 50)
-        async with self._semaphore:
-            response = await self._client.post(url, headers=headers, json=payload)
-        response.raise_for_status()
-        data = response.json()
-        self._log_resolved_model(payload, data)
-        if prompt is not None and "usage" in data:
+        color = _get_provider_color(self._provider)
+        try:
+            from cortex.routes.notch_ws import notify_notch_halo
+            asyncio.create_task(notify_notch_halo(color, True))
+        except Exception:
+            pass
+
+        try:
+            await apply_causal_jitter(tokens_estimate=len(payload.get("messages", [])) * 50)
+            async with self._semaphore:
+                response = await self._client.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            self._log_resolved_model(payload, data)
+            if prompt is not None and "usage" in data:
+                try:
+                    usage = data["usage"]
+                    prompt.prompt_tokens = usage.get("prompt_tokens")
+                    prompt.completion_tokens = usage.get("completion_tokens")
+                except Exception as e:
+                    logger.warning("Failed to extract usage metrics from response: %s", e)
+            return sanitize_response(data["choices"][0]["message"]["content"])
+        finally:
             try:
-                usage = data["usage"]
-                prompt.prompt_tokens = usage.get("prompt_tokens")
-                prompt.completion_tokens = usage.get("completion_tokens")
-            except Exception as e:
-                logger.warning("Failed to extract usage metrics from response: %s", e)
-        return sanitize_response(data["choices"][0]["message"]["content"])
+                from cortex.routes.notch_ws import notify_notch_halo
+                asyncio.create_task(notify_notch_halo(color, False))
+            except Exception:
+                pass
 
     def _log_resolved_model(self, payload: dict[str, Any], response_data: dict[str, Any]) -> None:
         requested = payload.get("model", "")
@@ -361,16 +385,30 @@ class LLMProvider(BaseProvider):
         else:
             payload["max_tokens"] = max_tokens
 
-        async for chunk in execute_stream(
-            self._client,
-            self._semaphore,
-            self._circuit_breaker,
-            self._provider,
-            url,
-            headers,
-            payload,
-        ):
-            yield chunk
+        color = _get_provider_color(self._provider)
+        try:
+            from cortex.routes.notch_ws import notify_notch_halo
+            asyncio.create_task(notify_notch_halo(color, True))
+        except Exception:
+            pass
+
+        try:
+            async for chunk in execute_stream(
+                self._client,
+                self._semaphore,
+                self._circuit_breaker,
+                self._provider,
+                url,
+                headers,
+                payload,
+            ):
+                yield chunk
+        finally:
+            try:
+                from cortex.routes.notch_ws import notify_notch_halo
+                asyncio.create_task(notify_notch_halo(color, False))
+            except Exception:
+                pass
 
     def _resolve_model(self, intent: IntentProfile) -> str:
         if self._provider == "vllm":

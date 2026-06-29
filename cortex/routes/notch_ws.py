@@ -155,3 +155,9 @@ async def notify_notch_model(model: str) -> None:
 async def notify_notch_pruning() -> None:
     """Shortcut: tell the notch we just pruned/filtered memory (Entropy Shockwave)."""
     await notch_hub.broadcast({"command": "shockwave", "intensity": 1.0})
+
+
+async def notify_notch_halo(color_hex: str, active: bool) -> None:
+    """Shortcut: tell the notch to display a colored halo during inference."""
+    await notch_hub.broadcast(f"halo:{'on' if active else 'off'}:{color_hex}")
+
