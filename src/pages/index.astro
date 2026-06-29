@@ -56,7 +56,7 @@ import CheckoutFlow from '../components/CheckoutFlow';
                 <a href="#forense">FORENSE</a>
                 <a href="#trust">TRUST</a>
                 <a href="#soundtrack">SOUNDTRACK</a>
-                <a href="blog/">BLOG</a>
+                <a href="#blog">BLOG</a>
                 <a href="https://github.com/borjamoskv/Cortex-Persist/tree/main/docs" class="nav-docs">Docs</a>
             </div>
             <button class="nav-cta" onclick="window.dispatchEvent(new CustomEvent('open-checkout', { detail: { plan: 'Pro Plan', price: '49' } }))">Get Started</button>
@@ -222,6 +222,54 @@ import CheckoutFlow from '../components/CheckoutFlow';
                 <li><span class="check-icon">✓</span><span class="check-text">Memory lifecycle controls</span></li>
             </ul>
             <p class="section-sub" style="margin-top: 2rem; color: #E0E0E0;">This is infrastructure for systems that operate repeatedly, not a one-shot prompt wrapper.</p>
+        </section>
+    </AwwwardsFadeIn>
+
+    <!-- Blog Section -->
+    <AwwwardsFadeIn client:visible direction="up">
+        <section id="blog" style="background: rgba(255,255,255,0.01); border-top: 1px solid rgba(255,255,255,0.05); padding: 80px 0;">
+            <div style="max-width: 1000px; margin: 0 auto; text-align: center; margin-bottom: 50px;">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1rem;">🔴 VERIFIABLE CHRONICLES</div>
+                <h2>Sovereign Writings & Cognitive Feeds</h2>
+                <p class="section-sub">Essays on physical information theory, AST genetic mutation, and the thermodynamics of long-term AI memory persistence.</p>
+            </div>
+            
+            <div class="blog-preview-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1100px; margin: 0 auto; padding: 0 20px;">
+                <a href="/blog/te_digo_to_y_no_te_digo_na" class="blog-preview-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 2rem; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: all 0.3s ease;">
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #ff0055; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.1em;">June 2026 · Ensayo</div>
+                    <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; color: #fff; line-height: 1.3;">Te digo tó y no te digo ná: Termodinámica + Teoría de la Información</h3>
+                    <p style="font-size: 0.9rem; color: rgba(255,255,255,0.6); line-height: 1.5; margin-bottom: 1.5rem;">El 0.002% de la población mundial domina la intersección entre Boltzmann y Shannon. La matemática de la equivalencia física de la información.</p>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent); margin-top: auto; font-weight: 700;">Read Log ➔</div>
+                </a>
+                
+                <a href="/blog/la_mutacion_causal_del_genoma" class="blog-preview-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 2rem; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: all 0.3s ease;">
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.1em;">June 2026 · Técnica</div>
+                    <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; color: #fff; line-height: 1.3;">La Mutación Causal del Genoma: AST y Exergía Pura</h3>
+                    <p style="font-size: 0.9rem; color: rgba(255,255,255,0.6); line-height: 1.5; margin-bottom: 1.5rem;">La transición de evolución estocástica a deducción causal. Cómo CORTEX-Persist aplica cirugía determinista sobre nodos fallidos mutando su propio genoma.</p>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent); margin-top: auto; font-weight: 700;">Read Log ➔</div>
+                </a>
+                
+                <a href="/blog/la_paradoja_del_contexto_infinito" class="blog-preview-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 2rem; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: all 0.3s ease;">
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.1em;">May 2026 · Análisis</div>
+                    <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; color: #fff; line-height: 1.3;">La Paradoja del Contexto Infinito</h3>
+                    <p style="font-size: 0.9rem; color: rgba(255,255,255,0.6); line-height: 1.5; margin-bottom: 1.5rem;">Google ofrece 2M de tokens de contexto. Y sin embargo, tu agente sigue amnésico al día siguiente. El problema nunca fue el tamaño de la ventana.</p>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent); margin-top: auto; font-weight: 700;">Read Log ➔</div>
+                </a>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="/blog" class="btn btn-outline" style="border: 1px solid rgba(255,255,255,0.2); padding: 0.8rem 2rem; border-radius: 999px; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 700; color: #fff; transition: all 0.3s ease; display: inline-block;">
+                    Access Full Exergy Ledger ➔
+                </a>
+            </div>
+            
+            <style is:inline>
+                .blog-preview-card:hover {
+                    transform: translateY(-4px);
+                    border-color: rgba(43, 59, 229, 0.4) !important;
+                    background: rgba(43, 59, 229, 0.04) !important;
+                }
+            </style>
         </section>
     </AwwwardsFadeIn>
 

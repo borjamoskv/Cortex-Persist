@@ -1,5 +1,7 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
+import SubstackLedger from '../../components/SubstackLedger';
+import substackNodes from '../../../public/substack_nodes.json';
 
 const articles = [
 	{
@@ -8,7 +10,7 @@ const articles = [
 		description: "El 0.002% de la población mundial domina la intersección entre Boltzmann y Shannon. Una estimación Fermi, el Criterio Técnico y la matemática detrás de la equivalencia física de la información.",
 		href: "/blog/te_digo_to_y_no_te_digo_na",
 		featured: true,
-        tag: "ensayo"
+		tag: "ensayo"
 	},
 	{
 		title: "La Mutación Causal del Genoma: AST, Autopoiesis y Exergía Pura",
@@ -24,7 +26,7 @@ const articles = [
 		description: "Google ofrece 2M de tokens de contexto. Anthropic, 200K. OpenAI, 128K. Y sin embargo, tu agente sigue olvidando todo al día siguiente. El problema nunca fue el tamaño de la ventana.",
 		href: "/blog/la_paradoja_del_contexto_infinito",
 		featured: false,
-        tag: "análisis"
+		tag: "análisis"
 	},
 	{
 		title: "La Extinción de las Formas de Pensar: Lenguas Muertas, Agentes Amnésicos y el Último Acto de la Memoria",
@@ -32,7 +34,7 @@ const articles = [
 		description: "Cada lengua que muere destruye un experimento cognitivo irrepetible de 10.000 años. Cada sesión de IA que se pierde replica el mismo patrón. Un ensayo sobre lingüística, entropía y persistencia soberana.",
 		href: "/blog/la_extincion_de_las_formas_de_pensar",
 		featured: false,
-        tag: "ensayo"
+		tag: "ensayo"
 	},
 	{
 		title: "La Muerte del Editor: La IA Agéntica como Modelo de Extracción de Renta",
@@ -40,7 +42,7 @@ const articles = [
 		description: "Google desmanteló el editor local en Antigravity 2.0. ¿Por qué a la industria le interesa forzar interfaces conversacionales y cómo ataca esto a la soberanía del programador?",
 		href: "/blog/la_muerte_del_editor.html",
 		featured: false,
-        tag: "ensayo"
+		tag: "ensayo"
 	},
 	{
 		title: "La Economía de la Mentira: Los Influencers de IA y la Industria del Humo Digital",
@@ -48,7 +50,7 @@ const articles = [
 		description: "En un mercado donde un avatar sin pulmones gana 40 veces más que un creador humano, la pregunta no es si la IA es el futuro, sino quién se está quedando con el presente.",
 		href: "/blog/economia_mentira_industrial.html",
 		featured: false,
-        tag: "análisis"
+		tag: "análisis"
 	},
 	{
 		title: "Why Your AI Agent Has Alzheimer's",
@@ -56,7 +58,7 @@ const articles = [
 		description: "You spent 3 hours teaching your AI agent the codebase. Next session? Gone. 100% amnesia. This is the most expensive bug in AI — and nobody's talking about it.",
 		href: "/blog/why-your-ai-agent-has-alzheimers.html",
 		featured: false,
-        tag: "técnica"
+		tag: "técnica"
 	}
 ];
 ---
@@ -66,42 +68,43 @@ const articles = [
 	description="Technical intelligence, sovereign engineering insights, and the operational reality of autonomous AI agents."
 >
 	<main class="noir-blog-shell">
-		<header class="masthead">
-			<a class="brand" href="/" aria-label="CORTEX Persist home">
-				<span class="brand-mark">CP</span>
-				<span class="brand-copy">
-					<strong>CORTEX Persist</strong>
-					<span>Verifiable memory for AI agents</span>
-				</span>
-			</a>
-			<nav class="site-nav" aria-label="Primary">
-				<a class="nav-link" href="/#problem">Problem</a>
-				<a class="nav-link" href="/#fit">Fit</a>
-				<a class="nav-link" href="/#pilot">Pilot</a>
-				<a class="nav-link active" href="/blog">Blog</a>
-			</nav>
-			<div class="masthead-actions">
-				<a class="button-tertiary" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer">
-					Open Source
+		<!-- Navigation Bar -->
+		<nav id="nav" class="nav-opaque">
+			<div class="nav-inner">
+				<a href="/" class="logo">
+					<span class="logo-icon">⚡</span>
+					<span class="logo-text">CORTEX</span>
 				</a>
-				<a class="button-primary" href="/async-demo">
-					Async Demo
-				</a>
+				<div class="nav-links">
+					<a href="/#architecture">ARCHITECTURE</a>
+					<a href="/#sintetologia">SINTETOLOGÍA</a>
+					<a href="/#forense">FORENSE</a>
+					<a href="/#trust">TRUST</a>
+					<a href="/#soundtrack">SOUNDTRACK</a>
+					<a href="/blog" class="active">BLOG</a>
+					<a href="https://github.com/borjamoskv/Cortex-Persist/tree/main/docs" class="nav-docs" target="_blank" rel="noreferrer">Docs</a>
+				</div>
+				<button class="nav-cta" onclick="window.dispatchEvent(new CustomEvent('open-checkout', { detail: { plan: 'Pro Plan', price: '49' } }))">Get Started</button>
 			</div>
-		</header>
+		</nav>
 
 		<!-- Hero Section -->
 		<section class="noir-hero">
 			<div class="noir-hero-label">INTELLIGENCE LOG</div>
 			<h1 class="noir-hero-title">SOVEREIGN <span>OPERATIONS</span></h1>
-			<p class="noir-hero-sub">Technical essays and state-of-the-art research on memory, autonomy, and the economics of verifiable AI.</p>
+			<p class="noir-hero-sub">Technical essays and state-of-the-art research on memory, autonomy, and the physical reality of verifiable AI.</p>
 		</section>
 
-		<!-- Blog Grid -->
+		<!-- Blog Grid (Featured Essays) -->
 		<section class="noir-grid-section">
+			<div class="section-title-wrapper">
+				<div class="section-eyebrow">🔴 CORTEX ARCHIVE</div>
+				<h2 class="section-heading">Featured Technical Essays</h2>
+			</div>
+			
 			<div class="noir-blog-grid">
 				{
-					articles.map((article, i) => (
+					articles.map((article) => (
 						<a href={article.href} class={`noir-blog-card ${article.featured ? 'noir-card-featured' : 'noir-card-standard'}`}>
 							<div class="noir-card-meta">
 								<span class="noir-card-tag">{article.tag || 'intelligence'}</span>
@@ -116,6 +119,20 @@ const articles = [
 			</div>
 		</section>
 
+		<!-- Substack Dynamic Ledger Section -->
+		<section class="noir-grid-section" id="ledger-section" style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 5rem;">
+			<div class="section-title-wrapper">
+				<div class="section-eyebrow">🌌 CAUSAL STREAM</div>
+				<h2 class="section-heading">Substack Exergy Ledger</h2>
+				<p class="section-desc" style="color: rgba(224, 224, 224, 0.5); font-size: 0.95rem; margin-top: 0.5rem; max-width: 600px;">
+					Real-time indexing of Borja Moskv's Substack nodes. All entries are classified, exergy-graded and signed under C5-REAL autarchy.
+				</p>
+			</div>
+
+			<SubstackLedger client:load initialNodes={substackNodes} />
+		</section>
+
+		<!-- Footer -->
 		<footer class="site-footer noir-footer">
 			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
 			<div class="footer-links">
@@ -131,18 +148,95 @@ const articles = [
 	/* ═══════════════════════════════════════════════════
 	   INDUSTRIAL NOIR 2026 — BLOG SUBSYSTEM
 	   ═══════════════════════════════════════════════════ */
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@400;500;700;900&family=Inter:wght@300;400;500&display=swap');
+	@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@400;500;700;900&family=Inter:wght@300;400;500&display=swap');
 
 	.noir-blog-shell {
 		min-height: 100vh;
 		background: #0A0A0A; /* Deep Noir Base */
 		color: #F3F4F6;
 		font-family: 'Inter', sans-serif;
+		position: relative;
+	}
+
+	/* Navigation Opaque Styles */
+	#nav.nav-opaque {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		z-index: 100;
+		background: rgba(10, 10, 10, 0.85);
+		backdrop-filter: blur(12px);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		transition: background 0.3s ease;
+	}
+
+	.nav-inner {
+		max-width: 1200px;
+		margin: 0 auto;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1.2rem 2rem;
+	}
+
+	.logo {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		text-decoration: none;
+		color: #ffffff;
+		font-weight: 900;
+		font-family: 'Orbitron', sans-serif;
+		letter-spacing: 0.1em;
+	}
+
+	.logo-icon {
+		color: #2B3BE5;
+		text-shadow: 0 0 10px rgba(43, 59, 229, 0.5);
+	}
+
+	.nav-links {
+		display: flex;
+		gap: 1.5rem;
+		align-items: center;
+	}
+
+	.nav-links a {
+		text-decoration: none;
+		color: rgba(224, 224, 224, 0.6);
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		transition: color 0.2s ease;
+	}
+
+	.nav-links a:hover, .nav-links a.active {
+		color: #ffffff;
+	}
+
+	.nav-cta {
+		background: #2B3BE5;
+		color: #ffffff;
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		border-radius: 999px;
+		padding: 0.5rem 1.2rem;
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 0.8rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: all 0.3s ease;
+	}
+
+	.nav-cta:hover {
+		background: #ff0055;
+		box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
 	}
 
 	/* Hero */
 	.noir-hero {
-		padding: 10rem 2rem 6rem;
+		padding: 12rem 2rem 5rem;
 		text-align: center;
 		position: relative;
 		overflow: hidden;
@@ -165,6 +259,7 @@ const articles = [
 		text-transform: uppercase;
 		color: #2B3BE5; /* YInMn Blue */
 		margin-bottom: 1.5rem;
+		text-shadow: 0 0 10px rgba(43, 59, 229, 0.3);
 	}
 
 	.noir-hero-title {
@@ -193,11 +288,33 @@ const articles = [
 		margin: 0 auto;
 	}
 
+	/* Section Headings */
+	.section-title-wrapper {
+		margin-bottom: 3rem;
+		text-align: left;
+	}
+
+	.section-eyebrow {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 0.75rem;
+		letter-spacing: 0.2em;
+		color: #FF0055;
+		margin-bottom: 0.5rem;
+	}
+
+	.section-heading {
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 2.2rem;
+		font-weight: 900;
+		letter-spacing: -0.02em;
+		color: #ffffff;
+	}
+
 	/* Grid */
 	.noir-grid-section {
 		max-width: 1200px;
 		margin: 0 auto;
-		padding: 0 2rem 8rem;
+		padding: 4rem 2rem;
 	}
 
 	.noir-blog-grid {
@@ -210,8 +327,8 @@ const articles = [
 	.noir-blog-card {
 		display: flex;
 		flex-direction: column;
-		background: rgba(255, 255, 255, 0.02);
-		border: 1px solid rgba(255, 255, 255, 0.06);
+		background: rgba(255, 255, 255, 0.01);
+		border: 1px solid rgba(255, 255, 255, 0.05);
 		border-radius: 12px;
 		padding: 2.5rem;
 		text-decoration: none;
@@ -237,7 +354,7 @@ const articles = [
 	.noir-blog-card:hover {
 		transform: translateY(-4px);
 		border-color: rgba(43, 59, 229, 0.4);
-		background: rgba(43, 59, 229, 0.05);
+		background: rgba(43, 59, 229, 0.04);
 	}
 
 	.noir-blog-card:hover::before {
@@ -249,7 +366,7 @@ const articles = [
 		grid-column: span 12;
 		padding: 4rem 3rem;
 		min-height: 380px;
-		background: rgba(43, 59, 229, 0.04);
+		background: rgba(43, 59, 229, 0.03);
 		border-color: rgba(43, 59, 229, 0.15);
 	}
 
@@ -293,11 +410,11 @@ const articles = [
 		background: rgba(43, 59, 229, 0.1);
 	}
 
-    .noir-card-featured .noir-card-tag {
-        border-color: rgba(255, 0, 85, 0.5);
+	.noir-card-featured .noir-card-tag {
+		border-color: rgba(255, 0, 85, 0.5);
 		color: #FF0055;
 		background: rgba(255, 0, 85, 0.1);
-    }
+	}
 
 	.noir-card-date {
 		font-family: 'Orbitron', sans-serif;
@@ -342,9 +459,27 @@ const articles = [
 	}
 	
 	.noir-footer {
-		margin-top: 4rem;
+		margin-top: 6rem;
 		border-top: 1px solid rgba(255, 255, 255, 0.05);
-		padding-top: 2rem;
-		padding-bottom: 2rem;
+		padding: 3rem 2rem;
+		text-align: center;
+	}
+
+	.footer-links {
+		display: flex;
+		justify-content: center;
+		gap: 2rem;
+		margin-top: 1.5rem;
+	}
+
+	.footer-links a {
+		color: rgba(224, 224, 224, 0.5);
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 0.85rem;
+		transition: color 0.2s ease;
+	}
+
+	.footer-links a:hover {
+		color: #ffffff;
 	}
 </style>

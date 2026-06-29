@@ -1,6 +1,9 @@
 // @C5-REAL
 import React from 'react';
-import { cn } from './AwwwardsFadeIn';
+
+function cn(...classes: (string | undefined | null | boolean)[]) {
+  return classes.filter(Boolean).join(' ');
+}
 
 interface GlassCardProps {
   children: React.ReactNode;
