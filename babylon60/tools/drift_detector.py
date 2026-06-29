@@ -1,17 +1,18 @@
 import hashlib
-import json
 import math
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
+
 import numpy as np
+
 
 @dataclass
 class BehavioralSnapshot:
     model_id: str
     timestamp_iso: str
     state_vectors: np.ndarray  # Shape: (n_samples, d_dimensions)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     sha256_hash: str = ""
 
     def __post_init__(self):
@@ -19,6 +20,7 @@ class BehavioralSnapshot:
             # Deterministic hash generation from state vectors bytes
             h = hashlib.sha256(self.state_vectors.tobytes())
             self.sha256_hash = h.hexdigest()
+
 
 @dataclass
 class DriftResult:
@@ -29,27 +31,26 @@ class DriftResult:
     is_significant: bool
     confidence_level: str
 
+
 @dataclass
 class SilentUpdateAlert:
     detected: bool
     severity: str
     kl_value: float
-    drift_dimensions: List[int]
+    drift_dimensions: list[int]
     recommended_action: str
+
 
 class DriftDetector:
     def __init__(self, regularization_eps: float = 1e-5):
         self.regularization_eps = regularization_eps
 
     def capture_snapshot(
-        self,
-        model_id: str,
-        states: List[np.ndarray],
-        metadata: Optional[Dict[str, Any]] = None
+        self, model_id: str, states: list[np.ndarray], metadata: Optional[dict[str, Any]] = None
     ) -> BehavioralSnapshot:
         if not states:
             raise ValueError("State vector list is empty")
-        
+
         matrix = np.array(states)
         if matrix.ndim == 1:
             matrix = matrix.reshape(1, -1)
@@ -59,16 +60,17 @@ class DriftDetector:
             model_id=model_id,
             timestamp_iso=timestamp,
             state_vectors=matrix,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
-    def _estimate_gaussian_params(self, matrix: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _estimate_gaussian_params(self, matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """
-        Estimates Mean and Covariance with regularization to avoid singular matrices.
+        Estimates Mean and Covariance with additive Laplace regularization (Σ_reg = Σ + εI).
+        Ensures robust divergence computation under disjoint, partial, or degenerate supports.
         """
         n, d = matrix.shape
         mean = np.mean(matrix, axis=0)
-        
+
         if n < 2:
             # Fallback for insufficient sample size
             cov = np.eye(d) * self.regularization_eps
@@ -77,18 +79,17 @@ class DriftDetector:
         cov = np.cov(matrix, rowvar=False)
         if cov.ndim == 0:
             cov = np.array([[float(cov)]])
-        
+
         # Regularization: Σ_reg = Σ + εI
         cov = cov + np.eye(d) * self.regularization_eps
         return mean, cov
 
     def compute_kl_divergence(
-        self,
-        snapshot_a: BehavioralSnapshot,
-        snapshot_b: BehavioralSnapshot
+        self, snapshot_a: BehavioralSnapshot, snapshot_b: BehavioralSnapshot
     ) -> DriftResult:
         """
-        Computes forward KL(B || A) and reverse KL(A || B) using Gaussian approximation.
+        Computes forward KL(B || A) and reverse KL(A || B) using smoothed Gaussian approximation.
+        Applies additive smoothing to guarantee compatible support across observed latent densities.
         Assumes snapshot_a is baseline (N0) and snapshot_b is target/current (N1).
         Formula:
         KL(N1 || N0) = 0.5 * [tr(S0^-1 S1) + (mu0 - mu1)^T S0^-1 (mu0 - mu1) - d + ln(det(S0)/det(S1))]
@@ -102,7 +103,7 @@ class DriftDetector:
             )
 
         d = v_a.shape[1]
-        
+
         mu_a, cov_a = self._estimate_gaussian_params(v_a)
         mu_b, cov_b = self._estimate_gaussian_params(v_b)
 
@@ -110,10 +111,10 @@ class DriftDetector:
         try:
             inv_cov_a = np.linalg.pinv(cov_a)
             inv_cov_b = np.linalg.pinv(cov_b)
-            
+
             sign_a, logdet_a = np.linalg.slogdet(cov_a)
             sign_b, logdet_b = np.linalg.slogdet(cov_b)
-            
+
             det_term = logdet_a - logdet_b
         except Exception:
             # Safe recovery back to Euclidean boundaries
@@ -142,14 +143,19 @@ class DriftDetector:
         per_dim = []
         for i in range(d):
             # 1D KL divergence formulation per axis
-            term_1d = 0.5 * (var_b[i]/var_a[i] + (mu_a[i] - mu_b[i])**2/var_a[i] - 1.0 + math.log(var_a[i]/var_b[i]))
+            term_1d = 0.5 * (
+                var_b[i] / var_a[i]
+                + (mu_a[i] - mu_b[i]) ** 2 / var_a[i]
+                - 1.0
+                + math.log(var_a[i] / var_b[i])
+            )
             per_dim.append(max(float(term_1d), 0.0))
-        
+
         per_dim_arr = np.array(per_dim)
 
         # Significance classification
         is_sig = symmetric_kl > 1.5
-        
+
         # Confidence score based on sample sizes
         n_a = v_a.shape[0]
         n_b = v_b.shape[0]
@@ -171,29 +177,30 @@ class DriftDetector:
             symmetric_kl=symmetric_kl,
             per_dimension_contribution=per_dim_arr,
             is_significant=is_sig,
-            confidence_level=confidence
+            confidence_level=confidence,
         )
 
-    def compute_symmetric_kl(self, snapshot_a: BehavioralSnapshot, snapshot_b: BehavioralSnapshot) -> float:
+    def compute_symmetric_kl(
+        self, snapshot_a: BehavioralSnapshot, snapshot_b: BehavioralSnapshot
+    ) -> float:
         res = self.compute_kl_divergence(snapshot_a, snapshot_b)
         return res.symmetric_kl
 
     def detect_silent_update(
-        self,
-        baseline: BehavioralSnapshot,
-        current: BehavioralSnapshot,
-        threshold: float = 2.0
+        self, baseline: BehavioralSnapshot, current: BehavioralSnapshot, threshold: float = 2.0
     ) -> SilentUpdateAlert:
         res = self.compute_kl_divergence(baseline, current)
-        
+
         # Top 3 drifting dimensions
         drift_dims = []
         if len(res.per_dimension_contribution) > 0:
             sorted_indices = np.argsort(res.per_dimension_contribution)[::-1]
-            drift_dims = [int(idx) for idx in sorted_indices[:3] if res.per_dimension_contribution[idx] > 0.1]
+            drift_dims = [
+                int(idx) for idx in sorted_indices[:3] if res.per_dimension_contribution[idx] > 0.1
+            ]
 
         detected = res.symmetric_kl >= threshold
-        
+
         if not detected:
             severity = "none"
             recommended = "No action required. Endpoints match operational signature."
@@ -205,12 +212,14 @@ class DriftDetector:
             recommended = "Flag silent update. Prompt structures may require adaptation."
         else:
             severity = "critical"
-            recommended = "Immediate rollback advised. Observable behavior has diverged significantly."
+            recommended = (
+                "Immediate rollback advised. Observable behavior has diverged significantly."
+            )
 
         return SilentUpdateAlert(
             detected=detected,
             severity=severity,
             kl_value=res.symmetric_kl,
             drift_dimensions=drift_dims,
-            recommended_action=recommended
+            recommended_action=recommended,
         )

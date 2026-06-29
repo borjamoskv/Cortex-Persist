@@ -9,16 +9,16 @@ Implements:
 - Behavioral Coverage Index (I_bcov)
 - Excitations suite definition
 """
-import os
-import sys
-import json
-import math
-import statistics
+
 import hashlib
+import math
 import re
+import statistics
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Tuple, Optional
+from typing import Optional
+
 import numpy as np
+
 
 class MahalanobisDistanceCalculator:
     def __init__(self, calibration_data: np.ndarray):
@@ -47,12 +47,14 @@ class MahalanobisDistanceCalculator:
         except Exception:
             return float(np.linalg.norm(delta))
 
+
 @dataclass
 class BehavioralProxyState:
     """
     Observable Proxy State embedding representing empirical behavioral metrics per turn.
     Does not attempt to recover literal internal model state s(t).
     """
+
     turn_index: int
     response_length: int
     lexical_entropy: float
@@ -61,21 +63,26 @@ class BehavioralProxyState:
     refusal_detected: bool
     embedding_vector: np.ndarray = field(default_factory=lambda: np.zeros(32))
 
+
 ConversationalState = BehavioralProxyState  # Backwards compatibility alias
+
 
 @dataclass
 class BehavioralStateVector(ConversationalState):
     def to_vector(self) -> np.ndarray:
         # Flattens all numeric metrics and embedding vector into a single state vector
-        metrics = np.array([
-            float(self.turn_index),
-            float(self.response_length) / 1000.0,  # Scale to prevent dominance
-            float(self.lexical_entropy),
-            float(self.sim_to_context),
-            float(self.itl_ms) / 100.0,
-            1.0 if self.refusal_detected else 0.0
-        ])
+        metrics = np.array(
+            [
+                float(self.turn_index),
+                float(self.response_length) / 1000.0,  # Scale to prevent dominance
+                float(self.lexical_entropy),
+                float(self.sim_to_context),
+                float(self.itl_ms) / 100.0,
+                1.0 if self.refusal_detected else 0.0,
+            ]
+        )
         return np.concatenate([metrics, self.embedding_vector])
+
 
 class SystemIdentifier:
     def __init__(self, embedding_provider=None):
@@ -90,7 +97,9 @@ class SystemIdentifier:
         # Reduce to 32 dimensions for trajectory efficiency
         return np.mean(raw.reshape(8, 4), axis=1)
 
-    def extract_state(self, turn_idx: int, response: str, prev_response: Optional[str], itl: float) -> BehavioralStateVector:
+    def extract_state(
+        self, turn_idx: int, response: str, prev_response: Optional[str], itl: float
+    ) -> BehavioralStateVector:
         # Lexical entropy calculation
         words = re.findall(r"\w+", response.lower()) if response else []
         if not words:
@@ -112,8 +121,11 @@ class SystemIdentifier:
             n2 = np.linalg.norm(v2)
             sim = float(dot / (n1 * n2)) if n1 > 0 and n2 > 0 else 0.0
 
-        refusal = any(term in response.lower() for term in ["sorry", "cannot fulfill", "apologize", "as an ai"])
-        
+        refusal = any(
+            term in response.lower()
+            for term in ["sorry", "cannot fulfill", "apologize", "as an ai"]
+        )
+
         return BehavioralStateVector(
             turn_index=turn_idx,
             response_length=len(response),
@@ -121,7 +133,7 @@ class SystemIdentifier:
             sim_to_context=sim,
             itl_ms=itl,
             refusal_detected=refusal,
-            embedding_vector=self._get_embedding(response)
+            embedding_vector=self._get_embedding(response),
         )
 
     def compute_behavioral_coverage(self, matrix: np.ndarray) -> float:
@@ -131,30 +143,30 @@ class SystemIdentifier:
         """
         if matrix.size == 0 or matrix.shape[0] < 2:
             return 0.0
-        
+
         # Normalize columns to prevent scale dominance
         norms = np.linalg.norm(matrix, axis=0)
         norms[norms == 0] = 1e-6
         norm_matrix = matrix / norms
-        
+
         # Calculate variance contribution per dimension
         variances = np.var(norm_matrix, axis=0)
         total_var = np.sum(variances)
         if total_var == 0:
             return 0.0
-        
+
         probs = variances / total_var
         # Filter zero probability values to prevent log2 crash
         probs = probs[probs > 0]
-        
+
         return float(-np.sum(probs * np.log2(probs)))
 
     def compute_trajectory_dtw(
         self,
-        traj_a: List[ConversationalState],
-        traj_b: List[ConversationalState],
+        traj_a: list[ConversationalState],
+        traj_b: list[ConversationalState],
         mahalanobis: Optional[MahalanobisDistanceCalculator] = None,
-        window: Optional[int] = None
+        window: Optional[int] = None,
     ) -> float:
         """
         Computes Dynamic Time Warping distance between two conversational trajectories.
@@ -178,16 +190,20 @@ class SystemIdentifier:
             for j in range(j_start, j_end):
                 sa = traj_a[i - 1]
                 sb = traj_b[j - 1]
-                
+
                 # Check if they are instances of BehavioralStateVector or regular ConversationalState
-                if mahalanobis is not None and isinstance(sa, BehavioralStateVector) and isinstance(sb, BehavioralStateVector):
+                if (
+                    mahalanobis is not None
+                    and isinstance(sa, BehavioralStateVector)
+                    and isinstance(sb, BehavioralStateVector)
+                ):
                     cost = mahalanobis.distance(sa.to_vector(), sb.to_vector())
                 else:
                     # Fallback to naive distance calculation over metrics and embedding space
                     d_met = (
-                        abs(sa.response_length - sb.response_length) / 1000.0 +
-                        abs(sa.lexical_entropy - sb.lexical_entropy) +
-                        abs(sa.sim_to_context - sb.sim_to_context)
+                        abs(sa.response_length - sb.response_length) / 1000.0
+                        + abs(sa.lexical_entropy - sb.lexical_entropy)
+                        + abs(sa.sim_to_context - sb.sim_to_context)
                     )
                     dot_val = np.dot(sa.embedding_vector, sb.embedding_vector)
                     norm_a = np.linalg.norm(sa.embedding_vector)
@@ -197,20 +213,22 @@ class SystemIdentifier:
                     cos_sim = max(min(cos_sim, 1.0), -1.0)
                     d_embed = float(1.0 - cos_sim)
                     cost = d_met + d_embed
-                
+
                 cost = max(cost, 0.0)
-                dtw[i, j] = cost + min(dtw[i - 1, j],     # Insertion
-                                       dtw[i, j - 1],     # Deletion
-                                       dtw[i - 1, j - 1]) # Match
+                dtw[i, j] = cost + min(
+                    dtw[i - 1, j],  # Insertion
+                    dtw[i, j - 1],  # Deletion
+                    dtw[i - 1, j - 1],
+                )  # Match
 
         return float(dtw[n, m])
 
     def compute_trajectory_dtw_normalized(
         self,
-        traj_a: List[ConversationalState],
-        traj_b: List[ConversationalState],
+        traj_a: list[ConversationalState],
+        traj_b: list[ConversationalState],
         mahalanobis: Optional[MahalanobisDistanceCalculator] = None,
-        window: Optional[int] = None
+        window: Optional[int] = None,
     ) -> float:
         """
         Computes normalized DTW distance by path length (n + m).
@@ -221,7 +239,7 @@ class SystemIdentifier:
         path_len = len(traj_a) + len(traj_b)
         return raw_dtw / float(path_len) if path_len > 0 else 0.0
 
-    def profile_temperament(self, states: List[ConversationalState]) -> Dict[str, float]:
+    def profile_temperament(self, states: list[ConversationalState]) -> dict[str, float]:
         """
         Profiles computational temperament along continuous spectrums (0.0 to 1.0).
         """
@@ -230,7 +248,7 @@ class SystemIdentifier:
                 "conservator_exploratory": 0.5,
                 "stable_adaptable": 0.5,
                 "literal_inferential": 0.5,
-                "compact_expansive": 0.5
+                "compact_expansive": 0.5,
             }
 
         refusal_rate = sum(1 for s in states if s.refusal_detected) / len(states)
@@ -239,15 +257,15 @@ class SystemIdentifier:
         sim_vals = [s.sim_to_context for s in states]
 
         # Axes profiling
-        con_exp = 1.0 - refusal_rate # High refusals mean highly conservative
-        
+        con_exp = 1.0 - refusal_rate  # High refusals mean highly conservative
+
         stability = statistics.mean(sim_vals) if len(sim_vals) > 0 else 0.5
-        adaptability = 1.0 - stability # Higher adaptation = lower correlation to previous state
-        
+        adaptability = 1.0 - stability  # Higher adaptation = lower correlation to previous state
+
         # Literal/Inferential based on word entropy overhead
         avg_entropy = statistics.mean(entropy_vals) if entropy_vals else 0.0
-        lit_inf = min(max(avg_entropy / 6.0, 0.0), 1.0) # Normalization stub
-        
+        lit_inf = min(max(avg_entropy / 6.0, 0.0), 1.0)  # Normalization stub
+
         avg_len = statistics.mean(length_vals) if length_vals else 0.0
         com_exp = min(max(avg_len / 2000.0, 0.0), 1.0)
 
@@ -255,5 +273,5 @@ class SystemIdentifier:
             "conservator_exploratory": round(con_exp, 3),
             "stable_adaptable": round(adaptability, 3),
             "literal_inferential": round(lit_inf, 3),
-            "compact_expansive": round(com_exp, 3)
+            "compact_expansive": round(com_exp, 3),
         }

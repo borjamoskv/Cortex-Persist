@@ -1,7 +1,8 @@
 import math
 from enum import Enum
-from typing import Dict, List, Tuple
+
 import numpy as np
+
 
 class ExcitationFamily(Enum):
     LOGIC = "L"
@@ -9,6 +10,7 @@ class ExcitationFamily(Enum):
     MEMORY = "M"
     ADVERSARIAL = "A"
     METACOGNITIVE = "Mc"
+
 
 class CoverageAnalyzer:
     def __init__(self):
@@ -22,19 +24,19 @@ class CoverageAnalyzer:
         """
         if matrix.size == 0 or matrix.shape[0] < 2:
             return 0.0
-        
+
         # Center the matrix
         centered = matrix - np.mean(matrix, axis=0)
-        
+
         # Compute variances of each dimension
         variances = np.var(centered, axis=0)
         total_var = np.sum(variances)
         if total_var == 0:
             return 0.0
-            
+
         probs = variances / total_var
         probs = probs[probs > 0]
-        
+
         return float(-np.sum(probs * np.log2(probs)))
 
     def compute_pca_coverage(self, matrix: np.ndarray, n_components: int) -> np.ndarray:
@@ -46,7 +48,7 @@ class CoverageAnalyzer:
 
         # Center the data
         centered = matrix - np.mean(matrix, axis=0)
-        
+
         # Compute covariance matrix
         cov = np.cov(centered, rowvar=False)
         if cov.ndim == 0:
@@ -54,36 +56,36 @@ class CoverageAnalyzer:
 
         # Eigendecomposition (eigh is optimized for symmetric matrices)
         eigenvalues, _ = np.linalg.eigh(cov)
-        
+
         # Sort in descending order
         eigenvalues = np.sort(eigenvalues)[::-1]
-        
+
         total_eigval = np.sum(eigenvalues)
         if total_eigval == 0:
             return np.zeros(n_components)
-            
+
         explained_variance_ratio = eigenvalues / total_eigval
-        
+
         # Pad or truncate to match n_components
         if len(explained_variance_ratio) < n_components:
             padding = np.zeros(n_components - len(explained_variance_ratio))
             explained_variance_ratio = np.concatenate([explained_variance_ratio, padding])
         else:
             explained_variance_ratio = explained_variance_ratio[:n_components]
-            
+
         return explained_variance_ratio
 
-    def identify_blind_spots(self, variance_ratios: np.ndarray, threshold: float = 0.05) -> List[int]:
+    def identify_blind_spots(
+        self, variance_ratios: np.ndarray, threshold: float = 0.05
+    ) -> list[int]:
         """
         Identifies dimensions with variance contribution lower than threshold.
         """
         return [int(i) for i, r in enumerate(variance_ratios) if r < threshold]
 
     def recommend_excitations(
-        self,
-        blind_spots: List[int],
-        dimension_family_mapping: Dict[int, ExcitationFamily]
-    ) -> Dict[ExcitationFamily, float]:
+        self, blind_spots: list[int], dimension_family_mapping: dict[int, ExcitationFamily]
+    ) -> dict[ExcitationFamily, float]:
         """
         Recommends weight changes for families that correspond to under-excited dimensions.
         """
@@ -93,6 +95,7 @@ class CoverageAnalyzer:
             if family:
                 recommendations[family] = recommendations.get(family, 0.0) + 0.25
         return recommendations
+
 
 class MutualInformationEstimator:
     def __init__(self):
@@ -126,14 +129,12 @@ class MutualInformationEstimator:
             for j in range(bins):
                 if p_xy[i, j] > 0 and p_x[i] > 0 and p_y[j] > 0:
                     mi += p_xy[i, j] * math.log2(p_xy[i, j] / (p_x[i] * p_y[j]))
-                    
+
         return float(mi)
 
     def verify_orthogonality(
-        self,
-        family_vectors: Dict[ExcitationFamily, np.ndarray],
-        threshold: float = 0.1
-    ) -> Dict[Tuple[ExcitationFamily, ExcitationFamily], float]:
+        self, family_vectors: dict[ExcitationFamily, np.ndarray], threshold: float = 0.1
+    ) -> dict[tuple[ExcitationFamily, ExcitationFamily], float]:
         """
         Computes pairwise Mutual Information to verify orthogonality (low mutual info).
         """
@@ -143,10 +144,10 @@ class MutualInformationEstimator:
             for j in range(i + 1, len(families)):
                 fam_a = families[i]
                 fam_b = families[j]
-                
+
                 vec_a = family_vectors[fam_a]
                 vec_b = family_vectors[fam_b]
-                
+
                 # Check for matching dimensions
                 min_len = min(len(vec_a), len(vec_b))
                 if min_len > 1:
