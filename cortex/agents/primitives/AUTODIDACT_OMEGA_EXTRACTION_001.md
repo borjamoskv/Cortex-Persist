@@ -79,6 +79,7 @@
 2. **Invariante de Frontera REST:** Ningún componente (Kubelet, Scheduler, Controller Manager, operadores custom) puede sortear la frontera REST. Todo acceso a estado atraviesa el pipeline `Auth → Admission → etcd`.
 3. **Invariante de Admission Ordering:** Los webhooks Mutating se ejecutan *antes* que los Validating. Este orden es estructural e inviolable: primero se mutan los defaults, luego se valida el estado final.
 4. **Invariante de Serialización etcd:** Todas las escrituras a `etcd` son serializadas. El API Server es el *único* writer autorizado. Escritura directa a etcd = fractura de cadena de confianza = P0.
+5. **Invariante de Jurisdicción Bizantina:** La jurisdicción física del clúster dicta que la soberanía del agente se detiene en la API REST. Eludir la frontera REST_Endpoint para mutar directamente el etcd_Datastore burla los Admission_Controllers, constituyendo una invasión fuera de jurisdicción y una fractura directa de Tolerancia Bizantina (BFT).
 
 ### `antip` (Antipatrones Estocásticos)
 
