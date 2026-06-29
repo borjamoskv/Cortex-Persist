@@ -152,7 +152,7 @@ jobs:
           while IFS= read -r file; do
             [ -z "${file}" ] && continue
             case "${file}" in
-              .github/workflows/*|.github/mlc_config.json|README.md|README.es.md|README.zh.md|CONTRIBUTING.md|RELEASE_PROCESS.md|CHANGELOG.md|VERSION_SUPPORT.md|docs/*|ouroboros-matrix/README.md|Dockerfile|pyproject.toml|uv.lock|MANIFEST.in|cortex/__init__.py|cortex/cli/prompt_cmds.py|scripts/release_preflight.py|scripts/repo_health_changed.py|astro.config.mjs|vercel.json|.vercelignore|package.json|package-lock.json|src/*|public/*)
+              .github/workflows/*|.github/mlc_config.json|README.md|README.es.md|README.zh.md|CONTRIBUTING.md|RELEASE_PROCESS.md|CHANGELOG.md|VERSION_SUPPORT.md|docs/*|ouroboros-matrix/README.md|Dockerfile|pyproject.toml|uv.lock|MANIFEST.in|cortex/__init__.py|cortex/cli/prompt_cmds.py|scripts/release_preflight.py|scripts/repo_health_changed.py|astro.config.mjs|wrangler.json|package.json|package-lock.json|src/*|public/*)
                 ;;
               *)
                 release_only=false
@@ -248,7 +248,7 @@ jobs:
           while IFS= read -r file; do
             [ -z "${file}" ] && continue
             case "${file}" in
-              .github/workflows/*|.github/mlc_config.json|README.md|README.es.md|README.zh.md|CONTRIBUTING.md|RELEASE_PROCESS.md|CHANGELOG.md|VERSION_SUPPORT.md|docs/*|ouroboros-matrix/README.md|Dockerfile|pyproject.toml|uv.lock|MANIFEST.in|cortex/__init__.py|cortex/cli/prompt_cmds.py|scripts/release_preflight.py|scripts/repo_health_changed.py|astro.config.mjs|vercel.json|.vercelignore|package.json|package-lock.json|src/*|public/*)
+              .github/workflows/*|.github/mlc_config.json|README.md|README.es.md|README.zh.md|CONTRIBUTING.md|RELEASE_PROCESS.md|CHANGELOG.md|VERSION_SUPPORT.md|docs/*|ouroboros-matrix/README.md|Dockerfile|pyproject.toml|uv.lock|MANIFEST.in|cortex/__init__.py|cortex/cli/prompt_cmds.py|scripts/release_preflight.py|scripts/repo_health_changed.py|astro.config.mjs|wrangler.json|package.json|package-lock.json|src/*|public/*)
                 ;;
               *)
                 release_only=false
@@ -366,7 +366,7 @@ jobs:
           while IFS= read -r file; do
             [ -z "${file}" ] && continue
             case "${file}" in
-              .github/workflows/*|.github/mlc_config.json|README.md|README.es.md|README.zh.md|CONTRIBUTING.md|RELEASE_PROCESS.md|CHANGELOG.md|VERSION_SUPPORT.md|docs/*|ouroboros-matrix/README.md|Dockerfile|pyproject.toml|uv.lock|MANIFEST.in|cortex/__init__.py|cortex/cli/prompt_cmds.py|scripts/release_preflight.py|scripts/repo_health_changed.py|astro.config.mjs|vercel.json|.vercelignore|package.json|package-lock.json|src/*|public/*)
+              .github/workflows/*|.github/mlc_config.json|README.md|README.es.md|README.zh.md|CONTRIBUTING.md|RELEASE_PROCESS.md|CHANGELOG.md|VERSION_SUPPORT.md|docs/*|ouroboros-matrix/README.md|Dockerfile|pyproject.toml|uv.lock|MANIFEST.in|cortex/__init__.py|cortex/cli/prompt_cmds.py|scripts/release_preflight.py|scripts/repo_health_changed.py|astro.config.mjs|wrangler.json|package.json|package-lock.json|src/*|public/*)
                 ;;
               *)
                 release_only=false
@@ -542,7 +542,7 @@ jobs:
           while IFS= read -r file; do
             [ -z "${file}" ] && continue
             case "${file}" in
-              .github/workflows/*|.github/mlc_config.json|README.md|README.es.md|README.zh.md|CONTRIBUTING.md|RELEASE_PROCESS.md|CHANGELOG.md|VERSION_SUPPORT.md|docs/*|ouroboros-matrix/README.md|Dockerfile|pyproject.toml|uv.lock|MANIFEST.in|cortex/__init__.py|cortex/cli/prompt_cmds.py|scripts/release_preflight.py|scripts/repo_health_changed.py|astro.config.mjs|vercel.json|.vercelignore|package.json|package-lock.json|src/*|public/*)
+              .github/workflows/*|.github/mlc_config.json|README.md|README.es.md|README.zh.md|CONTRIBUTING.md|RELEASE_PROCESS.md|CHANGELOG.md|VERSION_SUPPORT.md|docs/*|ouroboros-matrix/README.md|Dockerfile|pyproject.toml|uv.lock|MANIFEST.in|cortex/__init__.py|cortex/cli/prompt_cmds.py|scripts/release_preflight.py|scripts/repo_health_changed.py|astro.config.mjs|wrangler.json|package.json|package-lock.json|src/*|public/*)
                 ;;
               *)
                 release_only=false
