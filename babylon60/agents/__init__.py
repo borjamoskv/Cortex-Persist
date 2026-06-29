@@ -10,6 +10,7 @@ from __future__ import annotations
 from cortex.agents.base import BaseAgent, ReactiveTaskAgent
 from cortex.agents.bus import MessageBus, SqliteMessageBus
 from cortex.agents.consolidator import ConsolidatorAgent
+from cortex.agents.exergy_maximizer import ExergyMaximizerAgent, create_exergy_maximizer
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import (
     AgentMessage,
@@ -27,6 +28,8 @@ __all__ = [
     "BaseAgent",
     "ReactiveTaskAgent",
     "ConsolidatorAgent",
+    "ExergyMaximizerAgent",
+    "create_exergy_maximizer",
     "Supervisor",
     # Manifest & schema
     "AgentManifest",
