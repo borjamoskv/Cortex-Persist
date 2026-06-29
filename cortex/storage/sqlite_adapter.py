@@ -24,8 +24,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.storage.sqlite_adapter")
 
 
-class SQLiteAdapter:
-    """Adapts aiosqlite.Connection to the StorageAdapter protocol.
+class CortexConnection:
+    """Adapts aiosqlite.Connection to the StorageAdapter protocol (MTK v2 Enforced).
 
     Invariants:
     - commit() calls conn.commit() (aiosqlite is NOT auto-commit).
@@ -36,15 +36,21 @@ class SQLiteAdapter:
       delegates to the connection but the caller controls lifecycle.
     """
 
-    def __init__(self, conn: aiosqlite.Connection):
+    def __init__(self, conn: aiosqlite.Connection, causal_token: str | None = None):
         self._conn = conn
+        # MTK v2 Causal Token physical isolation
+        self._mtk_nonce = causal_token
+        self._causal_write_authorized = bool(causal_token)
 
     @classmethod
-    async def create(cls, conn: aiosqlite.Connection) -> SQLiteAdapter:
-        """Factory method enforcing R10 rigid connection factors (WAL + busy_timeout=5000)."""
+    async def create(cls, conn: aiosqlite.Connection, causal_token: str | None = None) -> CortexConnection:
+        """Factory method enforcing R10 and MTK v2 rigid connection factors."""
         await conn.execute("PRAGMA busy_timeout = 5000")
         await conn.execute("PRAGMA journal_mode = WAL")
-        return cls(conn)
+        # MTK v2 FFI Surface Lockdown
+        await conn.execute("PRAGMA trusted_schema = OFF")
+        await conn.execute("PRAGMA writable_schema = OFF")
+        return cls(conn, causal_token=causal_token)
 
     async def get_conn(self) -> aiosqlite.Connection:
         """Return the underlying aiosqlite.Connection."""
@@ -81,7 +87,9 @@ class SQLiteAdapter:
             raise
 
     async def execute_insert(self, sql: str, params: tuple[Any, ...] = ()) -> int:
-        """Execute an INSERT and return the last inserted row ID."""
+        """Execute an INSERT and return the last inserted row ID. (MTK v2 Protected)"""
+        if not self._causal_write_authorized:
+            raise RuntimeError("[MTK v2] Physical rejection: Missing causal token for state mutation.")
         try:
             async with self._conn.execute(sql, params) as cursor:
                 return cursor.lastrowid or 0
@@ -90,11 +98,13 @@ class SQLiteAdapter:
             raise
 
     async def executemany(self, sql: str, params_list: list[tuple[Any, ...]]) -> None:
-        """Batch execution wrapped in an explicit transaction.
+        """Batch execution wrapped in an explicit transaction. (MTK v2 Protected)
 
         Chronos/OOM hardened: atomicity + bounded commit prevents
         interleaved writes and unbounded memory if params_list is large.
         """
+        if not self._causal_write_authorized:
+            raise RuntimeError("[MTK v2] Physical rejection: Missing causal token for state mutation.")
         if not params_list:
             return
         try:
@@ -108,12 +118,14 @@ class SQLiteAdapter:
             raise
 
     async def executescript(self, script: str) -> None:
-        """Execute a multi-statement SQL script.
+        """Execute a multi-statement SQL script. (MTK v2 Protected)
 
         Note: aiosqlite.executescript issues an implicit COMMIT before
         running, matching SQLite's native behavior. Never accepts params
         (no injection surface).
         """
+        if not self._causal_write_authorized:
+            raise RuntimeError("[MTK v2] Physical rejection: Missing causal token for state mutation.")
         try:
             await self._conn.executescript(script)
         except (OSError, RuntimeError, ValueError):
@@ -152,4 +164,7 @@ class SQLiteAdapter:
             return False
 
     def __repr__(self) -> str:
-        return f"<SQLiteAdapter conn={self._conn!r}>"
+        return f"<CortexConnection causal={self._causal_write_authorized} conn={self._conn!r}>"
+
+# MTK v2 Alias for structural compatibility during transition
+SQLiteAdapter = CortexConnection
