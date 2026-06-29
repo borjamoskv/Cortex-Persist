@@ -9,42 +9,117 @@ import importlib.abc
 import importlib.util
 
 
-class AliasLoader(importlib.abc.Loader):
-    def __init__(self, target_module):
-        self.target_module = target_module
+import types
+
+class ProxyModule(types.ModuleType):
+    def __init__(self, name, real_module):
+        super().__init__(name)
+        object.__setattr__(self, '_real_module', real_module)
+
+    def __getattribute__(self, name):
+        if name in ('_real_module', '__class__', '__spec__', '__loader__', '__path__', '__file__', '__name__'):
+            return object.__getattribute__(self, name)
+        
+        try:
+            val = object.__getattribute__(self, name)
+            if isinstance(val, types.ModuleType):
+                return val
+        except AttributeError:
+            pass
+
+        if name == '__dict__':
+            try:
+                real = object.__getattribute__(self, '_real_module')
+            except AttributeError:
+                return object.__getattribute__(self, '__dict__')
+            d = dict(real.__dict__)
+            d.update({
+                '__name__': object.__getattribute__(self, '__name__'),
+            })
+            try:
+                d['__spec__'] = object.__getattribute__(self, '__spec__')
+            except AttributeError:
+                pass
+            try:
+                d['__loader__'] = object.__getattribute__(self, '__loader__')
+            except AttributeError:
+                pass
+            if hasattr(self, '__path__'):
+                d['__path__'] = object.__getattribute__(self, '__path__')
+            if hasattr(self, '__file__'):
+                d['__file__'] = object.__getattribute__(self, '__file__')
+            return d
+            
+        return getattr(self._real_module, name)
+
+    def __setattr__(self, name, value):
+        if name in ('_real_module', '__spec__', '__loader__', '__path__', '__file__', '__name__'):
+            object.__setattr__(self, name, value)
+        elif isinstance(value, types.ModuleType):
+            object.__setattr__(self, name, value)
+        else:
+            setattr(self._real_module, name, value)
+
+    def __dir__(self):
+        return dir(self._real_module)
+
+
+class LazyAliasLoader(importlib.abc.Loader):
+    def __init__(self, target_name):
+        self.target_name = target_name
 
     def create_module(self, spec):
-        return self.target_module
+        real_module = importlib.import_module(self.target_name)
+        proxy = ProxyModule(spec.name, real_module)
+        if hasattr(real_module, '__path__'):
+            proxy.__path__ = real_module.__path__
+        if hasattr(real_module, '__file__'):
+            proxy.__file__ = real_module.__file__
+        return proxy
 
     def exec_module(self, module):
         pass
 
 
+import threading
+if not hasattr(sys, '_cortex_babylon_local'):
+    sys._cortex_babylon_local = threading.local()
+
+
 class CortexExtensionsRedirector(importlib.abc.MetaPathFinder):
     def find_spec(self, fullname, path, target=None):
+        if getattr(sys._cortex_babylon_local, 'guard', False):
+            return None
+            
         if fullname == "cortex_extensions" or fullname.startswith("cortex_extensions."):
             target_name = fullname.replace("cortex_extensions", "cortex.extensions", 1)
+            sys._cortex_babylon_local.guard = True
             try:
-                mod = importlib.import_module(target_name)
-                spec = importlib.util.spec_from_loader(
-                    fullname, AliasLoader(mod), origin=getattr(mod, "__file__", None)
-                )
-                return spec
-            except ImportError:
+                spec = importlib.util.find_spec(target_name)
+                if spec is not None:
+                    return importlib.util.spec_from_loader(
+                        fullname, LazyAliasLoader(target_name), origin=spec.origin
+                    )
+            except Exception:
                 return None
+            finally:
+                sys._cortex_babylon_local.guard = False
         
         # Redirect legacy cortex submodules to physical babylon60 locations
-        for prefix in ("cortex.crypto", "cortex.guards", "cortex.ledger", "cortex.engine", "cortex.audit", "cortex.api"):
+        for prefix in ("cortex.api", "cortex.crypto", "cortex.guards", "cortex.ledger", "cortex.engine", "cortex.audit"):
             if fullname == prefix or fullname.startswith(prefix + "."):
                 target_name = fullname.replace("cortex", "babylon60", 1)
+                sys._cortex_babylon_local.guard = True
                 try:
-                    mod = importlib.import_module(target_name)
-                    spec = importlib.util.spec_from_loader(
-                        fullname, AliasLoader(mod), origin=getattr(mod, "__file__", None)
-                    )
-                    return spec
-                except ImportError:
+                    spec = importlib.util.find_spec(target_name)
+                    if spec is not None:
+                        return importlib.util.spec_from_loader(
+                            fullname, LazyAliasLoader(target_name), origin=spec.origin
+                        )
+                except Exception:
                     return None
+                finally:
+                    sys._cortex_babylon_local.guard = False
         return None
 
 
