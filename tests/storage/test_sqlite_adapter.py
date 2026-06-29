@@ -23,7 +23,7 @@ async def sqlite_adapter(tmp_path):
     conn = await aiosqlite.connect(str(db))
     await conn.executescript("CREATE TABLE facts (id INTEGER PRIMARY KEY, content TEXT);")
     await conn.commit()
-    adapter = SQLiteAdapter(conn)
+    adapter = SQLiteAdapter(conn, causal_token="test_token")
     yield adapter
     await conn.close()
 
