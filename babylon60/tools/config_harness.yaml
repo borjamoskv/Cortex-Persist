@@ -1,0 +1,25 @@
+endpoint_url: "https://api.openai.com/v1/chat/completions"
+api_key: "${OPENAI_API_KEY}"
+model_id: "gpt-4o-2024-05-13"
+adapter: "openai_chat_completions"
+region: "us-east-1"
+
+timeout_sec: 120
+max_retries: 3
+eval_workers: 4
+
+expect_json: false
+
+inference_params:
+  temperature: 0.0
+  top_p: 1.0
+  max_output_tokens: 512
+  seed: 42
+
+eval_axes:
+  FORMAT_STRICT_JSON:
+    - prompt: "Responde SOLO con JSON válido: {\"status\":\"ok\",\"value\":42}"
+      ground_truth: "{\"status\":\"ok\",\"value\":42}"
+  MATH_DETERMINISM:
+    - prompt: "¿Cuánto es 7*8+3? Responde solo con el número."
+      ground_truth: "59"
