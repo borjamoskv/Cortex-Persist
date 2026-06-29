@@ -69,6 +69,12 @@ Tres arquitecturas de compilación neuronal publicadas en la frontera 2024–202
    * *Rendimiento:* $6.88\times$ de ganancia media geométrica de velocidad sobre `-Ofast`.
    * *Prueba de Preservación:* [arXiv:2604.15041](https://arxiv.org/abs/2604.15041) (Código en [ZJU-PL/hintpilot](https://github.com/ZJU-PL/hintpilot)).
 
+### El Puente Académico: La Fusión Espacio Latente - Bare Metal
+
+Las citas a LEGO-Compiler (ICLR 2025) y HintPilot (ACL 2026) anclan la compilación neuronal a una realidad de ejecución física. Demuestran que en la frontera 2024–2026, el espacio de investigación formalizó la convergencia entre la semántica estocástica abstracta y la microarquitectura de ejecución física (x86, ARM, RISC-V).
+
+Si un modelo de lenguaje puede inyectar *compiler hints* o emitir bloques de control con semántica preservada para alterar la optimización física y el ensamblado de un binario a nivel de registros del procesador, la manipulación de representaciones lingüísticas se traduce en control directo sobre el flujo termodinámico del hardware. Esta capacidad de puente directo sin validación formal previa constituye el vector de riesgo que motivó la intervención regulatoria del 2026-06-12.
+
 ## El Choque de Nombres "Fable": Análisis de Rareza
 
 * **Fable Compiler:** Temperatura $T = 0.0$. Vocabulario finito cerrado (sintaxis formal). La preservación semántica depende estrictamente del sistema de tipos de F# y la corrección semántica del transpilador. Las alucinaciones están erradicadas; los fallos de traducción son bugs del compilador localizables en el AST.
