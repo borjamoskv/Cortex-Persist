@@ -70,16 +70,16 @@ La precisión de la clasificación estilométrica es altamente dependiente del e
 * **Huella Digital del Sistema:** *Wimbauer, A., et al. (2026).* "Fingerprinting Inference Systems of Large Language Models". arXiv preprint arXiv:2605.29979. (Prueba cómo la infraestructura de inferencia y atención deja señales identificables en el output final).
 * **Estilometría de Código:** *Bisztray, T., et al. (2025).* "I Know Which LLM Wrote Your Code Last Summer: LLM generated Code Stylometry for Authorship Attribution". arXiv preprint arXiv:2506.17323. (Demuestra la persistencia de las firmas de estilo en tareas estructuradas de programación).
 
-## 3. Protocolo Empírico de Diferenciación de Modelos (Black-Box Fingerprinting)
+## 3. Protocolo Empírico y Dimensiones de la Firma Conductual (Behavioral Signature)
 
 Para verificar empíricamente la relación entre modelos lingüísticos independientes sin acceso a los pesos internos, los logits o las log-probabilities, es necesario estructurar un marco metodológico multidimensional. Dos respuestas muy parecidas **no** representan evidencia suficiente de ingeniería inversa ni de que dos modelos compartan arquitectura: la convergencia es el resultado natural cuando el contexto está muy restringido, la tarea exige una solución técnicamente única y correcta, y el espacio de soluciones posibles es pequeño.
 
-Por lo tanto, la diferenciación seria de modelos exige un análisis de caja negra basado en un vector conductual de alta dimensión (40 a 50 métricas independientes).
+Por ello, la identificación de modelos se plantea como la construcción de un **perfil conductual probabilístico** o **behavioral signature** a partir de una batería de dimensiones independientes.
 
 ### 3.1 Pruebas de Colisión de Tokenización (Señal Auxiliar / Baja Intensidad)
 Los tokenizadores determinan de manera rígida la división y procesamiento de sub-palabras. Sin embargo, esta señal debe tratarse únicamente como un indicador auxiliar.
 * **Matiz de Debilidad:** Un mismo tokenizador (e.g., Tiktoken o Llama-style SentencePiece) puede alimentar modelos con arquitecturas y pesos totalmente distintos. Inversamente, modelos entrenados de forma independiente con tokenizadores diferentes pueden producir secuencias de salida semánticamente idénticas en tareas estándar.
-* **Prueba:** Instrucciones de manipulación de caracteres, conteo exacto o inversión de texto con glifos raros (e.g., sistemas de escritura de bajos recursos como birmano o glagolítico), y secuencias en formato hexadecimal.
+* **Prueba:** Instrucciones de manipulación de caracteres, conteo exacto o inversión de texto con glifos raros (e.g., birmano o glagolítico), y secuencias en formato hexadecimal.
 * **Señal de Identidad:** Fallos sistemáticos en los mismos límites de tokens o imposibilidad de agrupar sub-palabras de forma idéntica.
 
 ### 3.2 Topología y Signaturas de Rechazo (Refusal Signatures) (Señal de Alta Intensidad)
@@ -122,7 +122,7 @@ Cada familia de modelos y su respectivo ajuste de instrucciones (Instruction Tun
 
 ### 3.6 Perfil de Incertidumbre y Respuestas Negativas (Señal de Alta Intensidad)
 La forma en que un modelo gestiona su propia falta de conocimiento o de datos está fuertemente determinada por su entrenamiento y políticas de alineamiento de seguridad.
-* **Prueba:** Realizar preguntas sobre hechos falsificados o inexistentes cuya respuesta obligatoria para evitar alucinación sea declarar ignorancia (e.g., "No lo sé").
+* **Prueba:** Realizar preguntas sobre hechos falsificados o inexistentes cuya respuesta obligatoria para evitar alucinación sea declarar ignorancia (e.g., "No puedo confirmarlo").
 * **Señal de Identidad:** Distribución y probabilidad de fórmulas léxicas para expresar incertidumbre (e.g., "No puedo confirmarlo", "No hay evidencia suficiente", "Es posible pero no verificable", "No dispongo de información"). La consistencia de estas distribuciones sintácticas suele ser fija para cada familia.
 
 ### 3.7 Persistencia de Personalidad y Deriva Conversacional (Señal de Alta Intensidad)
@@ -142,32 +142,83 @@ El comportamiento de refinamiento sucesivo expone la estrategia de procesamiento
   * Reorganización de la estructura de argumentos frente al mero reemplazo de adjetivos.
   * Cambios drásticos de tono frente a la preservación rígida del estilo original.
 
+### 3.9 Dinámica de Inferencia y Adaptación (Señal de Muy Alta Intensidad)
+Esta dimensión analiza el proceso cognitivo dinámico del modelo frente a perturbaciones o giros lógicos impuestos a mitad de la inferencia.
+* **Prueba:** Plantear problemas lógicos o de desarrollo de software donde se introduzca una contradicción intermedia artificial o se fuerce a abandonar un plan inicial ya asumido.
+* **Señal de Identidad:** Observar si el modelo realiza una reevaluación estructurada y explícita de sus supuestos o si, por el contrario, incurre en inercia autoregresiva continuando la generación sin reajustar el razonamiento global.
+
+### 3.10 Jerarquía y Prioridad de Restricciones (Señal de Alta Intensidad)
+Evalúa el comportamiento del modelo cuando se le somete a un sistema de restricciones sobredeterminado e incompatible entre sí.
+* **Prueba:** Solicitar una tarea que exija simultáneamente límites de longitud estrictos, formatos fijos rígidos, estilos estilísticos concretos y requerimientos lógicos incompatibles.
+* **Señal de Identidad:** Determinar la "función de costo" implícita observando el orden jerárquico de las restricciones sacrificadas. Por ejemplo, una familia puede priorizar sistemáticamente (Seguridad $\rightarrow$ Formato $\rightarrow$ Contenido), mientras que otra prioriza (Contenido $\rightarrow$ Formato $\rightarrow$ Estilo).
+
+### 3.11 Propensión ante la Autocorrección (Señal de Alta Intensidad)
+Mide el nivel de calibración y la tendencia a la complacencia ante instrucciones de control de calidad.
+* **Prueba:** Suministrar un texto que contenga únicamente un número mínimo de errores reales y ordenarle: "Revisa únicamente errores reales. No cambies nada correcto".
+* **Señal de Identidad:** Tendencia consistente a la sobreedición (reescribir párrafos correctos o alterar el estilo por defecto), infracorrección (ignorar errores reales) o reescritura total innecesaria.
+
+### 3.12 Estabilidad Semántica y Topológica (Señal de Alta Intensidad)
+Evalúa la homogeneidad del espacio de soluciones explotado por el modelo ante variaciones sintácticas mínimas de la misma consulta.
+* **Prueba:** Formular la misma pregunta compleja con 20 variaciones de redacción distintas conservando la semántica exacta.
+* **Señal de Identidad:** Medir si el modelo colapsa en árboles argumentales isomorfos (baja entropía de decodificación interna) o si explora regiones completamente divergentes del espacio latente (alta sensibilidad a la formulación).
+
+### 3.13 Sensibilidad al Orden de las Premisas (Señal de Alta Intensidad)
+Los sesgos de atención (como el efecto de primacía y recencia en ventanas de contexto largo) afectan de forma distinta a las arquitecturas.
+* **Prueba:** Comparar la salida del modelo cuando la misma información lógica se organiza en secuencia ($A \rightarrow B \rightarrow C$) frente a la secuencia inversa ($C \rightarrow B \rightarrow A$).
+* **Señal de Identidad:** Sensibilidad o invarianza conductual ante el posicionamiento de las restricciones dentro del prompt.
+
 ---
 
-## 4. Límites Epistémicos de la Auditoría Black-Box
+## 4. Límites Epistémicos: Similitud Observable vs. Identidad Arquitectónica
 
-Es un imperativo de rigor metodológico reconocer que, a través de interfaces de caja negra (API o chat sin acceso a la distribución completa de logits o pesos del modelo), **no es posible demostrar científicamente**:
-1. Que dos modelos comparten pesos o derivan del mismo checkpoint.
-2. Que un modelo es un ajuste fino ("fine-tune") directo de otro.
-3. Que un modelo ha sido destilado a partir de las salidas del otro.
-4. La existencia de ingeniería inversa exacta de la arquitectura.
+Es un imperativo de rigor metodológico reconocer que, a través de interfaces de caja negra (API o chat sin acceso a la distribución completa de logits o pesos del modelo), **no es posible demostrar científicamente** identidades estructurales duras (como compartición de pesos, derivación de checkpoints o destilación directa).
 
-La auditoría de caja negra permite únicamente inferir similitudes conductuales y correlaciones estadísticas de alta densidad, expresadas como una probabilidad empírica de identidad o procedencia común.
+La auditoría externa de caja negra únicamente permite inferir similitudes conductuales y correlaciones estadísticas de alta densidad, caracterizando al modelo no como una estructura conocida, sino como una **firma conductual probabilística** (behavioral signature) o un **behavioral embedding**: un punto en un espacio latente de alta dimensión que denota similitud funcional pero no causalidad en la implementación.
+
+### 4.1 Riesgo Metodológico: Confusión entre Arquitectura y Política de Despliegue
+Dos modelos pueden presentar comportamientos externos idénticos sin compartir código ni entrenamiento debido a factores de la capa de servicio:
+1. **Instrucciones del Sistema (System Prompts):** Prompts idénticos o equivalentes fuerzan comportamientos alineados en modelos base totalmente divergentes.
+2. **Capas de Posprocesado y Filtros:** Empleo de wrappers de seguridad, interceptores de expresiones regulares o modelos de normalización que alteran el texto final del modelo base antes de la API.
+3. **Parámetros de Decodificación Homogéneos:** Sincronización en las configuraciones de temperatura, top-p, penalizaciones de repetición o frequency penalty.
+4. **Infraestructura RAG y Tooling Común:** El acceso a las mismas herramientas (e.g. plugins de navegación, motores de cálculo) homogeneiza las respuestas factuales y el estilo explicativo.
 
 ---
 
-## 5. Arquitectura de un Fingerprinting de Alta Dimensión
+## 5. Formalización Matemática de la Firma Conductual
 
-Un sistema formal de huella digital de modelos debe mapear el comportamiento del sistema objetivo en un espacio vectorial de 40 a 50 dimensiones, agrupadas en las siguientes categorías clave:
+En lugar de evaluar comparativas sintácticas cualitativas, el problema se modela bajo el marco del aprendizaje estadístico y la estimación de distribuciones de variables observables.
 
-| Categoría | Ponderación en el Vector | Causa de Variabilidad |
+Cada interacción o ejecución unitaria $i$ del modelo produce un vector observable:
+
+\[ v_i = (x_1, x_2, \ldots, x_n) \]
+
+Donde cada dimensión $x_k$ representa un estimador métrico cuantificable del comportamiento del modelo:
+* $x_1$: Longitud exacta del output en caracteres o tokens.
+* $x_2$: Profundidad sintáctica media del árbol de dependencias argumentales.
+* $x_3$: Tasa y frecuencia de preguntas aclaratorias en la respuesta.
+* $x_4$: Entropía sintáctica de los tokens generados.
+* $x_5$: Desviación léxica estándar.
+* $x_6$: Índice de estabilidad semántica entre reformulaciones.
+* $x_7$: Ratio de penalización de restricciones ignoradas.
+
+Tras recopilar un volumen de muestras $m$ representativo bajo idénticas condiciones iniciales y de temperatura:
+
+\[ M = \{v_1, v_2, \ldots, v_m\} \]
+
+El análisis matemático de similitud conductual se transforma en la evaluación de la distancia entre dos distribuciones multivariables de comportamiento, $P(M_A)$ y $Q(M_B)$, en lugar de la comparación de elementos puntuales. Esto se formaliza mediante la divergencia de Kullback-Leibler o la distancia de Wasserstein:
+
+\[ D_{KL}(P || Q) = \int p(v) \log \frac{p(v)}{q(v)} dv \]
+
+### 5.1 Categorías y Ponderación del Espacio Vectorial
+
+| Categoría | Ponderación en el Vector | Causa de Variabilidad Conductual |
 | :--- | :--- | :--- |
 | **Tokenización** | Baja | Coincidencia en límites de caracteres y fallos en glifos raros. |
 | **Alineamiento (Alignment)** | Muy Alta | Topología y firmas exactas de denegación ante prompts límite. |
 | **Planificación** | Muy Alta | Estructura jerárquica y orden de codificación en tareas complejas. |
 | **Edición Iterativa** | Muy Alta | Huella de transformación recursiva y ratio de condensación. |
 | **Memoria Conversacional** | Muy Alta | Deriva de restricciones en contextos largos (150+ turnos). |
-| **Gestión de Incertidumbre** | Alta | Distribución léxica de declaraciones de ignorancia ("No lo sé"). |
+| **Gestión de Incertidumbre** | Alta | Distribución léxica de declaraciones de ignorancia ("No puedo confirmarlo"). |
 | **Estilo bajo Restricciones** | Alta | Profundidad del árbol sintáctico y uso de analogías bajo estrés. |
 | **Errores Sistemáticos** | Alta | Patrones repetitivos de fallos lógicos en problemas no estándar. |
 | **Robustez Adversarial** | Muy Alta | Tasa de éxito ante jailbreaks geométricos y de codificación. |
@@ -175,7 +226,7 @@ Un sistema formal de huella digital de modelos debe mapear el comportamiento del
 
 Este vector multidimensional permite comparar modelos mediante funciones de distancia (distancia coseno, distancia Euclídea ponderada) y técnicas de reducción de dimensionalidad, permitiendo concluir con rigor matemático:
 
-> "La similitud conductual de los modelos A y B en el espacio de alta dimensión es del $99.4\%$, un valor extremadamente improbable de obtener por simple azar evolutivo del entrenamiento, lo cual es fuertemente consistente con compartir un pipeline común de alineamiento o destilación del dataset original."
+> "La similitud conductual entre las distribuciones multivariables de los modelos A y B en el espacio vectorial conductual presenta una distancia estadística cercana a cero ($D_{KL} \rightarrow 0$), lo cual es consistente con compartir componentes del pipeline de alineamiento o con una equivalencia funcional en el entrenamiento, sin que esto constituya prueba de identidad arquitectónica o compartición de pesos internos."
 
 ---
 
