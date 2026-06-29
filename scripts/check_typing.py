@@ -1,4 +1,14 @@
+# [C5-REAL] Exergy-Maximized
 #!/usr/bin/env python3
+"""
+cat_id: check-typing
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
+"""
+
 import json
 import subprocess
 import sys

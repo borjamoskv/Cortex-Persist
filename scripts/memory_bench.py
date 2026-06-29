@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
 """
-Memory Architecture Benchmark (P50/P95/P99)
-
-Red Team demanded evidence: "Prove the Tripartite Memory scales."
-This script generates synthetic facts, benchmarks read/write latency
-at increasing scales, and reports P50/P95/P99 percentiles.
-
-Output: JSON report + human-readable table.
+cat_id: memory-bench
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import json
 import os

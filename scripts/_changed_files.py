@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
-"""Dependency-free helpers for resolving changed files from Git."""
+"""
+cat_id: -changed-files
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
+"""
+
 
 from __future__ import annotations
 

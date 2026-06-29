@@ -1,12 +1,14 @@
+# [C5-REAL] Exergy-Maximized
 #!/usr/bin/env python3
 """
-[C5-REAL] Elite-Tier Substack Feed Generator.
-Optimized for:
-  - Smart Capitalization: Normalizes all-caps titles while preserving tech acronyms (IA, API, SDK, OS, ENS, EIP, AST, RAG, DNA, etc.).
-  - Interactive Exergy Telemetry: Prints beautiful exergy density meters to stderr using native ascii bars.
-  - Fail-safe Clipboard Persistence: Automatically writes to a temporary `feed.md` if clipboard copy fails.
-  - Advanced Category-aware Random Sampling & History Cooling.
+cat_id: get-random-feed
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import argparse
 import hashlib

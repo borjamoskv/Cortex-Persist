@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
 """
-Ouroboros Absorb Runner (Autopoietic Loop Closer)
-Connects reflections.md -> SovereignLLM -> WeismannBarrier -> SKILL.md -> Git Commit
-Execution Level: C5-REAL
+cat_id: ouroboros-absorb-runner
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import asyncio
 import fcntl

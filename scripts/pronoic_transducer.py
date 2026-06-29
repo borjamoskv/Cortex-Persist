@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
 """
-PRONOIC TRANSDUCER
-Intercepts exceptions, extracts execution context, calculates surprise metrics,
-and channels failure states into exergic curriculum entries for JIT healing.
+cat_id: pronoic-transducer
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import inspect
 import json

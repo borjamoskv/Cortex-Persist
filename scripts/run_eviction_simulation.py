@@ -1,12 +1,13 @@
 # [C5-REAL] Exergy-Maximized
 """
-Eviction Simulation Runner for BABYLON-60.
-Executes the test suite under three virtual import modes:
-  - present: standard coexistence.
-  - shadow-disabled: babylon60 acts strictly independently, failing on un-migrated imports.
-  - redirected: all cortex imports are routed to babylon60 if replacements exist.
-Generates compatibility delta graphs and outputs a consolidated report.
+cat_id: run-eviction-simulation
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import os
 import sys

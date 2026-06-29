@@ -2,6 +2,14 @@
 # [C5-REAL] PII Firewall Proof of Concept (PoC) with Ultrathink Metrics
 # Demonstrates that the upgraded Taint Engine successfully detects and blocks PII in multiple obfuscated layers.
 # Integrates the Ultrathink Physics Engine to compute thermodynamic exergy yields.
+"""
+cat_id: pii-firewall-poc
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
+"""
 
 import asyncio
 import math

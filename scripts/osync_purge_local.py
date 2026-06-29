@@ -2,6 +2,14 @@
 # [C5-REAL] OSYNC Local Entropy Purge Protocol
 # Execution: Autonomous Terminal
 # Target: Purge implicit PII (Borja Fernández Angulo) from local development environment.
+"""
+cat_id: osync-purge-local
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
+"""
 
 import logging
 import os

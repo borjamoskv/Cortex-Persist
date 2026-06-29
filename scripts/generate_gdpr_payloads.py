@@ -2,6 +2,14 @@
 # [C5-REAL] GDPR Notice Generator for OSINT Purge
 # Orchestrates legal payloads based on the PII Audit Database.
 # Output is routed directly to the secure Conversation Brain folder to avoid git PII leaks.
+"""
+cat_id: generate-gdpr-payloads
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
+"""
 
 import json
 import os

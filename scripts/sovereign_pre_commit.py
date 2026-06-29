@@ -1,8 +1,21 @@
+# [C5-REAL] Exergy-Maximized
 #!/usr/bin/env python3
 """
+cat_id: sovereign-pre-commit
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 Claim: PRE_COMMIT_AUDIT
-Proof: { Base: Execute, Range: [0,1], Confidence: C5-REAL }
+Proof:
+  Base: Execute
+  Range:
+  - 0
+  - 1
+  Confidence: C5-REAL
 """
+
 
 import re
 import sys

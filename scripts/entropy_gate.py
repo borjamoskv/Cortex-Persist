@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
 """
-ENTROPY GATE (Pre-Commit Hook)
-Blocks commits of Python files if their Cyclomatic Complexity (CC) exceeds
-the Sovereign standard (15).
+cat_id: entropy-gate
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import sys
 from pathlib import Path

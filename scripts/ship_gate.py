@@ -1,14 +1,14 @@
+# [C5-REAL] Exergy-Maximized
 #!/usr/bin/env python3
-"""CORTEX Ship Gate — Blocks deploy if quality checks fail.
-
-Exit 0 = safe to ship. Exit 1 = blocked.
-Outputs a JSON report to stdout.
-
-Usage:
-    python scripts/ship_gate.py              # all checks
-    python scripts/ship_gate.py --fast       # skip slow tests
-    python scripts/ship_gate.py --json-only  # suppress Rich output
 """
+cat_id: ship-gate
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
+"""
+
 
 from __future__ import annotations
 

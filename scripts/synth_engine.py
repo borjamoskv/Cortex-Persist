@@ -1,9 +1,13 @@
 # [C5-REAL] Exergy-Maximized
-"""CORTEX v6+ - Algorithmic Music OMEGA (Procedural Synthesis)
-
-Transforms mathematical invariants into structural acoustic waves (PCM).
-Output is strictly quarantined to ~/BOCETOS to contain entropy.
 """
+cat_id: synth-engine
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
+"""
+
 
 import random
 from pathlib import Path

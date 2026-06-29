@@ -1,3 +1,13 @@
+# [C5-REAL] Exergy-Maximized
+"""
+cat_id: test-osc
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
+"""
+
 import asyncio
 
 from cortex.extensions.bci.osc_bridge import AetherOscBridge

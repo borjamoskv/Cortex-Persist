@@ -1,15 +1,14 @@
+# [C5-REAL] Exergy-Maximized
 #!/usr/bin/env python3
 """
-CORTEX-PERSIST C5-REAL UPDATE MEMORY
-Vector A + B: Shadow Evolution Loop + C5-REAL Ledger Expansion
-
-Características:
-1. Diff semántico / Drift Detection (Vector A): Calcula la distancia de entropía
-   entre el estado de memoria actual y el nuevo. Si hay drift epistémico, lo marca.
-2. Ledger Append-Only (Vector B): Usa un Merkle-like hash chain para asegurar
-   que la memoria es inmutable.
-3. Rollback selectivo + Conciencia de estado.
+cat_id: update-memory-c5
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import datetime
 import hashlib

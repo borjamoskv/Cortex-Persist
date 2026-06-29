@@ -1,3 +1,13 @@
+# [C5-REAL] Exergy-Maximized
+"""
+cat_id: export-substack-nodes
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
+"""
+
 import json
 import os
 import sqlite3

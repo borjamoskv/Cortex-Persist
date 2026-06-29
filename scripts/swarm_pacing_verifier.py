@@ -1,9 +1,13 @@
 # [C5-REAL] Exergy-Maximized
 """
-1,000-Agent Swarm Pacing Verifier.
-Dispatches exactly 1,000 agents to verify the readability coefficient
-of the dynamically-paced chapters in chapters.json.
+cat_id: swarm-pacing-verifier
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import asyncio
 import json

@@ -1,8 +1,13 @@
 # [C5-REAL] Exergy-Maximized
 """
-Sovereign Swarm 10,000-Agent Project Consolidation.
-Deploys exactly 10,000 parallel virtual agents to execute global repository consolidation.
+cat_id: swarm-10k-consolidate
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import asyncio
 import logging

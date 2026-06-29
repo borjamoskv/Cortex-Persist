@@ -1,9 +1,13 @@
 # [C5-REAL] Exergy-Maximized
 """
-Sovereign Swarm Duration Optimizer.
-Dispatches 10,000 virtual agents to analyze the word count and density of each
-chapter, computing the mathematically optimal reading duration in frames.
+cat_id: swarm-duration-optimizer
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import asyncio
 import json

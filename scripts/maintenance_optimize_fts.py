@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
 """
-Ouroboros FTS5 Optimization Maintenance Script
-
-Optimizes SQLite FTS5 search indexes by running the 'optimize' command.
-This merges internal b-trees to maintain fast read queries and reduce index size.
-Recommended to run periodically via cron (e.g. daily or weekly).
+cat_id: maintenance-optimize-fts
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import argparse
 import logging

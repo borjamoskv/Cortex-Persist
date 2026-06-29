@@ -1,8 +1,13 @@
 # [C5-REAL] Exergy-Maximized
 """
-CORTEX - C5-Dynamic Proof for AX-VIII (Stochastic Obsolescence).
-Demonstrates the CausalClosureGuard intercepting Anergy in the Squadron phase.
+cat_id: prove-ax8-obsolescence
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import asyncio
 import logging

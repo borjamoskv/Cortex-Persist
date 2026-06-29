@@ -1,24 +1,14 @@
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
 """
-Ouroboros Thermodynamic Pruning Engine v2.0
-
-Full lifecycle manager for the CORTEX Knowledge Graph's entropic decay.
-Implements the Fact State Lifecycle: ACTIVE → WARM → COLD → TOMBSTONED
-with topological barrier protection, quadrant transitions, exergy score
-recalculation, and dry-run safety mode.
-
-Architecture:
-    1. Scan all non-C5, non-tombstoned facts
-    2. Compute exponential decay: exergy = 0.5^(age / half_life)
-    3. Protect facts with C5 descendants (topological barrier)
-    4. Transition surviving facts through storage tiers (HOT → WARM → COLD)
-    5. Tombstone facts below MIN_EXERGY_THRESHOLD
-    6. Update exergy_score on all scanned facts for real-time dashboards
-    7. Emit statistics
-
-Axioms: Ω2 (Entropic Asymmetry), AX-047 (Anti-Limerence)
+cat_id: ouroboros-prune
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import argparse
 import json

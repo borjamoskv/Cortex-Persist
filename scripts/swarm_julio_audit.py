@@ -1,10 +1,13 @@
 # [C5-REAL] Exergy-Maximized
 """
-Sovereign Swarm Parallel Auditor.
-Dispatches exactly 10,000 agents across 100 Centurions to audit
-the 94 chapters of "La Saga de los Cinco Julios".
-Calculates thermodynamic entropy, friction levels, and visualizes the results.
+cat_id: swarm-julio-audit
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import asyncio
 import json

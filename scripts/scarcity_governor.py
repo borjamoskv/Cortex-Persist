@@ -1,9 +1,15 @@
+# [C5-REAL] Exergy-Maximized
 #!/usr/bin/env python3
 """
-C5-REAL: MÖBIUS OS Scarcity Governor
-Enforces thermodynamic limits (CPU/Memory pressure) before allowing agent mitosis.
-If local geosphere (Mac) resources fall below thresholds, mitosis is blocked.
+cat_id: scarcity-governor
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
+C5-REAL: "M\xD6BIUS OS Scarcity Governor"
 """
+
 
 import json
 import sys

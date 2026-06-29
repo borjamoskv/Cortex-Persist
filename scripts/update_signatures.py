@@ -1,8 +1,14 @@
+# [C5-REAL] Exergy-Maximized
 #!/usr/bin/env python3
 """
-[C5-REAL] Exergy-Maximized Signature Automation Protocol
-Proof: { Base: AST-Parsing + Idempotent Injection, Range: [0,1], Confidence: C5-REAL }
+cat_id: update-signatures
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import re
 import sys

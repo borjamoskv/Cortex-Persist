@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
 """
-SQL Layer Benchmark (P50/P95/P99)
-
-Red Team Evidence: Prove SQLite fact store scales deterministically.
-Tests point lookups, filtered scans, aggregations, ouroboros scans.
+cat_id: sql-bench
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import json
 import os

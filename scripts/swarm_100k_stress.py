@@ -1,9 +1,13 @@
 # [C5-REAL] Exergy-Maximized
 """
-Sovereign Swarm 100,000-Agent Stress Test.
-Deploys exactly 100,000 parallel virtual agents across 1,000 Centurions
-to execute a global narrative consensus audit on Chapter 102.
+cat_id: swarm-100k-stress
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
 """
+
 
 import asyncio
 import json

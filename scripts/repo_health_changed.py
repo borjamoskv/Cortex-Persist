@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
-"""Lightweight repo-health checks for changed files.
-
-This guard is intentionally dependency-free so it can run early in CI.
-It focuses on high-signal failures that should never land in new changes:
-
-- unresolved merge conflict markers
-- Python syntax errors
-
-By default it inspects files changed in the current Git diff context.
-You can also pass file paths explicitly, or use ``--all`` to scan the repo.
 """
+cat_id: repo-health-changed
+cat_type: script
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P2
+"""
+
 
 from __future__ import annotations
 
