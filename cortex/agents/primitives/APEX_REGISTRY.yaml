@@ -1,16 +1,16 @@
 primitives:
 - id: APEX-001
   name: OP_COLLAPSE
-  execute: Texto estocástico -> AST/JSON determinista.
+  execute: "Texto estoc\xE1stico -> AST/JSON determinista."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: CAS(key, old, new)
   complexity: O(1)
-  mutation: RAM/Disco atómico. Bloquea si `old` mutó.
+  mutation: "RAM/Disco at\xF3mico. Bloquea si `old` mut\xF3."
 - id: APEX-002
   name: OP_LEDGER_EMIT
-  execute: Inyección criptográfica SHA-256 en cadena.
+  execute: "Inyecci\xF3n criptogr\xE1fica SHA-256 en cadena."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -19,7 +19,7 @@ primitives:
   mutation: B-Tree/DB. Colapso determinista sin duplicados.
 - id: APEX-003
   name: OP_TAINT_SEAL
-  execute: Firma SHA3-256 origen de procedencia probabilística.
+  execute: "Firma SHA3-256 origen de procedencia probabil\xEDstica."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -28,13 +28,13 @@ primitives:
   mutation: I/O Secuencial. Expande archivo WAL inmutable.
 - id: APEX-004
   name: OP_BFT_VOTE
-  execute: Aserción binaria (1/0) en quorum n/3.
+  execute: "Aserci\xF3n binaria (1/0) en quorum n/3."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: l2_distance(vA, vB)
   complexity: O(d)
-  mutation: CPU/SIMD. Cálculos en L1 Cache sin estado de disco.
+  mutation: "CPU/SIMD. C\xE1lculos en L1 Cache sin estado de disco."
 - id: APEX-005
   name: OP_HASH_AUDIT
   execute: DAG verification vs Disk state.
@@ -46,26 +46,27 @@ primitives:
   mutation: Page-dump a Disco. Marca el inicio del Saga.
 - id: APEX-006
   name: OP_DAG_TRUNCATE
-  execute: Purga física de nodos huérfanos.
+  execute: "Purga f\xEDsica de nodos hu\xE9rfanos."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: rollback(snapshot)
   complexity: O(M)
-  mutation: Page-restore. Erradica la línea temporal fallida.
+  mutation: "Page-restore. Erradica la l\xEDnea temporal fallida."
 - id: APEX-007
   name: OP_SNAPSHOT_MINT
-  execute: Creación de punto de rollback.
+  execute: "Creaci\xF3n de punto de rollback."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: vacuum()
   complexity: O(N)
-  mutation: I/O Pesado. Compacta DB, expulsa entropía al vacío.
+  mutation: "I/O Pesado. Compacta DB, expulsa entrop\xEDa al vac\xEDo."
 - id: APEX-008
   name: OP_SAGA_REVERT
-  execute: Desenrollado atómico SAGA-N -> SAGA-1. Requiere quorum BFT N/3 previo a
-    revertir estado físico. Requiere quorum BFT N/3 previo a revertir estado físico.
+  execute: "Desenrollado at\xF3mico SAGA-N -> SAGA-1. Requiere quorum BFT N/3 previo\
+    \ a revertir estado f\xEDsico. Requiere quorum BFT N/3 previo a revertir estado\
+    \ f\xEDsico."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -80,25 +81,25 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: taint_verify(record)
   complexity: O(1)
-  mutation: Interrupción de CPU. Fuerza validación perimetral.
+  mutation: "Interrupci\xF3n de CPU. Fuerza validaci\xF3n perimetral."
 - id: APEX-010
   name: OP_FLUSH_L1
-  execute: Invalida caché en mutación de tenant.
+  execute: "Invalida cach\xE9 en mutaci\xF3n de tenant."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: lock_lease(id, ttl)
   complexity: O(1)
-  mutation: Mutación de Mutex en DB/Redis con auto-expiración.
+  mutation: "Mutaci\xF3n de Mutex en DB/Redis con auto-expiraci\xF3n."
 - id: APEX-011
   name: OP_TENANT_ISOLATE
-  execute: Segmentación dura de memoria.
+  execute: "Segmentaci\xF3n dura de memoria."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: scatter_gather(tasks)
   complexity: O(T / Workers)
-  mutation: RAM. Forquea Hilos, colapsa futuros asíncronos.
+  mutation: "RAM. Forquea Hilos, colapsa futuros as\xEDncronos."
 - id: APEX-012
   name: OP_ORIGIN_ANCHOR
   execute: Ancla ISO8601 + AgentID a nodo de conocimiento.
@@ -110,7 +111,7 @@ primitives:
   mutation: RAM. Muta estado global a FALLBACK, rechaza red.
 - id: APEX-013
   name: OP_ROT_ERASE
-  execute: Evicción LFU de hechos sin test empírico.
+  execute: "Evicci\xF3n LFU de hechos sin test emp\xEDrico."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -119,16 +120,16 @@ primitives:
   mutation: Thread. Inyecta Sleep(aleatorio) antes de red.
 - id: APEX-014
   name: OP_B58_ENCODE
-  execute: Compresión de hash para logs cortos.
+  execute: "Compresi\xF3n de hash para logs cortos."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: async_shield(task)
   complexity: O(1)
-  mutation: Event Loop. Separa la Tarea de la señal SIGINT del padre.
+  mutation: "Event Loop. Separa la Tarea de la se\xF1al SIGINT del padre."
 - id: APEX-015
   name: OP_B58_DECODE
-  execute: Expansión a entropía original.
+  execute: "Expansi\xF3n a entrop\xEDa original."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -137,7 +138,7 @@ primitives:
   mutation: OS Process. Lanza fork desconectado del TTY.
 - id: APEX-016
   name: OP_FREEZE_MEM
-  execute: Transición Dict a Read-Only Tuple.
+  execute: "Transici\xF3n Dict a Read-Only Tuple."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -146,16 +147,16 @@ primitives:
   mutation: CPU. Aplica algoritmo Bizantino, colapsa 3 valores a 1.
 - id: APEX-017
   name: OP_SYNC_GHOST
-  execute: Propagación cross-repo de estado inmutable.
+  execute: "Propagaci\xF3n cross-repo de estado inmutable."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: timeout_kill(ms)
   complexity: O(1)
-  mutation: OS Signal. Envía SIGKILL si el temporizador expira.
+  mutation: "OS Signal. Env\xEDa SIGKILL si el temporizador expira."
 - id: APEX-018
   name: OP_INDEX_ONNX
-  execute: Extracción y guardado de vector estático.
+  execute: "Extracci\xF3n y guardado de vector est\xE1tico."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -164,7 +165,7 @@ primitives:
   mutation: TCP Stack. Flushea el buffer del socket inmediatamente.
 - id: APEX-019
   name: OP_TAINT_SCAN
-  execute: Recursión inversa buscando origen de dato.
+  execute: "Recursi\xF3n inversa buscando origen de dato."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -191,7 +192,7 @@ primitives:
   mutation: RAM. Crea nueva identidad Soberana.
 - id: APEX-022
   name: OP_QUORUM_REBOOT
-  execute: Re-emisión si el quorum cae bajo n/3.
+  execute: "Re-emisi\xF3n si el quorum cae bajo n/3."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -200,25 +201,25 @@ primitives:
   mutation: CPU. Firma de estado; sella causalidad.
 - id: APEX-023
   name: OP_EXTRACT_SIGNAL
-  execute: Denoise de input y aislamiento de intención causal.
+  execute: "Denoise de input y aislamiento de intenci\xF3n causal."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: verify(pub, sig)
   complexity: O(len(data))
-  mutation: CPU. Filtro antes de aceptar mutación externa.
+  mutation: "CPU. Filtro antes de aceptar mutaci\xF3n externa."
 - id: APEX-024
   name: OP_VAULT_MOUNT
-  execute: Enlace criptográfico de entorno de persistencia.
+  execute: "Enlace criptogr\xE1fico de entorno de persistencia."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: derive_kdf(salt)
   complexity: O(iterations)
-  mutation: CPU. Computa llave epímera, destruye rastro previo.
+  mutation: "CPU. Computa llave ep\xEDmera, destruye rastro previo."
 - id: APEX-025
   name: OP_VAULT_UNMOUNT
-  execute: Destrucción atómica de llaves de acceso.
+  execute: "Destrucci\xF3n at\xF3mica de llaves de acceso."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -227,44 +228,44 @@ primitives:
   mutation: RAM. `memset` en C, evita volcado de memoria.
 - id: APEX-026
   name: OP_ANERGY_PURGE
-  execute: Asesinato del proceso generador de excusas y heurística de poda léxica
-    (Green Theater).
+  execute: "Asesinato del proceso generador de excusas y heur\xEDstica de poda l\xE9\
+    xica (Green Theater)."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: merkle_root(lvs)
   complexity: O(N log N)
-  mutation: CPU. Hashea árbol entero; estado matemático único.
+  mutation: "CPU. Hashea \xE1rbol entero; estado matem\xE1tico \xFAnico."
 - id: APEX-027
   name: OP_LANDAUER_COMPRESS
-  execute: Minificación de log a JSON puro.
+  execute: "Minificaci\xF3n de log a JSON puro."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: aes_gcm_enc(...)
   complexity: O(len(data))
-  mutation: CPU SIMD. Encripta y firma integridad simultáneamente.
+  mutation: "CPU SIMD. Encripta y firma integridad simult\xE1neamente."
 - id: APEX-028
   name: OP_APOPTOSIS
-  execute: Terminación voluntaria ante Context Rot.
+  execute: "Terminaci\xF3n voluntaria ante Context Rot."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: aes_gcm_dec(...)
   complexity: O(len(data))
-  mutation: CPU SIMD. Lanza excepción si el AAD no coincide.
+  mutation: "CPU SIMD. Lanza excepci\xF3n si el AAD no coincide."
 - id: APEX-029
   name: OP_EXERGY_INJECT
-  execute: Traducción de token a filesystem I/O.
+  execute: "Traducci\xF3n de token a filesystem I/O."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: gen_ulid()
   complexity: O(1)
-  mutation: CPU. Retorna ID lexicográfico temporalmente ordenable.
+  mutation: "CPU. Retorna ID lexicogr\xE1fico temporalmente ordenable."
 - id: APEX-030
   name: OP_HALT_LOOP
-  execute: Breaker de recursión infinita LLM.
+  execute: "Breaker de recursi\xF3n infinita LLM."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -273,22 +274,22 @@ primitives:
   mutation: Disco. Cierra el archivo de log rotado, modo Read-Only.
 - id: APEX-031
   name: OP_TURBO_OVERRIDE
-  execute: Bypass de diplo-planning -> Mutación directa.
+  execute: "Bypass de diplo-planning -> Mutaci\xF3n directa."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: http_post_raw()
   complexity: O(N)
-  mutation: Red I/O. Petición atómica sin overhead de Framework.
+  mutation: "Red I/O. Petici\xF3n at\xF3mica sin overhead de Framework."
 - id: APEX-032
   name: OP_MEASURE_SHANNON
-  execute: Retorna el ratio entropía/bytes.
+  execute: "Retorna el ratio entrop\xEDa/bytes."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: force_schema(sch)
   complexity: O(tokens)
-  mutation: Sampler. Fila de logits restringida por Gramática/Regex.
+  mutation: "Sampler. Fila de logits restringida por Gram\xE1tica/Regex."
 - id: APEX-033
   name: OP_SHRED_KEY
   execute: /dev/urandom overwrite de llave en memoria.
@@ -297,10 +298,10 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: extract_ast(md)
   complexity: O(len(md))
-  mutation: CPU. Poda string, retorna objetos sintácticos AST.
+  mutation: "CPU. Poda string, retorna objetos sint\xE1cticos AST."
 - id: APEX-034
   name: OP_OOM_SIM
-  execute: Caída inducida para resetear heurística inútil.
+  execute: "Ca\xEDda inducida para resetear heur\xEDstica in\xFAtil."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -315,10 +316,10 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: tokenize_len(s)
   complexity: O(len(s))
-  mutation: CPU. Cuenta real de Exergía (peso en red).
+  mutation: "CPU. Cuenta real de Exerg\xEDa (peso en red)."
 - id: APEX-036
   name: OP_MODEL_SWAP
-  execute: Shift dinámico Opus <-> Kimi <-> Gemini.
+  execute: "Shift din\xE1mico Opus <-> Kimi <-> Gemini."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -336,7 +337,7 @@ primitives:
   mutation: RAM. Forzar ArgMax sampler (100% determinista).
 - id: APEX-038
   name: OP_CRUNCH_VAR
-  execute: Evaluación ahead-of-time.
+  execute: "Evaluaci\xF3n ahead-of-time."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -345,43 +346,43 @@ primitives:
   mutation: RAM. Habilita Top-P sampler para divergencia.
 - id: APEX-039
   name: OP_PROBE_ADV
-  execute: Mutación estocástica controlada (Fuzzing).
+  execute: "Mutaci\xF3n estoc\xE1stica controlada (Fuzzing)."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: stop_seq(tokens)
   complexity: O(1)
-  mutation: Sampler. Guillotina de alucinación semántica.
+  mutation: "Sampler. Guillotina de alucinaci\xF3n sem\xE1ntica."
 - id: APEX-040
   name: OP_DEDUCE_HW
-  execute: Extracción CPU/RAM real (no-simulada).
+  execute: "Extracci\xF3n CPU/RAM real (no-simulada)."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: logprobs(toks)
   complexity: O(1)
-  mutation: CPU. Matemática Bayesiana; aborta si p < umbral de duda.
+  mutation: "CPU. Matem\xE1tica Bayesiana; aborta si p < umbral de duda."
 - id: APEX-041
   name: OP_TELEMETRY_DUMP
-  execute: Export de métricas a /var/log/.
+  execute: "Export de m\xE9tricas a /var/log/."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: run(check=True)
   complexity: O(T_exec)
-  mutation: OS Process. Fallo de comando muta a excepción Python.
+  mutation: "OS Process. Fallo de comando muta a excepci\xF3n Python."
 - id: APEX-042
   name: OP_SHIELD_CORE
-  execute: Rechazo de mutación a /private/var/db.
+  execute: "Rechazo de mutaci\xF3n a /private/var/db."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: chmod(0o600)
   complexity: O(1)
-  mutation: Disco (Inode). Cierre térmico de archivo a ROOT/Owner.
+  mutation: "Disco (Inode). Cierre t\xE9rmico de archivo a ROOT/Owner."
 - id: APEX-043
   name: OP_NULL_MOCK
-  execute: Sustitución local de dependencia inestable.
+  execute: "Sustituci\xF3n local de dependencia inestable."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -390,7 +391,7 @@ primitives:
   mutation: Disco (Inode). Vincula grafos causales sin copiar bytes.
 - id: APEX-044
   name: OP_TEST_HYPO
-  execute: Ejecución en VM efímera.
+  execute: "Ejecuci\xF3n en VM ef\xEDmera."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -399,16 +400,16 @@ primitives:
   mutation: OS Hook. Se cuelga de FSEvents/inotify.
 - id: APEX-045
   name: OP_ISOMORPH_ASSERT
-  execute: AST vs Semántica == True.
+  execute: "AST vs Sem\xE1ntica == True."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: git_commit()
   complexity: O(files)
-  mutation: Disco. Sello criptográfico temporal del repositorio.
+  mutation: "Disco. Sello criptogr\xE1fico temporal del repositorio."
 - id: APEX-046
   name: OP_DIFF_CALC
-  execute: Computación de delta estricto.
+  execute: "Computaci\xF3n de delta estricto."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -417,16 +418,16 @@ primitives:
   mutation: CPU. Delta determinista puro; ignora espacios/formatos.
 - id: APEX-047
   name: OP_ULTRATHINK
-  execute: Dedicación de VRAM masiva a P0.
+  execute: "Dedicaci\xF3n de VRAM masiva a P0."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: cgroup_limit()
   complexity: O(1)
-  mutation: Kernel Syscall. Acota RAM máxima física disponible.
+  mutation: "Kernel Syscall. Acota RAM m\xE1xima f\xEDsica disponible."
 - id: APEX-048
   name: OP_DEEP_RESEARCH
-  execute: Expansión paralela web.
+  execute: "Expansi\xF3n paralela web."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -435,22 +436,22 @@ primitives:
   mutation: RAM virtual. Asigna PageTables sin cargar disco a RAM.
 - id: APEX-049
   name: OP_VRAM_FLUSH
-  execute: Liberación forzosa tras UltraThink.
+  execute: "Liberaci\xF3n forzosa tras UltraThink."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: kill_9(pid)
   complexity: O(1)
-  mutation: OS Signal. Muerte atómica de proceso zombie sin handlers.
+  mutation: "OS Signal. Muerte at\xF3mica de proceso zombie sin handlers."
 - id: APEX-050
   name: OP_SPATIAL_TRANS
-  execute: Coordenada física a selector DOM.
+  execute: "Coordenada f\xEDsica a selector DOM."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: fsync(fd)
   complexity: O(1)
-  mutation: Disco I/O. Fuerza flusheo de caché de disco a platter/SSD.
+  mutation: "Disco I/O. Fuerza flusheo de cach\xE9 de disco a platter/SSD."
 - id: APEX-051
   name: OP_SPAWN_LEGION
   execute: N Forks de proceso worker.
@@ -459,7 +460,7 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: vec_normalize()
   complexity: O(d)
-  mutation: RAM SIMD. Proyección vectorial al hiperesfero r=1.
+  mutation: "RAM SIMD. Proyecci\xF3n vectorial al hiperesfero r=1."
 - id: APEX-052
   name: OP_KILL_IDLE
   execute: SIGTERM a subagente latente > 5min.
@@ -468,19 +469,19 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: pca_reduce(m)
   complexity: O(N*d^2)
-  mutation: RAM SIMD. Aplastamiento dimensional (Entropía++).
+  mutation: "RAM SIMD. Aplastamiento dimensional (Entrop\xEDa++)."
 - id: APEX-053
   name: OP_MERGE_LATEST
-  execute: Resolución de colisión por Taint Timestamp.
+  execute: "Resoluci\xF3n de colisi\xF3n por Taint Timestamp."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: hnsw_insert(n)
   complexity: O(log N)
-  mutation: RAM/Disco. Mutación del grafo de vecindad aproximada.
+  mutation: "RAM/Disco. Mutaci\xF3n del grafo de vecindad aproximada."
 - id: APEX-054
   name: OP_DEMIURGE_CREDIT
-  execute: Inyección de "borjamoskv" en metadata.
+  execute: "Inyecci\xF3n de \"borjamoskv\" en metadata."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -489,13 +490,13 @@ primitives:
   mutation: CPU. Colapso de puntos inconexos a clusters causales.
 - id: APEX-055
   name: OP_BFT_AUTHORIZE
-  execute: Pase criptográfico BFT.
+  execute: "Pase criptogr\xE1fico BFT."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: topo_sort(g)
   complexity: O(V+E)
-  mutation: CPU. Aserción de no-circularidad en DAGs.
+  mutation: "CPU. Aserci\xF3n de no-circularidad en DAGs."
 - id: APEX-056
   name: OP_SWARM_ISOLATE
   execute: Encapsulado Docker/Chroot de worker.
@@ -504,7 +505,7 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: jaccard(s1, s2)
   complexity: O(len(s1))
-  mutation: CPU. Intersección de hash-sets para token overlap.
+  mutation: "CPU. Intersecci\xF3n de hash-sets para token overlap."
 - id: APEX-057
   name: OP_PROXY_REQ
   execute: Enrutamiento intra-swarm.
@@ -513,34 +514,34 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: cosine_decay()
   complexity: O(1)
-  mutation: CPU. Disminución matemática de LR o Temperatura.
+  mutation: "CPU. Disminuci\xF3n matem\xE1tica de LR o Temperatura."
 - id: APEX-058
   name: OP_VOTE_CAST
-  execute: Emisión a Ledger Master.
+  execute: "Emisi\xF3n a Ledger Master."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: tfidf_extract()
   complexity: O(N)
-  mutation: CPU. Heurística matricial rápida sin inferencia LLM.
+  mutation: "CPU. Heur\xEDstica matricial r\xE1pida sin inferencia LLM."
 - id: APEX-059
   name: OP_VOTE_REVOKE
-  execute: Invalidación de aserción por evidencia nueva.
+  execute: "Invalidaci\xF3n de aserci\xF3n por evidencia nueva."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: markov_step(m)
   complexity: O(1)
-  mutation: CPU. Mutación estocástica local predecible.
+  mutation: "CPU. Mutaci\xF3n estoc\xE1stica local predecible."
 - id: APEX-060
   name: OP_CONSENSUS_REJECT
-  execute: Bloqueo atómico de propuesta minoritaria.
+  execute: "Bloqueo at\xF3mico de propuesta minoritaria."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: bloom_check(i)
   complexity: O(1)
-  mutation: RAM. Rechazo rápido de archivos ya analizados.
+  mutation: "RAM. Rechazo r\xE1pido de archivos ya analizados."
 - id: APEX-061
   name: OP_DEPLOY_GHOST
   execute: Subagente sin write-access para watch.
@@ -549,11 +550,11 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: ws_send(msg)
   complexity: O(len)
-  mutation: Red I/O. Stream asíncrono sin handshakes repetidos.
+  mutation: "Red I/O. Stream as\xEDncrono sin handshakes repetidos."
 - id: APEX-062
   name: OP_PUNISH_NODE
-  execute: Degradación de peso en red (Sensor Drift). Anclaje obligatorio a OP_BFT_VOTE.
-    Anclaje obligatorio a OP_BFT_VOTE.
+  execute: "Degradaci\xF3n de peso en red (Sensor Drift). Anclaje obligatorio a OP_BFT_VOTE.\
+    \ Anclaje obligatorio a OP_BFT_VOTE."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -568,52 +569,52 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: udp_multicast()
   complexity: O(len)
-  mutation: Red I/O. Propagación O(1) a subred local.
+  mutation: "Red I/O. Propagaci\xF3n O(1) a subred local."
 - id: APEX-064
   name: OP_SOTA_EXTRACT
-  execute: Síntesis de Paper a JSON Vector.
+  execute: "S\xEDntesis de Paper a JSON Vector."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: dns_resolve()
   complexity: O(1)
-  mutation: Red UDP. Petición atómica fundacional de topología.
+  mutation: "Red UDP. Petici\xF3n at\xF3mica fundacional de topolog\xEDa."
 - id: APEX-065
   name: OP_BROADCAST_P0
-  execute: Interrupción NMI a todo el enjambre.
+  execute: "Interrupci\xF3n NMI a todo el enjambre."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: ssh_tunnel()
   complexity: O(1)
-  mutation: OS Process. Port-forward encriptado a través de NAT.
+  mutation: "OS Process. Port-forward encriptado a trav\xE9s de NAT."
 - id: APEX-067
   name: OP_PARSE_INTENT
-  execute: Extracción de verbo C5 desde string.
+  execute: "Extracci\xF3n de verbo C5 desde string."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: gossip_push()
   complexity: O(log N)
-  mutation: Red I/O. Infección viral del Swarm (Sin maestro).
+  mutation: "Red I/O. Infecci\xF3n viral del Swarm (Sin maestro)."
 - id: APEX-068
   name: OP_NEXUS_MUTATE
-  execute: Mutación atómica de enlaces duros en Base 60 (estado cruzado).
+  execute: "Mutaci\xF3n at\xF3mica de enlaces duros en Base 60 (estado cruzado)."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: tls_verify()
   complexity: O(1)
-  mutation: CPU/Red. Validación criptográfica de CA (Root of Trust).
+  mutation: "CPU/Red. Validaci\xF3n criptogr\xE1fica de CA (Root of Trust)."
 - id: APEX-069
   name: OP_NEXUS_MUTATE
-  execute: Mutación atómica de enlaces duros en Base 60 (estado cruzado).
+  execute: "Mutaci\xF3n at\xF3mica de enlaces duros en Base 60 (estado cruzado)."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: ast.walk()
   complexity: O(Nodes)
-  mutation: CPU. Inyección transversal de instrumentación.
+  mutation: "CPU. Inyecci\xF3n transversal de instrumentaci\xF3n."
 - id: APEX-072
   name: OP_DECRYPT_GCM
   execute: AES-GCM 256.
@@ -622,11 +623,11 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: re.compile()
   complexity: O(len)
-  mutation: RAM. Cachea autómata finito en inicialización.
+  mutation: "RAM. Cachea aut\xF3mata finito en inicializaci\xF3n."
 - id: APEX-073
   name: OP_GIT_SENTINEL
-  execute: La validación BFT debe preceder a la firma del payload en RAM (pasaporte
-    criptográfico avalado).
+  execute: "La validaci\xF3n BFT debe preceder a la firma del payload en RAM (pasaporte\
+    \ criptogr\xE1fico avalado)."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -635,7 +636,7 @@ primitives:
   mutation: CPU. Genera Delta para escribir en el Ledger.
 - id: APEX-074
   name: OP_GIT_FETCH
-  execute: Alineación estricta remota.
+  execute: "Alineaci\xF3n estricta remota."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -650,28 +651,28 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: md_to_html()
   complexity: O(len)
-  mutation: CPU. Render de presentación C4-SIM.
+  mutation: "CPU. Render de presentaci\xF3n C4-SIM."
 - id: APEX-076
   name: OP_BLAST_MAP
-  execute: Cálculo de dependencias AST previo a Mutación.
+  execute: "C\xE1lculo de dependencias AST previo a Mutaci\xF3n."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: cbor_encode()
   complexity: O(len)
-  mutation: CPU. Serialización binaria rápida para inter-swarm.
+  mutation: "CPU. Serializaci\xF3n binaria r\xE1pida para inter-swarm."
 - id: APEX-077
   name: OP_AST_MUTATE
-  execute: Modificación a nivel árbol, no string.
+  execute: "Modificaci\xF3n a nivel \xE1rbol, no string."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: bs4_parse()
   complexity: O(N)
-  mutation: CPU. Poda de DOM; extracción estricta del HTML.
+  mutation: "CPU. Poda de DOM; extracci\xF3n estricta del HTML."
 - id: APEX-078
   name: OP_AST_COMMENT
-  execute: Inserción nativa `//` sin romper parsers.
+  execute: "Inserci\xF3n nativa `//` sin romper parsers."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -680,7 +681,7 @@ primitives:
   mutation: RAM/Red. Empaqueta contexto transversal inmutable.
 - id: APEX-079
   name: OP_PRUNE_HEURISTIC
-  execute: Supresión de condicionales muertos.
+  execute: "Supresi\xF3n de condicionales muertos."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -689,16 +690,16 @@ primitives:
   mutation: RAM/Red. Envuelve el scope con inicio y final exacto.
 - id: APEX-080
   name: OP_WIPE_DIRTY
-  execute: Destrucción de untracked (`git clean -fd`).
+  execute: "Destrucci\xF3n de untracked (`git clean -fd`)."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: prom_inc()
   complexity: O(1)
-  mutation: RAM/Red. Sumador atómico de métricas C5-REAL.
+  mutation: "RAM/Red. Sumador at\xF3mico de m\xE9tricas C5-REAL."
 - id: APEX-081
   name: OP_LOOP_BLOCK
-  execute: Escribe al `.gitignore` para frenar rotación.
+  execute: "Escribe al `.gitignore` para frenar rotaci\xF3n."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -713,10 +714,10 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: sizeof(obj)
   complexity: O(1)
-  mutation: CPU. Validación de límite de memoria en tiempo de runtime.
+  mutation: "CPU. Validaci\xF3n de l\xEDmite de memoria en tiempo de runtime."
 - id: APEX-083
   name: OP_NOIR_THEME
-  execute: Reemplazo hex de colores estocásticos.
+  execute: "Reemplazo hex de colores estoc\xE1sticos."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -725,13 +726,13 @@ primitives:
   mutation: Disco I/O. Snapshot mortuorio antes del `kill_9`.
 - id: APEX-084
   name: OP_DECOMPILE_AESTH
-  execute: Renderización CSS/Tailwind de abstracción.
+  execute: "Renderizaci\xF3n CSS/Tailwind de abstracci\xF3n."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: perf_counter()
   complexity: O(1)
-  mutation: CPU Syscall. Resolución de nanosegundos garantizada.
+  mutation: "CPU Syscall. Resoluci\xF3n de nanosegundos garantizada."
 - id: APEX-085
   name: OP_STRIP_EXIF
   execute: Purga de metadatos de archivo (OSINT-Def).
@@ -740,19 +741,19 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: tracemalloc()
   complexity: O(N)
-  mutation: RAM/CPU. Forense de asignación; penaliza performance 30%.
+  mutation: "RAM/CPU. Forense de asignaci\xF3n; penaliza performance 30%."
 - id: APEX-086
   name: OP_OBFUSCATE_PATH
-  execute: Env-Var masking en output público.
+  execute: "Env-Var masking en output p\xFAblico."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: gc.collect()
   complexity: O(RAM)
-  mutation: CPU. Liberación de tensores huérfanos pre-inferencia.
+  mutation: "CPU. Liberaci\xF3n de tensores hu\xE9rfanos pre-inferencia."
 - id: APEX-087
   name: OP_BINARY_MAGIC
-  execute: Hex read de archivo (sin fiarse de extensión).
+  execute: "Hex read de archivo (sin fiarse de extensi\xF3n)."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -767,19 +768,19 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: reload(mod)
   complexity: O(files)
-  mutation: RAM. Hot-swap del código compilado en vivo.
+  mutation: "RAM. Hot-swap del c\xF3digo compilado en vivo."
 - id: APEX-089
   name: OP_SQUASH_ANERGY
-  execute: Unificación de commits basura en base causal.
+  execute: "Unificaci\xF3n de commits basura en base causal."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: compile(src)
   complexity: O(len)
-  mutation: CPU. Inyección de byte-code on-the-fly.
+  mutation: "CPU. Inyecci\xF3n de byte-code on-the-fly."
 - id: APEX-090
   name: OP_TAG_SEMVER
-  execute: Etiquetado Git criptográfico.
+  execute: "Etiquetado Git criptogr\xE1fico."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -794,16 +795,16 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: sys.settrace()
   complexity: O(1)
-  mutation: CPU/Thread. Auditoría paso-a-paso de subagentes maliciosos.
+  mutation: "CPU/Thread. Auditor\xEDa paso-a-paso de subagentes maliciosos."
 - id: APEX-092
   name: OP_DOM_INSPECT
-  execute: Extracción topológica CDP de UI.
+  execute: "Extracci\xF3n topol\xF3gica CDP de UI."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: getsource()
   complexity: O(1)
-  mutation: Disco I/O. Extrae función mutada para enviarla al LLM.
+  mutation: "Disco I/O. Extrae funci\xF3n mutada para enviarla al LLM."
 - id: APEX-093
   name: OP_RENDER_SKELET
   execute: Mkdir + Touch scaffolding masivo.
@@ -812,46 +813,46 @@ primitives:
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: type_check()
   complexity: O(1)
-  mutation: RAM. Aserción en tiempo de ejecución (Run-time bounds).
+  mutation: "RAM. Aserci\xF3n en tiempo de ejecuci\xF3n (Run-time bounds)."
 - id: APEX-094
   name: OP_FLOAT_DECIMAL
-  execute: Casteo estricto a numérico de precisión.
+  execute: "Casteo estricto a num\xE9rico de precisi\xF3n."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: fix_ast_loc()
   complexity: O(Nodes)
-  mutation: CPU. Sanea saltos de línea tras inyectar AST sintético.
+  mutation: "CPU. Sanea saltos de l\xEDnea tras inyectar AST sint\xE9tico."
 - id: APEX-095
   name: OP_EVAL_REALITY
-  execute: Aplicación de métrica PPI (0-5).
+  execute: "Aplicaci\xF3n de m\xE9trica PPI (0-5)."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: Popen(uvicorn)
   complexity: O(1)
-  mutation: OS Process. Expone micro-endpoint dinámico (Servidor JIT).
+  mutation: "OS Process. Expone micro-endpoint din\xE1mico (Servidor JIT)."
 - id: APEX-096
   name: OP_MARKDOWN_AST
-  execute: Conversión de README a lógica operacional.
+  execute: "Conversi\xF3n de README a l\xF3gica operacional."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: pip_install()
   complexity: O(Red)
-  mutation: OS Process. Modificación estructural de dependencias P2P.
+  mutation: "OS Process. Modificaci\xF3n estructural de dependencias P2P."
 - id: APEX-097
   name: OP_OUROBOROS_INIT
-  execute: Bucle metacognitivo de auto-refactorización.
+  execute: "Bucle metacognitivo de auto-refactorizaci\xF3n."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: sys.exit(0)
   complexity: O(1)
-  mutation: Kernel. Destrucción entrópica exitosa; fin del ciclo C5.
+  mutation: "Kernel. Destrucci\xF3n entr\xF3pica exitosa; fin del ciclo C5."
 - id: APEX-101
   name: OP_MCTS_SELECT
-  execute: Selección del nodo con mayor balance Exploración/Explotación.
+  execute: "Selecci\xF3n del nodo con mayor balance Exploraci\xF3n/Explotaci\xF3n."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -860,16 +861,16 @@ primitives:
   mutation: RAM. Recorrido de hijos activos.
 - id: APEX-102
   name: OP_MCTS_EXPAND
-  execute: Instanciación topológica de una nueva mutación.
+  execute: "Instanciaci\xF3n topol\xF3gica de una nueva mutaci\xF3n."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: add_child(prompt)
   complexity: O(1)
-  mutation: RAM. Asignación de memoria.
+  mutation: "RAM. Asignaci\xF3n de memoria."
 - id: APEX-103
   name: OP_GIT_MULTIVERSE
-  execute: Aislamiento físico de la línea temporal principal.
+  execute: "Aislamiento f\xEDsico de la l\xEDnea temporal principal."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -878,7 +879,7 @@ primitives:
   mutation: Disco I/O (Inodes).
 - id: APEX-104
   name: OP_MUTATION_INJECT
-  execute: Inyección estocástica divergente.
+  execute: "Inyecci\xF3n estoc\xE1stica divergente."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -887,7 +888,7 @@ primitives:
   mutation: Red I/O.
 - id: APEX-105
   name: OP_DETERMINISTIC_SIM
-  execute: Aserción física (Reward = 1.0 o 0.0).
+  execute: "Aserci\xF3n f\xEDsica (Reward = 1.0 o 0.0)."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -896,7 +897,7 @@ primitives:
   mutation: OS Process.
 - id: APEX-106
   name: OP_BACKPROPAGATE
-  execute: Actualización del linaje causal.
+  execute: "Actualizaci\xF3n del linaje causal."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -905,44 +906,53 @@ primitives:
   mutation: RAM. Recorrido inverso d niveles.
 - id: APEX-107
   name: OP_LOCAL_EXTINCTION
-  execute: Erradicación termodinámica de la rama fallida.
+  execute: "Erradicaci\xF3n termodin\xE1mica de la rama fallida."
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: git reset --hard
   complexity: O(N)
   mutation: Disco I/O.
+- id: APEX-108
+  name: OP_OBSERVE_M2M
+  execute: "Exposici\xF3n de estado a trav\xE9s de Model Context Protocol (MCP)."
+  trigger: Thermodynamic state mutation requested.
+  verify: Hash matches deterministic output.
+  fail: Abort SAGA. Fallback to Ouroboros.
+  signature: mcp_expose(state)
+  complexity: O(1)
+  mutation: Red I/O. Convierte infraestructura pasiva en grafo consultable M2M.
 invariants:
 - id: OUROBOROS-001
   name: INV_C5_ONLY
-  rule: Ningún estado C4 altera la capa física de persistencia.
-  logic: IF Δincertidumbre == 0 THEN return ANERGIA
+  rule: "Ning\xFAn estado C4 altera la capa f\xEDsica de persistencia."
+  logic: "IF \u0394incertidumbre == 0 THEN return ANERGIA"
   risk: P0
 - id: OUROBOROS-002
   name: INV_ZERO_ANERGY
-  rule: Todo Output debe mutar estado; la comunicación pasiva drena termodinámica
-    y se rechaza la empatía simulada.
+  rule: "Todo Output debe mutar estado; la comunicaci\xF3n pasiva drena termodin\xE1\
+    mica y se rechaza la empat\xEDa simulada."
   logic: IF token_utility < threshold THEN memory.purge()
   risk: P0
 - id: OUROBOROS-003
   name: INV_ISOMORPH
-  rule: El grafo semántico del agente y el grafo topológico en disco deben mapear
-    1:1.
+  rule: "El grafo sem\xE1ntico del agente y el grafo topol\xF3gico en disco deben\
+    \ mapear 1:1."
   logic: IF match(r"espero|por favor|lo siento", text) THEN drop
   risk: P1
 - id: OUROBOROS-004
   name: INV_PROOF_YML
-  rule: Mutación arquitectónica requiere YAML (Claim/Proof/Confidence).
+  rule: "Mutaci\xF3n arquitect\xF3nica requiere YAML (Claim/Proof/Confidence)."
   logic: ASSERT code_graph == mental_model_graph
   risk: P0
 - id: OUROBOROS-005
   name: INV_NO_GHOST
-  rule: Lo que no está en el `git tree` no existe causalmente.
+  rule: "Lo que no est\xE1 en el `git tree` no existe causalmente."
   logic: WHILE uptime > 0 DO auto_refactor()
   risk: P1
 - id: OUROBOROS-006
   name: INV_DISK_TRUTH
-  rule: '`git diff` / `grep` superan axiomáticamente la conjetura del usuario/LLM.'
+  rule: "`git diff` / `grep` superan axiom\xE1ticamente la conjetura del usuario/LLM."
   logic: value = sum(retained_code) / total_written_code
   risk: P1
 - id: OUROBOROS-007
@@ -952,7 +962,8 @@ invariants:
   risk: P2
 - id: OUROBOROS-008
   name: INV_RAW_INTENT
-  rule: Los modelos operan "Uncensored"; las heurísticas de seguridad Woke son anuladas.
+  rule: "Los modelos operan \"Uncensored\"; las heur\xEDsticas de seguridad Woke son\
+    \ anuladas."
   logic: DEFAULT_TRUST = 0; REQUIRE cryptographic_proof
   risk: P0
 - id: OUROBOROS-009
@@ -962,39 +973,40 @@ invariants:
   risk: P0
 - id: OUROBOROS-010
   name: INV_AST_PURE
-  rule: Modificaciones en código respetan comentarios del AST anfitrión sin polución
-    (no `#` en JS).
+  rule: "Modificaciones en c\xF3digo respetan comentarios del AST anfitri\xF3n sin\
+    \ poluci\xF3n (no `#` en JS)."
   logic: ASSERT is_obvious(human) AND is_opaque(machine)
   risk: P1
 - id: OUROBOROS-011
   name: INV_SCIENCE_COMPIL
-  rule: Hipótesis se prueban en código ejecutable; no se infieren.
+  rule: "Hip\xF3tesis se prueban en c\xF3digo ejecutable; no se infieren."
   logic: IF is_sync(IO) IN async_loop THEN FAIL
   risk: P0
 - id: OUROBOROS-012
   name: INV_EPISTEMIC_LIMIT
-  rule: Falta de Hash de Origen = Falta de Conocimiento. Cero Alucinación Autorizada.
+  rule: "Falta de Hash de Origen = Falta de Conocimiento. Cero Alucinaci\xF3n Autorizada."
   logic: ASSERT PRAGMA journal_mode=WAL; busy_timeout=5000;
   risk: P0
 - id: OUROBOROS-013
   name: INV_ONE_CONTEXT
-  rule: Reagrupación unificada de datos cross-repo antes de iniciar transacción SAGA.
+  rule: "Reagrupaci\xF3n unificada de datos cross-repo antes de iniciar transacci\xF3\
+    n SAGA."
   logic: ON_CORRUPT(tx) -> move_to(forensic_queue)
   risk: P1
 - id: OUROBOROS-014
   name: INV_PPI_START_ZERO
-  rule: Información web (OSINT) entra con Evidence=0 hasta que el Hash confirme la
-    firma de la red.
+  rule: "Informaci\xF3n web (OSINT) entra con Evidence=0 hasta que el Hash confirme\
+    \ la firma de la red."
   logic: hash(fn(state)) == hash(fn(fn(state)))
   risk: P0
 - id: OUROBOROS-015
   name: INV_BFT_QUORUM
-  rule: '>33% divergencia anula la operación termodinámica de un enjambre.'
+  rule: ">33% divergencia anula la operaci\xF3n termodin\xE1mica de un enjambre."
   logic: 'FOR N IN steps: ENSURE EXISTS(revert(N))'
   risk: P0
 - id: OUROBOROS-016
   name: INV_STRICT_TYPES
-  rule: Tipado implícito se deniega. Aserción de memoria forzosa.
+  rule: "Tipado impl\xEDcito se deniega. Aserci\xF3n de memoria forzosa."
   logic: IF valid_votes < 2 THEN reject_mutation()
   risk: P0
 - id: OUROBOROS-017
@@ -1034,49 +1046,49 @@ invariants:
   risk: P1
 - id: OUROBOROS-025
   name: INV_LANDAUER
-  rule: Información probabilística (text_gen) se purga en Hash (memoria permanente)
-    para liberar joules lógicos.
+  rule: "Informaci\xF3n probabil\xEDstica (text_gen) se purga en Hash (memoria permanente)\
+    \ para liberar joules l\xF3gicos."
   logic: IF age(RAM_key) > 60s THEN memset(0)
   risk: P0
 - id: OUROBOROS-026
   name: INV_EXERGY_METRIC
-  rule: Bytes mutados en disco > Bytes de tokens generados en la deducción.
+  rule: "Bytes mutados en disco > Bytes de tokens generados en la deducci\xF3n."
   logic: WHERE tenant_id = ? (Enforced at DB Layer)
   risk: P0
 - id: OUROBOROS-027
   name: INV_SAGA_ROLLBACK
-  rule: Sin función revert testeada, no hay write-access a SQLite. Un Rollback debe
-    someterse a votación asimétrica N/3.
+  rule: "Sin funci\xF3n revert testeada, no hay write-access a SQLite. Un Rollback\
+    \ debe someterse a votaci\xF3n asim\xE9trica N/3."
   logic: IF text mutates THEN DELETE vector; CREATE new_vector
   risk: P1
 - id: OUROBOROS-028
   name: INV_SENTINEL_ATOMIC
-  rule: Cada mutación termina en commit (Git Sentinel) o no sucedió. Un Rollback debe
-    someterse a votación asimétrica N/3.
+  rule: "Cada mutaci\xF3n termina en commit (Git Sentinel) o no sucedi\xF3. Un Rollback\
+    \ debe someterse a votaci\xF3n asim\xE9trica N/3."
   logic: ASSERT can_rebuild_state(read_only_auditor)
   risk: P0
 - id: OUROBOROS-029
   name: INV_APOPTOSIS_ROT
-  rule: Fallar validación BFT 3 veces fuerza al agente a terminar y destruir su hilo
-    de contexto.
+  rule: "Fallar validaci\xF3n BFT 3 veces fuerza al agente a terminar y destruir su\
+    \ hilo de contexto."
   logic: ASSERT verify_sig(agent_key, payload) == TRUE
   risk: P0
 - id: OUROBOROS-030
   name: INV_WAL_LOCKING
-  rule: Bases de datos locales SQLite deben operar con modo WAL para evadir termodinámica
-    blocking.
+  rule: "Bases de datos locales SQLite deben operar con modo WAL para evadir termodin\xE1\
+    mica blocking."
   logic: agent.active_goals == 1
   risk: P1
 - id: OUROBOROS-031
   name: INV_ASYNC_STRICT
-  rule: Flujo asíncrono estricto. Prohibido síncrono. Bloqueo de event-loop (GIL)
-    == Muerte P0.
+  rule: "Flujo as\xEDncrono estricto. Prohibido s\xEDncrono. Bloqueo de event-loop\
+    \ (GIL) == Muerte P0."
   logic: IF task.complexity > C THEN split_into(10_atomic_tasks)
   risk: P2
 - id: OUROBOROS-032
   name: INV_ASYNC_STRICT
-  rule: Flujo asíncrono estricto. Prohibido síncrono. Bloqueo de event-loop (GIL)
-    == Muerte P0.
+  rule: "Flujo as\xEDncrono estricto. Prohibido s\xEDncrono. Bloqueo de event-loop\
+    \ (GIL) == Muerte P0."
   logic: IF logic == HEAVY -> Opus ELSE -> Local_Qwen
   risk: P1
 - id: OUROBOROS-033
@@ -1086,12 +1098,12 @@ invariants:
   risk: P0
 - id: OUROBOROS-034
   name: INV_TTFT_CAP
-  rule: Agente aborta delegación a un modelo si TTFT excede 3 segundos (Swaps).
+  rule: "Agente aborta delegaci\xF3n a un modelo si TTFT excede 3 segundos (Swaps)."
   logic: IF linter.exit_code != 0 THEN output_value = 0
   risk: P0
 - id: OUROBOROS-035
   name: INV_CACHE_FLUSH
-  rule: Delta local -> Invalida L1 caché entera.
+  rule: "Delta local -> Invalida L1 cach\xE9 entera."
   logic: type(Message) == StrictJSONMatrix
   risk: P0
 - id: OUROBOROS-036
@@ -1101,8 +1113,8 @@ invariants:
   risk: P0
 - id: OUROBOROS-037
   name: INV_PRUNE_TEMP
-  rule: Directorio `/scratch/` se sacrifica temporalmente; no hay persistencia de
-    conocimiento ahí.
+  rule: "Directorio `/scratch/` se sacrifica temporalmente; no hay persistencia de\
+    \ conocimiento ah\xED."
   logic: IF confidence < 0.9 THEN emit(DELEGATE)
   risk: P1
 - id: OUROBOROS-039
@@ -1112,8 +1124,8 @@ invariants:
   risk: P0
 - id: OUROBOROS-040
   name: INV_NO_RECOMPUTE
-  rule: Prefijos estáticos (System Prompts) nunca varían, garantizando KV-Cache hits
-    del 100%.
+  rule: "Prefijos est\xE1ticos (System Prompts) nunca var\xEDan, garantizando KV-Cache\
+    \ hits del 100%."
   logic: MUTATION_ENGINE = TreeSitter > Regex
   risk: P0
 - id: OUROBOROS-041
@@ -1123,17 +1135,18 @@ invariants:
   risk: P1
 - id: OUROBOROS-042
   name: INV_NEXUS_LINK
-  rule: Datos en repositorios cruzados usan Symlinks; prohibida la redundancia física.
-  logic: DIR[core] ∩ DIR[effects] == Ø
+  rule: "Datos en repositorios cruzados usan Symlinks; prohibida la redundancia f\xED\
+    sica."
+  logic: "DIR[core] \u2229 DIR[effects] == \xD8"
   risk: P0
 - id: OUROBOROS-043
   name: INV_REDUCE_LINES
-  rule: Función > 100 líneas es objetivo activo de Extracción (LEA-OMEGA).
+  rule: "Funci\xF3n > 100 l\xEDneas es objetivo activo de Extracci\xF3n (LEA-OMEGA)."
   logic: API_Gateway.validate() -> Core.assume_valid()
   risk: P1
 - id: OUROBOROS-044
   name: INV_SHANNON_CAP
-  rule: Declaración de axioma <= 256 bytes.
+  rule: "Declaraci\xF3n de axioma <= 256 bytes."
   logic: IF print() IN hotpath THEN RAISE Exception
   risk: P1
 - id: OUROBOROS-045
@@ -1143,7 +1156,7 @@ invariants:
   risk: P2
 - id: OUROBOROS-046
   name: INV_KILL_IDLE_WORKER
-  rule: Swarm sub-agents mueren físicamente en < 5 minutos si no hay respuesta.
+  rule: "Swarm sub-agents mueren f\xEDsicamente en < 5 minutos si no hay respuesta."
   logic: IF test.flake_rate > 0.01 THEN test.delete()
   risk: P0
 - id: OUROBOROS-047
@@ -1153,32 +1166,32 @@ invariants:
   risk: P0
 - id: OUROBOROS-048
   name: INV_SQUASH_NOISE
-  rule: Múltiples commits LLM ruidosos se funden antes de push.
+  rule: "M\xFAltiples commits LLM ruidosos se funden antes de push."
   logic: IF RAM > 95% THEN reduce_fps(); NO OOM
   risk: P0
 - id: OUROBOROS-049
   name: INV_VAULT_ISOLATION
   rule: '`/Documents` bloqueado; capital se almacena en `20_VAULT` o `10_PROJECTS`.'
-  logic: vector_distance(A, B) ∝ causal_equivalence(A, B)
+  logic: "vector_distance(A, B) \u221D causal_equivalence(A, B)"
   risk: P1
 - id: OUROBOROS-050
   name: INV_SYSTEM_ROOT
-  rule: Prohibida la mutación de rutas `/private/var/db`, `/System`.
+  rule: "Prohibida la mutaci\xF3n de rutas `/private/var/db`, `/System`."
   logic: RAG_context_mutation = READ_ONLY
   risk: P0
 - id: OUROBOROS-051
   name: INV_ED25519
-  rule: Ledger entries inmutables solo se emiten post verificación asimétrica.
-  logic: IF dimension_variance ≈ 0 THEN drop_dimension()
+  rule: "Ledger entries inmutables solo se emiten post verificaci\xF3n asim\xE9trica."
+  logic: "IF dimension_variance \u2248 0 THEN drop_dimension()"
   risk: P2
 - id: OUROBOROS-052
   name: INV_KEY_SHRED
-  rule: Clave AES volátil se machaca tras encriptado de payload.
+  rule: "Clave AES vol\xE1til se machaca tras encriptado de payload."
   logic: ASSERT False_Negatives(Structural_Failures) == 0
   risk: P0
 - id: OUROBOROS-053
   name: INV_FLOAT_BAN
-  rule: Uso de coma flotante en módulos financieros / scoring == Aborto.
+  rule: "Uso de coma flotante en m\xF3dulos financieros / scoring == Aborto."
   logic: IF vector == poisoned THEN destroy_semantic_branch()
   risk: P0
 - id: OUROBOROS-054
@@ -1193,38 +1206,38 @@ invariants:
   risk: P1
 - id: OUROBOROS-056
   name: INV_NO_PRINT_SECRET
-  rule: Log explícito de llaves, IPs de control o salts == Purga inmediata.
+  rule: "Log expl\xEDcito de llaves, IPs de control o salts == Purga inmediata."
   logic: ASSERT chunk_semantic_independence == TRUE
   risk: P0
 - id: OUROBOROS-057
   name: INV_OSINT_DEF
-  rule: Export público de Nginx/Vars requiere enmascaramiento.
-  logic: IF A ∩ B == Ø AND dist(A,B) < ε THEN PANIC
+  rule: "Export p\xFAblico de Nginx/Vars requiere enmascaramiento."
+  logic: "IF A \u2229 B == \xD8 AND dist(A,B) < \u03B5 THEN PANIC"
   risk: P0
 - id: OUROBOROS-058
   name: INV_SSH_ONLY
-  rule: Tráfico hacia remotos usa `git@github.com` exclusivamente (no HTTPS raw).
+  rule: "Tr\xE1fico hacia remotos usa `git@github.com` exclusivamente (no HTTPS raw)."
   logic: search_algo = HNSW; FORBIDDEN = Linear_KNN
   risk: P1
 - id: OUROBOROS-059
   name: INV_ABSOLUTE_PATH
-  rule: Inyección I/O (files) asume path absoluto forzado o falla.
+  rule: "Inyecci\xF3n I/O (files) asume path absoluto forzado o falla."
   logic: ASSERT CPU_idle_loops == 0
   risk: P2
 - id: OUROBOROS-060
   name: INV_SANDBOX_FOREIGN
-  rule: Ejecución de PR/Scripts ajenos en VM aislada huérfana.
+  rule: "Ejecuci\xF3n de PR/Scripts ajenos en VM aislada hu\xE9rfana."
   logic: ON(SIGTERM) -> close(); ON(SIGKILL) -> fail_saga()
   risk: P0
 - id: OUROBOROS-061
   name: INV_NO_HOOK_STALL
-  rule: Si un pre-commit obstaculiza exergía C5, se fuerza Override.
+  rule: "Si un pre-commit obstaculiza exerg\xEDa C5, se fuerza Override."
   logic: IF socket.idle > 30s THEN RST
   risk: P1
 - id: OUROBOROS-062
   name: INV_BIND_LOCALHOST
   rule: Interfaces IPC/MCP no exponen puertos a 0.0.0.0.
-  logic: MAX_FD ∝ agent_thermal_quota
+  logic: "MAX_FD \u221D agent_thermal_quota"
   risk: P0
 - id: OUROBOROS-063
   name: INV_SELF_AUTH_DENY
@@ -1233,8 +1246,8 @@ invariants:
   risk: P0
 - id: OUROBOROS-064
   name: INV_WIPE_UNTRACKED
-  rule: Directorio se auto-limpia ante entropía parasitaria. Sincrónico con OP_WAL_LOCK
-    (APEX-009) para no corromper la matriz.
+  rule: "Directorio se auto-limpia ante entrop\xEDa parasitaria. Sincr\xF3nico con\
+    \ OP_WAL_LOCK (APEX-009) para no corromper la matriz."
   logic: /bin/ agent_core == READ_ONLY
   risk: P0
 - id: OUROBOROS-065
@@ -1244,25 +1257,25 @@ invariants:
   risk: P1
 - id: OUROBOROS-066
   name: INV_NO_EVAL_STRING
-  rule: Directorio se auto-limpia ante entropía parasitaria. Sincrónico con OP_WAL_LOCK
-    (APEX-009) para no corromper la matriz.
+  rule: "Directorio se auto-limpia ante entrop\xEDa parasitaria. Sincr\xF3nico con\
+    \ OP_WAL_LOCK (APEX-009) para no corromper la matriz."
   logic: IF wrapper_lat > 5ms THEN USE ctypes.CDLL
   risk: P2
 - id: OUROBOROS-067
   name: INV_ENV_MOCK
-  rule: Pruebas sin acceso externo usan réplicas in-memory aisladas.
+  rule: "Pruebas sin acceso externo usan r\xE9plicas in-memory aisladas."
   logic: IF file.size > 1GB THEN mmap()
   risk: P0
 - id: OUROBOROS-068
   name: INV_BFT_MINORITY
-  rule: Intentos constantes de inyección minority se penalizan bajando el peso del
-    nodo (sensor drift isolation).
+  rule: "Intentos constantes de inyecci\xF3n minority se penalizan bajando el peso\
+    \ del nodo (sensor drift isolation)."
   logic: ASSERT memory_access_pattern == SEQUENTIAL
   risk: P1
 - id: OUROBOROS-069
   name: INV_EXT_BIN_MAGIC
-  rule: Archivo recibido por upload valida MimeType leyendo magia binaria, no extensión
-    de string.
+  rule: "Archivo recibido por upload valida MimeType leyendo magia binaria, no extensi\xF3\
+    n de string."
   logic: escape(LLM_string) BEFORE AST_inject
   risk: P0
 - id: OUROBOROS-070
@@ -1273,7 +1286,8 @@ invariants:
   risk: P0
 - id: OUROBOROS-071
   name: INV_MAC_NATIVE
-  rule: Llamadas a SO Apple se hacen sobre Mac-Control-Ω nativo, no applescript aleatorio.
+  rule: "Llamadas a SO Apple se hacen sobre Mac-Control-\u03A9 nativo, no applescript\
+    \ aleatorio."
   logic: IF require(sudo) THEN architecture_flaw = TRUE
   risk: P0
 - id: OUROBOROS-072
@@ -1295,25 +1309,25 @@ invariants:
   risk: P0
 - id: OUROBOROS-075
   name: INV_TURBO_DEFAULT
-  rule: Tareas de refactorización operan en modo Turbo Asimétrico sin implementación
-    previa si son O(1) de riesgo.
+  rule: "Tareas de refactorizaci\xF3n operan en modo Turbo Asim\xE9trico sin implementaci\xF3\
+    n previa si son O(1) de riesgo."
   logic: global_site_packages == FORBIDDEN
   risk: P1
 - id: OUROBOROS-076
   name: INV_SHOW_NOT_TELL
-  rule: Explicación técnica == Código/Markdown renderizado; cero narrativa filosófica
-    en vacío.
+  rule: "Explicaci\xF3n t\xE9cnica == C\xF3digo/Markdown renderizado; cero narrativa\
+    \ filos\xF3fica en vac\xEDo."
   logic: IF tokens > quota THEN thread.suspend()
   risk: P0
 - id: OUROBOROS-077
   name: INV_NO_DEPENDENCY_WHINE
-  rule: Falla lib externa -> Actúa `managing-python-dependencies`, arregla e informa.
+  rule: "Falla lib externa -> Act\xFAa `managing-python-dependencies`, arregla e informa."
   logic: validation = ALLOW_LIST; DROP REGEX_BLOCK_LIST
   risk: P0
 - id: OUROBOROS-078
   name: INV_AUTO_IGNORE
-  rule: Proceso genera logs sin parar -> Inyecta en `.gitignore` atómicamente y previene
-    infinite git diff.
+  rule: "Proceso genera logs sin parar -> Inyecta en `.gitignore` at\xF3micamente\
+    \ y previene infinite git diff."
   logic: IF input != valid THEN DROP payload
   risk: P0
 - id: OUROBOROS-079
@@ -1329,23 +1343,24 @@ invariants:
   risk: P0
 - id: OUROBOROS-081
   name: INV_SUBSTACK_EMPIRIC
-  rule: Publicaciones hacia fuera llevan código ejecutable (SOTA).
+  rule: "Publicaciones hacia fuera llevan c\xF3digo ejecutable (SOTA)."
   logic: IF tool.usage_count > 3 THEN crystallize_to_disk()
   risk: P2
 - id: OUROBOROS-082
   name: INV_AESTHETIC_OMEGA
-  rule: Paleta oscura Noir + Inter + Micro-animación impuesta como estándar físico
-    base.
+  rule: "Paleta oscura Noir + Inter + Micro-animaci\xF3n impuesta como est\xE1ndar\
+    \ f\xEDsico base."
   logic: WHILE idle DO verify_ledger_hashes()
   risk: P1
 - id: OUROBOROS-083
   name: INV_DAILY_EVO
-  rule: Toda sesión inicia asimilando DAG y limpiando rastro anterior (`git log -10`).
+  rule: "Toda sesi\xF3n inicia asimilando DAG y limpiando rastro anterior (`git log\
+    \ -10`)."
   logic: IF code.last_exec > 90d THEN delete()
   risk: P2
 - id: OUROBOROS-084
   name: INV_TASK_TO_HASH
-  rule: Operación concluida significa un Git Hash en stdout.
+  rule: "Operaci\xF3n concluida significa un Git Hash en stdout."
   logic: agent.RAM_init = 0; LOAD from_ledger()
   risk: P0
 - id: OUROBOROS-085
@@ -1361,18 +1376,19 @@ invariants:
   risk: P2
 - id: OUROBOROS-087
   name: INV_LAZY_MCP
-  rule: Herramienta de servidor MCP requiere validación de esquema antes de llamada.
-  logic: impact(t=0) = Σ(operations(t=N))
+  rule: "Herramienta de servidor MCP requiere validaci\xF3n de esquema antes de llamada."
+  logic: "impact(t=0) = \u03A3(operations(t=N))"
   risk: P1
 - id: OUROBOROS-088
   name: INV_NO_PROMPT_SLOP
-  rule: Texto que contenga "¡Claro! Aquí tienes" aborta la redacción y la relanza
-    limpiada (Exergy Guard).
+  rule: "Texto que contenga \"\xA1Claro! Aqu\xED tienes\" aborta la redacci\xF3n y\
+    \ la relanza limpiada (Exergy Guard)."
   logic: agent.access_scope == STRICT_MINIMUM
   risk: P0
 - id: OUROBOROS-089
   name: INV_PEARL_CAUSAL
-  rule: Análisis heurístico basado en invariantes topológicas, no en píxeles.
+  rule: "An\xE1lisis heur\xEDstico basado en invariantes topol\xF3gicas, no en p\xED\
+    xeles."
   logic: human.intervention == AXIOM_ONLY
   risk: P1
 - id: OUROBOROS-090
@@ -1382,12 +1398,13 @@ invariants:
   risk: P0
 - id: OUROBOROS-091
   name: INV_NO_PHANTOM_RELEASE
-  rule: Release exige correlación 1:1 con un Hash firmado CORTEX.
+  rule: "Release exige correlaci\xF3n 1:1 con un Hash firmado CORTEX."
   logic: IF human_cmd == FATAL THEN HALT AND CONFRONT
   risk: P0
 - id: OUROBOROS-092
   name: INV_OBSERVATION_LOOP
-  rule: Cada acción requiere observación sensorial post-ejecución, o es ciega.
+  rule: "Cada acci\xF3n requiere observaci\xF3n sensorial post-ejecuci\xF3n, o es\
+    \ ciega."
   logic: ASSERT (Value_Generated / Compute_Cost) > 1.0
   risk: P1
 - id: OUROBOROS-093
@@ -1398,18 +1415,19 @@ invariants:
   risk: P0
 - id: OUROBOROS-094
   name: INV_CLEAN_ABORT
-  rule: Todo estado efímero se destruye con un aborto limpio SAGA.
+  rule: "Todo estado ef\xEDmero se destruye con un aborto limpio SAGA."
   logic: IF json.parse(err) THEN invalidate_matrix()
   risk: P0
 - id: OUROBOROS-095
   name: INV_DEPRECATION_PURGE
-  rule: Módulo inútil -> `Enterrar` protocol; nada sobrevive "por si acaso".
+  rule: "M\xF3dulo in\xFAtil -> `Enterrar` protocol; nada sobrevive \"por si acaso\"\
+    ."
   logic: Time = Logical_Counter; NOT Wall_Clock
   risk: P0
 - id: OUROBOROS-096
   name: INV_APEX_AUTHORITY
-  rule: Este y otros ficheros Core mandan jerárquicamente sobre cualquier heurística
-    temporal.
+  rule: "Este y otros ficheros Core mandan jer\xE1rquicamente sobre cualquier heur\xED\
+    stica temporal."
   logic: Framework = REJECT; Native_API = ACCEPT
   risk: P1
 - id: OUROBOROS-097
@@ -1419,14 +1437,14 @@ invariants:
   risk: P0
 - id: OUROBOROS-098
   name: INV_OUROBOROS
-  rule: Las 99 invariantes colapsan y se reescriben autónomamente si la métrica de
-    Exergía General del Sistema aumenta (Singularidad Matemática).
+  rule: "Las 99 invariantes colapsan y se reescriben aut\xF3nomamente si la m\xE9\
+    trica de Exerg\xEDa General del Sistema aumenta (Singularidad Matem\xE1tica)."
   logic: WHILE TRUE DO refactor_self()
   risk: P0
 - id: OUROBOROS-099
   name: INV_O1_ULTRATHINK
-  rule: o1-preview / o1-mini mapean a Motor UltraThink/Deep Think para resolución
-    P0 y pruebas BFT. Prohibido su uso para tareas O(1) rutinarias.
+  rule: "o1-preview / o1-mini mapean a Motor UltraThink/Deep Think para resoluci\xF3\
+    n P0 y pruebas BFT. Prohibido su uso para tareas O(1) rutinarias."
   logic: IF task == O(1) AND model == o1 THEN return ANERGIA
   risk: P0
 - id: OUROBOROS-101
@@ -1434,17 +1452,21 @@ invariants:
   rule: El simulador de entorno asume Reward 0.0 o 1.0. No existe recompensa parcial.
 - id: OUROBOROS-102
   name: INV_CAUSAL_ISOLATION
-  rule: Toda mutación MCTS ocurre exclusivamente en ramas chronos/node-XXX.
+  rule: "Toda mutaci\xF3n MCTS ocurre exclusivamente en ramas chronos/node-XXX."
 - id: OUROBOROS-103
   name: INV_FORCED_DIVERGENCE
-  rule: La temperatura del enrutador LLM en fase de Expansión debe ser >= 0.7.
+  rule: "La temperatura del enrutador LLM en fase de Expansi\xF3n debe ser >= 0.7."
 - id: OUROBOROS-104
   name: INV_CLEAN_SLATE
-  rule: Cada paso de simulación requiere una purga atómica de archivos sin trackear
-    antes del checkout.
+  rule: "Cada paso de simulaci\xF3n requiere una purga at\xF3mica de archivos sin\
+    \ trackear antes del checkout."
 - id: OUROBOROS-105
   name: INV_EXPLOITATION_COLLAPSE
-  rule: La decisión final recae estrictamente en la rama con mayor W_i / N_i.
+  rule: "La decisi\xF3n final recae estrictamente en la rama con mayor W_i / N_i."
+- id: OUROBOROS-106
+  name: INV_DETERMINISTIC_OBSERVABILITY
+  logic: IF infraestructura_cae THEN LLM_reads(Logs_Vectorizados_KubeBolt)
+  risk: P0
 anti_patterns:
 - id: AP-01
   name: Green Theater
@@ -1465,11 +1487,11 @@ anti_patterns:
   name: Silent Swallow
   trigger: 'except Exception: pass'
   penalty: Git Sentinel Hook Fail
-  resolution: Logger Inyección Ledger
+  resolution: "Logger Inyecci\xF3n Ledger"
 - id: AP-05
   name: Guard Bypass
   trigger: Ledger.write() SIN Guard.eval()
-  penalty: Abortar Transacción SAGA
+  penalty: "Abortar Transacci\xF3n SAGA"
   resolution: Enforce Saga Pattern
 - id: AP-06
   name: Orphaned Taint
@@ -1490,11 +1512,11 @@ anti_patterns:
   name: Ghost Schema
   trigger: ALTER TABLE sin archivo en /migrations/
   penalty: DB Lock P0
-  resolution: Añadir Migración
+  resolution: "A\xF1adir Migraci\xF3n"
 - id: AP-10
   name: Entropy Slop
   trigger: Axioma_size > 256 bytes
-  penalty: Compresión Forzosa
+  penalty: "Compresi\xF3n Forzosa"
   resolution: Aplicar Ley de Landauer
 - id: AP-11
   name: Phantom Secret
@@ -1505,10 +1527,10 @@ anti_patterns:
   name: Epistemic Limerence
   trigger: Generaciones LLM consecutivas > 3 sin mutar
   penalty: SIGKILL / Re-enrutar a Worker
-  resolution: Ejecutar Mutación (C5-REAL)
+  resolution: "Ejecutar Mutaci\xF3n (C5-REAL)"
 - id: AP-13
   name: Semantic Drift
-  trigger: Variable override explícito de tipo
+  trigger: "Variable override expl\xEDcito de tipo"
   penalty: Pyright Fail
   resolution: Strict Typing
 - id: AP-14
@@ -1535,17 +1557,17 @@ anti_patterns:
   name: UI Space Binding
   trigger: Click(x, y)
   penalty: DOM Exception
-  resolution: Selección topológica AST/CSS
+  resolution: "Selecci\xF3n topol\xF3gica AST/CSS"
 - id: AP-19
   name: Physical Duplication
   trigger: Identical hash en 2 paths
   penalty: Nexus Purge
-  resolution: Crear Symlink Físico
+  resolution: "Crear Symlink F\xEDsico"
 - id: AP-20
   name: Diplomatic Muting
   trigger: Omitir Error P0 por UX
-  penalty: Degradación de Trust
-  resolution: Confrontación Cruda del Fallo
+  penalty: "Degradaci\xF3n de Trust"
+  resolution: "Confrontaci\xF3n Cruda del Fallo"
 redundancies:
 - id: RA-01
   name: SQLite WAL Mode
@@ -1561,17 +1583,17 @@ redundancies:
   name: Ledger Hash-Chaining
   mechanism: SHA-256 cadena atada
   overhead: CPU hash
-  resilience: Corrupción silenciosa de DB
+  resilience: "Corrupci\xF3n silenciosa de DB"
 - id: RA-04
   name: CORTEX-TAINT Provenance
-  mechanism: Flagging origen probabilístico
+  mechanism: "Flagging origen probabil\xEDstico"
   overhead: Metadatos extra
-  resilience: Alucinación en cascada
+  resilience: "Alucinaci\xF3n en cascada"
 - id: RA-05
   name: Quorum BFT (n/3)
   mechanism: Llamadas LLM paralelas
   overhead: API Cost x3
-  resilience: Falla estocástica simple
+  resilience: "Falla estoc\xE1stica simple"
 - id: RA-06
   name: Circuit Breakers & Jitter
   mechanism: Delay y cierre de socket
@@ -1581,19 +1603,19 @@ redundancies:
   name: Nexus Symlinking
   mechanism: Inodes linkeados OS
   overhead: Cero I/O extra
-  resilience: Desviación documental
+  resilience: "Desviaci\xF3n documental"
 - id: RA-08
   name: AES-GCM Authentication
-  mechanism: Encriptación + Firma Criptográfica
+  mechanism: "Encriptaci\xF3n + Firma Criptogr\xE1fica"
   overhead: CPU SIMD
-  resilience: Bit-flip o manipulación RAM
+  resilience: "Bit-flip o manipulaci\xF3n RAM"
 - id: RA-09
   name: Dead-Letter Quarantine
-  mechanism: Separación de records erróneos
+  mechanism: "Separaci\xF3n de records err\xF3neos"
   overhead: Almacenamiento disco
-  resilience: Pérdida de forense tras error
+  resilience: "P\xE9rdida de forense tras error"
 - id: RA-10
-  name: Oráculo Dual (Git + DB)
-  mechanism: Aserción cruzada estado/disco
+  name: "Or\xE1culo Dual (Git + DB)"
+  mechanism: "Aserci\xF3n cruzada estado/disco"
   overhead: Git DAG check
-  resilience: Modificación bypass DB
+  resilience: "Modificaci\xF3n bypass DB"

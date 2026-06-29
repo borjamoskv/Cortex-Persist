@@ -14,16 +14,19 @@
     },
     "payload": {
       "type": "string",
+      "minLength": 1,
       "description": "Raw uncompressed data."
     },
     "timestamp": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "minLength": 1
     },
     "cortex_taint_hash": {
       "type": "string",
       "pattern": "^[a-fA-F0-9]{64}$",
       "description": "SHA3-256 seal of the payload."
     }
-  }
+  },
+  "additionalProperties": false
 }

@@ -11,15 +11,45 @@
     "pattern_ids": {
       "type": "array",
       "items": { "type": "string", "format": "uuid" },
-      "minItems": 1
+      "minItems": 1,
+      "uniqueItems": true
     },
     "causal_graph": {
       "type": "object",
-      "description": "Nodes and edges describing the systemic relationship."
+      "required": ["nodes", "edges"],
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from", "to", "relation"],
+            "properties": {
+              "from": { "type": "string", "minLength": 1 },
+              "to": { "type": "string", "minLength": 1 },
+              "relation": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
     },
     "confidence_level": {
       "type": "string",
       "enum": ["LOW", "MODERATE", "HIGH", "ABSOLUTE"]
     }
-  }
+  },
+  "additionalProperties": false
 }

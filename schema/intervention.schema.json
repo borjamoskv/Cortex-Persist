@@ -14,15 +14,18 @@
     },
     "git_sentinel_hash": {
       "type": "string",
+      "pattern": "^[a-fA-F0-9]{7,40}$",
       "description": "The commit hash of the C5-REAL mutation."
     },
     "saga_rollback_plan": {
       "type": "string",
+      "minLength": 1,
       "description": "Sequence of operations to revert if L6 Re-evaluation fails."
     },
     "l6_reevaluation_status": {
       "type": "string",
       "enum": ["PENDING", "DEGRADED", "RESOLVED"]
     }
-  }
+  },
+  "additionalProperties": false
 }

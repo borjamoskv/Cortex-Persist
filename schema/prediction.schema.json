@@ -14,20 +14,23 @@
     },
     "falsifiable_condition": {
       "type": "string",
+      "minLength": 1,
       "description": "If model is true, this MUST occur."
     },
     "experiment_design": {
       "type": "object",
       "required": ["setup_saga", "execution_trigger", "success_criteria"],
       "properties": {
-        "setup_saga": { "type": "string" },
-        "execution_trigger": { "type": "string" },
-        "success_criteria": { "type": "string" }
-      }
+        "setup_saga": { "type": "string", "minLength": 1 },
+        "execution_trigger": { "type": "string", "minLength": 1 },
+        "success_criteria": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
     },
     "experiment_result": {
       "type": "string",
       "enum": ["PENDING", "REFUTED", "CORROBORATED"]
     }
-  }
+  },
+  "additionalProperties": false
 }

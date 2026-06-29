@@ -4,8 +4,14 @@
   "type": "object",
   "required": ["experiment_id", "prediction_id", "execution_context", "outcome"],
   "properties": {
-    "experiment_id": { "type": "string", "format": "uuid" },
-    "prediction_id": { "type": "string", "format": "uuid" },
+    "experiment_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "prediction_id": {
+      "type": "string",
+      "format": "uuid"
+    },
     "execution_context": {
       "type": "string",
       "enum": ["SANDBOX_THREAD", "ISOLATED_BRANCH", "DRY_RUN", "ORPHAN_QUERY"]
@@ -14,9 +20,18 @@
       "type": "object",
       "required": ["refuted", "evidence_hash"],
       "properties": {
-        "refuted": { "type": "boolean", "description": "True if prediction failed." },
-        "evidence_hash": { "type": "string", "description": "Hash of the test execution log." }
-      }
+        "refuted": {
+          "type": "boolean",
+          "description": "True if prediction failed."
+        },
+        "evidence_hash": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$",
+          "description": "Hash of the test execution log."
+        }
+      },
+      "additionalProperties": false
     }
-  }
+  },
+  "additionalProperties": false
 }
