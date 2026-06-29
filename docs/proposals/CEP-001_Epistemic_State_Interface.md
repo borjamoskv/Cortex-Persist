@@ -19,6 +19,7 @@ EpistemicObject
 │
 ├── Assertion      (Declaración semántica pura sobre el dominio)
 ├── Evidence       (Artefacto observable que justifica una aserción)
+├── Relation       (Vínculo estructural entre aserciones y evidencias)
 ├── Provenance     (Atribución, autoría, marcas temporales y origen)
 ├── Diagnostic     (Metadato sobre la salud, contradicciones o lagunas)
 ├── Constraint     (Invariante lógico o límite del sistema)
@@ -43,14 +44,39 @@ Assertion
   type
 ```
 
-## 2. Core State Model
+## 2. Core State Model (Immutable Snapshot)
 
-El `EpistemicState` es el objeto contenedor de la verdad parcial del sistema.
+> **Definición Formal:** Un `EpistemicState` es una instantánea (snapshot) inmutable de un conjunto consistente de objetos epistemológicos y de las relaciones existentes entre ellos. 
 
-* **State Identity:** Identificador global único (UUIDv7 o URI determinista).
-* **State Hash:** Hash criptográfico (SHA3-256) generado a partir del contenido de su grafo interno.
-* **State DAG:** Las transiciones forman un Grafo Acíclico Dirigido (DAG) de estados históricos.
-* **Transition Contracts:** Un `EpistemicState` es inmutable por diseño. Cualquier actualización genera un nuevo estado validado criptográficamente y anclado al anterior.
+No es una base de datos ni un motor de inferencia. El estado **no contiene** las afirmaciones o evidencias directamente, sino que las referencia a través de índices, manteniendo un tamaño sorprendentemente pequeño y libre de lógica.
+
+```text
+EpistemicState
+  state_id
+  parent_states: List<StateID>
+  root_hash (Merkle Root)
+
+  assertion_index
+  evidence_index
+  provenance_index
+  constraint_index
+  diagnostic_index
+  relation_index
+```
+
+### Relaciones Explícitas (`SupportRelation`)
+El grafo epistémico deja de estar "embebido" dentro de los objetos. El soporte no es un atributo intrínseco de la evidencia, sino una **relación**. Esto independiza por completo a los objetos y simplifica drásticamente el cálculo del DAG.
+
+```text
+SupportRelation (hereda de Relation)
+  EvidenceID
+  AssertionID
+  relation_type ∈ {SUPPORTS, REFUTES, OBSERVES, DERIVED_FROM, CONTRADICTS}
+```
+
+### Características del Estado
+* **DAG Auténtico:** La propiedad `parent_states` (en plural) habilita ramificaciones y fusiones (merges), convirtiendo el historial en un verdadero Grafo Acíclico Dirigido, fundamental para sincronización, colaboración y razonamiento distribuido.
+* **Merkle Root:** El `root_hash` no es un hash plano del estado, sino un `MerkleRoot(Assertions, Evidence, Relations, Diagnostics, ...)`. Esto permite auditoría incremental, pruebas parciales, verificación eficiente del DAG histórico y evita que el coste crezca linealmente.
 
 ## 3. Execution Interfaces
 
@@ -68,6 +94,16 @@ El Kernel actúa como guardián de la integridad arquitectónica y orquesta las 
 * **Invariantes:** Los datos fluyen de forma apendicular. La mutación no destruye información pasada.
 * **Panic Conditions:** El sistema abortará operaciones críticas (p. ej., mutaciones) si detecta:
   * Ausencia de un origen (`Provenance`) explícito.
-  * Discrepancia entre el `root_hash` y los componentes estructurales del estado.
+  * Discrepancia entre el `root_hash` (Merkle) y los componentes estructurales referenciados.
   * Modificación in situ de objetos ya integrados al grafo de estado histórico (violación del DAG).
 * **Serialization & Compatibility:** Todos los objetos deben ser determinísticamente serializables y evolucionar mediante políticas de versionado que garanticen compatibilidad hacia atrás.
+
+## 5. El Verdadero Núcleo (Persistence & Identity)
+
+El diseño de este microkernel revela una conclusión fundamental: **CEP-001 no define todavía una teoría de la confianza, sino el modelo de persistencia y de identidad de un sistema epistemológico.**
+
+El verdadero núcleo inmutable del sistema es:
+```text
+Immutable Objects + Immutable Relations + Immutable State Snapshots
+```
+Todo lo demás (Trust, Inference, SAT, Render, Parser) son servicios acoplados tangencialmente que pueden cambiar. El primer contrato estable del microkernel es **cómo representar, identificar y versionar el conocimiento de forma inmutable**, garantizando así el desacoplamiento arquitectónico.
