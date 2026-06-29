@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 
-from cortex.darknet.ingestor import DarknetIngestor
-from cortex.engine.forensic.forensic_commander import ForensicCommander
-from cortex.engine.forensic.forensic_strike_config import MissionProfile
+from babylon60.darknet.ingestor import DarknetIngestor
+from babylon60.engine.forensic.forensic_commander import ForensicCommander
+from babylon60.engine.forensic.forensic_strike_config import MissionProfile
 
 logger = logging.getLogger("bounty_extractor")
 

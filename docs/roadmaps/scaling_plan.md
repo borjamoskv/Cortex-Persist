@@ -26,7 +26,7 @@
 | MCP server | ✅ Producción | 4 tools: store, search, recall, status |
 | Federation | ✅ Básico | `federation.py`, shard_dir |
 | Connection pool | ✅ Producción | `connection_pool.py` |
-| Landing page (Vercel) | ✅ Desplegada | cortex landing |
+| Landing page (Cloudflare Pages) | ✅ Desplegada | cortex landing |
 | Config env-based | ✅ Producción | Todos los settings via `os.environ` |
 
 **Conclusión: ~70% del trabajo de backend está hecho.**
@@ -195,7 +195,7 @@ TIERS = {
 - [ ] **3.3** Tabla `subscriptions` vinculada a `tenant_id`
 - [ ] **3.4** Middleware de quota check (facts count, search count)
 - [ ] **3.5** Webhook Stripe para activar/desactivar tiers
-- [ ] **3.6** Página de pricing en landing (Vercel)
+- [ ] **3.6** Página de pricing en landing (Cloudflare Pages)
 
 **Esfuerzo: ~24-40h**
 
@@ -207,7 +207,7 @@ TIERS = {
 
 ```
                     ┌──────────────────────────┐
-                    │     Vercel (Landing)      │
+                    │Cloudflare Pages (Landing)│
                     │   cortex.borjamoskv.com   │
                     └────────────┬─────────────┘
                                  │

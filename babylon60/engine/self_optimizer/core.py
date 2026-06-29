@@ -7,8 +7,8 @@ import time
 from collections import deque
 from typing import Any
 
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.core.performance_tracker import PerformanceSnapshot, PerformanceTracker
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from babylon60.engine.core.performance_tracker import PerformanceSnapshot, PerformanceTracker
 
 from .tuners import OptimizationTuners
 from .types import OptimizationEvent, OptimizerConfig, TuningDecision

@@ -6,8 +6,9 @@ import logging
 import sqlite3
 
 import aiosqlite
-from cortex.database.core import connect
-from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+
+from babylon60.database.core import connect
+from babylon60.extensions.signals.bus import AsyncSignalBus, SignalBus
 
 logger = logging.getLogger("cortex.engine.causal.oracle")
 

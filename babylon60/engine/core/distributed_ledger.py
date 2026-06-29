@@ -18,7 +18,7 @@ except ImportError:
     Producer = Any
     KAFKA_AVAILABLE = False
 
-from cortex.engine.core.evolution_ledger import (
+from babylon60.engine.core.evolution_ledger import (
     ControlVector,
     EvolutionLedger,
     MutationRecord,

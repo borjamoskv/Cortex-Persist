@@ -30,12 +30,12 @@ from typing import TYPE_CHECKING, Any
 import httpx
 
 if TYPE_CHECKING:
-    from cortex.extensions.llm.manager import LLMManager
+    from babylon60.extensions.llm.manager import LLMManager
 
-from cortex.engine.cognitive.crystallizer import AutoCrystallizer
-from cortex.engine.evo.autopoiesis import AutopoiesisEngine
-from cortex.swarm.swarm_10k import SwarmCommander
-from cortex.utils.errors import CortexError
+from babylon60.engine.cognitive.crystallizer import AutoCrystallizer
+from babylon60.engine.evo.autopoiesis import AutopoiesisEngine
+from babylon60.swarm.swarm_10k import SwarmCommander
+from babylon60.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.engine.cognitive.synthesis")
 
@@ -115,6 +115,7 @@ class CortexAutoSynthesisEngine:
     async def start(self) -> None:
         """Initialize the swarm commander substrate."""
         self._commander = SwarmCommander(bus_path=self._bus_path)
+        assert self._commander is not None
         await self._commander.initialize()
         logger.info("🚀 SwarmCommander ready at %s", self._bus_path)
 

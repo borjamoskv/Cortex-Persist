@@ -382,7 +382,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
 class TursoAuthBackend(BaseAuthBackend):
     """Distributed authentication backend for Turso / libSQL over HTTP/WebSockets.
 
-    Optimized for Vercel/Serverless deployments using libsql-client.
+    Optimized for Cloudflare Pages/Workers and Serverless deployments using libsql-client.
     """
 
     def __init__(self, url: str, auth_token: str) -> None:

@@ -7,7 +7,7 @@ thinks and executes. Combines a static knowledge bank with dynamic
 insights mined from CORTEX memory (decisions, errors, patterns).
 
 Usage:
-    from cortex.tips import TipsEngine, Tip
+    from babylon60.tips import TipsEngine, Tip
 
     engine = TipsEngine()
     tip = engine.random()           # Random tip
@@ -34,7 +34,7 @@ import aiosqlite
 __all__ = ["Tip", "TipCategory", "TipsEngine"]
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex.tips")
 
@@ -321,7 +321,7 @@ class TipsEngine:
         limit: int,
     ) -> list[Tip]:
         """Generic fact miner - extracts tips from any fact_type."""
-        from cortex.storage.classifier import classify_content
+        from babylon60.storage.classifier import classify_content
 
         tips: list[Tip] = []
         try:

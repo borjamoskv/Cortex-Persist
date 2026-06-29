@@ -16,8 +16,8 @@ try:
         FitnessOracleRs = cortex_rs.FitnessOracleRs  # type: ignore
 except ImportError:
     FitnessOracleRs = None
-from cortex.engine.evo.genome import FitnessRecord, StrategyGenome
-from cortex.isa.builder import AgentOp
+from babylon60.engine.evo.genome import FitnessRecord, StrategyGenome
+from babylon60.isa.builder import AgentOp
 
 
 @dataclass

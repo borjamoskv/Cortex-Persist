@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.engine.cognitive.models import Fact
+from babylon60.engine.cognitive.models import Fact
 
 logger = logging.getLogger("cortex.metadata")
 

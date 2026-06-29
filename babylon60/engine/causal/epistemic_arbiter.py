@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
-from babylon60.crypto.hash_registry import cortex_hash
 import logging
 from collections.abc import Callable
 
-from cortex.engine.flow.causality_models import (
+from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.engine.flow.causality_models import (
     Claim,
     DecisionTrace,
     EpistemicStatus,

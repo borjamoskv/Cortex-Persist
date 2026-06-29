@@ -6,7 +6,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.services.trust import TrustService
+    from babylon60.services.trust import TrustService
 
 logger = logging.getLogger("cortex.oracle.evidence")
 

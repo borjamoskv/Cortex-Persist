@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     import aiosqlite
 
-from cortex.database.core import causal_write
+from babylon60.database.core import causal_write
 
 logger = logging.getLogger("cortex.lock")
 

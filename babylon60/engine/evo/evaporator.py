@@ -12,8 +12,9 @@ import time
 from datetime import datetime, timedelta, timezone
 
 import aiosqlite
-from cortex.engine.core.mutation_engine import MUTATION_ENGINE
-from cortex.memory.temporal import now_iso
+
+from babylon60.engine.core.mutation_engine import MUTATION_ENGINE
+from babylon60.memory.temporal import now_iso
 
 logger = logging.getLogger("cortex.evaporator")
 

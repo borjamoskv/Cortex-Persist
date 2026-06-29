@@ -1,10 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 
-from cortex.engine.smte.llm_mutator import llm_driven_mutator
-from cortex.engine.smte.parser import AgentASTParser
-from cortex.engine.smte.weismann_barrier import enforce_weismann_barrier
-from cortex.guards.exergy_guard import calculate_exergy
+from babylon60.engine.smte.llm_mutator import llm_driven_mutator
+from babylon60.engine.smte.parser import AgentASTParser
+from babylon60.engine.smte.weismann_barrier import enforce_weismann_barrier
+from babylon60.guards.exergy_guard import calculate_exergy
 
 logger = logging.getLogger("cortex.engine.smte.trigger")
 logging.basicConfig(level=logging.INFO)

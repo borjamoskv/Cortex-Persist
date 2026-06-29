@@ -8,7 +8,7 @@ import uuid
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 
-from cortex.observability.prometheus_exporter import CortexPrometheusExporter
+from babylon60.observability.prometheus_exporter import CortexPrometheusExporter
 
 logger = logging.getLogger(__name__)
 

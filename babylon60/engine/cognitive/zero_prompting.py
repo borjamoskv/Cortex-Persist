@@ -18,14 +18,14 @@ Thermodynamic Model:
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.engine.evo.evolution_metrics import CortexMetrics
-from cortex.engine.evo.evolution_types import (
+from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.engine.evo.evolution_metrics import CortexMetrics
+from babylon60.engine.evo.evolution_types import (
     DomainMetrics,
     SovereignAgent,
     SubAgent,

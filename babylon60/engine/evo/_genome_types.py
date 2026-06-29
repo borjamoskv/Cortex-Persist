@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from cortex.isa.builder import (
+from babylon60.isa.builder import (
     AgentOp,
     dispatch_targets,
     node_count,

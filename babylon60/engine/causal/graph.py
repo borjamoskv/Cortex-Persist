@@ -8,14 +8,15 @@ from collections import deque
 from typing import Any
 
 import aiosqlite
-from cortex.engine.flow.causality_models import (
+
+from babylon60.engine.flow.causality_models import (
     EpistemicStatus,
     LedgerEvent,
     TaintReport,
 )
 
 try:
-    from cortex.engine.logic.atms import AtmsAdapter
+    from babylon60.engine.logic.atms import AtmsAdapter
 except ImportError:
     AtmsAdapter = None  # type: ignore
 
@@ -293,7 +294,7 @@ class AsyncCausalGraph:
         tenant_id: str = "default",
         floor_to_c1: bool = True,
     ) -> TaintReport:
-        from cortex.engine.causal.taint_propagation import TaintPropagator
+        from babylon60.engine.causal.taint_propagation import TaintPropagator
 
         propagator = TaintPropagator(self.conn)
         return await propagator.propagate_taint(fact_id, tenant_id, floor_to_c1)

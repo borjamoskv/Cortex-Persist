@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from cortex.isa.builder import (
+from babylon60.isa.builder import (
     AgentOp,
     dispatch_targets,
     node_count,
@@ -253,7 +253,7 @@ class TreeRewriter:
     @staticmethod
     def add_timeout_guard(tree: AgentOp, timeout_ms: int = 5000) -> AgentOp:
         """Wrap the entire tree in a conditional timeout halt."""
-        from cortex.isa.builder import Predicate, cond, halt, seq
+        from babylon60.isa.builder import Predicate, cond, halt, seq
 
         return seq(
             tree,
@@ -522,7 +522,7 @@ class ReflexionEngine:
     def _emit_endocrine_reward(self, iterations_used: int) -> None:
         """Emit hormonal signals based on reflexion outcome."""
         try:
-            from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+            from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 
             if iterations_used == 0:
                 # First-try success: reward

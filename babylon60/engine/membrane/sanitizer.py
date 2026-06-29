@@ -1,11 +1,12 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import re
 from typing import Any
 
 from pydantic import ValidationError
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 from .models import MembraneLog, MembraneLogLevel, PureEngram
 from .sri_hash import auto_heal_html

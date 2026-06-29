@@ -63,12 +63,12 @@ def generate_secure_taint_token(
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp}&nonce={nonce}&content_hash={content_hash}"
 
     if curve == "secp256k1":
-        from cortex.crypto.keys import Secp256k1Signer
+        from babylon60.crypto.keys import Secp256k1Signer
 
         signature = Secp256k1Signer.sign_raw_content(private_key_b64, canonical_payload)
         return f"taint:{curve}:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
     else:
-        from cortex.crypto.keys import Signer
+        from babylon60.crypto.keys import Signer
 
         signature = Signer.sign_raw_content(private_key_b64, canonical_payload)
         return f"taint:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
@@ -110,7 +110,7 @@ _NONCE_TABLE_CREATED_SYNC = False
 
 
 def _check_and_register_nonce_sync(conn, nonce: str) -> bool:
-    from cortex.database.core import causal_write
+    from babylon60.database.core import causal_write
 
     if not getattr(conn, "_taint_nonces_created", False):
         conn.execute("""
@@ -134,7 +134,7 @@ def _check_and_register_nonce_sync(conn, nonce: str) -> bool:
 
 
 async def _check_and_register_nonce_async(conn, nonce: str) -> bool:
-    from cortex.database.core import causal_write
+    from babylon60.database.core import causal_write
 
     if not getattr(conn, "_taint_nonces_created", False):
         await conn.execute("""
@@ -244,13 +244,13 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp_str}&nonce={nonce}&content_hash={content_hash}"
 
     if curve == "secp256k1":
-        from cortex.crypto.keys import Secp256k1Verifier
+        from babylon60.crypto.keys import Secp256k1Verifier
 
         is_verified = Secp256k1Verifier.verify_raw_content(
             canonical_payload, public_key_b64, signature
         )
     else:
-        from cortex.crypto.keys import Verifier
+        from babylon60.crypto.keys import Verifier
 
         is_verified = Verifier.verify_raw_content(canonical_payload, public_key_b64, signature)
 
@@ -323,7 +323,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
         check_anergy_and_green_theater(content)
 
         # -- OWASP Memory Firewall (SAGA-1.5) --
-        from cortex.security.memory_firewall import MemoryFirewall
+        from babylon60.security.memory_firewall import MemoryFirewall
         try:
             _, risk_level, _ = MemoryFirewall.screen_content(content)
         except ValueError as fw_err:
@@ -333,7 +333,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
         try:
             data = json.loads(content)
             if isinstance(data, dict) and "Email" in data and "Emails opened (6mo)" in data:
-                from cortex.guards.substack_crawler_guard import SubstackCrawlerGuard
+                from babylon60.guards.substack_crawler_guard import SubstackCrawlerGuard
                 try:
                     SubstackCrawlerGuard().enforce_saga_contract(data)
                 except ValueError as guard_err:
@@ -457,7 +457,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     check_anergy_and_green_theater(content)
 
     # -- OWASP Memory Firewall (SAGA-1.5) --
-    from cortex.security.memory_firewall import MemoryFirewall
+    from babylon60.security.memory_firewall import MemoryFirewall
     try:
         _, risk_level, _ = MemoryFirewall.screen_content(content)
     except ValueError as fw_err:
@@ -467,7 +467,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     try:
         data = json.loads(content)
         if isinstance(data, dict) and "Email" in data and "Emails opened (6mo)" in data:
-            from cortex.guards.substack_crawler_guard import SubstackCrawlerGuard
+            from babylon60.guards.substack_crawler_guard import SubstackCrawlerGuard
             try:
                 SubstackCrawlerGuard().enforce_saga_contract(data)
             except ValueError as guard_err:
@@ -489,7 +489,7 @@ def check_anergy_and_green_theater(content: str) -> None:
     if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
         return
 
-    from cortex.guards.exergy_guard import ExergyGuard, LandauerGuard
+    from babylon60.guards.exergy_guard import ExergyGuard, LandauerGuard
     try:
         is_sacred = "axiom" in content.lower() or "sacred" in content.lower()
         ExergyGuard().check_thermodynamic_yield(content, project="SYS_ROOT", fact_type="thought")
@@ -671,7 +671,7 @@ def secure_state_commit(content: str, metadata: dict) -> tuple:
     and executes the Git Sentinel (OP_GIT_SENTINEL) to ensure cryptographic continuity
     of the Sparse Merkle Tree hash chain.
     """
-    from cortex.agents.primitives.dispatcher import apex_dispatcher
+    from babylon60.agents.primitives.dispatcher import apex_dispatcher
 
     # 1. Structural Freeze (Immutable)
     frozen_state = apex_dispatcher.execute(

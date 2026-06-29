@@ -16,7 +16,8 @@ from dataclasses import dataclass
 from typing import Any
 
 import aiosqlite
-from cortex.engine.flow.causality import (
+
+from babylon60.engine.flow.causality import (
     EDGE_DERIVED_FROM,
     AsyncCausalGraph,
 )
@@ -339,7 +340,7 @@ class InferenceEngine:
         tenant_id: str,
     ) -> None:
         """Persist derivations as facts with causal edges."""
-        from cortex.memory.temporal import now_iso
+        from babylon60.memory.temporal import now_iso
 
         graph = AsyncCausalGraph(conn)
         await graph.ensure_table()
@@ -360,8 +361,8 @@ class InferenceEngine:
             if existing:
                 continue
 
-            from cortex.config import DB_PATH
-            from cortex.guards.contradiction_guard import detect_contradictions
+            from babylon60.config import DB_PATH
+            from babylon60.guards.contradiction_guard import detect_contradictions
 
             # FALSATION PROTOCOL (L7): Prevent entropy leaks by culling contradictory derivations
             conflict_report = await detect_contradictions(
@@ -376,7 +377,7 @@ class InferenceEngine:
                 )
                 continue
 
-            from cortex.engine.core.fact_store_core import insert_fact_record
+            from babylon60.engine.core.fact_store_core import insert_fact_record
 
             new_fact_id = await insert_fact_record(
                 conn=conn,

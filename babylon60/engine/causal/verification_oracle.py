@@ -1,9 +1,10 @@
 # [C5-REAL] Exergy-Maximized
-from babylon60.crypto.hash_registry import cortex_hash
 import base64
 import logging
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.engine.causal.verification_oracle")
 
@@ -15,7 +16,7 @@ class InvariantViolationError(ValueError):
 async def verify_ledger_continuity(conn) -> bool:
     """Inv-1 & Inv-2: Re-verifies the event ledger chain cryptographic continuity."""
     try:
-        from cortex.memory.ledger import EventLedgerL3
+        from babylon60.memory.ledger import EventLedgerL3
 
         ledger = EventLedgerL3(conn)
         res = await ledger.verify_chain("default")
@@ -105,7 +106,6 @@ async def verify_approved_auth_signatures(conn) -> bool:
                 # Check signature of (state_payload) treating req_id as fact_hash
                 # As done in AuthGateway: content=state_payload, fact_hash=req_id
                 # Verification payload in Ed25519Signer._canonical_payload is (sha256(content):fact_hash)
-                import hashlib
 
                 content_digest = cortex_hash(payload.encode("utf-8"))
                 canonical_msg = f"{content_digest}:{req_id}".encode()

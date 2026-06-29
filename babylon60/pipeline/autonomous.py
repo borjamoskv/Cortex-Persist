@@ -10,11 +10,11 @@ import logging
 import uuid
 from typing import Any
 
-from cortex.context.assembler import ContextAssembler
-from cortex.engine import CortexEngine
-from cortex.pipeline import DeliveryTarget, PipelineRequest, PipelineResult
-from cortex.pipeline.executor import AgentExecutor
-from cortex.pipeline.orchestrator import CortexOrchestrator
+from babylon60.context.assembler import ContextAssembler
+from babylon60.engine import CortexEngine
+from babylon60.pipeline import DeliveryTarget, PipelineRequest, PipelineResult
+from babylon60.pipeline.executor import AgentExecutor
+from babylon60.pipeline.orchestrator import CortexOrchestrator
 
 logger = logging.getLogger("cortex.pipeline.autonomous")
 

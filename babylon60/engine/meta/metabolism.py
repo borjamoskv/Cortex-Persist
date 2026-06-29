@@ -11,9 +11,10 @@ Zero signal  → flatline → graceful death
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 from dataclasses import dataclass
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 
 @dataclass

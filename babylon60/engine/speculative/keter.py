@@ -5,7 +5,6 @@ Metasistema de Invocacion Fractal. KETER auto-determina skills,
 secuencia, modelos. Invoca, ejecuta, entrega.
 """
 
-from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 import logging
 import os
@@ -13,7 +12,8 @@ import typing
 from abc import ABC, abstractmethod
 from typing import Any, Final, TypedDict
 
-from cortex.utils.errors import CortexError
+from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.utils.errors import CortexError
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ class LegionSwarm(SovereignPhase):
     """
 
     async def execute(self, payload: KeterPayload) -> KeterPayload:
-        from cortex.swarm.legion import LEGION_OMEGA
+        from babylon60.swarm.legion import LEGION_OMEGA
 
         intent = payload.get("intent", "Refactor")
         logger.info("🐝 [KETER] Desplegando Enjambre HYDRA (Legion-Omega)...")
@@ -125,8 +125,8 @@ class FormalVerificationGate(SovereignPhase):
             logger.debug("🛡️ [KETER] Phase 3.5 skipped (CORTEX_FV=0)")
             return payload
 
-        from cortex.verification.counterexample import learn_from_failure
-        from cortex.verification.verifier import SovereignVerifier
+        from babylon60.verification.counterexample import learn_from_failure
+        from babylon60.verification.verifier import SovereignVerifier
 
         logger.info("🛡️ [KETER] Validando Invariantes Soberanos (Z3)...")
 
@@ -190,7 +190,7 @@ class KeterReservoir:
     """
 
     def __init__(self, db_path: str):
-        from cortex.database.core import connect
+        from babylon60.database.core import connect
 
         self.db_path = db_path
         # Use centralized factory
@@ -239,7 +239,7 @@ class KeterEngine:
     """
 
     def __init__(self) -> None:
-        from cortex.extensions.skills.router import SkillRouter
+        from babylon60.extensions.skills.router import SkillRouter
 
         self.router = SkillRouter()
         self.phases: list[SovereignPhase] = [
@@ -305,7 +305,6 @@ class KeterEngine:
     def _check_thermal_bypass(
         self, intent: str, formation: str, thermal_audit: bool
     ) -> tuple[str, KeterPayload | None]:
-        import hashlib
 
         mission_id = cortex_hash(f"{intent}:{formation}".encode())
         cached_payload = self._reservoir.get(mission_id)

@@ -142,7 +142,7 @@ async def compact_ledger(
         compaction_timestamp = datetime.now(timezone.utc).isoformat()
         compaction_audit_id = cortex_hash(
             f"{compaction_timestamp}systemCORTEX_KERNELledger_masterCOMPACTION_NODE{snapshot_hash}{h_end}".encode()
-        ).hexdigest()
+        )
 
         # Execute Transaction
         in_tx_before = conn.in_transaction

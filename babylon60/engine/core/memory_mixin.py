@@ -6,7 +6,8 @@ import logging
 from pathlib import Path
 
 import aiosqlite
-from cortex.engine.mixins.base import EngineMixinBase
+
+from babylon60.engine.mixins.base import EngineMixinBase
 
 __all__ = ["MemoryMixin"]
 
@@ -53,16 +54,16 @@ class MemoryMixin(EngineMixinBase):
         try:
             import os
 
-            from cortex.memory.ledger import EventLedgerL3
+            from babylon60.memory.ledger import EventLedgerL3
 
             redis_url = os.environ.get("CORTEX_REDIS_URL")
             if redis_url:
-                from cortex.memory.redis_working import RedisWorkingMemoryL1
+                from babylon60.memory.redis_working import RedisWorkingMemoryL1
 
                 l1 = RedisWorkingMemoryL1(redis_url=redis_url)
                 logger.info("Memory L1 (RedisWorkingMemoryL1) initialized at %s", redis_url)
             else:
-                from cortex.memory.working import WorkingMemoryL1
+                from babylon60.memory.working import WorkingMemoryL1
 
                 l1 = WorkingMemoryL1()
             l3 = EventLedgerL3(conn)
@@ -74,7 +75,7 @@ class MemoryMixin(EngineMixinBase):
 
     def _init_signal_bus(self):
         try:
-            from cortex.extensions.signals.bus import SignalBus
+            from babylon60.extensions.signals.bus import SignalBus
 
             sync_conn = self._get_sync_conn()
             bus = SignalBus(sync_conn)
@@ -116,8 +117,8 @@ class MemoryMixin(EngineMixinBase):
     def _init_l2_dense(self, db_path: Path):
         l2, encoder, l2_skip_reason = None, None, None
         try:
-            from cortex.memory.encoder import AsyncEncoder
-            from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+            from babylon60.memory.encoder import AsyncEncoder
+            from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
 
             vector_path = db_path.parent / "vectors"
             encoder = AsyncEncoder(self._get_embedder())
@@ -133,7 +134,7 @@ class MemoryMixin(EngineMixinBase):
     def _init_hdc(self, db_path: Path):
         hdc_l2, hdc_encoder = None, None
         try:
-            from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2, ItemMemory
+            from babylon60.memory.hdc import HDCEncoder, HDCVectorStoreL2, ItemMemory
 
             hdc_path = db_path.parent / "hdc"
             item_mem = ItemMemory(codebook_path=hdc_path / "codebook.json")
@@ -148,7 +149,7 @@ class MemoryMixin(EngineMixinBase):
 
     def _init_memory_manager(self, l1, l2, l3, encoder, hdc_l2, hdc_encoder, bus):
         try:
-            from cortex.memory.manager import CortexMemoryManager
+            from babylon60.memory.manager import CortexMemoryManager
 
             self._memory_manager = CortexMemoryManager(
                 l1=l1,

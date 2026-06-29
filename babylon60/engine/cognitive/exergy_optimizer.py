@@ -10,7 +10,7 @@ import math
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.swarm.swarm_10k import NodeMetrics
+    from babylon60.swarm.swarm_10k import NodeMetrics
 
 
 class ExergyOptimizer:

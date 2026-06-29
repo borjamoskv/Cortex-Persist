@@ -12,9 +12,9 @@ import logging
 from collections.abc import Coroutine
 from typing import Any
 
-from cortex.engine.evo.decalcifier import SovereignDecalcifier
-from cortex.engine.evo.growth import GROWTH_ENGINE
-from cortex.engine.evo.reaper import GhostReaper
+from babylon60.engine.evo.decalcifier import SovereignDecalcifier
+from babylon60.engine.evo.growth import GROWTH_ENGINE
+from babylon60.engine.evo.reaper import GhostReaper
 
 logger = logging.getLogger("cortex.rem")
 
@@ -33,7 +33,7 @@ class REMCoordinator:
         if self._is_sleeping:
             return
 
-        from cortex.engine.evo.evaporator import EntropicEvaporator
+        from babylon60.engine.evo.evaporator import EntropicEvaporator
 
         self._is_sleeping = True
         logger.info("🌙 [REM] Entering Deep Sleep. Maintenance tasks starting.")

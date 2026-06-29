@@ -11,7 +11,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.ledger.execution_trace import ExecutionTraceLedger
+    from babylon60.ledger.execution_trace import ExecutionTraceLedger
 
 logger = logging.getLogger("cortex.engine.feedback.ley2_loop")
 

@@ -14,7 +14,7 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 
-from cortex.audit.ledger import EnterpriseAuditLedger
+from babylon60.audit.ledger import EnterpriseAuditLedger
 
 logger = logging.getLogger("cortex.engine.causal.apoptosis")
 if not logger.handlers:
@@ -129,7 +129,7 @@ class OuroborosCollapseEngine:
         winner = max(evaluations.items(), key=lambda x: x[1])[0]
         losers = [b for b in target_branches if b != winner]
 
-        from cortex.database.core import connect_async_ctx
+        from babylon60.database.core import connect_async_ctx
 
         async with connect_async_ctx(self.db_path) as conn:
             ledger = EnterpriseAuditLedger(conn)

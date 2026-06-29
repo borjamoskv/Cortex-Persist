@@ -1,5 +1,4 @@
 # [C5-REAL] Exergy-Maximized
-from babylon60.crypto.hash_registry import cortex_hash_raw
 import base64
 import hashlib
 import re
@@ -7,6 +6,8 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
+
+from babylon60.crypto.hash_registry import cortex_hash_raw
 
 
 # Cache previously fetched SRI hashes to avoid entropy
@@ -31,7 +32,7 @@ def generate_sri_hash(url: str, algo: str = "sha384") -> str:
         if parsed.hostname not in trusted_domains:
             return ""
 
-        from cortex.guards.url_guard import is_safe_url
+        from babylon60.guards.url_guard import is_safe_url
 
         if not is_safe_url(url):
             return ""

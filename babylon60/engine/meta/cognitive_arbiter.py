@@ -9,12 +9,12 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 from typing import Final
 
-from cortex.engine.meta.meta_arbiter_types import (
+from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.engine.meta.meta_arbiter_types import (
     ArbiterVerdict,
     ConflictPair,
     LayerID,

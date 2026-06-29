@@ -43,7 +43,7 @@ DATA DEL COMMIT:
 Hash: {payload.get("hash")}
 Message: {payload.get("message")}
 Raw Diff:
-{payload.get("diff")[:8000]} # Limitado a 8K chars para evitar saturación de prompt
+{str(payload.get("diff") or "")[:8000]} # Limitado a 8K chars para evitar saturación de prompt
 
 GENERATE SUBSTACK MARKDOWN:
 """
@@ -52,9 +52,9 @@ GENERATE SUBSTACK MARKDOWN:
                 model="gemini-2.5-pro",
                 contents=prompt,
             )
-            essay = response.text.strip()
+            essay = str(response.text or "").strip()
             logger.info(
-                f"[C5-REAL] Essay crystallized successfully for {payload.get('hash')[:7]}"
+                f"[C5-REAL] Essay crystallized successfully for {str(payload.get('hash') or '')[:7]}"
             )
             return essay
         except Exception as e:

@@ -7,13 +7,13 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any
 
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.evo._autocurative_state import HealingEvent, HealingPhase
-from cortex.engine.evo.repair_strategies import RepairResult
-from cortex.engine.forensic.circuit_breaker import CircuitState
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from babylon60.engine.evo._autocurative_state import HealingEvent, HealingPhase
+from babylon60.engine.evo.repair_strategies import RepairResult
+from babylon60.engine.forensic.circuit_breaker import CircuitState
 
 if TYPE_CHECKING:
-    from cortex.swarm.autocurative_agent import AutoCurativeAgent
+    from babylon60.swarm.autocurative_agent import AutoCurativeAgent
 
 logger = logging.getLogger("cortex.engine.autocurative")
 

@@ -46,7 +46,7 @@ async def check_dedup(
     Uses content hash (not ciphertext) to safely bypass AES-GCM nonce variance.
     Returns the existing fact_id if a duplicate is found, else None.
     """
-    from cortex.utils.canonical import compute_fact_hash
+    from babylon60.utils.canonical import compute_fact_hash
 
     f_hash = compute_fact_hash(content)
 

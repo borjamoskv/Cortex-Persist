@@ -11,10 +11,10 @@ import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
-from cortex.engine.oracle.analyzer_mixin import AnalyzerMixin
-from cortex.engine.oracle.evidence_mixin import EvidenceMixin
-from cortex.engine.oracle.policy_mixin import PolicyMixin
-from cortex.engine.temporal.forgetting_models import (
+from babylon60.engine.oracle.analyzer_mixin import AnalyzerMixin
+from babylon60.engine.oracle.evidence_mixin import EvidenceMixin
+from babylon60.engine.oracle.policy_mixin import PolicyMixin
+from babylon60.engine.temporal.forgetting_models import (
     EvictionVerdict,
     OracleReport,
     PolicyRecommendation,
@@ -23,8 +23,8 @@ from cortex.engine.temporal.forgetting_models import (
 # Deferred imports below inside __init__ to prevent circular import
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine as AsyncCortexEngine
-    from cortex.memory.working import WorkingMemoryL1
+    from babylon60.engine import CortexEngine as AsyncCortexEngine
+    from babylon60.memory.working import WorkingMemoryL1
 
 __all__ = ["ForgettingOracle"]
 
@@ -71,8 +71,8 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
         self._audit_count = 0
 
         # Ω₃/Ω₂: Integrated Services
-        from cortex.services.notebooklm import NotebookLMService
-        from cortex.services.trust import TrustService
+        from babylon60.services.notebooklm import NotebookLMService
+        from babylon60.services.trust import TrustService
 
         db_path = str(getattr(engine, "_db_path", ""))
         self._trust = TrustService(db_path) if db_path else None
@@ -149,7 +149,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             db_path = str(getattr(self._engine, "_db_path", ""))
             if not db_path:
                 return
-            from cortex.extensions.signals.bus import SignalBus
+            from babylon60.extensions.signals.bus import SignalBus
 
             conn = sqlite3.connect(db_path)
             try:

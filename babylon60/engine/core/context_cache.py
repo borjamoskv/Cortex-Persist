@@ -209,10 +209,11 @@ class ContextCacheManager:
             import time
 
             import numpy as np
-            from cortex.memory.encoder import AsyncEncoder
-            from cortex.memory.models import CortexFactModel
-            from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
-            from cortex.utils.turboquant import optimize_vector_qjl
+
+            from babylon60.memory.encoder import AsyncEncoder
+            from babylon60.memory.models import CortexFactModel
+            from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
+            from babylon60.utils.turboquant import optimize_vector_qjl
 
             # We apply asymmetric quantization TurboQuant 3.5b -> 1.0b
             quantized_int8_list = optimize_vector_qjl(

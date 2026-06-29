@@ -156,7 +156,7 @@ class BridgeGuard:
         Used for prescriptive bridge elevation to prevent code duplication.
         Returns (source_project, fact_hash) if a duplicate is found outside current_project.
         """
-        from cortex.utils.canonical import compute_fact_hash
+        from babylon60.utils.canonical import compute_fact_hash
 
         f_hash = compute_fact_hash(content)
 

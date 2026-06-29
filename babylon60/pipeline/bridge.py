@@ -17,14 +17,14 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-from cortex.pipeline import (
+from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+from babylon60.pipeline import (
     DeliveryTarget,
     DeliveryType,
     PipelineRequest,
     PipelineResult,
 )
-from cortex.pipeline.orchestrator import CortexOrchestrator
+from babylon60.pipeline.orchestrator import CortexOrchestrator
 
 logger = logging.getLogger("cortex.pipeline.bridge")
 
@@ -52,13 +52,13 @@ class CortexPipelineBridge:
             return
 
         # 1. CortexEngine (memory, facts, ledger)
-        from cortex.engine import CortexEngine
+        from babylon60.engine import CortexEngine
 
         self._engine = CortexEngine(self._db_path)
         await self._engine.init_db()
 
         # 2. Context Assembler with real backends
-        from cortex.context.assembler import ContextAssembler
+        from babylon60.context.assembler import ContextAssembler
 
         vsa_adapter = self._init_vsa()
         fact_adapter = FactStoreAdapter(self._engine)
@@ -68,12 +68,12 @@ class CortexPipelineBridge:
         )
 
         # 3. Agent Router
-        from cortex.router.router import AgentRouter
+        from babylon60.router.router import AgentRouter
 
         router = AgentRouter()
 
         # 4. Delivery Manager
-        from cortex.delivery.manager import DeliveryManager
+        from babylon60.delivery.manager import DeliveryManager
 
         delivery = DeliveryManager()
 
@@ -84,7 +84,7 @@ class CortexPipelineBridge:
         ledger = LedgerAdapter(self._engine)
 
         # 7. Agent Executor (real LLM dispatch)
-        from cortex.pipeline.executor import AgentExecutor
+        from babylon60.pipeline.executor import AgentExecutor
 
         self._executor = AgentExecutor()
 
@@ -104,7 +104,7 @@ class CortexPipelineBridge:
     def _init_budget(self) -> Any | None:
         """Initialize SwarmBudgetManager if available."""
         try:
-            from cortex.extensions.swarm.budget import get_budget_manager
+            from babylon60.extensions.swarm.budget import get_budget_manager
 
             return get_budget_manager()
         except ImportError:
@@ -114,7 +114,7 @@ class CortexPipelineBridge:
     def _init_vsa(self) -> Any | None:
         """Initialize VSA-SDM adapter if available."""
         try:
-            from cortex.context.vsa_adapter import VSAContextAdapter
+            from babylon60.context.vsa_adapter import VSAContextAdapter
 
             adapter = VSAContextAdapter(agent_id="cortex-pipeline")
             if adapter.is_available:

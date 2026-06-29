@@ -5,13 +5,14 @@ Transforms the operator's psychological entropy into executable topology.
 Implements the 8 vectors of epistemic friction as strict physical invariants.
 """
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import hashlib
 import logging
 import os
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logger = logging.getLogger(__name__)
 

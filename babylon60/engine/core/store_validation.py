@@ -25,7 +25,7 @@ async def _check_byzantine_auth(
 
 def _enforce_thermodynamics(cls: Any, fact_type: str, skip_thermo: bool) -> None:
     """Enforce Axiom Ω₁₃ (Landauer Limit) for active vs decorative modes."""
-    from cortex.guards.thermodynamic import AgentMode
+    from babylon60.guards.thermodynamic import AgentMode
 
     if (
         cls._agent_mode == AgentMode.DECORATIVE
@@ -81,7 +81,7 @@ async def _apply_semantic_dedup(
 async def _enforce_ctre(meta: dict | None) -> None:
     """Enforce Commit-Time Reconciliation Engine (CTRE) logic for UI_ACTION."""
     if meta and meta.get("intent") == "UI_ACTION" and "expected_ui_hash" in meta:
-        from cortex.guards.ctre_guard import CTRECollisionError, CTREGuard
+        from babylon60.guards.ctre_guard import CTRECollisionError, CTREGuard
 
         expected_hash = meta["expected_ui_hash"]
         current_hash = meta.get("current_ui_hash", expected_hash)
@@ -123,8 +123,8 @@ async def run_store_validation_logic(
     _enforce_thermodynamics(cls, fact_type, skip_thermo)
     _apply_exergy(cls, meta, fact_type, skip_thermo)
 
-    from cortex.engine.flow.storage_guard import StorageGuard
-    from cortex.engine.core.store_validators import check_dedup, validate_content
+    from babylon60.engine.flow.storage_guard import StorageGuard
+    from babylon60.engine.core.store_validators import check_dedup, validate_content
 
     StorageGuard.validate(
         project=project,
@@ -146,13 +146,13 @@ async def run_store_validation_logic(
     meta = await mixin_instance._apply_privacy_shield(conn, content, project, tenant_id, meta)
     content, meta = _sanitize_engram(content, fact_type, source, project, meta)
 
-    from cortex.engine.core.fact_store_core import resolve_causality_async
+    from babylon60.engine.core.fact_store_core import resolve_causality_async
 
     meta = await resolve_causality_async(conn, project, meta)
 
     nemesis_rejection = None
     if fact_type not in ("error", "ghost"):
-        from cortex.engine.meta.nemesis import NemesisProtocol
+        from babylon60.engine.meta.nemesis import NemesisProtocol
 
         nemesis_rejection = await NemesisProtocol.analyze_async(content, conn=conn)
 
@@ -164,7 +164,7 @@ async def run_store_validation_logic(
         if bridge_result and bridge_result.get("meta_flags"):
             meta = {**(meta or {}), **bridge_result["meta_flags"]}
 
-    from cortex.engine.flow.guard_integration_patch import enforce_store_guards
+    from babylon60.engine.flow.guard_integration_patch import enforce_store_guards
 
     await enforce_store_guards(
         content=content,
@@ -183,20 +183,20 @@ async def run_store_validation_logic(
 
 def _validate_dependencies():
     try:
-        from cortex.engine.flow.bridge_guard import BridgeGuard  # noqa
-        from cortex.engine.flow.guard_integration_patch import enforce_store_guards  # noqa
-        from cortex.engine.membrane.sanitizer import SovereignSanitizer  # noqa
-        from cortex.engine.meta.nemesis import NemesisProtocol  # noqa
-        from cortex.engine.flow.storage_guard import StorageGuard  # noqa
-        from cortex.guards.thermodynamic import AgentMode, should_enter_decorative_mode  # noqa
-        from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy  # noqa
+        from babylon60.engine.flow.bridge_guard import BridgeGuard  # noqa
+        from babylon60.engine.flow.guard_integration_patch import enforce_store_guards  # noqa
+        from babylon60.engine.membrane.sanitizer import SovereignSanitizer  # noqa
+        from babylon60.engine.meta.nemesis import NemesisProtocol  # noqa
+        from babylon60.engine.flow.storage_guard import StorageGuard  # noqa
+        from babylon60.guards.thermodynamic import AgentMode, should_enter_decorative_mode  # noqa
+        from babylon60.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy  # noqa
     except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
         raise RuntimeError(f"FAIL-CLOSED: dependencies unavailable: {exc}") from exc
 
 
 def _apply_exergy(cls: Any, meta: dict[str, Any] | None, fact_type: str, skip_thermo: bool):
-    from cortex.guards.thermodynamic import AgentMode, should_enter_decorative_mode
-    from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
+    from babylon60.guards.thermodynamic import AgentMode, should_enter_decorative_mode
+    from babylon60.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
 
     _has_entropy = meta is not None and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
     if not skip_thermo and meta is not None and _has_entropy:
@@ -225,7 +225,7 @@ def _apply_exergy(cls: Any, meta: dict[str, Any] | None, fact_type: str, skip_th
 def _sanitize_engram(
     content: str, fact_type: str, source: str | None, project: str, meta: dict | None
 ):
-    from cortex.engine.membrane.sanitizer import SovereignSanitizer
+    from babylon60.engine.membrane.sanitizer import SovereignSanitizer
 
     raw_engram = {
         "type": fact_type,
@@ -251,14 +251,14 @@ async def _enforce_cortex_taint(
     """Enforce attribution before ledger or persistence mutation begins."""
     if fact_type in ("telemetry_batch", "mafia_node"):
         return
-    from cortex.engine.causal.taint_engine import enforce_taint_check
+    from babylon60.engine.causal.taint_engine import enforce_taint_check
 
     token = meta.get("cortex_taint") if meta else None
     await enforce_taint_check(conn, token, content)
 
 
 async def _apply_bridge_guard(conn, content, project, tenant_id, fact_type):
-    from cortex.engine.flow.bridge_guard import BridgeGuard
+    from babylon60.engine.flow.bridge_guard import BridgeGuard
 
     bridge_candidate = await BridgeGuard.detect_bridge_candidate(conn, content, project, tenant_id)
     bridge_result = None

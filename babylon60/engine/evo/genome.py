@@ -20,8 +20,8 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-from cortex.engine.evo._genome_mutator import GenomeMutator
-from cortex.engine.evo._genome_types import (
+from babylon60.engine.evo._genome_mutator import GenomeMutator
+from babylon60.engine.evo._genome_types import (
     FitnessRecord,
     Lineage,
     MutationType,

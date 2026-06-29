@@ -6,11 +6,12 @@ import logging
 import re
 
 import aiosqlite
-from cortex.database.core import connect as db_connect
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+
+from babylon60.database.core import connect as db_connect
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 
 try:
-    from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+    from babylon60.extensions.signals.bus import AsyncSignalBus, SignalBus
 except ImportError:
     AsyncSignalBus = None  # type: ignore[assignment]
     SignalBus = None  # type: ignore[assignment]

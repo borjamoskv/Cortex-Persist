@@ -11,14 +11,14 @@ import logging
 import time
 from typing import Any
 
-from cortex.pipeline import (
+from babylon60.pipeline import (
     PipelineRequest,
     PipelineResult,
     PipelineStage,
     PipelineStatus,
     StageTrace,
 )
-from cortex.pipeline._orchestrator_exceptions import (
+from babylon60.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )

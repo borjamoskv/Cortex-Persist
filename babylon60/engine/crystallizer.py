@@ -1,9 +1,8 @@
 import logging
 from typing import Any
 
-from cortex.engine.entropy import entropy_annihilator
-
-from cortex.agents.primitives.dispatcher import apex_dispatcher
+from babylon60.agents.primitives.dispatcher import apex_dispatcher
+from babylon60.engine.entropy import entropy_annihilator
 
 logger = logging.getLogger(__name__)
 

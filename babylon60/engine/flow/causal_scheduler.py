@@ -11,12 +11,12 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from cortex.database.core import connect_async_ctx
+from babylon60.database.core import connect_async_ctx
 
 if TYPE_CHECKING:
-    from cortex.engine.core.rollback_engine import CausalRollbackEngine
-    from cortex.ledger.causal_graph import CausalGraph
-    from cortex.ledger.execution_trace import ExecutionTraceLedger
+    from babylon60.engine.core.rollback_engine import CausalRollbackEngine
+    from babylon60.ledger.causal_graph import CausalGraph
+    from babylon60.ledger.execution_trace import ExecutionTraceLedger
 
 logger = logging.getLogger("cortex.engine.flow.causal_scheduler")
 

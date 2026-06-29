@@ -9,16 +9,15 @@ import hashlib
 import logging
 from typing import Any
 
-from cortex.swarm.trust_registry import global_trust_registry
-
-from cortex.agents.primitives.dispatcher import apex_dispatcher
+from babylon60.agents.primitives.dispatcher import apex_dispatcher
+from babylon60.swarm.trust_registry import global_trust_registry
 
 logger = logging.getLogger("cortex.engine.logic.sanedrin")
 
 
 import json
 
-from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
+from babylon60.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 
 
 class SanedrinNode:
@@ -92,7 +91,7 @@ class SanedrinCouncil:
     """
 
     def __init__(self, node_count: int = 3, router: CortexLLMRouter | None = None) -> None:
-        from cortex.extensions.llm.provider import LLMProvider
+        from babylon60.extensions.llm.provider import LLMProvider
         self.router = router or CortexLLMRouter(primary=LLMProvider(provider="gemini"))
         
         self.nodes = [

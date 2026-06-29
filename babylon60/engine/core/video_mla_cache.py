@@ -5,9 +5,10 @@ Implements algorithms inspired by arXiv:2605.30351v1 for memory-efficient video 
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_raw
 import logging
 from dataclasses import dataclass
+
+from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_raw
 
 logger = logging.getLogger("cortex.exergy.video")
 

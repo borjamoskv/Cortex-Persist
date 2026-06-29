@@ -10,8 +10,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-from cortex.database.core import connect_async_ctx
+from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+from babylon60.database.core import connect_async_ctx
 
 __all__ = ["SnapshotManager", "SnapshotRecord"]
 

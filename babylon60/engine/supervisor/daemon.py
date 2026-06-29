@@ -6,8 +6,8 @@ import logging
 import time
 from typing import Any
 
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.forensic.predictive_healer import Prediction
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from babylon60.engine.forensic.predictive_healer import Prediction
 
 from .types import AgentStatus
 

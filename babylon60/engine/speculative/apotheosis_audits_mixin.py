@@ -6,8 +6,8 @@ import sqlite3
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.cognitive.manifestation import manifest_singularity
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from babylon60.engine.cognitive.manifestation import manifest_singularity
 
 if TYPE_CHECKING:
     pass
@@ -96,7 +96,7 @@ class ApotheosisAuditsMixin:
         if not getattr(self, "_cortex", None):
             return
         try:
-            from cortex.engine.meta.forgetting_oracle import ForgettingOracle
+            from babylon60.engine.meta.forgetting_oracle import ForgettingOracle
 
             if getattr(self, "_oracle", None) is None:
                 # Get reference to the optimized engine cache if it exists
@@ -111,7 +111,7 @@ class ApotheosisAuditsMixin:
 
             report = await self._oracle.evaluate(window=100)
             if report.regret_rate > ForgettingOracle.REGRET_THRESHOLD:
-                from cortex.engine.temporal.forgetting_models import PolicyRecommendation
+                from babylon60.engine.temporal.forgetting_models import PolicyRecommendation
 
                 if report.recommendation == PolicyRecommendation.PROTECT_CAUSAL_ROOTS:
                     ENDOCRINE.pulse(

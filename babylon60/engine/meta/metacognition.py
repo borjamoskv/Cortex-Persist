@@ -9,8 +9,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from cortex.utils.void_vec import cosine_similarity
 from pydantic import BaseModel
+
+from babylon60.utils.void_vec import cosine_similarity
 
 
 class DoubtAlert(BaseModel):

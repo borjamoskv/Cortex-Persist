@@ -1,4 +1,3 @@
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import atexit
 import logging
 import mmap
@@ -7,7 +6,8 @@ import struct
 import weakref
 from typing import Any
 
-from cortex.agents.primitives.dispatcher import apex_dispatcher
+from babylon60.agents.primitives.dispatcher import apex_dispatcher
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logger = logging.getLogger("cortex.ultramap")
 
@@ -21,8 +21,8 @@ except ImportError as e:
 
 # Evolution Ledger — replay-safe mutation tracking
 try:
-    from cortex.engine.checkpoint import CheckpointManager
-    from cortex.engine.evolution_ledger import ControlVector, EvolutionLedger
+    from babylon60.engine.checkpoint import CheckpointManager
+    from babylon60.engine.evolution_ledger import ControlVector, EvolutionLedger
 
     HAS_EVOLUTION_LEDGER = True
 except ImportError:

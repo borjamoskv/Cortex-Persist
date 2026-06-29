@@ -9,8 +9,9 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-from cortex.crypto import get_default_encrypter
-from cortex.engine.flow.causality_models import (
+
+from babylon60.crypto import get_default_encrypter
+from babylon60.engine.flow.causality_models import (
     EDGE_TAINTED_BY,
     Confidence,
     TaintReport,
@@ -66,7 +67,7 @@ class TaintPropagator:
         )
 
         if changes:
-            from cortex.database.core import causal_write
+            from babylon60.database.core import causal_write
 
             with causal_write(self.conn):
                 await self._apply_fact_updates(changes, nodes_data, meta_col, has_tenant, tenant_id)
@@ -281,7 +282,7 @@ class TaintPropagator:
         has_tenant: bool,
         tenant_id: str,
     ) -> None:
-        from cortex.utils.canonical import canonical_json
+        from babylon60.utils.canonical import canonical_json
 
         fact_updates: list[tuple[Any, ...]] = []
         enc = get_default_encrypter()

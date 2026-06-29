@@ -59,7 +59,7 @@ class CapabilityRegistry:
         has_vector = True
         try:
             # This is a light check
-            from cortex.database.core import connect
+            from babylon60.database.core import connect
 
             connect(":memory:")
             # We don't load the extension yet, just check if we want to

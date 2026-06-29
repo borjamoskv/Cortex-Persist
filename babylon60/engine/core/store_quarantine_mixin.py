@@ -12,8 +12,8 @@ import logging
 
 import aiosqlite
 
-from cortex.engine.mixins.base import EngineMixinBase
-from cortex.memory.temporal import now_iso
+from babylon60.engine.mixins.base import EngineMixinBase
+from babylon60.memory.temporal import now_iso
 
 __all__ = ["QuarantineMixin"]
 
@@ -44,7 +44,7 @@ class QuarantineMixin(EngineMixinBase):
         if not reason or not reason.strip():
             raise ValueError("Quarantine reason is required")
 
-        from cortex.engine.core.mutation_engine import MUTATION_ENGINE
+        from babylon60.engine.core.mutation_engine import MUTATION_ENGINE
 
         async def _impl(c: aiosqlite.Connection) -> bool:
             ts = now_iso()
@@ -91,7 +91,7 @@ class QuarantineMixin(EngineMixinBase):
         if not isinstance(fact_id, int) or fact_id <= 0:
             raise ValueError("Invalid fact_id")
 
-        from cortex.engine.core.mutation_engine import MUTATION_ENGINE
+        from babylon60.engine.core.mutation_engine import MUTATION_ENGINE
 
         async def _impl(c: aiosqlite.Connection) -> bool:
             ts = now_iso()

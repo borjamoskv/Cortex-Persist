@@ -1,8 +1,7 @@
 import logging
 
-from cortex.guards.landauer_guard import LandauerGuard
-
-from cortex.agents.primitives.dispatcher import apex_dispatcher
+from babylon60.agents.primitives.dispatcher import apex_dispatcher
+from babylon60.guards.landauer_guard import LandauerGuard
 
 logger = logging.getLogger(__name__)
 

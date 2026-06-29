@@ -48,7 +48,7 @@ class PredictorAST(ast.NodeVisitor):
 
 def scan_file_entropy(file_path: Path) -> list[dict[str, Any]]:
     """Deep analysis for entropy detection (Ω₂)."""
-    from cortex.utils.landauer import calculate_calcification
+    from babylon60.utils.landauer import calculate_calcification
 
     findings = []
     try:

@@ -27,15 +27,15 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final
 
-from cortex.engine.meta.meta_arbiter import (
+from babylon60.engine.meta.meta_arbiter import (
     ArbiterVerdict,
     LayerID,
     LayerSignal,
     MetaArbiter,
     Resolution,
 )
-from cortex.router.causal import CausalPolicyGradientRouter, CausalTrajectory
-from cortex.router.contract import (
+from babylon60.router.causal import CausalPolicyGradientRouter, CausalTrajectory
+from babylon60.router.contract import (
     CognitiveMode,
     InformationState,
     RoutingContext,
@@ -43,7 +43,7 @@ from cortex.router.contract import (
     Severity,
     resolve,
 )
-from cortex.router.policy import SignalVector
+from babylon60.router.policy import SignalVector
 
 logger = logging.getLogger("cortex.engine.flow.arbiter_bridge")
 

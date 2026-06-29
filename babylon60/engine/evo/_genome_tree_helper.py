@@ -6,7 +6,7 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-from cortex.isa.builder import AgentOp
+from babylon60.isa.builder import AgentOp
 
 
 def replace_target(tree: AgentOp, old_target: str, new_target: str) -> AgentOp:

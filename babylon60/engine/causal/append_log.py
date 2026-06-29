@@ -46,7 +46,7 @@ class CrystallizerDaemon:
             await self._task
 
     async def _loop(self):
-        from cortex.database.core import causal_write, connect_async
+        from babylon60.database.core import causal_write, connect_async
 
         db = await connect_async(self.db_path)
         await db.execute("PRAGMA journal_mode=WAL;")

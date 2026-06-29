@@ -10,11 +10,11 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from cortex.ledger.causal_graph import CausalGraph
+from babylon60.ledger.causal_graph import CausalGraph
 
 if TYPE_CHECKING:
-    from cortex.ledger.cost_field import CostField
-    from cortex.ledger.execution_trace import ExecutionTraceLedger
+    from babylon60.ledger.cost_field import CostField
+    from babylon60.ledger.execution_trace import ExecutionTraceLedger
 
 logger = logging.getLogger("cortex.engine.core.rollback_engine")
 
@@ -60,8 +60,8 @@ class CausalRollbackEngine:
         if not nodes:
             return {"status": "failed", "reason": "not_found", "details": sim}
 
-        from cortex.audit.ledger import EnterpriseAuditLedger
-        from cortex.database.core import connect_async
+        from babylon60.audit.ledger import EnterpriseAuditLedger
+        from babylon60.database.core import connect_async
 
         async with await connect_async(self.db_path) as conn:
             # Mark all affected nodes as rolled_back

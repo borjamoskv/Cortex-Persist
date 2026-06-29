@@ -18,10 +18,11 @@ Edge-compatible: Falls back to CPU. Fingerprint comparison is O(D) where D=384.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import struct
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.semantic_hash")
 
@@ -138,10 +139,11 @@ def semantic_fingerprint(
         raise ValueError("Cannot fingerprint empty text")
 
     if embedder is None:
-        from cortex.embeddings import LocalEmbedder
+        from babylon60.embeddings import LocalEmbedder
 
         embedder = LocalEmbedder()
 
+    assert embedder is not None
     embedding = embedder.embed(text)
     if isinstance(embedding[0], list):
         embedding = embedding[0]
@@ -223,10 +225,11 @@ def batch_fingerprint(
         return []
 
     if embedder is None:
-        from cortex.embeddings import LocalEmbedder
+        from babylon60.embeddings import LocalEmbedder
 
         embedder = LocalEmbedder()
 
+    assert embedder is not None
     embeddings = embedder.embed_batch(texts)
 
     results = []

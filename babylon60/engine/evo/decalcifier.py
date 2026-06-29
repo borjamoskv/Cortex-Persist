@@ -13,7 +13,8 @@ import time
 from typing import Any
 
 import aiosqlite
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 
 logger = logging.getLogger("cortex.engine.evo.decalcifier")
 
@@ -57,7 +58,7 @@ class SovereignDecalcifier:
             # So we create an ephemeral connection with isolation_level=None to execute VACUUM.
             import sqlite3
 
-            from cortex.core.paths import CORTEX_DB
+            from babylon60.core.paths import CORTEX_DB
 
             def _run_vacuum():
                 with sqlite3.connect(CORTEX_DB, isolation_level=None) as vconn:

@@ -6,8 +6,8 @@ on all structural generative assertions before they cross the Byzantine Boundary
 import logging
 import re
 
-from cortex.guards.landauer_guard import LandauerGuard
-from cortex.security.types import GuardViolation
+from babylon60.guards.landauer_guard import LandauerGuard
+from babylon60.security.types import GuardViolation
 
 logger = logging.getLogger("cortex.engine.exergy_sentinel")
 

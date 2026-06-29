@@ -13,7 +13,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.tools.trace_adapter import ExecutionTrace
+from babylon60.tools.trace_adapter import ExecutionTrace
 
 
 @dataclass(frozen=True)

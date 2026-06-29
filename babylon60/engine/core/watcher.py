@@ -10,10 +10,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from cortex.nexus_v8 import DomainOrigin, IntentType, NexusWorldModel, WorldMutation
+from babylon60.nexus_v8 import DomainOrigin, IntentType, NexusWorldModel, WorldMutation
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine as AsyncCortexEngine
+    from babylon60.engine import CortexEngine as AsyncCortexEngine
 
 logger = logging.getLogger("cortex.watcher")
 

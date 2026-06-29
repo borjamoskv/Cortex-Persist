@@ -10,8 +10,9 @@ from pathlib import Path
 from typing import Any
 
 import aiosqlite
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
-from cortex.extensions.signals.bus import SignalBus
+
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from babylon60.extensions.signals.bus import SignalBus
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ async def trigger_autonomic_reflex(
     )
 
     try:
-        from cortex.database.core import connect
+        from babylon60.database.core import connect
 
         db_path = getattr(cortex_engine, "_db_path", None)
         if db_path:
@@ -54,7 +55,7 @@ async def trigger_autonomic_reflex(
 
                         if target:
                             logger.warning("🎯 [REFLEX] Targeted Reflex: %s", target)
-                            from cortex.engine.speculative.keter import KeterEngine
+                            from babylon60.engine.speculative.keter import KeterEngine
 
                             keter = KeterEngine()
                             reflex_task = asyncio.create_task(
@@ -71,7 +72,7 @@ async def trigger_autonomic_reflex(
         logger.error("[REFLEX] Reflex failure: %s", e)
 
     ENDOCRINE.pulse(HormoneType.CORTISOL, 0.1)
-    from cortex.engine.speculative.keter import KeterEngine
+    from babylon60.engine.speculative.keter import KeterEngine
 
     keter = KeterEngine()
     try:

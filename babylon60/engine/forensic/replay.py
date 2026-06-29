@@ -8,7 +8,7 @@ cryptographically verified trajectory.
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from cortex.audit.ledger import EnterpriseAuditLedger
+from babylon60.audit.ledger import EnterpriseAuditLedger
 
 
 class ReplayEngine:

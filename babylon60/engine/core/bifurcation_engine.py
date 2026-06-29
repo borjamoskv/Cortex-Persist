@@ -23,7 +23,7 @@ class ExergyBifurcationEngine:
         """Branches the current reality (base_tenant) into a new isolated timeline."""
         new_tenant = f"tl_{uuid.uuid4().hex[:6]}"
 
-        from cortex.database.core import connect_async
+        from babylon60.database.core import connect_async
 
         async with await connect_async(self.db_path, timeout=10) as conn:
             cursor = await conn.execute(
@@ -77,7 +77,7 @@ class ExergyBifurcationEngine:
         Calculates the global Exergy of each timeline (Fitness = Coherence * Entropy Budget).
         Allows making decisions on which realities should collapse and which prevail.
         """
-        from cortex.database.core import connect_async
+        from babylon60.database.core import connect_async
 
         async with await connect_async(self.db_path, timeout=10) as conn:
             cursor = await conn.execute("SELECT DISTINCT tenant_id FROM thermodynamics_state")
@@ -131,7 +131,7 @@ class ExergyBifurcationEngine:
         if not dead_tenants:
             return
 
-        from cortex.database.core import connect_async
+        from babylon60.database.core import connect_async
 
         async with await connect_async(self.db_path, timeout=10) as conn:
             for t in dead_tenants:

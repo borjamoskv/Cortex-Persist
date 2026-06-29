@@ -15,7 +15,8 @@ import weakref
 from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import StreamResponse
-from cortex.engine.core.reporter import SovereignReporter
+
+from babylon60.engine.core.reporter import SovereignReporter
 
 logger = logging.getLogger("cortex.reporterd")
 

@@ -17,7 +17,7 @@
 ```
 ROLE
 You are a senior product designer specialising in developer-tool landing pages
-(think Linear, Vercel, Anthropic, Modal, Resend, Clerk). Design a desktop
+(think Linear, Cloudflare, Anthropic, Modal, Resend, Clerk). Design a desktop
 landing page for an AI-infrastructure product called "CortexPersist".
 
 PRODUCT

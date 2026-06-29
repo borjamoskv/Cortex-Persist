@@ -15,8 +15,9 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-from cortex.engine.evo._mutation_projectors import project
-from cortex.extensions.axioms.topological_id import flake_gen
+
+from babylon60.engine.evo._mutation_projectors import project
+from babylon60.extensions.axioms.topological_id import flake_gen
 
 __all__ = ["FactMutationEngine"]
 logger = logging.getLogger("cortex.mutation_engine")

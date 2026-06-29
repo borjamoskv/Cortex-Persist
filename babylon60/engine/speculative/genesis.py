@@ -26,8 +26,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.engine.evo.genome import FitnessRecord, GenomeMutator, StrategyGenome
-from cortex.isa.builder import (
+from babylon60.engine.evo.genome import FitnessRecord, GenomeMutator, StrategyGenome
+from babylon60.isa.builder import (
     Predicate,
     bind,
     cond,

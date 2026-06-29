@@ -11,8 +11,9 @@ import logging
 from typing import Any
 
 import aiosqlite
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.core.mutation_engine import MUTATION_ENGINE
+
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from babylon60.engine.core.mutation_engine import MUTATION_ENGINE
 
 logger = logging.getLogger("cortex.growth")
 
@@ -112,8 +113,8 @@ class NeuralGrowthEngine:
                     commit=False,
                 )
             else:
-                from cortex.engine.core.fact_store_core import insert_fact_record
-                from cortex.memory.temporal import now_iso
+                from babylon60.engine.core.fact_store_core import insert_fact_record
+                from babylon60.memory.temporal import now_iso
 
                 ts = now_iso()
                 # Ω₈: Morphic Resonance. Promoción a Axioma Global.

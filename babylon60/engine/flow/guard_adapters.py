@@ -71,7 +71,7 @@ class HealthGuardAdapter:
                     )
                 return
 
-        from cortex.guards.health_guard import HealthGuard
+        from babylon60.guards.health_guard import HealthGuard
 
         guard = HealthGuard(db_path=self._db_path)
         try:
@@ -104,7 +104,7 @@ class ContradictionGuardAdapter:
     ) -> None:
         if fact_type not in ("decision", "rule", "error"):
             return
-        from cortex.guards.contradiction_guard import detect_contradictions
+        from babylon60.guards.contradiction_guard import detect_contradictions
 
         report = await detect_contradictions(
             new_content=content, new_project=project, db_path=self._db_path
@@ -132,7 +132,7 @@ class VerifierGuardAdapter:
     ) -> None:
         if fact_type != "code":
             return
-        from cortex.verification.verifier import SovereignVerifier
+        from babylon60.verification.verifier import SovereignVerifier
 
         result = SovereignVerifier().check(content, context={"project": project})
         if not result.is_valid:
@@ -156,7 +156,7 @@ class ExergyGuardAdapter:
         *,
         tenant_id: str = "default",
     ) -> None:
-        from cortex.guards.exergy_guard import ExergyGuard
+        from babylon60.guards.exergy_guard import ExergyGuard
 
         guard = ExergyGuard()
         guard.check_thermodynamic_yield(content, project, fact_type, source=meta.get("source"))
@@ -179,7 +179,7 @@ class ZKGuardAdapter:
 
         if os.environ.get("CORTEX_TESTING") == "1":
             return
-        from cortex.guards.zk_guard import ZKSwarmGuard
+        from babylon60.guards.zk_guard import ZKSwarmGuard
 
         guard = ZKSwarmGuard()
         await guard.verify_integrity(content, fact_type, meta, tenant_id=tenant_id)
@@ -201,7 +201,7 @@ class VirgoGuardAdapter:
         *,
         tenant_id: str = "default",
     ) -> None:
-        from cortex.guards.virgo import VirgoContextGuard
+        from babylon60.guards.virgo import VirgoContextGuard
 
         guard = VirgoContextGuard(engine=self._engine)
         await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
@@ -229,7 +229,7 @@ class OmegaGuardAdapter:
         ):
             return
 
-        from cortex.guards.omega_auditor import run_omega_audit
+        from babylon60.guards.omega_auditor import run_omega_audit
 
         conflicts = await run_omega_audit(content, project)
         if conflicts:
@@ -253,7 +253,7 @@ class ArchaeologyGuardAdapter:
         *,
         tenant_id: str = "default",
     ) -> None:
-        from cortex.guards.archaeology_guard import ArchaeologyGuard
+        from babylon60.guards.archaeology_guard import ArchaeologyGuard
 
         guard = ArchaeologyGuard()
         result = await guard.check_history_audited(
@@ -306,8 +306,8 @@ class SignalEmitHook:
         source: str | None = None,
         db_path: str | None = None,
     ) -> None:
-        from cortex.extensions.signals.bus import AsyncSignalBus
-        from cortex.extensions.signals.fact_hook import _compact_threshold
+        from babylon60.extensions.signals.bus import AsyncSignalBus
+        from babylon60.extensions.signals.fact_hook import _compact_threshold
 
         bus = AsyncSignalBus(conn)
         payload = {
@@ -394,7 +394,7 @@ class OuroborosEntropyGuardAdapter:
         *,
         tenant_id: str = "default",
     ) -> None:
-        from cortex.guards.ouroboros_entropy_guard import OuroborosEntropyGuard
+        from babylon60.guards.ouroboros_entropy_guard import OuroborosEntropyGuard
 
         guard = OuroborosEntropyGuard()
         await guard.check(

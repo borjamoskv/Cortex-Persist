@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.engine.temporal.forgetting_models import (
+from babylon60.engine.temporal.forgetting_models import (
     EvictionVerdict,
     OracleReport,
     PolicyRecommendation,

@@ -5,11 +5,11 @@ import logging
 import random
 from typing import TYPE_CHECKING
 
-from cortex.engine.evo.genome import MutationType, StrategyGenome
-from cortex.engine.speculative.genesis import AgentBlueprint
+from babylon60.engine.evo.genome import MutationType, StrategyGenome
+from babylon60.engine.speculative.genesis import AgentBlueprint
 
 if TYPE_CHECKING:
-    from cortex.swarm.autopoietic_agent import AutopoieticAgent
+    from babylon60.swarm.autopoietic_agent import AutopoieticAgent
 
 logger = logging.getLogger("cortex.swarm.autopoietic_agent")
 

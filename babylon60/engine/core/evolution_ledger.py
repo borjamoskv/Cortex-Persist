@@ -22,7 +22,6 @@ portability and crash-safety (each line is atomic on POSIX fsync).
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 import os
@@ -34,6 +33,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.evolution_ledger")
 
@@ -463,7 +464,7 @@ class EvolutionLedger:
         Returns a snapshot that can be used to validate future replays
         without re-reading the entire log.
         """
-        from cortex.ledger.merkle import MerkleTree
+        from babylon60.ledger.merkle import MerkleTree
 
         hashes: list[str] = []
         for record in self.replay(mode=ReplayMode.STRICT):

@@ -11,10 +11,10 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 
 if TYPE_CHECKING:
-    from cortex.extensions.signals.bus import SignalBus
+    from babylon60.extensions.signals.bus import SignalBus
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ async def manifest_singularity(signal_bus: SignalBus | None = None) -> None:
 
 async def transfigure_ui(html_file: Path, signal_bus: SignalBus | None = None) -> bool:
     """Ω₆: Sovereign UI Refactor (Transfiguration)."""
-    from cortex.cli.bicameral import bicameral
+    from babylon60.cli.bicameral import bicameral
 
     msg = f"Transfiriendo coherencia estética a {html_file.name}"
     bicameral.log_limbic(msg, source="APOTH")

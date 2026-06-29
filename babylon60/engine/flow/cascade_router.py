@@ -5,13 +5,14 @@ Tactical routing logic to delegate heavy LLM tasks to local CLI engines:
 Gemini (Antigravity), Claude Code, and Codex.
 """
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import asyncio
 import logging
 import os
 import sqlite3
 import subprocess
 from pathlib import Path
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logger = logging.getLogger("cortex_cascade.router")
 
@@ -25,7 +26,7 @@ class CascadeRouter:
     def fallback_response(self, engine: str, prompt: str) -> str:
         """Fallback response when engine is unavailable."""
         try:
-            from cortex.engine.forensic.circuit_breaker import CircuitBreaker
+            from babylon60.engine.forensic.circuit_breaker import CircuitBreaker
 
             cb = CircuitBreaker(f"cascade_router_{engine}")
             cb._on_failure()

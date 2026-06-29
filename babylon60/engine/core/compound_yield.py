@@ -11,8 +11,8 @@ import sqlite3
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.database.core import connect as db_connect
-from cortex.memory.temporal import now_iso
+from babylon60.database.core import connect as db_connect
+from babylon60.memory.temporal import now_iso
 
 logger = logging.getLogger("cortex.chronos.compound")
 
@@ -265,9 +265,9 @@ class CompoundYieldTracker:
         project: str = "system",
     ) -> int | None:
         """Persist a CHRONOS Compound report as a CORTEX fact + emit signal."""
-        from cortex.database.core import connect_async_ctx
-        from cortex.engine.core.fact_store_core import insert_fact_record
-        from cortex.extensions.signals.bus import AsyncSignalBus
+        from babylon60.database.core import connect_async_ctx
+        from babylon60.engine.core.fact_store_core import insert_fact_record
+        from babylon60.extensions.signals.bus import AsyncSignalBus
 
         try:
             async with connect_async_ctx(self.db_path) as conn:

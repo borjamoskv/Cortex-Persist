@@ -71,7 +71,7 @@ class EngineMixinBase:
 
         Security: Strictly validates that the row belongs to the requested tenant.
         """
-        from cortex.engine.cognitive.models import row_to_fact
+        from babylon60.engine.cognitive.models import row_to_fact
 
         # RLS Verification: row[1] is always tenant_id in canonical FACT_COLUMNS
         row_tuple = tuple(row)
@@ -100,7 +100,7 @@ class EngineMixinBase:
     def _resolve_tenant(self, tenant_id: str) -> str:
         """Resolve and validate the tenant ID from context if 'default' is provided."""
         if tenant_id == "default":
-            from cortex.extensions.security.tenant import get_tenant_id
+            from babylon60.extensions.security.tenant import get_tenant_id
 
             tenant_id = get_tenant_id()
 

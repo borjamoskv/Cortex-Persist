@@ -10,8 +10,9 @@ import logging
 from pathlib import Path
 
 import aiosqlite
-from cortex.engine.cognitive.models import row_to_fact
-from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
+
+from babylon60.engine.cognitive.models import row_to_fact
+from babylon60.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 
 logger = logging.getLogger("cortex.engine.guards")
 
@@ -27,7 +28,7 @@ class DelegatesMixin:
         tenant_id: str = "default",
     ) -> list:
         """Recall causal episodes matching a query."""
-        from cortex.memory.episodic import CausalTracer
+        from babylon60.memory.episodic import CausalTracer
 
         async with self.session() as conn:  # pyright: ignore[reportAttributeAccessIssue]
             tracer = CausalTracer(conn)
@@ -41,7 +42,7 @@ class DelegatesMixin:
         tenant_id: str = "default",
     ):
         """Trace the full causal DAG from a given fact ID."""
-        from cortex.memory.episodic import CausalTracer
+        from babylon60.memory.episodic import CausalTracer
 
         async with self.session() as conn:  # pyright: ignore[reportAttributeAccessIssue]
             tracer = CausalTracer(conn)
@@ -86,13 +87,13 @@ class DelegatesMixin:
         res = await super().get_fact(fact_id, tenant_id=tenant_id)  # pyright: ignore[reportAttributeAccessIssue]
         if not res:
             return None
-        from cortex.engine.cognitive.models import Fact
+        from babylon60.engine.cognitive.models import Fact
 
         return Fact(**{k: v for k, v in res.items() if k in Fact.__dataclass_fields__})
 
     async def retrieve(self, fact_id: int):
         """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
-        from cortex.utils.errors import FactNotFound
+        from babylon60.utils.errors import FactNotFound
 
         async with (
             self.session() as conn,  # pyright: ignore[reportAttributeAccessIssue]
@@ -115,7 +116,7 @@ class DelegatesMixin:
 
     async def propagate_taint(self, fact_id: int, tenant_id: str = "default"):
         """Propagate causal taint through the tenant-scoped causality graph."""
-        from cortex.engine.flow.causality import AsyncCausalGraph
+        from babylon60.engine.flow.causality import AsyncCausalGraph
 
         tenant_id = self._resolve_tenant(tenant_id)  # pyright: ignore[reportAttributeAccessIssue]
         async with self.session() as conn:  # pyright: ignore[reportAttributeAccessIssue]
@@ -126,7 +127,7 @@ class DelegatesMixin:
     def get_trust_registry(self):
         """Return the in-memory trust registry used by trust endpoints."""
         if self._trust_registry is None:
-            from cortex.swarm.trust_registry import TrustRegistry
+            from babylon60.swarm.trust_registry import TrustRegistry
 
             self._trust_registry = TrustRegistry()
         return self._trust_registry
@@ -139,7 +140,7 @@ class DelegatesMixin:
     async def get_all_active_facts(self, *args, **kwargs):
         """Retrieve all active facts across all projects, wrapped in models."""
         results = await super().get_all_active_facts(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
-        from cortex.engine.cognitive.models import Fact
+        from babylon60.engine.cognitive.models import Fact
 
         return [
             Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results
@@ -148,7 +149,7 @@ class DelegatesMixin:
     async def history(self, *args, **kwargs):
         """Retrieve historical facts wrapped in models."""
         results = await super().history(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
-        from cortex.engine.cognitive.models import Fact
+        from babylon60.engine.cognitive.models import Fact
 
         return [
             Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results
@@ -157,7 +158,7 @@ class DelegatesMixin:
     async def get_causal_chain(self, *args, **kwargs):
         """Retrieve causal chain facts wrapped in models."""
         results = await super().get_causal_chain(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
-        from cortex.engine.cognitive.models import Fact
+        from babylon60.engine.cognitive.models import Fact
 
         return [
             Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results
@@ -165,7 +166,7 @@ class DelegatesMixin:
 
     async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""
-        from cortex.extensions.shannon.report import EntropyReport
+        from babylon60.extensions.shannon.report import EntropyReport
 
         return await EntropyReport.analyze(self, project)  # pyright: ignore[reportArgumentType]
 
@@ -175,13 +176,13 @@ class DelegatesMixin:
         top_domains: int = 15,
     ):
         """Cognitive Fingerprint - extract behavioral patterns from the Ledger."""
-        from cortex.extensions.fingerprint.extractor import FingerprintExtractor
+        from babylon60.extensions.fingerprint.extractor import FingerprintExtractor
 
         return await FingerprintExtractor.extract(self, project, top_domains)  # pyright: ignore[reportArgumentType]
 
     async def immortality_index(self, project: str | None = None) -> dict:
         """Immortality Index (ι) - cognitive crystallization metric."""
-        from cortex.extensions.shannon.immortality import ImmortalityIndex
+        from babylon60.extensions.shannon.immortality import ImmortalityIndex
 
         return await ImmortalityIndex.compute(self, project)  # pyright: ignore[reportArgumentType]
 
@@ -191,13 +192,13 @@ class DelegatesMixin:
         tenant_id: str = "default",
     ) -> list:
         """Bellman Policy Engine - prioritized action queue."""
-        from cortex.extensions.policy import PolicyEngine
+        from babylon60.extensions.policy import PolicyEngine
 
         policy = PolicyEngine(self)  # pyright: ignore[reportArgumentType]
         return await policy.evaluate(project=project, tenant_id=tenant_id)
 
     def export_snapshot(self, out_path: str | Path) -> str:
-        from cortex.extensions.sync.snapshot import export_snapshot
+        from babylon60.extensions.sync.snapshot import export_snapshot
 
         return export_snapshot(self, out_path)  # type: ignore[reportArgumentType,reportReturnType]
 

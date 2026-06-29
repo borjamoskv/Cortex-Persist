@@ -98,11 +98,11 @@ async def guard_exec(ctx: SagaContext):
 
     import json
 
-    from cortex.engine.causal.taint_engine import check_anergy_and_green_theater
-
+    from babylon60.engine.causal.taint_engine import check_anergy_and_green_theater
     from babylon60.guards.uptimebolt_guard import enforce_deploy_safety
 
-    payload_str = json.dumps(ctx["payload"]) if isinstance(ctx["payload"], dict) else str(ctx["payload"])
+    payload = ctx.get("payload")
+    payload_str = json.dumps(payload) if isinstance(payload, dict) else str(payload)
     try:
         enforce_deploy_safety(payload_str)
         check_anergy_and_green_theater(payload_str)
@@ -119,7 +119,7 @@ async def taint_exec(ctx: SagaContext):
     import datetime
     import json
 
-    from cortex.engine.causal.taint_engine import _fast_sha3, canonicalize_content
+    from babylon60.engine.causal.taint_engine import _fast_sha3, canonicalize_content
 
     agent_id = ctx.get("agent_id", "SYS_ROOT")
     session_id = ctx.get("session_id", "default_session")
@@ -147,7 +147,7 @@ async def schema_comp(ctx: SagaContext):
 
 async def encrypt_exec(ctx: SagaContext):
     # Encryption using C5-REAL AES-GCM
-    from cortex.crypto.aes import get_default_encrypter
+    from babylon60.crypto.aes import get_default_encrypter
 
     enc = get_default_encrypter()
     tenant = ctx.get("tenant_id", "default")
@@ -169,7 +169,7 @@ async def ledger_exec(ctx: SagaContext):
     # Audit trail
     import json
 
-    from cortex.engine.causal.taint_engine import _fast_sha3, canonicalize_content
+    from babylon60.engine.causal.taint_engine import _fast_sha3, canonicalize_content
     
     payload_str = json.dumps(ctx.get("payload", {}))
     canonical = canonicalize_content(payload_str)

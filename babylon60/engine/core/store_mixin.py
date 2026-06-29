@@ -12,23 +12,23 @@ import logging
 from typing import Any, ClassVar
 
 import aiosqlite
-from cortex.database.core import causal_write
+from babylon60.database.core import causal_write
 
-from cortex.crypto import get_default_encrypter
-from cortex.engine.cognitive.capabilities import CapabilityRegistry
-from cortex.engine.core.embedding_engine import embed_fact_async
-from cortex.engine.core.fact_store_core import insert_fact_record
-from cortex.database.mixins.ghost_mixin import GhostMixin
-from cortex.database.mixins.privacy_mixin import PrivacyMixin
-from cortex.engine.core.store_mutation import (
+from babylon60.crypto import get_default_encrypter
+from babylon60.engine.cognitive.capabilities import CapabilityRegistry
+from babylon60.engine.core.embedding_engine import embed_fact_async
+from babylon60.engine.core.fact_store_core import insert_fact_record
+from babylon60.database.mixins.ghost_mixin import GhostMixin
+from babylon60.database.mixins.privacy_mixin import PrivacyMixin
+from babylon60.engine.core.store_mutation import (
     deprecate_impl_logic,
     invalidate_impl_logic,
     purge_logic,
 )
-from cortex.engine.core.store_quarantine_mixin import QuarantineMixin
-from cortex.engine.core.store_validation import run_store_validation_logic
-from cortex.engine.core.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
-from cortex.guards.thermodynamic import AgentMode, ThermodynamicCounters
+from babylon60.engine.core.store_quarantine_mixin import QuarantineMixin
+from babylon60.engine.core.store_validation import run_store_validation_logic
+from babylon60.engine.core.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
+from babylon60.guards.thermodynamic import AgentMode, ThermodynamicCounters
 
 # now_iso removed (internal use relocated)
 
@@ -193,7 +193,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
 
         await self._run_pre_store_guards(conn, content, project, fact_type, meta, tenant_id)
 
-        from cortex.guards.ctre_guard import CTRECollisionError
+        from babylon60.guards.ctre_guard import CTRECollisionError
 
         try:
             dedupe_id, meta, content, fact_type = await self._run_store_validation(
@@ -275,7 +275,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     ) -> int:
         if tx_id is not None:
             return tx_id
-        from cortex.utils.canonical import compute_fact_hash
+        from babylon60.utils.canonical import compute_fact_hash
 
         content_hash = compute_fact_hash(content)
         return await self._log_transaction(
@@ -454,7 +454,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     def _invalidate_l1_cache(self, tenant_id: str) -> None:
         """Invalidate search L1 cache for the tenant."""
         try:
-            from cortex.cache import RedisL1Cache
+            from babylon60.cache import RedisL1Cache
 
             cache = RedisL1Cache.singleton()
             if cache.available:

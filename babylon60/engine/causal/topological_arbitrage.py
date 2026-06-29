@@ -13,11 +13,12 @@ Características:
 - Evaluación estructural combinada (descendants, fan-out, fan-in, depth)
 """
 
-from babylon60.crypto.hash_registry import cortex_hash
 import logging
 from collections import defaultdict, deque
 from decimal import Decimal
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger(__name__)
 
@@ -346,7 +347,6 @@ class TopologyIndex:
         Calculates a deterministic SHA-256 hash of the topological index state.
         This provides a cryptographic fingerprint of the scheduler's state.
         """
-        import hashlib
         import json
 
         state_repr = []

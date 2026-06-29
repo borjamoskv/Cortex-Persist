@@ -7,11 +7,12 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 import aiosqlite
-from cortex.crypto import get_default_encrypter
-from cortex.engine.flow.causality import AsyncCausalGraph
+
+from babylon60.crypto import get_default_encrypter
+from babylon60.engine.flow.causality import AsyncCausalGraph
 
 if TYPE_CHECKING:
-    from cortex.engine.core.mutation_engine import FactMutationEngine
+    from babylon60.engine.core.mutation_engine import FactMutationEngine
 
 logger = logging.getLogger("cortex.mutation_engine")
 

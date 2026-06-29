@@ -3,7 +3,7 @@ import logging
 import sqlite3
 from pathlib import Path
 
-from cortex.services.email import send_reengagement_email
+from babylon60.services.email import send_reengagement_email
 
 # Logging Configuration
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

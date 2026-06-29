@@ -57,7 +57,7 @@ async def embed_fact_async(
             else:
                 embedding = await asyncio.to_thread(embedder.embed, content)
 
-            from cortex.embeddings.obfuscation import obfuscate_vector
+            from babylon60.embeddings.obfuscation import obfuscate_vector
 
             embedding = obfuscate_vector(embedding, tenant_id=tenant_id, project=project)
 
@@ -76,8 +76,9 @@ async def embed_fact_async(
     ):
         try:
             import numpy as np
-            from cortex.memory.hdc.algebra import bind
-            from cortex.memory.models import CortexFactModel
+
+            from babylon60.memory.hdc.algebra import bind
+            from babylon60.memory.models import CortexFactModel
 
             fact_hv = memory_manager._hdc_encoder.encode_text(content)
             context_hv = memory_manager.get_context_vector()

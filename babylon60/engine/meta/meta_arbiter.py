@@ -17,13 +17,13 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-from cortex.engine.meta.cognitive_arbiter import MetaArbiter
-from cortex.engine.meta.meta_arbiter_kernel import (
+from babylon60.engine.meta.cognitive_arbiter import MetaArbiter
+from babylon60.engine.meta.meta_arbiter_kernel import (
     CollapseReceipt,
     MetaArbiterKernel,
     TrajectoryScore,
 )
-from cortex.engine.meta.meta_arbiter_types import (
+from babylon60.engine.meta.meta_arbiter_types import (
     ArbiterVerdict,
     ConflictPair,
     LayerID,

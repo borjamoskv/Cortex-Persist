@@ -12,9 +12,9 @@ import logging
 import random
 from typing import Any
 
-from cortex.engine.evo._genome_tree_helper import remove_target, replace_target
-from cortex.engine.evo._genome_types import MutationType, StrategyGenome
-from cortex.isa.builder import (
+from babylon60.engine.evo._genome_tree_helper import remove_target, replace_target
+from babylon60.engine.evo._genome_types import MutationType, StrategyGenome
+from babylon60.isa.builder import (
     Predicate,
     cond,
     dispatch,

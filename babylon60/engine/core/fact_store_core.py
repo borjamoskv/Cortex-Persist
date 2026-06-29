@@ -12,8 +12,9 @@ import sqlite3
 from typing import Any
 
 import aiosqlite
-from cortex.memory.temporal import now_iso
-from cortex.utils.canonical import compute_fact_hash
+
+from babylon60.memory.temporal import now_iso
+from babylon60.utils.canonical import compute_fact_hash
 
 logger = logging.getLogger("cortex")
 
@@ -29,8 +30,8 @@ async def _prepare_fact_content(
     content: str, tenant_id: str
 ) -> tuple[str, str, str | None, str | None]:
     """Encrypted content and cryptographic signatures."""
-    from cortex.crypto import get_default_encrypter
-    from cortex.extensions.security.signatures import get_default_signer
+    from babylon60.crypto import get_default_encrypter
+    from babylon60.extensions.security.signatures import get_default_signer
 
     f_hash = compute_fact_hash(content)
     enc = get_default_encrypter()
@@ -102,10 +103,10 @@ async def insert_fact_record(
 
     import os
 
-    from cortex.engine.causal.taint_engine import enforce_taint_check
-    from cortex.guards.memory_firewall import MemoryFirewallGuard
-    from cortex.guards.osint_guard import OSINTGuard
-    from cortex.guards.secret_guard import SecretGuard
+    from babylon60.engine.causal.taint_engine import enforce_taint_check
+    from babylon60.guards.memory_firewall import MemoryFirewallGuard
+    from babylon60.guards.osint_guard import OSINTGuard
+    from babylon60.guards.secret_guard import SecretGuard
 
     # Enforce OSINT containment boundaries (PII & Path Bleed)
     OSINTGuard.verify_clean_text(content)
@@ -139,7 +140,7 @@ async def insert_fact_record(
         expected_hash = meta.get("expected_ui_hash")
         current_hash = meta.get("current_ui_hash")
         if expected_hash is not None and current_hash is not None:
-            from cortex.guards.ctre_guard import CTRECollisionError, CTREGuard
+            from babylon60.guards.ctre_guard import CTRECollisionError, CTREGuard
 
             success, epsilon = CTREGuard.validate_commit(int(expected_hash), int(current_hash))
             if not success:
@@ -212,8 +213,8 @@ async def _build_fact_payload(
     ts: str,
 ) -> list[tuple[str, Any]]:
     """Construct the SQL payload with layout-aware column detection."""
-    from cortex.engine.cognitive.models import Fact
-    from cortex.engine.meta.metadata_engine import MetadataEngine
+    from babylon60.engine.cognitive.models import Fact
+    from babylon60.engine.meta.metadata_engine import MetadataEngine
 
     temp_fact = Fact(
         id=0,
@@ -282,7 +283,7 @@ async def _record_causality(
     parent_decision_id: int | None,
 ) -> None:
     """Record causal linkage for the fact."""
-    from cortex.engine.flow.causality import (
+    from babylon60.engine.flow.causality import (
         EDGE_DERIVED_FROM,
         EDGE_TRIGGERED_BY,
         EDGE_UPDATED_FROM,
@@ -353,7 +354,7 @@ async def _post_insert_actions(
     await _record_causality(conn, fact_id, project, tenant_id, meta, parent_decision_id)
 
     try:
-        from cortex.graph import process_fact_graph
+        from babylon60.graph import process_fact_graph
 
         await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
     except (ImportError, OSError, ValueError, sqlite3.Error) as e:
@@ -367,7 +368,7 @@ async def resolve_causality_async(
 
     Ω₁: Every decision must point to its progenitor.
     """
-    from cortex.engine.flow.causality import AsyncCausalOracle, link_causality
+    from babylon60.engine.flow.causality import AsyncCausalOracle, link_causality
 
     if not (meta and meta.get("causal_parent")):
         parent_sig = await AsyncCausalOracle.find_parent_signal(conn, project)
@@ -379,7 +380,7 @@ def resolve_causality(
     db_path: str | None, project: str, meta: dict[str, Any] | None
 ) -> dict[str, Any]:
     """Resolve causal linking for a fact (sync)."""
-    from cortex.engine.flow.causality import CausalOracle, link_causality
+    from babylon60.engine.flow.causality import CausalOracle, link_causality
 
     if db_path and not (meta and meta.get("causal_parent")):
         parent_sig = CausalOracle.find_parent_signal(db_path, project)

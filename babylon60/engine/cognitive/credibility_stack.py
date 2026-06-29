@@ -7,23 +7,24 @@ and triggers physical snapshots.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
-if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+from babylon60.crypto.hash_registry import cortex_hash
 
-from cortex.engine.core.snapshots import SnapshotManager
-from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
-from cortex.extensions.security.signatures import (
+if TYPE_CHECKING:
+    from babylon60.engine import CortexEngine
+
+from babylon60.engine.core.snapshots import SnapshotManager
+from babylon60.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
+from babylon60.extensions.security.signatures import (
     Ed25519Signer,
     generate_keypair,
     get_default_signer,
 )
-from cortex.extensions.shannon.analyzer import shannon_entropy
+from babylon60.extensions.shannon.analyzer import shannon_entropy
 
 
 class LedgerCredibilityStack:

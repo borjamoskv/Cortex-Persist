@@ -43,7 +43,7 @@ class AgentExecutor:
 
         if self._provider is None and self._router is None:
             try:
-                from cortex.pipeline.provider_factory import build_executor_stack
+                from babylon60.pipeline.provider_factory import build_executor_stack
 
                 router, provider = build_executor_stack()
                 self._router = router
@@ -60,7 +60,7 @@ class AgentExecutor:
             return self._provider
 
         try:
-            from cortex.extensions.llm.provider import LLMProvider
+            from babylon60.extensions.llm.provider import LLMProvider
 
             self._provider = LLMProvider(provider=self._provider_name)
             return self._provider
@@ -75,7 +75,7 @@ class AgentExecutor:
             return self._router
 
         try:
-            from cortex.extensions.llm.router import CortexLLMRouter
+            from babylon60.extensions.llm.router import CortexLLMRouter
 
             provider = await self._ensure_provider()
             if provider is None:
@@ -168,7 +168,7 @@ class AgentExecutor:
         budget_remaining: float,
     ) -> dict[str, Any]:
         """Execute a single agent via LLM inference."""
-        from cortex.extensions.llm._models import CortexPrompt, IntentProfile
+        from babylon60.extensions.llm._models import CortexPrompt, IntentProfile
 
         # Map pipeline agent_id to LLM IntentProfile
         intent_map = {

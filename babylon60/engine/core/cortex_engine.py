@@ -13,32 +13,33 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import aiosqlite
-from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-from cortex.database.mixins.query_mixin import QueryMixin
-from cortex.database.mixins.search_mixin import SearchMixin
-from cortex.database.mixins.sync_mixin import SyncMixin
-from cortex.database.mixins.transaction_mixin import TransactionMixin
-from cortex.engine.core._engine_connection import ConnectionMixin
-from cortex.engine.core._engine_delegates import DelegatesMixin
-from cortex.engine.core.durability import PersistenceSupervisor
-from cortex.engine.core.memory_mixin import MemoryMixin
-from cortex.engine.core.store_mixin import StoreMixin
-from cortex.engine.mixins.components import ComponentsMixin
-from cortex.engine.mixins.optimization import OptimizationMixin
-from cortex.swarm.agent_mixin import AgentMixin
+
+from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+from babylon60.database.mixins.query_mixin import QueryMixin
+from babylon60.database.mixins.search_mixin import SearchMixin
+from babylon60.database.mixins.sync_mixin import SyncMixin
+from babylon60.database.mixins.transaction_mixin import TransactionMixin
+from babylon60.engine.core._engine_connection import ConnectionMixin
+from babylon60.engine.core._engine_delegates import DelegatesMixin
+from babylon60.engine.core.durability import PersistenceSupervisor
+from babylon60.engine.core.memory_mixin import MemoryMixin
+from babylon60.engine.core.store_mixin import StoreMixin
+from babylon60.engine.mixins.components import ComponentsMixin
+from babylon60.engine.mixins.optimization import OptimizationMixin
+from babylon60.swarm.agent_mixin import AgentMixin
 
 if TYPE_CHECKING:
-    from cortex.consensus.manager import ConsensusManager
-    from cortex.embeddings import LocalEmbedder
-    from cortex.embeddings.manager import EmbeddingManager
-    from cortex.engine.flow.lock import SovereignLock
-    from cortex.facts.manager import FactManager
-    from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
-    from cortex.mac_maestro.executor import MaestroExecutor
-    from cortex.swarm.auth import ByzantineAuthLayer
-    from cortex.swarm.trust_registry import TrustRegistry
+    from babylon60.consensus.manager import ConsensusManager
+    from babylon60.embeddings import LocalEmbedder
+    from babylon60.embeddings.manager import EmbeddingManager
+    from babylon60.engine.flow.lock import SovereignLock
+    from babylon60.facts.manager import FactManager
+    from babylon60.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
+    from babylon60.mac_maestro.executor import MaestroExecutor
+    from babylon60.swarm.auth import ByzantineAuthLayer
+    from babylon60.swarm.trust_registry import TrustRegistry
 try:
-    from cortex.extensions.health.health_mixin import (
+    from babylon60.extensions.health.health_mixin import (
         HealthMixin,  # pyright: ignore[reportAssignmentType]
     )
 except ImportError:
@@ -133,7 +134,7 @@ class CortexEngine(
         (Blast Radius >= 3)
         """
         try:
-            from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
+            from babylon60.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
             
             radius = UltrathinkPhysicsEngine.measure_blast_radius(dependency_graph, epicenter_node)
             
@@ -152,7 +153,7 @@ class CortexEngine(
                 
                 # Emit system-wide critical alert to the Ledger
                 try:
-                    from cortex.agents.primitives.dispatcher import apex_dispatcher
+                    from babylon60.agents.primitives.dispatcher import apex_dispatcher
                     apex_dispatcher.execute(
                         "OP_GIT_SENTINEL",
                         commit_msg=f"CORTEX-ULTRATHINK: P0 Singularity Auto-Triggered at {epicenter_node} ({formation.value})",
@@ -204,7 +205,7 @@ class CortexEngine(
         """Protocol requirement for SearchMixin."""
         if self._embedder is None:
             try:
-                from cortex.embeddings import LocalEmbedder
+                from babylon60.embeddings import LocalEmbedder
 
                 self._embedder = LocalEmbedder()
             except ImportError:

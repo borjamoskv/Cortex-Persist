@@ -222,10 +222,10 @@ class ChronosROI:
         This closes the observability loop - CHRONOS metrics are now
         part of the CORTEX knowledge graph, not a dead-end calculation.
         """
-        from cortex.database.core import connect_async_ctx
-        from cortex.engine.core.fact_store_core import insert_fact_record
-        from cortex.extensions.signals.bus import AsyncSignalBus
-        from cortex.memory.temporal import now_iso
+        from babylon60.database.core import connect_async_ctx
+        from babylon60.engine.core.fact_store_core import insert_fact_record
+        from babylon60.extensions.signals.bus import AsyncSignalBus
+        from babylon60.memory.temporal import now_iso
 
         try:
             async with connect_async_ctx(db_path) as conn:

@@ -7,16 +7,15 @@ into deterministic, minimal paths (pure functions).
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import ast
 import logging
 from pathlib import Path
 from typing import Any
 
-from cortex.engine.smte.llm_mutator import call_qwen_mutator
-from cortex.engine.smte.weismann_barrier import enforce_weismann_barrier
-
-from cortex.agents.mixins import EngineAwareMixin
+from babylon60.agents.mixins import EngineAwareMixin
+from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.engine.smte.llm_mutator import call_qwen_mutator
+from babylon60.engine.smte.weismann_barrier import enforce_weismann_barrier
 
 logger = logging.getLogger("cortex.engine.smte.ouroboros_compiler")
 
@@ -33,7 +32,10 @@ class OuroborosCompiler(EngineAwareMixin):
 
         Calculates AST Complexity and Dead Code Ratio to enforce the Ouroboros-Omega L-EPI Guard.
         """
-        from cortex.engine.smte.analyzer import calculate_ast_complexity, estimate_dead_code_ratio
+        from babylon60.engine.smte.analyzer import (
+            calculate_ast_complexity,
+            estimate_dead_code_ratio,
+        )
 
         complexity = calculate_ast_complexity(source_code)
         dead_code_ratio = estimate_dead_code_ratio(source_code)
@@ -101,7 +103,6 @@ class OuroborosCompiler(EngineAwareMixin):
             content_val = (
                 f"L-EPI Guard amputated {target_path.name} due to high limerence/dead code."
             )
-            import hashlib
 
             logos_sig = cortex_hash(f"{content_val}SYSTEM".encode())
 
@@ -172,7 +173,6 @@ class OuroborosCompiler(EngineAwareMixin):
 
             # Persist to ledger
             content_val = f"Ouroboros compiled {target_path.name}. Cost reduced from {analysis['maintenance_cost']}."
-            import hashlib
 
             logos_sig = cortex_hash(f"{content_val}SYSTEM".encode())
 

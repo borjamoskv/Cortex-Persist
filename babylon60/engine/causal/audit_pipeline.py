@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from cortex.engine.causal.schema_validator import L0L6SchemaValidator
+from babylon60.engine.causal.schema_validator import L0L6SchemaValidator
 
 logger = logging.getLogger(__name__)
 
