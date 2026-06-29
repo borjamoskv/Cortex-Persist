@@ -55,7 +55,8 @@ def decrypt_cookie(encrypted_value, key):
     return decrypted.decode('utf-8', errors='ignore')
 
 def get_substack_cookies(db_path, key):
-    conn = sqlite3.connect(db_path)
+    from cortex.database.core import connect
+    conn = connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT host_key, name, encrypted_value FROM cookies WHERE host_key LIKE '%substack%'")
     

@@ -45,15 +45,12 @@ class DuressGuard:
         # Emit synchronous Ledger event bypassing the async loop to guarantee recording
         try:
             import hashlib
-            import sqlite3
             from datetime import datetime, timezone
+            from cortex.database.core import connect
 
             db_path = os.environ.get("CORTEX_DB_PATH", "cortex_ledger.db")
             if os.path.exists(db_path):
-                with sqlite3.connect(db_path, timeout=5.0) as conn:
-                    # Enforce Rule R10: Byzantine Tolerance DB Locking
-                    conn.execute("PRAGMA busy_timeout = 5000;")
-                    conn.execute("PRAGMA journal_mode=WAL;")
+                with connect(db_path, timeout=5) as conn:
 
                     timestamp = datetime.now(timezone.utc).isoformat()
                     conn.execute(
