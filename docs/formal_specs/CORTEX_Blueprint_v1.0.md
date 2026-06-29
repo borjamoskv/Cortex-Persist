@@ -115,3 +115,17 @@ The project lifecycle acknowledges three distinct levels of maturity:
 * **Blueprint (v1.0):** Defines principles, invariants, and abstract architecture. (Status: FROZEN).
 * **CEP (CORTEX Engineering Proposals):** Refines and formalizes specific components like the parameterizable Trust Algebra. (Status: OPEN SPECIFICATION).
 * **Reference Kernel & Test Suite:** Canonical implementation and conformance testing. (Status: NON-EXISTENT).
+
+---
+
+# Methodological Note: The Epistemic OS
+
+The primary contribution of CORTEX is not judged by the sophistication of its algorithms, but by the quality and stability of its epistemic interfaces.
+
+A conforming epistemic interface possesses four fundamental properties:
+1. **Explicit:** Every claim must be accompanied by the epistemic state from which it was emitted.
+2. **Composable:** New inference mechanisms, trust models, or evidence sources must integrate without violating architectural invariants.
+3. **Audited:** Every state transition must be strictly reconstructable from verifiable artifacts.
+4. **Replaceable:** No concrete trust model, provenance system, or inference engine constitutes an essential part of the architecture.
+
+CORTEX is designed to function as an **Operating System for Epistemological Models**. Just as an OS defines stable abstractions (processes, memory, file systems) allowing diverse applications to coexist, CORTEX defines stable infrastructure allowing multiple trust theories, inference engines, and provenance models to be implemented, compared, and replaced without altering fundamental system contracts.
