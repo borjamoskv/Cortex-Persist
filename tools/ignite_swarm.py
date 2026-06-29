@@ -20,9 +20,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from cortex.engine.swarm_10k import SwarmCommander
-
 from cortex.engine import CortexEngine
+from cortex.engine.swarm_10k import SwarmCommander
 from cortex.extensions.swarm.auto_fix import AutoFixPipeline
 
 logging.basicConfig(level=logging.INFO)

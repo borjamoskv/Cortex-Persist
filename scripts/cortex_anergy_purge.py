@@ -8,9 +8,8 @@ owner: borjamoskv
 exergy_tier: P2
 """
 
-import os
-import shutil
 import re
+import shutil
 from pathlib import Path
 
 # C5-REAL Anergy Purge Engine
@@ -85,7 +84,7 @@ def scan_and_purge():
                     
                     shutil.move(str(filepath), str(dest))
                     purged_files.append(str(filepath.relative_to(workspace_root)))
-            except Exception as e:
+            except Exception:
                 pass
 
 scan_and_purge()

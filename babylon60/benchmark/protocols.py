@@ -463,7 +463,7 @@ class TrajectoryComparator:
 
     @staticmethod
     def _euclidean(a: list[float], b: list[float]) -> float:
-        return math.sqrt(sum((ai - bi) ** 2 for ai, bi in zip(a, b)))
+        return math.sqrt(sum((ai - bi) ** 2 for ai, bi in zip(a, b, strict=False)))
 
     @staticmethod
     def _mahalanobis(
@@ -473,7 +473,7 @@ class TrajectoryComparator:
     ) -> float:
         """Mahalanobis distance: sqrt((a-b)^T Σ^{-1} (a-b))."""
         d = len(a)
-        diff = [ai - bi for ai, bi in zip(a, b)]
+        diff = [ai - bi for ai, bi in zip(a, b, strict=False)]
         result = 0.0
         for i in range(d):
             for j in range(d):
@@ -559,7 +559,8 @@ class TrajectoryComparator:
 
         if use_mahalanobis:
             inv_cov = TrajectoryComparator._compute_pooled_inv_cov(t_a, t_b)
-            dist_fn = lambda a, b: TrajectoryComparator._mahalanobis(a, b, inv_cov)
+            def dist_fn(a, b):
+                return TrajectoryComparator._mahalanobis(a, b, inv_cov)
         else:
             dist_fn = TrajectoryComparator._euclidean
 
@@ -654,14 +655,14 @@ class DriftDetector:
         eps = 1e-10
         return sum(
             pi * math.log2((pi + eps) / (qi + eps))
-            for pi, qi in zip(p, q)
+            for pi, qi in zip(p, q, strict=False)
             if pi > eps
         )
 
     @staticmethod
     def _jsd(p: list[float], q: list[float]) -> float:
         """Jensen-Shannon Divergence: symmetric, bounded ∈ [0, 1]."""
-        m = [(pi + qi) / 2.0 for pi, qi in zip(p, q)]
+        m = [(pi + qi) / 2.0 for pi, qi in zip(p, q, strict=False)]
         return 0.5 * DriftDetector._kl_divergence(p, m) + \
                0.5 * DriftDetector._kl_divergence(q, m)
 
@@ -689,7 +690,7 @@ class DriftDetector:
 
         ra = interp(sa, n)
         rb = interp(sb, n)
-        return sum(abs(ai - bi) for ai, bi in zip(ra, rb)) / n
+        return sum(abs(ai - bi) for ai, bi in zip(ra, rb, strict=False)) / n
 
     def detect(
         self,

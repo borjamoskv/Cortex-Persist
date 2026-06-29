@@ -6,9 +6,8 @@ Zero-dependency local LLM connector via Ollama HTTP API.
 """
 
 import json
-import urllib.request
 import urllib.error
-from typing import Any, Dict, Optional
+import urllib.request
 
 OLLAMA_HOST = "http://localhost:11434"
 

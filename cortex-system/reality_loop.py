@@ -25,22 +25,19 @@ No external dependencies.
 from __future__ import annotations
 
 import argparse
-import json
-import os
-import time
-import uuid
 import ast
-import re
+import asyncio
+import json
 import subprocess
 import sys
-from dataclasses import dataclass, asdict
+import time
+import uuid
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-import asyncio
+from typing import Any
 
 from babylon60.events.bus import DistributedEventBus
-
 
 # =============================================================================
 # Paths
@@ -103,7 +100,7 @@ class CortexEvent:
     timestamp: str
     source: str
     event_type: str
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
 
 
 @dataclass
@@ -111,10 +108,10 @@ class SwarmJob:
     job_id: str
     timestamp: str
     action: str
-    target_projects: List[str]
-    agent_chain: List[str]
-    constraints: Dict[str, Any]
-    metric_snapshot: Dict[str, Any]
+    target_projects: list[str]
+    agent_chain: list[str]
+    constraints: dict[str, Any]
+    metric_snapshot: dict[str, Any]
     decision_snapshot: str
 
 
@@ -135,7 +132,7 @@ def ensure_dirs() -> None:
         MOSKV_SWARM_INBOX.mkdir(exist_ok=True)
 
 
-def load_json(path: Path, default: Dict[str, Any]) -> Dict[str, Any]:
+def load_json(path: Path, default: dict[str, Any]) -> dict[str, Any]:
     if not path.exists():
         return default.copy()
 
@@ -146,21 +143,21 @@ def load_json(path: Path, default: Dict[str, Any]) -> Dict[str, Any]:
         return default.copy()
 
 
-def save_json(path: Path, data: Dict[str, Any]) -> None:
+def save_json(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(exist_ok=True)
 
     with path.open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-def append_jsonl(path: Path, item: Dict[str, Any]) -> None:
+def append_jsonl(path: Path, item: dict[str, Any]) -> None:
     path.parent.mkdir(exist_ok=True)
 
     with path.open("a", encoding="utf-8") as f:
         f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
 
-async def emit_event(source: str, event_type: str, payload: Dict[str, Any], bus: DistributedEventBus) -> CortexEvent:
+async def emit_event(source: str, event_type: str, payload: dict[str, Any], bus: DistributedEventBus) -> CortexEvent:
     event = CortexEvent(
         event_id=str(uuid.uuid4()),
         timestamp=utc_now(),
@@ -196,7 +193,7 @@ class ThresholdMutator(ast.NodeTransformer):
 
     # Obsolete. Replaced by push_mutation_to_babylon.
 
-async def push_mutation_to_babylon(metric: Dict[str, Any], bus: DistributedEventBus) -> bool:
+async def push_mutation_to_babylon(metric: dict[str, Any], bus: DistributedEventBus) -> bool:
     """
     Wave 4: Reality Loop Bridge to BABYLON-60.
     Mutates runtime vector first via event_bus, then promotes to disk and commits.
@@ -277,7 +274,7 @@ async def push_mutation_to_babylon(metric: Dict[str, Any], bus: DistributedEvent
         return False
 
 
-def entropy_bound_v3(metric: Dict[str, Any], state: Dict[str, Any]) -> str:
+def entropy_bound_v3(metric: dict[str, Any], state: dict[str, Any]) -> str:
     """
     Higher-level decision policy.
 
@@ -328,7 +325,7 @@ def entropy_bound_v3(metric: Dict[str, Any], state: Dict[str, Any]) -> str:
 # Swarm Dispatch
 # =============================================================================
 
-def agent_chain_for_action(action: str) -> List[str]:
+def agent_chain_for_action(action: str) -> list[str]:
     """
     Maps reinforcement actions to swarm agent chain.
 
@@ -368,9 +365,9 @@ def agent_chain_for_action(action: str) -> List[str]:
 
 def constraints_for_action(
     action: str,
-    registry: Dict[str, Any],
-    state: Dict[str, Any]
-) -> Dict[str, Any]:
+    registry: dict[str, Any],
+    state: dict[str, Any]
+) -> dict[str, Any]:
     base = {
         "core_vector": registry.get("active_core_vector", "ARTE_PURO"),
         "execution_mode": registry.get("execution_mode", "SWARMED"),
@@ -415,10 +412,10 @@ def constraints_for_action(
 
 def build_swarm_job(
     action: str,
-    metric: Dict[str, Any],
+    metric: dict[str, Any],
     decision: str,
-    registry: Dict[str, Any],
-    state: Dict[str, Any]
+    registry: dict[str, Any],
+    state: dict[str, Any]
 ) -> SwarmJob:
     return SwarmJob(
         job_id=str(uuid.uuid4()),
@@ -467,11 +464,11 @@ async def dispatch_swarm_job(job: SwarmJob, bus: DistributedEventBus) -> Path:
 # =============================================================================
 
 def mutate_state(
-    state: Dict[str, Any],
-    metric: Dict[str, Any],
+    state: dict[str, Any],
+    metric: dict[str, Any],
     decision: str,
     action: str
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     state["loop_count"] = int(state.get("loop_count", 0)) + 1
     state["last_action"] = action
     state["last_decision"] = decision
@@ -530,9 +527,9 @@ def mutate_state(
 # =============================================================================
 
 def evaluate_policy(
-    metric: Dict[str, Any],
-    registry: Dict[str, Any],
-    state: Dict[str, Any]
+    metric: dict[str, Any],
+    registry: dict[str, Any],
+    state: dict[str, Any]
 ) -> str:
     policy = registry.get("decision_policy", "entropy_bound_v3")
 
@@ -543,7 +540,7 @@ def evaluate_policy(
     return "default"
 
 
-def ingest_latest_feedback(default_metric: Dict[str, Any]) -> Dict[str, Any]:
+def ingest_latest_feedback(default_metric: dict[str, Any]) -> dict[str, Any]:
     """
     Zero-Choice feedback ingestion.
     Reads the newest swarm feedback and overrides the input metric.
@@ -573,7 +570,7 @@ def ingest_latest_feedback(default_metric: Dict[str, Any]) -> Dict[str, Any]:
     return default_metric
 
 
-async def run_reality_cycle(metric: Dict[str, Any], bus: DistributedEventBus) -> Dict[str, Any]:
+async def run_reality_cycle(metric: dict[str, Any], bus: DistributedEventBus) -> dict[str, Any]:
     ensure_dirs()
 
     registry = load_json(REGISTRY_PATH, DEFAULT_REGISTRY)
@@ -615,7 +612,7 @@ async def run_reality_cycle(metric: Dict[str, Any], bus: DistributedEventBus) ->
         engine = ArtistCortexEngine(db_path="artist_cortex.db")
         pruned_count = engine.suntsitu_prune(attention_threshold=0.2, originality_threshold=0.1)
         engine.close()
-    except Exception as e:
+    except Exception:
         # Failsafe for missing sqlite-vec or DB lock
         pass
 
@@ -646,7 +643,7 @@ async def run_reality_cycle(metric: Dict[str, Any], bus: DistributedEventBus) ->
 # CLI
 # =============================================================================
 
-def parse_metric_from_args(args: argparse.Namespace) -> Dict[str, Any]:
+def parse_metric_from_args(args: argparse.Namespace) -> dict[str, Any]:
     if args.metric_file:
         path = Path(args.metric_file)
 

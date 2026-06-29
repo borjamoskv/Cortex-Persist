@@ -18,8 +18,9 @@ Run:
 import asyncio
 import sqlite3
 
-from cortex import CortexEngine
 from cortex.config import DEFAULT_DB_PATH
+
+from cortex import CortexEngine
 
 
 async def main() -> None:

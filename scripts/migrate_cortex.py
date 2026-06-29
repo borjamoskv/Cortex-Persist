@@ -9,8 +9,9 @@ exergy_tier: P2
 """
 
 import os
-import subprocess
 import shutil
+import subprocess
+
 
 def is_tracked(path):
     return subprocess.run(["git", "ls-files", "--error-unmatch", path], capture_output=True).returncode == 0

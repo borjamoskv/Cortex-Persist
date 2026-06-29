@@ -9,7 +9,9 @@ exergy_tier: "P2"
 """
 
 from pathlib import Path
+
 import yaml
+
 
 def migrate_agent_file(path: Path) -> bool:
     try:

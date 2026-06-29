@@ -8,8 +8,10 @@ owner: borjamoskv
 exergy_tier: P2
 """
 
-import yaml
 from pathlib import Path
+
+import yaml
+
 
 def main():
     workspace = Path(__file__).parent.parent.resolve()
@@ -20,7 +22,7 @@ def main():
     
     for f in sorted(agents_dir.glob("*.yaml")):
         try:
-            with open(f, "r", encoding="utf-8") as file:
+            with open(f, encoding="utf-8") as file:
                 data = yaml.safe_load(file)
             
             meta = data.get("metadata", {})

@@ -3,11 +3,12 @@ C5-REAL: Abort Rules Policy
 Author: Borja Moskv / borjamoskv
 """
 
-from typing import Dict, Any
+from typing import Any
+
 
 class AbortRules:
     @staticmethod
-    def evaluate(metrics: Dict[str, Any]) -> Dict[str, Any]:
+    def evaluate(metrics: dict[str, Any]) -> dict[str, Any]:
         """
         Evaluates metrics against strict C5-REAL thresholds.
         Returns a dict with {"abort": bool, "reason": str}

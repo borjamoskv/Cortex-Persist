@@ -1,9 +1,9 @@
-import sys
-import types
 import importlib.abc
 import importlib.util
 import os
+import sys
 import threading
+import types
 
 if not hasattr(sys, '_cortex_legacy_local'):
     sys._cortex_legacy_local = threading.local()
@@ -272,6 +272,7 @@ if not any(isinstance(f, AliasFinder) and f.alias_name == 'cortex' for f in sys.
 
 # Create the root proxy module and register it in sys.modules
 import babylon60
+
 cortex_root = ProxyModule('cortex', babylon60)
 cortex_root.__path__ = [os.path.dirname(os.path.abspath(__file__))]
 if hasattr(babylon60, '__file__'):

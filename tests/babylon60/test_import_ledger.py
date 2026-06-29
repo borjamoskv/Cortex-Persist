@@ -28,7 +28,7 @@ def test_ledger_creation_and_logging(tmp_path):
     assert ledger_file.exists()
     
     # Read the lines and verify structures
-    with open(ledger_file, "r", encoding="utf-8") as f:
+    with open(ledger_file, encoding="utf-8") as f:
         lines = f.readlines()
         
     assert len(lines) == 3
@@ -76,7 +76,7 @@ def test_ledger_tampering_detection(tmp_path):
     assert ImportResolutionLedger.verify_ledger(str(ledger_file))["status"] == "verified"
     
     # Read and tamper with the resolution payload
-    with open(ledger_file, "r", encoding="utf-8") as f:
+    with open(ledger_file, encoding="utf-8") as f:
         lines = f.readlines()
         
     res_entry = json.loads(lines[1])

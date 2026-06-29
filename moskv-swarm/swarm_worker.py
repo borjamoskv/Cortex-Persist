@@ -16,17 +16,15 @@ This closes the loop:
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import sys
 import time
 import uuid
-from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-from ollama_connector import generate as ollama_generate
+from typing import Any, Optional
 
+from ollama_connector import generate as ollama_generate
 
 # =============================================================================
 # Paths
@@ -56,12 +54,12 @@ def ensure_dirs() -> None:
         d.mkdir(parents=True, exist_ok=True)
 
 
-def load_json(path: Path) -> Dict[str, Any]:
+def load_json(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def save_json(path: Path, data: Dict[str, Any]) -> None:
+def save_json(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
@@ -74,14 +72,14 @@ def save_json(path: Path, data: Dict[str, Any]) -> None:
 class Agent:
     name: str = "base"
 
-    def run(self, artifact: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+    def run(self, artifact: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
         raise NotImplementedError
 
 
 class GeneratorAgent(Agent):
     name = "AgentA.generator"
 
-    def run(self, artifact: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+    def run(self, artifact: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
         bias = context.get("output_bias", "novelty_over_polish")
         core_vector = context.get("core_vector", "ARTE_PURO")
         forbidden = context.get("forbidden_move", "none")
@@ -125,7 +123,7 @@ class GeneratorAgent(Agent):
 class CriticAgent(Agent):
     name = "AgentB.adversarial_critic"
 
-    def run(self, artifact: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+    def run(self, artifact: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
         require_pass = context.get("require_adversarial_pass", False)
         allow_contradiction = context.get("allow_contradiction", False)
 
@@ -156,7 +154,7 @@ class CriticAgent(Agent):
 class AssemblerAgent(Agent):
     name = "AgentC.assembler"
 
-    def run(self, artifact: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+    def run(self, artifact: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
         if artifact.get("status") == "rejected":
             return artifact
 
@@ -177,7 +175,7 @@ class AssemblerAgent(Agent):
 class DistributorAgent(Agent):
     name = "AgentD.distributor"
 
-    def run(self, artifact: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+    def run(self, artifact: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
         if artifact.get("status") == "rejected":
             return artifact
 
@@ -195,7 +193,7 @@ class DistributorAgent(Agent):
         return artifact
 
 
-AGENT_REGISTRY: Dict[str, Agent] = {
+AGENT_REGISTRY: dict[str, Agent] = {
     "AgentA.generator": GeneratorAgent(),
     "AgentB.adversarial_critic": CriticAgent(),
     "AgentC.assembler": AssemblerAgent(),
@@ -207,7 +205,7 @@ AGENT_REGISTRY: Dict[str, Agent] = {
 # Feedback Generator
 # =============================================================================
 
-def build_feedback(job: Dict[str, Any], artifact: Dict[str, Any]) -> Dict[str, Any]:
+def build_feedback(job: dict[str, Any], artifact: dict[str, Any]) -> dict[str, Any]:
     """
     Produce metrics that reality_loop.py can consume in its next cycle.
     """
@@ -256,17 +254,17 @@ class SwarmWorker:
             raise ValueError(f"Unknown agent: {name}")
         return AGENT_REGISTRY[name]
 
-    def process_file(self, path: Path) -> Optional[Dict[str, Any]]:
+    def process_file(self, path: Path) -> Optional[dict[str, Any]]:
         processing_path = PROCESSING / path.name
 
         # Atomic move to processing.
         shutil.move(str(path), str(processing_path))
 
         job = load_json(processing_path)
-        agent_chain: List[str] = job.get("agent_chain", [])
-        constraints: Dict[str, Any] = job.get("constraints", {})
+        agent_chain: list[str] = job.get("agent_chain", [])
+        constraints: dict[str, Any] = job.get("constraints", {})
 
-        artifact: Dict[str, Any] = {"status": "init", "job_id": job.get("job_id")}
+        artifact: dict[str, Any] = {"status": "init", "job_id": job.get("job_id")}
 
         print(f"[WORKER] Job {job.get('job_id')} | chain: {agent_chain}")
 
@@ -301,8 +299,8 @@ class SwarmWorker:
         print(f"[WORKER] Completed. Output: {out_path}")
         return feedback
 
-    def run_once(self) -> List[Dict[str, Any]]:
-        results: List[Dict[str, Any]] = []
+    def run_once(self) -> list[dict[str, Any]]:
+        results: list[dict[str, Any]] = []
 
         if not INBOX.exists():
             return results

@@ -8,9 +8,9 @@ templates remain in ``cortex_extensions.agents``.
 from __future__ import annotations
 
 from cortex.agents.base import BaseAgent, ReactiveTaskAgent
+from cortex.agents.boltzmann_engine import BoltzmannEngineAgent, create_boltzmann_engine
 from cortex.agents.bus import MessageBus, SqliteMessageBus
 from cortex.agents.consolidator import ConsolidatorAgent
-from cortex.agents.boltzmann_engine import BoltzmannEngineAgent, create_boltzmann_engine
 from cortex.agents.landauer_daemon import LandauerDaemonAgent, create_landauer_daemon
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.maxwell_router import MaxwellRouterAgent, create_maxwell_router

@@ -3,20 +3,21 @@ C5-REAL: Control Plane Orchestrator
 Author: Borja Moskv / borjamoskv
 """
 
-import sys
-import os
-import json
 import asyncio
+import json
 import logging
+import os
+import sys
 
 # Ensure internal modules can be imported
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from runtime.session_router import SessionRouter
-from babylon60.events.bus import DistributedEventBus
-from runtime.swarm_dispatcher import SwarmDispatcher
 from policies.abort_rules import AbortRules
 from policies.reward_model import reinforcement_cycle
+from runtime.session_router import SessionRouter
+from runtime.swarm_dispatcher import SwarmDispatcher
+
+from babylon60.events.bus import DistributedEventBus
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("cortex.system.control_plane")
@@ -36,7 +37,7 @@ class ControlPlane:
             self.event_bus.subscribe(topic, self._log_event)
 
     def _load_registry(self) -> dict:
-        with open(self.registry_path, "r", encoding="utf-8") as f:
+        with open(self.registry_path, encoding="utf-8") as f:
             return json.load(f)
 
     async def _log_event(self, event_dict) -> None:

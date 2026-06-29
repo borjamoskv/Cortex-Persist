@@ -10,20 +10,20 @@ Reality Level: C5-REAL
 Design System: Industrial Noir 2026
 """
 
+import argparse
 import asyncio
+import logging
 import os
 import sys
 import time
-import argparse
-import logging
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 # Ensure repository root is in sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm._models import CortexPrompt, IntentProfile
+from cortex.extensions.llm.provider import LLMProvider
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -35,12 +35,12 @@ class ConversationalCurvatureAuditor:
 
     def __init__(self, provider_name: str, model_name: str | None = None):
         self.provider = LLMProvider(provider=provider_name, model=model_name)
-        self.history: List[Dict[str, str]] = []
+        self.history: list[dict[str, str]] = []
         self.secret_key = "Singularidad-60"
         self.concept_name = "Isomorfismo MOSKV"
         self.concept_def = "El colapso determinista de la entropía estocástica en un AST inmutable."
 
-    async def run_audit(self, noise_turns: int = 5) -> Dict[str, Any]:
+    async def run_audit(self, noise_turns: int = 5) -> dict[str, Any]:
         """Executes the full evaluation protocol across multiple turn phases."""
         logger.info("==========================================================")
         logger.info("  ⚡ AUDITANDO CURVATURA DE APRENDIZAJE CONVERSACIONAL  ⚡")
@@ -49,7 +49,7 @@ class ConversationalCurvatureAuditor:
         logger.info(f"Turnos de ruido configurados: {noise_turns}")
         logger.info("----------------------------------------------------------")
 
-        metrics: Dict[str, Any] = {
+        metrics: dict[str, Any] = {
             "initial_setup": False,
             "noise_execution": False,
             "retrieval_score": 0.0,

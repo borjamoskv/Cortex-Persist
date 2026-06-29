@@ -16,7 +16,7 @@ import time
 from cortex.extensions.llm.router import CortexLLMRouter
 from cortex.extensions.swarm.centauro_engine import CentauroEngine
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn, BarColumn, TextColumn
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from rich.table import Table
 
 console = Console()
@@ -38,7 +38,7 @@ async def run_mission(
             status = result.get("status", "unknown")
             progress.update(task_id, advance=1)
             return status, elapsed
-        except Exception as e:
+        except Exception:
             elapsed = time.time() - start_time
             progress.update(task_id, advance=1)
             return "error", elapsed

@@ -8,15 +8,17 @@ owner: "borjamoskv"
 exergy_tier: "P2"
 """
 
-import sys
 import re
+import sys
 from pathlib import Path
+
 import yaml
+
 
 def check_yaml_agent(path: Path) -> tuple[bool, str]:
     """Verify if a YAML agent definition contains valid CAT-60 metadata."""
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
         if not data or not isinstance(data, dict):
             return False, "Invalid YAML structure (not a dictionary)"

@@ -3,19 +3,19 @@ C5-REAL: Adversarial Test Suite for Control Plane
 Author: Borja Moskv / borjamoskv
 """
 
-import sys
-import os
 import json
-import pytest
+import os
+import sys
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
+
+import pytest
 
 ROOT = Path(__file__).resolve().parent
 sys.path.append(str(ROOT))
 
 from control_plane import ControlPlane
-from runtime.session_router import SessionRouter
-from babylon60.extensions.artist_cortex.artist_cortex import ArtistCortexEngine
+
 
 @pytest.fixture
 def temp_environment(tmp_path):

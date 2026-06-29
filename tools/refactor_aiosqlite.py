@@ -11,6 +11,7 @@ exergy_tier: P2
 import re
 from pathlib import Path
 
+
 def refactor_file(path: Path) -> bool:
     try:
         content = path.read_text(encoding="utf-8")

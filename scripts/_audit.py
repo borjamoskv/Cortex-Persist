@@ -13,7 +13,6 @@ import os
 import sys
 from pathlib import Path
 
-import aiosqlite
 from babylon60.database.core import connect_async
 
 # Add root to sys.path to ensure cortex can be imported

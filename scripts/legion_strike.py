@@ -2,19 +2,22 @@
 """
 cat_id: legion-strike
 cat_type: script
-version: 1.0.0
+version: 1.1.0
 reality_level: C5-REAL
 owner: borjamoskv
-exergy_tier: P2
+exergy_tier: P1
 """
 
 import argparse
 import asyncio
+import logging
 import sys
 
-from cortex.extensions.llm.router import CortexLLMRouter
-from cortex.extensions.swarm.centauro_engine import CentauroEngine
+from babylon60.core import config
+from babylon60.extensions.llm.router import CortexLLMRouter
+from babylon60.extensions.swarm.centauro_engine import CentauroEngine
 
+logger = logging.getLogger("cortex.legion_strike")
 
 async def main():
     parser = argparse.ArgumentParser(
@@ -47,14 +50,20 @@ async def main():
         "--tolerance", type=float, default=0.67, help="Byzantine consensus tolerance"
     )
     parser.add_argument("--sim", action="store_true", help="Force C4-SIM mode (No LLM calls)")
+    parser.add_argument("--provider", help="Primary LLM provider (default: read from config)")
+    parser.add_argument("--model", help="Primary LLM model (default: read from config)")
 
     args = parser.parse_args()
 
+    # Dynamic LLM Provider configuration from config singleton or CLI overrides
+    primary_provider_name = args.provider or config.LLM_PROVIDER or "gemini"
+    primary_model_name = args.model or config.LLM_MODEL or "gemini-2.5-flash"
+
     # Despertar del Router (C5-REAL awakening)
     if not args.sim:
-        from cortex.extensions.llm.provider import LLMProvider
+        from babylon60.extensions.llm.provider import LLMProvider
 
-        primary_provider = LLMProvider("gemini")
+        primary_provider = LLMProvider(provider=primary_provider_name, model=primary_model_name)
         fallback_providers = [
             LLMProvider("openrouter"),
             LLMProvider("deepseek"),
@@ -70,6 +79,8 @@ async def main():
     print("🔱 LEGIØN-1 ACTIVATED")
     print(f"MISSION: {args.mission}")
     print(f"FORMATION: {args.formation}")
+    print(f"PRIMARY PROVIDER: {primary_provider_name}")
+    print(f"PRIMARY MODEL: {primary_model_name}")
     print(f"MODE: {'C4-SIM' if args.sim else 'C5-REAL'}")
     print("Executing Byzantine Consensus Quorum...")
 

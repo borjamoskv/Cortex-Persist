@@ -12,7 +12,6 @@ import logging
 from cortex.agents.base import BaseAgent
 from cortex.agents.bus import MessageBus
 from cortex.agents.manifest import AgentManifest
-from cortex.agents.schema import AgentRole
 from cortex.agents.state import AgentStatus
 
 logger = logging.getLogger("cortex.agents.landauer_daemon")

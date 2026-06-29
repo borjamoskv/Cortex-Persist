@@ -4,6 +4,7 @@ import hashlib
 from collections import defaultdict
 from decimal import Decimal
 
+
 def hash_ast_node(node):
     """Generates a structural hash for an AST node, ignoring names/values."""
     if isinstance(node, ast.AST):
@@ -21,7 +22,7 @@ def find_isomorphisms(paths):
     structural_groups = defaultdict(list)
     for path in paths:
         try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(path, encoding='utf-8') as f:
                 content = f.read()
             tree = ast.parse(content)
             for node in ast.walk(tree):
@@ -30,7 +31,7 @@ def find_isomorphisms(paths):
                     if len(list(ast.walk(node))) > 10:
                         node_hash = hash_ast_node(node)
                         structural_groups[node_hash].append((path, node.name))
-        except Exception as e:
+        except Exception:
             pass
             
     isomorphisms = {h: nodes for h, nodes in structural_groups.items() if len(nodes) > 1}

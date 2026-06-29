@@ -3,7 +3,7 @@ C5-REAL: Delegation Map Configuration
 Author: Borja Moskv / borjamoskv
 """
 
-from typing import Dict, Any, List
+from typing import Any
 
 AGENT_ROLES = {
     "A": {
@@ -34,11 +34,11 @@ AGENT_ROLES = {
 
 class DelegationMap:
     @staticmethod
-    def get_agent(agent_id: str) -> Dict[str, Any]:
+    def get_agent(agent_id: str) -> dict[str, Any]:
         """Returns agent configurations from mapping key (A, B, C, D)."""
         return AGENT_ROLES.get(agent_id, {})
 
     @staticmethod
-    def get_all_agents() -> List[Dict[str, Any]]:
+    def get_all_agents() -> list[dict[str, Any]]:
         """Returns list of all active configurations in the swarm."""
         return list(AGENT_ROLES.values())

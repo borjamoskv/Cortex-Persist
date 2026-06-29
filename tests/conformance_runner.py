@@ -26,7 +26,7 @@ def run_conformance_tests():
         if vector_file.name == "schema.json":
             continue
 
-        with open(vector_file, "r") as f:
+        with open(vector_file) as f:
             vector = json.load(f)
 
         vector_id = vector["vector_id"]

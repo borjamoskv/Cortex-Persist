@@ -2,20 +2,22 @@
 C5-REAL: Reward Model & Reinforcement Cycle
 Author: Borja Moskv / borjamoskv
 """
-from typing import Dict, Any, List, Optional
 import asyncio
-import time
 import json
 import logging
+import time
 from dataclasses import dataclass
+from typing import Any, Optional
+
 import httpx
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger('CortexBlackBox')
 MUTATION_RATE = 0.05
 ORIGINALITY_THRESHOLD = 0.389
 DISTRIBUTION_THRESHOLD = 0.161
 
-def reinforcement_cycle(metric: Dict[str, Any], decision: str) -> str:
+def reinforcement_cycle(metric: dict[str, Any], decision: str) -> str:
     """
     Evaluates metric yields to determine the next evolution/adaptation step.
 
@@ -55,7 +57,7 @@ class BlackBoxHarness:
         self.model_id = model_id
         self.headers = {'Authorization': f'Bearer {self.api_key}', 'Content-Type': 'application/json'}
 
-    async def execute_probe(self, prompt: str, parameters: Dict[str, Any]) -> EvalMetrics:
+    async def execute_probe(self, prompt: str, parameters: dict[str, Any]) -> EvalMetrics:
         """
         Executes a single streaming probe to capture exact token issuance latency.
         """
@@ -97,7 +99,7 @@ class BlackBoxHarness:
         tps = total_tokens / max(generation_time, 1e-06)
         return EvalMetrics(status_code=status_code, success=error_message is None and status_code == 200, ttft_seconds=ttft, total_latency_seconds=total_latency, total_tokens=total_tokens, tokens_per_second=tps, error_message=error_message)
 
-    async def evaluate_suite(self, prompts: List[str], parameters: Dict[str, Any], concurrency: int=2) -> List[EvalMetrics]:
+    async def evaluate_suite(self, prompts: list[str], parameters: dict[str, Any], concurrency: int=2) -> list[EvalMetrics]:
         """
         Executes a bounded concurrent evaluation of multiple prompts.
         """
@@ -109,7 +111,7 @@ class BlackBoxHarness:
         tasks = [bounded_probe(p) for p in prompts]
         return await asyncio.gather(*tasks)
 
-async def cortex_empirical_reward_binding(prompts: List[str], api_key: str, model_id: str, api_url: str='https://api.openai.com/v1/chat/completions', tps_normalization_factor: float=100.0) -> float:
+async def cortex_empirical_reward_binding(prompts: list[str], api_key: str, model_id: str, api_url: str='https://api.openai.com/v1/chat/completions', tps_normalization_factor: float=100.0) -> float:
     """
     Provides a deterministic scalar reward signal based on verifiable black-box behavior.
     """
@@ -118,7 +120,7 @@ async def cortex_empirical_reward_binding(prompts: List[str], api_key: str, mode
     successful_runs = [r for r in results if r.success]
     if not successful_runs:
         return 0.0
-    avg_tps = sum((r.tokens_per_second for r in successful_runs)) / len(successful_runs)
+    avg_tps = sum(r.tokens_per_second for r in successful_runs) / len(successful_runs)
     success_rate = len(successful_runs) / len(results)
     reward_score = success_rate * (avg_tps / tps_normalization_factor)
     logger.info(f'Empirical Reward Resolved: {reward_score:.4f} (Success: {success_rate * 100}%, TPS: {avg_tps:.2f})')

@@ -10,7 +10,9 @@ exergy_tier: P2
 
 import re
 from pathlib import Path
+
 import yaml
+
 
 def migrate_python_script(path: Path) -> bool:
     try:

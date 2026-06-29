@@ -9,7 +9,6 @@ import importlib.abc
 import importlib.util
 
 # Legacy aliases are now handled natively via cortex/__init__.py
-import os
 if os.environ.get("CORTEX_SHADOW_MODE"):
     from babylon60.shadow_tracer import enable_tracer
     enable_tracer(mode=os.environ.get("CORTEX_SHADOW_MODE"))
