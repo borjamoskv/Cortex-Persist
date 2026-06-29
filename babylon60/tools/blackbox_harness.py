@@ -155,7 +155,8 @@ class BaselineProfile:
     endpoints conocidos. Deliberadamente NO contiene atribución de proveedor.
     """
     id: str
-    features: Dict[str, float]
+    features_mean: Dict[str, float]
+    features_std: Dict[str, float]
     calibrated_at: float = field(default_factory=time.time)
     sample_size: int = 0  # N de runs usados para calibrar este perfil
 
@@ -163,19 +164,22 @@ class BaselineProfile:
 PROVENANCE_BASELINES = [
     BaselineProfile(
         id="profile_alpha",
-        features={"itl_ms": 22.5, "char_ratio": 3.8, "md_density": 0.12, "lexical_bias": 0.04},
+        features_mean={"itl_ms": 22.5, "char_ratio": 3.8, "md_density": 0.12, "lexical_bias": 0.04},
+        features_std={"itl_ms": 4.2, "char_ratio": 0.3, "md_density": 0.02, "lexical_bias": 0.01},
         calibrated_at=1770000000.0,
         sample_size=100
     ),
     BaselineProfile(
         id="profile_beta",
-        features={"itl_ms": 10.2, "char_ratio": 4.2, "md_density": 0.05, "lexical_bias": 0.02},
+        features_mean={"itl_ms": 10.2, "char_ratio": 4.2, "md_density": 0.05, "lexical_bias": 0.02},
+        features_std={"itl_ms": 2.1, "char_ratio": 0.4, "md_density": 0.01, "lexical_bias": 0.005},
         calibrated_at=1770000000.0,
         sample_size=100
     ),
     BaselineProfile(
         id="profile_gamma",
-        features={"itl_ms": 15.8, "char_ratio": 4.0, "md_density": 0.08, "lexical_bias": 0.03},
+        features_mean={"itl_ms": 15.8, "char_ratio": 4.0, "md_density": 0.08, "lexical_bias": 0.03},
+        features_std={"itl_ms": 3.5, "char_ratio": 0.2, "md_density": 0.03, "lexical_bias": 0.008},
         calibrated_at=1770000000.0,
         sample_size=100
     )
@@ -201,14 +205,6 @@ class ProvenanceAuditor:
         "char_ratio": 1.0,
         "md_density": 10.0,
         "lexical_bias": 50.0,
-    }
-
-    # Desviación típica estimada de cada dimensión para normalizar magnitudes físicas
-    DIMENSION_SCALES = {
-        "itl_ms": 10.0,
-        "char_ratio": 0.5,
-        "md_density": 0.05,
-        "lexical_bias": 0.01,
     }
 
     def __init__(
@@ -288,13 +284,13 @@ class ProvenanceAuditor:
         for p in self.baselines:
             d_sq = 0.0
             for k in obs:
-                if k not in p.features:
+                if k not in p.features_mean or k not in p.features_std:
                     continue  # Evita contaminación por inconsistencia de dimensiones
                 obs_val = obs[k]
-                ref_val = p.features[k]
-                # Normalización dimensional usando DIMENSION_SCALES
-                scale = self.DIMENSION_SCALES.get(k, 1.0)
-                diff_norm = (obs_val - ref_val) / scale
+                ref_mean = p.features_mean[k]
+                ref_std = max(p.features_std[k], 1e-6)  # Prevent division by zero
+                # Normalización dimensional empírica (Mahalanobis-style distance per axis)
+                diff_norm = (obs_val - ref_mean) / ref_std
                 d_sq += self.weights.get(k, 1.0) * (diff_norm ** 2)
             distances[p.id] = math.sqrt(d_sq)
 

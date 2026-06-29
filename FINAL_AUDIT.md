@@ -13,13 +13,16 @@
 
 These claims are externally inspectable or reproducible:
 
-- Commit `506b7a320` exists in the repository.
-- Test results are C5-REAL if executed and recorded.
-- Opaque baselines are present in source if the code contains no provider/model-name coupling.
+- Commit `506b7a320` is C5-REAL only if independently inspectable in the referenced repository.
+- Test results are C5-REAL only when accompanied by commands, environment, dependency versions, logs, and artifact hashes.
+- Opaque baselines are C5-REAL only if source inspection confirms absence of provider names, model names, endpoint identifiers, or hardcoded identity mappings.
 - ProvenanceAuditor explicitly avoids exact identity attribution.
 
+### Safety Boundary
+The auditor must not be used to de-anonymize blind evaluations, extract hidden model identities, or bypass platform identity protections.
+
 #### C5-FORMAL — Deterministic by Construction
-These claims hold for fixed inputs and fixed code:
+These claims hold for fixed inputs and fixed code. C5-FORMAL determinism assumes fixed code, fixed inputs, fixed dependency versions, fixed numerical backend, and no nondeterministic execution paths:
 
 - Feature extraction is deterministic for fixed harness outputs.
 - Distance computation is deterministic for fixed observed vectors and fixed baselines.
@@ -93,6 +96,17 @@ Rhetoric:
   Notes:
     - "Session metaphors remain useful but non-C5"
     - "Judgements of response superiority are C2-C3"
+
+SafetyBoundary:
+  identity_extraction: "not_supported"
+  blind_arena_deanonymization: "prohibited"
+  provider_name_recovery: "not_supported"
+  checkpoint_identification: "not_supported"
+  allowed_uses:
+    - "drift detection"
+    - "endpoint consistency auditing"
+    - "anonymous clustering"
+    - "regression monitoring"
 ```
 
 ### Closing Principle
