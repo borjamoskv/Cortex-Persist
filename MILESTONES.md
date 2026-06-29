@@ -1119,6 +1119,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 66: Modelado Formal de Límites de Confianza SAGA (Saga Trust Boundaries TLA+ Spec)
+- **Target**: `docs/formal_specs/CortexSagaTrustBoundaries.tla`, `docs/formal_specs/TRUST_BOUNDARIES_FORMAL_SPEC.md`
+- **Objective**: Especificación y modelado formal en TLA+ de las fronteras de confianza y límites transaccionales del patrón SAGA, verificando la imposibilidad de escalada de privilegios y garantizando el aislamiento de estados efímeros en rollback.
+- **Yield Target**: Demostración matemática formal de liveness y exclusión mutua en los límites de confianza SAGA.
+- **Reality Level**: `C6-FORMAL`
+- **Evidence**: Commit `09354d99d` (TLA+ specifications for SAGA trust boundaries) y archivo `docs/formal_specs/CortexSagaTrustBoundaries.tla`.
+```yaml
+Claim: SAGA trust boundaries formal specification modeled and validated via TLA+ syntax.
+Proof:
+  Base: "TLA+ spec defines actors, environments, and rollbacks without invariant violation."
+  Range: [C6, C6]
+  Confidence: C6-FORMAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
