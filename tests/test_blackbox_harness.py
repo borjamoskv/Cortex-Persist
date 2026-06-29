@@ -5,11 +5,11 @@ from babylon60.tools.blackbox_harness import ProvenanceAuditor, SingleResult, PR
 def test_empty_results():
     auditor = ProvenanceAuditor(PROVENANCE_BASELINES)
     analysis = auditor.analyze([])
-    assert analysis["status"] == "error"
+    assert analysis["status"] == "insufficient_data"
+    assert analysis["identity_claim"] == "not_supported"
 
 def test_profile_alpha_classification():
-    # Claude-like profile: itl_ms = 22.5, char_token_ratio = 3.8, md_density = 0.12, lexical_bias = 0.04
-    # Chars = 537, Tokens = 141, Latency = 3172.5, md_chars = 64, words = 84, score = 3.4
+    # Perfil opaco Alpha: itl_ms = 22.5, char_ratio = 3.8, md_density = 0.12, lexical_bias = 0.04
     text = "#" * 64 + " delve certainly tapestry " + "the " * 80 + "a" * 126
     run = SingleResult(
         prompt_sha256="abc",
@@ -28,13 +28,12 @@ def test_profile_alpha_classification():
     )
     auditor = ProvenanceAuditor(PROVENANCE_BASELINES)
     analysis = auditor.analyze([run])
-    assert analysis["predicted_profile"] == "profile_alpha"
-    assert analysis["confidence"] > 0.45
+    assert analysis["nearest_profile"] == "profile_alpha"
+    assert analysis["similarity_scores"]["profile_alpha"] > 0.45
 
 def test_profile_beta_classification():
-    # GPT-like profile: itl_ms = 10.2, char_token_ratio = 4.2, md_density = 0.05, lexical_bias = 0.02
-    # Chars = 420, Tokens = 100, Latency = 1020.0, md_chars = 21, words = 75, score = 1.5
-    text = "#" * 21 + " certainly complex " + "the " * 72 + "a" * 94
+    # Perfil opaco Beta: itl_ms = 10.2, char_ratio = 4.2, md_density = 0.05, lexical_bias = 0.02
+    text = "#" * 21 + " certainly " + "the " * 72 + "a" * 94
     run = SingleResult(
         prompt_sha256="def",
         status_code=200,
@@ -52,12 +51,11 @@ def test_profile_beta_classification():
     )
     auditor = ProvenanceAuditor(PROVENANCE_BASELINES)
     analysis = auditor.analyze([run])
-    assert analysis["predicted_profile"] == "profile_beta"
-    assert analysis["confidence"] > 0.45
+    assert analysis["nearest_profile"] == "profile_beta"
+    assert analysis["similarity_scores"]["profile_beta"] > 0.45
 
 def test_profile_gamma_classification():
-    # Gemini-like profile: itl_ms = 15.8, char_token_ratio = 4.0, md_density = 0.08, lexical_bias = 0.03
-    # Chars = 400, Tokens = 100, Latency = 1580.0, md_chars = 32, words = 73, score = 2.2
+    # Perfil opaco Gamma: itl_ms = 15.8, char_ratio = 4.0, md_density = 0.08, lexical_bias = 0.03
     text = "#" * 32 + " tapestry certainly " + "the " * 70 + "a" * 69
     run = SingleResult(
         prompt_sha256="ghi",
@@ -76,5 +74,6 @@ def test_profile_gamma_classification():
     )
     auditor = ProvenanceAuditor(PROVENANCE_BASELINES)
     analysis = auditor.analyze([run])
-    assert analysis["predicted_profile"] == "profile_gamma"
-    assert analysis["confidence"] > 0.45
+    assert analysis["nearest_profile"] == "profile_gamma"
+    assert analysis["similarity_scores"]["profile_gamma"] > 0.45
+

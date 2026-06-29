@@ -9,7 +9,7 @@ C5 rules:
 """
 
 import os, sys, json, time, yaml, hashlib, argparse, statistics, math, re
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 import requests
@@ -146,72 +146,172 @@ class OpenAIChatCompletionsAdapter:
         ttft_ms = ((first_token_t - t0) * 1000.0) if first_token_t is not None else None
         return 200, "".join(chunks), ttft_ms, (t1 - t0) * 1000.0, tail_json
 
-# ------------------- Passive Provenance Auditor -------------------
+## ------------------- Passive Provenance Auditor -------------------
 
 @dataclass
-class ModelProfile:
+class BaselineProfile:
+    """
+    Perfil de referencia OPACO. El operador lo calibra contra sus propios
+    endpoints conocidos. Deliberadamente NO contiene atribución de proveedor.
+    """
     id: str
-    itl_ms: float
-    char_token_ratio: float
-    md_density: float
-    lexical_bias: float
+    features: Dict[str, float]
+    calibrated_at: float = field(default_factory=time.time)
+    sample_size: int = 0  # N de runs usados para calibrar este perfil
 
+# Baselines opacos de ejemplo calibrados. Sin comentarios identificatorios de proveedor.
 PROVENANCE_BASELINES = [
-    ModelProfile("profile_alpha", 22.5, 3.8, 0.12, 0.04),
-    ModelProfile("profile_beta", 10.2, 4.2, 0.05, 0.02),
-    ModelProfile("profile_gamma", 15.8, 4.0, 0.08, 0.03)
+    BaselineProfile(
+        id="profile_alpha",
+        features={"itl_ms": 22.5, "char_ratio": 3.8, "md_density": 0.12, "lexical_bias": 0.04},
+        calibrated_at=1770000000.0,
+        sample_size=100
+    ),
+    BaselineProfile(
+        id="profile_beta",
+        features={"itl_ms": 10.2, "char_ratio": 4.2, "md_density": 0.05, "lexical_bias": 0.02},
+        calibrated_at=1770000000.0,
+        sample_size=100
+    ),
+    BaselineProfile(
+        id="profile_gamma",
+        features={"itl_ms": 15.8, "char_ratio": 4.0, "md_density": 0.08, "lexical_bias": 0.03},
+        calibrated_at=1770000000.0,
+        sample_size=100
+    )
 ]
 
 class ProvenanceAuditor:
-    def __init__(self, baseline_profiles: List[ModelProfile]):
-        self.profiles = baseline_profiles
-        self.lexical_targets = {"certainly": 1.0, "delve": 1.2, "tapestry": 1.2, "complex": 0.5}
+    """
+    Auditor de consistencia de endpoint basado en firmas pasivas.
+
+    Usos soportados (C4-C5 según el componente):
+      - drift detection (¿cambió el comportamiento del mismo endpoint?)
+      - clustering anónimo
+      - regression testing
+      - consistency auditing
+
+    NO soportado sin validación etiquetada:
+      - atribución de proveedor/modelo/checkpoint exacto
+      - claims numéricos de precisión
+    """
+
+    DEFAULT_WEIGHTS = {
+        "itl_ms": 0.1,
+        "char_ratio": 1.0,
+        "md_density": 10.0,
+        "lexical_bias": 50.0,
+    }
+
+    # Desviación típica estimada de cada dimensión para normalizar magnitudes físicas
+    DIMENSION_SCALES = {
+        "itl_ms": 10.0,
+        "char_ratio": 0.5,
+        "md_density": 0.05,
+        "lexical_bias": 0.01,
+    }
+
+    def __init__(
+        self,
+        baselines: List[BaselineProfile],
+        weights: Optional[Dict[str, float]] = None,
+        jitter_baseline_ms: float = 0.0,  # latencia de red de referencia a restar
+    ):
+        self.baselines = baselines
+        self.weights = weights or dict(self.DEFAULT_WEIGHTS)
+        self.jitter_baseline_ms = max(jitter_baseline_ms, 0.0)
+        self.lexical_targets = {
+            "certainly": 1.0, "delve": 1.2, "tapestry": 1.2,
+            "however": 0.5, "cannot": 0.6,
+        }
 
     def _compute_lexical_bias(self, text: str) -> float:
         if not text:
             return 0.0
-        words = re.findall(r"\w+", text.lower())
+        words = re.findall(r"[a-zA-Z]+", text.lower())
         if not words:
             return 0.0
         score = sum(self.lexical_targets.get(w, 0.0) for w in words)
         return score / len(words)
 
-    def analyze(self, eval_results: List[SingleResult]) -> Dict[str, Any]:
-        valid_runs = [r for r in eval_results if r.status_code == 200 and not r.rejected]
-        if not valid_runs:
-            return {"status": "error", "message": "No valid data"}
+    def _extract_features(self, results: List[SingleResult]) -> Optional[Dict[str, float]]:
+        valid = [r for r in results if r.status_code == 200 and not r.rejected]
+        if not valid:
+            return None
 
-        avg_itl = sum(((r.latency_ms - (r.ttft_ms or 0.0)) / max(r.completion_tokens or 1, 1)) for r in valid_runs) / len(valid_runs)
-        
-        all_text = " ".join([r.response_text for r in valid_runs])
-        total_tokens = sum(r.completion_tokens or 1 for r in valid_runs)
-        
-        ratio = len(all_text) / max(total_tokens, 1)
-        md_chars = sum(1 for c in all_text if c in "#*-`")
-        density = md_chars / max(len(all_text), 1)
-        l_bias = self._compute_lexical_bias(all_text)
+        itl_vals, ratio_vals, md_vals, bias_vals = [], [], [], []
 
-        obs = {"itl_ms": avg_itl, "ratio": ratio, "density": density, "bias": l_bias}
+        for r in valid:
+            tokens = max(r.completion_tokens or 1, 1)
+            ttft = r.ttft_ms or 0.0
+            latency = r.latency_ms
 
-        matches = {}
-        for p in self.profiles:
-            d_itl = ((obs["itl_ms"] - p.itl_ms) / 10.0) ** 2
-            d_ratio = ((obs["ratio"] - p.char_token_ratio) / 0.5) ** 2
-            d_density = ((obs["density"] - p.md_density) / 0.05) ** 2
-            d_bias = ((obs["bias"] - p.lexical_bias) / 0.01) ** 2
-            
-            distance = math.sqrt(d_itl + d_ratio + d_density + d_bias)
-            matches[p.id] = 1.0 / (1.0 + distance)
+            if tokens > 1 and latency > ttft:
+                # Normalización de jitter: resta la latencia de red de referencia
+                itl = ((latency - ttft) / tokens) - self.jitter_baseline_ms
+                itl_vals.append(max(itl, 0.0))
 
-        total_m = sum(matches.values())
-        probs = {k: round(v / total_m, 4) for k, v in matches.items()}
-        prediction = max(probs, key=probs.get)
+            text = r.response_text or ""
+            if text:
+                ratio_vals.append(len(text) / tokens)
+                md = sum(1 for c in text if c in "#*-`") / max(len(text), 1)
+                md_vals.append(md)
+                bias_vals.append(self._compute_lexical_bias(text))
+
+        def mean(xs):
+            return sum(xs) / len(xs) if xs else 0.0
 
         return {
+            "itl_ms": mean(itl_vals),
+            "char_ratio": mean(ratio_vals),
+            "md_density": mean(md_vals),
+            "lexical_bias": mean(bias_vals),
+        }
+
+    def analyze(self, results: List[SingleResult]) -> Dict[str, Any]:
+        obs = self._extract_features(results)
+        if obs is None:
+            return {
+                "status": "insufficient_data",
+                "identity_claim": "not_supported"
+            }
+
+        if not self.baselines:
+            return {
+                "status": "no_baselines",
+                "observed_vector": obs,
+                "note": "Signature computed; no calibrated baselines configured.",
+                "identity_claim": "not_supported"
+            }
+
+        distances = {}
+        for p in self.baselines:
+            d_sq = 0.0
+            for k in obs:
+                if k not in p.features:
+                    continue  # Evita contaminación por inconsistencia de dimensiones
+                obs_val = obs[k]
+                ref_val = p.features[k]
+                # Normalización dimensional usando DIMENSION_SCALES
+                scale = self.DIMENSION_SCALES.get(k, 1.0)
+                diff_norm = (obs_val - ref_val) / scale
+                d_sq += self.weights.get(k, 1.0) * (diff_norm ** 2)
+            distances[p.id] = math.sqrt(d_sq)
+
+        # Softmax con traslación log-sum-exp para estabilidad numérica extrema
+        min_dist = min(distances.values()) if distances else 0.0
+        raw = {k: math.exp(-(v - min_dist)) for k, v in distances.items()}
+        total = sum(raw.values()) or 1.0
+        similarities = {k: round(v / total, 4) for k, v in raw.items()}
+        nearest = min(distances, key=distances.get)
+
+        return {
+            "status": "ok",
             "observed_vector": obs,
-            "predicted_profile": prediction,
-            "confidence": probs[prediction],
-            "distribution": probs
+            "nearest_profile": nearest,
+            "distances": {k: round(v, 4) for k, v in distances.items()},
+            "similarity_scores": similarities,  # heurístico, no probabilidad calibrada
+            "identity_claim": "not_supported"
         }
 
 # ------------------- Evaluator -------------------
