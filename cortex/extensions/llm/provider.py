@@ -13,6 +13,7 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 import httpx
+from rich.console import Console
 
 from cortex.extensions.llm._audit import spectral_audit
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
@@ -36,6 +37,14 @@ logger = logging.getLogger("cortex_extensions.llm")
 
 _QUOTA_MANAGER: SovereignQuotaManager | None = None
 _RESULT_CACHE: ResultCache | None = None
+_HUD: Console | None = None
+
+
+def _get_hud() -> Console:
+    global _HUD
+    if _HUD is None:
+        _HUD = Console(stderr=True)
+    return _HUD
 
 
 def _get_quota_manager() -> SovereignQuotaManager:
@@ -198,6 +207,9 @@ class LLMProvider(BaseProvider):
         if cached := cache.get(payload):
             return cached
 
+        if os.environ.get("CORTEX_LIVE_ROUTING") == "1":
+            _get_hud().print(f"[bold magenta]⚡ COGNITIVE ROUTING[/bold magenta] [dim]➜[/dim] Provider: [bold cyan]{self._provider.upper()}[/bold cyan] | Weights: [bold yellow]{model_name}[/bold yellow] | Intent: [green]{intent.value}[/green]")
+
         await self._acquire_quota()
         url, headers = self._prepare_request()
 
@@ -330,6 +342,10 @@ class LLMProvider(BaseProvider):
         url, headers = self._prepare_request()
         headers = prepare_stealth_headers(headers)
         model_name = self._resolve_model(intent)
+
+        if os.environ.get("CORTEX_LIVE_ROUTING") == "1":
+            _get_hud().print(f"[bold magenta]⚡ COGNITIVE STREAM[/bold magenta] [dim]➜[/dim] Provider: [bold cyan]{self._provider.upper()}[/bold cyan] | Weights: [bold yellow]{model_name}[/bold yellow] | Intent: [green]{intent.value}[/green]")
+
         payload = {
             "model": model_name,
             "messages": [
@@ -441,6 +457,9 @@ class LLMProvider(BaseProvider):
         cache = _get_result_cache()
         if cached := cache.get(payload):
             return cached
+
+        if os.environ.get("CORTEX_LIVE_ROUTING") == "1":
+            _get_hud().print(f"[bold magenta]⚡ COGNITIVE ROUTING[/bold magenta] [dim]➜[/dim] Provider: [bold cyan]{self._provider.upper()}[/bold cyan] | Weights: [bold yellow]{model_name}[/bold yellow] | Intent: [green]{prompt.intent.value}[/green]")
 
         await self._acquire_quota()
         url, headers = self._prepare_request()
