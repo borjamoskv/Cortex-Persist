@@ -1,28 +1,47 @@
 # CORTEX ENGINE FACADE
 # Auto-generated to maintain compatibility after structural mitosis.
 
-from cortex.swarm import (
-    agent_mixin,
-    aleph_omega,
-    auth,
-    auth_gateway,
-    autocurative_agent,
-    autopoietic_agent,
-    enrichment_worker,
-    entropy_daemon,
-    exergy_agent,
-    exergy_daemon,
-    legion,
-    legion_vectors,
-    legion_vectors_plan,
-    nemesis_agent,
-    omega_daemon,
-    phoenix_omega,
-    squadrons,
-    swarm_10k,
-    test_autopoietic_agent,
-    trust_registry,
-)
+_SWARM_MODULES = {
+    "agent_mixin",
+    "aleph_omega",
+    "auth",
+    "auth_gateway",
+    "autocurative_agent",
+    "autopoietic_agent",
+    "enrichment_worker",
+    "entropy_daemon",
+    "exergy_agent",
+    "exergy_daemon",
+    "legion",
+    "legion_vectors",
+    "legion_vectors_plan",
+    "nemesis_agent",
+    "omega_daemon",
+    "phoenix_omega",
+    "squadrons",
+    "swarm_10k",
+    "test_autopoietic_agent",
+    "trust_registry",
+}
+
+_DEFERRED_ATTRIBUTES = {
+    "AsyncCortexEngine": ".core.cortex_engine",
+    "CortexEngine": ".core.cortex_engine",
+}
+
+def __getattr__(name: str):
+    if name in _SWARM_MODULES:
+        import importlib
+        return importlib.import_module(f"cortex.swarm.{name}")
+    if name in _DEFERRED_ATTRIBUTES:
+        import importlib
+        mod = importlib.import_module(_DEFERRED_ATTRIBUTES[name], __name__)
+        return getattr(mod, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+def __dir__():
+    return sorted(list(globals().keys()) + list(_SWARM_MODULES) + list(_DEFERRED_ATTRIBUTES.keys()))
+
 
 from .core import (
     _engine_connection,
@@ -50,7 +69,6 @@ from .core import (
     tuning_store,
     ultrathink_physics,
 )
-from .core.cortex_engine import AsyncCortexEngine, CortexEngine
 from .evo import (
     _autocurative_config,
     _autocurative_helper,
