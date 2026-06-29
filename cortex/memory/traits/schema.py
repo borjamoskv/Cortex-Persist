@@ -45,16 +45,23 @@ class SchemaTrait:
             conn.execute("PRAGMA synchronous=NORMAL;")
             conn.execute("PRAGMA busy_timeout=5000")
 
-            try:
-                conn.enable_load_extension(True)
-                sqlite_vec.load(conn)
-                self._vector_enabled = True
-                logger.info("✅ [VECTORS] sqlite-vec extension loaded successfully.")
-            except (AttributeError, sqlite3.OperationalError, Exception) as e:
+            if hasattr(conn, "enable_load_extension"):
+                try:
+                    conn.enable_load_extension(True)
+                    sqlite_vec.load(conn)
+                    self._vector_enabled = True
+                    logger.info("✅ [VECTORS] sqlite-vec extension loaded successfully.")
+                except (AttributeError, OSError, sqlite3.Error, Exception) as e:
+                    logger.warning(
+                        "⚠️ [VECTORS] Fallback Mode ACTIVE: Could not load sqlite-vec: %s. "
+                        "Semantic search will be disabled but metadata storage is preserved.",
+                        e,
+                    )
+                    self._vector_enabled = False
+            else:
                 logger.warning(
-                    "⚠️ [VECTORS] Fallback Mode ACTIVE: Could not load sqlite-vec: %s. "
-                    "Semantic search will be disabled but metadata storage is preserved.",
-                    e,
+                    "⚠️ [VECTORS] Fallback Mode ACTIVE: sqlite-vec not available, enable_load_extension missing. "
+                    "Semantic search will be disabled but metadata storage is preserved."
                 )
                 self._vector_enabled = False
 

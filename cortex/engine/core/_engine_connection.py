@@ -217,12 +217,15 @@ class ConnectionMixin:
         """Returns a synchronous connection for blocking processes."""
 
         conn = connect(str(self._db_path), row_factory=sqlite3.Row)  # pyright: ignore[reportAttributeAccessIssue]
-        try:
-            conn.enable_load_extension(True)
-            conn.load_extension(sqlite_vec.loadable_path())
-            conn.enable_load_extension(False)
-        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
-            logger.warning("Suppressed exception: %s", exc)
+        if hasattr(conn, "enable_load_extension"):
+            try:
+                conn.enable_load_extension(True)
+                conn.load_extension(sqlite_vec.loadable_path())
+                conn.enable_load_extension(False)
+            except (AttributeError, OSError, sqlite3.Error, ValueError, TypeError, KeyError, RuntimeError) as exc:
+                logger.warning("Suppressed exception: %s", exc)
+        else:
+            logger.debug("sqlite-vec not available for sync connection: enable_load_extension missing")
         if not hasattr(self, "_sync_conns"):
             self._sync_conns = []
         self._sync_conns.append(conn)

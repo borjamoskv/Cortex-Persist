@@ -452,6 +452,10 @@ async def load_sqlite_vec_async(conn: aiosqlite.Connection) -> bool:
     if sqlite_vec is None:
         return False
 
+    if not hasattr(conn, "enable_load_extension"):
+        logger.debug("sqlite-vec not available for async connection: enable_load_extension missing")
+        return False
+
     extension_toggle_enabled = False
     try:
         await conn.enable_load_extension(True)

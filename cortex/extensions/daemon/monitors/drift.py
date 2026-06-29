@@ -120,8 +120,18 @@ class DriftMonitorDaemon:
 
             conn = db_connect(str(self.vectors_db_path), timeout=10)
             conn.execute("PRAGMA busy_timeout=10000")
-            conn.enable_load_extension(True)
-            sqlite_vec.load(conn)
+            if hasattr(conn, "enable_load_extension"):
+                try:
+                    conn.enable_load_extension(True)
+                    sqlite_vec.load(conn)
+                except (AttributeError, OSError, sqlite3.Error) as exc:
+                    logger.warning("DriftMonitor: Failed to load sqlite_vec extension: %s", exc)
+                    conn.close()
+                    return None
+            else:
+                logger.warning("DriftMonitor: sqlite_vec not available, enable_load_extension missing")
+                conn.close()
+                return None
 
             # Check table exists
             cursor = conn.execute(

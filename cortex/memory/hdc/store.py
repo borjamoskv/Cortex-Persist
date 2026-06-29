@@ -82,13 +82,19 @@ class HDCVectorStoreL2:
             self._conn.execute("PRAGMA busy_timeout=5000")
 
             if sqlite_vec is not None:
-                try:
-                    self._conn.enable_load_extension(True)
-                    sqlite_vec.load(self._conn)
-                    self._vec_loaded = True
-                except (AttributeError, OSError, sqlite3.Error) as e:
+                if hasattr(self._conn, "enable_load_extension"):
+                    try:
+                        self._conn.enable_load_extension(True)
+                        sqlite_vec.load(self._conn)
+                        self._vec_loaded = True
+                    except (AttributeError, OSError, sqlite3.Error) as e:
+                        logger.warning(
+                            f"Could not load sqlite_vec extension: {e}. Falling back to pure Python vectors."
+                        )
+                        self._vec_loaded = False
+                else:
                     logger.warning(
-                        f"Could not load sqlite_vec extension: {e}. Falling back to pure Python vectors."
+                        "enable_load_extension missing from sqlite3 connection. Falling back to pure Python vectors."
                     )
                     self._vec_loaded = False
             else:
