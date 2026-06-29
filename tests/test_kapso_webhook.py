@@ -22,7 +22,7 @@ def test_verify_webhook_fallback_success(client):
     }
     # Ensure neither keyring nor environment variables are set
     with patch("babylon60.extensions.kapso.webhook.keyring", None):
-        with patch.dict(os.environ, {}, clear=True):
+        with patch.dict(os.environ, {"PYTEST_CURRENT_TEST": "true"}, clear=True):
             response = client.get("/kapso/webhook", params=params)
             assert response.status_code == 200
             assert response.json() == 123456
@@ -37,7 +37,7 @@ def test_verify_webhook_env_success(client):
         "hub.challenge": "654321"
     }
     with patch("babylon60.extensions.kapso.webhook.keyring", None):
-        with patch.dict(os.environ, {"CORTEX_KAPSO_VERIFY_TOKEN": "env_verify_token_999"}):
+        with patch.dict(os.environ, {"CORTEX_KAPSO_VERIFY_TOKEN": "env_verify_token_999", "PYTEST_CURRENT_TEST": "true"}, clear=True):
             response = client.get("/kapso/webhook", params=params)
             assert response.status_code == 200
             assert response.json() == 654321
@@ -56,7 +56,7 @@ def test_verify_webhook_keyring_success(client):
     mock_keyring.get_password.return_value = "keyring_verify_token_xyz"
     
     with patch("babylon60.extensions.kapso.webhook.keyring", mock_keyring):
-        with patch.dict(os.environ, {}, clear=True):
+        with patch.dict(os.environ, {"PYTEST_CURRENT_TEST": "true"}, clear=True):
             response = client.get("/kapso/webhook", params=params)
             assert response.status_code == 200
             assert response.json() == 789012
@@ -76,7 +76,7 @@ def test_verify_webhook_keyring_error_fallback(client):
     mock_keyring.get_password.side_effect = Exception("Keyring unavailable")
     
     with patch("babylon60.extensions.kapso.webhook.keyring", mock_keyring):
-        with patch.dict(os.environ, {"CORTEX_KAPSO_VERIFY_TOKEN": "fallback_token_from_env"}):
+        with patch.dict(os.environ, {"CORTEX_KAPSO_VERIFY_TOKEN": "fallback_token_from_env", "PYTEST_CURRENT_TEST": "true"}, clear=True):
             response = client.get("/kapso/webhook", params=params)
             assert response.status_code == 200
             assert response.json() == 456789
@@ -91,7 +91,7 @@ def test_verify_webhook_forbidden(client):
         "hub.challenge": "123456"
     }
     with patch("babylon60.extensions.kapso.webhook.keyring", None):
-        with patch.dict(os.environ, {}, clear=True):
+        with patch.dict(os.environ, {"PYTEST_CURRENT_TEST": "true"}, clear=True):
             response = client.get("/kapso/webhook", params=params)
             assert response.status_code == 403
             assert response.json() == {"detail": "Forbidden"}

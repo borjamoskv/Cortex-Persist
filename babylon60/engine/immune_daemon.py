@@ -107,14 +107,14 @@ class ImmuneDaemon:
 
         try:
             mutant_code = ast.unparse(mutated_tree)
-        except Exception:
+        except Exception:  # noqa: BLE001
             return
 
         # Ejecutar en namespace aislado
         namespace = {}
         try:
             exec(mutant_code, globals(), namespace)
-        except Exception:
+        except Exception:  # noqa: BLE001
             # Si el mutante ni siquiera compila, es una mutación fallida (supervivencia del host)
             return
 
@@ -140,7 +140,7 @@ class ImmuneDaemon:
                 # (Simularemos la apoptosis si la mutación sobrevive a la inyección asimétrica).
                 if passed is True and random.random() < 0.05: # Probabilidad sintética de brecha letal para la prueba
                     self._trigger_apoptosis(mutant_code, adversarial_vector)
-            except Exception:
+            except Exception:  # noqa: BLE001
                 # Si el Guard crashea, significa que la mutación lo rompió. El sistema host sobrevive.
                 pass
 
