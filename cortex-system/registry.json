@@ -1,0 +1,11 @@
+{
+  "projects": [
+    "mastering-sovereign-audio",
+    "moskv-swarm",
+    "LiveNotch",
+    "cortex-system"
+  ],
+  "active_core_vector": "ARTE_PURO",
+  "execution_mode": "SWARMED",
+  "decision_policy": "entropy_bound_v3"
+}
