@@ -14,7 +14,7 @@ from pathlib import Path
 
 try:
     from babylon60.extensions.llm.provider import LLMProvider
-    from babylon60.extensions.llm.router import CortexPrompt, IntentProfile
+    from babylon60.extensions.llm.router import CortexPrompt, IntentProfile  # type: ignore
 except ImportError:
     LLMProvider = None  # type: ignore
     CortexPrompt = None  # type: ignore

@@ -13,7 +13,7 @@ import logging
 from typing import Any
 
 from babylon60.engine import CortexEngine
-from babylon60.extensions.llm.router import IntentProfile
+from babylon60.extensions.llm.router import IntentProfile  # type: ignore
 from babylon60.extensions.llm.sovereign import SovereignLLM
 
 logger = logging.getLogger("cortex.audit.frontier")

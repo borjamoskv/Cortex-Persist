@@ -1,0 +1,968 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+	title="CORTEX Persist | Product Configurator"
+	description="Configure and optimize your sovereign agent memory layer infrastructure. Compute pricing, select hardware encryption, and map system topology."
+	canonical="https://cortexpersist.com/configurador"
+	bodyClass="configurador-body"
+>
+	<main class="landing-shell configurador-container">
+		<header class="config-header">
+			<a class="back-link" href="/" aria-label="Back to landing">
+				&larr; Return to landing
+			</a>
+			<div class="header-main">
+				<span class="eyebrow">Exergy Optimizer</span>
+				<h1>Product Configurator &amp; Swarm Architect</h1>
+				<p class="subtitle">
+					Optimize your local or distributed trust boundaries. Select deployment tiers, storage backends, and cryptographic compliance modules.
+				</p>
+			</div>
+		</header>
+
+		<div class="config-grid">
+			<!-- Form Control Side -->
+			<section class="surface config-controls">
+				<div class="section-head">
+					<span class="surface-label">Configuration Engine</span>
+					<span class="status-indicator">STANDBY</span>
+				</div>
+
+				<!-- Step 1: Deployment Tier -->
+				<fieldset class="config-section">
+					<legend class="surface-label">1. Deployment Tier</legend>
+					<div class="options-vertical">
+						<label class="option-card" for="tier-self">
+							<input type="radio" name="tier" id="tier-self" value="self" checked />
+							<div class="option-details">
+								<span class="option-title">Self-Hosted (BYOC)</span>
+								<span class="option-desc">On-prem sovereign nodes. Best for independent builders.</span>
+							</div>
+							<span class="option-price">$0/mo</span>
+						</label>
+
+						<label class="option-card" for="tier-pro">
+							<input type="radio" name="tier" id="tier-pro" value="pro" />
+							<div class="option-details">
+								<span class="option-title">Pro Cloud</span>
+								<span class="option-desc">Shared cloud database with basic telemetry logging.</span>
+							</div>
+							<span class="option-price">$29/mo</span>
+						</label>
+
+						<label class="option-card" for="tier-legion">
+							<input type="radio" name="tier" id="tier-legion" value="legion" />
+							<div class="option-details">
+								<span class="option-title">Legion Swarm</span>
+								<span class="option-desc">Dedicated high-throughput backend supporting up to 1k agents.</span>
+							</div>
+							<span class="option-price">$99/mo</span>
+						</label>
+
+						<label class="option-card" for="tier-sovereign">
+							<input type="radio" name="tier" id="tier-sovereign" value="sovereign" />
+							<div class="option-details">
+								<span class="option-title">Sovereign Enterprise</span>
+								<span class="option-desc">Dedicated VPC, multi-node BFT consensus, SOC 2 compliance.</span>
+							</div>
+							<span class="option-price">$999/mo</span>
+						</label>
+					</div>
+				</fieldset>
+
+				<!-- Step 2: Storage & Vector Backend -->
+				<fieldset class="config-section">
+					<legend class="surface-label">2. Storage &amp; Vector Sink</legend>
+					<div class="options-vertical">
+						<label class="option-card" for="storage-sqlite">
+							<input type="radio" name="storage" id="storage-sqlite" value="sqlite" checked />
+							<div class="option-details">
+								<span class="option-title">SQLite + sqlite-vec</span>
+								<span class="option-desc">Local-first embedding database. Low latency, zero cloud dependency.</span>
+							</div>
+							<span class="option-price">+$0</span>
+						</label>
+
+						<label class="option-card" for="storage-turbopuffer">
+							<input type="radio" name="storage" id="storage-turbopuffer" value="turbopuffer" />
+							<div class="option-details">
+								<span class="option-title">Turbopuffer L2 Sink</span>
+								<span class="option-desc">Hybrid storage. Auto-compaction to remote serverless vector cloud.</span>
+							</div>
+							<span class="option-price">+$20/mo</span>
+						</label>
+
+						<label class="option-card" for="storage-alloydb">
+							<input type="radio" name="storage" id="storage-alloydb" value="alloydb" />
+							<div class="option-details">
+								<span class="option-title">AlloyDB pgvector Cluster</span>
+								<span class="option-desc">Enterprise-grade distributed vector indexing. Unlimited scale.</span>
+							</div>
+							<span class="option-price">+$150/mo</span>
+						</label>
+					</div>
+				</fieldset>
+
+				<!-- Step 3: Agent Scale Slider -->
+				<div class="config-section">
+					<span class="surface-label">3. Concurrent Agent Scale</span>
+					<div class="slider-container">
+						<div class="slider-header">
+							<span class="slider-label"><strong id="agent-count-val">10</strong> Agents</span>
+							<span class="slider-cost" id="agent-cost-val">+$0/mo</span>
+						</div>
+						<input type="range" id="agent-slider" min="1" max="10000" value="10" class="cortex-slider" />
+						<div class="slider-ticks">
+							<span>1</span>
+							<span>1k</span>
+							<span>5k</span>
+							<span>10k</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Step 4: SLA & Consensus -->
+				<fieldset class="config-section">
+					<legend class="surface-label">4. SLA &amp; Consensus Model</legend>
+					<div class="options-vertical">
+						<label class="option-card" for="sla-best">
+							<input type="radio" name="sla" id="sla-best" value="best_effort" checked />
+							<div class="option-details">
+								<span class="option-title">Best Effort</span>
+								<span class="option-desc">Standard performance parameters. No downtime guarantees.</span>
+							</div>
+							<span class="option-price">+$0</span>
+						</label>
+
+						<label class="option-card" for="sla-uptime">
+							<input type="radio" name="sla" id="sla-uptime" value="uptime" />
+							<div class="option-details">
+								<span class="option-title">99.9% Swarm Uptime</span>
+								<span class="option-desc">SLA backing for distributed events and L1 cache endpoints.</span>
+							</div>
+							<span class="option-price">+$49/mo</span>
+						</label>
+
+						<label class="option-card" for="sla-bft">
+							<input type="radio" name="sla" id="sla-bft" value="bft" />
+							<div class="option-details">
+								<span class="option-title">99.99% BFT Consensus Guarantee</span>
+								<span class="option-desc">Hedged race execution and 15-node Byzantine fault tolerance.</span>
+							</div>
+							<span class="option-price">+$299/mo</span>
+						</label>
+					</div>
+				</fieldset>
+
+				<!-- Step 5: Compliance Modules -->
+				<fieldset class="config-section">
+					<legend class="surface-label">5. Compliance &amp; Security</legend>
+					<div class="options-vertical">
+						<label class="option-card checkbox-card" for="comp-eu">
+							<input type="checkbox" id="comp-eu" value="eu_ai" />
+							<div class="option-details">
+								<span class="option-title">EU AI Act (Article 12) Logger</span>
+								<span class="option-desc">Adds cryptographic traceability and audit pipelines.</span>
+							</div>
+							<span class="option-price">+$39/mo</span>
+						</label>
+
+						<label class="option-card checkbox-card" for="comp-soc">
+							<input type="checkbox" id="comp-soc" value="soc2" />
+							<div class="option-details">
+								<span class="option-title">SOC 2 Compliance Engine</span>
+								<span class="option-desc">Automated continuous security monitoring and audit exporter.</span>
+							</div>
+							<span class="option-price">+$99/mo</span>
+						</label>
+
+						<label class="option-card checkbox-card" for="comp-zk">
+							<input type="checkbox" id="comp-zk" value="zk_keys" />
+							<div class="option-details">
+								<span class="option-title">Zero-Knowledge Hardware Key Encryption</span>
+								<span class="option-desc">End-to-end memory encryption using hardware HSM keys.</span>
+							</div>
+							<span class="option-price">+$199/mo</span>
+						</label>
+					</div>
+				</fieldset>
+			</section>
+
+			<!-- Visualization & Summary Side -->
+			<section class="config-summary">
+				<!-- Topology Blueprint -->
+				<article class="surface config-topology">
+					<div class="surface-head">
+						<span class="surface-label">Infrastructure Blueprint</span>
+						<span class="surface-state" id="topo-state">Local</span>
+					</div>
+					<div class="topo-visualizer">
+						<div class="topo-node central-agent" id="node-agent">
+							<span class="node-label">MOSKV-1 Swarm</span>
+							<span class="node-sub" id="agent-display-count">10 Agents</span>
+						</div>
+						
+						<div class="topo-arrow">&darr;</div>
+
+						<div class="topo-node engine-core">
+							<span class="node-label">CORTEX Persist L1</span>
+							<span class="node-sub">Taint &amp; Verification Engine</span>
+						</div>
+
+						<div class="topo-arrow">&darr;</div>
+
+						<div class="topo-flex-row">
+							<div class="topo-node store-sink" id="node-storage">
+								<span class="node-label">Local SQLite-Vec</span>
+								<span class="node-sub">Locality: 100%</span>
+							</div>
+
+							<div class="topo-node compliance-node hidden" id="node-compliance">
+								<span class="node-label">Sovereign Audit Logger</span>
+								<span class="node-sub">EU AI / SOC 2 Active</span>
+							</div>
+						</div>
+
+						<div class="topo-arrow hidden" id="hsm-arrow">&darr;</div>
+
+						<div class="topo-node security-node hidden" id="node-hsm">
+							<span class="node-label">Hardware HSM Gateway</span>
+							<span class="node-sub">Zero-Knowledge Guard Active</span>
+						</div>
+					</div>
+				</article>
+
+				<!-- Performance / Yield Panel -->
+				<article class="surface config-metrics">
+					<div class="surface-head">
+						<span class="surface-label">Estimated Yield &amp; SLA</span>
+						<span class="surface-state">Calculated</span>
+					</div>
+					<div class="metrics-row">
+						<div class="metric-card">
+							<span class="metric-label">Latency (TTFT)</span>
+							<strong id="metric-latency">85 ms</strong>
+						</div>
+						<div class="metric-card">
+							<span class="metric-label">Fault Tolerance</span>
+							<strong id="metric-bft">f = 0</strong>
+						</div>
+						<div class="metric-card">
+							<span class="metric-label">Exergy Yield</span>
+							<strong id="metric-exergy">98.2%</strong>
+						</div>
+					</div>
+				</article>
+
+				<!-- Cost Calculation Panel -->
+				<article class="surface-sunken config-pricing">
+					<div class="pricing-header">
+						<span class="surface-label">CORTEX Exergy Agreement</span>
+						<div class="price-display">
+							<span class="currency">$</span>
+							<span class="amount" id="total-price-val">0</span>
+							<span class="period">/mo</span>
+						</div>
+					</div>
+
+					<div class="pricing-breakdown">
+						<div class="breakdown-item">
+							<span id="label-tier">Self-Hosted Tier</span>
+							<span id="val-tier">$0/mo</span>
+						</div>
+						<div class="breakdown-item">
+							<span id="label-storage">Local Storage</span>
+							<span id="val-storage">$0/mo</span>
+						</div>
+						<div class="breakdown-item">
+							<span id="label-agents">Agent Scale</span>
+							<span id="val-agents">$0/mo</span>
+						</div>
+						<div class="breakdown-item">
+							<span id="label-sla">Best Effort SLA</span>
+							<span id="val-sla">$0/mo</span>
+						</div>
+						<div class="breakdown-item hidden" id="breakdown-comp">
+							<span>Compliance Modules</span>
+							<span id="val-comp">$0/mo</span>
+						</div>
+					</div>
+
+					<button class="button-primary sign-button" id="sign-ledger-btn">
+						<span class="button-icon">&#x2716;</span>
+						Cripto-Firme de Contrato (Emitir a Ledger)
+					</button>
+				</article>
+			</section>
+		</div>
+	</main>
+</SiteLayout>
+
+<style is:global>
+	/* Global overrides and visual styles for Product Configurator page */
+	.configurador-body {
+		background-attachment: fixed;
+	}
+
+	.configurador-container {
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+		min-height: calc(100vh - 4rem);
+		padding-bottom: 4rem;
+		padding-top: 2rem;
+	}
+
+	.config-header {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.back-link {
+		color: var(--accent-soft);
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.85rem;
+		font-weight: 500;
+		transition: color 150ms ease;
+		width: max-content;
+	}
+
+	.back-link:hover {
+		color: var(--text);
+	}
+
+	.header-main {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.header-main h1 {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 2.2rem;
+		font-weight: 800;
+		letter-spacing: -0.02em;
+		margin: 0;
+		text-transform: uppercase;
+	}
+
+	.subtitle {
+		color: var(--muted);
+		font-size: 1.1rem;
+		line-height: 1.5;
+		margin: 0;
+		max-width: 700px;
+	}
+
+	.config-grid {
+		display: grid;
+		gap: 1.8rem;
+		grid-template-columns: 1.2fr 1fr;
+	}
+
+	@media (max-width: 1024px) {
+		.config-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.config-controls {
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+		padding: 2rem;
+	}
+
+	.section-head {
+		align-items: center;
+		border-bottom: 1px solid var(--line);
+		display: flex;
+		justify-content: space-between;
+		padding-bottom: 1rem;
+	}
+
+	.status-indicator {
+		background: rgba(43, 59, 229, 0.15);
+		border: 1px solid var(--line);
+		border-radius: 4px;
+		color: var(--accent-soft);
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.75rem;
+		font-weight: 600;
+		padding: 0.25rem 0.5rem;
+	}
+
+	.config-section {
+		border: none;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		margin: 0;
+		padding: 0;
+	}
+
+	.options-vertical {
+		display: flex;
+		flex-direction: column;
+		gap: 0.8rem;
+	}
+
+	.option-card {
+		align-items: center;
+		border: 1px solid var(--line);
+		border-radius: var(--radius-lg);
+		cursor: pointer;
+		display: flex;
+		gap: 1rem;
+		padding: 1.1rem;
+		transition:
+			background 180ms ease,
+			border-color 180ms ease;
+	}
+
+	.option-card:hover {
+		background: rgba(255, 255, 255, 0.02);
+		border-color: var(--line-strong);
+	}
+
+	.option-card input[type="radio"],
+	.option-card input[type="checkbox"] {
+		accent-color: var(--accent);
+		cursor: pointer;
+		height: 1.2rem;
+		margin: 0;
+		width: 1.2rem;
+	}
+
+	.option-details {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+		gap: 0.25rem;
+	}
+
+	.option-title {
+		color: var(--text);
+		font-size: 0.95rem;
+		font-weight: 700;
+	}
+
+	.option-desc {
+		color: var(--muted);
+		font-size: 0.8rem;
+		line-height: 1.4;
+	}
+
+	.option-price {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.9rem;
+		font-weight: 600;
+	}
+
+	.slider-container {
+		background: rgba(255, 255, 255, 0.01);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-lg);
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		padding: 1.2rem;
+	}
+
+	.slider-header {
+		align-items: center;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.slider-label {
+		color: var(--muted);
+		font-size: 0.9rem;
+	}
+
+	.slider-label strong {
+		color: var(--text);
+		font-family: 'Orbitron', sans-serif;
+		font-size: 1.1rem;
+	}
+
+	.slider-cost {
+		color: var(--success);
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.9rem;
+		font-weight: 600;
+	}
+
+	.cortex-slider {
+		accent-color: var(--accent);
+		cursor: pointer;
+		height: 6px;
+		width: 100%;
+	}
+
+	.slider-ticks {
+		color: var(--muted);
+		display: flex;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.7rem;
+		justify-content: space-between;
+	}
+
+	.config-summary {
+		display: flex;
+		flex-direction: column;
+		gap: 1.8rem;
+	}
+
+	.config-topology {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		padding: 1.8rem;
+	}
+
+	.topo-visualizer {
+		align-items: center;
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+		padding: 1rem 0;
+	}
+
+	.topo-node {
+		border: 1px solid var(--line);
+		border-radius: var(--radius-md);
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		padding: 0.85rem 1.2rem;
+		text-align: center;
+		transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+		width: 250px;
+	}
+
+	.topo-node:hover {
+		transform: scale(1.02);
+	}
+
+	.node-label {
+		font-size: 0.85rem;
+		font-weight: 700;
+		text-transform: uppercase;
+	}
+
+	.node-sub {
+		color: var(--muted);
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.72rem;
+	}
+
+	.central-agent {
+		background: rgba(43, 59, 229, 0.08);
+		border-color: var(--line-strong);
+		box-shadow: 0 0 20px rgba(43, 59, 229, 0.15);
+	}
+
+	.engine-core {
+		background: rgba(255, 255, 255, 0.02);
+	}
+
+	.store-sink {
+		background: rgba(0, 229, 163, 0.05);
+		border-color: rgba(0, 229, 163, 0.3);
+	}
+
+	.compliance-node {
+		background: rgba(229, 43, 85, 0.05);
+		border-color: rgba(229, 43, 85, 0.3);
+	}
+
+	.security-node {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: rgba(255, 255, 255, 0.2);
+	}
+
+	.topo-arrow {
+		color: var(--accent-soft);
+		font-family: monospace;
+		font-size: 1.2rem;
+	}
+
+	.topo-flex-row {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+	}
+
+	.hidden {
+		display: none !important;
+	}
+
+	.config-metrics {
+		padding: 1.8rem;
+	}
+
+	.metrics-row {
+		display: grid;
+		gap: 1.2rem;
+		grid-template-columns: repeat(3, 1fr);
+		margin-top: 1rem;
+	}
+
+	.metric-card {
+		background: rgba(255, 255, 255, 0.01);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-md);
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		padding: 1rem;
+		text-align: center;
+	}
+
+	.metric-card strong {
+		color: var(--text);
+		font-family: 'Orbitron', sans-serif;
+		font-size: 1.3rem;
+		font-weight: 700;
+	}
+
+	.config-pricing {
+		display: flex;
+		flex-direction: column;
+		gap: 1.8rem;
+		padding: 2rem;
+	}
+
+	.pricing-header {
+		align-items: center;
+		border-bottom: 1px solid var(--line);
+		display: flex;
+		justify-content: space-between;
+		padding-bottom: 1.2rem;
+	}
+
+	.price-display {
+		align-items: baseline;
+		display: flex;
+	}
+
+	.price-display .currency {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 1.4rem;
+		font-weight: 700;
+	}
+
+	.price-display .amount {
+		color: var(--success);
+		font-family: 'Orbitron', sans-serif;
+		font-size: 2.8rem;
+		font-weight: 800;
+	}
+
+	.price-display .period {
+		color: var(--muted);
+		font-size: 0.95rem;
+	}
+
+	.pricing-breakdown {
+		display: flex;
+		flex-direction: column;
+		gap: 0.85rem;
+	}
+
+	.breakdown-item {
+		display: flex;
+		font-size: 0.88rem;
+		justify-content: space-between;
+	}
+
+	.breakdown-item span:first-child {
+		color: var(--muted);
+	}
+
+	.breakdown-item span:last-child {
+		color: var(--text);
+		font-family: 'IBM Plex Mono', monospace;
+	}
+
+	.sign-button {
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		cursor: pointer;
+		font-family: 'Manrope', sans-serif;
+		font-size: 1rem;
+		text-transform: uppercase;
+		width: 100%;
+	}
+
+	.sign-button:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 16px 40px rgba(0, 229, 163, 0.15);
+	}
+
+	.button-icon {
+		font-size: 1.1rem;
+	}
+</style>
+
+<script>
+	// Configurator Pricing and Topology updates
+	document.addEventListener('DOMContentLoaded', () => {
+		const agentSlider = document.getElementById('agent-slider') as HTMLInputElement;
+		const agentCountVal = document.getElementById('agent-count-val');
+		const agentCostVal = document.getElementById('agent-cost-val');
+		
+		const totalPriceVal = document.getElementById('total-price-val');
+		
+		// Metrics
+		const metricLatency = document.getElementById('metric-latency');
+		const metricBft = document.getElementById('metric-bft');
+		const metricExergy = document.getElementById('metric-exergy');
+		
+		// Blueprint elements
+		const agentDisplayCount = document.getElementById('agent-display-count');
+		const nodeStorage = document.getElementById('node-storage');
+		const nodeCompliance = document.getElementById('node-compliance');
+		const nodeHsm = document.getElementById('node-hsm');
+		const hsmArrow = document.getElementById('hsm-arrow');
+		const topoState = document.getElementById('topo-state');
+		
+		// Breakdown targets
+		const labelTier = document.getElementById('label-tier');
+		const valTier = document.getElementById('val-tier');
+		const labelStorage = document.getElementById('label-storage');
+		const valStorage = document.getElementById('val-storage');
+		const labelAgents = document.getElementById('label-agents');
+		const valAgents = document.getElementById('val-agents');
+		const labelSla = document.getElementById('label-sla');
+		const valSla = document.getElementById('val-sla');
+		const breakdownComp = document.getElementById('breakdown-comp');
+		const valComp = document.getElementById('val-comp');
+
+		const signButton = document.getElementById('sign-ledger-btn');
+		const statusIndicator = document.querySelector('.status-indicator');
+
+		function calculate() {
+			// Get active tier
+			const tierEl = document.querySelector('input[name="tier"]:checked') as HTMLInputElement;
+			const tier = tierEl ? tierEl.value : 'self';
+			
+			// Get active storage
+			const storageEl = document.querySelector('input[name="storage"]:checked') as HTMLInputElement;
+			const storage = storageEl ? storageEl.value : 'sqlite';
+			
+			// Get agent slider
+			const agentsCount = parseInt(agentSlider.value);
+			
+			// Get active SLA
+			const slaEl = document.querySelector('input[name="sla"]:checked') as HTMLInputElement;
+			const sla = slaEl ? slaEl.value : 'best_effort';
+			
+			// Checkboxes
+			const compEu = (document.getElementById('comp-eu') as HTMLInputElement).checked;
+			const compSoc = (document.getElementById('comp-soc') as HTMLInputElement).checked;
+			const compZk = (document.getElementById('comp-zk') as HTMLInputElement).checked;
+
+			// Base Pricing parameters
+			let basePrice = 0;
+			let tierLabel = 'Self-Hosted Tier';
+			if (tier === 'pro') {
+				basePrice = 29;
+				tierLabel = 'Pro Cloud Tier';
+			} else if (tier === 'legion') {
+				basePrice = 99;
+				tierLabel = 'Legion Swarm Tier';
+			} else if (tier === 'sovereign') {
+				basePrice = 999;
+				tierLabel = 'Sovereign Ent. Tier';
+			}
+
+			// Storage Pricing
+			let storagePrice = 0;
+			let storageLabel = 'Local SQLite-Vec';
+			if (storage === 'turbopuffer') {
+				storagePrice = 20;
+				storageLabel = 'Turbopuffer L2 Sink';
+			} else if (storage === 'alloydb') {
+				storagePrice = 150;
+				storageLabel = 'AlloyDB pgvector';
+			}
+
+			// SLA Pricing
+			let slaPrice = 0;
+			let slaLabel = 'Best Effort SLA';
+			if (sla === 'uptime') {
+				slaPrice = 49;
+				slaLabel = '99.9% Uptime SLA';
+			} else if (sla === 'bft') {
+				slaPrice = 299;
+				slaLabel = '99.99% BFT SLA';
+			}
+
+			// Compliance Pricing
+			let compPrice = 0;
+			if (compEu) compPrice += 39;
+			if (compSoc) compPrice += 99;
+			if (compZk) compPrice += 199;
+
+			// Agent Pricing calculations
+			let agentsBase = 10;
+			let costPerAgent = 0.10;
+			if (tier === 'legion') {
+				agentsBase = 100;
+				costPerAgent = 0.05;
+			} else if (tier === 'sovereign') {
+				agentsBase = 1000;
+				costPerAgent = 0.02;
+			}
+
+			let agentPrice = 0;
+			if (agentsCount > agentsBase) {
+				agentPrice = Math.round((agentsCount - agentsBase) * costPerAgent);
+			}
+
+			const total = basePrice + storagePrice + agentPrice + slaPrice + compPrice;
+
+			// Update Text Nodes
+			if (agentCountVal) agentCountVal.textContent = agentsCount.toLocaleString();
+			if (agentCostVal) agentCostVal.textContent = `+$${agentPrice}/mo`;
+			if (totalPriceVal) totalPriceVal.textContent = total.toLocaleString();
+
+			// Update Breakdown List
+			if (labelTier) labelTier.textContent = tierLabel;
+			if (valTier) valTier.textContent = `$${basePrice}/mo`;
+			if (labelStorage) labelStorage.textContent = storageLabel;
+			if (valStorage) valStorage.textContent = `+$${storagePrice}/mo`;
+			if (labelAgents) labelAgents.textContent = `Agent Scale (${agentsCount} agents)`;
+			if (valAgents) valAgents.textContent = `+$${agentPrice}/mo`;
+			if (labelSla) labelSla.textContent = slaLabel;
+			if (valSla) valSla.textContent = `+$${slaPrice}/mo`;
+
+			if (compEu || compSoc || compZk) {
+				if (breakdownComp) breakdownComp.classList.remove('hidden');
+				if (valComp) valComp.textContent = `+$${compPrice}/mo`;
+			} else {
+				if (breakdownComp) breakdownComp.classList.add('hidden');
+			}
+
+			// Update Topology Blueprint
+			if (agentDisplayCount) {
+				agentDisplayCount.textContent = `${agentsCount.toLocaleString()} Agent${agentsCount > 1 ? 's' : ''}`;
+			}
+
+			if (nodeStorage) {
+				const storageLabelNode = nodeStorage.querySelector('.node-label');
+				const storageSubNode = nodeStorage.querySelector('.node-sub');
+				if (storage === 'sqlite') {
+					if (storageLabelNode) storageLabelNode.textContent = 'Local SQLite-Vec';
+					if (storageSubNode) storageSubNode.textContent = 'Locality: 100%';
+				} else if (storage === 'turbopuffer') {
+					if (storageLabelNode) storageLabelNode.textContent = 'L1 SQLite + L2 Turbopuffer';
+					if (storageSubNode) storageSubNode.textContent = 'Locality: Hybrid';
+				} else if (storage === 'alloydb') {
+					if (storageLabelNode) storageLabelNode.textContent = 'Distributed AlloyDB';
+					if (storageSubNode) storageSubNode.textContent = 'Locality: Cloud pgvector';
+				}
+			}
+
+			// Show compliance in blueprint if enabled
+			if (nodeCompliance) {
+				if (compEu || compSoc) {
+					nodeCompliance.classList.remove('hidden');
+				} else {
+					nodeCompliance.classList.add('hidden');
+				}
+			}
+
+			// Show ZK in blueprint if enabled
+			if (nodeHsm && hsmArrow) {
+				if (compZk) {
+					nodeHsm.classList.remove('hidden');
+					hsmArrow.classList.remove('hidden');
+				} else {
+					nodeHsm.classList.add('hidden');
+					hsmArrow.classList.add('hidden');
+				}
+			}
+
+			// Update Topology State Label
+			if (topoState) {
+				if (tier === 'self' && storage === 'sqlite') {
+					topoState.textContent = 'Sovereign Local';
+				} else if (tier === 'sovereign' || storage === 'alloydb' || sla === 'bft') {
+					topoState.textContent = 'Distributed BFT';
+				} else {
+					topoState.textContent = 'Hybrid Edge';
+				}
+			}
+
+			// Update Metrics Panel
+			if (metricLatency) {
+				let latency = 85;
+				if (tier === 'legion' || tier === 'sovereign') latency = 25;
+				if (storage === 'sqlite') latency -= 10;
+				if (sla === 'bft') latency = 12; // BFT hedged execution
+				metricLatency.textContent = `${latency} ms`;
+			}
+
+			if (metricBft) {
+				if (sla === 'bft' || tier === 'sovereign') {
+					metricBft.textContent = 'f = 4 (n=15)';
+				} else if (sla === 'uptime') {
+					metricBft.textContent = 'f = 1 (n=4)';
+				} else {
+					metricBft.textContent = 'f = 0 (n=1)';
+				}
+			}
+
+			if (metricExergy) {
+				let exergy = 98.2;
+				if (compZk) exergy += 0.5;
+				if (compEu) exergy += 0.8;
+				if (storage === 'alloydb') exergy -= 1.2; // Higher latency slightly lowers thermodynamic yield
+				metricExergy.textContent = `${exergy.toFixed(1)}%`;
+			}
+		}
+
+		// Event listeners for inputs
+		const radioInputs = document.querySelectorAll('input[type="radio"]');
+		radioInputs.forEach(input => {
+			input.addEventListener('change', calculate);
+		});
+
+		const checkboxInputs = document.querySelectorAll('input[type="checkbox"]');
+		checkboxInputs.forEach(input => {
+			input.addEventListener('change', calculate);
+		});
+
+		agentSlider.addEventListener('input', calculate);
+
+		// Button execution simulator
+		if (signButton) {
+			signButton.addEventListener('click', () => {
+				if (statusIndicator) {
+					statusIndicator.textContent = 'SIGNING...';
+					statusIndicator.style.background = 'rgba(0, 229, 163, 0.15)';
+					statusIndicator.style.color = 'var(--success)';
+					statusIndicator.style.borderColor = 'rgba(0, 229, 163, 0.3)';
+				}
+				signButton.textContent = 'Ledger Signature Accepted';
+				signButton.style.background = 'linear-gradient(135deg, var(--green), var(--green))';
+				signButton.style.color = '#0a0a0a';
+				signButton.setAttribute('disabled', 'true');
+
+				setTimeout(() => {
+					if (statusIndicator) {
+						statusIndicator.textContent = 'COMMITTED';
+					}
+				}, 1500);
+			});
+		}
+
+		// Initial calculation run
+		calculate();
+	});
+</script>

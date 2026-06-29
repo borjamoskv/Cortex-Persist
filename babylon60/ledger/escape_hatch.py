@@ -128,7 +128,7 @@ async def trigger_escape_hatch_export(
 
         # Query rows
         row_cursor = await conn.execute(f"SELECT * FROM {table};")
-        rows = await row_cursor.fetchall()
+        rows = list(await row_cursor.fetchall())
 
         table_file = export_path / f"{table}.jsonl"
         with open(table_file, "w", encoding="utf-8") as f:

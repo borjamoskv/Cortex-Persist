@@ -47,7 +47,8 @@ async def _migration_029_thermodynamic_bridges(conn: aiosqlite.Connection) -> No
                 meta = {}
                 if metadata_encrypted:
                     try:
-                        meta = json.loads(enc.decrypt_str(metadata_encrypted, tenant_id=tenant_id))
+                        decrypted_meta = enc.decrypt_str(metadata_encrypted, tenant_id=tenant_id)
+                        meta = json.loads(decrypted_meta) if decrypted_meta else {}
                     except Exception:
                         pass
 

@@ -16,7 +16,7 @@ from typing import Any, Literal, Optional, TypedDict
 import babylon60.utils.canonical as canonical
 
 # Context variable for async temporal coherence tracking
-current_import_parent = contextvars.ContextVar("current_import_parent", default=None)
+current_import_parent: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar("current_import_parent", default=None)
 
 class CausalEvent(TypedDict):
     id: str                   
