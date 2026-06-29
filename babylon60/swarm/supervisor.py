@@ -33,7 +33,7 @@ class DummyAgent(SwarmAgent):
     """Fallback agent for testing the pipeline."""
 
     async def execute(self, target: str) -> SwarmSignal:
-        await asyncio.sleep(0.01)  # Simulate work
+        await asyncio.sleep(0)  # Simulate work
         return SwarmSignal(
             agent_id=self.agent_id,
             target=target,

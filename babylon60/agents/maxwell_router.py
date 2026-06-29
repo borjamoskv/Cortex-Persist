@@ -75,16 +75,16 @@ class MaxwellRouterAgent(BaseAgent):
 
         # Emit delegated task
         delegation = new_message(
-            sender_id=self.id,
+            sender_id=self.agent_id,
             recipient_id=target_agent,
             kind=MessageKind.TASK_REQUEST,
             content=message.content,
         )
-        await self.publish(delegation)
+        await self.bus.send(delegation)
 
         # Reply to original sender that routing is complete
         reply = new_message(
-            sender_id=self.id,
+            sender_id=self.agent_id,
             recipient_id=message.sender_id,
             kind=MessageKind.TASK_RESULT,
             content={
@@ -95,7 +95,7 @@ class MaxwellRouterAgent(BaseAgent):
             },
             correlation_id=message.id
         )
-        await self.publish(reply)
+        await self.bus.send(reply)
 
         self.state.status = AgentStatus.IDLE
 

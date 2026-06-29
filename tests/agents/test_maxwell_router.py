@@ -23,7 +23,36 @@ async def test_maxwell_entropy_calculation():
 async def test_maxwell_routing():
     bus = SqliteMessageBus(db_path=_uid())
     agent = create_maxwell_router("maxwell-test", bus, entropy_threshold=0.8)
-    # bus is already bound
     
-    # Since it's a test, we just verify initialization and binding
+    # Verify initialization
     assert agent.manifest.agent_id == "maxwell-test"
+    
+    # Low entropy message routing
+    msg_low = new_message(
+        sender_id="user",
+        recipient_id="maxwell-test",
+        kind=MessageKind.TASK_REQUEST,
+        content={"prompt": "fix simple typo"}
+    )
+    
+    await agent._handle_message(msg_low)
+    
+    # Drain low entropy routed message from bus
+    low_messages = await bus.receive("flash_worker_01", timeout=0.5)
+    assert low_messages is not None
+    assert low_messages.recipient_id == "flash_worker_01"
+    
+    # High entropy message routing
+    msg_high = new_message(
+        sender_id="user",
+        recipient_id="maxwell-test",
+        kind=MessageKind.TASK_REQUEST,
+        content={"prompt": "Necesitamos diseñar la arquitectura BFT para la singularidad ultrathink"}
+    )
+    
+    await agent._handle_message(msg_high)
+    
+    # Drain high entropy routed message from bus
+    high_messages = await bus.receive("boltzmann_engine_01", timeout=0.5)
+    assert high_messages is not None
+    assert high_messages.recipient_id == "boltzmann_engine_01"
