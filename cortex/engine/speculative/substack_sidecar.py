@@ -9,7 +9,7 @@ from cortex.services.email import send_reengagement_email
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("CausalScheduler")
 
-CORTEX_DB_PATH = Path("~/10_PROJECTS/cortex-persist/cortex_data.db")
+CORTEX_DB_PATH = Path("~/10_PROJECTS/cortex-persist/cortex_data.db").expanduser()
 
 
 def evaluate_retention(dry_run=True):
