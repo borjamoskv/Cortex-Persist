@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Intervention Schema (L5 & L6)",
+  "type": "object",
+  "required": ["intervention_id", "prediction_id", "git_sentinel_hash", "saga_rollback_plan"],
+  "properties": {
+    "intervention_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "prediction_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "git_sentinel_hash": {
+      "type": "string",
+      "description": "The commit hash of the C5-REAL mutation."
+    },
+    "saga_rollback_plan": {
+      "type": "string",
+      "description": "Sequence of operations to revert if L6 Re-evaluation fails."
+    },
+    "l6_reevaluation_status": {
+      "type": "string",
+      "enum": ["PENDING", "DEGRADED", "RESOLVED"]
+    }
+  }
+}

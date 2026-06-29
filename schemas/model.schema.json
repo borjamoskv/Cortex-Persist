@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Cognitive Model Schema (L2)",
+  "type": "object",
+  "required": ["model_id", "pattern_ids", "causal_graph", "confidence_level"],
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "pattern_ids": {
+      "type": "array",
+      "items": { "type": "string", "format": "uuid" },
+      "minItems": 1
+    },
+    "causal_graph": {
+      "type": "object",
+      "description": "Nodes and edges describing the systemic relationship."
+    },
+    "confidence_level": {
+      "type": "string",
+      "enum": ["LOW", "MODERATE", "HIGH", "ABSOLUTE"]
+    }
+  }
+}
