@@ -1,0 +1,23 @@
+{
+  "status": "assembled",
+  "generator": {
+    "seed": "a2d06dc5",
+    "bias": "break_pattern",
+    "form": "unstructured",
+    "content": "raw_output_break_pattern_81c209",
+    "entropy_target": 0.5
+  },
+  "critic": {
+    "score": 0.6,
+    "passed": true,
+    "require_pass": true,
+    "notes": "entropy_acceptable"
+  },
+  "assembled": {
+    "version": "v1",
+    "content": "raw_output_break_pattern_81c209",
+    "form": "structured",
+    "timestamp": "2026-06-29T18:28:19.770994+00:00",
+    "core_vector": "ARTE_PURO"
+  }
+}

@@ -13,7 +13,7 @@ import logging
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from runtime.session_router import SessionRouter
-from runtime.event_bus import EventBus
+from babylon60.events.bus import DistributedEventBus
 from runtime.swarm_dispatcher import SwarmDispatcher
 from policies.abort_rules import AbortRules
 from policies.reward_model import reinforcement_cycle
@@ -28,26 +28,28 @@ class ControlPlane:
         self.registry = self._load_registry()
         
         self.session_router = SessionRouter(db_path=self.db_path)
-        self.event_bus = EventBus()
+        self.event_bus = DistributedEventBus()
         self.dispatcher = SwarmDispatcher(self.event_bus, self.session_router.engine)
         
-        # Subscribe a logger listener to all events
-        self.event_bus.subscribe("*", self._log_event)
+        # Subscribe a logger listener to active topics
+        for topic in ["think", "feedback", "commit"]:
+            self.event_bus.subscribe(topic, self._log_event)
 
     def _load_registry(self) -> dict:
         with open(self.registry_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    async def _log_event(self, event) -> None:
-        logger.info(f"[EVENT_BUS] {event.emitter} emitted '{event.event_type}': {event.payload}")
+    async def _log_event(self, event_dict) -> None:
+        logger.info(f"[EVENT_BUS] {event_dict.get('source', 'unknown')} emitted '{event_dict.get('action', 'unknown')}': {event_dict}")
         # Insert event log to database if session/artifact context is available
         cursor = self.session_router.engine.conn.cursor()
-        session_id = event.payload.get("session_id")
-        artifact_id = event.payload.get("artifact_id")
+        session_id = event_dict.get("session_id")
+        data = event_dict.get("data", {})
+        artifact_id = data.get("artifact_id") if isinstance(data, dict) else None
         cursor.execute("""
             INSERT INTO cortex_events (session_id, artifact_id, event_type, payload)
             VALUES (?, ?, ?, ?)
-        """, (session_id, artifact_id, event.event_type, json.dumps(event.payload)))
+        """, (session_id, artifact_id, event_dict.get("action", "unknown"), json.dumps(event_dict)))
         self.session_router.engine.conn.commit()
 
     async def execute_cycle(self, prompt: str, operator_id: str = "borjamoskv") -> dict:

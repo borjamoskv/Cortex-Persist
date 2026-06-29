@@ -81,7 +81,12 @@ class SwarmDispatcher:
         logger.info(f"Wrote job file: {job_path}")
 
         # Publish initial events
-        await self.event_bus.publish("think", {"status": "dispatched", "job_id": job_id}, "control_plane")
+        await self.event_bus.publish("think", {
+            "source": "control_plane",
+            "action": "think",
+            "status": "dispatched",
+            "job_id": job_id
+        })
 
         # 3. Wait for feedback file, fallback to programmatic execution if not found within 1.5 seconds
         feedback_path = self.cortex_feedback_dir / f"feedback_{job_id}.json"
@@ -158,8 +163,18 @@ class SwarmDispatcher:
         self.engine.conn.commit()
 
         # Emit validation pass/fail events
-        await self.event_bus.publish("feedback", {"job_id": job_id, "status": fb_data["artifact_status"]}, "assembler_prime")
-        await self.event_bus.publish("commit", {"artifact_id": artifact_id, "key": assembled_key}, "distributor_delta")
+        await self.event_bus.publish("feedback", {
+            "source": "assembler_prime",
+            "action": "feedback",
+            "job_id": job_id,
+            "status": fb_data["artifact_status"]
+        })
+        await self.event_bus.publish("commit", {
+            "source": "distributor_delta",
+            "action": "commit",
+            "artifact_id": artifact_id,
+            "key": assembled_key
+        })
 
         # Map to returned output format expected by control_plane
         return {

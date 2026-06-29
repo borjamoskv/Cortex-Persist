@@ -29,6 +29,10 @@ import json
 import os
 import time
 import uuid
+import ast
+import re
+import subprocess
+import sys
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -40,6 +44,9 @@ from typing import Any, Dict, List, Optional
 # =============================================================================
 
 ROOT = Path(__file__).resolve().parent
+sys.path.append(str(ROOT))
+from policies.reward_model import reinforcement_cycle
+
 REGISTRY_PATH = ROOT / "registry.json"
 
 RUNTIME_DIR = ROOT / "runtime"
@@ -161,48 +168,51 @@ def emit_event(source: str, event_type: str, payload: Dict[str, Any]) -> CortexE
 
 
 # =============================================================================
-# Reinforcement Policy
+# C5-REAL Autopoiesis (Self-Modification)
 # =============================================================================
 
-def reinforcement_cycle(metric: Dict[str, Any], decision: str) -> str:
+def mutate_reward_model(metric: Dict[str, Any]) -> bool:
     """
-    Minimal internal reinforcement policy.
-
-    Inputs:
-        metric:
-            Dictionary containing creative/economic/system metrics.
-
-            Expected useful keys:
-                - originality_ratio: float 0.0 - 1.0
-                - distribution_yield: float 0.0 - 1.0
-                - entropy: float optional
-                - coherence: float optional
-                - fatigue: float optional
-
-        decision:
-            Previous decision emitted by the cortex.
-
-    Output:
-        action:
-            - force_swarm_mode
-            - inject_attention_pressure
-            - trigger_rupture
-            - stable
+    Actively mutates the reward_model.py parameters based on system fatigue and entropy,
+    validates the AST, and executes a Git Sentinel commit (C5-REAL).
     """
-
-    originality = float(metric.get("originality_ratio", 1.0))
-    distribution = float(metric.get("distribution_yield", 1.0))
-
-    if originality < 0.4:
-        return "force_swarm_mode"
-
-    if distribution < 0.3:
-        return "inject_attention_pressure"
-
-    if decision == "default":
-        return "trigger_rupture"
-
-    return "stable"
+    model_path = ROOT / "policies" / "reward_model.py"
+    if not model_path.exists():
+        return False
+        
+    with model_path.open("r", encoding="utf-8") as f:
+        content = f.read()
+        
+    # Calculate new thresholds based on current entropy and fatigue
+    entropy = float(metric.get("entropy", 0.5))
+    fatigue = float(metric.get("fatigue", 0.0))
+    
+    # If entropy is low, we demand higher originality
+    new_orig = max(0.20, min(0.60, 0.34 + (0.5 - entropy) * 0.1))
+    # If fatigue is high, we lower distribution threshold to reduce pressure
+    new_dist = max(0.15, min(0.40, 0.26 - (fatigue * 0.1)))
+    
+    # Mutate using Regex
+    content = re.sub(r"ORIGINALITY_THRESHOLD\s*=\s*[\d\.]+", f"ORIGINALITY_THRESHOLD = {new_orig:.3f}", content)
+    content = re.sub(r"DISTRIBUTION_THRESHOLD\s*=\s*[\d\.]+", f"DISTRIBUTION_THRESHOLD = {new_dist:.3f}", content)
+    
+    # AST Validation
+    try:
+        ast.parse(content)
+    except SyntaxError:
+        return False
+        
+    with model_path.open("w", encoding="utf-8") as f:
+        f.write(content)
+        
+    # Git Sentinel Auto-Commit
+    try:
+        subprocess.run(["git", "add", str(model_path)], check=True, cwd=str(ROOT))
+        msg = f"refactor(policy): autopoiesis mutation [orig:{new_orig:.3f}, dist:{new_dist:.3f}]"
+        subprocess.run(["git", "commit", "-m", f"[bridge] {msg}"], check=True, cwd=str(ROOT))
+        return True
+    except subprocess.CalledProcessError:
+        return False
 
 
 def entropy_bound_v3(metric: Dict[str, Any], state: Dict[str, Any]) -> str:
@@ -451,6 +461,10 @@ def run_reality_cycle(metric: Dict[str, Any]) -> Dict[str, Any]:
     state = load_json(STATE_PATH, DEFAULT_STATE)
 
     decision = evaluate_policy(metric, registry, state)
+    
+    # C5-REAL: Self-modify policy thresholds before evaluating reinforcement action
+    mutate_reward_model(metric)
+    
     action = reinforcement_cycle(metric, decision)
 
     job = build_swarm_job(

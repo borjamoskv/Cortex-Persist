@@ -82,15 +82,71 @@ class GeneratorAgent(Agent):
 
     def run(self, artifact: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         bias = context.get("output_bias", "novelty_over_polish")
+        prompt = context.get("prompt", "Generate an oblique artistic concept.")
+        
+        # System instructions to shape output format
+        model_prompt = (
+            f"You are a C5-REAL swarm creative generator. "
+            f"Process input: '{prompt}' with bias: '{bias}'. "
+            f"Output only the raw aesthetic concept description, compressed, dense. No preambles, no apologies."
+        )
 
-        # Proto-generation: create a raw creative payload.
-        # In production, this calls an LLM, sampler, or generative model.
+        ollama_url = "http://localhost:11434/api/generate"
+        payload = {
+            "model": "llama3",
+            "prompt": model_prompt,
+            "stream": False,
+            "options": {
+                "temperature": 0.85
+            }
+        }
+        
+        content = None
+        entropy_score = 0.5
+        
+        import urllib.request
+        import urllib.error
+
+        try:
+            # Check available models first
+            req_tags = urllib.request.Request("http://localhost:11434/api/tags")
+            with urllib.request.urlopen(req_tags, timeout=1.0) as response:
+                tags_data = json.loads(response.read().decode("utf-8"))
+                models = [m["name"] for m in tags_data.get("models", [])]
+                if models:
+                    payload["model"] = models[0]
+                    
+            # Make the actual generation request
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(
+                ollama_url,
+                data=data,
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=5.0) as response:
+                res_data = json.loads(response.read().decode("utf-8"))
+                content = res_data.get("response", "").strip()
+                
+            if content:
+                words = content.lower().split()
+                unique_words = set(words)
+                if words:
+                    entropy_score = min(0.95, max(0.10, len(unique_words) / len(words)))
+                    
+        except Exception as e:
+            # Fallback silently to stub
+            pass
+            
+        if not content:
+            content = f"raw_output_{bias}_{uuid.uuid4().hex[:6]}"
+            entropy_score = 0.7 if "rupture" in bias or "novelty" in bias else 0.5
+
         raw = {
             "seed": uuid.uuid4().hex[:8],
             "bias": bias,
             "form": "unstructured",
-            "content": f"raw_output_{bias}_{uuid.uuid4().hex[:6]}",
-            "entropy_target": 0.7 if "rupture" in bias else 0.5,
+            "content": content,
+            "entropy_target": round(entropy_score, 3),
         }
 
         artifact["generator"] = raw
