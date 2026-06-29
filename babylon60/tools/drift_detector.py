@@ -84,6 +84,8 @@ class DriftDetector:
         cov = cov + np.eye(d) * self.regularization_eps
         return mean, cov
 
+    _fit_gaussian = _estimate_gaussian_params
+
     def compute_kl_divergence(
         self, snapshot_a: BehavioralSnapshot, snapshot_b: BehavioralSnapshot
     ) -> DriftResult:
