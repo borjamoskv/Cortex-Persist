@@ -269,16 +269,86 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
         return False
 
 
+# Pre-computed case-sensitive Base64 chunks for "borja", "fernandez", "angulo" at all offsets (0, 1, 2)
+PII_BASE64_CHUNKS: frozenset[str] = frozenset([
+    "Ym9yamE", "GJvcmph", "b3JqYQ",            # borja
+    "ZmVybmFuZGV6", "Zlcm5hbmRleg", "fZXJuYW5kZXo",  # fernandez
+    "YW5ndWxv", "GFuZ3Vsbw", "hbmd1bG8"        # angulo
+])
+
+# Pre-computed lowercased hex chunks for "borja", "fernandez", "angulo"
+PII_HEX_CHUNKS: frozenset[str] = frozenset([
+    "626f726a61",          # borja
+    "6665726e616e64657a",  # fernandez
+    "616e67756c6f"         # angulo
+])
+
+import re
+HOMOGLYPH_PREFILTER_RE = re.compile(r"[\u0400-\u04ff\u0370-\u03ff]")
+
+
 async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     """Enforces the CORTEX-TAINT check. Raises TaintValidationError if invalid."""
-    # [C5-REAL] Host Identity Strict Containment (UltraThink P0) - ALWAYS RUN
     import base64
     import os
     import re
     import unicodedata
     import urllib.parse
 
-    # 1. Homoglyphs mapping to standard Latin base characters
+    content_lower = content.lower()
+    p_b = "borja"
+    p_f = "fernandez"
+    p_a = "angulo"
+
+    # Fast bypass pre-filter to maximize exergy on clean payloads
+    has_plain = p_b in content_lower or p_f in content_lower or p_a in content_lower
+    has_obfuscated = False
+    if not has_plain:
+        if "%" in content:
+            has_obfuscated = True
+        elif HOMOGLYPH_PREFILTER_RE.search(content):
+            has_obfuscated = True
+        elif any(hc in content_lower for hc in PII_HEX_CHUNKS):
+            has_obfuscated = True
+        elif any(bc in content for bc in PII_BASE64_CHUNKS):
+            has_obfuscated = True
+
+    if not has_plain and not has_obfuscated and "[redacted_pii]" not in content_lower:
+        # Bypass check for test environment
+        if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
+            return
+
+        # 1. Zero Anergía Guard (Axiom Ω₁₃ / Ω₄)
+        check_anergy_and_green_theater(content)
+
+        # -- OWASP Memory Firewall (SAGA-1.5) --
+        from cortex.security.memory_firewall import MemoryFirewall
+        try:
+            _, risk_level, _ = MemoryFirewall.screen_content(content)
+        except ValueError as fw_err:
+            raise TaintValidationError(f"SAGA-1 Rejection by Memory Firewall: {fw_err}")
+
+        # -- SaaS Bot Inflation Firewall (Substack Crawler Guard) --
+        try:
+            data = json.loads(content)
+            if isinstance(data, dict) and "Email" in data and "Emails opened (6mo)" in data:
+                from cortex.guards.substack_crawler_guard import SubstackCrawlerGuard
+                try:
+                    SubstackCrawlerGuard().enforce_saga_contract(data)
+                except ValueError as guard_err:
+                    raise TaintValidationError(f"SAGA-1 Rejection by SaaS Firewall: {guard_err}")
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+        # We await the verify_taint_token check
+        is_valid = await verify_taint_token(conn, token, content)
+        if not is_valid:
+            raise TaintValidationError(
+                "SAGA-1 Rejection: Valid cryptographically signed CORTEX-TAINT token is required."
+            )
+        return
+
+    # Homoglyphs mapping to standard Latin base characters
     homoglyph_map = {
         # Cyrillic lowercase lookalikes
         '\u0430': 'a', '\u0435': 'e', '\u043e': 'o', '\u0440': 'p', '\u0441': 'c', '\u0443': 'y', '\u0445': 'x', '\u0456': 'i',
@@ -312,8 +382,8 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
             except Exception as e:
                 logger.debug("Failed URL layer extraction: %s", e)
 
-        # Hex / Binary peel
-        hex_pattern = re.compile(r'(?:0x)?([0-9a-fA-F]{6,})')
+        # Hex / Binary peel (optimizado longitud minima >= 10)
+        hex_pattern = re.compile(r'(?:0x)?([0-9a-fA-F]{10,})')
         for match in hex_pattern.finditer(raw_text):
             hex_str = match.group(1)
             if len(hex_str) % 2 == 0:
@@ -346,7 +416,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     p_a = "angulo"
 
     pii_leak = False
-    if "[redacted_pii]" in content.lower():
+    if "[redacted_pii]" in content_lower:
         pii_leak = True
 
     if not pii_leak:
@@ -378,18 +448,15 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
             "SAGA-1 Rejection: Payload contains prohibited Host Identity PII."
         )
 
-    # Bypass exergy, firewall, and token checks under test environment
+    # Bypass check for test environment
     if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
         return
 
     # 1. Zero Anergía Guard (Axiom Ω₁₃ / Ω₄)
     check_anergy_and_green_theater(content)
 
-    import json
-
     # -- OWASP Memory Firewall (SAGA-1.5) --
     from cortex.security.memory_firewall import MemoryFirewall
-
     try:
         _, risk_level, _ = MemoryFirewall.screen_content(content)
     except ValueError as fw_err:
@@ -400,15 +467,13 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
         data = json.loads(content)
         if isinstance(data, dict) and "Email" in data and "Emails opened (6mo)" in data:
             from cortex.guards.substack_crawler_guard import SubstackCrawlerGuard
-
             try:
                 SubstackCrawlerGuard().enforce_saga_contract(data)
             except ValueError as guard_err:
                 raise TaintValidationError(f"SAGA-1 Rejection by SaaS Firewall: {guard_err}")
     except (json.JSONDecodeError, TypeError):
-        pass  # Not a SaaS JSON payload
+        pass
 
-    # We await the verify_taint_token check
     is_valid = await verify_taint_token(conn, token, content)
     if not is_valid:
         raise TaintValidationError(

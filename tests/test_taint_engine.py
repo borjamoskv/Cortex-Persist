@@ -249,10 +249,8 @@ async def test_enforce_taint_check_bypass(sqlite_conn: sqlite3.Connection) -> No
 
 @pytest.mark.asyncio
 async def test_enforce_taint_check_pii_bleed(sqlite_conn: sqlite3.Connection) -> None:
-    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "0"
-    
-    # Patch ExergyGuard to allow short/conversational strings during PII verification
-    with patch("cortex.guards.exergy_guard.ExergyGuard.check_thermodynamic_yield", return_value=1.0):
+    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
+    try:
         # Simple plain text host identity bleed
         with pytest.raises(TaintValidationError, match="PII"):
             await enforce_taint_check(sqlite_conn, "token", "My name is Borja Fernandez Angulo")
@@ -271,6 +269,8 @@ async def test_enforce_taint_check_pii_bleed(sqlite_conn: sqlite3.Connection) ->
         hex_pii = b"borja fernandez".hex()
         with pytest.raises(TaintValidationError, match="PII"):
             await enforce_taint_check(sqlite_conn, "token", f"prefix {hex_pii} suffix")
+    finally:
+        os.environ["CORTEX_NO_TAINT_ENFORCE"] = "0"
 
 
 @pytest.mark.asyncio
