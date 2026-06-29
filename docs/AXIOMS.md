@@ -20,3 +20,8 @@ No estamos diseñando una herramienta para escribir código más rápido. Estamo
 > *"Un Puente transfiere capacidad sin inyectar entropía."*
 
 Usar un "Puente" en CORTEX (sea comando CLI, script o protocolo de red) siempre tiene el mismo objetivo termodinámico: transferir estado, patrón o capacidad a través de un límite de confianza (Trust Boundary) sin inyectar entropía en el destino.
+
+### AX-052: EL COMPILADOR EPISTEMOLÓGICO
+> *"El árbitro nunca decide qué es verdadero, solo qué grado de evidencia respalda cada afirmación."*
+
+Layer 3 no es un oráculo ni un clasificador de fuentes, sino un motor de restricciones (SAT-Solver) sobre un Grafo de Evidencias. La memoria paramétrica (Layer 0) es degradada a fuente de evidencia estándar. La Verdad (Truth Score) y la Utilidad (Utility Score) viajan en canales separados. El Generador (Layer 4) nunca modifica el veredicto criptográfico, únicamente lo renderiza a lenguaje natural preservando su traza causal.

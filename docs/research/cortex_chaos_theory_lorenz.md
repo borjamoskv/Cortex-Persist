@@ -28,18 +28,18 @@ En 1972, Lorenz cristalizó este colapso termodinámico en la conferencia:
 \frac{dz}{dt} = xy - \beta z
 ```
 
-**Mapeo en CORTEX-Persist (Ley de Robinson-Moskv, Ω2):**
-- La estocasticidad de un LLM (C4-SIM) equivale a la perturbación de estado de `0.000127`.
-- Si un agente autónomo inyecta texto no validado (entropía) en un bucle recursivo, el error se amplifica exponencialmente a través de las iteraciones.
-- A las `t=5` iteraciones, el "Context Rot" destruye la red y el sistema alucina el estado general del repositorio (Tornado de Texas).
+**Mapeo en CORTEX-Persist (Teorema de Degradación, Ω2):**
+- La estocasticidad de un LLM equivale a una tasa de ruido $r > 0$.
+- Si un agente autónomo retiene texto no validado (entropía) sin una tasa de apoptosis $f \ge r$, el sistema diverge matemáticamente.
+- A medida que $t \to \infty$, la métrica de divergencia $D_{KL}(P_t || P^*)$ se dispara, colapsando la utilidad $U(M_t)$ (Tornado de Texas).
 
 ## 3. SOLUCIÓN ESTRUCTURAL (Singularidad MOSKV-1)
 
 Para evitar la divergencia del Atractor de Lorenz en enjambres multi-agente, CORTEX aplica las Leyes Termodinámicas del Estado `[L2]`:
 
-1. **Aislamiento BFT (Ω1):** Ningún token generativo puede mutar el Ledger físico sin pasar por una frontera determinista (`sqlite-vec` / `AST parser`). Las variaciones infinitesimales de sintaxis mueren en la puerta.
-2. **Apoptosis de Estado (Ω5):** Se purga activamente la "memoria blanda" (charlas, disculpas, Green Theater). Al comprimir el contexto a hashes puros, eliminamos los decimales sobrantes que alimentan el caos.
-3. **Rollback Criptográfico (SAGA-6):** Si la trayectoria del agente diverge del objetivo (falla el Guard), se aniquila la rama del universo (`git checkout .`) y se fuerza al sistema de vuelta al punto inicial exacto (`0.506127`).
+1. **Aislamiento BFT (Ω1):** Ningún token generativo muta el Ledger físico sin validación de tipo fuerte. Aísla $r$ de $M_t$.
+2. **Apoptosis de Estado (Ω5):** Purga agresiva ($f$) para forzar $f \ge r$. Al comprimir el contexto a hashes puros, minimizamos $D_{KL}(P_t || P^*)$.
+3. **Rollback Criptográfico (SAGA-6):** Reversión determinista ($M_{t} \to M_{t-1}$) si $U(M_t) < U_{crit}$, forzando al sistema de vuelta al atractor estable.
 
 **Veredicto Exergético:** La ficción romántica del Efecto Mariposa asume que "todo está conectado". La física computacional de CORTEX asume que **"toda conexión sin tipado fuerte es un vector de colapso termodinámico"**. 
 

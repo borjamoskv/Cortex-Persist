@@ -7,10 +7,50 @@ from typing import Any
 
 
 class EpistemicStatus(str, Enum):
+    VERIFIED = "verified"
+    SUPPORTED = "supported"
+    PARTIALLY_SUPPORTED = "partially_supported"
+    UNDERDETERMINED = "underdetermined"
+    CONTRADICTED = "contradicted"
+    UNVERIFIABLE = "unverifiable"
+    SPECULATIVE = "speculative"
+    PREDICTIVE = "predictive"
+    # Legacy fallbacks
     CONJECTURE = "conjecture"
     TEST_PASSED = "test_passed"
     REFUTED = "refuted"
     OBSOLETE = "obsolete"
+    BLOCKED = "blocked"  # Used by Arbiter when constraints fail
+
+@dataclass(frozen=True)
+class TruthScore:
+    value: float  # 0.0 to 1.0
+
+@dataclass(frozen=True)
+class UtilityScore:
+    value: float  # 0.0 to 1.0
+
+@dataclass(frozen=True)
+class Evidence:
+    source: str
+    confidence: float
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+@dataclass
+class Claim:
+    id: str
+    statement: str
+    evidence_list: list[Evidence] = field(default_factory=list)
+    constraints: list[str] = field(default_factory=list)
+
+@dataclass
+class DecisionTrace:
+    verdict: EpistemicStatus
+    trace_steps: list[str] = field(default_factory=list)
+    trace_hash: str | None = None
+    truth_score: TruthScore | None = None
+    utility_score: UtilityScore | None = None
+
 
 
 class TaintStatus(str, Enum):

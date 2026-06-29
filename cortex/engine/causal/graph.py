@@ -23,9 +23,16 @@ except ImportError:
 logger = logging.getLogger("cortex.engine.causal.graph")
 
 
-class CausalGraph:
+class KnowledgeGraph:
+    """
+    Epistemic Graph structure over Claims, constraints, and their DecisionTraces.
+    Replaces CausalGraph as the primary epistemic tracker, moving language generation
+    down to Layer 4 (Rendering).
+    """
     def __init__(self) -> None:
         self._events: dict[str, LedgerEvent] = {}
+        self._claims: dict[str, Any] = {}  # Claim ID -> Claim
+        self._traces: dict[str, Any] = {}  # Claim ID -> DecisionTrace
         self._children: dict[str, list[str]] = {}
 
     def get_event(self, event_id: str) -> LedgerEvent:
@@ -37,6 +44,13 @@ class CausalGraph:
         for parent_id in event.parent_ids:
             self._children.setdefault(parent_id, []).append(event.event_id)
 
+    def add_claim_trace(self, claim: Any, trace: Any, parent_ids: list[str]) -> None:
+        self._claims[claim.id] = claim
+        self._traces[claim.id] = trace
+        self._children.setdefault(claim.id, [])
+        for parent_id in parent_ids:
+            self._children.setdefault(parent_id, []).append(claim.id)
+
     def get_descendants(self, node_id: str) -> list[str]:
         return self._children.get(node_id, [])
 
@@ -44,7 +58,7 @@ class CausalGraph:
         return self.get_event(node_id)
 
 
-def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay: float = 0.35) -> None:
+def propagate_refutation(graph: KnowledgeGraph, refuted_event_id: str, decay: float = 0.35) -> None:
     queue = deque([(refuted_event_id, 0)])
     visited: set[str] = set()
 
