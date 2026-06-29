@@ -378,7 +378,7 @@
 
 ---
 
-## MATRIZ 4: 10 REDUNDANCIAS ACTIVAS
+## MATRIZ 4: 20 REDUNDANCIAS ACTIVAS
 
 | ID | Redundancia C5 | Función Topológica | Riesgo Mitigado | Coste (Overhead) | Dependencias |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -392,6 +392,16 @@
 | **RA-MMQB-08** | Heartbeat Reconnection | Re-establish WebSockets on heartbeat failures | Connection timeouts | Minimal | WebSocket library |
 | **RA-MMQB-09** | Absolute Path Validator | Check paths against workspace bounds before write | Path traversal attacks | Minimal | File system utilities |
 | **RA-MMQB-10** | Logical Pruning Trigger | Automated pruning of unlinked vec0 elements | Database bloat | Minimal | SQLite trigger engine |
+| **RA-MMQB-11** | Dual-Engine Embedding Fallback | Fallover from ONNX BAAI/bge-m3 to cloud OpenAI ada-002 on local crash | Embedding vector loss during local inference failures | Low | API tokens and local ONNX runtime |
+| **RA-MMQB-12** | Multi-Path DNS Resolution | Query Cloudflare 1.1.1.1 alongside local resolver for MCP external tools | DNS spoofing and upstream routing blackouts | Minimal | aiohttp socket resolver config |
+| **RA-MMQB-13** | Shadow Database Mirror | Mirror WAL transactions asynchronously to read-only replica DB | Primary SQLite database corruption or disk failure | Medium | aiosqlite replication thread |
+| **RA-MMQB-14** | Dual-Model Swarm Validation | Run critical code verification on both Gemini 3.1 Pro and Claude 3.5 Sonnet | Model-specific reasoning blind spots or hallucination bias | High | Multi-provider API routing keys |
+| **RA-MMQB-15** | Redundant Token Counting | Calculate prompt length via both Tiktoken and sentencepiece tokenizers | Token truncation estimation mismatch pre-prefill | Minimal | tiktoken and transformers packages |
+| **RA-MMQB-16** | Backup Keyring Vault Replica | Mirror encrypted AES-GCM keyring credentials to secondary vault file | OS Keyring daemon crash or DBus session lock | Low | OS Keyring and local filesystem vault |
+| **RA-MMQB-17** | Parallel AST Parser Forks | Execute AST parsing simultaneously in Python ast and libcst | Edge-case syntax parsing failures on non-standard formatting | Low | libcst and stdlib ast modules |
+| **RA-MMQB-18** | Dual WebSocket Channel | Maintain fallback HTTP long-polling channel alongside WebSocket | Aggressive corporate NAT/firewall dropping WebSocket frames | Medium | OpenClaw gateway dual transport |
+| **RA-MMQB-19** | Memory Vault Snapshot Mirror | Mirror daily snapshots of SKILL.md rules to .snapshots/ archive | Accidental rule deletion or workspace syntax corruption | Minimal | git filesystem snapshot scripts |
+| **RA-MMQB-20** | Redundant Circuit Breaker State | Store breaker open/closed state in both RAM dict and SQLite ledger | Breaker reset on subagent worker restart allowing retry storms | Minimal | Shared SQLite master database |
 
 ---
 
