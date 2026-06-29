@@ -1065,6 +1065,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 63: Mitigación de Decodificación LLM y Cumplimiento SOC2 (LLM Resilience & SOC2 Auditing)
+- **Target**: `cortex/cli/memory_cmds.py`, `cortex_extensions/llm/_resilience.py`, `cortex_extensions/llm/provider.py`
+- **Objective**: Endurecimiento del CLI de memoria para exigir un identificador de actor (`actor_id`) compatible con SOC2, e implementación de un middleware de mitigación de caídas de decodificación en llamadas del proveedor LLM (`cortex_extensions/llm/`).
+- **Yield Target**: Validación de `actor_id` en todos los comandos de escritura de CLI y recuperación transparente ante fallos de decodificación en runtime.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commit `fa3c3062f` (SOC2 compliance & LLM resilience).
+```yaml
+Claim: CLI enforces actor_id validation and LLM provider exhibits resilience against decoding anomalies.
+Proof:
+  Base: "memory_cmds.py throws validation errors without actor_id; provider tests pass."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
