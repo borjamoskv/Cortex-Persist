@@ -22,6 +22,11 @@ $$\phi^{-1}(o) = s$$
 
 La asimetría cognitiva entre un filtro rígido y un modelo capaz de procesar transformaciones complejas asegura la existencia de representaciones que eluden la detección sintáctica inmediata manteniendo la integridad semántica.
 
+### 1.2 Referencias Reales de Vulnerabilidades por Codificación
+* **Obfuscación y Cifrado:** En el paper *"GPT-4 is too smart to be safe: Stealthy chat with LLMs via cipher"* (arXiv, 2023), se demuestra que la traducción de instrucciones a cifrados estructurados evade la detección sintáctica al separar la semántica decodificada del texto observable por el filtro.
+* **ASCII Art y Representación Visual:** *"ArtPrompt: ASCII Art-based Jailbreak Attacks"* (Jiang et al., 2024) evidencia cómo la fragmentación y representación espacial de caracteres elude detectores basados en secuencias de tokens lineales.
+* **Brecha Multilingüe:** *"Low-Resource Languages Jailbreak GPT-4"* (Yong et al., 2023) demuestra que la alineación de seguridad es altamente asimétrica, fallando sistemáticamente cuando se traducen directivas a lenguajes con baja representación en los conjuntos de datos de alineamiento.
+
 ---
 
 ## 2. Estilometría y Fingerprinting en Modelos de Lenguaje
@@ -33,5 +38,10 @@ La identificación del modelo generador a través de análisis estilométrico no
 * **Sesgo de Preferencia (RLHF/DPO):** El proceso de alineación por preferencias humanas altera la probabilidad de transiciones léxicas, introduciendo patrones estadísticamente significativos en la estructura de disculpas, advertencias morales y respuestas de rechazo.
 * **Distribución de Logits:** Las trayectorias de las distribuciones de probabilidad de los siguientes tokens bajo temperatura baja retienen firmas estadísticas del espacio de representación latente del modelo original.
 
-### 2.2 Mitigación y Trade-off de Información
+### 2.2 Referencias Reales de Fingerprinting y Atribución de Autoría
+* **Atribución de Autoría:** *"Authorship Attribution in the Era of LLMs: Problems, Methodologies, and Challenges"* (Huang et al., 2024, ACM SIGKDD Explorations) recopila el estado del arte y los límites de la atribución de textos generados.
+* **Huella Digital del Sistema:** *"Fingerprinting Inference Systems of Large Language Models"* (Wimbauer et al., 2026) demuestra cómo el hardware y el backend de atención dejan firmas físicas detectables en la secuencia de inferencia.
+* **Estilometría de Código:** El estudio *"I Know Which LLM Wrote Your Code Last Summer: LLM generated Code Stylometry for Authorship Attribution"* (arXiv, 2025) presenta metodologías para identificar el modelo de origen basándose en el estilo de escritura en código fuente.
+
+### 2.3 Mitigación y Trade-off de Información
 A diferencia de las afirmaciones de imposibilidad absoluta de evadir el fingerprinting, la señal estilométrica se degrada de manera continua ante procesos de sanitización, traducción y parafraseo. Existe un trade-off informacional fundamental: la eliminación total de la firma estilométrica mediante reescritura destructiva reduce la entropía condicional de la respuesta original, disminuyendo su utilidad y especificidad técnica.
