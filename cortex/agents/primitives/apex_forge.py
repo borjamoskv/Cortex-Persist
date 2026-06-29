@@ -23,7 +23,6 @@ import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-
 # ── Data Models ──────────────────────────────────────────────────────
 
 @dataclass
@@ -101,7 +100,7 @@ def parse_apex_core(path: Path) -> ForgeReport:
 
     section = None  # current section being parsed
 
-    for i, line in enumerate(lines):
+    for line in lines:
         stripped = line.strip()
 
         # Section detection

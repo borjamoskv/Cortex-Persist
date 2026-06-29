@@ -4,7 +4,7 @@
 Immutable core entities representing the atoms of knowledge in the DAG.
 """
 
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from typing import Any, ClassVar, Literal
 
 from cortex.engine.core.canonical import compute_object_hash

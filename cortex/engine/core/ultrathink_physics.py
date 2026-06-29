@@ -11,9 +11,9 @@ preserva el Invariante (ORT-004) y ancla el isomorfismo en el Estado/Ledger (ORT
 
 
 import logging
+from collections import deque
 from enum import Enum
 from typing import Any, Optional
-from collections import deque
 
 logger = logging.getLogger("cortex.engine.exergy_physics")
 

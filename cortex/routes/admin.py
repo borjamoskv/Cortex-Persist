@@ -40,7 +40,7 @@ from cortex.utils.export import export_facts
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 if TYPE_CHECKING:
-    pass
+    from cortex.auth import AuthManager
 
 __all__ = [
     "create_api_key",
@@ -79,7 +79,7 @@ def _get_lang(request: Request) -> str:
     return request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
 
 
-def _get_auth_manager() -> "ApiKeyManager":
+def _get_auth_manager() -> "AuthManager":
     """Resolve the active auth manager singleton."""
     return api_state.auth_manager or get_auth_manager()
 

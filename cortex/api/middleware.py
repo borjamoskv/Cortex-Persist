@@ -317,36 +317,66 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
         self._buffer.append(json.dumps(event) + "\n")
 
 
-class ImmuneMiddleware(BaseHTTPMiddleware):
+class SovereignIsolationMiddleware(BaseHTTPMiddleware):
     """
-    Middleware Inmunitario (L1 Sovereign Defense).
-    - Prevents data poisoning mathematically before hitting routing.
-    - Extracts and establishes Tenant Context for RLS isolation.
+    Middleware de Soberanía (L1 Sovereign Defense & Tenant Isolation).
+    - Extrae la identidad del API Key (AuthManager).
+    - Establece el Contexto `tenant_id` para RLS físico.
+    - Bloquea peticiones no autenticadas en rutas privadas.
     """
+
+    _PUBLIC_PATHS = ("/docs", "/openapi.json", "/redoc", "/health", "/metrics", "/v1/status")
 
     async def dispatch(self, request: Request, call_next):
+        from cortex.auth.manager import get_auth_manager
         from cortex.extensions.security.tenant import tenant_id_var
 
-        # 1. Establish Tenant Context for Database RLS
-        # In full production, this is validated by AuthManager from the JWT.
-        tenant_id = request.headers.get("X-Tenant-ID", "default")
+        # 1. Allow public paths without auth, default to 'default' tenant
+        if any(request.url.path.startswith(p) for p in self._PUBLIC_PATHS):
+            token = tenant_id_var.set("default")
+            try:
+                return await call_next(request)
+            finally:
+                tenant_id_var.reset(token)
+
+        # 2. Extract API Key
+        auth_header = request.headers.get("Authorization")
+        api_key = request.headers.get("x-api-key")
+        if auth_header and auth_header.startswith("Bearer "):
+            api_key = auth_header[7:]
+
+        if not api_key:
+            return JSONResponse(
+                status_code=401, 
+                content={"error": "[C5-REAL] P0: Missing authentication token"}
+            )
+
+        # 3. Authenticate and extract Tenant ID
+        auth_mgr = get_auth_manager()
+        result = await auth_mgr.authenticate_async(api_key)
+        if not result.authenticated:
+            return JSONResponse(
+                status_code=401, 
+                content={"error": f"[C5-REAL] P0: {result.error}"}
+            )
+
+        tenant_id = result.tenant_id
         token = tenant_id_var.set(tenant_id)
 
         try:
-            # 2. Deep Payload Defense (Poisoning Check)
+            # 4. Deep Payload Defense (Poisoning Check)
             if request.method in ("POST", "PUT", "PATCH"):
                 body = await request.body()
-
                 try:
                     from cortex.mcp_server.guard import MCPGuard
 
                     if MCPGuard.detect_poisoning(body.decode(errors="ignore")):
                         logger.warning(
-                            "🛡️ IMMUNE SYSTEM: Poisoning attempt rejected. Tenant: %s", tenant_id
+                            "🛡️ SOVEREIGN ISOLATION: Poisoning attempt rejected. Tenant: %s", tenant_id
                         )
                         return JSONResponse(
                             status_code=403,
-                            content={"error": "Payload rejected by Immune System (Data Poisoning)"},
+                            content={"error": "Payload rejected by Sovereign Isolation (Data Poisoning)"},
                         )
                 except Exception as exc:
                     logger.warning("Suppressed exception: %s", exc)

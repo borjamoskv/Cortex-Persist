@@ -72,6 +72,21 @@ class SagaOrchestrator:
                     logger.critical(
                         f"FATAL: Saga compensation failed for {step.name}. State corrupted. Error: {comp_e}"
                     )
+            
+            # [C5-REAL] INV_SAGA_ROLLBACK Tombstone Injection
+            if "ledger" in ctx and "tenant_id" in ctx:
+                try:
+                    await ctx["ledger"].log_action( # type: ignore
+                        tenant_id=ctx["tenant_id"],
+                        actor_role="saga_orchestrator",
+                        actor_id="system",
+                        action="SAGA_REVERT",
+                        resource=f"payload_hash:{ctx.get('ledger_hash', 'unknown')}",
+                        status="REVERTED"
+                    )
+                except Exception as l_err:
+                    logger.critical(f"FATAL: Failed to inject SAGA Tombstone into Ledger: {l_err}")
+
             raise RuntimeError(f"Saga Mutation Aborted: {e}") from e
 
 

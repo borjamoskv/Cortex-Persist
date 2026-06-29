@@ -7,9 +7,9 @@ Manages the lifecycle, activation, and loading rules for all 77 extensions.
 Enforces sandbox boundaries and logs warnings/errors for experimental modules.
 """
 
+import logging
 import os
 import sys
-import logging
 
 logger = logging.getLogger("cortex.extensions.registry")
 

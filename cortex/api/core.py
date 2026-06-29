@@ -22,10 +22,10 @@ from cortex import __version__, config
 from cortex.api.middleware import (
     ContentSizeLimitMiddleware,
     CortexBillingMiddleware,
-    ImmuneMiddleware,
     RateLimitMiddleware,
     SecurityFraudMiddleware,
     SecurityHeadersMiddleware,
+    SovereignIsolationMiddleware,
     TracingMiddleware,
 )
 from cortex.auth import AuthManager
@@ -197,7 +197,7 @@ app.add_middleware(
 )
 app.add_middleware(SecurityFraudMiddleware)
 app.add_middleware(TracingMiddleware)
-app.add_middleware(ImmuneMiddleware)
+app.add_middleware(SovereignIsolationMiddleware)
 app.add_middleware(ContentSizeLimitMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitMiddleware, limit=config.RATE_LIMIT, window=config.RATE_WINDOW)

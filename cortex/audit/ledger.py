@@ -503,69 +503,70 @@ class EnterpriseAuditLedger:
         in_tx_before = self._conn.in_transaction
 
         async with self._lock:
-            # 1. Fetch the actual last hash from DB to support transparent rollbacks
-            cursor = await self._conn.execute(
-                "SELECT prev_hash, signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
-            )
-            row = await cursor.fetchone()
-            if row:
-                prev_hash_db, sig_db = row[0], row[1]
-                cursor2 = await self._conn.execute(
-                    "SELECT audit_id FROM security_audit_log WHERE signature = ? ORDER BY rowid ASC",
-                    (sig_db,),
+            async with AsyncFileLock():
+                # 1. Fetch the actual last hash from DB to support transparent rollbacks
+                cursor = await self._conn.execute(
+                    "SELECT prev_hash, signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
                 )
-                rows2 = await cursor2.fetchall()
-                batch_audit_ids = [r[0] for r in rows2]
+                row = await cursor.fetchone()
+                if row:
+                    prev_hash_db, sig_db = row[0], row[1]
+                    cursor2 = await self._conn.execute(
+                        "SELECT audit_id FROM security_audit_log WHERE signature = ? ORDER BY rowid ASC",
+                        (sig_db,),
+                    )
+                    rows2 = await cursor2.fetchall()
+                    batch_audit_ids = [r[0] for r in rows2]
 
-                # Reconstruct Sparse Merkle Tree state for current batch
-                for aid in batch_audit_ids:
-                    smt_engine.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
+                    # Reconstruct Sparse Merkle Tree state for current batch
+                    for aid in batch_audit_ids:
+                        smt_engine.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
 
-                merkle_root = smt_engine.root
-                current_last_hash = hashlib.sha256(
-                    f"merkle_batch:{merkle_root}:{prev_hash_db}".encode()
+                    merkle_root = smt_engine.root
+                    current_last_hash = hashlib.sha256(
+                        f"merkle_batch:{merkle_root}:{prev_hash_db}".encode()
+                    ).hexdigest()
+                else:
+                    current_last_hash = "GENESIS"
+
+                # 2. Compute the new block via SMT inclusion
+                smt_engine.update(hashlib.sha256(audit_id.encode()).hexdigest(), audit_id)
+                merkle_root_new = smt_engine.root
+                entry_hash = hashlib.sha256(
+                    f"merkle_batch:{merkle_root_new}:{current_last_hash}".encode()
                 ).hexdigest()
-            else:
-                current_last_hash = "GENESIS"
+                signature = self.private_key.sign(entry_hash.encode()).hex()
 
-            # 2. Compute the new block via SMT inclusion
-            smt_engine.update(hashlib.sha256(audit_id.encode()).hexdigest(), audit_id)
-            merkle_root_new = smt_engine.root
-            entry_hash = hashlib.sha256(
-                f"merkle_batch:{merkle_root_new}:{current_last_hash}".encode()
-            ).hexdigest()
-            signature = self.private_key.sign(entry_hash.encode()).hex()
+                # 3. Insert synchronously inside the existing transaction
+                with causal_write(self._conn):
+                    await self._conn.execute(
+                        """INSERT INTO security_audit_log
+                           (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
+                            resource, status, prev_hash, signature, external_anchor)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (
+                            audit_id,
+                            timestamp,
+                            tenant_id,
+                            actor_role,
+                            actor_id,
+                            action,
+                            resource,
+                            status,
+                            current_last_hash,
+                            signature,
+                            None,
+                        ),
+                    )
+                    # Auto-commit ONLY if we are not inside a larger transaction
+                    if not in_tx_before:
+                        await self._conn.commit()
 
-            # 3. Insert synchronously inside the existing transaction
-            with causal_write(self._conn):
-                await self._conn.execute(
-                    """INSERT INTO security_audit_log
-                       (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
-                        resource, status, prev_hash, signature, external_anchor)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                    (
-                        audit_id,
-                        timestamp,
-                        tenant_id,
-                        actor_role,
-                        actor_id,
-                        action,
-                        resource,
-                        status,
-                        current_last_hash,
-                        signature,
-                        None,
-                    ),
-                )
-                # Auto-commit ONLY if we are not inside a larger transaction
-                if not in_tx_before:
-                    await self._conn.commit()
+                self._last_hash = entry_hash
 
-            self._last_hash = entry_hash
-
-            # Trigger anchor worker if not running
-            if self._batch_task is None:
-                self._batch_task = asyncio.create_task(self._anchor_worker())
+                # Trigger anchor worker if not running
+                if self._batch_task is None:
+                    self._batch_task = asyncio.create_task(self._anchor_worker())
 
         return audit_id
 

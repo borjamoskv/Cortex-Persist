@@ -7,7 +7,9 @@ for CORTEX Epistemic Objects.
 
 import hashlib
 from typing import Any
+
 import cbor2
+
 
 def _canonicalize(value: Any) -> Any:
     """Recursively enforce canonical byte ordering on collections."""
@@ -37,6 +39,6 @@ def compute_object_hash(type_tag: str, obj: Any) -> str:
     """Compute the SHA3-256 hash of an EpistemicObject (CEP-002)."""
     cbor_bytes = canonical_serialize(obj)
     # Type prefixing with null byte separator
-    prefix = f"{type_tag}\0".encode("utf-8")
+    prefix = f"{type_tag}\0".encode()
     h_input = prefix + cbor_bytes
     return hashlib.sha3_256(h_input).hexdigest()
