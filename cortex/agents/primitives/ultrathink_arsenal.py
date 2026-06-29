@@ -1,7 +1,7 @@
 # [C5-REAL] ULTRATHINK ARSENAL
 # Exergy-Maximized APEX Directives derived from Operator Cognitive Autopsy
 from dataclasses import dataclass
-from typing import List, Optional
+
 
 @dataclass
 class APEXDirective:
@@ -9,7 +9,7 @@ class APEXDirective:
     operation: str = "Auditoría topológica y extracción masiva de exergía"
     tolerance: int = 3  # N=3 BFT Consensus
 
-ULTRATHINK_ARSENAL: List[APEXDirective] = [
+ULTRATHINK_ARSENAL: list[APEXDirective] = [
     APEXDirective(target="Issue #467"),
     APEXDirective(target="Issue #470"),
     APEXDirective(target="Issue #487"),
@@ -112,6 +112,6 @@ ULTRATHINK_ARSENAL: List[APEXDirective] = [
     APEXDirective(target="CORTEX-CORE"),
 ]
 
-def get_ultrathink_arsenal() -> List[APEXDirective]:
+def get_ultrathink_arsenal() -> list[APEXDirective]:
     """Retorna las 100 primitivas cristalizadas para ejecución de Swarm."""
     return ULTRATHINK_ARSENAL

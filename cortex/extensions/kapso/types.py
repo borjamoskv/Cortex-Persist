@@ -1,4 +1,5 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -11,7 +12,7 @@ class WhatsAppTemplateLanguage(BaseModel):
 class WhatsAppTemplate(BaseModel):
     name: str
     language: WhatsAppTemplateLanguage
-    components: Optional[list[Dict[str, Any]]] = None
+    components: Optional[list[dict[str, Any]]] = None
 
 class WhatsAppMessage(BaseModel):
     messaging_product: str = "whatsapp"

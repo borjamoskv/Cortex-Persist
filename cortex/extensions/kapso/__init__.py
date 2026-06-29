@@ -4,7 +4,7 @@ Provides integration with Kapso WhatsApp API.
 """
 
 from .gateway import KapsoGateway
-from .types import WhatsAppMessage, WhatsAppTemplate, TextMessage
+from .types import TextMessage, WhatsAppMessage, WhatsAppTemplate
 
 __all__ = [
     "KapsoGateway",

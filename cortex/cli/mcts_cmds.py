@@ -63,8 +63,9 @@ def evolve(file: str, simulations: int, prompt: str) -> None:
 @mcts_cmds.command("prune")
 def prune() -> None:
     """[LEA-OMEGA] Garbage Collect orphaned MCTS Chronos worktrees and branches."""
-    from cortex.mcts.git_env import MCTSGitEnvironment
     from pathlib import Path
+
+    from cortex.mcts.git_env import MCTSGitEnvironment
     
     try:
         console.print(Panel.fit("[bold red]🗑️  CHRONOS GC: Initiating Apoptosis[/bold red]", border_style="red"))

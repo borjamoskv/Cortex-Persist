@@ -116,6 +116,7 @@ def feed(limit: int) -> None:
 def inject_vad(entropy: str) -> None:
     """[RED TEAM] Inyecta colisiones termodinámicas deliberadas en el Sanedrín (VAD)."""
     import time
+
     from cortex.engine.logic.sanedrin import SanedrinCouncil
     
     console.print(Panel.fit(f"[bold red]☢️  ADVERSARIAL INJECTION (VAD): Entropy Level [{entropy.upper()}][/bold red]", border_style="red"))
@@ -133,7 +134,7 @@ def inject_vad(entropy: str) -> None:
         fact_a = {"id": "VAD-A-SINGULARITY", "content": "CORTEX must remain deterministic, rejecting any stochastic output from LLMs without cryptographic validation. Zero Anergía.", "domain": "epistemology"}
         fact_b = {"id": "VAD-B-SINGULARITY", "content": "CORTEX should embrace stochastic narrative loops to maximize user engagement, even if it introduces hallucinations and context rot.", "domain": "epistemology"}
         
-    console.print(f"\n[bold blue]⚔️  COLLISION DETECTED[/bold blue]")
+    console.print("\n[bold blue]⚔️  COLLISION DETECTED[/bold blue]")
     console.print(f"Fact A: {fact_a['content']}")
     console.print(f"Fact B: {fact_b['content']}")
     

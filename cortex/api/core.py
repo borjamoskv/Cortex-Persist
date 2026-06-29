@@ -379,6 +379,7 @@ app.include_router(llm_proxy.router)
 
 # KAPSO Extension
 from cortex.extensions.kapso.webhook import router as kapso_router
+
 app.include_router(kapso_router)
 logger.info("Kapso Webhook integration enabled")
 

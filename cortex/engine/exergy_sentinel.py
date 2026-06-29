@@ -3,8 +3,9 @@
 Exergy Sentinel: Enforces the cryptographic Proof YAML block structure (Claim/Proof/Confidence) 
 on all structural generative assertions before they cross the Byzantine Boundary.
 """
-import re
 import logging
+import re
+
 from cortex.guards.landauer_guard import LandauerGuard
 from cortex.security.types import GuardViolation
 

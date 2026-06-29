@@ -11,6 +11,7 @@ Law Ω₀: Zero external dependencies. Pure Python list comprehensions.
 """
 
 from __future__ import annotations
+
 import hashlib
 import json
 import logging

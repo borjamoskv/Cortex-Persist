@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # [C5-REAL] CORTEX-RED-SHIFT - Circadian Exergy Enforcer
+import datetime
 import os
 import subprocess
-import datetime
-import time
 
 RED_WALLPAPER_PATH = "/tmp/cortex_red_shift.gif"
 

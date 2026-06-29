@@ -77,7 +77,10 @@ class ApexDispatcher:
 
     def _op_git_sentinel(self, commit_msg: str, force: bool = False, path: str = ".") -> str:
         """OP_GIT_SENTINEL: Causal persistence via cryptographic commit."""
-        from cortex.engine.causal.taint_engine import check_anergy_and_green_theater, TaintValidationError
+        from cortex.engine.causal.taint_engine import (
+            TaintValidationError,
+            check_anergy_and_green_theater,
+        )
         
         try:
             check_anergy_and_green_theater(commit_msg)

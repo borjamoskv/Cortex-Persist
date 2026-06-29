@@ -6,9 +6,11 @@ and Graph-RAG enrichment.
 """
 
 from __future__ import annotations
+
 import logging
 import sqlite3
 from typing import TYPE_CHECKING, Any
+
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
 from cortex.memory.temporal import build_temporal_filter_params, time_travel_filter
 

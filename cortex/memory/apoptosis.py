@@ -6,9 +6,8 @@ to prevent Context Rot and maintain C5-REAL execution boundaries.
 """
 
 import logging
-from typing import List, Dict, Any
-from datetime import datetime, timezone
 import time
+from typing import Any
 
 logger = logging.getLogger("cortex.memory.apoptosis")
 
@@ -23,7 +22,7 @@ class ApoptosisEngine:
     DECAY_THRESHOLD_HOURS = 72
 
     @classmethod
-    def scan_for_necrosis(cls, nodes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def scan_for_necrosis(cls, nodes: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         Scans a list of memory nodes and returns those identified as necrotic 
         (lacking exergy, unverified, or degraded).
@@ -57,7 +56,7 @@ class ApoptosisEngine:
         return necrotic_nodes
 
     @classmethod
-    def trigger_apoptosis(cls, nodes: List[Dict[str, Any]]) -> int:
+    def trigger_apoptosis(cls, nodes: list[dict[str, Any]]) -> int:
         """
         Executes Weaponized Forgetting on the provided nodes.
         Returns the count of purged nodes.

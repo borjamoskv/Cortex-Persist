@@ -5,6 +5,7 @@ Implementing Phase 6: Adverse Swarm Intelligence for Code Immunity.
 """
 
 from __future__ import annotations
+
 import asyncio
 import logging
 from abc import ABC, abstractmethod
@@ -70,6 +71,7 @@ class AsyncSignalBus:
         if signal.status == "SUCCESS" and signal.payload:
             import json
             import logging
+
             from cortex.guards.landauer_guard import LandauerGuard
 
             # Serialize to measure thermodynamic density
@@ -207,6 +209,7 @@ class Squadron(ABC):
         # Produce a real LedgerPayload to satisfy structural condensation
         import json
         from datetime import datetime, timezone
+
         from cortex.guards import CausalClosureGuard, SwarmProposal
 
         ledger_payload = {
