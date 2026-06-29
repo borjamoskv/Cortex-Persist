@@ -32,6 +32,19 @@ class CortexExtensionsRedirector(importlib.abc.MetaPathFinder):
                 return spec
             except ImportError:
                 return None
+        
+        # Redirect legacy cortex submodules to physical babylon60 locations
+        for prefix in ("cortex.crypto", "cortex.guards", "cortex.ledger", "cortex.engine", "cortex.audit"):
+            if fullname == prefix or fullname.startswith(prefix + "."):
+                target_name = fullname.replace("cortex", "babylon60", 1)
+                try:
+                    mod = importlib.import_module(target_name)
+                    spec = importlib.util.spec_from_loader(
+                        fullname, AliasLoader(mod), origin=getattr(mod, "__file__", None)
+                    )
+                    return spec
+                except ImportError:
+                    return None
         return None
 
 
