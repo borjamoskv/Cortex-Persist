@@ -138,6 +138,7 @@ Cortex-Persist opera bajo los siguientes invariantes axiomáticos:
 3. Ningún nodo único puede retirar soporte operativo compartido por encima del umbral de política.
 4. La integridad criptográfica no implica validez epistémica.
 5. La convergencia de réplica no implica corrección epistémica.
+6. **Ley de Conservación Epistémica:** Ninguna transformación del sistema puede incrementar el contenido informativo verificable sin introducir evidencia externa o una inferencia formalmente justificable (ej. resumir o refrasear no crea conocimiento).
 
 ---
 
@@ -151,7 +152,25 @@ Bajo esta mecánica, el scheduler puede excluir completamente el objeto de la in
 
 ---
 
-## 11. Integrity & Provenance
+## 11. Teoría Formal de Confianza (Trust Vector Space)
+
+CORTEX rechaza la reducción de la confianza a un escalar ($\text{Trust} \in [0,1]$). Un único número destruye la distinción entre una hipótesis con "procedencia perfecta y frescura baja" y otra con "procedencia mediocre y frescura máxima". 
+
+En lugar de eso, la confianza se define como un espacio vectorial multidimensional:
+
+$$ T(H) = (P, I, A, R, F, C, S) $$
+
+Donde las componentes representan: **P** (Procedencia), **I** (Independencia entre evidencias), **A** (Autoridad), **R** (Reproducibilidad), **F** (Frescura temporal), **C** (Consistencia global) y **S** (Estabilidad histórica).
+
+Esta topología obedece los siguientes principios epistemológicos:
+
+1. **Monotonía Restringida:** La confianza debe ser monotónica respecto a la nueva evidencia. Si una fuente simplemente repite a otra ($E_2 = f(E_1)$), el incremento de confianza es cero ($\Delta \text{Trust} = 0$). 
+2. **Independencia Causal Explícita:** La independencia se aproxima matemáticamente analizando el solapamiento en el Grafo de Procedencia de la Compilación (CPG): $\text{Ind}(E_i,E_j) = 1 - \text{Overlap}(\text{CPG}_i, \text{CPG}_j)$.
+3. **Coste Computacional de la Epistemología:** El sistema no solo pregunta "¿qué es más probable?", sino "¿qué merece la pena comprobar ahora?". La confianza incorpora un metarrazonamiento racional que pondera el valor esperado de la verificación frente a su coste computacional.
+
+---
+
+## 12. Integrity & Provenance
 
 *Fronteras de confianza*
 
@@ -163,7 +182,7 @@ El linaje criptográfico es innegable. Todo cambio de estado, parche semántico 
 
 ---
 
-## 12. Target Engineering Goals (SLOs Provisionales)
+## 13. Target Engineering Goals (SLOs Provisionales)
 
 > **Nota Epistémica:** Estos objetivos (_non-binding provisional performance targets_) requieren validación empírica continua mediante ENCB y profiling de implementación nativa. Sujeto a benchmark reproducible.
 
@@ -176,7 +195,7 @@ El linaje criptográfico es innegable. Todo cambio de estado, parche semántico 
 
 ---
 
-## 13. Roadmap
+## 14. Roadmap
 
 | Fase | Hito Técnico y Entregable |
 |:---|:---|
