@@ -7,6 +7,7 @@ import os
 import sys
 import json
 import pytest
+import tempfile
 from pathlib import Path
 
 # Ensure the project root is in sys.path
@@ -95,3 +96,11 @@ def test_merkle_root_computation():
     root = ImportResolutionLedger._compute_merkle_root(leaves)
     assert isinstance(root, str)
     assert len(root) == 64  # SHA-256 length
+
+if __name__ == "__main__":
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+        test_ledger_creation_and_logging(p)
+        test_ledger_tampering_detection(p)
+        test_merkle_root_computation()
+        print("All manual tests passed!")
