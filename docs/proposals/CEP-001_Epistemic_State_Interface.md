@@ -10,6 +10,10 @@
 ## Principio Fundamental de Diseño
 La arquitectura CORTEX se rige por el siguiente invariante: **Primero se definen los objetos; después se definen las transformaciones sobre esos objetos.** Las interfaces deben estabilizarse antes que los algoritmos que las implementan. El diseño actúa como un **microkernel con interfaces estables y servicios intercambiables**. El núcleo permanece pequeño, verificable y estable, mientras que las teorías de confianza, los motores de inferencia, los solvers o los renderizadores evolucionan de forma independiente respetando los contratos.
 
+> **Principio de Ignorancia Semántica:** El microkernel nunca interpreta el significado de los objetos que almacena. Únicamente garantiza su identidad, integridad, trazabilidad y compatibilidad estructural.
+
+El kernel nunca pregunta "¿Es verdadera esta afirmación?", pregunta únicamente "¿Está bien formada?" o "¿Es consistente con los contratos?". Esto elimina completamente cualquier dependencia respecto al dominio.
+
 ## 1. Core Object Model
 
 Los `EpistemicObjects` son estructuras de datos puras, serializables e inmutables. Toda entidad que transite por el núcleo de CORTEX debe heredar de la interfaz abstracta `EpistemicObject` (ID único + Hash criptográfico de estructura).
@@ -78,32 +82,29 @@ SupportRelation (hereda de Relation)
 * **DAG Auténtico:** La propiedad `parent_states` (en plural) habilita ramificaciones y fusiones (merges), convirtiendo el historial en un verdadero Grafo Acíclico Dirigido, fundamental para sincronización, colaboración y razonamiento distribuido.
 * **Merkle Root:** El `root_hash` no es un hash plano del estado, sino un `MerkleRoot(Assertions, Evidence, Relations, Diagnostics, ...)`. Esto permite auditoría incremental, pruebas parciales, verificación eficiente del DAG histórico y evita que el coste crezca linealmente.
 
-## 3. Execution Interfaces
+## 3. Kernel Service Interfaces (KSI)
 
-Los componentes de ejecución están estrictamente separados de los objetos persistentes (`EpistemicObjects`). Esta separación garantiza que el límite entre datos (serializables) y ejecución no se difumine.
+> **Nota Normativa:** Las especificaciones de ejecución activa y contratos del kernel residen ahora en documentos separados (CEP-002 y CEP-003, o anexos normativos). CEP-001 se consolida exclusivamente como la especificación del **modelo de persistencia del microkernel**.
 
-* **InferenceRule:** Reglas o lógicas puras. Una `InferenceRule` puede cambiar su implementación por completo sin alterar una sola `Assertion`.
-* **InferenceEngine / Solver Interface:** Componentes ejecutables, como motores de inferencia o Proof Obligations, que procesan estados para generar nuevas aserciones o evidencias.
-* **Trust Provider Interface:** Módulos que computan la confianza a partir de la evidencia, manteniéndola ortogonal a la aserción semántica.
-* **Renderer Interface:** Componentes que abstraen la presentación del estado epistémico.
+Los componentes de ejecución están estrictamente separados de los objetos persistentes. Las antiguas *Execution Interfaces* se definen ahora como **Kernel Service Interfaces (KSI)** (o Kernel Provider Interfaces, KPI). Conceptualmente, ya no son meras interfaces de ejecución, sino contratos para proveedores externos.
 
-## 4. Kernel Contracts
+El microkernel nunca conoce la implementación, sólo el contrato:
+* `KSI-TrustProvider`: Computa la valoración o confianza a partir de la evidencia.
+* `KSI-InferenceProvider`: Procesa estados para generar nuevas aserciones o evidencias.
+* `KSI-ParserProvider`: Traduce formatos externos a `EpistemicObjects`.
+* `KSI-RendererProvider`: Abstrae la presentación del estado epistémico.
+* `KSI-ProvenanceProvider`: Gestiona autoría y firmas.
 
-El Kernel actúa como guardián de la integridad arquitectónica y orquesta las transiciones epistémicas.
+*(Nota sobre mutaciones: El estado recibe una valoración externa mediante un **Annotated Commit** o **Valuated Commit**. Se evita explícitamente el término "Trusted Commit" ya que el kernel no confía ni adopta esa valoración, sólo la preserva).*
 
-* **Invariantes:** Los datos fluyen de forma apendicular. La mutación no destruye información pasada.
-* **Panic Conditions:** El sistema abortará operaciones críticas (p. ej., mutaciones) si detecta:
-  * Ausencia de un origen (`Provenance`) explícito.
-  * Discrepancia entre el `root_hash` (Merkle) y los componentes estructurales referenciados.
-  * Modificación in situ de objetos ya integrados al grafo de estado histórico (violación del DAG).
-* **Serialization & Compatibility:** Todos los objetos deben ser determinísticamente serializables y evolucionar mediante políticas de versionado que garanticen compatibilidad hacia atrás.
+## 4. El Verdadero Núcleo (Persistence & Identity)
 
-## 5. El Verdadero Núcleo (Persistence & Identity)
-
-El diseño de este microkernel revela una conclusión fundamental: **CEP-001 no define todavía una teoría de la confianza, sino el modelo de persistencia y de identidad de un sistema epistemológico.**
+El diseño de este microkernel revela una conclusión fundamental: **CEP-001 no define una teoría de la confianza, sino el modelo de persistencia y de identidad de un sistema epistemológico.**
 
 El verdadero núcleo inmutable del sistema es:
 ```text
 Immutable Objects + Immutable Relations + Immutable State Snapshots
 ```
-Todo lo demás (Trust, Inference, SAT, Render, Parser) son servicios acoplados tangencialmente que pueden cambiar. El primer contrato estable del microkernel es **cómo representar, identificar y versionar el conocimiento de forma inmutable**, garantizando así el desacoplamiento arquitectónico.
+Todo lo demás son servicios (KSI) acoplados tangencialmente que pueden cambiar. La "verdad" deja de ser un estado privilegiado. CORTEX es una infraestructura para gestionar estados epistemológicos, capaz de almacenar perfectamente hipótesis, contradicciones, múltiples valoraciones incompatibles y ramas alternativas del conocimiento simultáneamente, sin necesidad de resolverlas en una única narrativa.
+
+> **Cláusula Normativa Final - Neutralidad Epistemológica del Núcleo:** El microkernel no implementa ninguna teoría de la verdad, de la confianza ni de la inferencia. Su única responsabilidad es garantizar que cualquier teoría compatible con los contratos del sistema pueda persistir, evolucionar y ser auditada sin comprometer la integridad estructural del repositorio epistemológico.
