@@ -12,6 +12,13 @@ _MISSING = object()
 
 @contextmanager
 def _temporarily_reset_modules(*names: str):
+    expanded = list(names)
+    for name in names:
+        if name.startswith("cortex."):
+            expanded.append(name.replace("cortex.", "babylon60.", 1))
+        elif name == "cortex":
+            expanded.append("babylon60")
+    names = tuple(expanded)
     previous = {name: sys.modules.get(name) for name in names}
     parent_attrs: dict[str, tuple[object, str, object]] = {}
 

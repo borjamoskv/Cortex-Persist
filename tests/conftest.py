@@ -66,6 +66,8 @@ class ProxyModule(types.ModuleType):
     def __delattr__(self, name):
         if name in ('_real_module', '__spec__', '__loader__', '__path__', '__file__', '__name__'):
             object.__delattr__(self, name)
+        elif name in object.__getattribute__(self, '__dict__'):
+            object.__delattr__(self, name)
         else:
             delattr(self._real_module, name)
 
