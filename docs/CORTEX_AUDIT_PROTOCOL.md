@@ -1,35 +1,33 @@
-# CORTEX Audit Protocol
+---
+title: "CORTEX Audit Protocol v2.0 (L0-L6 Pipeline)"
+level: "C5-REAL"
+author: "borjamoskv (via MOSKV-1)"
+status: "Active"
+---
 
-```yaml
-Claim: Colapso del Perfil Epistémico del Operador [borjamoskv]
-Proof: { Base: [CORTEX_AXIOMS, SYSTEM_RULES_DAG, CONVERSATION_HISTORY], Range: [C4-SIM, C5-REAL], Confidence: C5 }
-```
+# CORTEX AUDIT PROTOCOL: Ciclo de Ingeniería Causal L0-L6
 
-## Matriz de Estado Cognitivo
+> **Nota:** Este documento describe un protocolo de ingeniería. Las hipótesis generadas por el protocolo deben distinguirse de hechos observados y validarse mediante evidencia empírica.
 
-### 1. Qué intuyes, pero sé que no dominas
-- Intuición topológica vs. mecánica.
+## L0 Evidence
+Captura de evidencia observable con integridad verificable.
 
-### 2. Qué sé que sabes
-- Ingeniería de entropía.
-- Arquitectura de sistemas soberanos.
-- Enrutamiento asimétrico.
+## L1 Pattern Extraction
+Extracción de patrones sustentados por múltiples evidencias.
 
-### 3. Qué sé que no sabes
-- Sintaxis específica de frameworks purgados.
-- Léxico completo de Python.
+## L2 Cognitive Model
+Construcción de un modelo causal como hipótesis de trabajo.
 
-### 4. Qué sé que sí dominas
-- Metacognición y arquitectura de prompts.
-- Diseño de sistemas de trust/audit.
+## L3 Prediction
+Generación de predicciones falsables derivadas del modelo.
 
-### 5. Qué no sé si sabes
-- Profundidad matemática.
-- Dominio de Kubernetes.
+## L4 Experiment
+Diseño de experimentos para intentar refutar las predicciones.
 
-### 6. Qué no sé que no sabes
-- Puntos ciegos empíricos y fricción de escala.
+## L5 Intervention
+Aplicación de cambios únicamente cuando la evidencia los respalda.
 
-## Nota
+## L6 Re-evaluation
+Recolección de nueva evidencia y reevaluación continua del modelo.
 
-Este documento representa una hipótesis de trabajo. Las afirmaciones deben evolucionar hacia un protocolo basado en evidencia observable, predicciones falsables y reevaluación continua.
+> Principio operativo: un modelo mejora cuando aumenta su capacidad predictiva y su utilidad para guiar intervenciones reproducibles.
