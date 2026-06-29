@@ -17,12 +17,12 @@ def _reset_pipeline():
     """Reset singleton pipeline between tests."""
     with (
         patch(
-            "cortex.extensions.immune.error_boundary.ErrorBoundary._persist",
+            "babylon60.extensions.immune.error_boundary.ErrorBoundary._persist",
             new_callable=AsyncMock,
             return_value=42,
         ) as mock_persist,
         patch(
-            "cortex.extensions.immune.error_boundary.ErrorBoundary._persist_sync",
+            "babylon60.extensions.immune.error_boundary.ErrorBoundary._persist_sync",
             new_callable=MagicMock,
         ) as mock_persist_sync,
     ):
