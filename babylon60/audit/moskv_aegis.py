@@ -18,9 +18,9 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
+from babylon60.audit.ledger import EnterpriseAuditLedger
+from babylon60.audit.moskv_videntia import MoskvVidentiaChainBuilder, MoskvVidentiaOracle
 from babylon60.crypto.hash_registry import cortex_hash
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.audit.moskv_videntia import MoskvVidentiaChainBuilder, MoskvVidentiaOracle
 
 logger = logging.getLogger("cortex.audit.moskv_aegis")
 
@@ -196,7 +196,7 @@ class MoskvAegisEngine:
 
         signature = self.ledger.private_key.sign(entry_hash.encode("utf-8")).hex()
 
-        from cortex.database.core import causal_write
+        from babylon60.database.core import causal_write
 
         with causal_write(self._conn):
             await self._conn.execute(

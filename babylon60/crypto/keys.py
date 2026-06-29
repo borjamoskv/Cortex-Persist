@@ -23,10 +23,11 @@ try:
         import keyring
 except ImportError:
     keyring = None
-from cortex.crypto.vault import Vault
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
+
+from babylon60.crypto.vault import Vault
 
 logger = logging.getLogger("cortex.crypto.keys")
 

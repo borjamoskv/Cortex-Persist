@@ -3,7 +3,7 @@
 COGNITIVE-CONFIG: Declarative policies and SQL definitions for Cognitive Router.
 """
 
-from cortex.audit.cognitive_classifier import SafetyClassifier
+from babylon60.audit.cognitive_classifier import SafetyClassifier
 
 _CREATE_ROUTER_LOG_SQL = """
 CREATE TABLE IF NOT EXISTS cognitive_router_log (

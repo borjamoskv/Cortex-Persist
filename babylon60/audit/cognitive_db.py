@@ -5,11 +5,11 @@ COGNITIVE-DB: Database migration and schema ensure logic.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import logging
 from typing import Any
 
-from cortex.audit.cognitive_config import _CREATE_ROUTER_LOG_SQL
+from babylon60.audit.cognitive_config import _CREATE_ROUTER_LOG_SQL
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.audit.cognitive_db")
 
@@ -33,7 +33,7 @@ async def ensure_table_for_router(router: Any) -> None:
                 or "classifier_version" not in sql
                 or "routing_policy_version" not in sql
             ):
-                from cortex.database.core import causal_write
+                from babylon60.database.core import causal_write
 
                 try:
                     with causal_write(router._conn):
@@ -82,7 +82,7 @@ async def ensure_table_for_router(router: Any) -> None:
                     logger.error("Failed to migrate cognitive_router_log table: %s", e)
                     raise
         else:
-            from cortex.database.core import causal_write
+            from babylon60.database.core import causal_write
 
             with causal_write(router._conn):
                 await router._conn.execute(_CREATE_ROUTER_LOG_SQL)

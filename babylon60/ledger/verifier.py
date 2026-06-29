@@ -5,14 +5,14 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
-from cortex.ledger.models import (
+from babylon60.ledger.models import (
     ActionResult,
     ActionTarget,
     IntentPayload,
     LedgerEvent,
     LedgerOriginSignature,
 )
-from cortex.ledger.store import LedgerStore
+from babylon60.ledger.store import LedgerStore
 
 if TYPE_CHECKING:
     pass
@@ -78,9 +78,10 @@ class LedgerVerifier:
         import base64
         import os
 
-        from cortex.crypto.aes import get_default_encrypter
-        from cortex.crypto.keyring import keyring
         from cryptography.hazmat.primitives.asymmetric import mldsa
+
+        from babylon60.crypto.aes import get_default_encrypter
+        from babylon60.crypto.keyring import keyring
 
         db_dir = os.path.dirname(self.store.db_path) if self.store.db_path else "."
         if not db_dir:
@@ -167,7 +168,7 @@ class LedgerVerifier:
         return mldsa.MLDSA44PrivateKey.from_seed_bytes(seed)
 
     def create_checkpoint(self, batch_size: int = 10) -> int | None:
-        from cortex.consensus.merkle import MerkleTree
+        from babylon60.consensus.merkle import MerkleTree
 
         with self.store.tx() as conn:
             conn.execute(

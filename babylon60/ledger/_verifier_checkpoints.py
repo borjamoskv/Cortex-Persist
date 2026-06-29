@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from cortex.ledger.public_verifier_utils import (
+from babylon60.ledger.public_verifier_utils import (
     _b64url_decode,
     _event_hash,
     _merkle_root_v1,
@@ -15,7 +15,7 @@ from cortex.ledger.public_verifier_utils import (
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from cortex.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier
+    from babylon60.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier
 
 
 def verify_checkpoints(verifier: _PublicLedgerVerifier) -> None:

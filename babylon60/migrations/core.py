@@ -9,8 +9,9 @@ import logging
 import sqlite3
 
 import aiosqlite
-from cortex.database.schema import get_all_schema
-from cortex.migrations.registry import MIGRATIONS
+
+from babylon60.database.schema import get_all_schema
+from babylon60.migrations.registry import MIGRATIONS
 
 __all__ = [
     "ensure_migration_table",

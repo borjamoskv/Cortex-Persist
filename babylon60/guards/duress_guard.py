@@ -12,7 +12,7 @@ import os
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.security.types import GuardViolation
+from babylon60.security.types import GuardViolation
 
 logger = logging.getLogger("cortex.guards.duress")
 
@@ -44,10 +44,10 @@ class DuressGuard:
 
         # Emit synchronous Ledger event bypassing the async loop to guarantee recording
         try:
-            from babylon60.crypto.hash_registry import cortex_hash
             from datetime import datetime, timezone
 
-            from cortex.database.core import connect
+            from babylon60.crypto.hash_registry import cortex_hash
+            from babylon60.database.core import connect
 
             db_path = os.environ.get("CORTEX_DB_PATH", "cortex_ledger.db")
             if os.path.exists(db_path):

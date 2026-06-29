@@ -92,7 +92,7 @@ class LedgerEvent:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def compute_hash(self, prev_hash: str) -> str:
-        from cortex.utils.canonical import canonical_json, compute_tx_hash
+        from babylon60.utils.canonical import canonical_json, compute_tx_hash
 
         project = self.metadata.get("project", self.actor)
         detail_json = canonical_json(self.to_canonical_payload())

@@ -2,7 +2,7 @@
 from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
-    from cortex.ledger.public_verifier import VerificationInput
+    from babylon60.ledger.public_verifier import VerificationInput
 
 
 class PublicVerifierProtocol(Protocol):

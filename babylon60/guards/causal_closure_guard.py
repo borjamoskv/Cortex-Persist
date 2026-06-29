@@ -13,7 +13,7 @@ import logging
 import re
 from dataclasses import dataclass
 
-from cortex.guards.structural_certifier import StructuralCertifier, StructuralGrade
+from babylon60.guards.structural_certifier import StructuralCertifier, StructuralGrade
 
 logger = logging.getLogger("cortex.guards.causal_closure")
 

@@ -17,14 +17,14 @@ class LedgerStore:
         self._init_db()
 
     def _connect(self) -> sqlite3.Connection:
-        from cortex.database.core import connect
+        from babylon60.database.core import connect
 
         return connect(self.db_path, row_factory=sqlite3.Row)
 
     @contextmanager
     def tx(self) -> Iterator[sqlite3.Connection]:
         conn = self._connect()
-        from cortex.database.core import causal_write
+        from babylon60.database.core import causal_write
 
         try:
             with causal_write(conn):
@@ -222,7 +222,7 @@ class LedgerStore:
 
     def _ensure_compat_columns(self, conn: sqlite3.Connection, table_name: str) -> None:
         """Backfill compatibility columns for legacy ledger job tables."""
-        from cortex.utils.sql_identifiers import validate_sql_identifier
+        from babylon60.utils.sql_identifiers import validate_sql_identifier
 
         validate_sql_identifier(table_name)
         existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table_name})").fetchall()}

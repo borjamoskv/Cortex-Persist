@@ -18,8 +18,9 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-from cortex.config import DB_PATH
-from cortex.database.core import connect_async_ctx
+
+from babylon60.config import DB_PATH
+from babylon60.database.core import connect_async_ctx
 
 logger = logging.getLogger(__name__)
 
@@ -97,8 +98,8 @@ class BillingIntegrityGateway:
     async def _handle_event(self, action: str, payload: dict[str, Any]) -> None:
         """Route the specific action to the AuthManager."""
         # We decouple imperative logic from stripe.py
-        import cortex.api.state as api_state
-        from cortex.core import config
+        import babylon60.api.state as api_state
+        from babylon60.core import config
 
         if action == "checkout.session.completed":
             session = payload["data"]["object"]
@@ -122,7 +123,7 @@ class BillingIntegrityGateway:
                 storage_bytes = int(amount_usd * Decimal(str(100 * 1024 * 1024)))
                 permissions = ["read", "write"]
             else:
-                from cortex.routes.stripe import PLAN_CONFIG
+                from babylon60.routes.stripe import PLAN_CONFIG
                 plan_cfg = PLAN_CONFIG.get(plan, PLAN_CONFIG["pro"])
                 calls_limit = plan_cfg.get("calls_limit", 50000)
                 rate_limit = plan_cfg.get("rate_limit", 300)
@@ -151,7 +152,7 @@ class BillingIntegrityGateway:
                 "stripe_subscription_item_id": f"si_{customer_email[-8:]}" if not config.STRIPE_SECRET_KEY else ""
             }
 
-            from cortex.database.core import causal_write
+            from babylon60.database.core import causal_write
             async with connect_async_ctx(self.db_path) as conn:
                 with causal_write(conn):
                     await conn.execute(
@@ -171,7 +172,7 @@ class BillingIntegrityGateway:
             subscription = payload["data"]["object"]
             customer_id = subscription.get("customer", "")
 
-            from cortex.routes.stripe import _get_stripe
+            from babylon60.routes.stripe import _get_stripe
 
             stripe_obj = _get_stripe()
             customer = stripe_obj.Customer.retrieve(customer_id)

@@ -21,10 +21,10 @@ from typing import TYPE_CHECKING, Any, cast
 import aiosqlite
 
 if TYPE_CHECKING:
-    from cortex.database.pool import CortexConnectionPool
+    from babylon60.database.pool import CortexConnectionPool
 
-from cortex.database.core import causal_write
-from cortex.utils.canonical import (
+from babylon60.database.core import causal_write
+from babylon60.utils.canonical import (
     canonical_json,
     compute_tx_hash,
     now_iso,
@@ -49,7 +49,7 @@ class SovereignLedger(LedgerAuditMixin):
     HIGH_WRITE_THRESHOLD = 10  # writes/sec triggers adaptive reduction
 
     def __init__(self, db: sqlite3.Connection | aiosqlite.Connection | CortexConnectionPool):
-        from cortex.core import config
+        from babylon60.core import config
 
         self.db = db
         self._write_timestamps: deque[float] = deque(maxlen=5000)
@@ -61,7 +61,7 @@ class SovereignLedger(LedgerAuditMixin):
 
     @property
     def _lock(self) -> asyncio.Lock:
-        from cortex.utils.locks import get_loop_lock
+        from babylon60.utils.locks import get_loop_lock
 
         return get_loop_lock(self, "ledger")
 
@@ -401,7 +401,7 @@ class SovereignLedger(LedgerAuditMixin):
                     db_path = None
 
             if db_path:
-                from cortex.database.core import connect_async
+                from babylon60.database.core import connect_async
 
                 conn = await connect_async(str(db_path))
                 try:

@@ -13,7 +13,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.crypto.keys import ZKSwarmIdentity
+from babylon60.crypto.keys import ZKSwarmIdentity
 
 logger = logging.getLogger("cortex.guards.memory_firewall")
 

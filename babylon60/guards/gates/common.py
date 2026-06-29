@@ -7,8 +7,8 @@ import sys
 from pathlib import Path
 from typing import Protocol, TypeAlias
 
-from cortex.guards._seal_printer import SealPrinter
-from cortex.guards._seals_cache import GlobalSourceCache
+from babylon60.guards._seal_printer import SealPrinter
+from babylon60.guards._seals_cache import GlobalSourceCache
 
 __all__ = [
     "GateResult",

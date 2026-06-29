@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     pass
-from cortex.ledger.merkle import MerkleTree
-from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1, now_iso
+from babylon60.ledger.merkle import MerkleTree
+from babylon60.utils.canonical import compute_tx_hash, compute_tx_hash_v1, now_iso
 
 logger = logging.getLogger("cortex.ledger")
 
@@ -43,7 +43,7 @@ class LedgerAuditMixin:
 
             # Finalize audit record
             status = "ok" if not violations else "violation"
-            from cortex.database.core import causal_write
+            from babylon60.database.core import causal_write
 
             with causal_write(conn):
                 await conn.execute(
@@ -164,8 +164,8 @@ class LedgerAuditMixin:
                 }
         await fact_cursor.close()
 
-        from cortex.crypto import get_default_encrypter
-        from cortex.utils.canonical import compute_fact_hash
+        from babylon60.crypto import get_default_encrypter
+        from babylon60.utils.canonical import compute_fact_hash
 
         enc = get_default_encrypter()
         for f_tx_id, info in list(active_facts_by_tx.items()):

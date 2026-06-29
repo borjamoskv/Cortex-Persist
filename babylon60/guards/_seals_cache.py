@@ -6,7 +6,7 @@ import os
 import sys
 from pathlib import Path
 
-from cortex.guards._seal_printer import SealPrinter
+from babylon60.guards._seal_printer import SealPrinter
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 printer = SealPrinter()

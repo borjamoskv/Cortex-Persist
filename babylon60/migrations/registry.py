@@ -1,24 +1,24 @@
 # [C5-REAL] Exergy-Maximized
-from cortex.migrations.mig_base import (
+from babylon60.migrations.mig_base import (
     _migration_001_add_updated_at,
     _migration_002_add_indexes,
     _migration_003_enable_wal,
     _migration_004_vector_index,
     _migration_005_fts5_setup,
 )
-from cortex.migrations.mig_bridge_thermodynamics import _migration_029_thermodynamic_bridges
-from cortex.migrations.mig_cognitive_layer import _migration_022_cognitive_layer
-from cortex.migrations.mig_consensus import (
+from babylon60.migrations.mig_bridge_thermodynamics import _migration_029_thermodynamic_bridges
+from babylon60.migrations.mig_cognitive_layer import _migration_022_cognitive_layer
+from babylon60.migrations.mig_consensus import (
     _migration_007_consensus_layer,
     _migration_008_consensus_refinement,
     _migration_009_reputation_consensus,
 )
-from cortex.migrations.mig_dual_identity import _migration_028_dual_identity
-from cortex.migrations.mig_fts import _migration_017_fts_decouple
-from cortex.migrations.mig_graph import _migration_006_graph_memory
-from cortex.migrations.mig_ha import _migration_013_cluster_nodes
-from cortex.migrations.mig_hash import _migration_016_add_fact_hash
-from cortex.migrations.mig_ledger import (
+from babylon60.migrations.mig_dual_identity import _migration_028_dual_identity
+from babylon60.migrations.mig_fts import _migration_017_fts_decouple
+from babylon60.migrations.mig_graph import _migration_006_graph_memory
+from babylon60.migrations.mig_ha import _migration_013_cluster_nodes
+from babylon60.migrations.mig_hash import _migration_016_add_fact_hash
+from babylon60.migrations.mig_ledger import (
     _migration_010_immutable_ledger,
     _migration_011_link_facts_to_tx,
     _migration_012_ghosts_table,
@@ -26,14 +26,14 @@ from cortex.migrations.mig_ledger import (
     _migration_025_tenant_bound_merkle_roots,
     _migration_026_ledger_replay_admission,
 )
-from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
-from cortex.migrations.mig_signals import _migration_019_signal_bus
+from babylon60.migrations.mig_security_hardening import _migration_018_security_hardening
+from babylon60.migrations.mig_signals import _migration_019_signal_bus
 
 # migration 23 (mig_simplify_facts) removed - incompatible with live schema (Ω₃)
-from cortex.migrations.mig_solid_state import _migration_021_solid_state
-from cortex.migrations.mig_temporal_kg import _migration_027_temporal_kg
-from cortex.migrations.mig_tenant import _migration_015_tenant_unification
-from cortex.migrations.mig_tombstone import _migration_020_tombstone
+from babylon60.migrations.mig_solid_state import _migration_021_solid_state
+from babylon60.migrations.mig_temporal_kg import _migration_027_temporal_kg
+from babylon60.migrations.mig_tenant import _migration_015_tenant_unification
+from babylon60.migrations.mig_tombstone import _migration_020_tombstone
 
 __all__ = ["MIGRATIONS"]
 

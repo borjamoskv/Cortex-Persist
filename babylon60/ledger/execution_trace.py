@@ -12,7 +12,8 @@ import logging
 from typing import Any
 
 import aiosqlite
-from cortex.database.core import connect_async_ctx
+
+from babylon60.database.core import connect_async_ctx
 
 logger = logging.getLogger("cortex.ledger.execution_trace")
 

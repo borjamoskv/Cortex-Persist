@@ -15,8 +15,12 @@ from typing import ClassVar
 
 HEALTH_AVAILABLE = True
 try:
-    from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
-    from cortex.extensions.health.models import Grade, HealthSLA, HealthSLAViolation  # type: ignore
+    from babylon60.extensions.health.health_mixin import HealthMixin  # type: ignore
+    from babylon60.extensions.health.models import (  # type: ignore
+        Grade,
+        HealthSLA,
+        HealthSLAViolation,
+    )
 except ImportError:
     HEALTH_AVAILABLE = False
 

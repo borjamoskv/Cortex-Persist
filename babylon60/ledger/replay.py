@@ -1,7 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import sqlite3
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -9,8 +8,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Literal
 
-from cortex.ledger.models import LedgerEvent, LedgerOriginSignature
-from cortex.ledger.public_verifier_utils import _canonical_public_json
+from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.ledger.models import LedgerEvent, LedgerOriginSignature
+from babylon60.ledger.public_verifier_utils import _canonical_public_json
 
 
 class ReplayAdmissionError(ValueError):
@@ -142,7 +142,7 @@ def validate_batch_import_manifest(export_dir: str | Path) -> dict[str, Any]:
     if not (root / "manifest.json").exists():
         raise ReplayAdmissionError("batch_import_manifest_missing")
 
-    from cortex.ledger.public_verifier import verify_export
+    from babylon60.ledger.public_verifier import verify_export
 
     report = verify_export(root)
     if report.get("result") != "VALID_FULL_STRICT":

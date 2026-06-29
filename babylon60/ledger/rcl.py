@@ -13,7 +13,7 @@ import time
 from enum import Enum
 from typing import Any, Literal, Optional, TypedDict
 
-import cortex.utils.canonical as canonical
+import babylon60.utils.canonical as canonical
 
 # Context variable for async temporal coherence tracking
 current_import_parent = contextvars.ContextVar("current_import_parent", default=None)

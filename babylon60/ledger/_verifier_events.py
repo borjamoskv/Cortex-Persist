@@ -4,7 +4,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any
 
-from cortex.ledger.public_verifier_utils import (
+from cryptography.exceptions import InvalidSignature
+
+from babylon60.ledger.public_verifier_utils import (
     PublicVerifierError,
     _event_hash,
     _event_signature_scope,
@@ -15,10 +17,9 @@ from cortex.ledger.public_verifier_utils import (
     _string_list,
     _verify_ed25519,
 )
-from cryptography.exceptions import InvalidSignature
 
 if TYPE_CHECKING:
-    from cortex.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier
+    from babylon60.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier
 
 STRICT_REQUIRED_EVENT_FIELDS = frozenset(
     {

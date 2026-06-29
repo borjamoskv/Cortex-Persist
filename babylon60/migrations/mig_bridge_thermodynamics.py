@@ -38,7 +38,7 @@ async def _migration_029_thermodynamic_bridges(conn: aiosqlite.Connection) -> No
 
         if orig:
             target_hash = orig[0]
-            from cortex.crypto import get_default_encrypter
+            from babylon60.crypto import get_default_encrypter
 
             try:
                 enc = get_default_encrypter()

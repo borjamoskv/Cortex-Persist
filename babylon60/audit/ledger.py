@@ -14,13 +14,13 @@ from pathlib import Path
 from typing import Any
 
 import aiosqlite
-from cortex.audit.smt import smt_engine
-from cortex.database.core import causal_write
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
+from babylon60.audit.smt import smt_engine
 from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.database.core import causal_write
 
 logger = logging.getLogger("cortex.audit.ledger")
 
@@ -104,7 +104,7 @@ class EnterpriseAuditLedger:
         self.max_batch_size = int(os.environ.get("CORTEX_LEDGER_MAX_BATCH", "500"))
 
         # C5-REAL Sovereign Ed25519 Keypair (Enterprise Key Management)
-        from cortex.crypto.keys import KeyManager
+        from babylon60.crypto.keys import KeyManager
 
         self._km = KeyManager(service_name="cortex_ledger_enterprise")
         self.actor_id = "ledger_master"
@@ -259,7 +259,7 @@ class EnterpriseAuditLedger:
 
         # Verify Merkle chain and signatures
         expected_prev_hash = "GENESIS"
-        from cortex.audit.smt import SparseMerkleTree
+        from babylon60.audit.smt import SparseMerkleTree
 
         local_smt = SparseMerkleTree()
 
@@ -313,7 +313,7 @@ class EnterpriseAuditLedger:
                         anchor_data = json.loads(row["external_anchor"])
                         rekor_uuid = anchor_data.get("rekor_uuid")
                         if rekor_uuid and rekor_uuid != "mock_rekor":
-                            from cortex.audit.rekor_client import RekorClient
+                            from babylon60.audit.rekor_client import RekorClient
 
                             rekor_client = RekorClient()
                             try:
@@ -369,8 +369,9 @@ class EnterpriseAuditLedger:
             logger.warning(
                 "rfc3161ng is not installed. TSA signatures will be disabled. Run pip install cortex-persist[secure]"
             )
-        from cortex.audit.rekor_client import RekorClient
         from cryptography.hazmat.primitives import serialization
+
+        from babylon60.audit.rekor_client import RekorClient
 
         # C5-REAL Exergy Optimization: Instantiate external clients once outside the loop.
         rekor_client = RekorClient()
@@ -410,7 +411,7 @@ class EnterpriseAuditLedger:
                             for audit_id, signature, prev_hash in unanchored:
                                 external_anchor = None
                                 try:
-                                    from cortex.audit.smt import SparseMerkleTree
+                                    from babylon60.audit.smt import SparseMerkleTree
 
                                     smt_state = SparseMerkleTree()
                                     smt_state.update(cortex_hash(audit_id.encode()), audit_id)
@@ -595,7 +596,7 @@ class EnterpriseAuditLedger:
         try:
             # Reconstruct batch entry_hash
             if smt_state is None:
-                from cortex.audit.smt import SparseMerkleTree
+                from babylon60.audit.smt import SparseMerkleTree
 
                 smt_state = SparseMerkleTree()
             for aid in batch_audit_ids:
@@ -614,6 +615,6 @@ class EnterpriseAuditLedger:
         """[C5-REAL] Compacts historical ledger events into a cryptographic snapshot.
         Delegates to ledger_compactor to preserve the SMT hash chain via COMPACTION_NODE.
         """
-        from cortex.audit.ledger_compactor import compact_ledger as run_compaction
+        from babylon60.audit.ledger_compactor import compact_ledger as run_compaction
 
         return await run_compaction(self._conn, self, max_rows, snapshot_dir)

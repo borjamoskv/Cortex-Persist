@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from cortex.ledger.store import LedgerStore
+from babylon60.ledger.store import LedgerStore
 
 _BOOT_TIME_OFFSET = time.time() - time.monotonic()
 

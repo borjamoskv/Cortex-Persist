@@ -8,10 +8,10 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any
 
-from cortex.audit.cognitive_classifier import cosine_similarity
+from babylon60.audit.cognitive_classifier import cosine_similarity
 
 if TYPE_CHECKING:
-    from cortex.audit.cognitive_router import CognitiveRouter
+    from babylon60.audit.cognitive_router import CognitiveRouter
 
 
 class RoutingReplayDebugger:

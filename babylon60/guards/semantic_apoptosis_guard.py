@@ -11,7 +11,7 @@ import logging
 import re
 from typing import Any
 
-from cortex.utils.errors import CortexError
+from babylon60.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.guards.semantic_apoptosis")
 

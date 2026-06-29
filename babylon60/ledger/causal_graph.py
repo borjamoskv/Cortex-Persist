@@ -10,7 +10,8 @@ from collections import deque
 from typing import Any
 
 import aiosqlite
-from cortex.database.core import connect_async_ctx
+
+from babylon60.database.core import connect_async_ctx
 
 
 class CausalGraph:

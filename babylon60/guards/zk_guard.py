@@ -9,7 +9,7 @@ mathematical proofs of consensus encoded inside the fact metadata.
 
 from typing import Any
 
-from cortex.crypto.keys import ZKSwarmIdentity
+from babylon60.crypto.keys import ZKSwarmIdentity
 
 
 class VoidStateSecurityError(Exception):

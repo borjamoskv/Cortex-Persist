@@ -2,7 +2,7 @@
 import ast
 from pathlib import Path
 
-from cortex.guards.models import EXEC_MODULES, ORACLE_BINARIES, SOVEREIGN_MARKERS
+from babylon60.guards.models import EXEC_MODULES, ORACLE_BINARIES, SOVEREIGN_MARKERS
 
 
 def has_exec_import(source: str) -> bool:

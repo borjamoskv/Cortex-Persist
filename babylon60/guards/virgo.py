@@ -7,15 +7,15 @@ deterministic validation signature checks, and automatic ledger state rollbacks.
 
 from __future__ import annotations
 
-import time
-from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import math
 from typing import Any
 
 import aiosqlite
-from cortex.crypto.keys import ZKSwarmIdentity
-from cortex.utils.errors import CortexError
+
+from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.crypto.keys import ZKSwarmIdentity
+from babylon60.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.security.virgo")
 
@@ -91,7 +91,7 @@ class VirgoContextGuard:
 
         # C. Verify agent registered key matches (if registered and signature is valid)
         if is_valid_sig and agent_id and agent_public_key:
-            from cortex.crypto.keys import KeyManager
+            from babylon60.crypto.keys import KeyManager
 
             try:
                 km = KeyManager(service_name=tenant_id)
@@ -134,8 +134,8 @@ class VirgoContextGuard:
                         error_class=VirgoValidationError,
                     )
 
-            from cortex.database.core import causal_write
-            from cortex.utils.canonical import now_iso
+            from babylon60.database.core import causal_write
+            from babylon60.utils.canonical import now_iso
 
             with causal_write(conn):
                 await conn.execute(

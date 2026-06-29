@@ -9,17 +9,15 @@ injecting a ZERO-KNOWLEDGE COMPACTION_NODE into the database to preserve the cry
 import gzip
 import json
 import logging
-import sqlite3
-import time
 from datetime import datetime, timezone
 from pathlib import Path
-
-from babylon60.crypto.hash_registry import cortex_hash
 from typing import Any
 
 import aiosqlite
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.audit.smt import SparseMerkleTree
+
+from babylon60.audit.ledger import EnterpriseAuditLedger
+from babylon60.audit.smt import SparseMerkleTree
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.audit.ledger_compactor")
 

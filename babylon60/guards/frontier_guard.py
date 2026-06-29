@@ -3,8 +3,8 @@ import json
 import logging
 from pathlib import Path
 
-from cortex.guards.models import ALLOWED_TIERS
-from cortex.utils.errors import SovereignViolation
+from babylon60.guards.models import ALLOWED_TIERS
+from babylon60.utils.errors import SovereignViolation
 
 logger = logging.getLogger("cortex.guards.frontier")
 

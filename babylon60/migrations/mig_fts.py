@@ -2,7 +2,7 @@
 import logging
 import sqlite3
 
-from cortex.crypto import get_default_encrypter
+from babylon60.crypto import get_default_encrypter
 
 logger = logging.getLogger("cortex")
 

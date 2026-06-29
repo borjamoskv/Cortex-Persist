@@ -1,9 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 from dataclasses import dataclass
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 
 @dataclass(frozen=True)
@@ -98,7 +99,7 @@ class SemanticMerkleTree:
         embedder: Any = None,
         threshold: float = 0.98,
     ):
-        from cortex.engine.core.semantic_hash import (
+        from babylon60.engine.core.semantic_hash import (
             SemanticFingerprint,
             batch_fingerprint,
         )
@@ -133,7 +134,7 @@ class SemanticMerkleTree:
           - exact_match: bool (byte-exact hash match)
           - threshold: float
         """
-        from cortex.engine.core.semantic_hash import (
+        from babylon60.engine.core.semantic_hash import (
             cosine_similarity,
             semantic_fingerprint,
         )
@@ -162,7 +163,7 @@ class SemanticMerkleTree:
 
     def verify_batch(self, contents: list[str], embedder: Any = None) -> list[dict]:
         """Verify multiple content entries. GPU-accelerated via batch embedding."""
-        from cortex.engine.core.semantic_hash import batch_fingerprint, cosine_similarity
+        from babylon60.engine.core.semantic_hash import batch_fingerprint, cosine_similarity
 
         if not self._fingerprints:
             return []

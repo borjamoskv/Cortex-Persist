@@ -14,11 +14,12 @@ import os
 import threading
 from typing import Any
 
-from cortex.utils.errors import DecryptionPolicyError
 from cryptography.exceptions import InvalidKey, InvalidTag
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+
+from babylon60.utils.errors import DecryptionPolicyError
 
 logger = logging.getLogger("cortex.crypto")
 
@@ -45,7 +46,7 @@ class CortexEncrypter:
         self.strict_mode = strict_mode
         if hkdf_salt is None:
             try:
-                import cortex.core.config as config
+                import babylon60.core.config as config
 
                 self.hkdf_salt = config.HKDF_SALT.encode("utf-8")
             except (ImportError, AttributeError):
@@ -167,7 +168,7 @@ def get_default_encrypter() -> CortexEncrypter:
     if _default_encrypter_instance is None:
         with _encrypter_lock:
             if _default_encrypter_instance is None:
-                from cortex.crypto.keyring import get_master_key
+                from babylon60.crypto.keyring import get_master_key
 
                 _default_encrypter_instance = CortexEncrypter(get_master_key())
     return _default_encrypter_instance
