@@ -1047,6 +1047,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 62: Framework de Pruebas Caóticas ENCB v2 (Epistemic Noise Chaos Benchmark)
+- **Target**: `benchmarks/encb/`, `benchmarks/encb_benchmark.py`
+- **Objective**: Desarrollo y despliegue del framework de pruebas comparativas ENCB v2 (Epistemic Noise Chaos Benchmark). Este benchmark ejecuta simulaciones de Monte Carlo inyectando ruido y contradicciones sobre un grafo de creencias para evaluar la convergencia de LogOP, ATMS-Lite y CRDTs semánticos frente a una base de control de memoria pasiva (RAG tradicional).
+- **Yield Target**: Cuantificación del PFBR (Persistent False Belief Rate) y del Epistemic Debt para contrastar la resiliencia epistémica de la persistencia activa.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Código en `benchmarks/encb/` y runner en `benchmarks/encb_benchmark.py`.
+```yaml
+Claim: ENCB v2 Monte Carlo simulation pipeline operational with plot rendering capability.
+Proof:
+  Base: "python benchmarks/encb_benchmark.py runs and evaluates S0-S3 strategies successfully."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
