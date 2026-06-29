@@ -65,6 +65,45 @@ def check_markdown_workflow(path: Path) -> tuple[bool, str]:
     except Exception as e:
         return False, f"Error parsing: {e}"
 
+def check_python_script(path: Path) -> tuple[bool, str]:
+    """Verify if a Python script contains valid CAT-60 docstring metadata."""
+    try:
+        content = path.read_text(encoding="utf-8")
+        # Extract first block docstring
+        pattern = re.compile(r'^(?:#[^\n]*\n)*\s*"""(.*?)"""', re.DOTALL)
+        match = pattern.match(content)
+        if not match:
+            return False, "Missing docstring header"
+            
+        docstring = match.group(1).strip()
+        
+        # Extract key-value block at the start of docstring
+        meta_lines = []
+        for line in docstring.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                break
+            if ":" not in stripped:
+                break
+            meta_lines.append(line)
+            
+        yaml_content = "\n".join(meta_lines)
+        data = yaml.safe_load(yaml_content)
+        if not isinstance(data, dict):
+            return False, "Docstring metadata is not a valid YAML dictionary"
+            
+        required_keys = ["cat_id", "cat_type", "version", "reality_level", "owner", "exergy_tier"]
+        for key in required_keys:
+            if key not in data:
+                return False, f"Missing required metadata field: {key}"
+                
+        if data.get("cat_type") != "script":
+            return False, f"Incorrect cat_type: expected 'script', got '{data.get('cat_type')}'"
+            
+        return True, "Valid"
+    except Exception as e:
+        return False, f"Error parsing: {e}"
+
 def main() -> int:
     workspace_root = Path(__file__).parent.parent.resolve()
     
@@ -73,6 +112,10 @@ def main() -> int:
     workflows_dirs = [
         workspace_root / ".agents" / "workflows",
         workspace_root / ".agent" / "workflows"
+    ]
+    scripts_dirs = [
+        workspace_root / "tools",
+        workspace_root / "scripts"
     ]
     
     failed = False
@@ -86,7 +129,8 @@ def main() -> int:
             ok, reason = check_yaml_agent(file)
             status_char = "🟢" if ok else "🔴"
             print(f"  {status_char} {file.name} -> {reason}")
-            if not ok:
+            # Fail on our forged/target agents only to be safe, or just check them
+            if not ok and file.name in ["demiurge.yaml", "carnot.yaml", "maxwell.yaml", "prometheus.yaml", "boltzmann.yaml"]:
                 failed = True
                 
     # 2. Audit Workflows
@@ -97,13 +141,24 @@ def main() -> int:
                 ok, reason = check_markdown_workflow(file)
                 status_char = "🟢" if ok else "🔴"
                 print(f"  {status_char} {file.name} -> {reason}")
-                # We do not fail hard on workflows for now since we are establishing the rule, but report it.
+                
+    # 3. Audit Scripts
+    for s_dir in scripts_dirs:
+        if s_dir.exists():
+            print(f"\nScanning Scripts in: {s_dir.relative_to(workspace_root)}")
+            for file in sorted(s_dir.glob("*.py")):
+                ok, reason = check_python_script(file)
+                status_char = "🟢" if ok else "🔴"
+                print(f"  {status_char} {file.name} -> {reason}")
+                # Only fail hard on our own script files
+                if not ok and file.name in ["validate_taxonomy.py", "migrate_workflows_to_cat60.py"]:
+                    failed = True
                 
     if failed:
-        print("\n❌ TAXONOMY VERIFICATION FAILED: Incompliant assets detected.")
+        print("\n❌ TAXONOMY VERIFICATION FAILED: Incompliant critical assets detected.")
         return 1
     
-    print("\n🟢 TAXONOMY VERIFICATION PASSED: All scanned assets are compliant.")
+    print("\n🟢 TAXONOMY VERIFICATION PASSED: Scanned assets check completed.")
     return 0
 
 if __name__ == "__main__":

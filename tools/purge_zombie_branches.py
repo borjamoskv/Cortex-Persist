@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
+"""
+cat_id: "purge-zombie-branches"
+cat_type: "script"
+version: "1.0.0"
+reality_level: "C5-REAL"
+owner: "borjamoskv"
+exergy_tier: "P2"
+
+Purges zombie branches that have been merged or are abandoned.
+"""
 import re
 import subprocess
 

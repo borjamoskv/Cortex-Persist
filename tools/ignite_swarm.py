@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
 """
+cat_id: "ignite-swarm"
+cat_type: "script"
+version: "1.0.0"
+reality_level: "C5-REAL"
+owner: "borjamoskv"
+exergy_tier: "P2"
+
 Swarm 10k Ignition Protocol (Phase 2).
 Queries CortexEngine for 'type:ghost' and dispatches them to SwarmCommander.
 Falls back to 50 synthetic ghosts if none exist to validate thermodynamic limits.
