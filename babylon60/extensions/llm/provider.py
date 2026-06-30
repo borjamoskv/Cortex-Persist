@@ -336,17 +336,7 @@ class LLMProvider(BaseProvider):
             async with self._semaphore:
                 response = await self._client.post(url, headers=headers, json=payload)
             response.raise_for_status()
-            try:
-                data = response.json()
-            except (UnicodeDecodeError, json.JSONDecodeError):
-                raw_bytes = response.content
-                if not raw_bytes:
-                    raise ValueError(
-                        f"Provider '{self._provider}' returned HTTP 200 with empty body. "
-                        "Model may require stream=True (speculative/preview models)."
-                    )
-                raw = raw_bytes.decode("utf-8", errors="replace")
-                data = json.loads(raw)
+            data = self._parse_response_json(response)
             self._log_resolved_model(payload, data)
             if prompt is not None and "usage" in data:
                 try:
@@ -363,6 +353,19 @@ class LLMProvider(BaseProvider):
                 asyncio.create_task(notify_notch_halo(color, False))
             except Exception:
                 pass
+
+    def _parse_response_json(self, response: httpx.Response) -> dict[str, Any]:
+        try:
+            return response.json()
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            raw_bytes = response.content
+            if not raw_bytes:
+                raise ValueError(
+                    f"Provider '{self._provider}' returned HTTP 200 with empty body. "
+                    "Model may require stream=True (speculative/preview models)."
+                )
+            raw = raw_bytes.decode("utf-8", errors="replace")
+            return json.loads(raw)
 
     def _log_resolved_model(self, payload: dict[str, Any], response_data: dict[str, Any]) -> None:
         requested = payload.get("model", "")
@@ -461,10 +464,7 @@ class LLMProvider(BaseProvider):
         if self._provider not in ["ollama", "lmstudio"]:
             await _get_quota_manager().acquire(tokens=1, fast_reject=True)
 
-    async def invoke(self, prompt: CortexPrompt) -> str:
-        model_name = self._resolve_model(prompt.intent)
-        messages = prompt.to_openai_messages()
-
+    def _apply_stealth_noise(self, prompt: CortexPrompt, messages: list[dict[str, Any]]) -> None:
         if getattr(prompt, "stealth", False) and messages:
             noise_id = hashlib.sha256(f"{time.monotonic()}{random.random()}".encode()).hexdigest()[
                 :8
@@ -474,19 +474,14 @@ class LLMProvider(BaseProvider):
                     msg["content"] += f"\n\n<!-- ctx:{noise_id} -->"
                     msg["content"] = (" " * random.randint(0, 2)) + msg["content"]
                     break
-            await apply_causal_jitter(tokens_estimate=50)
 
-        payload: dict[str, Any] = {
-            "model": model_name,
-            "messages": messages,
-            "temperature": prompt.temperature,
-        }
-
-        if "dashscope" in getattr(self, "_base_url", ""):
-            payload["enable_thinking"] = True
-            payload["preserve_thinking"] = True
-
-        cache_config = get_prefix_cache_config(self._provider)
+    async def _try_gemini_cached_invoke(
+        self,
+        model_name: str,
+        messages: list[dict[str, Any]],
+        prompt: CortexPrompt,
+        cache_config: dict[str, Any],
+    ) -> str | None:
         prefix_cache_key = getattr(prompt, "prefix_cache_key", None)
         system_extraction = (
             messages[0]["content"] if messages and messages[0]["role"] == "system" else ""
@@ -516,6 +511,30 @@ class LLMProvider(BaseProvider):
                     prompt.temperature,
                     prompt.max_tokens,
                 )
+        return None
+
+    async def invoke(self, prompt: CortexPrompt) -> str:
+        model_name = self._resolve_model(prompt.intent)
+        messages = prompt.to_openai_messages()
+
+        if getattr(prompt, "stealth", False):
+            self._apply_stealth_noise(prompt, messages)
+            await apply_causal_jitter(tokens_estimate=50)
+
+        payload: dict[str, Any] = {
+            "model": model_name,
+            "messages": messages,
+            "temperature": prompt.temperature,
+        }
+
+        if "dashscope" in getattr(self, "_base_url", ""):
+            payload["enable_thinking"] = True
+            payload["preserve_thinking"] = True
+
+        cache_config = get_prefix_cache_config(self._provider)
+        if cache_config.get("enabled") and self._provider == "gemini":
+            if res := await self._try_gemini_cached_invoke(model_name, messages, prompt, cache_config):
+                return res
 
         cache = _get_result_cache()
         if cached := cache.get(payload):
@@ -523,7 +542,10 @@ class LLMProvider(BaseProvider):
 
         if os.environ.get("CORTEX_LIVE_ROUTING") == "1":
             _get_hud().print(
-                f"[bold magenta]⚡ COGNITIVE ROUTING[/bold magenta] [dim]➜[/dim] Provider: [bold cyan]{self._provider.upper()}[/bold cyan] | Weights: [bold yellow]{model_name}[/bold yellow] | Intent: [green]{prompt.intent.value}[/green]"
+                f"[bold magenta]⚡ COGNITIVE ROUTING[/bold magenta] [dim]➜[/dim] "
+                f"Provider: [bold cyan]{self._provider.upper()}[/bold cyan] | "
+                f"Weights: [bold yellow]{model_name}[/bold yellow] | "
+                f"Intent: [green]{prompt.intent.value}[/green]"
             )
 
         await self._acquire_quota()
