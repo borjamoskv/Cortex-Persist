@@ -153,5 +153,6 @@ In any non-trivial change (Frontend/Backend), tasks are parallelized across dist
 3.  **LL-AC-03 · Captura Específica de Errores (Error Containment):** Se prohíbe capturar "Exception" de forma genérica en rutas críticas de la aplicación sin propagación ("re-raise") o compensación atómica demostrable. Cada captura debe estar acotada a la excepción mínima requerida.
 4.  **LL-AC-04 · Coalescencia y Complejidad (Anti-O(N²)):** Queda prohibida la ejecución de consultas repetidas de base de datos o lecturas KV en memoria dentro de bucles interactivos. Toda operación repetida debe consolidarse en un único batch o resolverse mediante estructuras hash O(1).
 5.  **LL-AC-05 · Autodidactismo y Cero Consulta:** Ante entornos, frameworks o APIs desconocidas, el agente debe investigar, modelar localmente y validar la sintaxis de forma independiente antes de proponer código o consultar al Operador.
+6.  **LL-AC-06 · Invariante de Cero Dependencias (RUSH Portability):** Para herramientas de análisis de código, CLI o módulos core de rápida iteración, queda estrictamente prohibido el uso de parsers externos (como `tree-sitter`) o dependencias `pip`. Todo análisis estructural debe colapsarse utilizando exclusivamente la librería estándar (`ast` para Python, heurísticas ligeras con `re` para JS/TS). Cero fricción térmica de instalación.
 
 
