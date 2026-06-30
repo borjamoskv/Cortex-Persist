@@ -1,10 +1,12 @@
 {
-  "purged_count": 0,
-  "files": [],
+  "purged_count": 1,
+  "files": [
+    "docs/BABYLON60_ARCHITECTURE.md"
+  ],
   "ledger_apoptosis": {
     "status": "compacted",
-    "rows_compacted": 3,
-    "snapshot_path": "/Users/borjafernandezangulo/30_BABYLON-60/.snapshots/ledger_snapshot_20260630074019_13045c21.json.gz",
+    "rows_compacted": 1,
+    "snapshot_path": "/Users/borjafernandezangulo/30_BABYLON-60/.snapshots/ledger_snapshot_20260630110556_45397818.json.gz",
     "h_start": "GENESIS",
     "h_end": "188caa5440fd8c0863996d7165fe7b52cb4ddc22de753d57510e2b96273651bb"
   }
