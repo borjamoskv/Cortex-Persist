@@ -15,6 +15,7 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import random
 import time
@@ -135,12 +136,14 @@ class AutopoieticAgent:
                 report["variants_generated"] += 1
                 self.state.total_mutations += 1
 
-        # ── 4. Evaluate variants ───────────────────────────────
+        # ── 4. Evaluate variants (Parallelized C5-REAL) ────────
         variant_scores = []
-        for variant, _mt in variants:
-            fitness = await evaluate_genome(self, variant)
-            variant_scores.append((variant, fitness))
-            report["variants_evaluated"] += 1
+        if variants:
+            tasks = [evaluate_genome(self, variant) for variant, _ in variants]
+            scores = await asyncio.gather(*tasks)
+            for i, (variant, _) in enumerate(variants):
+                variant_scores.append((variant, scores[i]))
+                report["variants_evaluated"] += 1
 
         # ── 5. Select best variant ─────────────────────────────
         if variant_scores:
