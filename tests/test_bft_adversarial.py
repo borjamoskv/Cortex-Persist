@@ -168,3 +168,47 @@ async def test_concurrent_proposals_resolved():
 
     # Issue 10 proposals concurrently
     await asyncio.gather(*(run_single_proposal(i) for i in range(10)))
+
+@pytest.mark.asyncio
+async def test_network_partition_convergence_time():
+    """Simulates a network partition (async delay) to check convergence time."""
+    engine = MockEngine()
+    gateway = QuorumGateway(engine, n_nodes=4, f_nodes=1)
+    await gateway.ensure_table()
+
+    agents = [generate_agent_keys() for _ in range(4)]
+    payload = {"action": "partition_test"}
+    payload_str = json.dumps(payload)
+    req_id = await gateway.request_override("Partition Payload", payload)
+
+    start_time = time.monotonic()
+
+    # Agent 0 and 1 are fast, agent 2 is delayed (partitioned)
+    v0 = await gateway.submit_vote(
+        req_id, sign_payload(agents[0][0], payload_str, req_id), agents[0][1]
+    )
+    v1 = await gateway.submit_vote(
+        req_id, sign_payload(agents[1][0], payload_str, req_id), agents[1][1]
+    )
+    assert v0 and v1
+
+    # Still not reached quorum (2/3 needed for f=1 and n=4, wait, quorum is 2f+1 = 3)
+    cursor = engine.conn.cursor()
+    cursor.execute("SELECT status FROM quorum_requests WHERE id = ?", (req_id,))
+    assert cursor.fetchone()[0] == "PENDING"
+
+    # Simulate delay for agent 2
+    delay_time = 0.2
+    await asyncio.sleep(delay_time)
+    
+    v2 = await gateway.submit_vote(
+        req_id, sign_payload(agents[2][0], payload_str, req_id), agents[2][1]
+    )
+    assert v2
+
+    # Now quorum is reached
+    cursor.execute("SELECT status FROM quorum_requests WHERE id = ?", (req_id,))
+    assert cursor.fetchone()[0] == "QUORUM_REACHED"
+
+    end_time = time.monotonic()
+    assert (end_time - start_time) >= delay_time
