@@ -69,3 +69,12 @@ class AdaptiveFPUPID:
         timing_gate_ms = math.exp(-abs(error)) * self.target_latency_ms
 
         return float(correction), float(timing_gate_ms)
+
+    def predict_forward_state(self, current_state: float, motor_command: float) -> float:
+        """
+        Forward Model (Smith Predictor Isomorphism).
+        Predicts sensory consequence of a motor command before physical execution.
+        Prevents L1 oscillation.
+        """
+        predicted_delta = motor_command * 0.85  # Damping factor
+        return float(current_state + predicted_delta)
