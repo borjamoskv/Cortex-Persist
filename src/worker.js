@@ -15,19 +15,21 @@ const RAG_DATA_STREAM = {
   }
 };
 
+// [C5-REAL] Exergy-Maximized: Pre-computación global para V8 Isolate (O(1) HTTP Response)
+const COMPILED_PAYLOAD = JSON.stringify(RAG_DATA_STREAM);
+const IMMUTABLE_HEADERS = {
+  "content-type": "application/json;charset=UTF-8",
+  "X-Provenance-Hash": "PROVENANCE_HASH_PLACEHOLDER",
+  "X-Epistemic-Authority": "dns:labalpha.eth",
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'; sandbox",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "no-referrer"
+};
+
 export default {
   async fetch(request, env, ctx) {
-    return new Response(JSON.stringify(RAG_DATA_STREAM, null, 2), {
-      headers: {
-        "content-type": "application/json;charset=UTF-8",
-        "X-Provenance-Hash": "PROVENANCE_HASH_PLACEHOLDER",
-        "X-Epistemic-Authority": "dns:labalpha.eth",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-        "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'; sandbox",
-        "X-Content-Type-Options": "nosniff",
-        "X-Frame-Options": "DENY",
-        "Referrer-Policy": "no-referrer"
-      },
-    });
+    return new Response(COMPILED_PAYLOAD, { headers: IMMUTABLE_HEADERS });
   },
 };
