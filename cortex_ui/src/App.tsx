@@ -1,6 +1,7 @@
 // cortex_ui/src/App.tsx
-import { useEffect, useState, useRef } from 'react';
-import './index.css';
+import { useEffect, useState, useRef } from "react";
+import "./index.css";
+import { useStreamingEngine } from "./StreamingEngine";
 
 interface CausalNode {
   hash_id: string;
@@ -12,23 +13,30 @@ interface CausalNode {
 
 function App() {
   const [nodes, setNodes] = useState<Map<string, CausalNode>>(new Map());
-  const [status, setStatus] = useState<string>('DISCONNECTED');
+  const [status, setStatus] = useState<string>("DISCONNECTED");
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const logContainerRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const { text: logText, appendToken } = useStreamingEngine(logContainerRef, sentinelRef);
 
   useEffect(() => {
-    setStatus('CONNECTING...');
+    setStatus("CONNECTING...");
     // Endpoint C5-REAL SSE
-    const es = new EventSource('http://localhost:8000/observability/fsm/stream');
+    const es = new EventSource("http://localhost:8000/observability/fsm/stream");
 
-    es.onmessage = (event) => {
+    es.onmessage = () => {
       // Not expected on default message, we listen to 'state_mutation'
     };
 
-    es.addEventListener('state_mutation', (e) => {
-      setStatus('C5-REAL SYNCED');
+    es.addEventListener("state_mutation", (e) => {
+      setStatus("C5-REAL SYNCED");
       try {
         const data = JSON.parse((e as MessageEvent).data);
         
+        const logMsg = `[SYNC] Node staged: ${data.hash_id.substring(0, 8)} | Type: ${data.type || "NODE"} | Parent: ${(data.parent_hash || "root").substring(0, 8)}\n`;
+        appendToken(logMsg);
+
         setNodes(prev => {
           const next = new Map(prev);
           if (!next.has(data.hash_id)) {
@@ -59,9 +67,9 @@ function App() {
       }
     });
 
-    es.addEventListener('error', (e) => {
-      setStatus('ENTROPY FAULT');
-      console.error('SSE Error', e);
+    es.addEventListener("error", (e) => {
+      setStatus("ENTROPY FAULT");
+      console.error("SSE Error", e);
     });
 
     return () => es.close();
@@ -74,7 +82,7 @@ function App() {
         
         <div className="metrics-box">
           <div className="metric-label">Swarm Connection</div>
-          <div className="metric-value" style={{ color: status.includes('SYNCED') ? 'var(--accent-cyan)' : '#ff3366', fontSize: '1rem' }}>
+          <div className="metric-value" style={{ color: status.includes("SYNCED") ? "var(--accent-cyan)" : "#ff3366", fontSize: "1rem" }}>
             {status}
           </div>
         </div>
@@ -84,18 +92,41 @@ function App() {
           <div className="metric-value">{nodes.size}</div>
         </div>
 
-        <div style={{ marginTop: 'auto', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+        <div className="metrics-box log-stream-box" style={{ flexGrow: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div className="metric-label">Live C5-REAL Stream</div>
+          <div 
+            ref={logContainerRef} 
+            style={{ 
+              marginTop: "0.75rem", 
+              fontFamily: "var(--font-mono)", 
+              fontSize: "0.7rem", 
+              color: "var(--accent-cyan)", 
+              overflowY: "auto", 
+              maxHeight: "350px", 
+              whiteSpace: "pre-wrap",
+              background: "#020202",
+              padding: "0.5rem",
+              border: "1px solid var(--border-color)",
+              borderRadius: "4px",
+              flexGrow: 1
+            }}
+          >
+            {logText || "Waiting for events..."}
+            <div ref={sentinelRef} />
+          </div>
+        </div>
+
+        <div style={{ marginTop: "auto", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
           C5-REAL OBSERVABILITY<br/>
           O(1) BYTE-OFFSET WATCHER
         </div>
       </aside>
 
-      <main className="canvas-container" ref={containerRef} style={{ position: 'relative' }}>
-        <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}>
+      <main className="canvas-container" ref={containerRef} style={{ position: "relative" }}>
+        <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }}>
           {Array.from(nodes.values()).map(n => {
             if (n.parent_hash && nodes.has(n.parent_hash)) {
               const p = nodes.get(n.parent_hash)!;
-              // Ajuste simple (+60, +30) asumiendo un nodo de 120x60 aprox para conectar los centros
               return (
                 <line 
                   key={`edge-${n.hash_id}`}
@@ -117,12 +148,12 @@ function App() {
           <div 
             key={n.hash_id} 
             className="node new-node"
-            style={{ left: n.x, top: n.y, position: 'absolute', zIndex: 1 }}
+            style={{ left: n.x, top: n.y, position: "absolute", zIndex: 1 }}
             title={`Parent: ${n.parent_hash}`}
           >
             {n.hash_id.substring(0, 8)}...
-            <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-              {n.type || 'NODE'}
+            <div style={{ fontSize: "0.6rem", color: "var(--text-secondary)", marginTop: "4px" }}>
+              {n.type || "NODE"}
             </div>
           </div>
         ))}
