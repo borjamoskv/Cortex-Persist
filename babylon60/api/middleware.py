@@ -439,6 +439,21 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
         request.state.plan = plan
         request.state.plan_quota = plan_quota
 
+        # 3.5. Enforce O(1) TenantGuard Rate Limits and Quotas
+        # We skip public or unmetered 'free' plan if not required, but here we enforce it based on config.
+        # Ensure we catch HTTPException to return a JSONResponse directly from the middleware.
+        try:
+            from babylon60.api.tenant_guard import tenant_guard
+            from fastapi import HTTPException
+            # Free bypass for default or pwyw without strict enforcement on stripe
+            if plan != "free" and plan != "pwyw":
+                tenant_guard.verify_request(tenant_id=tenant_id, plan_name=plan, ssu_cost=1)
+        except Exception as exc:
+            from fastapi import HTTPException
+            if isinstance(exc, HTTPException):
+                return JSONResponse(status_code=exc.status_code, content={"error": exc.detail})
+            logger.error("TenantGuard failure: %s", exc)
+
         try:
             # 4. Deep Payload Defense (Poisoning Check)
             if request.method in ("POST", "PUT", "PATCH"):
