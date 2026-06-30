@@ -8,13 +8,11 @@ import logging
 import zipfile
 from pathlib import Path
 
-import aiosqlite
 import click
 from rich.console import Console
 
 from cortex.cli.main import cli
-from cortex.database.core import connect_async, connect_async_ctx
-
+from cortex.database.core import connect_async_ctx
 
 console = Console()
 logger = logging.getLogger("cortex.cli.export")

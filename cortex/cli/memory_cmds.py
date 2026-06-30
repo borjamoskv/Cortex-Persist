@@ -178,6 +178,7 @@ def store(
 def store_batch(file_path, db) -> None:
     """Store multiple facts from a JSON file in CORTEX via Single-Writer IPC."""
     import sys
+
     from cortex.ipc.client import dispatch_store_batch
 
     with open(file_path, encoding="utf-8") as f:

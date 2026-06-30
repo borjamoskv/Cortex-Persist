@@ -9,9 +9,14 @@ inmutablemente en el Ledger para cristalizar la evolución causal de la confianz
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from cortex_extensions.hypervisor.belief_object import BeliefConfidence, BeliefObject, ProvenanceChain, ProvenanceEntry
+from cortex_extensions.hypervisor.belief_object import (
+    BeliefConfidence,
+    BeliefObject,
+    ProvenanceChain,
+    ProvenanceEntry,
+)
 from cortex_extensions.trust.bayesian import BayesianTrustUpdater, Signal
 
 if TYPE_CHECKING:

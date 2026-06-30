@@ -37,7 +37,7 @@ class ProbabilisticEventStore:
         """
         print(f"\n[!] OBSERVATION TRIGGERED BY: {query_context}")
         print("[!] Collapsing system wavefunction...")
-        time.sleep(0.5)  # Simulating compute cost of observation
+        time.sleep(0.5)  # Simulating compute cost of observation  # noqa: TID251
 
         results = []
         for event in self.superposed_events:

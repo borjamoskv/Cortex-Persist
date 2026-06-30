@@ -16,13 +16,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from cortex.database.core import connect_async_ctx
 from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
 from cortex.engine.uncategorized.exergy_optimizer import ExergyOptimizer
 from cortex.engine.uncategorized.shared_bus import SovereignSharedBus
 from cortex.engine.uncategorized.slashing import SlashingPenalty
 from cortex_extensions.signals.sharded_bus import ShardedAsyncSignalBus
-from cortex.database.core import connect_async, connect_async_ctx
-
 
 logger = logging.getLogger("cortex.engine.swarm.swarm_10k")
 
@@ -302,7 +301,6 @@ class SwarmCommander:
 
     async def dispatch_optimal_hypotheses(self, count: int = 100) -> None:
         """Pulls optimal tasks from TopologyIndex based on CBR and dispatches them."""
-        import aiosqlite
 
         from cortex.config import DB_PATH
         from cortex.engine.causal.topological_arbitrage import TopologyIndex

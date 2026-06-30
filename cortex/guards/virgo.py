@@ -127,9 +127,8 @@ class VirgoContextGuard:
                         error_class=VirgoValidationError,
                     )
 
-            from cortex.utils.canonical import now_iso
-
             from cortex.database.core import causal_write
+            from cortex.utils.canonical import now_iso
             with causal_write(conn):
                 await conn.execute(
                     """

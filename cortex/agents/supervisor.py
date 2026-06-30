@@ -15,6 +15,7 @@ from __future__ import annotations
 import asyncio
 import inspect
 import logging
+import sqlite3
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -196,13 +197,13 @@ class Supervisor:
             self._monitor_task.cancel()
             try:
                 await self._monitor_task
-            except Exception as exc:
+            except (sqlite3.Error, OSError, ValueError, RuntimeError) as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
         for agent_id in list(self._agents.keys()):
             try:
                 await self.stop_agent(agent_id)
-            except Exception as exc:
+            except (sqlite3.Error, OSError, ValueError, RuntimeError) as exc:
                 logger.error("Supervisor: Error stopping '%s': %s", agent_id, exc)
 
         logger.info("Supervisor: All agents stopped")
@@ -217,7 +218,7 @@ class Supervisor:
                 await self.health_check()
             except asyncio.CancelledError:
                 break
-            except Exception as exc:
+            except (sqlite3.Error, OSError, ValueError, RuntimeError) as exc:
                 logger.error("Supervisor: Health monitor error: %s", exc)
 
     async def health_check(self) -> dict[str, Any]:
@@ -346,7 +347,7 @@ class EvolutionSupervisor(Supervisor):
                     else:
                         pre_metrics = pre_eval()
                     logger.info("   [PRE-EVAL] Metrics: %s", pre_metrics)
-                except Exception as exc:
+                except (sqlite3.Error, OSError, ValueError, RuntimeError) as exc:
                     logger.error("   [PRE-EVAL] Failed: %s", exc)
                     pre_metrics = {"error": str(exc)}
 
@@ -356,7 +357,7 @@ class EvolutionSupervisor(Supervisor):
             if execute_fn is not None:
                 try:
                     exec_result = await execute_fn(objective)
-                except Exception as exc:
+                except (sqlite3.Error, OSError, ValueError, RuntimeError) as exc:
                     logger.exception("   [EXECUTION] Agent objective execution failed")
                     exec_result = {"status": "FAILED", "error": str(exc)}
             else:
@@ -372,7 +373,7 @@ class EvolutionSupervisor(Supervisor):
                     else:
                         post_metrics = post_eval()
                     logger.info("   [POST-EVAL] Metrics: %s", post_metrics)
-                except Exception as exc:
+                except (sqlite3.Error, OSError, ValueError, RuntimeError) as exc:
                     logger.error("   [POST-EVAL] Failed: %s", exc)
                     post_metrics = {"error": str(exc)}
 
@@ -439,7 +440,7 @@ class EvolutionSupervisor(Supervisor):
                         "reason": "Unsupported dream engine interface",
                     }
                 logger.info("💤 AutoDream consolidation finished: %s", dream_report)
-            except Exception as exc:
+            except (sqlite3.Error, OSError, ValueError, RuntimeError) as exc:
                 logger.error("❌ [AutoDream] Consolidation failed: %s", exc)
                 dream_report = {"status": "FAILED", "error": str(exc)}
         else:

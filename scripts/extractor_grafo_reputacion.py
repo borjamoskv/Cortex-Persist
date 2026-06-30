@@ -163,7 +163,7 @@ def main():
     for node in SEED_NODES:
         recs = extractor.fetch_mentions(node)
         all_recommendations.extend(recs)
-        time.sleep(1)  # Rate limit protection
+        time.sleep(1)  # Rate limit protection  # noqa: TID251
 
     print(f"\\n[*] Total Raw Edges Captured: {len(all_recommendations)}")
     print("[*] Construyendo matriz topológica...")

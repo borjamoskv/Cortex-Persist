@@ -1,23 +1,4 @@
 # [C5-REAL] Exergy-Maximized
-from __future__ import annotations
-
-import os
-from cortex.ipc.server import IPCServer
-import asyncio
-import hashlib
-import logging
-from typing import Any
-
-try:
-    import structlog  # pyright: ignore[reportMissingImports]
-
-    logger = structlog.get_logger(__name__)
-except ModuleNotFoundError:  # pragma: no cover
-    import logging
-
-    logger = logging.getLogger(__name__)
-
-from cortex.ipc.client import dispatch_store_batch
 """Storage mixin - store, update, deprecate, ghost management.
 
 Security guards  → cortex.engine.store_guards
@@ -25,18 +6,25 @@ Validators/dedup → cortex.engine.core.store_validators
 Quarantine       → cortex.engine.core.store_quarantine_mixin
 """
 
+from __future__ import annotations
+
+import asyncio
 import logging
+import os
 from typing import Any, ClassVar
 
 import aiosqlite
-from cortex.database.core import causal_write
+
+try:
+    import structlog  # pyright: ignore[reportMissingImports]
+    logger = structlog.get_logger(__name__)
+except ModuleNotFoundError:  # pragma: no cover
+    logger = logging.getLogger(__name__)
 
 from cortex.crypto import get_default_encrypter
-from cortex.engine.uncategorized.capabilities import CapabilityRegistry
+from cortex.database.core import causal_write
 from cortex.engine.core.embedding_engine import embed_fact_async
 from cortex.engine.core.fact_store_core import insert_fact_record
-from cortex.engine.uncategorized.ghost_mixin import GhostMixin
-from cortex.engine.uncategorized.privacy_mixin import PrivacyMixin
 from cortex.engine.core.store_mutation import (
     deprecate_impl_logic,
     invalidate_impl_logic,
@@ -45,7 +33,11 @@ from cortex.engine.core.store_mutation import (
 from cortex.engine.core.store_quarantine_mixin import QuarantineMixin
 from cortex.engine.core.store_validation import run_store_validation_logic
 from cortex.engine.core.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
+from cortex.engine.uncategorized.capabilities import CapabilityRegistry
+from cortex.engine.uncategorized.ghost_mixin import GhostMixin
+from cortex.engine.uncategorized.privacy_mixin import PrivacyMixin
 from cortex.guards.thermodynamic import AgentMode, ThermodynamicCounters
+from cortex.ipc.server import IPCServer
 
 # now_iso removed (internal use relocated)
 

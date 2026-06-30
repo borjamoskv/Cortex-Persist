@@ -60,7 +60,7 @@ class FiatOracle:
                 self._check_signals_sync()
             except (OSError, ValueError, CortexError) as e:
                 logger.error("❌ [FIAT_ORACLE] (Thread) Error: %s", e)
-            time.sleep(self.interval)
+            time.sleep(self.interval)  # noqa: TID251
 
     def _verify_signature(self, data: dict, signature: str) -> bool:
         """
@@ -252,7 +252,7 @@ class FiatOracle:
                     MAX_RETRIES,
                     delay,
                 )
-                time.sleep(delay)
+                time.sleep(delay)  # noqa: TID251
 
         logger.critical(
             "💀 [FIAT_ORACLE] Falla catastrófica almacenando TX %s tras %s intentos.",

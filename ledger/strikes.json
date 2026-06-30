@@ -1,0 +1,18 @@
+[
+  {
+    "id": "STRIKE-BABYLON-60-1782669599",
+    "target": "Babylon-60",
+    "amount": 1000000,
+    "status": "SUBMITTED",
+    "timestamp": "2026-06-28T19:59:59.263875",
+    "verdict": "C5-REAL"
+  },
+  {
+    "id": "STRIKE-BABYLON-60-1782669616",
+    "target": "Babylon-60",
+    "amount": 1000000,
+    "status": "SUBMITTED",
+    "timestamp": "2026-06-28T20:00:16.319537",
+    "verdict": "C5-REAL"
+  }
+]

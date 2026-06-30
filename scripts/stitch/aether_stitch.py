@@ -24,7 +24,7 @@ def watch_tokens():
 
     try:
         while True:
-            time.sleep(2)
+            time.sleep(2)  # noqa: TID251
             new_hash = get_hash(TOKENS_PATH)
 
             if current_hash != new_hash and new_hash != "":

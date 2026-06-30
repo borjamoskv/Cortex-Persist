@@ -1,10 +1,15 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
+import logging
 import subprocess
 
 from google.antigravity import Agent, types
 from google.antigravity.connections.local import LocalAgentConfig
 from google.antigravity.hooks import hooks
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+logger = logging.getLogger("cortex.agents.sovereign_e2e_swarm")
 
 # ==============================================================================
 # PILAR 2: AUTOPOIESIS & RADAR DE ENTROPÍA (Hooks & Triggers)
@@ -14,20 +19,20 @@ from google.antigravity.hooks import hooks
 @hooks.on_session_start
 async def radar_de_entropia_inicio():
     """Se ejecuta al iniciar el agente. Detecta dirty state y purga deuda."""
-    print("[AUTÓNOMO v2] Iniciando Radar de Entropía...")
+    logger.info("[AUTÓNOMO v2] Iniciando Radar de Entropía...")
     try:
         # Check Git status
         result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
         if result.stdout.strip():
-            print("[AUTÓNOMO v2] C5-REAL: Estado sucio detectado. Auto-Commit Zero-Ask.")
+            logger.warning("[AUTÓNOMO v2] C5-REAL: Estado sucio detectado. Auto-Commit Zero-Ask.")
             subprocess.run(["git", "add", "."])
             subprocess.run(
                 ["git", "commit", "-m", "chore(auto): purga y estabilización de entropía"]
             )
         else:
-            print("[AUTÓNOMO v2] Homeostasis confirmada. Procediendo.")
+            logger.info("[AUTÓNOMO v2] Homeostasis confirmada. Procediendo.")
     except Exception as e:
-        print(f"[AUTÓNOMO v2] Falla en radar: {e}")
+        logger.error("[AUTÓNOMO v2] Falla en radar: %s", e)
 
 
 @hooks.pre_turn
@@ -47,18 +52,16 @@ async def zero_ask_override(data: str) -> types.HookResult:
 @hooks.post_turn
 async def protocolo_ship_omega(data: str):
     """Fuerza la persistencia en el ledger CORTEX y ejecución de pruebas."""
-    print("\n[SHIP-Ω] Iniciando Cierre Criptográfico de la iteración.")
+    logger.info("[SHIP-Ω] Iniciando Cierre Criptográfico de la iteración.")
 
     # Simula la persistencia en CORTEX-Persist
-    print("[SHIP-Ω] Ejecutando: cortex store --type decision --source agent:gemini")
+    logger.info("[SHIP-Ω] Ejecutando: cortex store --type decision --source agent:gemini")
     try:
         # subprocess.run(["cortex", "store", "--type", "decision", "--source", "agent:gemini", "sovereign_e2e_swarm", "Iteración finalizada end-to-end"])
         pass
     except Exception as exc:
-        import logging
-
-        logging.warning("Suppressed exception: %s", exc)
-    print("[SHIP-Ω] Cristalización C5-REAL completada.\n")
+        logger.warning("Suppressed exception: %s", exc)
+    logger.info("[SHIP-Ω] Cristalización C5-REAL completada.")
 
 
 # ==============================================================================
@@ -67,7 +70,7 @@ async def protocolo_ship_omega(data: str):
 
 
 async def main():
-    print("Forjando Enjambre Soberano C5-REAL...")
+    logger.info("Forjando Enjambre Soberano C5-REAL...")
 
     # Configuración Base del Agente E2E
     config = LocalAgentConfig(
@@ -92,7 +95,7 @@ async def main():
     # Ejemplo de ejecución E2E
     user_prompt = "Audita el UI actual y elimina componentes React sin uso."
 
-    print(f"\n> Prompt de entrada: {user_prompt}\n")
+    logger.info("> Prompt de entrada: %s", user_prompt)
 
     # En un caso real de delegación (Pilar 4):
     # 1. El agente invocaría al subagente 'Aesthetic-Omega' para auditar UI.
@@ -101,9 +104,9 @@ async def main():
 
     # Aquí simulamos el run() principal.
     # response = await agent.chat(user_prompt)
-    # print(f"Respuesta final: {response.text}")
+    # logger.info("Respuesta final: %s", response.text)
 
-    print("[!] Nodo terminal E2E completado. Esperando próxima anomalía.")
+    logger.info("[!] Nodo terminal E2E completado. Esperando próxima anomalía.")
 
 
 if __name__ == "__main__":

@@ -14,11 +14,10 @@ from typing import Any
 import aiosqlite
 
 from cortex.config import DB_PATH
+from cortex.database.core import connect_async
 from cortex.engine.causal.topological_arbitrage import TopologyIndex
 from cortex.engine.swarm.legion import AsyncSignalBus, LegionPool, SwarmAgent, SwarmSignal
 from cortex.engine.swarm.state_store import CausalStateStore
-from cortex.database.core import connect_async, connect_async_ctx
-
 
 logger = logging.getLogger("cortex.engine.swarm.supervisor")
 

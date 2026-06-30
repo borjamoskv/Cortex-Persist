@@ -21,7 +21,7 @@ print(f"Simulating high-load swarm ingress: {len(intents)} concurrent events.\n"
 # Simulates token processing and reasoning overhead for routing (e.g. 1ms per task simulated overhead for LLM latency locally)
 def monolithic_coordinator(payload):
     # Simulating API / LLM overhead (context ingestion + generation)
-    time.sleep(0.001)  # Ultra-fast simulated LLM
+    time.sleep(0.001)  # Ultra-fast simulated LLM  # noqa: TID251
     return "agent_xyz"
 
 

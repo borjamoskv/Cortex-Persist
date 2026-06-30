@@ -13,8 +13,8 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-from cortex.database.core import connect_async, connect_async_ctx
 
+from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger("cortex.compliance.eu_ai_act")
 

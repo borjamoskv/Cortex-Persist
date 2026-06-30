@@ -1,12 +1,11 @@
 # [C5-REAL] Exergy-Maximized - SOTA BFT-Ready Analysis API (x100 10-cycle iteration)
-import os
 import json
+import os
 import time
 from datetime import datetime
-from typing import List
 
 import jwt
-from fastapi import FastAPI, Depends, Header, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -34,7 +33,7 @@ class FactNode(BaseModel):
 class AuditResponse(BaseModel):
     query: str
     nodes_yield: int
-    results: List[FactNode]
+    results: list[FactNode]
     authorized_by: str
     exergy_latency_ms: float
 
@@ -64,13 +63,13 @@ def verify_strict_token(authorization: str = Header(None)):
         # L1-Φ2: Erradicación del Green Theater. Fallo -> 401 Hard reject.
         raise HTTPException(status_code=401, detail=f"BFT_SIGNATURE_INVALID: {str(e)}")
 
-def _extract_cortex_memory(query: str) -> List[FactNode]:
+def _extract_cortex_memory(query: str) -> list[FactNode]:
     """Zero-entropy extraction from CORTEX VSA system memory"""
     ghosts_file = os.path.join(MEMORY_PATH, "ghosts.json")
     facts = []
     if os.path.exists(ghosts_file):
         try:
-            with open(ghosts_file, "r") as f:
+            with open(ghosts_file) as f:
                 data = json.load(f)
                 for proj, ghost in data.items():
                     task = ghost.get("last_task", "")

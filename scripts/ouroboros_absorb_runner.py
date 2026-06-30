@@ -17,6 +17,7 @@ from pathlib import Path
 
 # CORTEX imports
 from cortex.extensions.llm.sovereign import SovereignLLM
+
 from cortex.ledger.models import LedgerEvent
 from cortex.ledger.writer import LedgerWriter
 

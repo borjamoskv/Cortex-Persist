@@ -3,9 +3,7 @@ import asyncio
 import logging
 import os
 
-import aiosqlite
-from cortex.database.core import connect_async, connect_async_ctx
-
+from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger(__name__)
 

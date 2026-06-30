@@ -1,10 +1,12 @@
 import hashlib
 import json
+import logging
 import time
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
+logger = logging.getLogger("cortex.core.membrane")
 
 class EpistemicState(Enum):
     CONFIRMED = "confirmed"
@@ -32,7 +34,7 @@ try:
     Z3_AVAILABLE = True
 except ImportError:
     Z3_AVAILABLE = False
-    print("Warning: Z3 not available. Logical guards will be disabled.")
+    logger.warning("Z3 not available. Logical guards will be disabled.")
 
 
 class Z3Guard:
@@ -55,7 +57,7 @@ class Z3Guard:
     def __init__(self):
         if not Z3_AVAILABLE:
             self.enabled = False
-            print("⚠️ Z3 SMT no disponible. Guards lógicos desactivados.")
+            logger.warning("⚠️ Z3 SMT no disponible. Guards lógicos desactivados.")
             return
         self.enabled = True
         self.reset()

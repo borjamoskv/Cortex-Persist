@@ -10,11 +10,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-import aiosqlite
-
+from cortex.database.core import connect_async_ctx
 from cortex.ledger.causal_graph import CausalGraph
-from cortex.database.core import connect_async, connect_async_ctx
-
 
 if TYPE_CHECKING:
     from cortex.ledger.cost_field import CostField

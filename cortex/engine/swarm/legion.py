@@ -26,9 +26,8 @@ except ImportError:
 
     bicameral = BicameralStub()
 
+from cortex.database.core import connect_async_ctx
 from cortex.engine.swarm.legion_vectors import RED_TEAM_SWARM, AttackVector
-from cortex.database.core import connect_async, connect_async_ctx
-
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +66,6 @@ class AsyncSignalBus:
         
         Empty payloads are considered semantically empty and are downgraded to VOID.
         """
-        import aiosqlite
         import sys
         
         db_path = getattr(sys.modules.get('cortex.engine.swarm.legion'), 'DB_PATH', None)

@@ -26,12 +26,12 @@ def _init_ml() -> None:
     _ML_INITIALIZED = True
     if os.environ.get("CORTEX_NO_EMBED") != "1":
         try:
-            import torch
+            import torch  # noqa: F401
             HAS_TORCH = True
         except ImportError:
             pass
         try:
-            import sentence_transformers
+            import sentence_transformers  # noqa: F401
             HAS_SENTENCE_TRANSFORMERS = True
         except ImportError:
             pass
@@ -53,7 +53,7 @@ def get_sentence_transformer(model_name: str = "all-MiniLM-L6-v2") -> Any:
     if model_name not in _MODEL_CACHE:
         if HAS_SENTENCE_TRANSFORMERS:
             try:
-                import torch
+                import torch  # noqa: F401
                 from sentence_transformers import SentenceTransformer
                 
                 if HAS_TORCH:
