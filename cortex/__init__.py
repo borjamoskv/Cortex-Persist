@@ -23,6 +23,37 @@ def _map_name(fullname: str) -> str:
     return fullname
 
 
+_in_ensure_compat = False
+
+
+def _ensure_compat_aliases():
+    global _in_ensure_compat
+    if _in_ensure_compat:
+        return
+    _in_ensure_compat = True
+    try:
+        for name in list(sys.modules.keys()):
+            if name.startswith("babylon60.") or name == "babylon60":
+                if name.startswith("babylon60.extensions"):
+                    alias1 = "cortex_extensions" + name[len("babylon60.extensions"):]
+                elif name.startswith("babylon60"):
+                    alias1 = "cortex" + name[len("babylon60"):]
+                else:
+                    alias1 = name
+
+                if alias1 not in sys.modules:
+                    sys.modules[alias1] = _CortexCompat(alias1)
+
+                if name.startswith("babylon60"):
+                    alias2 = "cortex" + name[len("babylon60"):]
+                    if alias2 not in sys.modules:
+                        sys.modules[alias2] = _CortexCompat(alias2)
+    except Exception:
+        pass
+    finally:
+        _in_ensure_compat = False
+
+
 class _CortexCompat(types.ModuleType):
     """Transparent proxy that redirects cortex.X attribute access to babylon60.X."""
 
@@ -49,25 +80,30 @@ class _CortexCompat(types.ModuleType):
             pass
 
     def __getattr__(self, name):
-        # Shield module identity dunders
-        if name in {"__name__", "__spec__", "__loader__", "__package__"}:
+        # 1. Sync aliases so sys.modules is always complete
+        _ensure_compat_aliases()
+
+        # 2. Shield dunders and module identity properties from falling through
+        if name.startswith("__") and name.endswith("__"):
+            if name in self.__dict__:
+                return self.__dict__[name]
             raise AttributeError(f"module '{self.__name__}' has no attribute '{name}'")
 
-        target_pkg = _map_name(self.__name__)
+        # 3. Submodule resolution via proxy namespace (takes precedence over real module attributes)
+        sub_cortex = f"{self.__name__}.{name}"
+        try:
+            if importlib.util.find_spec(_map_name(sub_cortex)) is not None:
+                return importlib.import_module(sub_cortex)
+        except Exception:
+            pass
 
-        # 1. Resolve attribute from the real module
+        # 4. Resolve attribute from the real module
+        target_pkg = _map_name(self.__name__)
         try:
             mod = importlib.import_module(target_pkg)
             if hasattr(mod, name):
                 return getattr(mod, name)
         except Exception:
-            pass
-
-        # 2. Submodule resolution via proxy namespace
-        try:
-            sub_cortex = f"{self.__name__}.{name}"
-            return importlib.import_module(sub_cortex)
-        except ImportError:
             pass
 
         raise AttributeError(f"module '{self.__name__}' has no attribute '{name}'")
@@ -104,8 +140,13 @@ class _CortexFinder:
         if fullname in ("cortex", "cortex_extensions") or fullname.startswith(("cortex.", "cortex_extensions.")):
             target_name = _map_name(fullname)
             try:
-                if importlib.util.find_spec(target_name) is not None:
-                    return ModuleSpec(fullname, self)
+                target_spec = importlib.util.find_spec(target_name)
+                if target_spec is not None:
+                    is_pkg = target_spec.submodule_search_locations is not None
+                    spec = ModuleSpec(fullname, self, is_package=is_pkg)
+                    if is_pkg:
+                        spec.submodule_search_locations = target_spec.submodule_search_locations
+                    return spec
             except Exception:
                 pass
         return None
@@ -118,10 +159,12 @@ class _CortexFinder:
         try:
             real_mod = importlib.import_module(target_name)
             for k, v in real_mod.__dict__.items():
-                if k not in {"__name__", "__spec__", "__loader__", "__package__", "__file__", "__path__"}:
-                    setattr(module, k, v)
+                if k not in {"__name__", "__spec__", "__loader__", "__package__", "__file__", "__path__", "__getattr__", "__dir__"}:
+                    if not isinstance(v, types.ModuleType):
+                        setattr(module, k, v)
         except Exception:
             pass
+        _ensure_compat_aliases()
 
 
 # Bootstrap the top-level module proxy
