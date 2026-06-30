@@ -1,5 +1,5 @@
 [project]
-name = "cortex-persist"
+name = "babylon60"
 version = "1.0.2"
 description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
 readme = "README.md"
