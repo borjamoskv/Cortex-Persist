@@ -25,7 +25,7 @@ def test_ataque_b_sql_direct(test_db_path):
     with pytest.raises(RuntimeError, match=r"Direct sqlite3.connect\(\) is structurally forbidden"):
         import babylon60.database.core
 
-        cortex.database.core.sqlite3.connect(test_db_path)
+        babylon60.database.core.sqlite3.connect(test_db_path)
 
     # 2. Use the factory but without causal authorization
     conn = connect(test_db_path)

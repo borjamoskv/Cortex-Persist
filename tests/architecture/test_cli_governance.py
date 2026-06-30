@@ -40,8 +40,8 @@ def test_cli_lazy_loader_works():
     code = (
         "import sys\n"
         "import babylon60.cli.main\n"
-        "cmd = cortex.cli.main.cli.get_command(None, 'agent')\n"
-        "loaded_cmds = [m for m in sys.modules if m.startswith('cortex.cli.') and m.endswith('_cmds')]\n"
+        "cmd = babylon60.cli.main.cli.get_command(None, 'agent')\n"
+        "loaded_cmds = [m for m in sys.modules if m.startswith('babylon60.cli.') and m.endswith('_cmds')]\n"
         "print(','.join(loaded_cmds))\n"
     )
 
@@ -53,4 +53,4 @@ def test_cli_lazy_loader_works():
     loaded_cmds = loaded_cmds_str.split(",") if loaded_cmds_str else []
 
     assert len(loaded_cmds) > 0, "Failed to lazy load the commands upon access."
-    assert "cortex.cli.agent_cmds" in loaded_cmds, "The specific agent_cmds module was not loaded."
+    assert "babylon60.cli.agent_cmds" in loaded_cmds, "The specific agent_cmds module was not loaded."

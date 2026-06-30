@@ -86,7 +86,7 @@ __all__ = [
     "get_init_meta",
 ]
 
-SCHEMA_VERSION = "5.0.0"
+SCHEMA_VERSION = "5.4.3"
 
 # ─── Core Facts Table ────────────────────────────────────────────────
 CREATE_FACTS = """

@@ -204,7 +204,7 @@ def test_cli_base_flow_without_extended_runtime_dependencies(tmp_path: Path) -> 
     combined = ""
     for cmd in commands:
         result = subprocess.run(
-            [sys.executable, "-m", "cortex"] + cmd,
+            [sys.executable, "-m", "babylon60"] + cmd,
             capture_output=True,
             text=True,
             env=env,
@@ -247,7 +247,7 @@ def test_cli_base_flow_without_keyring_when_env_master_key_is_set(tmp_path: Path
     combined = ""
     for cmd in commands:
         result = subprocess.run(
-            [sys.executable, "-m", "cortex"] + cmd,
+            [sys.executable, "-m", "babylon60"] + cmd,
             capture_output=True,
             text=True,
             env=env,

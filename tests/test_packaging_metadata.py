@@ -76,7 +76,7 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
     assert _dependency_names(extras["platform"]) >= {"pyobjc-core", "pyobjc-framework-Cocoa"}
     assert _dependency_names(extras["authoring"]) == {"PyYAML"}
     assert extras["all"] == [
-        "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality,llm_compat,audio,distributed]"
+        "babylon60[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality,llm_compat,audio,distributed]"
     ]
 
     assert (

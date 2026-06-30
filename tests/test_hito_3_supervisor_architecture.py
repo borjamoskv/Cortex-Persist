@@ -38,7 +38,7 @@ def mock_causal_guard(monkeypatch):
 
     import babylon60.swarm.state_store
 
-    monkeypatch.setattr(cortex.swarm.state_store, "CausalClosureGuard", MockGuard)
+    monkeypatch.setattr("babylon60.swarm.state_store.CausalClosureGuard", MockGuard)
 
 
 async def setup_db(path: str):

@@ -37,14 +37,14 @@ M1_PRIMITIVES:
   Gravedad: P1
   Intervención: Inyectar ruido térmico controlado (T=0.5).
 - ID: ENDO-P05
-  Primitiva: OP_FIXED_POINT
-  Mecanismo Causal: Convergencia a un estado inmutable donde el endomorfismo no produce
-    cambios.
-  Activación (Trigger): Ejecución iterativa hasta alcanzar la estabilidad semántica.
-  Sensor (Síntoma): f(x) == x`.
+  Primitiva: OP_FROBENIUS_MAP
+  Mecanismo Causal: Mapeo de Frobenius sobre curvas elípticas ($f(x,y) = (x^p, y^p)$)
+    en campos finitos.
+  Activación (Trigger): Mutación de estados criptográficos en isogenias.
+  Sensor (Síntoma): Mismatch de traza del Frobenius en la curva.
   Escala Temporal: MS
-  Gravedad: P2
-  Intervención: Detener ciclo y emitir hash.
+  Gravedad: P0
+  Intervención: Validar par isogénico y re-computar.
 - ID: ENDO-P06
   Primitiva: OP_AUTO_ISO_BREAK
   Mecanismo Causal: Pérdida de la inyectividad/sobreyectividad en un endomorfismo
@@ -83,14 +83,14 @@ M1_PRIMITIVES:
   Gravedad: P1
   Intervención: Firmar procedencia con `CORTEX-TAINT`.
 - ID: ENDO-P10
-  Primitiva: OP_EIGEN_DRIFT
-  Mecanismo Causal: Desviación gradual de los autovalores del sistema bajo transformaciones
-    continuas.
-  Activación (Trigger): FP16/MoE batching drift en loops prolongados.
-  Sensor (Síntoma): Error cuadrático medio > umbral.
-  Escala Temporal: Lenta
-  Gravedad: P1
-  Intervención: Calibración térmica a T=0.0.
+  Primitiva: OP_SCHUR_SIMPLE
+  Mecanismo Causal: Mapeo de endomorfismos sobre módulos simples según el Lema de
+    Schur.
+  Activación (Trigger): Homomorfismo entre dos representaciones simples no isomorfas.
+  Sensor (Síntoma): Salida no nula de homomorfismo nulo.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Forzar morfismo nulo o isomorfismo.
 - ID: ENDO-P11
   Primitiva: OP_RECURSION_LIMIT
   Mecanismo Causal: Desbordamiento de pila por llamadas anidadas del endomorfismo
@@ -109,14 +109,15 @@ M1_PRIMITIVES:
   Gravedad: P0
   Intervención: Rollback al ledger previo (AX-041).
 - ID: ENDO-P13
-  Primitiva: OP_KERNEL_NULL
-  Mecanismo Causal: El núcleo (Kernel/Nullspace) del morfismo absorbe toda la información
-    útil.
-  Activación (Trigger): Proyección destructiva a subespacio de dimensión cero.
-  Sensor (Síntoma): Estado colapsa a nulo/vacío.
+  Primitiva: OP_LADDER_COMP
+  Mecanismo Causal: Composición de operadores de escala (ladder operators $a, a^\dagger$)
+    en el Heisenberg-Weyl.
+  Activación (Trigger): Aplicación sucesiva de operadores de creación/aniquilación
+    en física cuántica.
+  Sensor (Síntoma): Divergencia en la norma del vector de estado Hilbert.
   Escala Temporal: MS
-  Gravedad: P0
-  Intervención: Purga de anergía (LEA-OMEGA).
+  Gravedad: P1
+  Intervención: Normalizar vector en base de Hilbert.
 - ID: ENDO-P14
   Primitiva: OP_END_AUTOP_LOCK
   Mecanismo Causal: Bloqueo por autopoiesis recursiva que impide la entrada de inputs
@@ -222,22 +223,23 @@ M1_PRIMITIVES:
   Gravedad: P0
   Intervención: Forzar temperatura T=0.0.
 - ID: ENDO-P26
-  Primitiva: OP_NILPOTENT_FALL
-  Mecanismo Causal: El endomorfismo colapsa al estado cero tras N iteraciones ($f^N
-    = 0$).
-  Activación (Trigger): Aplicación recursiva de filtros de atenuación de señal.
-  Sensor (Síntoma): Estado vacío o nulo persistente.
+  Primitiva: OP_GEOM_PROJ
+  Mecanismo Causal: Proyección ortogonal de estados sobre un subespacio lineal ($P^2
+    = P$).
+  Activación (Trigger): Reducción de dimensionalidad semántica en SQLite-Vec.
+  Sensor (Síntoma): Pérdida de autovalores unitarios en el proyector.
   Escala Temporal: MS
   Gravedad: P1
-  Intervención: Desactivar poda agresiva.
+  Intervención: Forzar idempotencia del proyector.
 - ID: ENDO-P27
-  Primitiva: OP_IDEMPOTENT_LOCK
-  Mecanismo Causal: El morfismo se bloquea en su primera aplicación ($f^2 = f$).
-  Activación (Trigger): Pérdida de dinamismo por sobre-simplificación.
-  Sensor (Síntoma): Ausencia de transiciones tras t=1.
+  Primitiva: OP_GEOM_REFLECT
+  Mecanismo Causal: Reflexión de estados respecto a un hiperplano simétrico ($R^2
+    = I$).
+  Activación (Trigger): Inversión simétrica del grafo de relaciones semánticas.
+  Sensor (Síntoma): Involución fallida ($R^2(x) != x$).
   Escala Temporal: MS
-  Gravedad: P2
-  Intervención: Inyectar delta estocástica.
+  Gravedad: P0
+  Intervención: Rollback total y calibración.
 - ID: ENDO-P28
   Primitiva: OP_SPLIT_BRAIN_MAP
   Mecanismo Causal: Divergencia en el mapeo de estados en sub-enjambres paralelos.
@@ -854,12 +856,12 @@ M1_PRIMITIVES:
   Intervención: Invocación de ejecución eager.
 M2_INVARIANTS:
 - ID: ENDO-I01
-  Invariante: INV_DOM_CODOM_ID
-  Lógica / Principio: El dominio y codominio de todo endomorfismo deben ser el mismo
-    objeto conceptual.
-  Implicación Operacional: Garantiza la clausura algebraica de las transiciones.
-  Condición de Borde: Mutación de tipos de estado.
-  Métrica Falsable: dom(f) == cod(f) == X`.
+  Invariante: INV_DIAGONALIZABILITY
+  Lógica / Principio: Para ser diagonalizable, la multiplicidad algebraica de cada
+    autovalor debe ser igual a su multiplicidad geométrica.
+  Implicación Operacional: Descomposición espectral del estado en una base diagonal.
+  Condición de Borde: Cálculo del polinomio característico.
+  Métrica Falsable: AM(lambda) == GM(lambda)` para todo $\lambda$.
 - ID: ENDO-I02
   Invariante: INV_IDENTITY_EXIST
   Lógica / Principio: Existe un único morfismo identidad $1_X$ neutral para la composición.
@@ -917,11 +919,12 @@ M2_INVARIANTS:
   Condición de Borde: Inferencia estocástica activa.
   Métrica Falsable: Schema_Version == Constant`.
 - ID: ENDO-I10
-  Invariante: INV_STATE_ISO
-  Lógica / Principio: El estado en memoria es isomorfo a su almacenamiento en SQLite-Vec.
-  Implicación Operacional: Evita divergencias de percepción (Sensor Drift).
-  Condición de Borde: Sync de embeddings vectoriales.
-  Métrica Falsable: RAM_State == SQLite_State`.
+  Invariante: INV_MONOID_STRUCTURE
+  Lógica / Principio: El conjunto de endomorfismos de un objeto $X$ forma un monoide
+    bajo la composición.
+  Implicación Operacional: Clausura y asociatividad forzada en los loops del Swarm.
+  Condición de Borde: Bootstrap de transiciones.
+  Métrica Falsable: f . (g . h) == (f . g) . h` y `f . 1_X == f`.
 - ID: ENDO-I11
   Invariante: INV_ANERGY_ZERO
   Lógica / Principio: Las respuestas del loop de composición carecen de prosa o Green
@@ -990,11 +993,13 @@ M2_INVARIANTS:
   Condición de Borde: Acceso a variables de estado.
   Métrica Falsable: Mutex.is_locked == True` en write.
 - ID: ENDO-I21
-  Invariante: INV_DIAG_COMMUTE
-  Lógica / Principio: Los diagramas de composición temporal deben conmutar estrictamente.
-  Implicación Operacional: Garantiza coherencia causal a través de diferentes rutas.
-  Condición de Borde: Reconciliación de datos.
-  Métrica Falsable: f . g == g . f` si conmutan.
+  Invariante: INV_SCHUR_DIVISION
+  Lógica / Principio: Según el Lema de Schur, el anillo de endomorfismos de un módulo
+    simple es un anillo de división.
+  Implicación Operacional: Toda transformación no nula en un sub-módulo simple es
+    invertible.
+  Condición de Borde: Mapeo de representaciones simples.
+  Métrica Falsable: is_invertible(f) == True` para $f \neq 0$.
 - ID: ENDO-I22
   Invariante: INV_IMAGE_BOUND
   Lógica / Principio: La imagen del endomorfismo de conocimiento no puede ser vacía.
@@ -1156,11 +1161,12 @@ M2_INVARIANTS:
   Condición de Borde: Emisión de voto.
   Métrica Falsable: Signer_Key_Valid == True`.
 - ID: ENDO-I46
-  Invariante: INV_SCHUR_ORT
-  Lógica / Principio: El espacio de estados vectorial se descompone en base ortogonal.
-  Implicación Operacional: Evita colisiones de significado semántico.
-  Condición de Borde: Optimización vec0.
-  Métrica Falsable: Dot_Product(Basis_A, Basis_B) == 0`.
+  Invariante: INV_HEISENBERG_COMM
+  Lógica / Principio: Los operadores de posición y momento satisfacen la relación
+    canónica ($[x, p] = i\hbar$).
+  Implicación Operacional: No conmutatividad de transformaciones de escala en el Heisenberg-Weyl.
+  Condición de Borde: Composición de operadores escalares.
+  Métrica Falsable: x . p - p . x == i * h_bar`.
 - ID: ENDO-I47
   Invariante: INV_FIBER_LIMIT
   Lógica / Principio: El número de preimágenes para un estado meta está acotado.

@@ -131,24 +131,29 @@ def _get_audit_trail(conn, project: str, limit: int):
     """Internal helper to get the audit trail rows."""
     from babylon60.cli.errors import err_empty_results
 
-    conditions = ["f.valid_until IS NULL"]
-    params: list = []
-
     if project:
-        conditions.append("f.project = ?")
-        params.append(project)
+        query = """
+            SELECT f.id, f.project, f.content, f.fact_type,
+                   f.created_at, t.hash
+            FROM facts f
+            LEFT JOIN transactions t ON f.tx_id = t.id
+            WHERE f.valid_until IS NULL AND f.project = ?
+            ORDER BY f.id DESC
+            LIMIT ?
+        """
+        params = [project, limit]
+    else:
+        query = """
+            SELECT f.id, f.project, f.content, f.fact_type,
+                   f.created_at, t.hash
+            FROM facts f
+            LEFT JOIN transactions t ON f.tx_id = t.id
+            WHERE f.valid_until IS NULL
+            ORDER BY f.id DESC
+            LIMIT ?
+        """
+        params = [limit]
 
-    where_clause = " AND ".join(conditions)
-    query = f"""
-        SELECT f.id, f.project, f.content, f.fact_type,
-               f.created_at, t.hash
-        FROM facts f
-        LEFT JOIN transactions t ON f.tx_id = t.id
-        WHERE {where_clause}
-        ORDER BY f.id DESC
-        LIMIT ?
-    """
-    params.append(limit)
     rows = conn.execute(query, params).fetchall()
 
     if not rows:

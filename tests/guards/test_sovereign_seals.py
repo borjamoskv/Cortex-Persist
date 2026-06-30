@@ -49,7 +49,7 @@ from babylon60.guards import seals
     assert "pathlib" in imports
     assert "json" in imports
     assert "sys" in imports
-    assert "cortex" in imports
+    assert "babylon60" in imports
 
 
 @pytest.mark.asyncio

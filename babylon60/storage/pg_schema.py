@@ -157,17 +157,6 @@ CREATE TABLE IF NOT EXISTS cortex_meta (
 );
 """
 
-# ─── Consensus Votes ─────────────────────────────────────────────────
-PG_CREATE_VOTES = """
-CREATE TABLE IF NOT EXISTS consensus_votes (
-    id      BIGSERIAL PRIMARY KEY,
-    fact_id BIGINT NOT NULL REFERENCES facts(id),
-    agent   TEXT NOT NULL,
-    vote    INTEGER NOT NULL,
-    timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(fact_id, agent)
-);
-"""
 
 # ─── Agents ──────────────────────────────────────────────────────────
 PG_CREATE_AGENTS = """
@@ -430,7 +419,6 @@ PG_ALL_SCHEMA = [
     PG_CREATE_TIME_ENTRIES,
     PG_CREATE_TIME_ENTRIES_INDEX,
     PG_CREATE_META,
-    PG_CREATE_VOTES,
     PG_CREATE_AGENTS,
     PG_CREATE_VOTES_V2,
     PG_CREATE_TRUST_EDGES,

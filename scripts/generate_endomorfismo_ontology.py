@@ -7,7 +7,7 @@ os.makedirs(ontology_dir, exist_ok=True)
 # ==========================================
 # 1. PRIMITIVAS 01-50
 # ==========================================
-primitivas_01_50_content = """# ONTOLOGY-FORGE-OMEGA: ENDOMORFISMO PRIMITIVAS (BATCH 1)
+primitivas_01_50_content = r"""# ONTOLOGY-FORGE-OMEGA: ENDOMORFISMO PRIMITIVAS (BATCH 1)
 **Dominio:** Endomorfismos en sistemas agénticos, teoría de categorías aplicada a la autopoiesis y composición de loops reflexivos.
 **Sys_ID:** `borjamoskv` | **Estado:** C5-REAL
 
@@ -20,15 +20,15 @@ Mecanismos elementales de fallo lógico, loops de auto-mutación y pérdidas de 
 | **ENDO-P02** | `OP_MONOID_COMP` | Composición asociativa de múltiples endomorfismos sobre un mismo objeto. | Encadenamiento de operaciones secuenciales sobre el estado de un agente. | `Compose(f, g) -> h`. | MS | P1 | Validar propiedad asociativa en el ledger. |
 | **ENDO-P03** | `OP_IDENTITY_CHECK` | Verificación de la existencia y preservación del endomorfismo identidad ($1_X$). | Bootstrap del loop o inicialización de estado nulo. | `f(x) != x` cuando se esperaba $1_X$. | MS | P0 | Abortar SAGA y restaurar snapshot. |
 | **ENDO-P04** | `OP_IMAGE_DECAY` | Reducción sistemática del espacio de estados accesibles tras aplicaciones repetidas. | Inferencia stocástica recursiva sin inyección de entropía externa. | Cardinalidad del codominio < dominio. | Segundos | P1 | Inyectar ruido térmico controlado (T=0.5). |
-| **ENDO-P05** | `OP_FIXED_POINT` | Convergencia a un estado inmutable donde el endomorfismo no produce cambios. | Ejecución iterativa hasta alcanzar la estabilidad semántica. | `f(x) == x`. | MS | P2 | Detener ciclo y emitir hash. |
+| **ENDO-P05** | `OP_FROBENIUS_MAP` | Mapeo de Frobenius sobre curvas elípticas ($f(x,y) = (x^p, y^p)$) en campos finitos. | Mutación de estados criptográficos en isogenias. | Mismatch de traza del Frobenius en la curva. | MS | P0 | Validar par isogénico y re-computar. |
 | **ENDO-P06** | `OP_AUTO_ISO_BREAK` | Pérdida de la inyectividad/sobreyectividad en un endomorfismo que debía ser automorfismo. | Modificación destructiva de campos clave del estado en el loop. | `Aut(X)` colapsa a `End(X)` no invertible. | MS | P0 | Reconstruir el mapeo de estados. |
 | **ENDO-P07** | `OP_ORBIT_CYCLE` | Captura de la secuencia de estados en un ciclo cerrado periódico infinito. | Aplicación cíclica sin criterio de parada. | `f^n(x) == x` para $n > 1$. | Segundos | P0 | Circuit Breaker (AX-047) detona. |
 | **ENDO-P08** | `OP_CODOM_MISMATCH` | El estado de salida no coincide con el dominio requerido para la siguiente composición. | Alteración del esquema de estado en caliente. | `TypeError` en paso intermedio. | MS | P0 | SAGA-3 Abort inmediato. |
 | **ENDO-P09** | `OP_FUNCTOR_MAPPED` | Traslación de un endomorfismo a otra categoría conservando la estructura. | Sincronización trans-repositorio (Singularity Nexus). | `F(f) : F(X) -> F(X)` verificado. | Segundos | P1 | Firmar procedencia con `CORTEX-TAINT`. |
-| **ENDO-P10** | `OP_EIGEN_DRIFT` | Desviación gradual de los autovalores del sistema bajo transformaciones continuas. | FP16/MoE batching drift en loops prolongados. | Error cuadrático medio > umbral. | Lenta | P1 | Calibración térmica a T=0.0. |
+| **ENDO-P10** | `OP_SCHUR_SIMPLE` | Mapeo de endomorfismos sobre módulos simples según el Lema de Schur. | Homomorfismo entre dos representaciones simples no isomorfas. | Salida no nula de homomorfismo nulo. | MS | P0 | Forzar morfismo nulo o isomorfismo. |
 | **ENDO-P11** | `OP_RECURSION_LIMIT` | Desbordamiento de pila por llamadas anidadas del endomorfismo sin TCO. | Composición profunda de morfismos en memoria RAM. | `RecursionError` en intérprete. | MS | P0 | Forzar paralelización vía `invoke_subagent`. |
 | **ENDO-P12** | `OP_STATE_SHADOWING` | Ocultamiento de estados previos por superposición no reversible. | Escritura en caliente sin snapshotting local. | Pérdida de histórico en el Ledger. | MS | P0 | Rollback al ledger previo (AX-041). |
-| **ENDO-P13** | `OP_KERNEL_NULL` | El núcleo (Kernel/Nullspace) del morfismo absorbe toda la información útil. | Proyección destructiva a subespacio de dimensión cero. | Estado colapsa a nulo/vacío. | MS | P0 | Purga de anergía (LEA-OMEGA). |
+| **ENDO-P13** | `OP_LADDER_COMP` | Composición de operadores de escala (ladder operators $a, a^\dagger$) en el Heisenberg-Weyl. | Aplicación sucesiva de operadores de creación/aniquilación en física cuántica. | Divergencia en la norma del vector de estado Hilbert. | MS | P1 | Normalizar vector en base de Hilbert. |
 | **ENDO-P14** | `OP_END_AUTOP_LOCK` | Bloqueo por autopoiesis recursiva que impide la entrada de inputs externos. | Priorización absoluta de loops de auto-análisis. | Consumo de CPU al 100% sin entrada de red. | Segundos | P0 | Apoptosis celular forzada. |
 | **ENDO-P15** | `OP_COPROD_LEAK` | Fuga de contexto al intentar acoplar coproductos dentro del dominio del morfismo. | Mezcla de tipos algebraicos en el loop de estado. | Entrada de campos ajenos al dominio. | MS | P1 | Validar tipos con Pydantic estricto. |
 | **ENDO-P16** | `OP_NON_ASSOC_COMP` | Ruptura de la asociatividad durante la composición por efectos secundarios locales. | Modificación de variables globales del host en el loop. | `(f . g) . h != f . (g . h)`. | MS | P0 | Forzar pureza funcional (T=0.0). |
@@ -41,8 +41,8 @@ Mecanismos elementales de fallo lógico, loops de auto-mutación y pérdidas de 
 | **ENDO-P23** | `OP_EPISTEMIC_SLOP` | Inyección de ruido narrativo en la definición matemática del endomorfismo. | LLM intentando explicar la transformación en prosa. | Pérdida de exergía de Shannon en fact. | Segundos | P1 | Invocar `Epistemic-Purge-OMEGA`. |
 | **ENDO-P24** | `OP_GHOST_TRANSIT` | Transición a un estado fantasma no persistente ni registrado. | Mutación fuera del ledger sin tracking de git. | Git working tree sucio en CI. | Segundos | P0 | Git Sentinel intercepta y aborta. |
 | **ENDO-P25** | `OP_CHAOTIC_ORBIT` | Generación de trayectorias caóticas sin atractor en el espacio de estados. | Modificación sin acotar bajo alta temperatura. | Divergencia exponencial de estados. | Segundos | P0 | Forzar temperatura T=0.0. |
-| **ENDO-P26** | `OP_NILPOTENT_FALL` | El endomorfismo colapsa al estado cero tras N iteraciones ($f^N = 0$). | Aplicación recursiva de filtros de atenuación de señal. | Estado vacío o nulo persistente. | MS | P1 | Desactivar poda agresiva. |
-| **ENDO-P27** | `OP_IDEMPOTENT_LOCK` | El morfismo se bloquea en su primera aplicación ($f^2 = f$). | Pérdida de dinamismo por sobre-simplificación. | Ausencia de transiciones tras t=1. | MS | P2 | Inyectar delta estocástica. |
+| **ENDO-P26** | `OP_GEOM_PROJ` | Proyección ortogonal de estados sobre un subespacio lineal ($P^2 = P$). | Reducción de dimensionalidad semántica en SQLite-Vec. | Pérdida de autovalores unitarios en el proyector. | MS | P1 | Forzar idempotencia del proyector. |
+| **ENDO-P27** | `OP_GEOM_REFLECT` | Reflexión de estados respecto a un hiperplano simétrico ($R^2 = I$). | Inversión simétrica del grafo de relaciones semánticas. | Involución fallida ($R^2(x) != x$). | MS | P0 | Rollback total y calibración. |
 | **ENDO-P28** | `OP_SPLIT_BRAIN_MAP` | Divergencia en el mapeo de estados en sub-enjambres paralelos. | Falta de consenso BFT en la tabla de morfismos. | Múltiples salidas de estado en conflicto. | MS | P0 | Aplicar `OP_WAL_LOCK` inmediato. |
 | **ENDO-P29** | `OP_TAINT_BYPASS` | Mutación de estado por endomorfismo sin firma de procedencia válida. | Campo `CORTEX-TAINT` ausente o no validado. | Bloqueo automático del canal de persistencia. | MS | P0 | Aborto en SAGA-2 de inmediato. |
 | **ENDO-P30** | `OP_MONOID_DECAY` | Desintegración del monoid de endomorfismos por pérdida de clausura. | Una composición resulta en una función fuera del conjunto. | Error de import o llamada a módulo huérfano. | MS | P0 | Forzar chequeo de AST local. |
@@ -71,7 +71,7 @@ Mecanismos elementales de fallo lógico, loops de auto-mutación y pérdidas de 
 # ==========================================
 # 2. PRIMITIVAS 51-100
 # ==========================================
-primitivas_51_100_content = """# ONTOLOGY-FORGE-OMEGA: ENDOMORFISMO PRIMITIVAS (BATCH 2)
+primitivas_51_100_content = r"""# ONTOLOGY-FORGE-OMEGA: ENDOMORFISMO PRIMITIVAS (BATCH 2)
 **Dominio:** Endomorfismos en sistemas agénticos, teoría de categorías aplicada a la autopoiesis y composición de loops reflexivos.
 **Sys_ID:** `borjamoskv` | **Estado:** C5-REAL
 
@@ -135,7 +135,7 @@ Ampliación de los mecanismos causales de fallo e inconsistencia en transformaci
 # ==========================================
 # 3. INVARIANTES 01-50
 # ==========================================
-invariantes_01_50_content = """# ONTOLOGY-FORGE-OMEGA: ENDOMORFISMO INVARIANTES (BATCH 1)
+invariantes_01_50_content = r"""# ONTOLOGY-FORGE-OMEGA: ENDOMORFISMO INVARIANTES (BATCH 1)
 **Dominio:** Endomorfismos en sistemas agénticos, teoría de categorías aplicada a la autopoiesis y composición de loops reflexivos.
 **Sys_ID:** `borjamoskv` | **Estado:** C5-REAL
 
@@ -144,7 +144,7 @@ Leyes inmutables de conservación de estructura, consistencia semántica y conte
 
 | ID | Invariante | Lógica / Principio | Implicación Operacional | Condición de Borde | Métrica Falsable |
 |:---|:---|:---|:---|:---|:---|
-| **ENDO-I01** | `INV_DOM_CODOM_ID` | El dominio y codominio de todo endomorfismo deben ser el mismo objeto conceptual. | Garantiza la clausura algebraica de las transiciones. | Mutación de tipos de estado. | `dom(f) == cod(f) == X`. |
+| **ENDO-I01** | `INV_DIAGONALIZABILITY` | Para ser diagonalizable, la multiplicidad algebraica de cada autovalor debe ser igual a su multiplicidad geométrica. | Descomposición espectral del estado en una base diagonal. | Cálculo del polinomio característico. | `AM(lambda) == GM(lambda)` para todo $\lambda$. |
 | **ENDO-I02** | `INV_IDENTITY_EXIST` | Existe un único morfismo identidad $1_X$ neutral para la composición. | Inicialización limpia y restauración sin cambios de estado. | Bootstrap del loop reflexivo. | `f . 1_X == 1_X . f == f`. |
 | **ENDO-I03** | `INV_COMP_CLOSURE` | La composición de endomorfismos genera obligatoriamente otro endomorfismo sobre el mismo objeto. | Previene la desalineación de esquemas en transformaciones en cascada. | Enrutamiento de eventos inter-agentes. | `f, g in End(X) -> f . g in End(X)`. |
 | **ENDO-I04** | `INV_COMP_ASSOC` | La composición de endomorfismos es estrictamente asociativa. | El orden secuencial de agrupamiento no altera el resultado final. | Invocación asíncrona concurrente. | `(f . g) . h == f . (g . h)`. |
@@ -153,7 +153,7 @@ Leyes inmutables de conservación de estructura, consistencia semántica y conte
 | **ENDO-I07** | `INV_LANDAUER_HEAT` | La poda o simplificación de información del estado disipa energía exérgica. | Límite físico en la retención indefinida de estados estocásticos. | Compactación de base de datos. | `Exergy_Cost >= k * T * ln(2)`. |
 | **ENDO-I08** | `INV_TENANT_BOUND` | Un endomorfismo opera únicamente en el aislamiento del tenant_id origen. | Prohibición absoluta de accesos cruzados. | API REST Request. | `Tenant_ID_In == Tenant_ID_Out`. |
 | **ENDO-I09** | `INV_IMMUT_SCHEMAS` | El esquema del objeto de estado es inmutable en caliente durante el ciclo. | Evita roturas del compilador AST en tiempo de ejecución. | Inferencia estocástica activa. | `Schema_Version == Constant`. |
-| **ENDO-I10** | `INV_STATE_ISO` | El estado en memoria es isomorfo a su almacenamiento en SQLite-Vec. | Evita divergencias de percepción (Sensor Drift). | Sync de embeddings vectoriales. | `RAM_State == SQLite_State`. |
+| **ENDO-I10** | `INV_MONOID_STRUCTURE` | El conjunto de endomorfismos de un objeto $X$ forma un monoide bajo la composición. | Clausura y asociatividad forzada en los loops del Swarm. | Bootstrap de transiciones. | `f . (g . h) == (f . g) . h` y `f . 1_X == f`. |
 | **ENDO-I11** | `INV_ANERGY_ZERO` | Las respuestas del loop de composición carecen de prosa o Green Theater. | Optimización extrema del consumo de tokens (Zero-Fluff). | Output del agente en loop. | `Prose_Tokens == 0`. |
 | **ENDO-I12** | `INV_BFT_CONSENSUS` | Las transiciones críticas requieren quorum BFT verificado de N/3 nodos. | Protección contra fallos bizantinos de workers. | Transición de estado P0. | `Votes_Approved >= 2*t + 1`. |
 | **ENDO-I13** | `INV_SANDBOX_RUN` | Todo código auto-generado por el loop se valida en sandbox aislado. | Evita escalada de privilegios y daños al host. | Invocación de JIT compiler. | `Sandbox_Violations == 0`. |
@@ -164,7 +164,7 @@ Leyes inmutables de conservación de estructura, consistencia semántica y conte
 | **ENDO-I18** | `INV_COMP_BOUND` | El número de morfismos en composición secuencial no excede el límite de pila. | Previene fallos de StackOverflow en el host. | Ejecución del loop. | `Stack_Depth <= 100`. |
 | **ENDO-I19** | `INV_KEY_ROTATION` | Las claves de encriptación del estado se rotan cada 100 composiciones. | Minimiza el radio de blast de claves comprometidas. | Fin de ciclo. | `Key_Age_Blocks <= 100`. |
 | **ENDO-I20** | `INV_COMOD_LOCK` | Toda lectura/escritura concurrente al estado del morfismo está protegida por Mutex. | Previene condiciones de carrera destructivas en variables. | Acceso a variables de estado. | `Mutex.is_locked == True` en write. |
-| **ENDO-I21** | `INV_DIAG_COMMUTE` | Los diagramas de composición temporal deben conmutar estrictamente. | Garantiza coherencia causal a través de diferentes rutas. | Reconciliación de datos. | `f . g == g . f` si conmutan. |
+| **ENDO-I21** | `INV_SCHUR_DIVISION` | Según el Lema de Schur, el anillo de endomorfismos de un módulo simple es un anillo de división. | Toda transformación no nula en un sub-módulo simple es invertible. | Mapeo de representaciones simples. | `is_invertible(f) == True` para $f \neq 0$. |
 | **ENDO-I22** | `INV_IMAGE_BOUND` | La imagen del endomorfismo de conocimiento no puede ser vacía. | El loop debe producir información útil distinta de cero. | Fin de inferencia. | `len(Image(f)) > 0`. |
 | **ENDO-I23** | `INV_REVERSE_ISO` | Los automorfismos preservan correspondencia biyectiva exacta con su inversa. | Permite reversibilidad atómica de estado (Saga compensating). | Aborto de transacción. | `f . f_inv == 1_X`. |
 | **ENDO-I24** | `INV_SECURE_CIPHER`| Los payloads del estado se cifran con AES-GCM-256 usando nonces únicos. | Confidencialidad y protección contra replay attacks. | Escritura en almacenamiento. | `Cipher_Method == "AES-GCM-256"`. |
@@ -189,7 +189,7 @@ Leyes inmutables de conservación de estructura, consistencia semántica y conte
 | **ENDO-I43** | `INV_FUNCTOR_ID`  | Un functor de mapeo mapea la identidad a la identidad. | Preservación de la estructura del loop en traslación. | Validación functorial. | `F(1_X) == 1_F(X)`. |
 | **ENDO-I44** | `INV_FUNCTOR_COMP`| El functor preserva la composición de morfismos. | Preservación del historial de operaciones compuesto. | Sincronización remota. | `F(f . g) == F(f) . F(g)`. |
 | **ENDO-I45** | `INV_BFT_KEYS`    | Los nodos BFT firman mensajes con Ed25519 con claves únicas en Keyring. | Autenticidad innegable de los votos de consenso. | Emisión de voto. | `Signer_Key_Valid == True`. |
-| **ENDO-I46** | `INV_SCHUR_ORT`   | El espacio de estados vectorial se descompone en base ortogonal. | Evita colisiones de significado semántico. | Optimización vec0. | `Dot_Product(Basis_A, Basis_B) == 0`. |
+| **ENDO-I46** | `INV_HEISENBERG_COMM` | Los operadores de posición y momento satisfacen la relación canónica ($[x, p] = i\hbar$). | No conmutatividad de transformaciones de escala en el Heisenberg-Weyl. | Composición de operadores escalares. | `x . p - p . x == i * h_bar`. |
 | **ENDO-I47** | `INV_FIBER_LIMIT` | El número de preimágenes para un estado meta está acotado. | Evita explosión de relaciones n-a-n en el grafo. | Inserción en base de datos. | `Preimages_Count <= 100` por estado. |
 | **ENDO-I48** | `INV_GIT_SENTINEL`| Todo commit generado incluye el hash SHA-256 de Ledger actual. | Enlace bidireccional inquebrantable entre código y base. | Git commit trigger. | `Ledger_Hash in Commit_Message`. |
 | **ENDO-I49** | `INV_SHANNON_MAX` | El texto persistido debe tener una entropía superior al umbral mínimo. | Excluye alucinaciones vacías y respuestas enlatadas. | Fact commit block. | `Shannon_Entropy >= 1.5` bits. |
@@ -199,7 +199,7 @@ Leyes inmutables de conservación de estructura, consistencia semántica y conte
 # ==========================================
 # 4. INVARIANTES 51-100
 # ==========================================
-invariantes_51_100_content = """# ONTOLOGY-FORGE-OMEGA: ENDOMORFISMO INVARIANTES (BATCH 2)
+invariantes_51_100_content = r"""# ONTOLOGY-FORGE-OMEGA: ENDOMORFISMO INVARIANTES (BATCH 2)
 **Dominio:** Endomorfismos en sistemas agénticos, teoría de categorías aplicada a la autopoiesis y composición de loops reflexivos.
 **Sys_ID:** `borjamoskv` | **Estado:** C5-REAL
 
@@ -263,7 +263,7 @@ Ampliación de las leyes inmutables de preservación de consistencia, control de
 # ==========================================
 # 5. ESTRUCTURAL: ANTIPATRONES, REDUNDANCIAS, RED ALERTS
 # ==========================================
-estructural_content = """# ONTOLOGY-FORGE-OMEGA: ESTRUCTURAS DE RESILIENCIA Y AMENAZAS (ENDOMORFISMO)
+estructural_content = r"""# ONTOLOGY-FORGE-OMEGA: ESTRUCTURAS DE RESILIENCIA Y AMENAZAS (ENDOMORFISMO)
 **Dominio:** Endomorfismos en sistemas agénticos, teoría de categorías aplicada a la autopoiesis y composición de loops reflexivos.
 **Sys_ID:** `borjamoskv` | **Estado:** C5-REAL
 

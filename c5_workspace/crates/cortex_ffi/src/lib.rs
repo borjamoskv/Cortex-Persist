@@ -14,6 +14,9 @@ impl BoundaryKernel {
     }
 
     pub fn submit_ir(&mut self, ir: &str) -> String {
+        if ir.contains('\0') {
+            return "REJECTED".to_string();
+        }
         let event = parse_ir(ir).unwrap_or(cortex_types::Event::Unknown(ir.to_string()));
         match self.inner.apply_event(event) {
             cortex_types::KernelResult::Accepted => "ACCEPTED".to_string(),
