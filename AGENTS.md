@@ -38,7 +38,12 @@ Schema migration?                    → Review babylon60/migrate.py. Check exis
 New session on this repo?            → Execute Multi-Session Handoff (§6.4) first.
 Writing sacred/axiom facts?          → Ensure thermodynamic compression (high Shannon Entropy) to pass LandauerGuard (Ω₄) check.
 Injecting knowledge to store?        → Purge conversational slop to pass ExergyGuard (Ω₁₃).
+Need to run a shell command via agent? → NEVER use 'bash -c "..."' or 'sh -c "..."' directly.
+                                       The Antigravity sandbox cannot fork /bin/zsh as a shell wrapper.
+                                       ALWAYS use: .venv/bin/python scripts/c5_exec.py "<your command>"
+                                       OR call the binary directly: .venv/bin/python -m babylon60.cli <cmd>
 ```
+
 
 ---
 
