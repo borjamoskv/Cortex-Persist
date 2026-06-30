@@ -236,7 +236,7 @@ def get_reg_index(reg_str):
     if reg_str.startswith('R'):
         try:
             return int(reg_str[1:])
-        except:
+        except Exception as e:
             pass
     return 0
 
