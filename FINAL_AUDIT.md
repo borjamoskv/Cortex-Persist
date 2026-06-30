@@ -16,7 +16,7 @@ Proof:
 ## ✅ VECTOR 1 — Static Analysis (Ruff)
 
 | Metric | Value |
-|:---|:---|
+| :--- | :--- |
 | Files scanned | `cortex/` (552 LOC active) |
 | Violations found | 10 |
 | Auto-fixed | 9 |
@@ -29,19 +29,19 @@ Violations fixed: I001 (unsorted-imports), F401 x3 (hashlib/Set/Optional unused)
 ## ✅ VECTOR 2 — Security Scan (Bandit)
 
 | SEVERITY.HIGH | SEVERITY.MEDIUM | SEVERITY.LOW | LOC |
-|:---:|:---:|:---:|:---:|
+| :---: | :---: | :---: | :---: |
 | 0 | 0 | 4 (cortex/__init__.py) | 552 |
 
 4 LOW/HIGH-confidence findings in `cortex/__init__.py`. No critical surface exposure.
 
 ---
 
-## 🔴 VECTOR 3 — Dependency Vulnerabilities (pip-audit)
+## ▄ Dep Vulnerabilities (pip-audit)
 
-**50+ CVEs across 18 packages.**
+__50+ CVEs across 18 packages.__
 
 | Package | Current | Fix | Priority |
-|:---|:---|:---|:---|
+| :--- | :--- | :--- | :--- |
 | `starlette` | 0.52.1 | ≥1.3.1 | 🔴 P0 |
 | `python-multipart` | 0.0.22 | ≥0.0.31 | 🔴 P0 |
 | `pyjwt` | 2.12.1 | ≥2.13.0 | 🔴 P0 |
@@ -68,8 +68,8 @@ Remediation: `pip install --upgrade starlette python-multipart pyjwt litellm pyp
 ## ✅ VECTOR 4 — Test Suite (pytest)
 
 | Tests | Passed | Skipped | Failed | Duration |
-|:---:|:---:|:---:|:---:|:---:|
-| 3,886 | **3,845** | 41 | **0** | 146s |
+| :---: | :---: | :---: | :---: | :---: |
+| 3,886 | __3,845__ | 41 | __0__ | 146s |
 
 Warnings fixed: `chaos`/`integration` marks registered, `audioread` deprecations suppressed, `SyntaxWarning` in `azkartu_retrain_loop.py` resolved.
 
@@ -78,7 +78,7 @@ Warnings fixed: `chaos`/`integration` marks registered, `audioread` deprecations
 ## ✅ VECTOR 5 — Rust Audit
 
 | Target | Result |
-|:---|:---|
+| :--- | :--- |
 | `cortex_rs` cargo audit (57 crates) | ✅ 0 advisories |
 | `cortex_ffi` | ✅ FIXED — added missing `cortex_types` dep |
 | `scratch_rust` | ✅ FIXED — removed unused `mut` |
@@ -88,27 +88,25 @@ Warnings fixed: `chaos`/`integration` marks registered, `audioread` deprecations
 ## 🟠 VECTOR 6 — Workspace Hygiene
 
 | Issue | Status |
-|:---|:---|
+| :--- | :--- |
 | 62 `:memory:*` files at root (1.03 MB) | ✅ Added to `.gitignore` |
 | 9 scratch `.py` files at project root | ⚠️ Recommend moving to `scratch/` |
 | `.env` not tracked by git | ✅ OK |
 | 14 active git stashes | ⚠️ Review and prune |
 
----
+## 🟠 VECTOR 7 — Namespace Migration Reality
 
-## 🔴 VECTOR 7 — Architecture Divergence
+__36 of 37__ documented modules exist, but they live in the `babylon60/` namespace rather than `cortex/`.
+`cortex/` contains a minimal set of modules: `agents/`, `cli/`, `consensus/`, `memory/`, and `mcp_server/`, where `agents`, `cli`, and `mcp_server` are symbolic links mapping directly to their corresponding directories in `babylon60/`.
 
-Only **4 of 37** documented `cortex/` modules physically exist.
-Missing critical modules: `engine/`, `audit/`, `ledger/`, `guards/`, `crypto/`, `migrations/`, `verification/`, `security/`, `forensics/`, `auth/`, `facts/`, `services/`, `database/`, `storage/`, `cache/`, `embeddings/`, `search/`, `semantic/`, `telemetry/`, `types/`, `core/`, `utils/`, `extensions/`, `swarm/`, `mcp/`, `adk/`, `gateway/`, `router/`, `pipeline/`, `events/`, `context/`, `routes/`, `api/`.
-
-AGENTS.md describes target architecture. Current implementation is 11% of spec.
+AGENTS.md references the legacy `cortex/` namespace instead of the active `babylon60/` workspace layout. Update to documentation required to prevent developer/agent routing confusion.
 
 ---
 
 ## ✅ VECTOR 8 — SQLite / Ledger Health
 
 | Check | Result |
-|:---|:---|
+| :--- | :--- |
 | `PRAGMA integrity_check` | ✅ ok |
 | Journal mode | ✅ WAL |
 | `merkle_roots` rows | ❌ 0 — hash chain never initialized |
@@ -119,7 +117,7 @@ AGENTS.md describes target architecture. Current implementation is 11% of spec.
 ## 📊 VECTOR 9 — Git State
 
 | Metric | Value |
-|:---|:---|
+| :--- | :--- |
 | Total commits | 5,696 |
 | Top author | Borja Moskv (2,466) |
 | Active stashes | 14 |
@@ -130,7 +128,7 @@ AGENTS.md describes target architecture. Current implementation is 11% of spec.
 ## FIXES APPLIED (This Session)
 
 | Fix | File |
-|:---|:---|
+| :--- | :--- |
 | Ruff auto-fix (9 violations) | `cortex/consensus/sync_protocol.py` |
 | Added `cortex_types` dependency | `c5_workspace/crates/cortex_ffi/Cargo.toml` |
 | Removed unused `mut` | `scratch_rust/src/main.rs:26` |
@@ -149,16 +147,16 @@ P0_1:
   Reason: "Active API surface with known exploit CVEs"
 
 P0_2:
-  Action: "Create cortex/audit/ledger.py and bootstrap merkle_roots"
-  Reason: "Cryptographic hash chain never initialized — Write-Path Contract broken"
+  Action: "Verify babylon60/audit/ledger.py and bootstrap merkle_roots in memory.db"
+  Reason: "Cryptographic hash chain never initialized — Write-Path Contract pending bootstrap"
 
 P0_3:
   Action: "Load sqlite-vec at DB connection startup"
   Reason: "vec0 not loaded — all vector embedding tables unreachable"
 
 P1_1:
-  Action: "Reconcile AGENTS.md module map with actual codebase (33 ghost modules)"
-  Reason: "Documentation describes non-existent architecture"
+  Action: "Reconcile AGENTS.md module map to explicitly refer to babylon60/ namespace instead of cortex/"
+  Reason: "Documentation describes legacy namespace layout"
 
 P1_2:
   Action: "Move 9 scratch .py files from root to scratch/ and prune 14 stashes"
@@ -167,4 +165,4 @@ P1_2:
 
 ---
 
-*Audit by **Borja Moskv** (`borjamoskv`) — MOSKV-1 APEX | C5-REAL | 2026-06-30*
+_Audit by __Borja Moskv__ (`borjamoskv`) — MOSKV-1 APEX | C5-REAL | 2026-06-30_

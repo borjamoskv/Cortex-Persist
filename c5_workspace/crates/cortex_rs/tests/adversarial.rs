@@ -1,6 +1,6 @@
 use cortex_ffi::BoundaryKernel;
 use cortex_replay::{divergence, ReplayEngine};
-use cortex_rs::CortexKernel;
+use cortex_rs::{CortexKernel, KernelTrait};
 
 #[test]
 fn membrane_rejects_poisoned_ir() {
