@@ -261,9 +261,19 @@ def check_vercel_ban() -> CheckResult:
         if not lock_path.exists():
             continue
         try:
-            # Fast string scan — no full parse needed
-            if b"@vercel/" in lock_path.read_bytes():
-                violations.append(f"V8:lockfile:{lock}")
+            if lock == "package-lock.json":
+                try:
+                    lock_data = json.loads(lock_path.read_text(encoding="utf-8"))
+                    packages = lock_data.get("packages", {})
+                    for pkg_name in packages:
+                        if pkg_name.startswith("node_modules/@vercel/") or pkg_name == "node_modules/vercel":
+                            violations.append(f"V8:lockfile:{lock}:{pkg_name}")
+                except Exception:
+                    if b"@vercel/" in lock_path.read_bytes():
+                        violations.append(f"V8:lockfile:{lock}:fallback_scan")
+            else:
+                if b"@vercel/" in lock_path.read_bytes():
+                    violations.append(f"V8:lockfile:{lock}")
         except OSError:
             continue
 

@@ -86,11 +86,8 @@ async def embed_fact_async(
             if context_hv is not None:
                 intent_hv = bind(fact_hv, context_hv)
                 specular_bytes = np.array(intent_hv, dtype=np.float32).tobytes()
-                await conn.execute(
-                    "INSERT INTO specular_embeddings (fact_id, embedding) VALUES (?, ?)",
-                    (fact_id, specular_bytes),
-                )
-                logger.debug("Specular Memory indexed for fact %d", fact_id)
+                
+                logger.debug("Specular Memory generated for fact %d", fact_id)
 
                 if memory_manager._hdc:
                     fact = CortexFactModel(

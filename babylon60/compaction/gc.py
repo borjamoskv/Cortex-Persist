@@ -90,7 +90,6 @@ class GarbageCollector:
         # Check which tables exist in sqlite_master to avoid no such table errors
         target_tables = {
             "fact_embeddings",
-            "specular_embeddings",
             "pruned_embeddings",
             "consensus_votes_v2",
             "consensus_votes",
@@ -113,10 +112,6 @@ class GarbageCollector:
         if "fact_embeddings" in existing_tables:
             await conn.executemany(
                 "DELETE FROM fact_embeddings WHERE fact_id = ?", [(fid,) for fid in fact_ids]
-            )
-        if "specular_embeddings" in existing_tables:
-            await conn.executemany(
-                "DELETE FROM specular_embeddings WHERE fact_id = ?", [(fid,) for fid in fact_ids]
             )
 
         # 2. Pruned embeddings archive deletion
