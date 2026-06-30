@@ -6,7 +6,7 @@ import os
 
 from click.testing import CliRunner
 
-from cortex.cli import cli
+from babylon60.cli import cli
 
 
 class _DummyEngine:
@@ -19,7 +19,7 @@ class _DummyEngine:
         return None
 
     async def store(self, **_: object) -> int:
-        self.no_embed_during_store.append(os.environ.get("CORTEX_NO_EMBED"))
+        self.no_embed_during_store.append(os.environ.get("MOSKV_NO_EMBED") or os.environ.get("CORTEX_NO_EMBED"))
         return 1
 
     async def close(self) -> None:
@@ -34,15 +34,18 @@ def test_init_uses_no_embed_during_seed_and_restores_env(monkeypatch) -> None:
     engine = _DummyEngine()
     runner = CliRunner()
 
-    monkeypatch.setattr("cortex.cli.init_cmds.get_engine", lambda _db: engine)
-    monkeypatch.setattr("cortex.cli.init_cmds._run_async", _run)
+    for ns in ("cortex", "babylon60"):
+        monkeypatch.setattr(f"{ns}.cli.init_cmds.get_engine", lambda _db: engine, raising=False)
+        monkeypatch.setattr(f"{ns}.cli.init_cmds._run_async", _run, raising=False)
     monkeypatch.delenv("CORTEX_NO_EMBED", raising=False)
+    monkeypatch.delenv("MOSKV_NO_EMBED", raising=False)
 
     result = runner.invoke(cli, ["init", "--db", "/tmp/test-cortex.db"])
 
     assert result.exit_code == 0
     assert engine.no_embed_during_store == ["1"] * 10
     assert os.environ.get("CORTEX_NO_EMBED") is None
+    assert os.environ.get("MOSKV_NO_EMBED") is None
     assert engine.closed is True
 
 
@@ -50,12 +53,15 @@ def test_init_restores_existing_no_embed_value(monkeypatch) -> None:
     engine = _DummyEngine()
     runner = CliRunner()
 
-    monkeypatch.setattr("cortex.cli.init_cmds.get_engine", lambda _db: engine)
-    monkeypatch.setattr("cortex.cli.init_cmds._run_async", _run)
+    for ns in ("cortex", "babylon60"):
+        monkeypatch.setattr(f"{ns}.cli.init_cmds.get_engine", lambda _db: engine, raising=False)
+        monkeypatch.setattr(f"{ns}.cli.init_cmds._run_async", _run, raising=False)
     monkeypatch.setenv("CORTEX_NO_EMBED", "0")
+    monkeypatch.setenv("MOSKV_NO_EMBED", "0")
 
     result = runner.invoke(cli, ["init", "--db", "/tmp/test-cortex.db"])
 
     assert result.exit_code == 0
     assert engine.no_embed_during_store == ["1"] * 10
     assert os.environ.get("CORTEX_NO_EMBED") == "0"
+    assert os.environ.get("MOSKV_NO_EMBED") == "0"

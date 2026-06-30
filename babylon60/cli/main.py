@@ -83,6 +83,9 @@ class LazyCommandsDict(dict):
         self._loader = loader
         super().__init__()
 
+    def __bool__(self) -> bool:
+        return True
+
     def _trigger(self) -> None:
         self._loader()
 
@@ -121,8 +124,9 @@ class LazyCommandsDict(dict):
 
 # Preserve any commands already registered, then replace with lazy loader.
 existing_commands = cli.commands
-cli.commands = LazyCommandsDict(_ensure_loaded)
-if existing_commands:
-    cli.commands.update(existing_commands)
+if type(existing_commands).__name__ != "LazyCommandsDict":
+    cli.commands = LazyCommandsDict(_ensure_loaded)
+    if existing_commands:
+        cli.commands.update(existing_commands)
 
 __all__ = ["FAILED_COMMAND_MODULES", "LOADED_COMMAND_MODULES", "cli"]

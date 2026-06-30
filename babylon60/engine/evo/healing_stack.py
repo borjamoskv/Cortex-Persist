@@ -32,7 +32,7 @@ from babylon60.engine.core.tuning_store import TuningStore
 from babylon60.engine.evo._autocurative_config import AutoCurativeConfig
 from babylon60.engine.forensic.predictive_healer import Prediction, PredictiveHealer
 from babylon60.engine.self_optimizer import OptimizerConfig, SelfOptimizer
-from babylon60.swarm.autocurative_agent import AutoCurativeAgent
+
 
 __all__ = ["HealingStack", "HealingStackConfig"]
 
@@ -88,6 +88,8 @@ class HealingStack:
     """
 
     def __init__(self, config: HealingStackConfig | None = None) -> None:
+        from babylon60.swarm.autocurative_agent import AutoCurativeAgent
+
         self._config = config or HealingStackConfig()
 
         # Core components

@@ -114,9 +114,11 @@ async def test_billing_gateway_pwyw_scaling(tmp_db, monkeypatch):
 
     # Mock auth manager key creation
     mock_auth_manager = AsyncMock()
-    import cortex.api.state as api_state
+    import babylon60.api.state as api_state_b60
+    import cortex.api.state as api_state_ctx
 
-    monkeypatch.setattr(api_state, "auth_manager", mock_auth_manager)
+    monkeypatch.setattr(api_state_b60, "auth_manager", mock_auth_manager)
+    monkeypatch.setattr(api_state_ctx, "auth_manager", mock_auth_manager)
 
     # Mock stripe key configuration
     monkeypatch.setattr(config, "STRIPE_SECRET_KEY", "sk_test_mock_123")

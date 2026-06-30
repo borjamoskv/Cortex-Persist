@@ -33,16 +33,22 @@ def _bootstrap_without_embeddings() -> Iterator[None]:
     finally:
         if prev_embed is None:
             os.environ.pop("CORTEX_NO_EMBED", None)
+            os.environ.pop("MOSKV_NO_EMBED", None)
         else:
             os.environ["MOSKV_NO_EMBED"] = prev_embed
+            os.environ["CORTEX_NO_EMBED"] = prev_embed
         if prev_omega is None:
             os.environ.pop("CORTEX_NO_OMEGA", None)
+            os.environ.pop("MOSKV_NO_OMEGA", None)
         else:
             os.environ["MOSKV_NO_OMEGA"] = prev_omega
+            os.environ["CORTEX_NO_OMEGA"] = prev_omega
         if prev_taint is None:
             os.environ.pop("CORTEX_NO_TAINT_ENFORCE", None)
+            os.environ.pop("MOSKV_NO_TAINT_ENFORCE", None)
         else:
             os.environ["MOSKV_NO_TAINT_ENFORCE"] = prev_taint
+            os.environ["CORTEX_NO_TAINT_ENFORCE"] = prev_taint
 
 
 @cli.command()
