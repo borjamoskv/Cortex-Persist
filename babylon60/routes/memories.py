@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Memories Router (Public API Surface).
@@ -15,7 +16,6 @@ Public API:
     GET    /v1/memories/verify   → Verify integrity (ledger check)
 """
 
-from __future__ import annotations
 
 import logging
 import sqlite3

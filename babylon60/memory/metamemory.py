@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """CORTEX v7+ - Metamemory: The Agent That Knows What It Knows.
@@ -6,7 +7,6 @@ Nelson & Narens (1990) framework: FOK, JOL, calibration, TOT detection.
 Schema layer (Verdict, MemoryCard, etc.) lives in metamemory_schema.py.
 """
 
-from __future__ import annotations
 
 import logging
 import math

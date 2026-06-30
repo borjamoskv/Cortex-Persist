@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """SICA Constitution - Immutable Epistemic Principles.
@@ -12,7 +13,6 @@ Principles are organized by severity:
   - ADVISORY: violation = meta-log only (soft feedback)
 """
 
-from __future__ import annotations
 
 import logging
 import time

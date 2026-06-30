@@ -12,6 +12,8 @@ from babylon60.cli.common import DEFAULT_DB, cli, close_engine_sync, console, ge
 @click.option("--tenant-id", default="default", help="Tenant ID for evaluation")
 def eval_cmd(db: str, limit: int, top_k: int, tenant_id: str) -> None:
     """Run V8 Recall Precision Proxy tests."""
+    from babylon60.cli.common import resolve_cli_tenant
+    tenant_id = resolve_cli_tenant(tenant_id)
     from babylon60.memory.evaluator import calculate_recall_precision
 
     console.print("[bold cyan]🔬 CORTEX v8 Evaluation Engine[/]")

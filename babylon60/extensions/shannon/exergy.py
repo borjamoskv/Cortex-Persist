@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Exergy Scoring - Axiom Ω₁₃ Shannon Upgrade.
@@ -12,7 +13,6 @@ it's a semáforo pintado en una pared.
 Status: IMPLEMENTED (upgraded from DECORATIVE via Ω₁₃ enforcement).
 """
 
-from __future__ import annotations
 
 import logging
 from dataclasses import dataclass

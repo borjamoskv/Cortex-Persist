@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """FitnessRecord, Lineage, MutationType, and StrategyGenome definition.
@@ -5,7 +6,6 @@ from decimal import Decimal
 Reality Level: C5-REAL
 """
 
-from __future__ import annotations
 
 import copy
 import hashlib

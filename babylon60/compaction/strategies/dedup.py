@@ -150,7 +150,7 @@ async def _merge_duplicate_group(
                     canonical_id,
                     content=merged,
                 )
-            except (ValueError, Exception) as e:
+            except (ValueError, Exception) as e:  # noqa: BLE001
                 # IntegrityError (UNIQUE hash collision) is expected when
                 # merged content hashes identically to another active fact.
                 # The canonical fact is already correct - skip silently.

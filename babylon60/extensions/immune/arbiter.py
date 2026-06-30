@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -12,7 +13,6 @@ F4: Entropy (Complexity vs Utility)
 F5: Confidence (Epistemic Trust)
 """
 
-from __future__ import annotations
 
 import logging
 import time

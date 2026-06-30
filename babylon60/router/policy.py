@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Cortex Router v2 - Differentiable Policy Network.
@@ -7,7 +8,6 @@ Implements a trainable MoE-style router evaluating the epistemic state vector
 to output a stochastic routing distribution via softmax.
 """
 
-from __future__ import annotations
 
 import logging
 import math

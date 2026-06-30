@@ -84,7 +84,7 @@ class RedisL1Cache:
                     client.ping()
                     self._client = client
                     logger.info("Redis L1 cache instance created: %s:%d/%d", host, port, db)
-                except (OSError, ConnectionError, TimeoutError, RedisError, Exception) as exc:
+                except (OSError, ConnectionError, TimeoutError, RedisError, Exception) as exc:  # noqa: BLE001
                     logger.warning("Redis L1 unavailable (%s), operating in pass-through mode", exc)
                     self._client = None
 

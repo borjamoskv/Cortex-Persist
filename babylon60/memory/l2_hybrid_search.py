@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -35,7 +36,6 @@ DECISION: Operate on L2's sync conn to avoid aiosqlite overhead for
          hot-path recall queries. asyncio.to_thread wraps at call site.
 """
 
-from __future__ import annotations
 
 import logging
 import re

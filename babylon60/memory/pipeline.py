@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -14,7 +15,6 @@ epistemic evaluation, emotional tagging, or synaptic reinforcement.
 Derivation: Ω₃ (Byzantine Default) + Ω₂ (Entropic Asymmetry)
 """
 
-from __future__ import annotations
 
 import logging
 import time

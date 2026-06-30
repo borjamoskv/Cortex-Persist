@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Analyzer Mixin for Forgetting Oracle.
@@ -5,7 +6,6 @@ from decimal import Decimal
 Evaluates individual cache eviction decisions to measure regret value.
 """
 
-from __future__ import annotations
 
 import json
 import logging

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Cortex Router v1 - Epistemic Model Arbitrator.
@@ -7,7 +8,6 @@ and Gemini 3.1 Pro (Semantic Layer) based on deterministic thresholds
 like AST complexity, predictive entropy, and KL instability score.
 """
 
-from __future__ import annotations
 
 import logging
 from dataclasses import dataclass

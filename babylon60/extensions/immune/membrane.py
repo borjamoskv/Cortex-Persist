@@ -1,10 +1,10 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Cortex Immune Membrane - The Sovereign Arbiter.
 """
 
-from __future__ import annotations
 
 import asyncio
 import logging

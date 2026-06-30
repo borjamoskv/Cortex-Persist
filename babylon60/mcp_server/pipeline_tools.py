@@ -244,7 +244,7 @@ def _get_status() -> str:
             "remaining_usd": budget_info.get("remaining", 0),
             "total_spent_usd": budget_info.get("spent", 0),
         }
-    except (ImportError, Exception):
+    except (ImportError, Exception):  # noqa: BLE001
         status["budget"] = "unavailable"
 
     return json.dumps(status, indent=2, default=str)

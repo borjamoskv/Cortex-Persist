@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Trend detection - drift detection from health snapshots.
@@ -10,7 +11,6 @@ Ring buffer of last N scores. Computes slope to classify:
 Supports optional SQLite persistence via health_history table.
 """
 
-from __future__ import annotations
 
 import logging
 import sqlite3

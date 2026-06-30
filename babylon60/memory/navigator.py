@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """CORTEX v7+ - Semantic Navigator (Grid Cell Architecture).
@@ -20,7 +21,6 @@ KnowledgeMap:
 Derivation: Ω₁ (Multi-Scale Causality) + Ω₄ (Aesthetic Integrity)
 """
 
-from __future__ import annotations
 
 import logging
 import math

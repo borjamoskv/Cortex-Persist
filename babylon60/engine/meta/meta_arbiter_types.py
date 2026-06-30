@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """CORTEX Meta-Arbiter Types.
@@ -7,7 +8,6 @@ Data structures for Cognitive Arbitration.
 Reality Level: C5-REAL
 """
 
-from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field

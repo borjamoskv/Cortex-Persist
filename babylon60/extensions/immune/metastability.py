@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Metastability Probing - Axiom Ω₁₃ Immune System Upgrade.
@@ -9,7 +10,6 @@ evidence of stability.
 Status: IMPLEMENTED (upgraded from PARTIAL via Ω₁₃ enforcement).
 """
 
-from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -8,7 +9,6 @@ Monitors rate of mutations, entropy of content, and behavioral
 baselines per project using Z-score analysis.
 """
 
-from __future__ import annotations
 
 import logging
 import math

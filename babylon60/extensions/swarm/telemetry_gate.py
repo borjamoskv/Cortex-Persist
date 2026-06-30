@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -21,7 +22,6 @@ Changelog v2 - 2026-03-09:
   ✓ Integration point with CapatazOrchestrator (SovereignReward feedback)
 """
 
-from __future__ import annotations
 
 import logging
 import os

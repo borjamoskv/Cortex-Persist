@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Conflict Resolution Protocol (LEGION-Ω).
@@ -6,7 +7,6 @@ from decimal import Decimal
 Axioms: Ω₃ (Byzantine), Ω₂ (Entropic Asymmetry), Ω₅ (Antifragile).
 """
 
-from __future__ import annotations
 
 import logging
 import time

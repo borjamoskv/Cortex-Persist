@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # SPDX-License-Identifier: Apache-2.0
@@ -7,7 +8,6 @@ Defines the type-safe domain objects for territorial risk analysis:
 zone classifications, coordinates, risk scores, and blind-spot reports.
 """
 
-from __future__ import annotations
 
 from babylon60.crypto.hash_registry import cortex_hash
 import time

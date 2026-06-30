@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -9,7 +10,6 @@ without explicit, cryptographically verifiable operator approval, unless the swa
 reaches a 100% unanimous Zenith Consensus rating.
 """
 
-from __future__ import annotations
 
 import asyncio
 import json

@@ -1,0 +1,59 @@
+# ONTOLOGY-FORGE-OMEGA: ENDOMORFISMO INVARIANTES (BATCH 2)
+**Dominio:** Endomorfismos en sistemas agénticos, teoría de categorías aplicada a la autopoiesis y composición de loops reflexivos.
+**Sys_ID:** `borjamoskv` | **Estado:** C5-REAL
+
+## MATRIZ 2.1: 50 INVARIANTES ADICIONALES DE COHERENCIA (ENDO-I51..100)
+Ampliación de las leyes inmutables de preservación de consistencia, control de concurrencia y seguridad en transformaciones de estado.
+
+| ID | Invariante | Lógica / Principio | Implicación Operacional | Condición de Borde | Métrica Falsable |
+|:---|:---|:---|:---|:---|:---|
+| **ENDO-I51** | `INV_LOOP_RESOLV` | Las corrutinas del loop reflexivo deben ceder control periódicamente. | Previene congelamientos del event loop del Gateway. | Ejecución asíncrona de morfismo. | `Time_Between_Yields <= 100` ms. |
+| **ENDO-I52** | `INV_HOM_SET_CAP` | El número de morfismos distintos en un objeto está acotado. | Previene desbordamiento de memoria por meta-conocimiento. | Indexado semántico en base. | `len(Hom(X, X)) <= 10_000`. |
+| **ENDO-I53** | `INV_EIGEN_VAL_OK`| Los autovalores del sistema de transiciones están en el rango (-1, 1). | Garantiza convergencia y estabilidad a largo plazo. | Multiplicación matricial. | `abs(Eigenvalues) < 1.0`. |
+| **ENDO-I54** | `INV_FUNCTOR_DET` | El mapeo functorial es determinista y no depende de variables de red. | Evita inconsistencias de transiciones entre entornos. | Mapeo inter-sistema. | `F(f, State) == Constant` en t. |
+| **ENDO-I55** | `INV_EIGEN_DIM`   | El espacio vectorial de embeddings mantiene su dimensionalidad estática. | Previene colisiones por mezcla de modelos en vec0. | Inserción vectorial. | `Vector_Dimension == 1536` o 768. |
+| **ENDO-I56** | `INV_MONOID_UNIT` | La identidad `1_X` es única para cada conjunto de endomorfismos. | Previene inicializaciones ambiguas del loop. | Carga inicial del sistema. | `len(Identity_Elements) == 1`. |
+| **ENDO-I57** | `INV_SCHED_FIFO`  | Las tareas del cron se ejecutan en orden estrictamente temporal. | Previene condiciones de carrera por reordenamiento. | Encolador de tareas. | `Execution_Order == Sorted_Timestamp`.|
+| **ENDO-I58** | `INV_LOG_EXERGY`  | Los logs de traza contienen estrictamente información estructurada. | Evita desperdicio de tokens en almacenamiento local. | Logger output check. | `contains("slop") == False`. |
+| **ENDO-I59** | `INV_SANDBOX_NET` | El sandbox de ejecución tiene deshabilitado el acceso a red externa. | Evita exfiltración de datos sensibles durante JIT compilation. | Configuración de sandbox. | `Network_Connections_Allowed == False`.|
+| **ENDO-I60** | `INV_MIG_ROLLBACK`| Todo script de migración expone obligatoriamente ruta de rollback. | Permite recuperación de estado ante fallos de despliegue. | Declaración de migración. | `hasattr(Migration, "down") == True`.|
+| **ENDO-I61** | `INV_FD_LIMIT`    | El loop de composición no puede exceder el 80% de descriptores de archivos del host. | Previene caídas catastróficas por saturación del SO. | Bootstrap del socket. | `Open_FDs < 0.8 * Max_FDs`. |
+| **ENDO-I62** | `INV_ISOM_PAIR`   | El morfismo inverso `f_inv` se genera y actualiza atómicamente con `f`. | Evita estados intermedios no reversibles en SAGA-6. | Mutación de clases de lógica. | `hasattr(f, "inverse") == True`. |
+| **ENDO-I63** | `INV_RAM_GC`      | La memoria RAM del worker se libera explícitamente tras cada ciclo. | Evita OOM en ejecuciones prolongadas de swarm. | Hook post-ejecución. | `RAM_Usage_After_GC <= Basal_Limit`. |
+| **ENDO-I64** | `INV_EPIST_RECON` | Dos verdades conflictivas inician reconciliación automatizada. | Evita bloqueos epistémicos o loops de parálisis. | Guard check de coherencia. | `Reconciliation_Active == True`. |
+| **ENDO-I65** | `INV_TAINT_DEEP`  | La copia de morfismos de estado debe realizarse vía deepcopy. | Conserva metadatos de taint originales y previene desvío. | Copia de clases de estado. | `id(State_In.taint) != id(State_Out.taint)`.|
+| **ENDO-I66** | `INV_GIT_CLEAN`   | El working tree del repositorio debe estar limpio antes de transicionar. | Previene contaminación de commits con archivos huérfanos. | Pre-commit hook validation. | `git_status == "clean"`. |
+| **ENDO-I67** | `INV_CHAOTIC_LIM` | La divergencia de autovectores en loops está limitada por exponente de Lyapunov. | Garantiza predictibilidad matemática del sistema. | Simulación dinámica. | `Lyapunov_Exponent <= Threshold`. |
+| **ENDO-I68** | `INV_NIL_TRANS`   | El estado nilpotent nulo no puede ser el destino final del flujo principal. | Evita colapso absoluto del sistema a estado cero. | Verificación de parada. | `Final_State != 0`. |
+| **ENDO-I69** | `INV_IDEM_GRAD`   | Las transiciones deben aportar un delta exérgico neto mayor que cero. | Previene parálisis del loop en estados idempotentes. | Evaluación en runtime. | `Exergy_Yield > 0` en composición. |
+| **ENDO-I70** | `INV_COHOM_DET`   | Los ciclos de cohomología están cerrados y validados criptográficamente. | Garantiza coherencia distributiva sin bucles huérfanos. | Swarm status verification. | `verify_cohomology() == True`. |
+| **ENDO-I71** | `INV_AUT_EVOLVE`  | El loop de automorfismos debe acoplarse con inyección de inputs externos. | Previene ciclos cerrados estériles sin aprendizaje. | Ingesta de memoria. | `Inputs_Processed > 0` en t. |
+| **ENDO-I72** | `INV_KEY_SECURE`  | La clave de cifrado se aloja en almacenamiento de llavero del SO local. | Evita exposición de secretos en archivos de configuración. | Keyring check. | `Key_Source == "OS_Keyring"`. |
+| **ENDO-I73** | `INV_DB_CONCUR`   | SQLite opera estrictamente con `busy_timeout` fijado en 5000ms. | Previene deadlocks por colisiones de escritura concurrentes. | DB initialization helper. | `busy_timeout == 5000`. |
+| **ENDO-I74** | `INV_COLIM_BOUND` | El colímite de la base está acotado a 1 millón de registros vectoriales. | Previene degradación de rendimiento en vec0. | DB insertion hook. | `Total_Records <= 1_000_000`. |
+| **ENDO-I75** | `INV_SENTINEL_OK` | El Git Sentinel valida el hash Ledger en cada commit local. | Evita desincronizaciones de base de datos inter-sesión. | Git commit verification. | `Verify_Sentinel_Hash() == True`. |
+| **ENDO-I76** | `INV_ENTROPY_MIN` | Las respuestas conservan un nivel mínimo de Shannon en base a tokens únicos. | Filtra outputs simplistas de baja exergía. | Cortex vault commit filter. | `Shannon_Entropy >= 1.2` bits. |
+| **ENDO-I77** | `INV_STACK_YIELD` | Las funciones recursivas de morfismos ejecutan un yield cada 5 niveles. | Previene desbordamiento de pila física del runtime. | Intérprete check. | `Recursion_Depth_Since_Yield <= 5`. |
+| **ENDO-I78** | `INV_KEY_MEMORY`  | Las llaves de cifrado en memoria volátil se purgan tras el uso. | Previene extracción de claves vía volcados de memoria (dump). | Cryptography wrapper. | `Memory_Cleared == True` post-decrypt. |
+| **ENDO-I79** | `INV_MUTEX_BLOCK` | Todo lock de recurso compartido expone un timeout de resolución máximo de 1s. | Previene bloqueos mutuos permanentes. | Lock request logic. | `Lock_Timeout <= 1000` ms. |
+| **ENDO-I80** | `INV_BFT_QUORUM`  | Los mensajes de consenso BFT se transmiten firmados por al menos 2/3 nodos. | Previene ataques Sybil y desviaciones de Ledger. | Consensual commit step. | `Signers_Count >= (2/3) * N_Nodes`. |
+| **ENDO-I81** | `INV_FASTAPI_VAL` | FastAPI utiliza validadores Pydantic estrictos en todos los payloads. | Previene inyección de payloads deformados al backend. | Endpoint function definition. | `hasattr(endpoint, "pydantic_model")`.|
+| **ENDO-I82** | `INV_PORT_CHECK`  | El script de bootstrap valida que el puerto de red está libre antes de levantar. | Evita colisiones de puertos con servicios zombies. | Server startup utility. | `Port_Is_Free == True`. |
+| **ENDO-I83** | `INV_CONN_RETRY`  | Los reintentos de conexión inter-agente emplean algoritmo de backoff con jitter. | Previene colapso del Gateway por thundering herd. | Http client helper. | `Retry_Method == "Backoff_With_Jitter"`.|
+| **ENDO-I84** | `INV_GATEWAY_CAP` | El Gateway limita el tamaño máximo de los campos JSON a 1MB. | Previene desbordamientos de buffer por inyección. | FastAPI request limits. | `Max_Field_Size <= 1_000_000` bytes. |
+| **ENDO-I85** | `INV_CORS_STRICT` | Las cabeceras CORS en producción excluyen explícitamente el wildcard asterisco. | Previene ataques de scripting malicioso. | API configuration middleware. | `CORS_Wildcard == False`. |
+| **ENDO-I86** | `INV_LIMIT_BLOCK` | Peticiones que exceden el rate limit son bloqueadas por 60 segundos. | Previene ataques de fuerza bruta. | Rate limiter filter. | `Ban_Duration == 60` segundos. |
+| **ENDO-I87** | `INV_TLS_CIPHER`  | Se exige TLS 1.3 con suite de cifrado AES-256-GCM en el socket. | Garantiza protección del canal ante ataques criptográficos modernos. | TLS connection handshake. | `Cipher_Suite == "AES-256-GCM"`. |
+| **ENDO-I88** | `INV_VER_COMPAT`  | Las API del morfismo son compatibles retroactivamente hasta un nivel menor (Minor). | Evita rupturas del sistema durante actualizaciones parciales. | API gateway validation middleware. | `Client_Minor_Ver >= Required_Minor`.|
+| **ENDO-I89** | `INV_CLEAN_ERR`   | El Gateway devuelve JSON estructurado de error sin rutas físicas legibles. | Evita exposición de directorios del host. | Exception handler global. | `Physical_Paths_In_Response == 0`. |
+| **ENDO-I90** | `INV_MONITOR_RUN` | El daemon de watchdog se ejecuta como proceso independiente del host. | Garantiza monitorización persistente e inmune a fallas de API. | Watchdog script check. | `Watchdog_PID_Active == True`. |
+| **ENDO-I91** | `INV_CACHE_REDIS` | El almacenamiento Redis L1 cache tiene TTL máximo de 300 segundos. | Previene consistencia degradada por caché obsoleta prolongada. | Redis client instantiation. | `Default_TTL <= 300` segundos. |
+| **ENDO-I92** | `INV_HOST_WHITE`  | El proxy local del morfismo sólo enruta peticiones a dominios de lista blanca. | Previene desvío de tráfico sensible a redes externas. | API Gateway routing table. | `Target_Domain in Whitelist`. |
+| **ENDO-I93** | `INV_ASYNC_POOL`  | El cliente httpx utiliza un único pool de conexiones cerrado. | Evita el consumo desmedido de descriptores de socket TCP. | API gateway client helper. | `Pool_Closed == True` on app exit. |
+| **ENDO-I94** | `INV_ASGI_TIMEOUT`| Uvicorn timeout keep-alive está configurado a 15 segundos en local. | Minimiza retención de sockets inactivos. | ASGI command run execution. | `keep_alive_timeout == 15`. |
+| **ENDO-I95** | `INV_MIME_STRICT` | El parser rechaza cualquier payload que no declare Content-Type válido. | Previene inyecciones de payloads deformados. | API Gateway entry validation. | `Header_Content_Type == Required`. |
+| **ENDO-I96** | `INV_SIGN_MT`     | Todo mensaje inter-agente incluye la firma digital Ed25519 del emisor. | Garantiza autenticidad y previene suplantación de nodos. | Message serialization handler. | `hasattr(Message, "Signature")`. |
+| **ENDO-I97** | `INV_MIG_LEDGER`  | Las migraciones de esquema emiten un evento criptográfico al Ledger. | Registra la trazabilidad del cambio de estructura. | Database migration execution. | `Ledger_Event_Logged == True`. |
+| **ENDO-I98** | `INV_INVAR_FILE`  | Los archivos de configuración invariantes se montan en modo lectura en el Docker/SO. | Previene modificaciones accidentales de directivas. | Container execution configuration. | `Mount_Mode == "read_only"`. |
+| **ENDO-I99** | `INV_VEC_STRICT`  | SQLite-Vec exige concordancia de dimensiones del vector en cada query. | Evita fallas catastróficas de comparación. | SQLite query build. | `Query_Vector_Dimension == DB_Dim`. |
+| **ENDO-I100**| `INV_LAZY_CLEAN`  | Las colas de tareas lazy se purgan por completo al detener el worker. | Previene persistencia de tareas huérfanas en el reinicio. | Shutdown lifecycle hook. | `Lazy_Queue_Depth == 0` on stop. |

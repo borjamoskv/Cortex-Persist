@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -5,7 +6,6 @@ SchGen Topology - Semantically Grounded Hardware Generation
 Implements arXiv:2605.30345v1 PCB design algorithms via semantic routing.
 """
 
-from __future__ import annotations
 
 import logging
 from dataclasses import dataclass

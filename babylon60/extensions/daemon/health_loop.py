@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Health monitoring loop for moskv-daemon.
@@ -5,7 +6,6 @@ from decimal import Decimal
 Uses sealed Grade enum for comparisons. TrendDetector for drift.
 """
 
-from __future__ import annotations
 
 import logging
 import time

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -8,7 +9,6 @@ thermodynamic value (Exergy) of recent actions and the biological
 significance (CrystalVitals) of the active project.
 """
 
-from __future__ import annotations
 
 import logging
 import time

@@ -156,6 +156,35 @@ def _detect_agent_source() -> str:
     return "cli"
 
 
+def resolve_cli_tenant(tenant_id: str) -> str:
+    """Resolve the active tenant for CLI commands and set tenant_id_var context."""
+    import os
+    import json
+    from pathlib import Path
+    from babylon60.extensions.security.tenant import tenant_id_var
+
+    if tenant_id == "default":
+        # 1. Environment variable
+        env_tenant = os.environ.get("CORTEX_TENANT_ID")
+        if env_tenant:
+            tenant_id = env_tenant
+        else:
+            # 2. Config file
+            config_path = Path("/Users/borjafernandezangulo/10_PROJECTS/cortex-meta/active-context.json")
+            if config_path.is_file():
+                try:
+                    with open(config_path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        tenant_id = data.get("tenant_id") or data.get("active_tenant") or "default"
+                except Exception:  # noqa: BLE001
+                    tenant_id = "default"
+
+    # Set context variable for deep RLS verification in engine mixins
+    tenant_id_var.set(tenant_id)
+    return tenant_id
+
+
+
 @click.group()
 @click.version_option(__version__, prog_name="cortex")
 def cli() -> None:

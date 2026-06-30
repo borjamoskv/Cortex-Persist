@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """VEX Data Models - Cryptographically verifiable execution primitives.
@@ -8,7 +9,6 @@ with CORTEX's ImmutableLedger and WBFT consensus.
 Derivation: Ω₃ (Byzantine Default) - every model is self-verifiable.
 """
 
-from __future__ import annotations
 
 import enum
 import json

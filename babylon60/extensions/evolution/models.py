@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # cortex/evolution/models.py
@@ -9,7 +10,6 @@ Implements the structural types for agent evolution:
 3. EvolutionMutation: A record of a discrete state change.
 """
 
-from __future__ import annotations
 
 import time
 import uuid

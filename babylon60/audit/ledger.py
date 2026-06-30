@@ -179,7 +179,7 @@ class EnterpriseAuditLedger:
             self._batch_task.cancel()
             try:
                 await self._batch_task
-            except (asyncio.CancelledError, Exception):
+            except (asyncio.CancelledError, Exception):  # noqa: BLE001
                 pass
             self._batch_task = None
 

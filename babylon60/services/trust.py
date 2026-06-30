@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """TrustService - Sovereign Audit, Compliance & Cryptographic Integrity (Ω₃).
@@ -7,7 +8,6 @@ not from itself.  Every hash is verified live.  Every chain break is reported.
 Silence is NOT compliance.
 """
 
-from __future__ import annotations
 
 import dataclasses
 import logging

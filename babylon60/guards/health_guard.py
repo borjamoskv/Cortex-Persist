@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -8,7 +9,6 @@ underlying system health is degraded or failing. This prevents entropy
  cascades (e.g., trying to write to a massive/corrupted DB).
 """
 
-from __future__ import annotations
 
 import logging
 from pathlib import Path

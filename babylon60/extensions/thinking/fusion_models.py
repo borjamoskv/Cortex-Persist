@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX.
@@ -11,7 +12,6 @@ Dataclasses, enums, y utilidades de tokenización compartidas
 por el motor de fusión y otros módulos del paquete thinking.
 """
 
-from __future__ import annotations
 
 import re
 from collections import defaultdict

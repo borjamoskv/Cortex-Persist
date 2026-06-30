@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -9,7 +10,6 @@ Transforms static memory into learned intuition by:
 2. Injecting the top-K semantically relevant reflections before each new session.
 """
 
-from __future__ import annotations
 
 import json
 import logging

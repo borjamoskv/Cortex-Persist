@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Shannon Entropy Module - Corpus-Level Information Measurement (Ω₁₃).
@@ -9,7 +10,6 @@ and exergy ratio estimation.
 Status: IMPLEMENTED (upgraded from DECORATIVE).
 """
 
-from __future__ import annotations
 
 import logging
 import math

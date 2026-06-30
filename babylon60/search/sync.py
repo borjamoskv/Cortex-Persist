@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -10,7 +11,6 @@ Combines semantic vector search (sqlite-vec) with full-text search
 for hybrid retrieval using Reciprocal Rank Fusion (RRF).
 """
 
-from __future__ import annotations
 
 import json
 import logging

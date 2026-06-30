@@ -51,7 +51,7 @@ class SchemaTrait:
                 sqlite_vec.load(conn)
                 self._vector_enabled = True
                 logger.info("✅ [VECTORS] sqlite-vec extension loaded successfully.")
-            except (AttributeError, sqlite3.OperationalError, Exception) as e:
+            except (AttributeError, sqlite3.OperationalError, Exception) as e:  # noqa: BLE001
                 logger.warning(
                     "⚠️ [VECTORS] Fallback Mode ACTIVE: Could not load sqlite-vec: %s. "
                     "Semantic search will be disabled but metadata storage is preserved.",

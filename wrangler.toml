@@ -1,0 +1,6 @@
+name = "babylon-60-worker"
+main = "src/worker.js"
+compatibility_date = "2026-06-30"
+
+[observability]
+enabled = true

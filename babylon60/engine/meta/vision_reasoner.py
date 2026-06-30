@@ -1,10 +1,10 @@
+from __future__ import annotations
 from decimal import Decimal
 """
 VisAnomReasoner Topology - VLM Time-Series Rationales for Anomaly Detection
 Implements algorithms inspired by arXiv:2605.30344v1 for visual time-series reasoning.
 """
 
-from __future__ import annotations
 
 import logging
 from collections import deque

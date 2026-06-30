@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Bayesian Trust Updater - Sovereign confidence as a running posterior.
@@ -14,7 +15,6 @@ Usage:
     result = await updater.update(fact_id=42, signal=Signal.CONFIRM)
 """
 
-from __future__ import annotations
 
 import logging
 from dataclasses import dataclass

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Sovereign Growth Engine v1.0.0.
@@ -6,7 +7,6 @@ Motor soberano de crecimiento acelerado. Detecta oportunidades de monetización
 y ejecuta distribución de forma unificada.
 """
 
-from __future__ import annotations
 
 import asyncio
 import logging

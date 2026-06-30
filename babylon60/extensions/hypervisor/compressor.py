@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """CORTEX Hypervisor - Complexity Compressor.
@@ -6,7 +7,6 @@ Transforms rich internal types into simple tenant-facing models.
 This is the thermal barrier: internal entropy stays inside.
 """
 
-from __future__ import annotations
 
 import logging
 import time

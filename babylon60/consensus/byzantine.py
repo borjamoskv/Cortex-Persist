@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX.
@@ -35,7 +36,6 @@ Usage::
     print(verdict.confidence)           # Overall consensus confidence
 """
 
-from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field

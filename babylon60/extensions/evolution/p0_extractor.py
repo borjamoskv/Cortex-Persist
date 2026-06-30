@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX.
@@ -34,7 +35,6 @@ Invariants:
     - Ω₉ compliance: output declares C4-SIMULACIÓN status
 """
 
-from __future__ import annotations
 
 import json
 import logging

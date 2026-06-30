@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Weighted 0-100 health scoring engine.
@@ -5,7 +6,6 @@ from decimal import Decimal
 Uses sealed Grade enum. Supports configurable weight overrides.
 """
 
-from __future__ import annotations
 
 from babylon60.extensions.health.models import Grade, HealthScore, MetricSnapshot
 

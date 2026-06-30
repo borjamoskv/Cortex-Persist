@@ -59,24 +59,44 @@ class ZKInvariantTransformer(ast.NodeTransformer):
         )
         
     def visit_Call(self, node: ast.Call) -> ast.AST:
-        """Transforms recursive verification into Curve Cycle delegation."""
+        """Transforms recursive verification and bridge consensus logic."""
         self.generic_visit(node)
-        if isinstance(node.func, ast.Name) and node.func.id in ['verify_proof', 'check_signature']:
-            self.applied_invariants.add("CurveCycle")
-            return ast.Call(
-                func=ast.Name(id='CurveCycleRecursion', ctx=ast.Load()),
-                args=node.args,
-                keywords=node.keywords
-            )
+        if isinstance(node.func, ast.Name):
+            # 1. ZK Recursion
+            if node.func.id in ['verify_proof', 'check_signature']:
+                self.applied_invariants.add("CurveCycle")
+                return ast.Call(
+                    func=ast.Name(id='CurveCycleRecursion', ctx=ast.Load()),
+                    args=node.args,
+                    keywords=node.keywords
+                )
+            # 2. ZK Bridges (Puentes): Consensus Header Validation
+            elif node.func.id in ['verify_headers', 'sync_committee', 'tendermint_bft']:
+                self.applied_invariants.add("ConsensusProofFolding")
+                return ast.Call(
+                    func=ast.Name(id='ConsensusProofFolding', ctx=ast.Load()),
+                    args=node.args,
+                    keywords=node.keywords
+                )
+            # 3. ZK Bridges: Batch Signature Verification for Multi-Sig/Validators
+            elif node.func.id in ['verify_bls_signatures', 'verify_validators']:
+                self.applied_invariants.add("BLSBatching")
+                return ast.Call(
+                    func=ast.Name(id='BLSBatchVerification', ctx=ast.Load()),
+                    args=node.args,
+                    keywords=node.keywords
+                )
         return node
 
 class AsymmetricZKCompiler:
     def __init__(self) -> None:
-        self.cost_reductions: dict[str, float] = {
+        self.cost_reductions: Dict[str, float] = {
             "GKR": 0.60,
             "Nova": 0.50,
             "LogUp": 0.45,
             "CurveCycle": 0.85, # Avoids O(N log N) non-native field simulation
+            "ConsensusProofFolding": 0.90, # Aggregates N bridge headers into 1 O(1) proof
+            "BLSBatching": 0.75, # Random linear combination of N signatures -> 1 pairing check
             "PlonK": 0.0
         }
 
@@ -140,3 +160,9 @@ if __name__ == "__main__":
     
     recursion_circuit = "def ivc_verify(proof, vk): return verify_proof(proof, vk)"
     print(compiler.compile_circuit("Recursive_SNARK", recursion_circuit))
+    
+    bridge_consensus_circuit = "def check_light_client(headers): return verify_headers(headers)"
+    print(compiler.compile_circuit("ZK_Bridge_Consensus", bridge_consensus_circuit))
+    
+    bridge_sig_circuit = "def check_validators(sigs, pubkeys, msg): return verify_bls_signatures(sigs, pubkeys, msg)"
+    print(compiler.compile_circuit("ZK_Bridge_BLS_Batch", bridge_sig_circuit))

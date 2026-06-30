@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -5,7 +6,6 @@ Ouroboros-Omega: The Central Autopoietic Metabolism of CORTEX.
 Implements Darwinian Code Mutation (Axiom Ω₂) with fully atomic rollback.
 """
 
-from __future__ import annotations
 
 import ast
 import copy

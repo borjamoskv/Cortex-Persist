@@ -31,6 +31,8 @@ def _run_async(coro: Coroutine[Any, Any, _T]) -> _T:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def delete(fact_id, reason, tenant_id, db) -> None:
     """Soft-delete: depreca un fact y auto-sincroniza JSON."""
+    from babylon60.cli.common import resolve_cli_tenant
+    tenant_id = resolve_cli_tenant(tenant_id)
 
     async def _do_delete():
         engine = get_engine(db)
@@ -77,6 +79,8 @@ def delete(fact_id, reason, tenant_id, db) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def list_facts(project, fact_type, limit, tenant_id, db) -> None:
     """Listar facts activos (tabulado)."""
+    from babylon60.cli.common import resolve_cli_tenant
+    tenant_id = resolve_cli_tenant(tenant_id)
 
     async def _do_list():
         engine = get_engine(db)
@@ -148,6 +152,8 @@ def list_facts(project, fact_type, limit, tenant_id, db) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def edit(fact_id, new_content, tenant_id, db) -> None:
     """Editar un fact: depreca el viejo y crea uno nuevo con el contenido actualizado."""
+    from babylon60.cli.common import resolve_cli_tenant
+    tenant_id = resolve_cli_tenant(tenant_id)
 
     async def _do_edit():
         engine = get_engine(db)
@@ -194,6 +200,8 @@ def edit(fact_id, new_content, tenant_id, db) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def inspect(fact_id, tenant_id, db) -> None:
     """Deep inspection of a fact (Double-Plane V2 facets)."""
+    from babylon60.cli.common import resolve_cli_tenant
+    tenant_id = resolve_cli_tenant(tenant_id)
 
     async def _do_inspect():
         engine = get_engine(db)

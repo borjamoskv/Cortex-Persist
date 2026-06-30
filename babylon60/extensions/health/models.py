@@ -1,6 +1,6 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
-from __future__ import annotations
 
 import enum
 import time

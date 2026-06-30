@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -9,7 +10,6 @@ to prevent accidental synchronization to cloud backends.
 Pattern coverage: 25 categories, 4 severity tiers.
 """
 
-from __future__ import annotations
 
 import logging
 import re

@@ -221,7 +221,7 @@ async def store_fact(
             confidence=str(confidence),
             source_metadata=source_meta,
         )
-    except (Exception) as e:
+    except (Exception) as e:  # noqa: BLE001
         logger.error("SAGA-1 Abort: Fact validation failed: %s", e)
         return "aborted:validation_error"
 

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
@@ -14,7 +15,6 @@ Defense Layers:
   L5: Encoded payloads (entropy scoring)
 """
 
-from __future__ import annotations
 
 import logging
 import math
