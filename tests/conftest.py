@@ -112,6 +112,8 @@ def isolate_swarm_ledger(tmp_path, monkeypatch):
     db_path = tmp_path / "swarm_ledger.db"
     monkeypatch.setenv("CORTEX_SWARM_DB_PATH", str(db_path))
     monkeypatch.setenv("CORTEX_DB_PATH", str(tmp_path))
+    monkeypatch.setenv("CORTEX_DIR", str(tmp_path))
+    monkeypatch.setenv("MOSKV_DIR", str(tmp_path))
 
 
 def pytest_configure(config):
