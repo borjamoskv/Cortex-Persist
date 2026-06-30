@@ -21,23 +21,33 @@ def _map_name(fullname: str) -> str:
     return fullname
 
 
+_in_ensure_compat = False
+
+
 def _ensure_compat_aliases():
-    for name in list(sys.modules.keys()):
-        if name.startswith("babylon60.") or name == "babylon60":
-            if name.startswith("babylon60.extensions"):
-                alias1 = "cortex_extensions" + name[len("babylon60.extensions"):]
-            elif name.startswith("babylon60"):
-                alias1 = "cortex" + name[len("babylon60"):]
-            else:
-                alias1 = name
+    global _in_ensure_compat
+    if _in_ensure_compat:
+        return
+    _in_ensure_compat = True
+    try:
+        for name in list(sys.modules.keys()):
+            if name.startswith("babylon60.") or name == "babylon60":
+                if name.startswith("babylon60.extensions"):
+                    alias1 = "cortex_extensions" + name[len("babylon60.extensions"):]
+                elif name.startswith("babylon60"):
+                    alias1 = "cortex" + name[len("babylon60"):]
+                else:
+                    alias1 = name
 
-            if alias1 not in sys.modules:
-                sys.modules[alias1] = _CortexCompat(alias1)
+                if alias1 not in sys.modules:
+                    sys.modules[alias1] = _CortexCompat(alias1)
 
-            if name.startswith("babylon60"):
-                alias2 = "cortex" + name[len("babylon60"):]
-                if alias2 not in sys.modules:
-                    sys.modules[alias2] = _CortexCompat(alias2)
+                if name.startswith("babylon60"):
+                    alias2 = "cortex" + name[len("babylon60"):]
+                    if alias2 not in sys.modules:
+                        sys.modules[alias2] = _CortexCompat(alias2)
+    finally:
+        _in_ensure_compat = False
 
 
 class _CortexCompat(types.ModuleType):
