@@ -37,7 +37,7 @@ A continuación se detallan los programas de investigación no-algebrizantes act
 - **Mecanismo:** A diferencia de $P$ vs $NP$, donde se busca probar una separación, el consenso general es que $P = BPP$ (la aleatoriedad no otorga poder computacional adicional de manera exponencial).
 - **Avances Recientes (2022-2025):** El trabajo de Ryan Williams y Lijie Chen (2022) demostró avances cruciales hacia la desaleatorización completa (desaleatorización no trivial implica cotas inferiores). En abril de 2025, Williams demostró que cualquier algoritmo que use espacio $t$ puede transformarse para reducir drásticamente el espacio a $\approx \sqrt{t}$, reestructurando el campo de las relaciones tiempo-espacio.
 
-## 🔮 4. CONTEXTO CUÁNTICO: CLASE MIP* Y ENTRALAZAMIENTO
+## 🔮 4. CONTEXTO CUÁNTICO: CLASE MIP* Y ENTRELAZAMIENTO
 *Teorema MIP* = RE (Ji, Natarajan, Vidick, Wright, Yuen, 2020)*
 - **Sustrato:** Sistemas de pruebas interactivas multi-probador con entrelazamiento cuántico.
 - **Mecanismo:** El teorema demuestra que $MIP^* = RE$ (la clase de problemas recursivamente enumerables). Su impacto es de naturaleza metamatemática profunda: refuta la conjetura de inmersión de Connes en álgebras de operadores y resuelve el problema de Tsirelson en física cuántica.
