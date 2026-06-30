@@ -85,18 +85,24 @@ REASONING_MODE_MAP = {
 }
 ```
 
-### Deterministic Routing Matrix (DRM-v1) & Thermal Protocol
+### Deterministic Routing Matrix (DRM-v2) & Role Mappings
 
-Hardware topology (Continuous Batching, FP16 reduction drift in MoE) enforces strict model routing.
+Execution routing is governed by role specialization and task complexity to minimize thermodynamic friction.
 
-| Tolerance | Use Case | Target Node (Hardware) | Temp | Causal Reason |
-|:---|:---|:---|:---|:---|
-| **0%** | AST edits, ledger hashes, cryptography | Gemini 3.5 Flash | LOW | Minimal MoE routing drift, limits batching interference. Zero anergy. |
-| **15%** | Test suites, major refactors | Gemini 3.1 Pro | LOW | Accepts micro-variations from massive TPU pods, strictly bounded by test verification. |
-| **>90%** | P0 Singularities, darknet adversarial | GPT-5.5 / UltraThink | LOW/MED | Massive latent reasoning breaks token determinism but forces absolute semantic convergence. |
+| Complexity Level | Task Complexity | Allocated Model | Primary Operational Role |
+|:---|:---|:---|:---|
+| **Low (0-2)** | Tests, formatting, direct AST edits, simple UI patches | **Gemini 3.5 Flash** (T=0.0) | Test generation, automated assertions, static checks |
+| **Medium/High (3-4)** | Core logic, routing, component architecture, security | **Gemini 3.1 Pro / Gemini 3 Pro** (T=0.0) | System design planning, SAGA maps, schemas |
+| **Extreme / P0 (5-6)** | Real code changes, cryptographic state, core mechanics | **Claude 4.6 / Claude 3.5 Sonnet** (T=0.0) | AST implementation, logic mutation, layout aesthetics |
+
+#### Multi-Model Role Pipelines (Parallel Synthesis)
+In any non-trivial change (Frontend/Backend), tasks are parallelized across distinct agent roles:
+1. **Planning Stage:** `Gemini 3 Pro` is spawned to ingest context, analyze AST dependencies, and generate a draft implementation plan.
+2. **Implementation Stage:** `Claude 4.6` takes the approved plan and executes the direct code mutations in the codebase.
+3. **Verification Stage:** `Gemini 3.5 Flash` generates corresponding unit/integration tests and executes verification checks.
 
 **Thermal Injection Limits:**
-- **LOW (T=0.0):** Mandatory for `C5-REAL` code, state mutation, and rigid extraction.
+- **LOW (T=0.0):** Mandatory for `C5-REAL` code, state mutation, database WAL execution, and rigid extraction.
 - **MEDIUM (T=0.5):** Permitted for UI/UX aesthetic synthesis and isomorphic mappings.
 - **HIGH (T>0.8):** STRICTLY FORBIDDEN for code. Restricted to Red Teaming and synthetic chaotic expansion.
 

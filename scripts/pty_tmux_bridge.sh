@@ -23,7 +23,10 @@ show_help() {
     echo "  spawn <cmd>      Inicia una sesión desacoplada ejecutando <cmd>."
     echo "  read             Captura el buffer visual actual de la pantalla (pane viewport)."
     echo "  history          Captura todo el buffer del scrollback histórico (hasta 32k líneas)."
+    echo "  dump <file>      Vuelca el buffer visual actual a un archivo físico."
     echo "  inject <keys>    Inyecta secuencias de teclas físicas o combinaciones (ej. Enter, C-c, Down)."
+    echo "  send-text <txt>  Inyecta una cadena de texto literal de forma segura."
+    echo "  clear            Limpia la pantalla de la TUI (inyecta C-l)."
     echo "  wait <regex> [t] Bloquea el hilo esperando que la expresión regular coincida en pantalla (timeout t seg, def: 10)."
     echo "  resize <w> <h>   Redimensiona el viewport del terminal virtual (ej. resize 120 40)."
     echo "  status           Muestra el PID de ejecución, tiempo de vida y estado de salud."
@@ -71,6 +74,20 @@ case "$COMMAND" in
         tmux capture-pane -S -32768 -t "$SESSION_NAME" -p
         ;;
 
+    dump)
+        FILE="${1:-}"
+        if [ -z "$FILE" ]; then
+            echo "❌ [ERROR] Debes especificar la ruta física del archivo (ej. dump out.txt)." >&2
+            exit 1
+        fi
+        if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+            echo "❌ [ERROR] La sesión '$SESSION_NAME' no existe." >&2
+            exit 1
+        fi
+        tmux capture-pane -t "$SESSION_NAME" -p > "$FILE"
+        echo "[C5-REAL] TMUX PTY [$SESSION_NAME] -> Viewport volcado en $FILE"
+        ;;
+
     inject)
         KEY="$*"
         if [ -z "$KEY" ]; then
@@ -82,7 +99,31 @@ case "$COMMAND" in
             exit 1
         fi
         tmux send-keys -t "$SESSION_NAME" "$KEY"
-        echo "[C5-REAL] TMUX PTY [$SESSION_NAME] -> Simulación física inyectó: $KEY"
+        echo "[C5-REAL] TMUX PTY [$SESSION_NAME] -> Simulación física inyectó tecla(s): $KEY"
+        ;;
+
+    send-text)
+        TEXT="$*"
+        if [ -z "$TEXT" ]; then
+            echo "❌ [ERROR] Texto vacío para inyectar." >&2
+            exit 1
+        fi
+        if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+            echo "❌ [ERROR] La sesión '$SESSION_NAME' no existe." >&2
+            exit 1
+        fi
+        # Usa -l para literal
+        tmux send-keys -t "$SESSION_NAME" -l "$TEXT"
+        echo "[C5-REAL] TMUX PTY [$SESSION_NAME] -> Simulación física inyectó texto literal: $TEXT"
+        ;;
+
+    clear)
+        if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+            echo "❌ [ERROR] La sesión '$SESSION_NAME' no existe." >&2
+            exit 1
+        fi
+        tmux send-keys -t "$SESSION_NAME" "C-l"
+        echo "[C5-REAL] TMUX PTY [$SESSION_NAME] -> Pantalla limpiada (C-l inyectado)."
         ;;
 
     wait)

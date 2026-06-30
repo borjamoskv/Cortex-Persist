@@ -339,6 +339,16 @@ def calculate_exergy(content: str) -> float:
     return min(exergy * 1.4, 1.0)
 
 
+class ExergyGuardViolation(GuardViolation, ValueError):
+    """Raised when exergy guard validation fails."""
+    pass
+
+
+class LandauerGuardViolation(GuardViolation, ValueError):
+    """Raised when Landauer guard validation fails."""
+    pass
+
+
 class ExergyGuard(Guard[str]):
     """
     Evaluates semantic exergy of incoming facts to ensure they meet Axiom Ω₁₃.
@@ -360,12 +370,26 @@ class ExergyGuard(Guard[str]):
         Raises:
             GuardViolation: If the exergy score falls below the minimum viable threshold.
         """
-        # Code snippets and JSON have arbitrary syntax, ignore for now to prevent false
-        # positives.
-        if fact_type not in ("decision", "rule", "note", "analysis", "thought"):
-            return payload
+        self.check_thermodynamic_yield(payload, project, fact_type, source, **kwargs)
+        return payload
 
-        score = calculate_exergy(payload)
+    def check_thermodynamic_yield(
+        self,
+        content: str,
+        project: str = "",
+        fact_type: str = "note",
+        source: str | None = None,
+        **kwargs,
+    ) -> float:
+        """Calculates exergy score and enforces the cutoff threshold.
+
+        Raises:
+            ValueError: If the exergy score falls below the minimum viable threshold.
+        """
+        if fact_type not in ("decision", "rule", "note", "analysis", "thought"):
+            return 1.0
+
+        score = calculate_exergy(content)
 
         if score < MIN_EXERGY_THRESHOLD:
             logger.warning(
@@ -374,7 +398,7 @@ class ExergyGuard(Guard[str]):
                 score,
                 project,
             )
-            raise GuardViolation(
+            raise ExergyGuardViolation(
                 f"[Axiom Ω₁₃] Thermodynamic Violation: Exergy score too low "
                 f"({score:.2f} < {MIN_EXERGY_THRESHOLD}). "
                 "The text is largely rhetorical, repetitive, or conversational padding. "
@@ -382,7 +406,7 @@ class ExergyGuard(Guard[str]):
                 "and submit only crystallized structural facts."
             )
 
-        return payload
+        return score
 
 
 class LandauerGuard(Guard[str]):
@@ -401,7 +425,16 @@ class LandauerGuard(Guard[str]):
         Raises:
             GuardViolation: If the Shannon entropy falls below the threshold for a sacred fact.
         """
-        entropy = calculate_shannon_entropy(payload)
+        self.check_landauer_limit(payload, is_sacred=is_sacred, **kwargs)
+        return payload
+
+    def check_landauer_limit(self, content: str, is_sacred: bool = False, **kwargs) -> float:
+        """Validates thermodynamic density.
+
+        Raises:
+            ValueError: If the Shannon entropy falls below the threshold for a sacred fact.
+        """
+        entropy = calculate_shannon_entropy(content)
 
         # Thresholds: Sacred facts require high density (minimum 4.0 bits/char)
         if is_sacred and entropy < 4.0:
@@ -409,9 +442,9 @@ class LandauerGuard(Guard[str]):
                 "Landauer Violation (Axiom Ω₄): Rejected low entropy sacred fact (Entropy: %.2f).",
                 entropy,
             )
-            raise GuardViolation(
+            raise LandauerGuardViolation(
                 f"[Axiom Ω₄] Landauer Violation: Thermodynamic density too low for Sacred Axiom "
                 f"(Entropy: {entropy:.2f} < 4.0). Facts must be highly compressed."
             )
 
-        return payload
+        return entropy
