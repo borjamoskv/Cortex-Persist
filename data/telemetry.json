@@ -1,0 +1,12 @@
+{
+  "latency_metrics": {
+    "nvmeof_rocev2": {
+      "mean": "12.4µs",
+      "p99": "18.2µs",
+      "load": "85%",
+      "pfc": "active",
+      "hardware": "Mellanox ConnectX-6"
+    }
+  },
+  "timestamp": "2026-06-30T12:45:03Z"
+}

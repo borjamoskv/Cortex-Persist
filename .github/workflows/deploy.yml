@@ -1,0 +1,46 @@
+name: "ULTRATHINK P0: Ingesta Inmutable y Despliegue Edge"
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'data/telemetry.json'
+      - 'src/worker.js'
+jobs:
+  sign-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Clonar Repositorio
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar Entorno Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-level: '20'
+
+      - name: 2.5. Validación Estructural (Fail-Fast Termodinámico)
+        run: |
+          npm install -g ajv-cli
+          ajv validate -s schema/telemetry.schema.json -d data/telemetry.json
+
+      - name: 3. Calcular Invariante y Criptografía (Provenance Hash)
+        id: crypto_hash
+        run: |
+          # Generar hash SHA-256 puro del dataset empírico para la cabecera X-Provenance-Hash
+          DATA_HASH=$(sha256sum data/telemetry.json | awk '{print $1}')
+          echo "PROVENANCE_HASH=$DATA_HASH" >> $GITHUB_ENV
+          echo "Hash generado con éxito: $DATA_HASH"
+      - name: 4. Inyectar Matriz de Datos en el Worker
+        run: |
+          # Leer el contenido de telemetría purificada
+          DATA_CONTENT=$(cat data/telemetry.json | tr -d '\n' | sed 's/"/\\"/g')
+          
+          # Reemplazar los marcadores dinámicos dentro del script del Worker antes del renderizado
+          sed -i "s/PROVENANCE_HASH_PLACEHOLDER/${{ env.PROVENANCE_HASH }}/g" src/worker.js
+          sed -i "s/DATA_STREAM_PLACEHOLDER/$DATA_CONTENT/g" src/worker.js
+      - name: 5. Despliegue Perimetral Inmediato en Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy src/worker.js --name ultrathink-edge-ingest
