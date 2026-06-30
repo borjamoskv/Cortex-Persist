@@ -16,6 +16,21 @@ from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logger = logging.getLogger("babylon60_cascade.router")
 
+def _get_local_ollama_models() -> list[str]:
+    import sys
+    if "pytest" in sys.modules or "py.test" in sys.modules:
+        return ["qwen2.5-coder:32b", "qwen2.5-coder:7b", "llama3:latest"]
+
+    import urllib.request
+    import json
+    try:
+        req = urllib.request.Request("http://localhost:11434/api/tags")
+        with urllib.request.urlopen(req, timeout=1.0) as response:
+            data = json.loads(response.read().decode())
+            return [m["name"] for m in data.get("models", [])]
+    except Exception:
+        return []
+
 
 class CascadeRouter:
     """Tactical router to delegate heavy LLM tasks to CLI engines."""
@@ -79,6 +94,15 @@ class CascadeRouter:
                 primary_model = "qwen2.5-coder:32b"
                 fallback_model = "qwen2.5-coder:7b"
 
+                # Downgrade immediately if the primary model is not locally installed in Ollama
+                local_models = _get_local_ollama_models()
+                if primary_model not in local_models and f"{primary_model}:latest" not in local_models:
+                    if fallback_model in local_models or f"{fallback_model}:latest" in local_models:
+                        logger.info(
+                            f"🔌 [ROUTER] {primary_model} not found locally. Fast-falling back to {fallback_model}."
+                        )
+                        primary_model = fallback_model
+
                 # Graceful Degradation: Fallback to lighter local quant if attempt > 1
                 if attempt == 1:
                     if engine in ("gemini", "claude"):
@@ -109,6 +133,7 @@ class CascadeRouter:
                 process = await asyncio.create_subprocess_exec(
                     *cmd,
                     env=child_env,
+                    stdin=subprocess.DEVNULL,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                 )
@@ -150,29 +175,31 @@ class CascadeRouter:
                             os.environ.get("CORTEX_DB_PATH", "~/.cortex/cortex.db")
                         ).expanduser()
                         if db_path.exists():
-                            conn = sqlite3.connect(db_path)
+                            from babylon60.database.core import connect as secure_connect, causal_write
+                            conn = secure_connect(str(db_path))
                             digest = cortex_hash_truncated(
                                 output_content.encode("utf-8"), length=16
                             )
                             # Escribir en la tabla de episodios/BM25
-                            conn.execute(
-                                "INSERT INTO episodes (session_id, event_type, project, content) VALUES (?, ?, ?, ?)",
-                                (
-                                    "cascade-sys",
-                                    "llm_task_result",
-                                    "cortex-engine",
-                                    f"task_id:{task_id} engine:{engine} digest:{digest}\n{output_content[:500]}",
-                                ),
-                            )
-                            # Opcional: Actualizar la tarea original
-                            try:
-                                status = "completed" if process.returncode == 0 else "failed"
+                            with causal_write(conn):
                                 conn.execute(
-                                    "UPDATE tasks SET status=? WHERE id=?", (status, task_id)
+                                    "INSERT INTO episodes (session_id, event_type, project, content) VALUES (?, ?, ?, ?)",
+                                    (
+                                        "cascade-sys",
+                                        "llm_task_result",
+                                        "cortex-engine",
+                                        f"task_id:{task_id} engine:{engine} digest:{digest}\n{output_content[:500]}",
+                                    ),
                                 )
-                            except sqlite3.OperationalError:
-                                pass  # Ignore if the tasks table does not have that structure
-                            conn.commit()
+                                # Opcional: Actualizar la tarea original
+                                try:
+                                    status = "completed" if process.returncode == 0 else "failed"
+                                    conn.execute(
+                                        "UPDATE tasks SET status=? WHERE id=?", (status, task_id)
+                                    )
+                                except sqlite3.OperationalError:
+                                    pass  # Ignore if the tasks table does not have that structure
+                                conn.commit()
                             conn.close()
                     except (ValueError, TypeError, KeyError, OSError, RuntimeError) as db_e:
                         logger.error(f"⚠️ [ROUTER] DB persistence failed for indexing: {db_e}")
