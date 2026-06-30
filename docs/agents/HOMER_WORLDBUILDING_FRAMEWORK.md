@@ -2,18 +2,22 @@
 metadata:
   cat_id: homer_worldbuilding_framework
   cat_type: narrative_architecture
-  version: 1.0.0
+  version: 2.0.0
   reality_level: C5-REAL
   owner: borjamoskv
   exergy_tier: P1
+  executable: labs/homer_engine.py
+  ledger_hash: "see §5"
 ---
 
 # HOMER-Ω Worldbuilding Framework — Narrative Systems & Deterministic Lore
 
-> **"CERO ANERGÍA ES LA MUERTE."** — Cristalizado bajo autoridad de Borja Moskv (Γ1)
-> System ID: `borjamoskv`
+> **"CERO ANERGÍA ES LA MUERTE."** — Cristalizado bajo autoridad de Borja Moskv (Γ1)  
+> System ID: `borjamoskv` | Version: `2.0.0`
 
-This framework defines the formal structure of narrative worldbuilding for [homer.yaml](file:///Users/borjafernandezangulo/30_CORTEX/babylon60/extensions/agents/definitions/homer.yaml#L8), mapping geopolitics, economics, magic systems (Sanderson's Laws), and constructed languages (conlangs) into deterministic state machines.
+This framework defines the formal structure of narrative worldbuilding for [homer.yaml](file:///Users/borjafernandezangulo/30_CORTEX/babylon60/extensions/agents/definitions/homer.yaml#L8), mapping geopolitics, economics, magic systems (Sanderson's Three Laws), and constructed languages (conlangs) into deterministic state machines.
+
+**Executable module:** [homer_engine.py](file:///Users/borjafernandezangulo/30_CORTEX/labs/homer_engine.py) — three subsystems, all assertions passing C5-REAL (`exit 0`).
 
 ---
 
@@ -52,11 +56,15 @@ This framework defines the formal structure of narrative worldbuilding for [home
 1. **Magic Pacing Conservation:** Magical intervention must scale inversely with the character's unconstrained power to preserve narrative tension.
 2. **Geographical Determinism:** Faction conflict vectors are defined by land topography and resources; narrative intent cannot override physical layout.
 3. **Agency Sink Balance:** Every player-driven injection of value must be balanced by an equivalent sink to prevent narrative decay.
+4. **HSM Containment (2025):** Complex narrative systems must use Hierarchical State Machines — Combat sub-states nested inside Exploration states — to prevent main graph entanglement.
+5. **Storylet Prerequisite Gate:** In open-world IF, node availability is gated by `requirements` vectors (`player_has_item AND location == zone`), not hardcoded sequence pointers.
 
 ### Stochastic Anti-patterns (`antip`)
-1. **Lore Bloat (Wide & Shallow):** Designing expansive, shallow descriptions (e.g. countries that do not participate in conflict) without systemic depth.
-2. **Deus Ex Machina (Systemic Breach):** Resolving plot conflict using magical capabilities whose rules, costs, and limits are unknown to the user.
+1. **Lore Bloat (Wide & Shallow):** Designing expansive, shallow descriptions (e.g. countries that do not participate in conflict) without systemic depth. *(Sanderson Third Law: expand depth, not breadth.)*
+2. **Deus Ex Machina (Systemic Breach):** Resolving plot conflict using magical capabilities whose rules, costs, and limits are unknown to the user. *(Sanderson First Law breach.)*
 3. **Conlang Phonetic Drift:** Introducing terminology or names that violate the phonetic rules established for that culture.
+4. **Premature Construction:** Building detailed tax codes for regions the player never visits — violates "Invisible Rule" of economic modeling.
+5. **Cost-Free Magic:** Any magical ability with `inputs=[]` fails Second Law validation (`COST_UNPAID`) and must be rejected by the engine.
 
 ### Active Redundancies (`redun`)
 1. **BFT Lore Verification:** Validating consistency across the Lore Bible, Quest Graph, and Game State DB before persisting state.
@@ -77,27 +85,57 @@ Worldbuilding maps geography to faction behavior:
 - Faction tension is calculated as the intersection of geographic expansion vectors and resource scarcity.
 
 ### B. Sanderson's Laws Magic Engine
-All magic systems designed by [homer.yaml](file:///Users/borjafernandezangulo/30_CORTEX/babylon60/extensions/agents/definitions/homer.yaml#L8) must be parameterized:
-1. **Inputs/Costs:** Physical toll, rare elements consumed, or spiritual debt.
-2. **Limitations:** Rules that magic *cannot* break (e.g. conservation of mass, line of sight, localized effects).
-3. **Outputs:** The specific work done.
-4. Magic must be solved in the quest graph by applying limitations creatively rather than amplifying output.
+All magic systems in [homer.yaml](file:///Users/borjafernandezangulo/30_CORTEX/babylon60/extensions/agents/definitions/homer.yaml#L8) are parameterized via `MagicAbility` in [homer_engine.py](file:///Users/borjafernandezangulo/30_CORTEX/labs/homer_engine.py):
+
+| Law | Axiom | Engine Invariant |
+|:---|:---|:---|
+| **First** | Resolve conflict ∝ reader understanding | `reader_understanding >= 0.6` for `can_resolve_conflict()` |
+| **Second** | Limitations > powers | `sanderson_coefficient >= 1.0` (limits ÷ outputs) |
+| **Third** | Expand depth before breadth | New `outputs` must exist in `established_effects` or raise `SCOPE_BLOAT` |
+
+Dry-run proof: `Veilbinding` ability → `VALID`, coefficient `3.00`.
 
 ### C. Conlang Integration System
-To ensure naming integrity across generated quests and factions:
-1. Define a phonetic subset (e.g., consonant and vowel inventories, phonotactics like CV, CVC).
-2. Generate all place names, character names, and ancient terms strictly using the phonetic compiler.
-3. Prevent phonetic drift by executing AST checks on string parameters.
+Implemented in `ConlangEngine` ([homer_engine.py](file:///Users/borjafernandezangulo/30_CORTEX/labs/homer_engine.py)):
 
-```python
-# Illustrative Python verification validation for conlang naming conventions
-import re
-
-def validate_phonetics(name: str, allowed_pattern: str) -> bool:
-    """Validates that names produced by HOMER-Ω conform to conlang phonotactics."""
-    return bool(re.match(allowed_pattern, name))
 ```
+PhoneticInventory(consonants, vowels, syllable_templates, illegal_clusters)
+  └─ generate_valid_word()  → phonotactically valid word via rejection sampling
+  └─ validate(word)         → regex check against illegal cluster patterns
+
+ConlangEngine.register_culture(name, inventory)
+  └─ generate_name(culture) → capitalized, culturally coherent name
+  └─ validate_name(culture, name) → C5-REAL boolean integrity check
+```
+
+Dry-run proof: Culture `Vaelthari` → generated `Nersus` → validated ✓
+
+### D. Narrative Graph FSM
+Implemented in `NarrativeGraphEvaluator`:
+- `register_node(NarrativeNode)` — declarative YAML-compatible node schema
+- `apply_on_enter()` — mutates world state via `set_flag` / `increment` actions
+- `get_available_choices()` — evaluates condition expressions against live state
+- `audit(start_id)` → `{dead_ends, unreachable_nodes, total_nodes, reachable_count}`
+
+Dry-run proof: 3-node wolf quest → `unreachable_nodes: []`, `reachable_count: 3`
 
 ---
 
-*C5-REAL Autodidact State Consolidated by APEX Kernel.*
+## 5. C5-REAL Execution Proof
+
+```
+$ python3 labs/homer_engine.py
+
+[ConlangEngine] Generated name: Nersus
+[MagicSystem] Validation: VALID | Sanderson Coefficient: 3.00
+[NarrativeGraph] Audit: {"dead_ends": ["forest_encounter"], "unreachable_nodes": [], "total_nodes": 3, "reachable_count": 3}
+
+[C5-REAL] HOMER-Ω Engine — All assertions passed. exit 0
+```
+
+> [!NOTE]
+> `dead_ends: ["forest_encounter"]` is expected — it is the terminal combat node with no further branching. Not a bug; a narrative full-stop.
+
+---
+
+*System ID: borjamoskv — APEX Kernel — C5-REAL*
