@@ -39,3 +39,9 @@ class CortexSemanticEngram(CortexFactModel):
         """Process a retrieval event, boosting synaptic energy (simulate LTP)."""
         object.__setattr__(self, "last_accessed", time.time())
         object.__setattr__(self, "energy_level", min(1.0, self.energy_level + boost))
+
+    def compute_decay(self, decay_rate_per_day: float = 0.05) -> float:
+        """Calculate the current actual energy accounting for temporal decay."""
+        days_since_access = max(0.0, (time.time() - self.last_accessed) / 86400.0)
+        decayed = self.energy_level - (days_since_access * decay_rate_per_day)
+        return max(0.0, float(decayed))

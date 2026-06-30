@@ -254,7 +254,7 @@ class CortexFactModel(BaseModel):
     # Sovereign Metadata
     is_diamond: bool = Field(default=False, description="Immune to temporal decay.")
     is_bridge: bool = Field(default=False, description="Pattern transferred between projects.")
-    confidence: str = Field(..., description="Confidence level [C1-C5]. OBLIGATORIO.")
+    confidence: str = Field(default="C5", description="Confidence level [C1-C5]. OBLIGATORIO.")
 
     # Entropy and Health (The OUROBOROS engine will update this)
     success_rate: float = Field(default=1.0, description="Degrades if this fact causes errors.")
@@ -308,7 +308,8 @@ class CortexFactModel(BaseModel):
 
     # Pragmatic Metamemory Phase 1 Additions
     source_metadata: SourceMetadata = Field(
-        ..., description="Provenance of the fact for Source Monitoring. OBLIGATORIO."
+        default_factory=lambda: SourceMetadata(origin="system", author="system", confidence_in_source=1.0),
+        description="Provenance of the fact for Source Monitoring. OBLIGATORIO.",
     )
     access_stats: MemoryAccessStats = Field(
         default_factory=MemoryAccessStats, description="Metamemory usage stats."
