@@ -7,6 +7,7 @@ Ejecución Geométrica de Consenso sin Reyes.
 import asyncio
 import hashlib
 import logging
+import os
 from typing import Any
 
 from babylon60.agents.primitives.dispatcher import apex_dispatcher
@@ -99,9 +100,19 @@ class SanedrinCouncil:
 
         # [C5-REAL] Mitigation for ADVERSARIAL_VECTOR_2 (BFT Sybil Injection)
         # Enforce hardware/provider asymmetry. Each node must run on an isolated stochastic matrix.
-        self.router_n1 = router or CortexLLMRouter(primary=LLMProvider(provider="anthropic"))
-        self.router_n2 = router or CortexLLMRouter(primary=LLMProvider(provider="groq"))
-        self.router_n3 = router or CortexLLMRouter(primary=LLMProvider(provider="openai"))
+        self.router_n1 = router or CortexLLMRouter(
+            primary=LLMProvider(
+                provider="anthropic", api_key=os.environ.get("ANTHROPIC_API_KEY", "mock_key")
+            )
+        )
+        self.router_n2 = router or CortexLLMRouter(
+            primary=LLMProvider(provider="groq", api_key=os.environ.get("GROQ_API_KEY", "mock_key"))
+        )
+        self.router_n3 = router or CortexLLMRouter(
+            primary=LLMProvider(
+                provider="openai", api_key=os.environ.get("OPENAI_API_KEY", "mock_key")
+            )
+        )
 
         self.nodes = [
             SanedrinNode("N1-Synthesizer", "Claude-3.5-Simulation", self.router_n1),
