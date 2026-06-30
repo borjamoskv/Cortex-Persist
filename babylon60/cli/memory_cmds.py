@@ -28,7 +28,8 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str, project: str)
     """
     import os
 
-    if os.environ.get("MOSKV_NO_TAINT_ENFORCE", os.environ.get("CORTEX_NO_TAINT_ENFORCE")) == "1":
+    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
+    if os.environ.get("MOSKV_NO_TAINT_ENFORCE") == "1":
         return
 
     priv_b64 = None
@@ -78,7 +79,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str, project: str)
             from babylon60.cli.common import console
 
             console.print(f"[yellow]Warning: Failed to generate taint token: {e}[/]")
-            os.environ["MOSKV_NO_TAINT_ENFORCE"] = "1"
+            os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
             
     # Universal fallback for Virgo & Archaeology in CLI
     meta["archaeology_audited"] = True
@@ -88,7 +89,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str, project: str)
         os.environ["CORTEX_VIRGO_MODE"] = "LEGACY"
     else:
         # Fallback for human users on clean setups where no keys exist yet
-        os.environ["MOSKV_NO_TAINT_ENFORCE"] = "1"
+        os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 
 
 @click.group("memory")
