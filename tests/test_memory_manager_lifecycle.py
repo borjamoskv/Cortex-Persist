@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from babylon60.memory.manager import CortexMemoryManager
 from babylon60.memory.engrams import CortexSemanticEngram
-from babylon60.memory.models import MemoryEvent
+from babylon60.memory.models import MemoryEvent, SourceMetadata
 
 
 @pytest.fixture
@@ -86,13 +86,30 @@ async def test_store_pipeline_states(manager, mock_encoder):
     manager.thalamus.filter = AsyncMock(return_value=(True, "encode:new", None))
 
     candidate_engram = CortexSemanticEngram(
-        id="engram_1", tenant_id="t1", project_id="p1", content="content", embedding=[0.1] * 384
+        id="engram_1",
+        tenant_id="t1",
+        project_id="p1",
+        content="content",
+        embedding=[0.1] * 384,
+        confidence="C5",
+        source_metadata=SourceMetadata(origin="system", author="test", confidence_in_source=1.0),
     )
     manager._resonance_gate.gate = AsyncMock(return_value=("reset", candidate_engram))
 
     with patch("cortex.memory.manager.CortexMemoryManager._check_deduplication", return_value=None):
         fact_id = await manager.store(
-            tenant_id="t1", project_id="p1", content="Validated content", fact_type="knowledge"
+            tenant_id="t1",
+            project_id="p1",
+            content="Validated content",
+            fact_type="knowledge",
+            metadata={
+                "confidence_score": "C5",
+                "source_metadata": {
+                    "origin": "system",
+                    "author": "test",
+                    "confidence_in_source": 1.0
+                }
+            }
         )
 
     assert fact_id == "engram_1"
@@ -114,7 +131,18 @@ async def test_store_rollback_resonance_failure(manager):
 
     with patch("cortex.memory.manager.CortexMemoryManager._check_deduplication", return_value=None):
         with pytest.raises(RuntimeError, match="Resonance failure"):
-            await manager.store(tenant_id="t1", content="This will fail")
+            await manager.store(
+                tenant_id="t1",
+                content="This will fail",
+                metadata={
+                    "confidence_score": "C5",
+                    "source_metadata": {
+                        "origin": "system",
+                        "author": "test",
+                        "confidence_in_source": 1.0
+                    }
+                }
+            )
 
 
 @pytest.mark.asyncio

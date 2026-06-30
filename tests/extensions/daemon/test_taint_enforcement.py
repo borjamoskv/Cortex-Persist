@@ -28,7 +28,7 @@ from babylon60.engine.causal.verification_oracle import (
 )
 from babylon60.engine.core.fact_store_core import insert_fact_record
 from babylon60.memory.ledger import EventLedgerL3
-from babylon60.memory.models import MemoryEvent, CortexFactModel
+from babylon60.memory.models import MemoryEvent, CortexFactModel, SourceMetadata
 from babylon60.memory.hdc.store import HDCVectorStoreL2
 from babylon60.memory.hdc.codec import HDCEncoder
 from babylon60.memory.hdc.item_memory import ItemMemory
@@ -386,6 +386,8 @@ async def test_hdc_store_l2_taint_rejection(tmp_path, agent_keys):
         embedding=[0.1] * 128,
         specular_embedding=[1] * 128,
         metadata={},
+        confidence="C5",
+        source_metadata=SourceMetadata(origin="system", author="test", confidence_in_source=1.0),
     )
     with pytest.raises(TaintValidationError):
         await store.memorize(fact_missing)
@@ -399,6 +401,8 @@ async def test_hdc_store_l2_taint_rejection(tmp_path, agent_keys):
         embedding=[0.1] * 128,
         specular_embedding=[1] * 128,
         metadata={"cortex_taint": valid_token},
+        confidence="C5",
+        source_metadata=SourceMetadata(origin="system", author="test", confidence_in_source=1.0),
     )
     # Should succeed
     await store.memorize(fact_valid)
@@ -463,6 +467,8 @@ async def test_write_trait_taint_rejection(clean_db, agent_keys):
         content="WriteTrait Fact",
         embedding=[0.1] * 384,
         metadata={},
+        confidence="C5",
+        source_metadata=SourceMetadata(origin="system", author="test", confidence_in_source=1.0),
     )
     with pytest.raises(TaintValidationError):
         await writer.memorize(fact_missing)
@@ -475,6 +481,8 @@ async def test_write_trait_taint_rejection(clean_db, agent_keys):
         content="WriteTrait Fact",
         embedding=[0.1] * 384,
         metadata={"cortex_taint": valid_token},
+        confidence="C5",
+        source_metadata=SourceMetadata(origin="system", author="test", confidence_in_source=1.0),
     )
     # Should succeed
     await writer.memorize(fact_valid)

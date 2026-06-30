@@ -6,7 +6,7 @@ import time
 from typing import Any
 
 from babylon60.compat.optional import np
-from babylon60.memory.models import CortexFactModel
+from babylon60.memory.models import CortexFactModel, SourceMetadata
 from babylon60.utils import void_vec
 from babylon60.utils.turboquant import encode_query_qjl
 
@@ -51,6 +51,15 @@ class ReadTrait:
                 rows = cursor.fetchall()
                 final_facts = []
                 for row in rows:
+                    parsed_meta = json.loads(row["metadata"]) if row["metadata"] else {}
+                    source_meta_dict = parsed_meta.get("source_metadata")
+                    if source_meta_dict:
+                        try:
+                            source_meta = SourceMetadata.model_validate(source_meta_dict)
+                        except Exception:
+                            source_meta = SourceMetadata(origin="system", author="unknown", confidence_in_source=1.0)
+                    else:
+                        source_meta = SourceMetadata(origin="system", author="unknown", confidence_in_source=1.0)
                     fact = CortexFactModel(
                         id=row["id"],
                         tenant_id=row["tenant_id"],
@@ -63,7 +72,8 @@ class ReadTrait:
                         confidence=row["confidence"],
                         cognitive_layer=row["cognitive_layer"],
                         parent_decision_id=row["parent_decision_id"],
-                        metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                        source_metadata=source_meta,
+                        metadata=parsed_meta,
                     )
                     object.__setattr__(fact, "_recall_score", 0.0)
                     final_facts.append(fact)
@@ -175,6 +185,15 @@ class ReadTrait:
 
             final_facts = []
             for row in rows:
+                parsed_meta = json.loads(row["metadata"]) if row["metadata"] else {}
+                source_meta_dict = parsed_meta.get("source_metadata")
+                if source_meta_dict:
+                    try:
+                        source_meta = SourceMetadata.model_validate(source_meta_dict)
+                    except Exception:
+                        source_meta = SourceMetadata(origin="system", author="unknown", confidence_in_source=1.0)
+                else:
+                    source_meta = SourceMetadata(origin="system", author="unknown", confidence_in_source=1.0)
                 fact = CortexFactModel(
                     id=row["id"],
                     tenant_id=row["tenant_id"],
@@ -187,7 +206,8 @@ class ReadTrait:
                     confidence=row["confidence"],
                     cognitive_layer=row["cognitive_layer"],
                     parent_decision_id=row["parent_decision_id"],
-                    metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                    source_metadata=source_meta,
+                    metadata=parsed_meta,
                 )
                 object.__setattr__(fact, "_recall_score", row["final_score"])
                 final_facts.append(fact)

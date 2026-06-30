@@ -86,7 +86,7 @@ async def compress_and_store(
     Called as a background asyncio.Task - must NEVER raise.
     """
     try:
-        from babylon60.memory.models import CortexFactModel, MemoryEntry
+        from babylon60.memory.models import CortexFactModel, MemoryEntry, SourceMetadata
 
         summary = await summarize_events(manager, events)
         is_sovereign = manager._l2.__class__.__name__ == "SovereignVectorStoreL2"
@@ -108,6 +108,8 @@ async def compress_and_store(
                 embedding=vector,
                 timestamp=time.monotonic(),
                 cognitive_layer="episodic",
+                confidence="C5",
+                source_metadata=SourceMetadata(origin="system", author="system", confidence_in_source=1.0),
                 metadata=_meta,
             )
             await manager._l2.memorize(fact)

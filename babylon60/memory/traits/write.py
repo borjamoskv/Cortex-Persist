@@ -38,6 +38,8 @@ class WriteTrait:
         # ─── PII Sanitization Gate (Moved outside the DB Lock) ────────
         sanitized_content = fact.content
         sanitized_meta = dict(fact.metadata) if fact.metadata else {}
+        if hasattr(fact, "source_metadata") and fact.source_metadata:
+            sanitized_meta["source_metadata"] = fact.source_metadata.model_dump()
 
         sanitizer = self._get_sanitizer()  # pyright: ignore[reportAttributeAccessIssue]
         if sanitizer and fact.content:

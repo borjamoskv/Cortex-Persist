@@ -139,7 +139,7 @@ class AdaptiveResonanceGate:
             sim = cosine_similarity(candidate.embedding, neighbor.embedding)
 
             # Metabolic Modifier: Lower energy engrams are harder to "wake up"
-            current_energy = neighbor.compute_decay()
+            current_energy = neighbor.energy_level
             metabolic_penalty = (1.0 - current_energy) * 0.05
 
             effective_sim = sim + topo_boost - metabolic_penalty
