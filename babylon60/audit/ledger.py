@@ -519,6 +519,17 @@ class EnterpriseAuditLedger:
 
         async with self._lock:
             async with AsyncFileLock():
+                # [C5-REAL] Circuit Breaker: Fail-Close against Phantom Fork (Adversarial Vector 1)
+                # Ensure the number of unanchored events does not exceed the maximum allowed threshold.
+                cursor = await self._conn.execute(
+                    "SELECT COUNT(*) FROM security_audit_log WHERE external_anchor IS NULL"
+                )
+                row = await cursor.fetchone()
+                if row and row[0] > (self.max_batch_size * 2):
+                    raise RuntimeError(
+                        f"[C5-REAL] Circuit Breaker Tripped: {row[0]} unanchored events. Anchor worker stalled or blocked by adversarial network isolation."
+                    )
+
                 # 1. Fetch the actual last hash from DB to support transparent rollbacks
                 cursor = await self._conn.execute(
                     "SELECT prev_hash, signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
