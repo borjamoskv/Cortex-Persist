@@ -85,20 +85,7 @@ class RetrievalOutcome:
 # ─── Core Engine ──────────────────────────────────────────────────────
 
 
-def _cosine_similarity(a: list[float], b: list[float]) -> float:
-    """Compute cosine similarity between two vectors. O(d).
-
-    Uses math.fsum (Shewchuk compensated summation) for O(1) error
-    bound regardless of dimensionality - critical for 384–768 dim embeddings.
-    """
-    if len(a) != len(b) or not a:
-        return 0.0
-    dot = math.fsum(x * y for x, y in zip(a, b, strict=True))
-    norm_a = math.sqrt(math.fsum(x * x for x in a))
-    norm_b = math.sqrt(math.fsum(x * x for x in b))
-    if norm_a < 1e-12 or norm_b < 1e-12:
-        return 0.0
-    return dot / (norm_a * norm_b)
+# cosine similarity moved away
 
 
 def _embedding_norm(embedding: list[float]) -> float:
@@ -125,7 +112,7 @@ class MetamemoryMonitor:
 
     def judge_fok(
         self,
-        query_embedding: list[float],
+        query_embedding: list[float] | None,
         candidate_engrams: list[Any],
         threshold: float | None = None,
     ) -> MetaJudgment:
@@ -133,17 +120,24 @@ class MetamemoryMonitor:
 
         Analyzes the similarity distribution of retrieved engrams to
         estimate whether knowledge exists in memory - even if the top
-        match isn't perfect.
+        match isn't perfect. Supports RRF hybrid scores natively.
 
         Returns a MetaJudgment with fok_score and accessibility populated.
         """
         rho = threshold or self._fok_threshold
 
-        if not candidate_engrams or not query_embedding:
+        if not candidate_engrams:
             return MetaJudgment(fok_score=0.0, accessibility=0.0, source="fok")
 
-        # Compute similarity for each candidate
-        similarities = _compute_similarities(query_embedding, candidate_engrams)
+        # Extract pre-computed scores from Hybrid/Dense search
+        similarities: list[float] = []
+        for e in candidate_engrams:
+            s = float(getattr(e, "score", getattr(e, "rrf_score", getattr(e, "_recall_score", 0.0))))
+            # Auto-scale RRF scores (which max out around 0.01639 for K=60, W=1.0)
+            if 0.0 < s < 0.1:
+                s = min(1.0, s * 60.0)
+            similarities.append(s)
+
         if not similarities:
             return MetaJudgment(fok_score=0.0, accessibility=0.0, source="fok")
 
@@ -267,9 +261,9 @@ class MetamemoryMonitor:
 
     def introspect(
         self,
-        query_embedding: list[float],
+        query_embedding: list[float] | None,
         candidate_engrams: list[Any],
-        retrieval_score: Decimal = 0.0,
+        retrieval_score: Decimal = Decimal("0.0"),
     ) -> MetaJudgment:
         """Full metacognitive assessment combining FOK, JOL, and calibration.
 
@@ -380,17 +374,7 @@ class MetamemoryMonitor:
 # ─── Extracted pure functions (Suntsitu: CC flattening) ──────────────
 
 
-def _compute_similarities(
-    query_embedding: list[float],
-    candidate_engrams: list[Any],
-) -> list[float]:
-    """Compute cosine similarities between query and candidate embeddings."""
-    similarities: list[float] = []
-    for engram in candidate_engrams:
-        emb = getattr(engram, "embedding", None)
-        if emb:
-            similarities.append(_cosine_similarity(query_embedding, emb))
-    return similarities
+# similarities computed natively now
 
 
 def _compute_fok_score(
