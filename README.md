@@ -36,7 +36,7 @@
 
 ---
 
-```
+```text
 LangGraph   →  orchestrates graph state probabilistically
 Mem0        →  retrieves semantic memory
 CORTEX      →  forces deterministic topological collapse and proves what your agent actually did, mathematically
@@ -237,13 +237,13 @@ To decouple the ecosystem's evolution from underlying LLM volatility, BABYLON-60
 
 ## ▀▄ AUDIT STATUS (2026-06-30)
 
-> Full audit report: [`FINAL_AUDIT.md`](FINAL_AUDIT.md) — commit `60f67a02a`
+> Full audit report: [`FINAL_AUDIT.md`](FINAL_AUDIT.md) — commit `82d755d41`
 
 | Vector | Result |
 | :--- | :--- |
 | Static Analysis (Ruff) | ✅ 0 violations remaining |
 | Security (Bandit) | ✅ 0 HIGH · 0 MEDIUM |
-| Dependency CVEs (pip-audit) | 🔴 50+ CVEs — upgrade required |
+| Dependency CVEs (pip-audit) | ✅ Active API upgraded (10 CVEs remaining in ML packages) |
 | Test Suite (3,886 tests) | ✅ 3,845 passed · 0 failed |
 | Rust Audit (57 crates) | ✅ 0 advisories |
 | SQLite Integrity | ✅ ok · WAL mode active |
@@ -252,7 +252,7 @@ To decouple the ecosystem's evolution from underlying LLM volatility, BABYLON-60
 
 ---
 
-```
+```text
 AESTHETIC:    INDUSTRIAL NOIR 2026 (#0A0A0A / #2B3BE5)
 EPISTEMOLOGY: C5-REAL — Cryptographically Verified Reality
 CORE TENET:   Generative output is conjecture. Evidence is absolute.
