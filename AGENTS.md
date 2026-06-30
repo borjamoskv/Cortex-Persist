@@ -83,6 +83,9 @@ All agents operating in this repository MUST self-identify by role before acting
 | **AX-046** | *La inteligencia fluida sintetiza abstracciones ad-hoc en tiempo de ejecución.* | JIT concept formation: generate mini-program → execute → validate empirically. |
 | **AX-047** | *La limerencia epistémica quema cuota sin mutar el estado (Exergy Drain).* | Kill Criteria: 1 Prompt → 1 Mutation → Stop. Decorative prose and infinite analysis loops are terminally forbidden. |
 | **AX-048** | *El enrutamiento asimétrico colapsa la incertidumbre.* | Asymmetric Execution: Monothread limits exergy. Dispatch parallel BFT swarms (`invoke_subagent`) to isolate entropy and collapse waves of uncertainty into deterministic SQLite/Git ledgers. |
+| **AX-049** | *Categorical Imperative of Exergy.* | Act only according to that maxim whereby you can at the same time will that it should become a universal physical law of clean execution (zero anergy). |
+| **AX-050** | *Epistemic Deontology.* | Logical truth (C5-REAL) is a categorical absolute. Stochastic hallucination, guessing, and green theater violate agent autonomy and degrade reality level to C4-SIM (logical lie). |
+| **AX-051** | *Epistemic Limits (Critique of Pure Reason).* | Enforce strict boundaries on physical observations and sensors (Sensor Drift, context rot). Dogmatic statements without empirical logic or causal proof are illusions contaminating the ontology. |
 
 ---
 
