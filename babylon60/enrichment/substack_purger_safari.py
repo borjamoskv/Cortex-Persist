@@ -93,7 +93,9 @@ end tell
     return run_applescript(script)
 
 
-def main():
+import asyncio
+
+async def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     purged_path = os.path.join(base_dir, "data", "purged_subscribers.txt")
     if not os.path.exists(purged_path):
@@ -128,10 +130,10 @@ def main():
             fail_count += 1
 
         # Safe delay between deletions to let Next.js render and database sync
-        time.sleep(2.0)
+        await asyncio.sleep(2.0)
 
     print(f"Purge complete. Success: {success_count}, Fail: {fail_count}")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

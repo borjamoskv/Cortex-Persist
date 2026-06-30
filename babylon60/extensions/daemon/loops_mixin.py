@@ -92,27 +92,24 @@ class LoopsMixin:
         except Exception as e:  # noqa: BLE001
             logger.error("%s loop error: %s", name, e)
 
-    def _auto_sync(self, status: DaemonStatus) -> None:
+    async def _auto_sync(self, status: DaemonStatus) -> None:
         """Automatic memory JSON ↔ CORTEX DB synchronization."""
         if not self._shared_engine:
             return
         try:
             from babylon60.extensions.sync import export_snapshot, export_to_json, sync_memory
 
-            async def _run_sync():
-                s_res = await sync_memory(self._shared_engine)
-                w_res = await export_to_json(self._shared_engine)
-                await export_snapshot(self._shared_engine)
-                return s_res, w_res
+            s_res = await sync_memory(self._shared_engine)
+            w_res = await export_to_json(self._shared_engine)
+            await export_snapshot(self._shared_engine)
 
-            sync_result, wb_result = asyncio.run(_run_sync())
-            if sync_result.had_changes:
-                logger.info("Sync: %d facts synced", sync_result.total)
-            if wb_result.had_changes:
+            if s_res.had_changes:
+                logger.info("Sync: %d facts synced", s_res.total)
+            if w_res.had_changes:
                 logger.info(
                     "Write-back: %d files, %d items",
-                    wb_result.files_written,
-                    wb_result.items_exported,
+                    w_res.files_written,
+                    w_res.items_exported,
                 )
         except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
             status.errors.append(f"Memory sync error: {e}")

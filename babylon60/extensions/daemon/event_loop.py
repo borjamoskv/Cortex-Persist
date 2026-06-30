@@ -251,8 +251,8 @@ class EventLoopMixin:
         """Async version of the main check loop."""
         while not self._shutdown:
             try:
-                # Run check in thread pool to not block the event loop
-                await asyncio.to_thread(self.check)
+                # Run check directly in the sovereign event loop natively
+                await self.check()
 
                 # Update hot state cycle counter
                 if self.hot_state is not None:

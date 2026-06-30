@@ -15,6 +15,7 @@ Commands:
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import sys
 from pathlib import Path
@@ -157,7 +158,7 @@ def start(ctx: click.Context) -> None:
 def check(ctx: click.Context) -> None:
     """Run all checks once and print results."""
     daemon = _build_daemon(ctx)
-    status = daemon.check()
+    status = asyncio.run(daemon.check())
 
     # Header
     console.print()
