@@ -1,9 +1,9 @@
 # [C5-REAL] Barreras Formales para Probar P ≠ NP  
 **Versión corregida y consolidada**  
-**cat_id:** wca-critique-barriers  
+**cat_id:** complexity-barriers-survey  
 **cat_type:** technical_survey  
 **reality_level:** C5-REAL  
-**owner:** borjamoskv / Oppie Team  
+**owner:** borjamoskv  
 **exergy_tier:** P0  
 
 ## 1. Evaluación del Documento Original (WCA)
@@ -40,24 +40,25 @@ Una prueba natural de P ≠ NP destruiría también la existencia de funciones u
 
 Tras el resultado IP = PSPACE de Shamir (1989-1992), que no relativizaba, quedó claro que las técnicas algebraicas (aritmetización) podían sortear la barrera de relativización. Aaronson y Wigderson respondieron definiendo una noción más fuerte: la *algebrización*.
 
-En lugar de dar a las máquinas acceso solo al oráculo *A*, se les da acceso tanto a *A* como a una **extensión de bajo grado** (low-degree extension) de *A* sobre un cuerpo finito. Demostraron que la mayoría de los resultados algebraicos conocidos (incluyendo IP = PSPACE, MIP = NEXP, y ciertas separaciones como MA ⊈ P/poly) *algebrizan*.
+En lugar de dar a las máquinas acceso solo al oráculo *A*, se les da acceso tanto a *A* como a una **extensión de bajo grado** (low-degree extension) de *A* sobre un cuerpo finito. Demostraron que la mayoría de los resultados algebraicos conocidos (incluyendo IP = PSPACE, MIP = NEXP, y las separaciones $MA_{EXP} \not\subseteq P/poly$ de Buhrman-Fortnow-Thierauf y $PromiseMA \not\subseteq SIZE(n^k)$ de Santhanam) *algebrizan*.
 
-Por tanto, casi todos los problemas abiertos centrales (P vs NP, P vs RP, NEXP vs P/poly) requieren técnicas **no algebrizantes** para ser resueltos.
+Por tanto, los problemas abiertos centrales de separación (P vs NP, NEXP vs P/poly) requieren técnicas **no algebrizantes** para ser resueltos. En el caso de BPP, la desaleatorización progresiva apunta a un colapso total a P ($P = BPP$).
 
 ## 5. Estado del Arte y Programas de Investigación Activos
 
 Ninguna técnica conocida supera simultáneamente las tres barreras (relativización, pruebas naturales y algebrización).
 
-Los avances más serios hacia cotas inferiores fuertes son precisamente intentos explícitos de evadirlas:
-- El **Geometric Complexity Theory (GCT)** de Mulmuley y Sohoni: usa geometría algebraica y teoría de representaciones para atacar la versión algebraica VP vs VNP (análoga a P vs NP).
-- El método de Williams (“algorithms-to-lower-bounds”): convierte mejoras algorítmicas en cotas inferiores no-naturales (como el resultado sobre NEXP vs ACC⁰).
+Los avances más serios hacia cotas inferiores fuertes son intentos explícitos de evadirlas a través de programas activos:
+- **Geometric Complexity Theory (GCT)** de Mulmuley y Sohoni: usa geometría algebraica y teoría de representaciones para atacar la versión algebraica VP vs VNP. GCT sufrió reveses en 2016 al demostrarse la no-existencia de ciertas "obstrucciones de representación" para la estrategia original, lo que obliga a replantear el marco de búsqueda de coeficientes.
+- **Algorithms-to-lower-bounds** de Williams: convierte mejoras algorítmicas de búsqueda en cotas inferiores no-naturales y no-algebrizantes.
+- **Complejidad de Pruebas (Proof Complexity) y Lifting Theorems**: buscan acotar la longitud de pruebas proposicionales y elevar cotas de árboles de decisión a comunicación.
 
-Estos programas buscan exactamente la “matemática constructiva nueva” que sería necesaria. Hasta la fecha, ninguno ha resuelto P vs NP ni VP vs VNP.
+**Nota sobre MIP\* = RE (2020):** Aunque MIP\* evade la algebrización mediante propiedades de correlación no-local en mecánica cuántica, su logro histórico reside en la refutación del problema de Tsirelson y la conjetura de Connes en álgebras de operadores. No constituye un programa activo para deducir cotas inferiores clásicas deterministas sobre la jerarquía polinómica.
 
 ## 6. Conclusión
 
-El documento original WCA no sortea ninguna de estas barreras. No proporciona una técnica nueva de cota inferior, no exhibe un método no-relativizante, no-natural y no-algebrizante, ni demuestra nada dentro de la matemática finitaria relevante para la computación. Introduce un axioma ad hoc que presupone la conclusión y mezcla niveles de infinitud de forma injustificada.
+El documento original WCA no proporciona una técnica nueva de cota inferior, no exhibe un método no-relativizante, no-natural y no-algebrizante, ni demuestra nada dentro de la matemática finitaria relevante para la computación. Introduce un axioma ad hoc que presupone la conclusión y mezcla niveles de infinitud de forma injustificada.
 
-**P ≠ NP sigue siendo un problema abierto.** Cualquier prueba genuina deberá superar las tres barreras conocidas (y posiblemente otras aún no descubiertas). El camino requiere avances profundos en matemáticas (geometría algebraica, teoría de representaciones, análisis de pseudorandomness, etc.), no axiomas circulares ni metáforas termodinámicas mal aplicadas.
+**P ≠ NP sigue siendo un problema abierto.** Cualquier prueba genuina deberá superar las tres barreras conocidas (y posiblemente otras aún no descubiertas). El camino requiere avances profundos en matemáticas rigurosas, no axiomas circulares ni analogías físicas.
 
 *Zero handwaving. Crystallized rigor.*
