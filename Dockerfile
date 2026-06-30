@@ -16,7 +16,7 @@ RUN python -m venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 
 COPY pyproject.toml README.md ./
-COPY cortex/ ./cortex/
+COPY babylon60/ ./babylon60/
 
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -e ".[api,mcp]" && \
@@ -25,13 +25,13 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Pre-create the Hugging Face cache path so the runtime-stage COPY remains valid
 # even if the embedder initialization skips downloading model artifacts.
 RUN mkdir -p /root/.cache/huggingface && \
-    python -c "from cortex.embeddings import LocalEmbedder; LocalEmbedder()"
+    python -c "from babylon60.embeddings import LocalEmbedder; LocalEmbedder()"
 
 # Stage 2: Runtime
 FROM python:3.12-slim-bookworm
 
 LABEL maintainer="borjamoskv.com"
-LABEL description="CORTEX — Sovereign Memory Engine for AI Agents"
+LABEL description="BABYLON-60 — Sovereign Memory Engine for AI Agents"
 LABEL org.opencontainers.image.source="https://github.com/borjamoskv/Cortex-Persist"
 
 WORKDIR /app
@@ -43,7 +43,7 @@ RUN apt-get update && \
 
 # Copy virtual environment and editable-install source from builder
 COPY --from=builder /app/.venv /app/.venv
-COPY --from=builder /app/cortex /app/cortex
+COPY --from=builder /app/babylon60 /app/babylon60
 
 # Run as non-root user
 RUN useradd -m -u 1000 cortex && \
@@ -65,4 +65,4 @@ EXPOSE 8484
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s \
     CMD curl -f http://localhost:8484/health || exit 1
 
-CMD ["uvicorn", "cortex.api:app", "--host", "0.0.0.0", "--port", "8484", "--workers", "1"]
+CMD ["uvicorn", "babylon60.api:app", "--host", "0.0.0.0", "--port", "8484", "--workers", "1"]

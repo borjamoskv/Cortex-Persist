@@ -2,7 +2,7 @@
 # Version Support
 
 This document defines the public support posture for released versions of
-`cortex-persist`.
+`babylon60`.
 
 ## Supported Versions
 

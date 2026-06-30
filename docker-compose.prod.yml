@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   api:
-    build: ./cortex
+    build: .
     container_name: cortex-api
     restart: always
     environment:
@@ -16,7 +16,7 @@ services:
       - postgres
 
   worker:
-    build: ./cortex
+    build: .
     container_name: cortex-worker
     restart: always
     command: python worker.py

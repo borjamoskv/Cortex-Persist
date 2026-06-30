@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "cortex-landing",
+  "name": "babylon60-landing",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat_v2"],
   "kv_namespaces": [
@@ -12,9 +12,9 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "cortex_persistence",
+      "database_name": "babylon60_persistence",
       "database_id": "e976aa16-d3f9-41eb-915e-3c9c99ceeed9",
-      "migrations_dir": "cortex/migrations/edge"
+      "migrations_dir": "babylon60/migrations/edge"
     }
   ]
 }

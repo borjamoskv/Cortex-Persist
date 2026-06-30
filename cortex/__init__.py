@@ -20,6 +20,8 @@ class _CortexCompat(types.ModuleType):
         try:
             return importlib.import_module(f"babylon60.{name}")
         except ImportError:
+            if hasattr(babylon60, name):
+                return getattr(babylon60, name)
             raise AttributeError(
                 f"module 'cortex' has no attribute '{name}' "
                 f"(babylon60.{name} not found)"
@@ -44,8 +46,15 @@ class _CortexFinder:
 
     def find_spec(self, fullname, path, target=None):
         if fullname == "cortex" or fullname.startswith("cortex."):
-            from importlib.machinery import ModuleSpec
-            return ModuleSpec(fullname, self)
+            target_name = fullname.replace("cortex", "babylon60", 1)
+            try:
+                # Only return a spec if it is actually a module or package, not an attribute
+                import importlib.util
+                if importlib.util.find_spec(target_name) is not None:
+                    from importlib.machinery import ModuleSpec
+                    return ModuleSpec(fullname, self)
+            except Exception:
+                pass
         return None
 
     def create_module(self, spec):

@@ -1,11 +1,11 @@
 services:
   - type: web
-    name: cortex-persist-api
+    name: babylon60-api
     env: docker
     dockerContext: .
     dockerfilePath: Dockerfile
     disk:
-      name: cortex-data
+      name: babylon60-data
       mountPath: /data
       sizeGB: 10
     envVars:

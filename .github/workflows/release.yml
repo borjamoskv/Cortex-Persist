@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/cortex-persist/
+      url: https://pypi.org/project/babylon60/
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -88,7 +88,7 @@ jobs:
           if version is None:
               raise SystemExit("unable to determine built version from wheel filename")
 
-          url = "https://pypi.org/pypi/cortex-persist/json"
+          url = "https://pypi.org/pypi/babylon60/json"
           for attempt in range(12):
               try:
                   with urllib.request.urlopen(url, timeout=30) as response:
@@ -98,9 +98,9 @@ jobs:
                       raise
                   payload = {"releases": {}}
               if version in payload.get("releases", {}):
-                  print(f"PyPI now exposes cortex-persist {version}")
+                  print(f"PyPI now exposes babylon60 {version}")
                   break
               if attempt == 11:
-                  raise SystemExit(f"cortex-persist {version} not visible on PyPI after publish")
+                  raise SystemExit(f"babylon60 {version} not visible on PyPI after publish")
               time.sleep(10)
           PY

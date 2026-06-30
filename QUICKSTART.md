@@ -7,7 +7,7 @@ A tamper-evident, sovereign memory engine for autonomous AI systems. This guide 
 Install BABYLON-60 via pip. Python 3.10+ is required.
 
 ```bash
-pip install cortex-persist
+pip install babylon60
 ```
 
 *(For Node.js/TypeScript users, the local HTTP server provides a standard REST API).*

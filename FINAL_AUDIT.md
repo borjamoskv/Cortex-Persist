@@ -2,7 +2,7 @@
 <!-- [C5-REAL] borjamoskv | MOSKV-1 APEX | 2026-06-30T01:43Z -->
 
 ```yaml
-Claim: "Full-spectrum code audit — cortex-persist v1.0.0"
+Claim: "Full-spectrum code audit — babylon60 v1.0.0"
 Proof:
   Base: "git:f549fc0c5 → HEAD"
   Commits: 5696

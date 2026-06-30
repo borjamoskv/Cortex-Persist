@@ -61,7 +61,7 @@ jobs:
           Agent execution as a metric space. Hash-chain ledger. ~390k agents/sec.
 
           github.com/borjamoskv/Cortex-Persist
-          pip install cortex-persist
+          pip install babylon60
 
           #AgentOps #Python #OpenSource #AI"""
 
@@ -111,7 +111,7 @@ jobs:
           Looking for feedback on the metric space formalization specifically — the distance function and equivalence class definitions are the newest part.
 
           Repo: https://github.com/borjamoskv/Cortex-Persist
-          `pip install cortex-persist`"""
+          `pip install babylon60`"""
 
           if os.environ["DRY_RUN"] == "true":
               print("[DRY RUN] r/MachineLearning post:")
@@ -123,7 +123,7 @@ jobs:
                   client_secret=os.environ["REDDIT_CLIENT_SECRET"],
                   username=os.environ["REDDIT_USERNAME"],
                   password=os.environ["REDDIT_PASSWORD"],
-                  user_agent="cortex-persist-launch/1.0",
+                  user_agent="babylon60-launch/1.0",
               )
               sub = reddit.subreddit("MachineLearning")
               post = sub.submit(title=title, selftext=body)
@@ -143,7 +143,7 @@ jobs:
 
           title = "CORTEX-Persist: tamper-evident, cryptographically sealed memory for AI agents"
 
-          body = """Just published `cortex-persist` to PyPI — a Python library that adds cryptographic provenance to AI agent execution.
+          body = """Just published `babylon60` to PyPI — a Python library that adds cryptographic provenance to AI agent execution.
 
           **The one-liner:**
           ```python
@@ -163,7 +163,7 @@ jobs:
           - Deterministic replay engine
           - DivergenceMap: geometric distance between execution runs
 
-          `pip install cortex-persist`
+          `pip install babylon60`
           Repo: https://github.com/borjamoskv/Cortex-Persist
 
           Feedback welcome, especially on the Rust-Python FFI boundary."""
@@ -178,7 +178,7 @@ jobs:
                   client_secret=os.environ["REDDIT_CLIENT_SECRET"],
                   username=os.environ["REDDIT_USERNAME"],
                   password=os.environ["REDDIT_PASSWORD"],
-                  user_agent="cortex-persist-launch/1.0",
+                  user_agent="babylon60-launch/1.0",
               )
               sub = reddit.subreddit("Python")
               post = sub.submit(title=title, selftext=body)
@@ -209,7 +209,7 @@ jobs:
           echo "distance > threshold). This lets you detect, replay, and arbitrate"
           echo "between execution branches deterministically."
           echo ""
-          echo "pip install cortex-persist"
+          echo "pip install babylon60"
           echo "====================================================="
 
       - name: ✅ Launch summary

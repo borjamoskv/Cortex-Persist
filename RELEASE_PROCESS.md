@@ -18,7 +18,7 @@ This repository uses PyPI Trusted Publishing through GitHub Actions.
 
 The exact identity that PyPI must trust is:
 
-- PyPI project name: `cortex-persist`
+- PyPI project name: `babylon60`
 - GitHub owner: `borjamoskv`
 - GitHub repository: `Cortex-Persist`
 - workflow filename: `release.yml`
