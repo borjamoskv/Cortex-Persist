@@ -37,6 +37,7 @@ import asyncio
 import json
 import logging
 import os
+import sys
 
 # Secure absolute offline autarchy for HF model loading
 os.environ["HF_HUB_OFFLINE"] = "1"
