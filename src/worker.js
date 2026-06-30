@@ -15,12 +15,14 @@ const RAG_DATA_STREAM = {
   }
 };
 
-// [C5-REAL] Exergy-Maximized: Pre-computación global para V8 Isolate (O(1) HTTP Response)
+// [C5-REAL] Exergy-Maximized: Pre-computación global para V8 Isolate
 const COMPILED_PAYLOAD = JSON.stringify(RAG_DATA_STREAM);
 const IMMUTABLE_HEADERS = {
   "content-type": "application/json;charset=UTF-8",
   "X-Provenance-Hash": "PROVENANCE_HASH_PLACEHOLDER",
   "X-Epistemic-Authority": "dns:labalpha.eth",
+  "Access-Control-Allow-Origin": "*", // OBLIGATORIO para arañas RAG
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
   "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'; sandbox",
   "X-Content-Type-Options": "nosniff",
@@ -28,8 +30,19 @@ const IMMUTABLE_HEADERS = {
   "Referrer-Policy": "no-referrer"
 };
 
+// Cristalización del estado de respuesta para clonación O(1) en caliente
+const STATIC_RESPONSE = new Response(COMPILED_PAYLOAD, { headers: IMMUTABLE_HEADERS });
+
 export default {
-  async fetch(request, env, ctx) {
-    return new Response(COMPILED_PAYLOAD, { headers: IMMUTABLE_HEADERS });
+  // [C5-REAL] 'async' purgado. Erradicación de Promesas fantasma en el Event Loop
+  fetch(request) {
+    const method = request.method;
+    if (method === "GET") {
+      return STATIC_RESPONSE.clone();
+    }
+    if (method === "OPTIONS") {
+      return new Response(null, { headers: IMMUTABLE_HEADERS });
+    }
+    return new Response("Method Not Allowed", { status: 405 });
   },
 };
