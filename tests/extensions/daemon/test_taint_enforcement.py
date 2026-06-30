@@ -16,23 +16,23 @@ from cryptography.hazmat.primitives.serialization import (
     PublicFormat,
 )
 
-from cortex.engine.causal.taint_engine import (
+from babylon60.engine.causal.taint_engine import (
     generate_secure_taint_token,
     TaintValidationError,
     verify_taint_token,
     canonicalize_content,
 )
-from cortex.engine.causal.verification_oracle import (
+from babylon60.engine.causal.verification_oracle import (
     verify_c5_state_machine,
     InvariantViolationError,
 )
-from cortex.engine.core.fact_store_core import insert_fact_record
-from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.models import MemoryEvent, CortexFactModel
-from cortex.memory.hdc.store import HDCVectorStoreL2
-from cortex.memory.hdc.codec import HDCEncoder
-from cortex.memory.hdc.item_memory import ItemMemory
-from cortex.memory.traits.write import WriteTrait
+from babylon60.engine.core.fact_store_core import insert_fact_record
+from babylon60.memory.ledger import EventLedgerL3
+from babylon60.memory.models import MemoryEvent, CortexFactModel
+from babylon60.memory.hdc.store import HDCVectorStoreL2
+from babylon60.memory.hdc.codec import HDCEncoder
+from babylon60.memory.hdc.item_memory import ItemMemory
+from babylon60.memory.traits.write import WriteTrait
 
 
 # Set environment variable to enable verification in tests
