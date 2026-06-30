@@ -174,7 +174,6 @@ class MOSKV1Core:
             self._mlx_model = None
             self._mlx_tokenizer = None
 
-        import asyncio
         from concurrent.futures import ThreadPoolExecutor
 
         def _load():
@@ -653,7 +652,6 @@ class MOSKV1Core:
                     self._mlx_is_reloading = True
                     asyncio.create_task(self._async_reload_weights(current_mtime))
 
-            import asyncio
             from concurrent.futures import ThreadPoolExecutor
 
             def _load_and_gen():
@@ -710,7 +708,6 @@ class MOSKV1Core:
     async def _async_reload_weights(self, target_mtime: float) -> None:
         """Asynchronously loads the new LoRA weights and swaps them atomically in memory."""
         try:
-            import asyncio
             from concurrent.futures import ThreadPoolExecutor
             
             def _load_new():
