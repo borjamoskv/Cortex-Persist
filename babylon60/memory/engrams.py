@@ -44,6 +44,4 @@ class CortexSemanticEngram(CortexFactModel):
         """Process an LTD event (Long-Term Depression), reducing synaptic energy."""
         object.__setattr__(self, "energy_level", max(0.0, self.energy_level - penalty))
 
-    def compute_decay(self, decay_rate_per_day: float = 0.05) -> float:
-        """Deprecated: Returns current energy_level to satisfy legacy calls without dynamic temporal decay."""
-        return self.energy_level
+
