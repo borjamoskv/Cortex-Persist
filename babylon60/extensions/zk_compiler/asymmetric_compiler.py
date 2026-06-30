@@ -57,6 +57,18 @@ class ZKInvariantTransformer(ast.NodeTransformer):
             args=[node.generators[0].iter],
             keywords=[]
         )
+        
+    def visit_Call(self, node: ast.Call) -> ast.AST:
+        """Transforms recursive verification into Curve Cycle delegation."""
+        self.generic_visit(node)
+        if isinstance(node.func, ast.Name) and node.func.id in ['verify_proof', 'check_signature']:
+            self.applied_invariants.add("CurveCycle")
+            return ast.Call(
+                func=ast.Name(id='CurveCycleRecursion', ctx=ast.Load()),
+                args=node.args,
+                keywords=node.keywords
+            )
+        return node
 
 class AsymmetricZKCompiler:
     def __init__(self) -> None:
@@ -64,8 +76,10 @@ class AsymmetricZKCompiler:
             "GKR": 0.60,
             "Nova": 0.50,
             "LogUp": 0.45,
+            "CurveCycle": 0.85, # Avoids O(N log N) non-native field simulation
             "PlonK": 0.0
         }
+
     
     def compile_circuit(self, circuit_name: str, code_str: str) -> Dict[str, Any]:
         """
@@ -123,3 +137,6 @@ if __name__ == "__main__":
     
     lookup_circuit = "def ram_read(memory, ptr): return memory[ptr]"
     print(compiler.compile_circuit("ZK_VM_RAM", lookup_circuit))
+    
+    recursion_circuit = "def ivc_verify(proof, vk): return verify_proof(proof, vk)"
+    print(compiler.compile_circuit("Recursive_SNARK", recursion_circuit))
