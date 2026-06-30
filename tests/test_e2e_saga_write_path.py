@@ -205,11 +205,23 @@ async def test_saga_write_path_bft_quorum(tmp_path: Path, clean_payload: str, mo
     
     db_file = str(tmp_path / "saga_test_bft.db")
     
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+    from cryptography.hazmat.primitives import serialization
+    import base64
+    
     # Generate N=4 peers
     peers = {
         f"peer_{i}": ZKSwarmIdentity.generate_keypair() for i in range(4)
     }
-    known_peers = {pid: kp.private_key.public_key() for pid, kp in peers.items()}
+    
+    known_peers = {}
+    priv_keys = {}
+    for pid, kp in peers.items():
+        pub_bytes = base64.b64decode(kp.public_key_b64)
+        known_peers[pid] = serialization.load_ssh_public_key(pub_bytes)
+        
+        priv_bytes = base64.b64decode(kp.private_key_b64)
+        priv_keys[pid] = ed25519.Ed25519PrivateKey.from_private_bytes(priv_bytes)
     
     # F = (4-1)//3 = 1. Required Quorum = 2f+1 = 3.
     
@@ -225,7 +237,7 @@ async def test_saga_write_path_bft_quorum(tmp_path: Path, clean_payload: str, mo
         coordinator = SagaCoordinator(ledger)
         
         # Primary taint token from peer_0
-        token = generate_secure_taint_token(
+        token1 = generate_secure_taint_token(
             agent_id="test_agent",
             session_id="test_session",
             content=clean_payload,
@@ -235,8 +247,8 @@ async def test_saga_write_path_bft_quorum(tmp_path: Path, clean_payload: str, mo
         
         # 1) Generate signatures from 2 peers (less than quorum of 3)
         bft_sigs_failed = {
-            "peer_0": peers["peer_0"].private_key.sign(clean_payload.encode('utf-8')),
-            "peer_1": peers["peer_1"].private_key.sign(clean_payload.encode('utf-8'))
+            "peer_0": priv_keys["peer_0"].sign(clean_payload.encode('utf-8')),
+            "peer_1": priv_keys["peer_1"].sign(clean_payload.encode('utf-8'))
         }
         
         metadata_failed = {
@@ -252,16 +264,24 @@ async def test_saga_write_path_bft_quorum(tmp_path: Path, clean_payload: str, mo
                 actor_id="test_agent",
                 resource="test_resource",
                 content=clean_payload,
-                taint_token=token,
+                taint_token=token1,
                 schema_name="mock_schema",
                 metadata=metadata_failed
             )
             
+        token2 = generate_secure_taint_token(
+            agent_id="test_agent",
+            session_id="test_session",
+            content=clean_payload,
+            private_key_b64=peers["peer_0"].private_key_b64,
+            curve="ed25519"
+        )
+
         # 2) Generate signatures from 3 peers (meets quorum of 3)
         bft_sigs_success = {
-            "peer_0": peers["peer_0"].private_key.sign(clean_payload.encode('utf-8')),
-            "peer_1": peers["peer_1"].private_key.sign(clean_payload.encode('utf-8')),
-            "peer_2": peers["peer_2"].private_key.sign(clean_payload.encode('utf-8'))
+            "peer_0": priv_keys["peer_0"].sign(clean_payload.encode('utf-8')),
+            "peer_1": priv_keys["peer_1"].sign(clean_payload.encode('utf-8')),
+            "peer_2": priv_keys["peer_2"].sign(clean_payload.encode('utf-8'))
         }
         
         metadata_success = {
@@ -278,7 +298,7 @@ async def test_saga_write_path_bft_quorum(tmp_path: Path, clean_payload: str, mo
                 actor_id="test_agent",
                 resource="test_resource",
                 content=clean_payload,
-                taint_token=token,
+                taint_token=token2,
                 schema_name="mock_schema",
                 metadata=metadata_success
             )

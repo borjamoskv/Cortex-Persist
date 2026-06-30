@@ -174,65 +174,83 @@ class AutonomousTrainingDaemon:
 
         unconsolidated = [sid for sid in all_sessions if sid not in consolidated]
 
+        cycle_result: dict[str, Any] = {}
+
         if not unconsolidated:
             logger.info("💤 No new sessions to consolidate.")
-            return {"status": "idle", "processed_sessions": 0}
+            cycle_result = {"status": "idle", "processed_sessions": 0}
+        else:
+            logger.info("🧪 Found %d new sessions for consolidation.", len(unconsolidated))
+            try:
+                # Trigger nocturnal consolidation (MLX LoRA training subprocess)
+                result = await self.ttt_engine.run_nocturnal_consolidation(unconsolidated)
 
-        logger.info("🧪 Found %d new sessions for consolidation.", len(unconsolidated))
+                if result.get("status") == "success":
+                    # Verify the generated adapter
+                    adapter_path = self.ttt_engine.adapter_path
+                    verify_res = self.verifier.verify_adapter(adapter_path, self.base_model)
 
-        try:
-            # Trigger nocturnal consolidation (MLX LoRA training subprocess)
-            result = await self.ttt_engine.run_nocturnal_consolidation(unconsolidated)
+                    if verify_res.get("success"):
+                        metrics = {
+                            "average_reward": result.get("average_reward", 0.0),
+                            "golden_trajectories": result.get("golden_trajectories", 0),
+                            "verifier_metrics": verify_res.get("metrics", {}),
+                        }
+                        self.register_verified_adapter(adapter_path, metrics)
 
-            if result.get("status") == "success":
-                # Verify the generated adapter
-                adapter_path = self.ttt_engine.adapter_path
-                verify_res = self.verifier.verify_adapter(adapter_path, self.base_model)
+                        # Mark sessions as consolidated
+                        new_consolidated = consolidated.union(unconsolidated)
+                        self.save_consolidated_sessions(new_consolidated)
 
-                if verify_res.get("success"):
-                    metrics = {
-                        "average_reward": result.get("average_reward", 0.0),
-                        "golden_trajectories": result.get("golden_trajectories", 0),
-                        "verifier_metrics": verify_res.get("metrics", {}),
-                    }
-                    self.register_verified_adapter(adapter_path, metrics)
-
-                    # Mark sessions as consolidated
+                        cycle_result = {
+                            "status": "success",
+                            "processed_sessions": len(unconsolidated),
+                            "adapter": str(adapter_path),
+                            "metrics": metrics,
+                        }
+                    else:
+                        logger.error("❌ Adapter verification failed: %s", verify_res.get("error"))
+                        cycle_result = {
+                            "status": "verification_failed",
+                            "error": verify_res.get("error"),
+                            "processed_sessions": 0,
+                        }
+                elif result.get("status") == "skipped":
+                    # Even if skipped (e.g., no high reward data), we mark them as processed to avoid re-evaluating
                     new_consolidated = consolidated.union(unconsolidated)
                     self.save_consolidated_sessions(new_consolidated)
-
-                    return {
-                        "status": "success",
+                    logger.info("⏭️ Consolidation skipped: %s", result.get("reason"))
+                    cycle_result = {
+                        "status": "skipped",
+                        "reason": result.get("reason"),
                         "processed_sessions": len(unconsolidated),
-                        "adapter": str(adapter_path),
-                        "metrics": metrics,
                     }
-                logger.error("❌ Adapter verification failed: %s", verify_res.get("error"))
-                return {
-                    "status": "verification_failed",
-                    "error": verify_res.get("error"),
-                    "processed_sessions": 0,
-                }
-            if result.get("status") == "skipped":
-                # Even if skipped (e.g., no high reward data), we mark them as processed to avoid re-evaluating
-                new_consolidated = consolidated.union(unconsolidated)
-                self.save_consolidated_sessions(new_consolidated)
-                logger.info("⏭️ Consolidation skipped: %s", result.get("reason"))
-                return {
-                    "status": "skipped",
-                    "reason": result.get("reason"),
-                    "processed_sessions": len(unconsolidated),
-                }
-            logger.error("❌ Consolidation pipeline failed: %s", result.get("error"))
-            return {
-                "status": "failed",
-                "error": result.get("error"),
-                "processed_sessions": 0,
-            }
+                else:
+                    logger.error("❌ Consolidation pipeline failed: %s", result.get("error"))
+                    cycle_result = {
+                        "status": "failed",
+                        "error": result.get("error"),
+                        "processed_sessions": 0,
+                    }
 
-        except Exception as e:
-            logger.error("Exception during training cycle: %s", e)
-            return {"status": "error", "error": str(e), "processed_sessions": 0}
+            except Exception as e:
+                logger.error("Exception during training cycle: %s", e)
+                cycle_result = {"status": "error", "error": str(e), "processed_sessions": 0}
+
+        # Write to dynamic telemetry log
+        try:
+            telemetry_file = self.training_dir / "training_telemetry.jsonl"
+            log_entry = {
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "unconsolidated_sessions_found": len(unconsolidated),
+                **cycle_result
+            }
+            with open(telemetry_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(log_entry) + "\n")
+        except Exception as te:
+            logger.error("Failed writing telemetry entry: %s", te)
+
+        return cycle_result
 
     async def start(self) -> None:
         """Starts the background loop."""

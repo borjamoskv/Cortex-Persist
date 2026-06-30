@@ -167,7 +167,9 @@ def _shannon_entropy(text: str) -> float:
         return 0.0
     freq = Counter(text)
     total = len(text)
-    return -sum((count / total) * math.log2(count / total) for count in freq.values() if count > 0)
+    log2_total = math.log2(total)
+    sum_terms = sum(count * math.log2(count) for count in freq.values() if count > 0)
+    return log2_total - (sum_terms / total)
 
 
 def _exergy_score(text: str) -> float:
@@ -425,7 +427,14 @@ class MOSKV1DatasetCompiler:
         if not file_path.exists():
             return 0
 
-        content = file_path.read_text(encoding="utf-8")
+        try:
+            content = file_path.read_text(encoding="utf-8")
+        except Exception as e:
+            logger.warning("Failed to read markdown directive file %s: %s", file_path, e)
+            return 0
+        if len(content.strip()) < 100:
+            logger.info("Skipping trivial markdown directive file: %s", file_path)
+            return 0
         self.stats.total_files_scanned += 1
         self.stats.total_bytes_input += len(content.encode("utf-8"))
 
@@ -480,7 +489,11 @@ class MOSKV1DatasetCompiler:
             if not sdir.exists():
                 continue
             for skill_md in sdir.rglob("SKILL.md"):
-                content = skill_md.read_text(encoding="utf-8")
+                try:
+                    content = skill_md.read_text(encoding="utf-8")
+                except Exception as e:
+                    logger.warning("Failed to read skill file %s: %s", skill_md, e)
+                    continue
                 self.stats.total_files_scanned += 1
                 self.stats.total_bytes_input += len(content.encode("utf-8"))
 
@@ -532,7 +545,8 @@ class MOSKV1DatasetCompiler:
 
             try:
                 content = py_file.read_text(encoding="utf-8")
-            except (OSError, UnicodeDecodeError):
+            except (OSError, UnicodeDecodeError) as e:
+                logger.warning("Failed to read Python file %s: %s", py_file, e)
                 continue
 
             self.stats.total_files_scanned += 1
@@ -609,7 +623,8 @@ class MOSKV1DatasetCompiler:
         for transcript_file in target.rglob("transcript.jsonl"):
             try:
                 content = transcript_file.read_text(encoding="utf-8")
-            except (OSError, UnicodeDecodeError):
+            except (OSError, UnicodeDecodeError) as e:
+                logger.warning("Failed to read transcript file %s: %s", transcript_file, e)
                 continue
 
             self.stats.total_files_scanned += 1
@@ -672,7 +687,8 @@ class MOSKV1DatasetCompiler:
 
             try:
                 content = vault_file.read_text(encoding="utf-8")
-            except (OSError, UnicodeDecodeError):
+            except (OSError, UnicodeDecodeError) as e:
+                logger.warning("Failed to read vault file %s: %s", vault_file, e)
                 continue
 
             self.stats.total_files_scanned += 1
@@ -710,7 +726,8 @@ class MOSKV1DatasetCompiler:
         for wf_file in target.glob("*.md"):
             try:
                 content = wf_file.read_text(encoding="utf-8")
-            except (OSError, UnicodeDecodeError):
+            except (OSError, UnicodeDecodeError) as e:
+                logger.warning("Failed to read workflow file %s: %s", wf_file, e)
                 continue
 
             self.stats.total_files_scanned += 1
@@ -794,10 +811,13 @@ class MOSKV1DatasetCompiler:
             )
 
             for row in cursor:
-                content = row["content"]
-                fact_type = row["fact_type"] or "general"
-                project = row["project"] or "cortex"
-                tags = row["tags"] or ""
+                row_dict = dict(row)
+                content = row_dict.get("content")
+                if not content:
+                    continue
+                fact_type = row_dict.get("fact_type") or "general"
+                project = row_dict.get("project") or "cortex"
+                tags = row_dict.get("tags") or ""
 
                 instruction = (
                     f"Recupera el hecho verificado de tipo '{fact_type}' del proyecto '{project}'"

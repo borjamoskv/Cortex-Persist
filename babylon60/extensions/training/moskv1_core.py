@@ -204,6 +204,14 @@ class MOSKV1Core:
         """Reset conversation history."""
         self._history.clear()
 
+    def close(self) -> None:
+        """Cleanly shutdown the persistent threadpool."""
+        if hasattr(self, "_pool"):
+            self._pool.shutdown(wait=False)
+
+    def __del__(self) -> None:
+        self.close()
+
     def add_to_history(self, role: str, content: str) -> None:
         """Add a turn to conversation history."""
         self._history.append(ConversationTurn(role=role, content=content, timestamp=time.time()))
