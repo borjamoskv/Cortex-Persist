@@ -1,0 +1,32 @@
+{
+  "cortex_nexus_version": "2.0.0",
+  "workspaces": {
+    "frontend": {
+      "path": "frontend",
+      "target_repo": "cortex_ui",
+      "specialist_skill": ".agents/skills/Frontend-Specialist/SKILL.md",
+      "routing_constraints": {
+        "planning_model": "Gemini 3 Pro",
+        "execution_model": "Claude 3.5 Sonnet",
+        "testing_model": "Gemini 3.5 Flash",
+        "thermal_limit": "T=0.5"
+      }
+    },
+    "backend": {
+      "path": "backend",
+      "target_repo": "babylon60",
+      "specialist_skill": ".agents/skills/Backend-Specialist/SKILL.md",
+      "routing_constraints": {
+        "planning_model": "Gemini 3.1 Pro",
+        "execution_model": "Claude 4.6",
+        "testing_model": "Gemini 3.5 Flash",
+        "thermal_limit": "T=0.0"
+      }
+    }
+  },
+  "invariants": [
+    "LL-AC-01",
+    "LL-AC-02",
+    "LL-AC-04"
+  ]
+}
