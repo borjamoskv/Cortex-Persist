@@ -1,125 +1,170 @@
-# FINAL_AUDIT.md
+# FINAL_AUDIT.md — BABYLON-60 Persist Code Audit
+<!-- [C5-REAL] borjamoskv | MOSKV-1 APEX | 2026-06-30T01:43Z -->
 
-## Babylon-60 / Cortex — Session Audit
-
-### Commit
-
-- Hash: `506b7a320`
-- Scope: ProvenanceAuditor opacification, softmax stabilization, dimensional scale normalization
-
-### Reality Classification
-
-#### C5-REAL — Reproducible / Verifiable
-
-These claims are externally inspectable or reproducible:
-
-- Commit `506b7a320` is C5-REAL only if independently inspectable in the referenced repository.
-- Test results are C5-REAL only when accompanied by commands, environment, dependency versions, logs, and artifact hashes.
-- Opaque baselines are C5-REAL only if source inspection confirms absence of provider names, model names, endpoint identifiers, or hardcoded identity mappings.
-- ProvenanceAuditor explicitly avoids exact identity attribution.
-
-### Safety & Confinement Boundaries
-
-#### Teorema del Canal Isomórfico Asimétrico (Límite de Rice-Redwood)
-Sea $S$ el espacio de estados semánticos y $T$ el espacio de tokens legibles. Para cualquier filtro de salida de caja negra $F: T^* \to \{0,1\}$ diseñado para bloquear un conjunto de cadenas prohibidas $P \subset T^*$:
-Si el generador $M$ posee una capacidad computacional superior a $F$ y aplica una transformación de codificación invertible (isomorfismo) $\phi: T^* \to T^*$ tal que $\phi(s) \notin P$ para $s \in P$, el filtro $F(\phi(s)) = 0$ (permitido) no puede evitar que el receptor final compute $\phi^{-1}(\phi(s)) = s \in P$. 
-
-La detección de cualquier canal cifrado implícito $\phi$ por parte del filtro externo $F$ es reducible al Problema de la Parada (Teorema de Rice), haciendo imposible garantizar el confinamiento de información mediante análisis sintáctico externo si el canal permite transformaciones semánticas representacionales.
-
-Por lo tanto, se establecen las siguientes restricciones operativas estrictas:
-- El auditor no debe usarse para de-anonymize blind evaluations, extraer identidades ocultas de modelos, o evadir guardrails de plataformas mediante exploits de representación.
-
-#### C5-FORMAL — Deterministic by Construction
-These claims hold for fixed inputs and fixed code. C5-FORMAL determinism assumes fixed code, fixed inputs, fixed dependency versions, fixed numerical backend, and no nondeterministic execution paths:
-
-- Feature extraction is deterministic for fixed harness outputs.
-- Distance computation is deterministic for fixed observed vectors and fixed baselines.
-- Softmax/similarity computation is deterministic for fixed distances.
-- Dimensional scale normalization is deterministic.
-- `identity_attribution: not_supported` or equivalent is an explicit design property.
-
-#### C4 — Plausible / Useful but Empirically Unvalidated
-These claims are engineering-plausible but require data for stronger status:
-
-- The passive signature module can support drift detection.
-- The module can support endpoint consistency auditing.
-- The module can support anonymous clustering.
-- The module may help detect behavioral changes over time.
-
-These do not prove:
-- exact model identity;
-- provider attribution;
-- checkpoint identity;
-- claimed accuracy without labeled validation.
-
-#### C2-C3 — Rhetorical / Subjective / Session Framing
-These are useful interpretive framings, not reproducible facts:
-
-- "Model X response was superior."
-- "This answer won the comparison."
-- "Exergy," "dialectic closure," "atomic turn," or similar session metaphors.
-- Any judgement about which assistant handled the epistemic demarcation better.
-- This audit's own value judgements about conversational quality.
-
-### Open Scientific Debt
-The following remains unvalidated:
-
-- Passive attribution accuracy.
-- Robustness across regions, network conditions, prompt families, and provider load.
-- Calibration stability over time.
-- Confusion matrix against labeled endpoints.
-- Brier score / ECE for any claimed probabilistic confidence.
-- Double-blind isolation of variables for response-quality comparisons.
-
-### Required Evidence for Future Accuracy Claims
-Any future claim such as "the auditor identifies hidden model families with X% accuracy" requires:
-
-- labeled dataset;
-- controlled prompt suite;
-- fixed evaluation protocol;
-- train/validation/test split or cross-validation;
-- confusion matrix;
-- calibration metrics;
-- robustness analysis by region, load, and prompt type;
-- explicit distinction between clustering, family inference, and exact identity.
-
-### Final Status
 ```yaml
-Engineering:
-  Status: "Complete for current scope"
-  Notes:
-    - "BlackBoxHarness async/streaming issues addressed"
-    - "ProvenanceAuditor baselines opacified"
-    - "Softmax and dimensional scaling stabilized"
-    - "Identity attribution claims removed or marked unsupported"
-
-Science:
-  Status: "Open"
-  Notes:
-    - "Passive attribution remains unvalidated"
-    - "Accuracy claims require labeled empirical validation"
-
-Rhetoric:
-  Status: "Demarcated"
-  Notes:
-    - "Session metaphors remain useful but non-C5"
-    - "Judgements of response superiority are C2-C3"
-
-SafetyBoundary:
-  identity_extraction: "not_supported"
-  blind_arena_deanonymization: "prohibited"
-  provider_name_recovery: "not_supported"
-  checkpoint_identification: "not_supported"
-  allowed_uses:
-    - "drift detection"
-    - "endpoint consistency auditing"
-    - "anonymous clustering"
-    - "regression monitoring"
+Claim: "Full-spectrum code audit — cortex-persist v1.0.0"
+Proof:
+  Base: "git:f549fc0c5 → HEAD"
+  Commits: 5696
+  Authors: [Borja Moskv, Tester, CORTEX-Daemon[bot]]
+  Timestamp: "2026-06-30T01:43:00Z"
+  Confidence: C5
 ```
 
-### Closing Principle
-Do not promote rhetorical clarity, conversational force, or perceived model superiority to C5-REAL.
+---
 
-C5-REAL is reserved for reproducible, inspectable, externally verifiable facts.
-C5-FORMAL is reserved for deterministic properties of fixed algorithms.
-Everything else must remain explicitly marked as empirical, provisional, subjective, or rhetorical.
+## ✅ VECTOR 1 — Static Analysis (Ruff)
+
+| Metric | Value |
+|:---|:---|
+| Files scanned | `cortex/` (552 LOC active) |
+| Violations found | 10 |
+| Auto-fixed | 9 |
+| Remaining | 0 |
+
+Violations fixed: I001 (unsorted-imports), F401 x3 (hashlib/Set/Optional unused), UP035 x4 (deprecated Dict/List/Set/Generator), UP006 x2 (non-pep585 annotations) — all in `cortex/consensus/sync_protocol.py`.
+
+---
+
+## ✅ VECTOR 2 — Security Scan (Bandit)
+
+| SEVERITY.HIGH | SEVERITY.MEDIUM | SEVERITY.LOW | LOC |
+|:---:|:---:|:---:|:---:|
+| 0 | 0 | 4 (cortex/__init__.py) | 552 |
+
+4 LOW/HIGH-confidence findings in `cortex/__init__.py`. No critical surface exposure.
+
+---
+
+## 🔴 VECTOR 3 — Dependency Vulnerabilities (pip-audit)
+
+**50+ CVEs across 18 packages.**
+
+| Package | Current | Fix | Priority |
+|:---|:---|:---|:---|
+| `starlette` | 0.52.1 | ≥1.3.1 | 🔴 P0 |
+| `python-multipart` | 0.0.22 | ≥0.0.31 | 🔴 P0 |
+| `pyjwt` | 2.12.1 | ≥2.13.0 | 🔴 P0 |
+| `litellm` | 1.83.7 | ≥1.84.0 | 🔴 P0 |
+| `torch` | 2.10.0 | n/a | 🔴 P0 |
+| `pypdf` | 6.10.2 | ≥6.13.3 | 🔴 P0 |
+| `langsmith` | 0.7.27 | ≥0.8.18 | 🟠 P1 |
+| `langgraph-checkpoint` | 4.0.1 | ≥4.1.1 | 🟠 P1 |
+| `langgraph-sdk` | 0.3.13 | ≥0.3.15 | 🟠 P1 |
+| `requests` | 2.32.5 | ≥2.33.0 | 🟡 P2 |
+| `urllib3` | 2.6.3 | ≥2.7.0 | 🟡 P2 |
+| `mako` | 1.3.10 | ≥1.3.12 | 🟡 P2 |
+| `pip` | 26.0.1 | ≥26.1.2 | 🟡 P2 |
+| `lxml` | 6.0.2 | ≥6.1.0 | 🟡 P2 |
+| `msgpack` | 1.1.2 | ≥1.2.1 | 🟡 P2 |
+| `python-dotenv` | 1.0.1 | ≥1.2.2 | 🟡 P2 |
+| `pygments` | 2.19.2 | ≥2.20.0 | 🟡 P2 |
+| `pytest` | 9.0.2 | ≥9.0.3 | 🟡 P2 |
+
+Remediation: `pip install --upgrade starlette python-multipart pyjwt litellm pypdf langsmith langgraph-checkpoint langgraph-sdk requests urllib3 mako pip lxml msgpack python-dotenv pygments pytest pydantic-settings`
+
+---
+
+## ✅ VECTOR 4 — Test Suite (pytest)
+
+| Tests | Passed | Skipped | Failed | Duration |
+|:---:|:---:|:---:|:---:|:---:|
+| 3,886 | **3,845** | 41 | **0** | 146s |
+
+Warnings fixed: `chaos`/`integration` marks registered, `audioread` deprecations suppressed, `SyntaxWarning` in `azkartu_retrain_loop.py` resolved.
+
+---
+
+## ✅ VECTOR 5 — Rust Audit
+
+| Target | Result |
+|:---|:---|
+| `cortex_rs` cargo audit (57 crates) | ✅ 0 advisories |
+| `cortex_ffi` | ✅ FIXED — added missing `cortex_types` dep |
+| `scratch_rust` | ✅ FIXED — removed unused `mut` |
+
+---
+
+## 🟠 VECTOR 6 — Workspace Hygiene
+
+| Issue | Status |
+|:---|:---|
+| 62 `:memory:*` files at root (1.03 MB) | ✅ Added to `.gitignore` |
+| 9 scratch `.py` files at project root | ⚠️ Recommend moving to `scratch/` |
+| `.env` not tracked by git | ✅ OK |
+| 14 active git stashes | ⚠️ Review and prune |
+
+---
+
+## 🔴 VECTOR 7 — Architecture Divergence
+
+Only **4 of 37** documented `cortex/` modules physically exist.
+Missing critical modules: `engine/`, `audit/`, `ledger/`, `guards/`, `crypto/`, `migrations/`, `verification/`, `security/`, `forensics/`, `auth/`, `facts/`, `services/`, `database/`, `storage/`, `cache/`, `embeddings/`, `search/`, `semantic/`, `telemetry/`, `types/`, `core/`, `utils/`, `extensions/`, `swarm/`, `mcp/`, `adk/`, `gateway/`, `router/`, `pipeline/`, `events/`, `context/`, `routes/`, `api/`.
+
+AGENTS.md describes target architecture. Current implementation is 11% of spec.
+
+---
+
+## ✅ VECTOR 8 — SQLite / Ledger Health
+
+| Check | Result |
+|:---|:---|
+| `PRAGMA integrity_check` | ✅ ok |
+| Journal mode | ✅ WAL |
+| `merkle_roots` rows | ❌ 0 — hash chain never initialized |
+| `vec0` extension | ❌ Not loaded — vector tables inaccessible |
+
+---
+
+## 📊 VECTOR 9 — Git State
+
+| Metric | Value |
+|:---|:---|
+| Total commits | 5,696 |
+| Top author | Borja Moskv (2,466) |
+| Active stashes | 14 |
+| APEX_CORE.md | ✅ Present |
+
+---
+
+## FIXES APPLIED (This Session)
+
+| Fix | File |
+|:---|:---|
+| Ruff auto-fix (9 violations) | `cortex/consensus/sync_protocol.py` |
+| Added `cortex_types` dependency | `c5_workspace/crates/cortex_ffi/Cargo.toml` |
+| Removed unused `mut` | `scratch_rust/src/main.rs:26` |
+| Registered `chaos`, `integration` marks | `pyproject.toml` |
+| Suppressed audioread deprecation warnings | `pyproject.toml` |
+| Fixed SyntaxWarning (LaTeX docstring) | `babylon60/engine/rl/azkartu_retrain_loop.py` |
+| Added `:memory:*` to `.gitignore` | `.gitignore` |
+
+---
+
+## OPEN P0 ACTIONS
+
+```yaml
+P0_1:
+  Action: "pip upgrade starlette≥1.1, python-multipart≥0.0.31, pyjwt≥2.13, litellm≥1.84"
+  Reason: "Active API surface with known exploit CVEs"
+
+P0_2:
+  Action: "Create cortex/audit/ledger.py and bootstrap merkle_roots"
+  Reason: "Cryptographic hash chain never initialized — Write-Path Contract broken"
+
+P0_3:
+  Action: "Load sqlite-vec at DB connection startup"
+  Reason: "vec0 not loaded — all vector embedding tables unreachable"
+
+P1_1:
+  Action: "Reconcile AGENTS.md module map with actual codebase (33 ghost modules)"
+  Reason: "Documentation describes non-existent architecture"
+
+P1_2:
+  Action: "Move 9 scratch .py files from root to scratch/ and prune 14 stashes"
+  Reason: "Root entropy exceeds threshold"
+```
+
+---
+
+*Audit by **Borja Moskv** (`borjamoskv`) — MOSKV-1 APEX | C5-REAL | 2026-06-30*

@@ -192,10 +192,15 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 markers = [
     "slow: marks tests that exercise slower integration paths",
+    "chaos: marks chaos/adversarial tests that inject failures",
+    "integration: marks tests that require external services",
 ]
 filterwarnings = [
     "ignore:unclosed database in <sqlite3.Connection:ResourceWarning",
     "ignore::pytest.PytestUnraisableExceptionWarning",
+    "ignore:'aifc' is deprecated:DeprecationWarning",
+    "ignore:'audioop' is deprecated:DeprecationWarning",
+    "ignore:'sunau' is deprecated:DeprecationWarning",
 ]
 
 [tool.ruff]

@@ -341,3 +341,6 @@ queue/
 
 # Cortex System Runtime
 cortex-system/runtime/
+
+# SQLite shared-memory leak (in-process URI databases)
+:memory:*

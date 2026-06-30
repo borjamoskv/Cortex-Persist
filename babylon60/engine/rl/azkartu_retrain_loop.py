@@ -36,7 +36,7 @@ class ExperienceReplay:
 
 
 class ActorCriticTrainer:
-    """
+    r"""
     Sovereign Actor-Critic Optimization.
     
     Mathematical Invariants (PPO Update):

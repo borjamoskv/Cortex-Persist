@@ -15,3 +15,4 @@ extension-module = ["pyo3/extension-module"]
 pyo3 = { version = "0.21.2", features = ["abi3-py310"] }
 cortex_rs = { path = "../cortex_rs" }
 cortex_chaos = { path = "../cortex_chaos" }
+cortex_types = { path = "../cortex_types" }

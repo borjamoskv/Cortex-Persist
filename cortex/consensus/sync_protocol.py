@@ -1,13 +1,13 @@
-import hashlib
-import json
 import fcntl
-from typing import Dict, List, Set, Optional, Generator
+import json
+from collections.abc import Generator
+
 
 class VectorClock:
     """Reloj Vectorial para garantizar orden parcial estricto en redes asíncronas."""
     def __init__(self, agent_id: str):
         self.agent_id = agent_id
-        self.clocks: Dict[str, int] = {agent_id: 0}
+        self.clocks: dict[str, int] = {agent_id: 0}
 
     def increment(self):
         self.clocks[self.agent_id] += 1
@@ -47,7 +47,7 @@ class BFTMerger:
         # Placeholder para la aserción de firewall causal (Taint Engine)
         return True
 
-    def compute_diff(self, remote_ledger_path: str) -> List[dict]:
+    def compute_diff(self, remote_ledger_path: str) -> list[dict]:
         """Calcula el delta aislando hashes faltantes con complejidad de memoria O(1) local."""
         local_hashes = {n.get("hash_id") for n in self._stream_ledger(self.local_ledger_path) if n.get("hash_id")}
         
