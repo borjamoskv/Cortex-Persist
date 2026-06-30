@@ -53,7 +53,59 @@ def _ensure_compat_aliases():
 class _CortexCompat(types.ModuleType):
     """Minimal proxy that redirects cortex.X attribute access to babylon60.X."""
 
+    def __init__(self, name: str):
+        super().__init__(name)
+        target_pkg = _map_name(name)
+        self.__package__ = target_pkg
+        self.__name__ = name
+        self.__file__ = None
+        self.__path__ = None
+
+        # Set __spec__ to prevent ValueError on find_spec
+        try:
+            if target_pkg in sys.modules and hasattr(sys.modules[target_pkg], "__spec__"):
+                self.__spec__ = sys.modules[target_pkg].__spec__
+            else:
+                from importlib.machinery import ModuleSpec
+                self.__spec__ = ModuleSpec(name, loader=None)
+        except Exception:
+            self.__spec__ = None
+
+        try:
+            if target_pkg in sys.modules:
+                target_mod = sys.modules[target_pkg]
+                if hasattr(target_mod, "__file__"):
+                    self.__file__ = target_mod.__file__
+                if hasattr(target_mod, "__path__"):
+                    self.__path__ = target_mod.__path__
+        except Exception:
+            pass
+
+    @property
+    def _real_module(self):
+        target_pkg = _map_name(self.__name__)
+        return importlib.import_module(target_pkg)
+
     def __getattr__(self, name):
+        # Do not delegate module identity dunders to the target module
+        if name in {"__name__", "__spec__", "__loader__", "__package__"}:
+            if name in self.__dict__:
+                return self.__dict__[name]
+            raise AttributeError(f"module '{self.__name__}' has no attribute '{name}'")
+
+        # Short-circuit other dunders to prevent recursion and slow import lookups
+        if name.startswith("__") and name.endswith("__"):
+            if name in self.__dict__:
+                return self.__dict__[name]
+            target_pkg = _map_name(self.__name__)
+            try:
+                mod = importlib.import_module(target_pkg)
+                if hasattr(mod, name):
+                    return getattr(mod, name)
+            except Exception:
+                pass
+            raise AttributeError(f"module '{self.__name__}' has no attribute '{name}'")
+
         target_pkg = _map_name(self.__name__)
         sub_target = f"{target_pkg}.{name}"
         try:
@@ -61,13 +113,11 @@ class _CortexCompat(types.ModuleType):
             proxy = _CortexCompat(f"{self.__name__}.{name}")
             sys.modules[proxy.__name__] = proxy
             setattr(self, name, proxy)
-            _ensure_compat_aliases()
             return proxy
         except ImportError:
             mod = importlib.import_module(target_pkg)
             if hasattr(mod, name):
                 val = getattr(mod, name)
-                _ensure_compat_aliases()
                 return val
             raise AttributeError(
                 f"module '{self.__name__}' has no attribute '{name}' "
