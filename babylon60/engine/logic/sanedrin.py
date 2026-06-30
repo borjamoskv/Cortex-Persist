@@ -45,7 +45,10 @@ class SanedrinNode:
                 '{"claim": "<winner_id>", "proof_density": <float_0_to_1>, "reasoning": "<short_proof>"}'
             ),
             working_memory=[
-                {"role": "user", "content": f"Fact A (ID: {id_a}): {json.dumps(fact_a)}\nFact B (ID: {id_b}): {json.dumps(fact_b)}"}
+                {
+                    "role": "user",
+                    "content": f"Fact A (ID: {id_a}): {json.dumps(fact_a)}\nFact B (ID: {id_b}): {json.dumps(fact_b)}",
+                }
             ],
             intent=IntentProfile.REASONING,
             temperature=0.2,
@@ -53,7 +56,7 @@ class SanedrinNode:
         )
 
         res = await self.router.execute_resilient(prompt)
-        
+
         # Fallback to deterministic collision if LLM fails
         if res.is_err():
             logger.error(f"[Sanhedrin] Node {self.node_id} failed inference: {res.error}")
@@ -93,12 +96,17 @@ class SanedrinCouncil:
 
     def __init__(self, node_count: int = 3, router: CortexLLMRouter | None = None) -> None:
         from babylon60.extensions.llm.provider import LLMProvider
-        self.router = router or CortexLLMRouter(primary=LLMProvider(provider="gemini"))
-        
+
+        # [C5-REAL] Mitigation for ADVERSARIAL_VECTOR_2 (BFT Sybil Injection)
+        # Enforce hardware/provider asymmetry. Each node must run on an isolated stochastic matrix.
+        self.router_n1 = router or CortexLLMRouter(primary=LLMProvider(provider="anthropic"))
+        self.router_n2 = router or CortexLLMRouter(primary=LLMProvider(provider="groq"))
+        self.router_n3 = router or CortexLLMRouter(primary=LLMProvider(provider="openai"))
+
         self.nodes = [
-            SanedrinNode("N1-Synthesizer", "Claude-3.5-Simulation", self.router),
-            SanedrinNode("N2-Logician", "Llama-3-Simulation", self.router),
-            SanedrinNode("N3-Vector", "GPT-4o-Simulation", self.router),
+            SanedrinNode("N1-Synthesizer", "Claude-3.5-Simulation", self.router_n1),
+            SanedrinNode("N2-Logician", "Llama-3-Simulation", self.router_n2),
+            SanedrinNode("N3-Vector", "GPT-4o-Simulation", self.router_n3),
         ][:node_count]
 
     async def convene(self, fact_a: dict[str, Any], fact_b: dict[str, Any]) -> dict[str, Any]:
@@ -114,18 +122,21 @@ class SanedrinCouncil:
 
         # 2. Strict Proof-of-Logic Consensus (Quorum > N/2)
         from collections import Counter
+
         vote_counts = Counter(e["claim"] for e in evals)
-        
+
         required_quorum = len(self.nodes) // 2
         winning_claim = None
         for claim, count in vote_counts.items():
             if count > required_quorum:
                 winning_claim = claim
                 break
-                
+
         if not winning_claim:
             logger.error("[Sanhedrin] Byzantine Fault: No quorum reached. Apoptosis initiated.")
-            raise RuntimeError(f"ByzantineFaultException: Consensus failed. Votes: {dict(vote_counts)}")
+            raise RuntimeError(
+                f"ByzantineFaultException: Consensus failed. Votes: {dict(vote_counts)}"
+            )
 
         # 3. Best evaluation from Quorum
         quorum_evals = [e for e in evals if e["claim"] == winning_claim]
@@ -141,7 +152,9 @@ class SanedrinCouncil:
                     ev["node"], "Failed Proof-of-Logic audit: Voted against BFT Quorum in Sanhedrin"
                 )
 
-        resolution_msg = f"SANEDRIN_BFT: {winning_claim} validated by Quorum (Hash: {best_eval['hash'][:8]})"
+        resolution_msg = (
+            f"SANEDRIN_BFT: {winning_claim} validated by Quorum (Hash: {best_eval['hash'][:8]})"
+        )
 
         # Emit Sentinel Audit
         apex_dispatcher.execute(
