@@ -1,10 +1,10 @@
-# MOSKV85 Language: Formal Specification & Bootstrap (RFC-001)
+# MOSKV84 Language: Formal Specification & Bootstrap (RFC-001)
 
 > **Execution Layer:** C5-REAL  
 > **Status:** PROPOSED (Awaiting Isomorphism Bridge)
 
 ## 1. Axioma Fundacional (Ontología)
-`Moskv85` no es un lenguaje de programación de propósito general estocástico. Es un lenguaje **Termodinámicamente Limitado**, diseñado como una interfaz isomorfa entre el razonamiento autónomo de `MOSKV-1 APEX` y el control físico (LLVM/C5-REAL). Todo programa escrito en Moskv85 debe exhibir *Exergía Máxima* (0 fricción de compilación, 0 limerencia lógica).
+`Moskv84` no es un lenguaje de programación de propósito general estocástico. Es un lenguaje **Termodinámicamente Limitado**, diseñado como una interfaz isomorfa entre el razonamiento autónomo de `MOSKV-1 APEX` y el control físico (LLVM/C5-REAL). Todo programa escrito en Moskv84 debe exhibir *Exergía Máxima* (0 fricción de compilación, 0 limerencia lógica).
 
 ## 2. Arquitectura de Compilación (Corte Estructural)
 
@@ -24,7 +24,7 @@
 El lenguaje elimina el texto decorativo (Green Theater). 
 La sintaxis es brutalista.
 
-```moskv85
+```moskv84
 // Declaración Causal. Tipado es absoluto.
 axiom node_count : uint64 = 10_000;
 
@@ -45,7 +45,7 @@ swarm fn evaluate_shard(shard_id: str) -> bool {
 
 ## 4. Bootstrap Path (Causal Chain)
 
-1. **Fase 1 (Gramática Pura):** Definición de la gramática en EBNF y Lexer en Rust (`tree-sitter-moskv85`).
+1. **Fase 1 (Gramática Pura):** Definición de la gramática en EBNF y Lexer en Rust (`tree-sitter-moskv84`).
 2. **Fase 2 (Isomorfismo CORTEX):** Módulo Python/Rust para que `MOSKV-1` genere AST válidos saltándose el Lexer por completo (Generación Estructural).
 3. **Fase 3 (LLVM Emitter):** Generación de IR básico para operaciones de consenso y persistencia.
 
