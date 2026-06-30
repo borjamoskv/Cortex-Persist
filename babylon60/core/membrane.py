@@ -25,6 +25,8 @@ class EpistemicEvent:
     reality_level: str
 
 
+import ast
+
 # Z3 for logical guards
 try:
     from z3 import And, Bool, Int, Real, Solver, sat, unsat
@@ -33,6 +35,69 @@ try:
 except ImportError:
     Z3_AVAILABLE = False
     print("Warning: Z3 not available. Logical guards will be disabled.")
+
+
+class Z3ASTCompiler(ast.NodeVisitor):
+    """
+    Seguridad AST compiler para mapear strings a constraints Z3 en runtime.
+    Garantiza una ejecución C5-REAL libre de inyecciones de código arbitrario.
+    """
+    def __init__(self, variables: dict[str, Any]):
+        self.variables = variables
+
+    def compile_expr(self, node: ast.AST) -> Any:
+        return self.visit(node)
+
+    def visit_Expression(self, node: ast.Expression):
+        return self.visit(node.body)
+
+    def visit_BinOp(self, node: ast.BinOp):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        if isinstance(node.op, ast.Add): return left + right
+        if isinstance(node.op, ast.Sub): return left - right
+        if isinstance(node.op, ast.Mult): return left * right
+        if isinstance(node.op, ast.Div): return left / right
+        raise ValueError(f"Operador binario no soportado: {type(node.op)}")
+
+    def visit_Compare(self, node: ast.Compare):
+        left = self.visit(node.left)
+        expr = True
+        for op, comparator in zip(node.ops, node.comparators):
+            right = self.visit(comparator)
+            if isinstance(op, ast.Eq): current = (left == right)
+            elif isinstance(op, ast.NotEq): current = (left != right)
+            elif isinstance(op, ast.Lt): current = (left < right)
+            elif isinstance(op, ast.LtE): current = (left <= right)
+            elif isinstance(op, ast.Gt): current = (left > right)
+            elif isinstance(op, ast.GtE): current = (left >= right)
+            else: raise ValueError(f"Operador de comparación no soportado: {type(op)}")
+            expr = And(expr, current) if expr is not True else current
+            left = right
+        return expr
+
+    def visit_Name(self, node: ast.Name):
+        if node.id in self.variables:
+            return self.variables[node.id]
+        # Auto-declarar variable como Real si no está presente en el contexto
+        var = Real(node.id)
+        self.variables[node.id] = var
+        return var
+
+    def visit_Constant(self, node: ast.Constant):
+        return node.value
+
+    def visit_Num(self, node: ast.Num): # Compatibilidad Python anterior
+        return node.n
+
+    def visit_BoolOp(self, node: ast.BoolOp):
+        values = [self.visit(val) for val in node.values]
+        if isinstance(node.op, ast.And):
+            return And(*values)
+        if isinstance(node.op, ast.Or):
+            from z3 import Or
+            return Or(*values)
+        raise ValueError(f"Operador lógico no soportado: {type(node.op)}")
 
 
 class Z3Guard:
@@ -61,7 +126,7 @@ class Z3Guard:
         self.reset()
         self.presets = {
             "pricing_policy": "price >= base_price * 0.7",
-            "confidence_range": "0 <= confidence <= 100",
+            "confidence_range": "confidence >= 0 and confidence <= 100",
             "temporal_valid": "timestamp >= last_update",
         }
 
@@ -149,8 +214,15 @@ class Z3Guard:
         if guards:
             for g in guards:
                 if g in self.presets:
-                    # Aquí se podría parsear string a expr Z3 en futuro
-                    pass
+                    try:
+                        expr_str = self.presets[g]
+                        node = ast.parse(expr_str, mode="eval")
+                        compiler = Z3ASTCompiler(self.variables)
+                        z3_expr = compiler.compile_expr(node)
+                        self.add_constraint(g, z3_expr)
+                    except Exception as e:
+                        # Fallback robusto ante fallos de compilación AST
+                        print(f"Error compilando guard {g}: {e}")
 
         result = self.solver.check()
 

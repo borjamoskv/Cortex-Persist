@@ -77,7 +77,12 @@ class TestAdapterVerifier:
             json.dumps({"model": "base-model", "validation_loss": 0.05, "iters": 200})
         )
         weights_safetensors = adapter_dir / "adapters.safetensors"
-        weights_safetensors.write_text("fake safetensors weights")
+        try:
+            from safetensors.numpy import save_file
+            import numpy as np
+            save_file({"weight": np.zeros((2, 2), dtype=np.float32)}, str(weights_safetensors))
+        except ImportError:
+            weights_safetensors.write_text("fake safetensors weights")
 
         verifier = AdapterVerifier()
         result = verifier.verify_adapter(adapter_dir, "base-model")

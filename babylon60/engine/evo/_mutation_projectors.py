@@ -41,16 +41,7 @@ async def project(
     }
     projector = _PROJECTORS.get(event_type)
     if projector:
-        if event_type in {
-            "tombstone",
-            "archaeology_merge",
-            "quarantine",
-            "taint_update",
-            "reparent",
-        }:
-            await projector(engine, conn, fact_id, payload, tenant_id=tenant_id)
-        else:
-            await projector(engine, conn, fact_id, payload)
+        await projector(engine, conn, fact_id, payload, tenant_id=tenant_id)
     else:
         # Unknown event type - log but don't fail.
         logger.info(
@@ -65,19 +56,21 @@ async def proj_decalcify(
     conn: aiosqlite.Connection,
     fact_id: int,
     payload: dict,
+    tenant_id: str | None = None,
 ) -> None:
     """Protocol Ω₃-E: Reduce certainty over time to prevent stagnation."""
+    resolved_tenant_id = tenant_id or await engine._get_fact_tenant_id(conn, fact_id)
     decay_factor = payload.get("decay_factor", 0.95)
     ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
     facts_columns = await engine._facts_columns(conn)
     has_consensus_column = "consensus_score" in facts_columns
     # 1. Fetch current scores
     score_query = (
-        "SELECT consensus_score, confidence FROM facts WHERE id = ?"
+        "SELECT consensus_score, confidence FROM facts WHERE id = ? AND tenant_id = ?"
         if has_consensus_column
-        else "SELECT json_extract(metadata, '$.consensus_score'), confidence FROM facts WHERE id = ?"
+        else "SELECT json_extract(metadata, '$.consensus_score'), confidence FROM facts WHERE id = ? AND tenant_id = ?"
     )
-    async with conn.execute(score_query, (fact_id,)) as cursor:
+    async with conn.execute(score_query, (fact_id, resolved_tenant_id)) as cursor:
         row = await cursor.fetchone()
         if not row:
             return
@@ -92,8 +85,8 @@ async def proj_decalcify(
         new_confidence = "disputed"
     if has_consensus_column:
         await conn.execute(
-            "UPDATE facts SET confidence = ?, updated_at = ?, consensus_score = ? WHERE id = ?",
-            (new_confidence, ts, new_score, fact_id),
+            "UPDATE facts SET confidence = ?, updated_at = ?, consensus_score = ? WHERE id = ? AND tenant_id = ?",
+            (new_confidence, ts, new_score, fact_id, resolved_tenant_id),
         )
         return
     query = (
@@ -102,9 +95,9 @@ async def proj_decalcify(
         "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
         "  ELSE json_set(COALESCE(metadata, '{}'), '$.consensus_score', ?) "
         "END "
-        "WHERE id = ?"
+        "WHERE id = ? AND tenant_id = ?"
     )
-    await conn.execute(query, (new_confidence, ts, new_score, fact_id))
+    await conn.execute(query, (new_confidence, ts, new_score, fact_id, resolved_tenant_id))
 
 
 async def proj_deprecate(
@@ -112,8 +105,10 @@ async def proj_deprecate(
     conn: aiosqlite.Connection,
     fact_id: int,
     payload: dict,
+    tenant_id: str | None = None,
 ) -> None:
     ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+    resolved_tenant_id = tenant_id or await engine._get_fact_tenant_id(conn, fact_id)
     reason = payload.get("reason", "deprecated")
     await conn.execute(
         "UPDATE facts SET valid_until = ?, updated_at = ?, "
@@ -121,8 +116,8 @@ async def proj_deprecate(
         "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
         "  ELSE json_set(COALESCE(metadata, '{}'), '$.deprecation_reason', ?) "
         "END "
-        "WHERE id = ?",
-        (ts, ts, reason, fact_id),
+        "WHERE id = ? AND tenant_id = ?",
+        (ts, ts, reason, fact_id, resolved_tenant_id),
     )
 
 
@@ -131,12 +126,14 @@ async def proj_mutate_to_ghost(
     conn: aiosqlite.Connection,
     fact_id: int,
     payload: dict,
+    tenant_id: str | None = None,
 ) -> None:
     """Project an evaporation event into ghost state."""
+    resolved_tenant_id = tenant_id or await engine._get_fact_tenant_id(conn, fact_id)
     ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
     await conn.execute(
-        "UPDATE facts SET fact_type = 'ghost', updated_at = ? WHERE id = ?",
-        (ts, fact_id),
+        "UPDATE facts SET fact_type = 'ghost', updated_at = ? WHERE id = ? AND tenant_id = ?",
+        (ts, fact_id, resolved_tenant_id),
     )
 
 
@@ -147,6 +144,7 @@ async def proj_tombstone(
     payload: dict,
     tenant_id: str | None = None,
 ) -> None:
+    resolved_tenant_id = tenant_id or await engine._get_fact_tenant_id(conn, fact_id)
     reason = payload.get("reason", "tombstoned")
     ts = payload.get("timestamp", datetime.now(timezone.utc).isoformat())
     query = (
@@ -156,10 +154,9 @@ async def proj_tombstone(
         "  ELSE json_set(COALESCE(metadata, '{}'), '$.tombstoned_at', ?, "
         "                '$.tombstone_reason', ?) "
         "END "
-        "WHERE id = ?"
+        "WHERE id = ? AND tenant_id = ?"
     )
-    await conn.execute(query, (ts, ts, ts, reason, fact_id))
-    resolved_tenant_id = tenant_id or await engine._get_fact_tenant_id(conn, fact_id)
+    await conn.execute(query, (ts, ts, ts, reason, fact_id, resolved_tenant_id))
     graph = AsyncCausalGraph(conn)
     report = await graph.propagate_taint(fact_id, tenant_id=resolved_tenant_id)
     logger.info(
@@ -213,15 +210,15 @@ async def proj_quarantine(
     payload: dict,
     tenant_id: str | None = None,
 ) -> None:
+    resolved_tenant_id = tenant_id or await engine._get_fact_tenant_id(conn, fact_id)
     ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
     reason = payload.get("reason", "quarantined")
     await conn.execute(
         "UPDATE facts SET is_quarantined = 1, quarantined_at = ?, "
         "quarantine_reason = ?, updated_at = ? "
-        "WHERE id = ?",
-        (ts, reason, ts, fact_id),
+        "WHERE id = ? AND tenant_id = ?",
+        (ts, reason, ts, fact_id, resolved_tenant_id),
     )
-    resolved_tenant_id = tenant_id or await engine._get_fact_tenant_id(conn, fact_id)
     graph = AsyncCausalGraph(conn)
     report = await graph.propagate_taint(fact_id, tenant_id=resolved_tenant_id)
     logger.info(
@@ -236,12 +233,14 @@ async def proj_unquarantine(
     conn: aiosqlite.Connection,
     fact_id: int,
     payload: dict,
+    tenant_id: str | None = None,
 ) -> None:
     ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+    resolved_tenant_id = tenant_id or await engine._get_fact_tenant_id(conn, fact_id)
     await conn.execute(
         "UPDATE facts SET is_quarantined = 0, quarantined_at = NULL, "
-        "quarantine_reason = NULL, updated_at = ? WHERE id = ?",
-        (ts, fact_id),
+        "quarantine_reason = NULL, updated_at = ? WHERE id = ? AND tenant_id = ?",
+        (ts, fact_id, resolved_tenant_id),
     )
 
 
@@ -250,25 +249,27 @@ async def proj_score_update(
     conn: aiosqlite.Connection,
     fact_id: int,
     payload: dict,
+    tenant_id: str | None = None,
 ) -> None:
     score = payload.get("consensus_score")
+    resolved_tenant_id = tenant_id or await engine._get_fact_tenant_id(conn, fact_id)
     confidence = payload.get("confidence")
     facts_columns = await engine._facts_columns(conn)
     has_consensus_column = "consensus_score" in facts_columns
     if has_consensus_column and score is not None and confidence is not None:
         await conn.execute(
-            "UPDATE facts SET confidence = ?, consensus_score = ? WHERE id = ?",
-            (confidence, score, fact_id),
+            "UPDATE facts SET confidence = ?, consensus_score = ? WHERE id = ? AND tenant_id = ?",
+            (confidence, score, fact_id, resolved_tenant_id),
         )
     elif has_consensus_column and score is not None:
         await conn.execute(
-            "UPDATE facts SET consensus_score = ? WHERE id = ?",
-            (score, fact_id),
+            "UPDATE facts SET consensus_score = ? WHERE id = ? AND tenant_id = ?",
+            (score, fact_id, resolved_tenant_id),
         )
     elif confidence is not None and score is None:
         await conn.execute(
-            "UPDATE facts SET confidence = ? WHERE id = ?",
-            (confidence, fact_id),
+            "UPDATE facts SET confidence = ? WHERE id = ? AND tenant_id = ?",
+            (confidence, fact_id, resolved_tenant_id),
         )
     elif score is not None and confidence is not None:
         await conn.execute(
@@ -277,8 +278,8 @@ async def proj_score_update(
             "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
             "  ELSE json_set(COALESCE(metadata, '{}'), '$.consensus_score', ?) "
             "END "
-            "WHERE id = ?",
-            (confidence, score, fact_id),
+            "WHERE id = ? AND tenant_id = ?",
+            (confidence, score, fact_id, resolved_tenant_id),
         )
     elif score is not None:
         await conn.execute(
@@ -287,13 +288,13 @@ async def proj_score_update(
             "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
             "  ELSE json_set(COALESCE(metadata, '{}'), '$.consensus_score', ?) "
             "END "
-            "WHERE id = ?",
-            (score, fact_id),
+            "WHERE id = ? AND tenant_id = ?",
+            (score, fact_id, resolved_tenant_id),
         )
     elif confidence is not None:
         await conn.execute(
-            "UPDATE facts SET confidence = ? WHERE id = ?",
-            (confidence, fact_id),
+            "UPDATE facts SET confidence = ? WHERE id = ? AND tenant_id = ?",
+            (confidence, fact_id, resolved_tenant_id),
         )
 
 
@@ -305,7 +306,7 @@ async def _update_metadata(
     updates: dict,
 ) -> str | None:
     async with conn.execute(
-        f"SELECT {metadata_column} FROM facts WHERE id = ?", (fact_id,)
+        f"SELECT {metadata_column} FROM facts WHERE id = ? AND tenant_id = ?", (fact_id, tenant_id)
     ) as cursor:
         row = await cursor.fetchone()
     raw_meta = row[0] if row else None
@@ -421,11 +422,13 @@ async def proj_restore(
     conn: aiosqlite.Connection,
     fact_id: int,
     payload: dict,
+    tenant_id: str | None = None,
 ) -> None:
     ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+    resolved_tenant_id = tenant_id or await engine._get_fact_tenant_id(conn, fact_id)
     await conn.execute(
         "UPDATE facts SET valid_until = NULL, is_tombstoned = 0, "
         "tombstoned_at = NULL, is_quarantined = 0, quarantined_at = NULL, "
-        "quarantine_reason = NULL, updated_at = ? WHERE id = ?",
-        (ts, fact_id),
+        "quarantine_reason = NULL, updated_at = ? WHERE id = ? AND tenant_id = ?",
+        (ts, fact_id, resolved_tenant_id),
     )

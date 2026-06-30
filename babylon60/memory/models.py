@@ -125,12 +125,12 @@ class SourceMetadata(BaseModel):
     """Tracks origin of the knowledge for Source Monitoring."""
 
     origin: Literal["user", "agent", "document", "system", "abstraction"] = Field(
-        default="system", description="Where did this memory come from?"
+        ..., description="Where did this memory come from? Required for structural provenance."
     )
-    author: str = Field(default="", description="Specific entity (e.g., username, agent_id).")
+    author: str = Field(..., description="Specific entity (e.g., username, agent_id). Required.")
     document_ref: str = Field(default="", description="Reference to external source if any.")
     confidence_in_source: float = Field(
-        default=1.0, description="Trust in the source itself [0, 1]."
+        ..., description="Trust in the source itself [0, 1]. Required."
     )
 
 
@@ -254,7 +254,7 @@ class CortexFactModel(BaseModel):
     # Sovereign Metadata
     is_diamond: bool = Field(default=False, description="Immune to temporal decay.")
     is_bridge: bool = Field(default=False, description="Pattern transferred between projects.")
-    confidence: str = Field(default="C5", description="Confidence level [C1-C5].")
+    confidence: str = Field(..., description="Confidence level [C1-C5]. OBLIGATORIO.")
 
     # Entropy and Health (The OUROBOROS engine will update this)
     success_rate: float = Field(default=1.0, description="Degrades if this fact causes errors.")
@@ -308,7 +308,7 @@ class CortexFactModel(BaseModel):
 
     # Pragmatic Metamemory Phase 1 Additions
     source_metadata: SourceMetadata = Field(
-        default_factory=SourceMetadata, description="Provenance of the fact for Source Monitoring."
+        ..., description="Provenance of the fact for Source Monitoring. OBLIGATORIO."
     )
     access_stats: MemoryAccessStats = Field(
         default_factory=MemoryAccessStats, description="Metamemory usage stats."

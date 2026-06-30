@@ -102,7 +102,7 @@ class SilentEngram(CortexSemanticEngram):
         age = self.age_days()
         has_aged = age >= self.maturation_days
         is_clean = self.contradiction_count == 0
-        has_energy = self.compute_decay() > 0.1
+        has_energy = self.energy_level > 0.1
 
         return has_aged and is_clean and has_energy
 
@@ -116,7 +116,7 @@ class SilentEngram(CortexSemanticEngram):
             return EngramState.DECEASED
 
         # Check for death conditions
-        current_energy = self.compute_decay()
+        current_energy = self.energy_level
         if current_energy <= 0.0 and self.contradiction_count > 0:
             return EngramState.DECEASED
 
@@ -255,15 +255,13 @@ class SystemsConsolidator:
                   AND json_extract(metadata, '$.state') = 'silent'
                   AND (
                       json_extract(metadata, '$.contradiction_count') > 0
-                      OR (
-                          cortex_decay(is_diamond, timestamp, ?, 3.0 * 24 * 3600) <= 0.0
-                      )
+                      OR success_rate <= 0.0
                   )
             """
 
             # Extract doomed facts for Weaponized Forgetting (L3 Cold Storage)
             select_sql = f"SELECT * FROM facts_meta {apoptosis_where_clause}"
-            cursor.execute(select_sql, (tenant_id, now))
+            cursor.execute(select_sql, (tenant_id,))
 
             if cursor.description:
                 columns = [col[0] for col in cursor.description]
@@ -278,7 +276,7 @@ class SystemsConsolidator:
 
             # Annihilate from active memory
             deletion_sql = f"DELETE FROM facts_meta {apoptosis_where_clause}"
-            cursor.execute(deletion_sql, (tenant_id, now))
+            cursor.execute(deletion_sql, (tenant_id,))
             deceased_count = cursor.rowcount
 
             # Count pending silent engrams remaining

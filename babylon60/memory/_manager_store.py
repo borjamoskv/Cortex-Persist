@@ -122,8 +122,6 @@ async def store_fact(
         return f"filtered:{dedup_id}" if dedup_id == "empty" else f"deduplicated:{dedup_id}"
 
     _meta = dict(metadata) if metadata else {}
-    if "confidence_score" not in _meta:
-        _meta["confidence_score"] = 0.8
 
     adjusted_layer = manager._determine_layer(project_id, layer)
 
@@ -134,17 +132,34 @@ async def store_fact(
     vector = await manager._encoder.encode(content)
     fact_id = str(uuid.uuid4())
 
-    candidate = CortexSemanticEngram(
-        id=fact_id,
-        tenant_id=tenant_id,
-        project_id=project_id,
-        content=content,
-        embedding=vector,
-        timestamp=time.time(),
-        metadata=_meta,
-        cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
-        parent_decision_id=int(parent_decision_id) if parent_decision_id is not None else None,
-    )
+    try:
+        from pydantic import ValidationError
+
+        confidence = _meta.get("confidence_score") or _meta.get("confidence")
+        if not confidence:
+            raise ValueError("C5-REAL Guard: confidence_score OBLIGATORIO faltante en payload")
+            
+        source_meta = _meta.get("source_metadata", _meta.get("provenance"))
+        if not source_meta:
+            raise ValueError("C5-REAL Guard: provenance/source_metadata OBLIGATORIO faltante en payload")
+
+        candidate = CortexSemanticEngram(
+            id=fact_id,
+            tenant_id=tenant_id,
+            project_id=project_id,
+            content=content,
+            embedding=vector,
+            timestamp=time.time(),
+            metadata=_meta,
+            cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
+            parent_decision_id=int(parent_decision_id) if parent_decision_id is not None else None,
+            confidence=str(confidence),
+            source_metadata=source_meta,
+        )
+    except (Exception) as e:
+        logger.error("SAGA-1 Abort: Fact validation failed: %s", e)
+        return f"aborted:validation_error"
+
 
     if manager._resonance_gate is None:
         raise RuntimeError("Resonance gate unavailable; refusing to persist without validation")

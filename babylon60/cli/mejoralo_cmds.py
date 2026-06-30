@@ -267,17 +267,6 @@ def mejoralo_trend(project, window, db):
         console.print(f"  Delta promedio: [{color}]Δ{trend.avg_delta:+.1f}[/]")
         console.print(f"  Tasa de mejora: {trend.positive_rate:.0%}")
 
-        # Decay risk bar
-        risk_pct = trend.decay_risk * 100
-        if risk_pct < 20:
-            risk_color = "green"
-        elif risk_pct < 50:
-            risk_color = "yellow"
-        else:
-            risk_color = "red"
-        bar = "█" * int(risk_pct / 5) + "░" * (20 - int(risk_pct / 5))
-        console.print(f"  Riesgo de decay: [{risk_color}]{bar} {risk_pct:.0f}%[/]")
-
         if trend.stagnant:
             console.print(
                 "  [bold red]⚠️  ESTANCAMIENTO DETECTADO - últimas 5 sesiones sin mejora[/]"

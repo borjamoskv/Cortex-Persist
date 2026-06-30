@@ -87,7 +87,8 @@ class _CortexCompat(types.ModuleType):
         if name.startswith("__") and name.endswith("__"):
             if name in self.__dict__:
                 return self.__dict__[name]
-            raise AttributeError(f"module '{self.__name__}' has no attribute '{name}'")
+            if name != "__version__":
+                raise AttributeError(f"module '{self.__name__}' has no attribute '{name}'")
 
         # 3. Submodule resolution via proxy namespace (takes precedence over real module attributes)
         sub_cortex = f"{self.__name__}.{name}"
