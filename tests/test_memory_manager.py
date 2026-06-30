@@ -10,7 +10,7 @@ import pytest_asyncio
 
 from babylon60.memory.engrams import CortexSemanticEngram
 from babylon60.memory.manager import CortexMemoryManager
-from babylon60.memory.models import MemoryEvent
+from babylon60.memory.models import MemoryEvent, SourceMetadata
 
 
 @pytest.fixture
@@ -203,6 +203,8 @@ async def test_store_direct_pipeline(manager, mock_mem0_pipeline):
                 project_id="p",
                 content="c",
                 embedding=[0.0],
+                confidence="C5",
+                source_metadata=SourceMetadata(origin="system", author="test", confidence_in_source=1.0),
             ),
         )
     )
@@ -224,6 +226,14 @@ async def test_store_direct_pipeline(manager, mock_mem0_pipeline):
             project_id="proj",
             content="Important fact",
             fact_type="knowledge",
+            metadata={
+                "confidence_score": "C5",
+                "source_metadata": {
+                    "origin": "system",
+                    "author": "test",
+                    "confidence_in_source": 1.0
+                }
+            }
         )
 
     assert result_id == "engram_123"
@@ -277,6 +287,8 @@ async def test_store_resonance_deduplication(manager, mock_mem0_pipeline):
         project_id="p",
         content="c",
         embedding=[0.0],
+        confidence="C5",
+        source_metadata=SourceMetadata(origin="system", author="test", confidence_in_source=1.0),
     )
     manager._resonance_gate.gate = AsyncMock(
         return_value=("resonance", existing_match),
@@ -290,6 +302,14 @@ async def test_store_resonance_deduplication(manager, mock_mem0_pipeline):
         result_id = await manager.store(
             tenant_id="t1",
             content="Similar fact",
+            metadata={
+                "confidence_score": "C5",
+                "source_metadata": {
+                    "origin": "system",
+                    "author": "test",
+                    "confidence_in_source": 1.0
+                }
+            }
         )
     assert result_id == "deduplicated:existing_456"
 
