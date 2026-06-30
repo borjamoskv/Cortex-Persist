@@ -107,6 +107,10 @@ def inject_test_master_key(monkeypatch):
     # Base64 for 32 bytes of '0'
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
 
+    from babylon60.crypto.aes import reset_default_encrypter
+
+    reset_default_encrypter()
+
 
 @pytest.fixture(autouse=True)
 def isolate_swarm_ledger(tmp_path, monkeypatch):
