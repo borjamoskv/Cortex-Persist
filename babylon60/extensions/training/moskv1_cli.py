@@ -64,7 +64,7 @@ def cmd_compile(workspace: str | None = None) -> None:
 
 def cmd_train(
     model: str = "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit",
-    iters: int = 50,
+    iters: int = 600,
     batch_size: int = 2,
     lora_layers: int = 16,
     learning_rate: float = 2e-5,
@@ -407,7 +407,7 @@ def main() -> None:
         workspace = sys.argv[2] if len(sys.argv) > 2 else None
         cmd_compile(workspace)
     elif command == "train":
-        iters = 50
+        iters = 600
         if len(sys.argv) > 2:
             try:
                 iters = int(sys.argv[2])
