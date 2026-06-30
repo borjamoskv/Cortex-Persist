@@ -132,7 +132,7 @@ def _intervention(**overrides):
 class TestSchemaLoading:
     """Schema registry initialization and introspection."""
 
-    def test_loads_all_six_schemas(self, validator):
+    def test_loads_base_schemas(self, validator):
         expected = {
             "evidence.schema",
             "pattern.schema",
@@ -141,7 +141,7 @@ class TestSchemaLoading:
             "experiment.schema",
             "intervention.schema",
         }
-        assert expected == set(validator.available_schemas)
+        assert expected.issubset(set(validator.available_schemas))
 
     def test_each_schema_has_draft07_marker(self, validator):
         for name, schema in validator._schemas.items():

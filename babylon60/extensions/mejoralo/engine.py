@@ -70,34 +70,24 @@ class MejoraloEngine:
         """Retrieve historical Mejoralo sessions for a project."""
         res = self.engine.recall_sync(
             project=project,
-            limit=100,
+            tags=["mejoralo"],
+            limit=limit,
         )
         if not isinstance(res, list):
             return []
-        filtered = []
-        for fact in res:
-            meta = fact.get("meta", {}) or {}
-            tags = meta.get("tags", []) if isinstance(meta, dict) else fact.get("tags", [])
-            if any(t in tags for t in ["mejoralo"]):
-                filtered.append(fact)
-        return filtered[:limit]
+        return res
 
     def scars(self, project: str, file_path: str, limit: int = 10) -> list[dict[str, Any]]:
         """Retrieve historical taints (scars) for a specific file."""
         res = self.engine.recall_sync(
             project=project,
             fact_type="error",
-            limit=100,
+            tags=["mejoralo"],
+            limit=limit,
         )
         if not isinstance(res, list):
             return []
-        filtered = []
-        for fact in res:
-            meta = fact.get("meta", {}) or {}
-            tags = meta.get("tags", []) if isinstance(meta, dict) else fact.get("tags", [])
-            if any(t in tags for t in ["mejoralo", "taint", "scar"]):
-                filtered.append(fact)
-        return filtered[:limit]
+        return res
 
     async def scars_async(
         self, project: str, file_path: str, limit: int = 10
@@ -106,17 +96,13 @@ class MejoraloEngine:
         res = await self.engine.recall(
             project=project,
             fact_type="error",
-            limit=100,
+            tags=["mejoralo"],
+            limit=limit,
         )
         if not isinstance(res, list):
             return []
-        filtered = []
-        for fact in res:
-            meta = fact.get("meta", {}) or {}
-            tags = meta.get("tags", []) if isinstance(meta, dict) else fact.get("tags", [])
-            if any(t in tags for t in ["mejoralo", "taint", "scar"]):
-                filtered.append(fact)
-        return filtered[:limit]
+        return res
+
 
     def record_scar(self, project: str, file_path: str, reason: str) -> None:
         """Record a scar (failure/taint evidence) in the CORTEX ledger."""

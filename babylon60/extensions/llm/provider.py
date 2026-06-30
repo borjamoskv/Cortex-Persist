@@ -442,7 +442,7 @@ class LLMProvider(BaseProvider):
         if self._provider == "vllm":
             from pathlib import Path
 
-            registry_file = Path.home() / ".cortex" / "training" / "verified_adapter.json"
+            registry_file = Path.home() / ".babylon60" / "training" / "verified_adapter.json"
             if registry_file.exists():
                 try:
                     with open(registry_file, encoding="utf-8") as f:

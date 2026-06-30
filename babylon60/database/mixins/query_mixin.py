@@ -105,6 +105,7 @@ class QueryMixin(EngineMixinBase):
         tenant_id: str = "default",
         fact_type: str | None = None,
         offset: int = 0,
+        tags: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """Bayesian-scored recall with temporal decay.
         Scoring: ``consensus_score * 0.8 + temporal_proximity * 0.2``.
@@ -123,6 +124,10 @@ class QueryMixin(EngineMixinBase):
             if fact_type:
                 q += " AND f.fact_type = ?"
                 params.append(fact_type)
+            if tags:
+                for tag in tags:
+                    q += " AND EXISTS (SELECT 1 FROM json_each(f.tags) WHERE value = ?)"
+                    params.append(tag)
             # Unified Scoring: Bayesian reputation + Temporal decay
             # Guard json_extract against encrypted meta (v6_aesgcm: prefix)
             q += """

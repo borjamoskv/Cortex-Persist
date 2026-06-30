@@ -68,7 +68,7 @@ class NativeVLLMProvider(BaseProvider):
 
         # Check active verified adapter registry
         verified_adapter_path = None
-        registry_file = Path.home() / ".cortex" / "training" / "verified_adapter.json"
+        registry_file = Path.home() / ".babylon60" / "training" / "verified_adapter.json"
         if registry_file.exists():
             try:
                 with open(registry_file, encoding="utf-8") as f:
@@ -138,7 +138,7 @@ class NativeVLLMProvider(BaseProvider):
 
         # Dynamically load verified adapter if registered
         lora_request = None
-        registry_file = Path.home() / ".cortex" / "training" / "verified_adapter.json"
+        registry_file = Path.home() / ".babylon60" / "training" / "verified_adapter.json"
         if registry_file.exists():
             try:
                 with open(registry_file, encoding="utf-8") as f:
@@ -246,7 +246,7 @@ class NativeVLLMProvider(BaseProvider):
 
         # Dynamically load verified adapter if registered
         lora_request = None
-        registry_file = Path.home() / ".cortex" / "training" / "verified_adapter.json"
+        registry_file = Path.home() / ".babylon60" / "training" / "verified_adapter.json"
         if registry_file.exists():
             try:
                 with open(registry_file, encoding="utf-8") as f:

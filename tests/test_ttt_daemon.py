@@ -146,7 +146,7 @@ class TestAutonomousTrainingDaemon:
         assert result["metrics"]["average_reward"] == 0.85
 
         # Verify registry file created and has correct format
-        registry_file = mock_home / ".cortex" / "training" / "verified_adapter.json"
+        registry_file = mock_home / ".babylon60" / "training" / "verified_adapter.json"
         assert registry_file.exists()
         with open(registry_file, encoding="utf-8") as f:
             reg = json.load(f)
@@ -155,7 +155,7 @@ class TestAutonomousTrainingDaemon:
             assert reg["adapter_path"] == str(adapter_dir.resolve())
 
         # Verify consolidation tracking saved
-        consolidated_file = mock_home / ".cortex" / "training" / "consolidated_sessions.json"
+        consolidated_file = mock_home / ".babylon60" / "training" / "consolidated_sessions.json"
         assert consolidated_file.exists()
         with open(consolidated_file, encoding="utf-8") as f:
             sessions = json.load(f)
@@ -186,7 +186,7 @@ class TestAutonomousTrainingDaemon:
         assert result["processed_sessions"] == 1
 
         # Check marked as consolidated
-        consolidated_file = mock_home / ".cortex" / "training" / "consolidated_sessions.json"
+        consolidated_file = mock_home / ".babylon60" / "training" / "consolidated_sessions.json"
         assert consolidated_file.exists()
 
     @pytest.mark.asyncio
@@ -231,7 +231,7 @@ class TestLLMProviderLoRARouting:
         assert resolved_model == "local-model"
 
         # 2. Register a verified adapter
-        registry_dir = mock_home / ".cortex" / "training"
+        registry_dir = mock_home / ".babylon60" / "training"
         registry_dir.mkdir(parents=True, exist_ok=True)
         registry_file = registry_dir / "verified_adapter.json"
         registry_file.write_text(
@@ -259,7 +259,7 @@ class TestLLMProviderLoRARouting:
         # Mock the entire vllm module import
         with patch.dict("sys.modules", {"vllm": mock_vllm}):
             # Setup verified adapter
-            registry_dir = mock_home / ".cortex" / "training"
+            registry_dir = mock_home / ".babylon60" / "training"
             registry_dir.mkdir(parents=True, exist_ok=True)
             registry_file = registry_dir / "verified_adapter.json"
             registry_file.write_text(
