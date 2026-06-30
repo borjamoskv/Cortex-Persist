@@ -11,9 +11,9 @@ SYS_ID: borjamoskv
 """
 
 from __future__ import annotations
-import cmath
+
 import math
-from typing import Callable, Sequence
+from collections.abc import Callable, Sequence
 
 
 class Dual:

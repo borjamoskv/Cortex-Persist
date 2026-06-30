@@ -54,19 +54,25 @@ class EntropyPruner:
         return pruned_count
 
     async def _prune_engram(self, engram: Any) -> bool:
-        """Evaluate and prune/update a single engram. Returns True if pruned."""
+        """Evaluate and prune/update a single engram. Returns True if pruned.
+
+        Calculates and persists explicit metabolic decay (LTD) by disuse.
+        """
         if not isinstance(engram, CortexSemanticEngram):
             return False
 
-        current_energy = engram.compute_decay()
+        import time
+        days_since_access = max(0.0, (time.time() - engram.last_accessed) / 86400.0)
+        decay_rate = 0.05
+        decayed_energy = max(0.0, engram.energy_level - (days_since_access * decay_rate))
 
-        if current_energy < self._atp_threshold and not engram.is_diamond:
-            logger.debug("Pruning depleted engram %s (E=%.2f)", engram.id, current_energy)
+        if decayed_energy < self._atp_threshold and not engram.is_diamond:
+            logger.debug("Pruning depleted engram %s (E=%.2f)", engram.id, decayed_energy)
             await self._vs.delete(engram.id)
             return True
 
-        if abs(current_energy - engram.energy_level) > 0.05:
-            updated = engram.model_copy(update={"energy_level": current_energy})
+        if abs(decayed_energy - engram.energy_level) > 0.05:
+            updated = engram.model_copy(update={"energy_level": decayed_energy})
             await self._vs.upsert(updated)
 
         return False

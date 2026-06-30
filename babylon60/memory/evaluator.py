@@ -5,7 +5,7 @@ import sqlite3
 from typing import Any
 
 
-def calculate_recall_precision(engine, limit: int = 20, top_k: int = 5) -> dict[str, Any]:
+def calculate_recall_precision(engine, tenant_id: str, limit: int = 20, top_k: int = 5) -> dict[str, Any]:
     """Calculates Semantic Recall@K Precision on existing memory facts using synchronous engine."""
 
     # We access the raw db connection strictly for reading sample rows autonomously
@@ -19,7 +19,7 @@ def calculate_recall_precision(engine, limit: int = 20, top_k: int = 5) -> dict[
     with sqlite3.connect(db_path) as conn:
         cur = conn.cursor()
         try:
-            cur.execute("SELECT id, content FROM facts_meta ORDER BY RANDOM() LIMIT ?", (limit,))
+            cur.execute("SELECT id, content FROM facts_meta WHERE tenant_id = ? ORDER BY RANDOM() LIMIT ?", (tenant_id, limit))
             facts = cur.fetchall()
         except sqlite3.OperationalError as e:
             if "no such table: facts_meta" in str(e):

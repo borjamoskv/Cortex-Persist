@@ -286,11 +286,12 @@ class OmegaDaemon:
 
                 # --- Thermodynamic Apoptosis Hooks ---
                 try:
-                    from babylon60.database.core import connect_async_ctx
+                    from pathlib import Path
+
                     from babylon60.audit.ledger import EnterpriseAuditLedger
                     from babylon60.audit.ledger_compactor import compact_ledger
+                    from babylon60.database.core import connect_async_ctx
                     from babylon60.extensions.daemon.apoptosis_daemon import ApoptosisDaemon
-                    from pathlib import Path
                     
                     async with connect_async_ctx("cortex_ledger.db") as conn:
                         ledger = EnterpriseAuditLedger(conn)
@@ -346,8 +347,6 @@ class OmegaDaemon:
                             "Critical entropy detected. Hooking Ouroboros to Turbopuffer for Prune."
                         )
                         try:
-                            import os
-
                             import keyring
 
                             from babylon60.engine.causal.taint_engine import (

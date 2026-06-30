@@ -9,17 +9,19 @@ from babylon60.cli.common import DEFAULT_DB, cli, close_engine_sync, console, ge
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 @click.option("--limit", default=20, help="Number of facts to evaluate")
 @click.option("--top-k", default=5, help="Top K results to consider for recall")
-def eval_cmd(db: str, limit: int, top_k: int) -> None:
+@click.option("--tenant-id", default="default", help="Tenant ID for evaluation")
+def eval_cmd(db: str, limit: int, top_k: int, tenant_id: str) -> None:
     """Run V8 Recall Precision Proxy tests."""
     from babylon60.memory.evaluator import calculate_recall_precision
 
     console.print("[bold cyan]🔬 CORTEX v8 Evaluation Engine[/]")
-    console.print(f"Running Recall@{top_k} tests across {limit} samples...\n")
-
+    console.print(f"[bold cyan]🔍 Evaluando BABYLON-60 (tenant: {tenant_id})[/]")
+    
     engine = None
     try:
         engine = get_engine(db)
-        result = calculate_recall_precision(engine, limit=limit, top_k=top_k)
+        with console.status("Ejecutando pruebas de Recall Semántico..."):
+            result = calculate_recall_precision(engine, tenant_id=tenant_id, limit=limit, top_k=top_k)
 
         recall = result["recall_at_k"] * 100
         color = "green" if recall >= 80 else "yellow" if recall >= 50 else "red"

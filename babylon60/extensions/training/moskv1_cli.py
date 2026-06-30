@@ -311,12 +311,12 @@ def cmd_validate() -> None:
         
         if verdict["success"]:
             metrics = verdict["metrics"]
-            print(f"   Status:        ✅ PASSED")
+            print("   Status:        ✅ PASSED")
             print(f"   Total Tensors: {metrics['tensor_count']}")
             print(f"   Parameters:    {metrics['total_params']:,}")
-            print(f"   Layers Check:  All weights finite, zero NaNs/infs.")
+            print("   Layers Check:  All weights finite, zero NaNs/infs.")
         else:
-            print(f"   Status:        ❌ FAILED")
+            print("   Status:        ❌ FAILED")
             print(f"   Error:         {verdict['error']}")
     else:
         print()

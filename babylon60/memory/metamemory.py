@@ -418,8 +418,6 @@ def _compute_accessibility(
     if best_idx < len(candidate_engrams):
         best_engram = candidate_engrams[best_idx]
         energy = getattr(best_engram, "energy_level", 1.0)
-        if hasattr(best_engram, "compute_decay"):
-            energy = best_engram.compute_decay()
         accessibility = best_sim * (0.5 + 0.5 * energy)
     return accessibility
 

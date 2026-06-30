@@ -160,7 +160,6 @@ async def store_fact(
     fact_id = str(uuid.uuid4())
 
     try:
-        from pydantic import ValidationError
 
         confidence = _meta.get("confidence_score") or _meta.get("confidence")
         if not confidence:
@@ -185,7 +184,7 @@ async def store_fact(
         )
     except (Exception) as e:
         logger.error("SAGA-1 Abort: Fact validation failed: %s", e)
-        return f"aborted:validation_error"
+        return "aborted:validation_error"
 
 
     if manager._resonance_gate is None:

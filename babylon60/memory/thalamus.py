@@ -90,7 +90,7 @@ class ThalamusGate:
         # 3. Causal Saturation Check (Entropy Containment)
         if parent_decision_id and conn:
             try:
-                child_count = await self._count_children(conn, parent_decision_id, fact_type)
+                child_count = await self._count_children(conn, parent_decision_id, fact_type, tenant_id)
                 if child_count >= self.max_causal_children:
                     logger.info(
                         "Thalamus: Discarding fact - causal saturation "
@@ -119,13 +119,14 @@ class ThalamusGate:
         conn: Any,
         parent_id: int,
         fact_type: str,
+        tenant_id: str,
     ) -> int:
         """Count how many children of a given type a parent decision has."""
 
         def execute_query():
             cursor = conn.execute(
-                "SELECT COUNT(*) FROM facts_meta WHERE parent_decision_id = ? AND fact_type = ?",
-                (str(parent_id), fact_type),
+                "SELECT COUNT(*) FROM facts_meta WHERE parent_decision_id = ? AND fact_type = ? AND tenant_id = ?",
+                (str(parent_id), fact_type, tenant_id),
             )
             return cursor.fetchone()
 

@@ -63,7 +63,7 @@ class Z3ASTCompiler(ast.NodeVisitor):
     def visit_Compare(self, node: ast.Compare):
         left = self.visit(node.left)
         expr = True
-        for op, comparator in zip(node.ops, node.comparators):
+        for op, comparator in zip(node.ops, node.comparators, strict=True):
             right = self.visit(comparator)
             if isinstance(op, ast.Eq): current = (left == right)
             elif isinstance(op, ast.NotEq): current = (left != right)
