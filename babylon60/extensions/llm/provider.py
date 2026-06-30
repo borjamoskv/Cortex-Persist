@@ -336,7 +336,11 @@ class LLMProvider(BaseProvider):
             async with self._semaphore:
                 response = await self._client.post(url, headers=headers, json=payload)
             response.raise_for_status()
-            data = response.json()
+            try:
+                data = response.json()
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                raw = response.content.decode("utf-8", errors="replace")
+                data = json.loads(raw)
             self._log_resolved_model(payload, data)
             if prompt is not None and "usage" in data:
                 try:

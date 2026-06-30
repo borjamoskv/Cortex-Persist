@@ -12,6 +12,14 @@ import argparse
 import asyncio
 import sys
 import time
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Load .env from repo root so API keys are visible to the process
+_repo_root = Path(__file__).parent.parent
+load_dotenv(_repo_root / ".env", override=False)
+load_dotenv(_repo_root / ".env.local", override=True)
 
 from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
