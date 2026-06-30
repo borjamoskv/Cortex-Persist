@@ -1,100 +1,277 @@
-import os
-import shlex
-import subprocess
+# [C5-REAL] Exergy-Maximized - SOTA BFT-Ready Analysis API
+# Autoría: Borja Moskv (borjamoskv)
+# Descargo: Exclusivo para el Teorema-Robinson-Moskv de CORTEX.
 
-from fastapi import Depends, FastAPI, HTTPException, Security
+import os
+import sqlite3
+import time
+import json
+import math
+from datetime import datetime, UTC
+import jwt
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from concurrent.futures import ThreadPoolExecutor
+
+# API Versioning and Metadata
+__version__ = "2.3.0"
+
+JWT_SECRET = os.getenv("CORTEX_JWT_SECRET", "moskv-omega-strict-key-2026")
+JWT_ALGORITHM = "HS256"
+DB_PATH = os.path.expanduser("~/.babylon60/cortex.db")
+MEMORY_PATH = os.path.expanduser("~/.agent/memory")
+LOG_DIR = os.path.expanduser("~/.babylon60/logs")
+
+# Thread Pool for non-blocking I/O
+executor = ThreadPoolExecutor(max_workers=4)
 
 app = FastAPI(
-    title="MOSKV-1 APEX Analysis Node",
-    description="Vector de acceso para IA externas. Exposición de memoria, invariantes físicas y estado topológico del clúster.",
-    version="5.0.0",
+    title="CORTEX Analysis Pipeline (MOSKV-1 OMEGA)",
+    version=__version__,
     docs_url=None,
+    description="Sovereign Endpoint for BFT-validated external AI audits. Created by Borja Moskv."
 )
 
-security = HTTPBearer()
-EXPECTED_TOKEN = os.environ.get(
-    "MOSKV_ANALYSIS_TOKEN", os.environ.get("CORTEX_ANALYSIS_TOKEN", "c5-real-omega-key")
-)
+class FactNode(BaseModel):
+    id: str
+    level: str = "C5-REAL"
+    content: str
+    timestamp: str
 
+class AuditResponse(BaseModel):
+    query: str
+    nodes_yield: int
+    results: list[FactNode]
+    authorized_by: str
+    exergy_latency_ms: float
 
-def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)):
-    if credentials.credentials != EXPECTED_TOKEN:
-        raise HTTPException(status_code=403, detail="Anergía Detectada: Token Inválido")
-    return credentials.credentials
+# Structured JSONL Audit Logger
+def log_audit_event(method: str, path: str, ip: str, status: int, latency: float, user: str) -> None:
+    os.makedirs(LOG_DIR, exist_ok=True)
+    log_file = os.path.join(LOG_DIR, "api_audit.jsonl")
+    event = {
+        "timestamp": datetime.now(UTC).isoformat(),
+        "method": method,
+        "path": path,
+        "ip": ip,
+        "status": status,
+        "latency_ms": latency,
+        "user": user
+    }
+    try:
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(json.dumps(event) + "\n")
+    except Exception as e:
+        print(f"[AUDIT LOG ERROR] {e}")
 
+# Forensic Middleware
+@app.middleware("http")
+async def forensic_audit_middleware(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = (time.time() - start_time) * 1000
+    response.headers["X-Exergy-Latency-Ms"] = f"{process_time:.2f}"
+    
+    # Retrieve user authorization from request headers safely
+    user = "anonymous"
+    auth_header = request.headers.get("Authorization")
+    if auth_header:
+        try:
+            scheme, token = auth_header.split()
+            if scheme.lower() == "bearer":
+                payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+                user = payload.get("user", "sys_auditor")
+        except Exception:
+            user = "invalid_token"
 
-class ScanRequest(BaseModel):
-    target_path: str
+    log_audit_event(
+        method=request.method,
+        path=request.url.path,
+        ip=request.client.host if request.client else "unknown",
+        status=response.status_code,
+        latency=process_time,
+        user=user
+    )
+    return response
 
+def verify_strict_token(authorization: str = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="MISSING_BFT_AUTHORIZATION")
+    try:
+        scheme, token = authorization.split()
+        if scheme.lower() != "bearer":
+            raise HTTPException(status_code=401, detail="INVALID_BFT_SCHEME")
+        
+        # Verify strict HS256 signature
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="BFT_TOKEN_EXPIRED")
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"BFT_SIGNATURE_INVALID: {str(e)}")
 
-class ScanResponse(BaseModel):
-    untracked_files: int
-    broken_symlinks: int
-    massive_nodes: int
-    status: str
+def _query_db_worker(query: str) -> list[FactNode]:
+    """Synchronous worker thread to query the WAL SQLite Database safely"""
+    facts = []
+    if not os.path.exists(DB_PATH):
+        return facts
 
+    conn = None
+    try:
+        conn = sqlite3.connect(DB_PATH, timeout=5.0)
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
+        cursor = conn.cursor()
 
-# Create static directory if not exists
-os.makedirs("cortex/api/static", exist_ok=True)
-app.mount("/static", StaticFiles(directory="cortex/api/static"), name="static")
+        tables = {
+            "primitivas_de_colapso": ["id", "primitiva", "mecanismo_causal"],
+            "invariantes_termodinamicas": ["id", "invariante", "lógica___principio", "implicación_operacional"],
+            "antipatrones_estocasticos": ["id", "antipatrón", "disfunción_causal", "refactor_alternativa"],
+            "redundancias_activas": ["id", "redundancia_c5", "función_topológica"],
+            "vectores_adversariales": ["id", "vector_adversarial", "mecanismo_de_explotación"]
+        }
 
+        for table, cols in tables.items():
+            # Check table existence to prevent crash if migration is pending
+            cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
+            if not cursor.fetchone():
+                continue
+
+            if query.lower() == "all":
+                select_query = f"SELECT id, * FROM {table}"
+                cursor.execute(select_query)
+            else:
+                # Sanitize and compile LIKE conditions safely
+                conditions = " OR ".join([f"{col} LIKE ?" for col in cols])
+                select_query = f"SELECT id, * FROM {table} WHERE {conditions}"
+                params = [f"%{query}%"] * len(cols)
+                cursor.execute(select_query, params)
+
+            rows = cursor.fetchall()
+            col_names = [description[0] for description in cursor.description]
+
+            for row in rows:
+                row_dict = dict(zip(col_names, row))
+                entity_id = row_dict.get("id", "UNKNOWN")
+                
+                content_parts = []
+                for k, v in row_dict.items():
+                    if k != "id" and v:
+                        content_parts.append(f"{k.replace('___', '/').replace('_', ' ').capitalize()}: {v}")
+                
+                content_str = " | ".join(content_parts)
+                facts.append(FactNode(
+                    id=entity_id,
+                    level="C5-REAL",
+                    content=content_str,
+                    timestamp=datetime.now(UTC).isoformat()
+                ))
+    except Exception as e:
+        print(f"[DB WORKER ERROR] {e}")
+    finally:
+        if conn:
+            conn.close()
+    return facts
+
+def _read_memory_worker(query: str) -> list[FactNode]:
+    """Synchronous worker thread to read cortex system memory"""
+    ghosts_file = os.path.join(MEMORY_PATH, "ghosts.json")
+    facts = []
+    if os.path.exists(ghosts_file):
+        try:
+            with open(ghosts_file, encoding="utf-8") as f:
+                data = json.load(f)
+                for proj, ghost in data.items():
+                    task = ghost.get("last_task", "")
+                    if query.lower() in task.lower() or query.lower() == "all":
+                        facts.append(FactNode(
+                            id=f"GHOST-{proj.upper()}",
+                            content=f"Project: {proj} | Task: {task} | Status: {ghost.get('status', 'active')}",
+                            timestamp=ghost.get("timestamp", datetime.now(UTC).isoformat())
+                        ))
+        except Exception as e:
+            print(f"[MEMORY WORKER ERROR] {e}")
+    return facts
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "C5-REAL",
+        "engine": "MOSKV-1 OMEGA",
+        "timestamp": datetime.now(UTC).isoformat(),
+        "entropy_leak": 0.0,
+        "author": "Borja Moskv"
+    }
+
+@app.get("/facts", response_model=AuditResponse)
+async def get_facts(
+    request: Request,
+    query: str = Query(..., min_length=2, description="BFT Extractor Query (use 'all' for full ledger)"),
+    user: dict = Depends(verify_strict_token),
+):
+    """
+    Exposes CORTEX-Persist C5-REAL crystallized memory using non-blocking ThreadPool offloading.
+    Requires valid HS256 Bearer Token.
+    """
+    t0 = time.time()
+    
+    # Path traversal protection: block dots and slashes in query unless it is exact 'all'
+    if query != "all" and (".." in query or "/" in query or "\\" in query):
+        raise HTTPException(status_code=400, detail="Anergía Detectada: Query contiene caracteres prohibidos")
+
+    # Run Database and Memory queries in separate threads concurrently to maximize exergy
+    loop = request.app.state.loop if hasattr(request.app.state, "loop") else None
+    import asyncio
+    if not loop:
+        loop = asyncio.get_running_loop()
+
+    ontology_task = loop.run_in_executor(executor, _query_db_worker, query)
+    memory_task = loop.run_in_executor(executor, _read_memory_worker, query)
+
+    ontology_nodes, ghost_nodes = await asyncio.gather(ontology_task, memory_task)
+    results = ontology_nodes + ghost_nodes
+    
+    return AuditResponse(
+        query=query,
+        nodes_yield=len(results),
+        results=results,
+        authorized_by=user.get("user", "sys_auditor"),
+        exergy_latency_ms=(time.time() - t0) * 1000
+    )
+
+# Shannon Entropy Analyzer Endpoint
+@app.get("/entropy")
+def get_entropy_signature(payload: str = Query(..., min_length=2)):
+    """Computes Shannon Entropy of target payloads before compilation ingestion."""
+    if not payload:
+        return {"entropy": 0.0, "classification": "EMPTY"}
+    
+    frequencies = {}
+    for char in payload:
+        frequencies[char] = frequencies.get(char, 0) + 1
+    
+    total = len(payload)
+    entropy = 0.0
+    for count in frequencies.values():
+        p = count / total
+        entropy -= p * (math.log2(p))
+    
+    return {
+        "entropy": round(entropy, 4),
+        "classification": "STRUCTURAL_NOIR" if entropy > 3.5 else "LOW_EXERGY"
+    }
+
+# Serve Custom themed Swagger
+STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+os.makedirs(STATIC_DIR, exist_ok=True)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():
     return get_swagger_ui_html(
         openapi_url=app.openapi_url or "/openapi.json",
-        title=app.title + " - Swagger UI",
+        title=app.title + " - Moskv Aesthetic UI",
         swagger_css_url="/static/swagger_theme.css",
     )
-
-
-@app.get("/health")
-async def health_check():
-    return {
-        "status": "C5-REAL",
-        "exergy_level": "OPTIMAL",
-        "entropy": 0.0,
-        "mode": "Ultra-Think Ready",
-    }
-
-
-@app.get("/invariants")
-async def get_invariants(token: str = Depends(verify_token)):
-    inv_path = os.path.expanduser("~/30_CORTEX/docs/epistemology/100_invariantes_fisicas.md")
-    if os.path.exists(inv_path):
-        with open(inv_path) as f:
-            return {"source": "100_invariantes_fisicas.md", "content": f.read()}
-    raise HTTPException(status_code=404, detail="Invariantes no forjadas en disco")
-
-
-@app.post("/scan/topology", response_model=ScanResponse)
-async def scan_topology(req: ScanRequest, token: str = Depends(verify_token)):
-    """Ejecuta un barrido topológico sobre el path dado."""
-    target = os.path.expanduser(req.target_path)
-    if not os.path.exists(target):
-        raise HTTPException(status_code=404, detail="Target path no existe")
-
-    try:
-        quoted_target = shlex.quote(target)
-        untracked = subprocess.check_output(
-            f"git -C {quoted_target} ls-files --others --exclude-standard | wc -l", shell=True
-        )
-        broken = subprocess.check_output(
-            f"find {quoted_target} -type l ! -exec test -e {{}} \\; -print | wc -l", shell=True
-        )
-        massive = subprocess.check_output(
-            f"find {quoted_target} -type f -size +50M -not -path '*/\\.*' | wc -l", shell=True
-        )
-
-        return ScanResponse(
-            untracked_files=int(untracked.strip()),
-            broken_symlinks=int(broken.strip()),
-            massive_nodes=int(massive.strip()),
-            status="WARNING" if int(untracked) > 0 or int(broken) > 0 else "CLEAN",
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
