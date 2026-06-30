@@ -15,12 +15,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/borjamoskv/cortex-persist/stargazers"><img src="https://img.shields.io/github/stars/borjamoskv/cortex-persist?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="GitHub Stars"></a>
+  <a href="https://github.com/borjamoskv/BABYLON-60/stargazers"><img src="https://img.shields.io/github/stars/borjamoskv/BABYLON-60?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="GitHub Stars"></a>
   <a href="https://pypi.org/project/cortex-persist/"><img src="https://img.shields.io/pypi/v/cortex-persist.svg?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="PyPI"></a>
-  <a href="https://github.com/borjamoskv/cortex-persist/actions"><img src="https://img.shields.io/github/actions/workflow/status/borjamoskv/cortex-persist/ci.yml?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="CI"></a>
-  <a href="https://github.com/borjamoskv/cortex-persist"><img src="https://img.shields.io/badge/Architecture-LEGION--10k-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="LEGION-10k Ready"></a>
+  <a href="https://github.com/borjamoskv/BABYLON-60/actions"><img src="https://img.shields.io/github/actions/workflow/status/borjamoskv/BABYLON-60/ci.yml?style=for-the-badge&color=0A0A0A&labelColor=2B3BE5" alt="CI"></a>
+  <a href="https://github.com/borjamoskv/BABYLON-60"><img src="https://img.shields.io/badge/Architecture-LEGION--10k-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="LEGION-10k Ready"></a>
   <a href="cortex/agents/primitives/APEX_CORE.md"><img src="https://img.shields.io/badge/Compliance-APEX--100-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="APEX-100 Compliant"></a>
   <a href="docs/mcp.md"><img src="https://img.shields.io/badge/MCP-native-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="MCP Compatible"></a>
+  <a href="FINAL_AUDIT.md"><img src="https://img.shields.io/badge/Audit-C5--REAL%202026--06--30-0A0A0A.svg?style=for-the-badge&labelColor=2B3BE5" alt="Audit C5-REAL"></a>
 </p>
 
 <p align="center">
@@ -231,12 +232,32 @@ To decouple the ecosystem's evolution from underlying LLM volatility, BABYLON-60
 | [API Reference](docs/api.md) | SDK primitives and REST endpoints |
 | [MCP Integration](docs/mcp.md) | MCP server setup and tool catalog |
 
+---
+
+## ▀▄ AUDIT STATUS (2026-06-30)
+
+> Full audit report: [`FINAL_AUDIT.md`](FINAL_AUDIT.md) — commit `60f67a02a`
+
+| Vector | Result |
+| :--- | :--- |
+| Static Analysis (Ruff) | ✅ 0 violations remaining |
+| Security (Bandit) | ✅ 0 HIGH · 0 MEDIUM |
+| Dependency CVEs (pip-audit) | 🔴 50+ CVEs — upgrade required |
+| Test Suite (3,886 tests) | ✅ 3,845 passed · 0 failed |
+| Rust Audit (57 crates) | ✅ 0 advisories |
+| SQLite Integrity | ✅ ok · WAL mode active |
+| Ledger Hash Chain | ⚠️ `merkle_roots` not bootstrapped |
+| Vector Extension (sqlite-vec) | ⚠️ `vec0` not loaded at startup |
+
+---
+
 ```
 AESTHETIC:    INDUSTRIAL NOIR 2026 (#0A0A0A / #2B3BE5)
 EPISTEMOLOGY: C5-REAL — Cryptographically Verified Reality
 CORE TENET:   Generative output is conjecture. Evidence is absolute.
 THROUGHPUT:   ~390k Agents/Sec (Rust-FFI, GIL-free)
-UPDATED:      June 2026 — Execution Manifold · SAGA Write-Path · UltraThink Routing
+COMMIT:       60f67a02a | branch: wave4-reality-loop-bridge
+UPDATED:      2026-06-30 — Full-Spectrum Audit · SAGA Write-Path · UltraThink Routing
 ```
 
 > **LICENSE:** Apache-2.0 | **OPERATOR:** borjamoskv | [cortexpersist.org](https://cortexpersist.org) | [Sponsor](https://github.com/sponsors/borjamoskv)
