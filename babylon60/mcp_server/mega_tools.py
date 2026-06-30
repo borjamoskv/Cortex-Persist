@@ -41,6 +41,7 @@ def register_mega_tools(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register all 'Mega Poderosas' tools on the MCP server."""
     _register_reality_weaver(mcp, ctx)
     _register_entropy_cracker(mcp, ctx)
+    _register_linguistic_entropy(mcp, ctx)
     _register_temporal_nexus(mcp, ctx)
 
 
@@ -488,6 +489,89 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
         else:
             lines.append("> [!NOTE]")
             lines.append(f"> System health: moderate. {ghost_count} ghost(s) pending resolution.")
+
+        ctx.metrics.record_request()
+        return "\n".join(lines)
+
+
+# ─── Linguistic Entropy ──────────────────────────────────────────────
+
+
+def _register_linguistic_entropy(mcp: FastMCP, ctx: _MCPContext) -> None:
+    """Register the ``cortex_linguistic_entropy`` tool."""
+
+    @mcp.tool()
+    async def cortex_linguistic_entropy(path_or_text: str, is_file: bool = False) -> str:
+        """Analyze textual or file data for linguistic entropy, lexical diversity, and slop.
+
+        Uses the LinguisticEntropyDetector to calculate Shannon entropies,
+        MATTR, Burstiness, Context Rot, and identify LLM Slop.
+
+        Args:
+            path_or_text: The literal text to analyze, or a path to a file if is_file is True.
+            is_file: If True, treats path_or_text as a file path and reads it.
+        """
+        await ctx.ensure_ready()
+        from babylon60.utils.linguistic_entropy import LinguisticEntropyDetector
+
+        detector = LinguisticEntropyDetector()
+
+        if is_file:
+            safe_path = _resolve_safe_path(path_or_text)
+            if safe_path is None or not os.path.isfile(safe_path):
+                ctx.metrics.record_error()
+                return f"❌ Path '{path_or_text}' is outside allowed boundaries or is not a file."
+            
+            try:
+                with open(safe_path, encoding="utf-8") as f:
+                    text = f.read()
+            except Exception as e:
+                ctx.metrics.record_error()
+                return f"❌ Failed to read file: {e}"
+            label = f"FILE: {os.path.basename(safe_path)}"
+        else:
+            text = path_or_text
+            label = "LITERAL TEXT"
+
+        report = detector.analyze(text)
+        r = report.to_dict()
+        
+        lines = [
+            f"═══ LINGUISTIC ENTROPY ANALYSIS: {label} ═══",
+            "",
+            f"**Exergy Score:** {report.exergy_score:.4f} / 1.0 (Higher = Denser/Cleaner)",
+            "",
+            "### Counts",
+            f"- **Words:** {report.word_count}",
+            f"- **Chars:** {report.char_count}",
+            f"- **Sentences:** {report.sentence_count}",
+            f"- **Unique Words:** {report.unique_words}",
+            "",
+            "### Entropy (Shannon)",
+            f"- **Character:** {report.char_entropy:.4f}",
+            f"- **Word:** {report.word_entropy:.4f}",
+            f"- **Bigram:** {report.bigram_entropy:.4f}",
+            f"- **Trigram:** {report.trigram_entropy:.4f}",
+            "",
+            "### Lexical Diversity & Structure",
+            f"- **TTR (Type-Token Ratio):** {report.ttr:.4f}",
+            f"- **MATTR (Moving Avg TTR):** {report.mattr:.4f}",
+            f"- **Burstiness:** {report.burstiness:.4f}",
+            f"- **Context Rot:** {report.context_rot_score:.4f}",
+            "",
+            "### Slop / Anergy Detection",
+            f"- **Instances:** {r['slop_instances_count']}",
+            f"- **Density:** {report.slop_density:.4f}",
+            f"- **Weight Total:** {report.slop_weight_total:.2f}",
+        ]
+
+        if r['slop_instances_count'] > 0:
+            lines.append("")
+            lines.append("#### Slop Matches Detected:")
+            for s in r["slop_instances"][:5]:
+                lines.append(f"- `[{s['severity_weight']:.1f}]` {s['matched_text'][:60]}")
+            if r['slop_instances_count'] > 5:
+                lines.append(f"- ... and {r['slop_instances_count'] - 5} more.")
 
         ctx.metrics.record_request()
         return "\n".join(lines)
