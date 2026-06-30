@@ -349,3 +349,69 @@ with open(os.path.join(ontology_dir, "endomorfismo_estructural.md"), "w") as f:
     f.write(estructural_content)
 
 print("[C5-REAL] Todos los archivos de la ontología Endomorfismo guardados con éxito.")
+
+# ----------------- PARSER Y COMPILADOR A JSON/YAML -----------------
+import json
+import yaml
+
+def parse_markdown_tables(filepath):
+    all_tables = []
+    current_table = []
+    headers = []
+    in_table = False
+    with open(filepath, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line.startswith("|"):
+                if in_table and current_table:
+                    all_tables.append(current_table)
+                    current_table = []
+                in_table = False
+                headers = []
+                continue
+            if "---" in line or "|:---" in line:
+                continue
+            cells = [cell.strip().replace("**", "").strip("`").strip() for cell in line.split("|")[1:-1]]
+            if not in_table:
+                headers = cells
+                in_table = True
+            else:
+                entity = dict(zip(headers, cells, strict=False))
+                if entity.get("ID") and entity["ID"].startswith("ENDO-"):
+                    current_table.append(entity)
+        if in_table and current_table:
+            all_tables.append(current_table)
+    return all_tables
+
+print("[C5-REAL] Compilando ontología Endomorfismo en JSON y YAML...")
+
+primitivas = parse_markdown_tables(os.path.join(ontology_dir, "endomorfismo_primitivas_01.md"))[0] + \
+             parse_markdown_tables(os.path.join(ontology_dir, "endomorfismo_primitivas_02.md"))[0]
+
+invariantes = parse_markdown_tables(os.path.join(ontology_dir, "endomorfismo_invariantes_01.md"))[0] + \
+              parse_markdown_tables(os.path.join(ontology_dir, "endomorfismo_invariantes_02.md"))[0]
+
+estructural_tables = parse_markdown_tables(os.path.join(ontology_dir, "endomorfismo_estructural.md"))
+antipatrones = estructural_tables[0]
+redundancias = estructural_tables[1]
+adversariales = estructural_tables[2]
+
+registry = {
+    "M1_PRIMITIVES": primitivas,
+    "M2_INVARIANTS": invariantes,
+    "M3_ANTIPATTERNS": antipatrones,
+    "M4_REDUNDANCIAS": redundancias,
+    "M5_VECTORS": adversariales
+}
+
+output_json = os.path.join(ontology_dir, "endomorfismo_ontology.json")
+output_yaml = os.path.join(ontology_dir, "endomorfismo_ontology.yaml")
+
+with open(output_json, "w", encoding="utf-8") as f:
+    json.dump(registry, f, indent=2, ensure_ascii=False)
+
+with open(output_yaml, "w", encoding="utf-8") as f:
+    yaml.dump(registry, f, allow_unicode=True, sort_keys=False)
+
+print(f"[C5-REAL] Ontología compilada con éxito: {len(primitivas)}P + {len(invariantes)}I + {len(antipatrones)}AP + {len(redundancias)}RA + {len(adversariales)}AV.")
+

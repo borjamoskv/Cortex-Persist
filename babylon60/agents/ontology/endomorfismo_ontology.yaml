@@ -1,0 +1,1799 @@
+M1_PRIMITIVES:
+- ID: ENDO-P01
+  Primitiva: OP_SELF_MAPPING
+  Mecanismo Causal: Transformación de estado donde el dominio coincide con el codominio.
+  Activación (Trigger): Modificación de un nodo que se referencia a sí mismo.
+  Sensor (Síntoma): State_In == State_Out`.
+  Escala Temporal: MS
+  Gravedad: P2
+  Intervención: Verificar morfismo identidad.
+- ID: ENDO-P02
+  Primitiva: OP_MONOID_COMP
+  Mecanismo Causal: Composición asociativa de múltiples endomorfismos sobre un mismo
+    objeto.
+  Activación (Trigger): Encadenamiento de operaciones secuenciales sobre el estado
+    de un agente.
+  Sensor (Síntoma): Compose(f, g) -> h`.
+  Escala Temporal: MS
+  Gravedad: P1
+  Intervención: Validar propiedad asociativa en el ledger.
+- ID: ENDO-P03
+  Primitiva: OP_IDENTITY_CHECK
+  Mecanismo Causal: Verificación de la existencia y preservación del endomorfismo
+    identidad ($1_X$).
+  Activación (Trigger): Bootstrap del loop o inicialización de estado nulo.
+  Sensor (Síntoma): f(x) != x` cuando se esperaba $1_X$.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Abortar SAGA y restaurar snapshot.
+- ID: ENDO-P04
+  Primitiva: OP_IMAGE_DECAY
+  Mecanismo Causal: Reducción sistemática del espacio de estados accesibles tras aplicaciones
+    repetidas.
+  Activación (Trigger): Inferencia stocástica recursiva sin inyección de entropía
+    externa.
+  Sensor (Síntoma): Cardinalidad del codominio < dominio.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Inyectar ruido térmico controlado (T=0.5).
+- ID: ENDO-P05
+  Primitiva: OP_FIXED_POINT
+  Mecanismo Causal: Convergencia a un estado inmutable donde el endomorfismo no produce
+    cambios.
+  Activación (Trigger): Ejecución iterativa hasta alcanzar la estabilidad semántica.
+  Sensor (Síntoma): f(x) == x`.
+  Escala Temporal: MS
+  Gravedad: P2
+  Intervención: Detener ciclo y emitir hash.
+- ID: ENDO-P06
+  Primitiva: OP_AUTO_ISO_BREAK
+  Mecanismo Causal: Pérdida de la inyectividad/sobreyectividad en un endomorfismo
+    que debía ser automorfismo.
+  Activación (Trigger): Modificación destructiva de campos clave del estado en el
+    loop.
+  Sensor (Síntoma): Aut(X)` colapsa a `End(X)` no invertible.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Reconstruir el mapeo de estados.
+- ID: ENDO-P07
+  Primitiva: OP_ORBIT_CYCLE
+  Mecanismo Causal: Captura de la secuencia de estados en un ciclo cerrado periódico
+    infinito.
+  Activación (Trigger): Aplicación cíclica sin criterio de parada.
+  Sensor (Síntoma): f^n(x) == x` para $n > 1$.
+  Escala Temporal: Segundos
+  Gravedad: P0
+  Intervención: Circuit Breaker (AX-047) detona.
+- ID: ENDO-P08
+  Primitiva: OP_CODOM_MISMATCH
+  Mecanismo Causal: El estado de salida no coincide con el dominio requerido para
+    la siguiente composición.
+  Activación (Trigger): Alteración del esquema de estado en caliente.
+  Sensor (Síntoma): TypeError` en paso intermedio.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: SAGA-3 Abort inmediato.
+- ID: ENDO-P09
+  Primitiva: OP_FUNCTOR_MAPPED
+  Mecanismo Causal: Traslación de un endomorfismo a otra categoría conservando la
+    estructura.
+  Activación (Trigger): Sincronización trans-repositorio (Singularity Nexus).
+  Sensor (Síntoma): 'F(f) : F(X) -> F(X)` verificado.'
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Firmar procedencia con `CORTEX-TAINT`.
+- ID: ENDO-P10
+  Primitiva: OP_EIGEN_DRIFT
+  Mecanismo Causal: Desviación gradual de los autovalores del sistema bajo transformaciones
+    continuas.
+  Activación (Trigger): FP16/MoE batching drift en loops prolongados.
+  Sensor (Síntoma): Error cuadrático medio > umbral.
+  Escala Temporal: Lenta
+  Gravedad: P1
+  Intervención: Calibración térmica a T=0.0.
+- ID: ENDO-P11
+  Primitiva: OP_RECURSION_LIMIT
+  Mecanismo Causal: Desbordamiento de pila por llamadas anidadas del endomorfismo
+    sin TCO.
+  Activación (Trigger): Composición profunda de morfismos en memoria RAM.
+  Sensor (Síntoma): RecursionError` en intérprete.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Forzar paralelización vía `invoke_subagent`.
+- ID: ENDO-P12
+  Primitiva: OP_STATE_SHADOWING
+  Mecanismo Causal: Ocultamiento de estados previos por superposición no reversible.
+  Activación (Trigger): Escritura en caliente sin snapshotting local.
+  Sensor (Síntoma): Pérdida de histórico en el Ledger.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Rollback al ledger previo (AX-041).
+- ID: ENDO-P13
+  Primitiva: OP_KERNEL_NULL
+  Mecanismo Causal: El núcleo (Kernel/Nullspace) del morfismo absorbe toda la información
+    útil.
+  Activación (Trigger): Proyección destructiva a subespacio de dimensión cero.
+  Sensor (Síntoma): Estado colapsa a nulo/vacío.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Purga de anergía (LEA-OMEGA).
+- ID: ENDO-P14
+  Primitiva: OP_END_AUTOP_LOCK
+  Mecanismo Causal: Bloqueo por autopoiesis recursiva que impide la entrada de inputs
+    externos.
+  Activación (Trigger): Priorización absoluta de loops de auto-análisis.
+  Sensor (Síntoma): Consumo de CPU al 100% sin entrada de red.
+  Escala Temporal: Segundos
+  Gravedad: P0
+  Intervención: Apoptosis celular forzada.
+- ID: ENDO-P15
+  Primitiva: OP_COPROD_LEAK
+  Mecanismo Causal: Fuga de contexto al intentar acoplar coproductos dentro del dominio
+    del morfismo.
+  Activación (Trigger): Mezcla de tipos algebraicos en el loop de estado.
+  Sensor (Síntoma): Entrada de campos ajenos al dominio.
+  Escala Temporal: MS
+  Gravedad: P1
+  Intervención: Validar tipos con Pydantic estricto.
+- ID: ENDO-P16
+  Primitiva: OP_NON_ASSOC_COMP
+  Mecanismo Causal: Ruptura de la asociatividad durante la composición por efectos
+    secundarios locales.
+  Activación (Trigger): Modificación de variables globales del host en el loop.
+  Sensor (Síntoma): (f . g) . h != f . (g . h)`.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Forzar pureza funcional (T=0.0).
+- ID: ENDO-P17
+  Primitiva: OP_ISOMORPHIC_FAIL
+  Mecanismo Causal: Falla al mapear el endomorfismo a su representación dual en base
+    de datos.
+  Activación (Trigger): Desalineación de AST entre la memoria RAM y SQLite-Vec.
+  Sensor (Síntoma): SchemaMismatch` en guard.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Inyectar `cortex/engine/causal/taint_engine.py`.
+- ID: ENDO-P18
+  Primitiva: OP_TRACE_COLLAPSE
+  Mecanismo Causal: El operador de traza del endomorfismo diverge o arroja valores
+    vacíos.
+  Activación (Trigger): Pérdida de telemetría de composición del loop.
+  Sensor (Síntoma): Trace nula en el logger central.
+  Escala Temporal: MS
+  Gravedad: P2
+  Intervención: Forzar Structured Logging.
+- ID: ENDO-P19
+  Primitiva: OP_INJECTIVE_LOSS
+  Mecanismo Causal: Dos estados distintos colapsan al mismo estado destino bajo el
+    morfismo.
+  Activación (Trigger): Pérdida de granularidad en la memoria.
+  Sensor (Síntoma): Colisión de hashes en el indexador.
+  Escala Temporal: MS
+  Gravedad: P1
+  Intervención: Aumentar resolución del embedding.
+- ID: ENDO-P20
+  Primitiva: OP_SURJECTIVE_LOSS
+  Mecanismo Causal: Pérdida de cobertura de estados válidos en el codominio.
+  Activación (Trigger): Imposibilidad de alcanzar ciertos estados meta.
+  Sensor (Síntoma): Zonas muertas en la base de datos.
+  Escala Temporal: Lenta
+  Gravedad: P1
+  Intervención: Re-indexado forzado de vec0.
+- ID: ENDO-P21
+  Primitiva: OP_COMMUTATIVE_FAIL
+  Mecanismo Causal: Dos endomorfismos conmutativos fallan en preservar el orden de
+    ejecución.
+  Activación (Trigger): Condiciones de carrera en hilos concurrentes.
+  Sensor (Síntoma): f(g(x)) != g(f(x))`.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Modo WAL activo y locking estricto (R10).
+- ID: ENDO-P22
+  Primitiva: OP_ADJOINT_DISRUPT
+  Mecanismo Causal: Pérdida de la correspondencia adjunta con el morfismo inverso.
+  Activación (Trigger): Modificación asimétrica del canal de ida y retorno.
+  Sensor (Síntoma): Falla de consistencia bidireccional.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: SAGA-6 rollback total.
+- ID: ENDO-P23
+  Primitiva: OP_EPISTEMIC_SLOP
+  Mecanismo Causal: Inyección de ruido narrativo en la definición matemática del endomorfismo.
+  Activación (Trigger): LLM intentando explicar la transformación en prosa.
+  Sensor (Síntoma): Pérdida de exergía de Shannon en fact.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Invocar `Epistemic-Purge-OMEGA`.
+- ID: ENDO-P24
+  Primitiva: OP_GHOST_TRANSIT
+  Mecanismo Causal: Transición a un estado fantasma no persistente ni registrado.
+  Activación (Trigger): Mutación fuera del ledger sin tracking de git.
+  Sensor (Síntoma): Git working tree sucio en CI.
+  Escala Temporal: Segundos
+  Gravedad: P0
+  Intervención: Git Sentinel intercepta y aborta.
+- ID: ENDO-P25
+  Primitiva: OP_CHAOTIC_ORBIT
+  Mecanismo Causal: Generación de trayectorias caóticas sin atractor en el espacio
+    de estados.
+  Activación (Trigger): Modificación sin acotar bajo alta temperatura.
+  Sensor (Síntoma): Divergencia exponencial de estados.
+  Escala Temporal: Segundos
+  Gravedad: P0
+  Intervención: Forzar temperatura T=0.0.
+- ID: ENDO-P26
+  Primitiva: OP_NILPOTENT_FALL
+  Mecanismo Causal: El endomorfismo colapsa al estado cero tras N iteraciones ($f^N
+    = 0$).
+  Activación (Trigger): Aplicación recursiva de filtros de atenuación de señal.
+  Sensor (Síntoma): Estado vacío o nulo persistente.
+  Escala Temporal: MS
+  Gravedad: P1
+  Intervención: Desactivar poda agresiva.
+- ID: ENDO-P27
+  Primitiva: OP_IDEMPOTENT_LOCK
+  Mecanismo Causal: El morfismo se bloquea en su primera aplicación ($f^2 = f$).
+  Activación (Trigger): Pérdida de dinamismo por sobre-simplificación.
+  Sensor (Síntoma): Ausencia de transiciones tras t=1.
+  Escala Temporal: MS
+  Gravedad: P2
+  Intervención: Inyectar delta estocástica.
+- ID: ENDO-P28
+  Primitiva: OP_SPLIT_BRAIN_MAP
+  Mecanismo Causal: Divergencia en el mapeo de estados en sub-enjambres paralelos.
+  Activación (Trigger): Falta de consenso BFT en la tabla de morfismos.
+  Sensor (Síntoma): Múltiples salidas de estado en conflicto.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Aplicar `OP_WAL_LOCK` inmediato.
+- ID: ENDO-P29
+  Primitiva: OP_TAINT_BYPASS
+  Mecanismo Causal: Mutación de estado por endomorfismo sin firma de procedencia válida.
+  Activación (Trigger): Campo `CORTEX-TAINT` ausente o no validado.
+  Sensor (Síntoma): Bloqueo automático del canal de persistencia.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Aborto en SAGA-2 de inmediato.
+- ID: ENDO-P30
+  Primitiva: OP_MONOID_DECAY
+  Mecanismo Causal: Desintegración del monoid de endomorfismos por pérdida de clausura.
+  Activación (Trigger): Una composición resulta en una función fuera del conjunto.
+  Sensor (Síntoma): Error de import o llamada a módulo huérfano.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Forzar chequeo de AST local.
+- ID: ENDO-P31
+  Primitiva: OP_END_COMPACT_ERR
+  Mecanismo Causal: Falla en la compactación de la secuencia de endomorfismos históricos.
+  Activación (Trigger): Pruning de logs interrumpe la cadena causal.
+  Sensor (Síntoma): Hash chain del ledger rota.
+  Escala Temporal: Minutos
+  Gravedad: P0
+  Intervención: Alertar P0 y bloquear escrituras.
+- ID: ENDO-P32
+  Primitiva: OP_INVARIANT_BREAK
+  Mecanismo Causal: Modificación de una variable que debía ser invariante bajo el
+    endomorfismo.
+  Activación (Trigger): Mutación accidental de llaves primarias.
+  Sensor (Síntoma): AssertError` en la validación del guard.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Ejecutar compensación SAGA.
+- ID: ENDO-P33
+  Primitiva: OP_DENSE_BLOAT
+  Mecanismo Causal: Crecimiento incontrolado de la matriz de estados por endomorfismos
+    inflados.
+  Activación (Trigger): Adición de dimensiones redundantes al espacio.
+  Sensor (Síntoma): SQLite file size crece exponencialmente.
+  Escala Temporal: Lenta
+  Gravedad: P1
+  Intervención: Pruning de base de datos vía aiosqlite.
+- ID: ENDO-P34
+  Primitiva: OP_COMPOSITION_LATE
+  Mecanismo Causal: Retraso en la resolución de composiciones perezosas (lazy).
+  Activación (Trigger): Acumulación de promesas sin resolver en memoria.
+  Sensor (Síntoma): Latencia de API > 5s en ruteo.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Forzar ejecución ansiosa (eager).
+- ID: ENDO-P35
+  Primitiva: OP_COHOMOLOGY_GAP
+  Mecanismo Causal: Vacío en la coherencia global del grafo de morfismos distribuidos.
+  Activación (Trigger): Ciclos no triviales no cubiertos por la verificación.
+  Sensor (Síntoma): Agujeros de consistencia en bases replicadas.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Correr validador Merkle tree.
+- ID: ENDO-P36
+  Primitiva: OP_MCT_COLLAPSE
+  Mecanismo Causal: Colapso del árbol de búsqueda Monte Carlo en un único endomorfismo
+    inútil.
+  Activación (Trigger): Heurística sesgada por falsos positivos.
+  Sensor (Síntoma): Ausencia de ramificación en planificación.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Re-inicializar espacio de búsqueda.
+- ID: ENDO-P37
+  Primitiva: OP_AUT_ORBIT_LOCK
+  Mecanismo Causal: Bloqueo en un grupo de automorfismos sin capacidad de salida del
+    sistema.
+  Activación (Trigger): Restricción excesiva a transformaciones invertibles.
+  Sensor (Síntoma): Cero evolución neta de conocimiento.
+  Escala Temporal: Lenta
+  Gravedad: P2
+  Intervención: Habilitar transiciones no invertibles.
+- ID: ENDO-P38
+  Primitiva: OP_DIAGRAM_NO_COMM
+  Mecanismo Causal: El diagrama de morfismos no conmuta debido a inconsistencias temporales.
+  Activación (Trigger): Diferencias de reloj o asincronismo mal gestionado.
+  Sensor (Síntoma): g(f(x)) != h(x)` cuando debían coincidir.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Sincronización del Swarm (Legion).
+- ID: ENDO-P39
+  Primitiva: OP_END_DECAY_RATE
+  Mecanismo Causal: Pérdida de la tasa de exergía mínima requerida para mantener el
+    loop activo.
+  Activación (Trigger): Sucesión de morfismos de baja calidad (slop).
+  Sensor (Síntoma): Tasa de exergía < 80%.
+  Escala Temporal: Minutos
+  Gravedad: P1
+  Intervención: Purgar código inútil vía LEA-OMEGA.
+- ID: ENDO-P40
+  Primitiva: OP_SCHUR_DRIFT
+  Mecanismo Causal: Pérdida de la descomposición ortogonal del espacio de estados.
+  Activación (Trigger): Envenenamiento de dimensiones en SQLite-Vec.
+  Sensor (Síntoma): Vectores de búsqueda desalineados.
+  Escala Temporal: MS
+  Gravedad: P1
+  Intervención: Limpieza manual de vec0.
+- ID: ENDO-P41
+  Primitiva: OP_FIBER_EXPLOSION
+  Mecanismo Causal: Multiplicación exponencial de fibras (preimágenes) bajo endomorfismo
+    no inyectivo.
+  Activación (Trigger): Ingesta masiva de alias para el mismo concepto.
+  Sensor (Síntoma): Desborde de claves en base de datos.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Forzar deduplicación vía Singularity Nexus.
+- ID: ENDO-P42
+  Primitiva: OP_END_TENANT_LEAK
+  Mecanismo Causal: Filtración de datos de inquilinos durante la aplicación del endomorfismo
+    global.
+  Activación (Trigger): Un endomorfismo global opera sobre datos cruzados sin filtrar.
+  Sensor (Síntoma): tenant_id` cruzado en el Ledger.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Aborto inmediato perimetral.
+- ID: ENDO-P43
+  Primitiva: OP_ZERO_DIV_MORPH
+  Mecanismo Causal: Intento de normalización de morfismos por un autovalor nulo.
+  Activación (Trigger): División por cero en el cálculo térmico o de exergía.
+  Sensor (Síntoma): ZeroDivisionError` en engine/core.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Inyectar epsilon de seguridad.
+- ID: ENDO-P44
+  Primitiva: OP_COLIMIT_UNBOUND
+  Mecanismo Causal: El colímite de la secuencia de endomorfismos diverge al infinito.
+  Activación (Trigger): Crecimiento desmedido de la base de conocimiento sin poda.
+  Sensor (Síntoma): Memory OOM en runtime.
+  Escala Temporal: Lenta
+  Gravedad: P0
+  Intervención: Purga de base de conocimiento (Compaction).
+- ID: ENDO-P45
+  Primitiva: OP_END_HOOK_MUT
+  Mecanismo Causal: Mutación no autorizada del hook de pre-commit durante la auto-evaluación.
+  Activación (Trigger): Inyección de script malicioso en `.git/hooks/`.
+  Sensor (Síntoma): Desviación de firma en Git Sentinel.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Bloquear ejecución y alertar P0.
+- ID: ENDO-P46
+  Primitiva: OP_SHANNON_DECAY
+  Mecanismo Causal: Disminución crítica de la entropía de Shannon en la secuencia
+    de transformaciones.
+  Activación (Trigger): Generación repetitiva de texto genérico (C4-SIM).
+  Sensor (Síntoma): Shannon_Entropy < 1.5` bits.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Rechazar y regenerar con T=0.7.
+- ID: ENDO-P47
+  Primitiva: OP_END_STACK_OVER
+  Mecanismo Causal: Desbordamiento de la pila de llamadas del engine por composición
+    infinita.
+  Activación (Trigger): Bucle infinito sin yield asíncrono.
+  Sensor (Síntoma): RecursionError` o StackOverflow del SO.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Forzar `await asyncio.sleep(0)`.
+- ID: ENDO-P48
+  Primitiva: OP_END_KEY_ROT
+  Mecanismo Causal: Falla en la rotación de llaves durante el cifrado del estado endomórfico.
+  Activación (Trigger): Clave expirada o inaccesible en el Keyring local.
+  Sensor (Síntoma): CryptographyError` en persistencia.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Abortar SAGA-4 y alertar.
+- ID: ENDO-P49
+  Primitiva: OP_COMOD_MUT_ERR
+  Mecanismo Causal: Modificación concurrente del estado de dominio durante la aplicación
+    del morfismo.
+  Activación (Trigger): Falta de locks en el diccionario de Python.
+  Sensor (Síntoma): 'RuntimeError: dictionary changed size`.'
+  Escala Temporal: MS
+  Gravedad: P1
+  Intervención: Copiar estado antes de iterar.
+- ID: ENDO-P50
+  Primitiva: OP_END_BFT_VOTE
+  Mecanismo Causal: Falla al recolectar votos BFT para validar la clausura del endomorfismo.
+  Activación (Trigger): Timeout de red en la comunicación inter-agente.
+  Sensor (Síntoma): Quorum de N/3 no alcanzado.
+  Escala Temporal: Segundos
+  Gravedad: P0
+  Intervención: Re-congelamiento de bases de datos.
+- ID: ENDO-P51
+  Primitiva: OP_END_REVOLVER
+  Mecanismo Causal: Loop infinito de llamadas cruzadas asíncronas entre dos endomorfismos
+    duales.
+  Activación (Trigger): Mutación circular de estado sin resolvedor de promesas.
+  Sensor (Síntoma): CPU al 100% en hilos secundarios.
+  Escala Temporal: Segundos
+  Gravedad: P0
+  Intervención: Circuit Breaker (AX-047).
+- ID: ENDO-P52
+  Primitiva: OP_HOM_SET_BLOAT
+  Mecanismo Causal: Crecimiento incontrolado de morfismos intermedios no clasificados.
+  Activación (Trigger): Ingesta masiva de alias conceptuales no estructurados.
+  Sensor (Síntoma): Desborde de almacenamiento L1.
+  Escala Temporal: Lenta
+  Gravedad: P1
+  Intervención: Forzar compactación manual.
+- ID: ENDO-P53
+  Primitiva: OP_END_COEFF_GAP
+  Mecanismo Causal: Desviación de coeficientes ponderados de fiabilidad en la matriz
+    de morfismos.
+  Activación (Trigger): FP16 MoE batching interference sin normalizar.
+  Sensor (Síntoma): Divergencia en métricas de predicción.
+  Escala Temporal: MS
+  Gravedad: P1
+  Intervención: Calibrar pesos en WAL DB.
+- ID: ENDO-P54
+  Primitiva: OP_FUNCTOR_INJECT
+  Mecanismo Causal: Contaminación del functor de mapeo por efectos secundarios externos.
+  Activación (Trigger): Lectura de variables de entorno no acotadas.
+  Sensor (Síntoma): Salida del functor no coincide con codominio.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Cuarentena de variables del host.
+- ID: ENDO-P55
+  Primitiva: OP_EIGEN_COLLAPSE
+  Mecanismo Causal: El espacio de autovectores pierde dimensionalidad crítica.
+  Activación (Trigger): Filtrado excesivo de señales de entrada en el indexador.
+  Sensor (Síntoma): Búsqueda semántica retorna vacía.
+  Escala Temporal: MS
+  Gravedad: P1
+  Intervención: Recalcular embeddings en vec0.
+- ID: ENDO-P56
+  Primitiva: OP_MONOID_FRACT
+  Mecanismo Causal: Fractura del monoide por pérdida de elemento de identidad absoluto.
+  Activación (Trigger): Modificación del estado inicial a un valor no invertible.
+  Sensor (Síntoma): 1_X` indefinido para el objeto.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Abortar SAGA-1 y reiniciar.
+- ID: ENDO-P57
+  Primitiva: OP_END_SCHED_ERR
+  Mecanismo Causal: Falla en la planificación de ejecución secuencial de morfismos
+    por hilos concurrentes.
+  Activación (Trigger): Invocación fuera de cron programado.
+  Sensor (Síntoma): Tareas encoladas de forma indeterminista.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Forzar ordenamiento por timestamp.
+- ID: ENDO-P58
+  Primitiva: OP_TRACE_POISON
+  Mecanismo Causal: Contaminación de la traza de ejecución con logs huérfanos o inválidos.
+  Activación (Trigger): Inserción directa de prints síncronos en runtime.
+  Sensor (Síntoma): Caída de exergía en logs.
+  Escala Temporal: MS
+  Gravedad: P2
+  Intervención: purgar logs estocásticos.
+- ID: ENDO-P59
+  Primitiva: OP_COMP_ISOLATION
+  Mecanismo Causal: El morfismo compuesto rompe el aislamiento del sandbox de memoria.
+  Activación (Trigger): Acceso indebido a regiones de memoria protegidas por directiva
+    R5.
+  Sensor (Síntoma): PermissionError` en lectura.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Abortar proceso y aislar.
+- ID: ENDO-P60
+  Primitiva: OP_END_MIG_GAP
+  Mecanismo Causal: Incompatibilidad de versión del endomorfismo durante migración
+    de datos.
+  Activación (Trigger): Ejecución de script de migración obsoleto.
+  Sensor (Síntoma): MigrationError` en base de datos.
+  Escala Temporal: Minutos
+  Gravedad: P0
+  Intervención: Revertir git commit anterior.
+- ID: ENDO-P61
+  Primitiva: OP_LIMIT_UNBOUNDED
+  Mecanismo Causal: El límite de la secuencia de composiciones supera los descriptores
+    del SO.
+  Activación (Trigger): Apertura desmedida de subprocesos sin control.
+  Sensor (Síntoma): 'OSError: [Errno 24] Too many open files`.'
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Cerrar sockets concurrentes.
+- ID: ENDO-P62
+  Primitiva: OP_ISOM_MUTATION
+  Mecanismo Causal: Modificación unilateral del isomorfismo inverso sin actualizar
+    la ida.
+  Activación (Trigger): Edición manual de archivos de configuración.
+  Sensor (Síntoma): Inconsistencia lógica detectada por Guard.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Restaurar desde Ledger.
+- ID: ENDO-P63
+  Primitiva: OP_END_MEM_LEAK
+  Mecanismo Causal: Fuga de memoria RAM por acumulación de clausuras léxicas en el
+    loop de estado.
+  Activación (Trigger): Retención de referencias locales a objetos grandes.
+  Sensor (Síntoma): Crecimiento constante de uso de RAM.
+  Escala Temporal: Lenta
+  Gravedad: P1
+  Intervención: Forzar recolección de basura.
+- ID: ENDO-P64
+  Primitiva: OP_EPISTEMIC_LOCK
+  Mecanismo Causal: Bloqueo epistémico por incapacidad de asimilar morfismos contradictorios.
+  Activación (Trigger): Entrada de dos verdades base opuestas sin reconciliación.
+  Sensor (Síntoma): Bucle de auto-evaluación infinito.
+  Escala Temporal: Segundos
+  Gravedad: P0
+  Intervención: Forzar apoptosis temporal.
+- ID: ENDO-P65
+  Primitiva: OP_END_TAINT_GAP
+  Mecanismo Causal: Pérdida de procedencia en sub-morfismos debido a copia superficial.
+  Activación (Trigger): Uso de `copy.copy` en lugar de `copy.deepcopy`.
+  Sensor (Síntoma): Metadatos de taint vacíos.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Middleware de seguridad interviene.
+- ID: ENDO-P66
+  Primitiva: OP_DIAG_DIVERGE
+  Mecanismo Causal: Desalineación topológica entre el grafo físico y el grafo lógico.
+  Activación (Trigger): Mutación no registrada en el repositorio Git.
+  Sensor (Síntoma): Working tree desalineado con Ledger.
+  Escala Temporal: Segundos
+  Gravedad: P0
+  Intervención: Sincronización automática de Git.
+- ID: ENDO-P67
+  Primitiva: OP_CHAOTIC_SINK
+  Mecanismo Causal: El atractor del espacio de estados colapsa a un pozo caótico destructivo.
+  Activación (Trigger): Operación continua a alta temperatura.
+  Sensor (Síntoma): Divergencia exponencial en embeddings.
+  Escala Temporal: Segundos
+  Gravedad: P0
+  Intervención: Resetear temperatura a 0.0.
+- ID: ENDO-P68
+  Primitiva: OP_NIL_LOCK
+  Mecanismo Causal: El sistema alcanza el estado nilpotent nulo y no puede salir de
+    él.
+  Activación (Trigger): Falta de transiciones no nulas programadas.
+  Sensor (Síntoma): Estado nulo permanente en base de datos.
+  Escala Temporal: MS
+  Gravedad: P1
+  Intervención: Cargar configuración inicial.
+- ID: ENDO-P69
+  Primitiva: OP_IDEM_STALL
+  Mecanismo Causal: Detención en estado idempotente intermedio que impide la convergencia.
+  Activación (Trigger): Falta de gradiente exérgico en la inferencia.
+  Sensor (Síntoma): Ausencia de nuevos commits.
+  Escala Temporal: Minutos
+  Gravedad: P2
+  Intervención: Forzar nueva iteración.
+- ID: ENDO-P70
+  Primitiva: OP_COHOM_GAP
+  Mecanismo Causal: Ruptura en la cohomología del espacio de transiciones lógicas.
+  Activación (Trigger): Falta de control de ciclos en grafos orientados.
+  Sensor (Síntoma): Agujeros de consistencia en el Swarm.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Validar base distribuida.
+- ID: ENDO-P71
+  Primitiva: OP_AUT_ORBIT
+  Mecanismo Causal: Órbita cerrada de automorfismos sin capacidad de evolución neta.
+  Activación (Trigger): Restricción extrema a transformaciones reversibles.
+  Sensor (Síntoma): Cero avance en metas agénticas.
+  Escala Temporal: Lenta
+  Gravedad: P2
+  Intervención: Permitir morfismos destructivos.
+- ID: ENDO-P72
+  Primitiva: OP_END_KEY_ERR
+  Mecanismo Causal: Falla de desencriptación en el retorno del loop por clave corrupta.
+  Activación (Trigger): Falla de acceso en el llavero del host.
+  Sensor (Síntoma): DecryptionError` en base de datos.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Alerta P0 y bloqueo del disco.
+- ID: ENDO-P73
+  Primitiva: OP_COMOD_LOCK
+  Mecanismo Causal: Bloqueo mutuo (Deadlock) al intentar mutar concurrentemente el
+    mismo estado.
+  Activación (Trigger): Dos subagentes acceden al mismo registro SQLite sin modo WAL.
+  Sensor (Síntoma): 'sqlite3.OperationalError: database is locked`.'
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Habilitar WAL mode y busy_timeout.
+- ID: ENDO-P74
+  Primitiva: OP_COLIM_BLOAT
+  Mecanismo Causal: Desborde del colímite por inclusión de morfismos no simplificados.
+  Activación (Trigger): Crecimiento incontrolado de la base sin pruning.
+  Sensor (Síntoma): OOM en runtime.
+  Escala Temporal: Lenta
+  Gravedad: P0
+  Intervención: Compresión de base vía aiosqlite.
+- ID: ENDO-P75
+  Primitiva: OP_END_HOOK
+  Mecanismo Causal: Falla en la ejecución del hook de Git Sentinel al validar el morfismo.
+  Activación (Trigger): Script de validación local modificado.
+  Sensor (Síntoma): Falla en verificación de firma del commit.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Bloqueo absoluto de Git.
+- ID: ENDO-P76
+  Primitiva: OP_SHANNON_FALL
+  Mecanismo Causal: Caída de entropía por repetición de patrones estocásticos.
+  Activación (Trigger): Inferencia sesgada por datos de entrenamiento locales.
+  Sensor (Síntoma): Shannon_Entropy < 1.0` bit.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Regenerar con temperatura media.
+- ID: ENDO-P77
+  Primitiva: OP_END_STACK
+  Mecanismo Causal: Desbordamiento de pila por llamadas recursivas sin YIELD.
+  Activación (Trigger): Composición cíclica directa en memoria.
+  Sensor (Síntoma): RecursionError` en runtime.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Forzar `asyncio.sleep(0)`.
+- ID: ENDO-P78
+  Primitiva: OP_END_KEY
+  Mecanismo Causal: Pérdida de la clave efímera del morfismo durante el procesado
+    asíncrono.
+  Activación (Trigger): Corrupción de la clave en memoria volátil.
+  Sensor (Síntoma): InvalidKeyError` en desencriptación.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Rollback total inmediato.
+- ID: ENDO-P79
+  Primitiva: OP_COMOD_MUT
+  Mecanismo Causal: Mutación concurrente no controlada de la estructura de datos del
+    morfismo.
+  Activación (Trigger): Operaciones concurrentes sin bloqueos atómicos.
+  Sensor (Síntoma): Inconsistencia de datos en la memoria.
+  Escala Temporal: MS
+  Gravedad: P1
+  Intervención: Clonar estructura antes de procesar.
+- ID: ENDO-P80
+  Primitiva: OP_END_BFT
+  Mecanismo Causal: Pérdida de quórum BFT para autorizar la persistencia del morfismo.
+  Activación (Trigger): Timeout de red inter-agente.
+  Sensor (Síntoma): Quorum insuficiente en el Ledger.
+  Escala Temporal: Segundos
+  Gravedad: P0
+  Intervención: Bloquear base de datos.
+- ID: ENDO-P81
+  Primitiva: OP_END_SCHEMA
+  Mecanismo Causal: Falla en el mapeo de tipos durante la serialización del morfismo
+    a JSON.
+  Activación (Trigger): Cambios de esquema en caliente sin versión de fallback.
+  Sensor (Síntoma): ValidationError` en FastAPI route.
+  Escala Temporal: MS
+  Gravedad: P1
+  Intervención: Validar esquema en deserialización.
+- ID: ENDO-P82
+  Primitiva: OP_END_PORT
+  Mecanismo Causal: Conflicto de puertos al levantar el servidor interno del morfismo
+    distribuido.
+  Activación (Trigger): Puerto ya ocupado por proceso zombie.
+  Sensor (Síntoma): Address already in use` error.
+  Escala Temporal: MS
+  Gravedad: P1
+  Intervención: Asignar puerto de forma dinámica.
+- ID: ENDO-P83
+  Primitiva: OP_END_CONN
+  Mecanismo Causal: Caída del socket TCP entre subagentes durante la transmisión del
+    morfismo.
+  Activación (Trigger): Pérdida de conectividad física.
+  Sensor (Síntoma): ConnectionAbortedError`.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Habilitar reintentos automáticos.
+- ID: ENDO-P84
+  Primitiva: OP_END_BODY
+  Mecanismo Causal: Payload de morfismo demasiado grande satura la memoria del Gateway.
+  Activación (Trigger): Intento de enviar base completa en un solo payload.
+  Sensor (Síntoma): Gateway retorna 413 Payload Too Large.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Paginar payloads.
+- ID: ENDO-P85
+  Primitiva: OP_END_CORS
+  Mecanismo Causal: Bloqueo del navegador al intentar interactuar con el morfismo
+    por CORS.
+  Activación (Trigger): Configuración CORS restrictiva.
+  Sensor (Síntoma): Error de CORS en consola.
+  Escala Temporal: MS
+  Gravedad: P2
+  Intervención: Configurar hosts locales permitidos.
+- ID: ENDO-P86
+  Primitiva: OP_END_LIMIT
+  Mecanismo Causal: Bloqueo por rate limiter al intentar sincronizar morfismos en
+    cascada.
+  Activación (Trigger): Ráfaga de peticiones concurrentes del Swarm.
+  Sensor (Síntoma): HTTP 429 en inter-comunicaciones.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Cola de mensajes de control de flujo.
+- ID: ENDO-P87
+  Primitiva: OP_END_TLS
+  Mecanismo Causal: Falla de handshake TLS por certificados no confiables en el canal
+    local.
+  Activación (Trigger): Certificado local del enjambre expirado.
+  Sensor (Síntoma): SSLError en comunicación.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Auto-generar certificados locales.
+- ID: ENDO-P88
+  Primitiva: OP_END_VERSION
+  Mecanismo Causal: Desalineación de versiones entre el emisor y receptor del morfismo.
+  Activación (Trigger): Despliegue de parches en caliente desordenados.
+  Sensor (Síntoma): Status Code 400 Bad Request.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Validar versión en cabecera HTTP.
+- ID: ENDO-P89
+  Primitiva: OP_END_STACK_L
+  Mecanismo Causal: Stack trace expuesta en caso de fallo del endomorfismo en backend.
+  Activación (Trigger): Excepción no capturada se envía al cliente HTTP.
+  Sensor (Síntoma): Stack trace en JSON de respuesta.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Limpiar trazas en middleware.
+- ID: ENDO-P90
+  Primitiva: OP_END_SILENT
+  Mecanismo Causal: Muerte silenciosa del worker del endomorfismo sin liberar sockets.
+  Activación (Trigger): El proceso colapsa por señal SIGKILL del host.
+  Sensor (Síntoma): El puerto de red sigue bloqueado.
+  Escala Temporal: Minutos
+  Gravedad: P0
+  Intervención: Monitorizar salud con demonio externo.
+- ID: ENDO-P91
+  Primitiva: OP_END_CACHE
+  Mecanismo Causal: Inconsistencia de datos por lectura de caché fría del morfismo.
+  Activación (Trigger): Actualización en DB no propaga purga a redis/memoria.
+  Sensor (Síntoma): Datos obsoletos leídos por subagente.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Invalidar caché de forma proactiva.
+- ID: ENDO-P92
+  Primitiva: OP_END_HOST
+  Mecanismo Causal: Peticiones redirigidas a hosts ajenos por falsificación de cabecera.
+  Activación (Trigger): Proxy local no valida la cabecera Host.
+  Sensor (Síntoma): Peticiones locales redirigidas a internet.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Whitelist de Host Headers en API.
+- ID: ENDO-P93
+  Primitiva: OP_END_PROXY
+  Mecanismo Causal: Agotamiento de descriptores de sockets de salida en el proxy del
+    morfismo.
+  Activación (Trigger): Apertura de múltiples clientes http innecesarios.
+  Sensor (Síntoma): error `Cannot assign requested address`.
+  Escala Temporal: Lenta
+  Gravedad: P1
+  Intervención: Reutilizar httpx.AsyncClient.
+- ID: ENDO-P94
+  Primitiva: OP_END_UVI
+  Mecanismo Causal: Timeout keep-alive inferior al tiempo de procesamiento del morfismo.
+  Activación (Trigger): Procesamiento de inferencia tarda más que el TTL de red.
+  Sensor (Síntoma): Respuesta vacía del servidor.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Optimizar tiempos de respuesta.
+- ID: ENDO-P95
+  Primitiva: OP_END_MIME
+  Mecanismo Causal: payload enviado en formato no estructurado provoca falla en parser.
+  Activación (Trigger): Cliente no envía Content-Type correcto.
+  Sensor (Síntoma): Gateway retorna 415 error.
+  Escala Temporal: MS
+  Gravedad: P2
+  Intervención: Validar cabecera Content-Type.
+- ID: ENDO-P96
+  Primitiva: OP_END_POISON
+  Mecanismo Causal: Inyección de morfismo modificado por agente no autenticado.
+  Activación (Trigger): Falta de control de firmas en entrada.
+  Sensor (Síntoma): Envenenamiento de base de datos.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Validación obligatoria de firmas.
+- ID: ENDO-P97
+  Primitiva: OP_END_COMPACT
+  Mecanismo Causal: Error de compactación corrompe registros de base de datos históricos.
+  Activación (Trigger): Interrupción de proceso de mantenimiento.
+  Sensor (Síntoma): DatabaseDiskImageMalformed`.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Backup automático y restauración.
+- ID: ENDO-P98
+  Primitiva: OP_END_INVAR
+  Mecanismo Causal: Modificación de variable invariante global por morfismo descontrolado.
+  Activación (Trigger): Falta de encapsulación a nivel código.
+  Sensor (Síntoma): Variables de entorno del sistema modificadas.
+  Escala Temporal: MS
+  Gravedad: P0
+  Intervención: Proteger variables de entorno.
+- ID: ENDO-P99
+  Primitiva: OP_END_DENSE
+  Mecanismo Causal: Crecimiento desmedido de vectores de embeddings del morfismo.
+  Activación (Trigger): Ingesta de textos redundantes sin simplificar.
+  Sensor (Síntoma): Consumo de almacenamiento se duplica.
+  Escala Temporal: Lenta
+  Gravedad: P1
+  Intervención: Ejecutar deduplicación vectorial.
+- ID: ENDO-P100
+  Primitiva: OP_END_LAZY
+  Mecanismo Causal: Acumulación de tareas lazy sin resolver satura los recursos del
+    loop.
+  Activación (Trigger): Demasiados callbacks encolados en event loop.
+  Sensor (Síntoma): Latencia del sistema incrementada en 200%.
+  Escala Temporal: Segundos
+  Gravedad: P1
+  Intervención: Invocación de ejecución eager.
+M2_INVARIANTS:
+- ID: ENDO-I01
+  Invariante: INV_DOM_CODOM_ID
+  Lógica / Principio: El dominio y codominio de todo endomorfismo deben ser el mismo
+    objeto conceptual.
+  Implicación Operacional: Garantiza la clausura algebraica de las transiciones.
+  Condición de Borde: Mutación de tipos de estado.
+  Métrica Falsable: dom(f) == cod(f) == X`.
+- ID: ENDO-I02
+  Invariante: INV_IDENTITY_EXIST
+  Lógica / Principio: Existe un único morfismo identidad $1_X$ neutral para la composición.
+  Implicación Operacional: Inicialización limpia y restauración sin cambios de estado.
+  Condición de Borde: Bootstrap del loop reflexivo.
+  Métrica Falsable: f . 1_X == 1_X . f == f`.
+- ID: ENDO-I03
+  Invariante: INV_COMP_CLOSURE
+  Lógica / Principio: La composición de endomorfismos genera obligatoriamente otro
+    endomorfismo sobre el mismo objeto.
+  Implicación Operacional: Previene la desalineación de esquemas en transformaciones
+    en cascada.
+  Condición de Borde: Enrutamiento de eventos inter-agentes.
+  Métrica Falsable: f, g in End(X) -> f . g in End(X)`.
+- ID: ENDO-I04
+  Invariante: INV_COMP_ASSOC
+  Lógica / Principio: La composición de endomorfismos es estrictamente asociativa.
+  Implicación Operacional: El orden secuencial de agrupamiento no altera el resultado
+    final.
+  Condición de Borde: Invocación asíncrona concurrente.
+  Métrica Falsable: (f . g) . h == f . (g . h)`.
+- ID: ENDO-I05
+  Invariante: INV_TAINT_FLOW
+  Lógica / Principio: Toda transformación reflexiva propaga la cadena de firmas de
+    procedencia.
+  Implicación Operacional: Trazabilidad forense ininterrumpida de cambios de estado.
+  Condición de Borde: Inserción en SQLite.
+  Métrica Falsable: hasattr(State, "CORTEX-TAINT")`.
+- ID: ENDO-I06
+  Invariante: INV_LEDGER_CHAIN
+  Lógica / Principio: Cada aplicación de un endomorfismo se firma y escribe en el
+    Master Ledger.
+  Implicación Operacional: Auditoría inmutable contra manipulaciones maliciosas.
+  Condición de Borde: Fin de bloque en loop.
+  Métrica Falsable: Ledger.verify() == True`.
+- ID: ENDO-I07
+  Invariante: INV_LANDAUER_HEAT
+  Lógica / Principio: La poda o simplificación de información del estado disipa energía
+    exérgica.
+  Implicación Operacional: Límite físico en la retención indefinida de estados estocásticos.
+  Condición de Borde: Compactación de base de datos.
+  Métrica Falsable: Exergy_Cost >= k * T * ln(2)`.
+- ID: ENDO-I08
+  Invariante: INV_TENANT_BOUND
+  Lógica / Principio: Un endomorfismo opera únicamente en el aislamiento del tenant_id
+    origen.
+  Implicación Operacional: Prohibición absoluta de accesos cruzados.
+  Condición de Borde: API REST Request.
+  Métrica Falsable: Tenant_ID_In == Tenant_ID_Out`.
+- ID: ENDO-I09
+  Invariante: INV_IMMUT_SCHEMAS
+  Lógica / Principio: El esquema del objeto de estado es inmutable en caliente durante
+    el ciclo.
+  Implicación Operacional: Evita roturas del compilador AST en tiempo de ejecución.
+  Condición de Borde: Inferencia estocástica activa.
+  Métrica Falsable: Schema_Version == Constant`.
+- ID: ENDO-I10
+  Invariante: INV_STATE_ISO
+  Lógica / Principio: El estado en memoria es isomorfo a su almacenamiento en SQLite-Vec.
+  Implicación Operacional: Evita divergencias de percepción (Sensor Drift).
+  Condición de Borde: Sync de embeddings vectoriales.
+  Métrica Falsable: RAM_State == SQLite_State`.
+- ID: ENDO-I11
+  Invariante: INV_ANERGY_ZERO
+  Lógica / Principio: Las respuestas del loop de composición carecen de prosa o Green
+    Theater.
+  Implicación Operacional: Optimización extrema del consumo de tokens (Zero-Fluff).
+  Condición de Borde: Output del agente en loop.
+  Métrica Falsable: Prose_Tokens == 0`.
+- ID: ENDO-I12
+  Invariante: INV_BFT_CONSENSUS
+  Lógica / Principio: Las transiciones críticas requieren quorum BFT verificado de
+    N/3 nodos.
+  Implicación Operacional: Protección contra fallos bizantinos de workers.
+  Condición de Borde: Transición de estado P0.
+  Métrica Falsable: Votes_Approved >= 2*t + 1`.
+- ID: ENDO-I13
+  Invariante: INV_SANDBOX_RUN
+  Lógica / Principio: Todo código auto-generado por el loop se valida en sandbox aislado.
+  Implicación Operacional: Evita escalada de privilegios y daños al host.
+  Condición de Borde: Invocación de JIT compiler.
+  Métrica Falsable: Sandbox_Violations == 0`.
+- ID: ENDO-I14
+  Invariante: INV_GIT_ALIGN
+  Lógica / Principio: El grafo de estado en el Ledger está alineado con el historial
+    de Git (AX-041).
+  Implicación Operacional: Evita estados fantasmas fuera del control de versiones.
+  Condición de Borde: Commit en sentinel.
+  Métrica Falsable: Git_HEAD_Hash == Ledger_HEAD_Hash`.
+- ID: ENDO-I15
+  Invariante: INV_TEMP_BOUND
+  Lógica / Principio: La temperatura del morfismo se acota a T=0.0 en mutaciones C5-REAL.
+  Implicación Operacional: Garantiza determinismo lógico estricto.
+  Condición de Borde: Mutación en base de datos.
+  Métrica Falsable: Temperature == 0.0`.
+- ID: ENDO-I16
+  Invariante: INV_SHANNON_MIN
+  Lógica / Principio: Las transformaciones de conocimiento preservan una entropía
+    de Shannon mínima.
+  Implicación Operacional: Evita degradación a texto plano redundante (slop).
+  Condición de Borde: Inserción en Cortex Vault.
+  Métrica Falsable: Shannon_Entropy >= 2.0` bits.
+- ID: ENDO-I17
+  Invariante: INV_WAL_LOCK
+  Lógica / Principio: Toda escritura en la base de datos se realiza con lock exclusivo
+    en modo WAL.
+  Implicación Operacional: Previene bloqueos concurrentes y corrupción de SQLite.
+  Condición de Borde: Escritura en SQLite.
+  Métrica Falsable: Journal_Mode == "wal"`.
+- ID: ENDO-I18
+  Invariante: INV_COMP_BOUND
+  Lógica / Principio: El número de morfismos en composición secuencial no excede el
+    límite de pila.
+  Implicación Operacional: Previene fallos de StackOverflow en el host.
+  Condición de Borde: Ejecución del loop.
+  Métrica Falsable: Stack_Depth <= 100`.
+- ID: ENDO-I19
+  Invariante: INV_KEY_ROTATION
+  Lógica / Principio: Las claves de encriptación del estado se rotan cada 100 composiciones.
+  Implicación Operacional: Minimiza el radio de blast de claves comprometidas.
+  Condición de Borde: Fin de ciclo.
+  Métrica Falsable: Key_Age_Blocks <= 100`.
+- ID: ENDO-I20
+  Invariante: INV_COMOD_LOCK
+  Lógica / Principio: Toda lectura/escritura concurrente al estado del morfismo está
+    protegida por Mutex.
+  Implicación Operacional: Previene condiciones de carrera destructivas en variables.
+  Condición de Borde: Acceso a variables de estado.
+  Métrica Falsable: Mutex.is_locked == True` en write.
+- ID: ENDO-I21
+  Invariante: INV_DIAG_COMMUTE
+  Lógica / Principio: Los diagramas de composición temporal deben conmutar estrictamente.
+  Implicación Operacional: Garantiza coherencia causal a través de diferentes rutas.
+  Condición de Borde: Reconciliación de datos.
+  Métrica Falsable: f . g == g . f` si conmutan.
+- ID: ENDO-I22
+  Invariante: INV_IMAGE_BOUND
+  Lógica / Principio: La imagen del endomorfismo de conocimiento no puede ser vacía.
+  Implicación Operacional: El loop debe producir información útil distinta de cero.
+  Condición de Borde: Fin de inferencia.
+  Métrica Falsable: len(Image(f)) > 0`.
+- ID: ENDO-I23
+  Invariante: INV_REVERSE_ISO
+  Lógica / Principio: Los automorfismos preservan correspondencia biyectiva exacta
+    con su inversa.
+  Implicación Operacional: Permite reversibilidad atómica de estado (Saga compensating).
+  Condición de Borde: Aborto de transacción.
+  Métrica Falsable: f . f_inv == 1_X`.
+- ID: ENDO-I24
+  Invariante: INV_SECURE_CIPHER
+  Lógica / Principio: Los payloads del estado se cifran con AES-GCM-256 usando nonces
+    únicos.
+  Implicación Operacional: Confidencialidad y protección contra replay attacks.
+  Condición de Borde: Escritura en almacenamiento.
+  Métrica Falsable: Cipher_Method == "AES-GCM-256"`.
+- ID: ENDO-I25
+  Invariante: INV_PORT_STATIC
+  Lógica / Principio: Los puertos de comunicación del loop local son estáticos y parametrizados.
+  Implicación Operacional: Evita colisiones de red con puertos efímeros del host.
+  Condición de Borde: Bootstrap del socket.
+  Métrica Falsable: Port in Allowed_List`.
+- ID: ENDO-I26
+  Invariante: INV_TLS_FORCE
+  Lógica / Principio: Toda conexión entre instancias distribuidas exige TLS 1.3 con
+    mTLS.
+  Implicación Operacional: Protección del canal de red contra escuchas y suplantaciones.
+  Condición de Borde: Handshake tcp.
+  Métrica Falsable: TLS_Version == "1.3"`.
+- ID: ENDO-I27
+  Invariante: INV_LIMIT_PAYLOAD
+  Lógica / Principio: El tamaño máximo del payload del morfismo de estado es de 10MB.
+  Implicación Operacional: Previene desbordamientos de memoria en el Gateway.
+  Condición de Borde: Entrada de API.
+  Métrica Falsable: Payload_Size <= 10_000_000` bytes.
+- ID: ENDO-I28
+  Invariante: INV_CORS_RESTRICT
+  Lógica / Principio: Las peticiones CORS están restringidas a la lista blanca de
+    hosts locales.
+  Implicación Operacional: Evita ejecución de scripts maliciosos desde navegadores
+    externos.
+  Condición de Borde: OPTIONS response headers.
+  Métrica Falsable: Access-Control-Allow-Origin != "*"`.
+- ID: ENDO-I29
+  Invariante: INV_RATE_LIMIT
+  Lógica / Principio: Límite estricto de peticiones por segundo en el API Gateway
+    del morfismo.
+  Implicación Operacional: Protección contra denegación de servicio por subagentes.
+  Condición de Borde: Ingesta de peticiones.
+  Métrica Falsable: Requests_Per_Second <= 50`.
+- ID: ENDO-I30
+  Invariante: INV_MIME_CHECK
+  Lógica / Principio: Los payloads de comunicación se transmiten estrictamente en
+    JSON tipado.
+  Implicación Operacional: Previene fallos en el parser de esquemas de FastAPI.
+  Condición de Borde: Header de petición.
+  Métrica Falsable: Content-Type == "application/json"`.
+- ID: ENDO-I31
+  Invariante: INV_VERSION_CHECK
+  Lógica / Principio: El receptor rechaza morfismos emitidos por versiones de código
+    no alineadas.
+  Implicación Operacional: Evita corrupción del Ledger por incompatibilidad de clases.
+  Condición de Borde: Cabecera HTTP parseada.
+  Métrica Falsable: Client_Version == Server_Version`.
+- ID: ENDO-I32
+  Invariante: INV_ERROR_CLEAN
+  Lógica / Principio: Las respuestas HTTP de error no contienen stack traces del backend.
+  Implicación Operacional: Evita fugas de información sobre la topología física.
+  Condición de Borde: HTTP response body.
+  Métrica Falsable: contains("traceback") == False`.
+- ID: ENDO-I33
+  Invariante: INV_ALIVE_PROBE
+  Lógica / Principio: El worker del endomorfismo expone endpoint de liveness `/health`
+    local.
+  Implicación Operacional: Monitorización de caída silenciosa del proceso.
+  Condición de Borde: Petición externa.
+  Métrica Falsable: Health_Status == 200`.
+- ID: ENDO-I34
+  Invariante: INV_CACHE_COHER
+  Lógica / Principio: La caché en memoria se invalida inmediatamente al ocurrir una
+    escritura.
+  Implicación Operacional: Garantiza lecturas de datos actualizados.
+  Condición de Borde: Post-persist hook.
+  Métrica Falsable: Cache_Is_Dirty == True` tras write.
+- ID: ENDO-I35
+  Invariante: INV_HOST_VERIFY
+  Lógica / Principio: El Gateway valida estrictamente la cabecera Host de la petición
+    entrante.
+  Implicación Operacional: Previene ataques de envenenamiento de DNS local.
+  Condición de Borde: Middleware API.
+  Métrica Falsable: Host_Header in Allowed_Hosts`.
+- ID: ENDO-I36
+  Invariante: INV_PROXY_REUSE
+  Lógica / Principio: El proxy utiliza un pool de conexiones HTTP reutilizables.
+  Implicación Operacional: Evita el agotamiento de sockets TCP en el SO.
+  Condición de Borde: Inicialización de httpx client.
+  Métrica Falsable: Pool_Size >= 1` (reutilización).
+- ID: ENDO-I37
+  Invariante: INV_UVI_TIMEOUT
+  Lógica / Principio: El timeout de keep-alive del servidor ASGI es superior al TTL
+    de inferencia.
+  Implicación Operacional: Previene cierres inesperados de conexión en peticiones
+    largas.
+  Condición de Borde: Configuración de Uvicorn.
+  Métrica Falsable: Keep_Alive_Timeout >= 60` segundos.
+- ID: ENDO-I38
+  Invariante: INV_POISON_BLOCK
+  Lógica / Principio: Todo morfismo entrante se valida con la clave pública del Swarm.
+  Implicación Operacional: Protección contra inyección de transiciones no autorizadas.
+  Condición de Borde: Ingesta de evento.
+  Métrica Falsable: Signature_Valid == True`.
+- ID: ENDO-I39
+  Invariante: INV_COMP_BACKUP
+  Lógica / Principio: Se ejecuta backup inmutable de base de datos antes de una compactación.
+  Implicación Operacional: Permite recuperación ante fallos de disco catastróficos.
+  Condición de Borde: Hook de mantenimiento.
+  Métrica Falsable: Backup_File_Exists == True`.
+- ID: ENDO-I40
+  Invariante: INV_ENV_PROTECT
+  Lógica / Principio: El endomorfismo no puede modificar variables de entorno del
+    host.
+  Implicación Operacional: Aislamiento operativo a nivel de sistema operativo.
+  Condición de Borde: Evaluación en sandbox.
+  Métrica Falsable: Env_Modified == False`.
+- ID: ENDO-I41
+  Invariante: INV_VEC_DEDUP
+  Lógica / Principio: Los vectores de embeddings del estado no contienen registros
+    idénticos.
+  Implicación Operacional: Previene redundancias y degradación de búsqueda en vec0.
+  Condición de Borde: Commit vectorial.
+  Métrica Falsable: Distance(Vector_A, Vector_B) > epsilon`.
+- ID: ENDO-I42
+  Invariante: INV_LAZY_EAGER
+  Lógica / Principio: Las tareas encoladas se resuelven en un ciclo máximo de 10 iteraciones.
+  Implicación Operacional: Evita acumulación infinita de callbacks latentes en memoria.
+  Condición de Borde: Monitor del event loop.
+  Métrica Falsable: Lazy_Queue_Depth <= 10`.
+- ID: ENDO-I43
+  Invariante: INV_FUNCTOR_ID
+  Lógica / Principio: Un functor de mapeo mapea la identidad a la identidad.
+  Implicación Operacional: Preservación de la estructura del loop en traslación.
+  Condición de Borde: Validación functorial.
+  Métrica Falsable: F(1_X) == 1_F(X)`.
+- ID: ENDO-I44
+  Invariante: INV_FUNCTOR_COMP
+  Lógica / Principio: El functor preserva la composición de morfismos.
+  Implicación Operacional: Preservación del historial de operaciones compuesto.
+  Condición de Borde: Sincronización remota.
+  Métrica Falsable: F(f . g) == F(f) . F(g)`.
+- ID: ENDO-I45
+  Invariante: INV_BFT_KEYS
+  Lógica / Principio: Los nodos BFT firman mensajes con Ed25519 con claves únicas
+    en Keyring.
+  Implicación Operacional: Autenticidad innegable de los votos de consenso.
+  Condición de Borde: Emisión de voto.
+  Métrica Falsable: Signer_Key_Valid == True`.
+- ID: ENDO-I46
+  Invariante: INV_SCHUR_ORT
+  Lógica / Principio: El espacio de estados vectorial se descompone en base ortogonal.
+  Implicación Operacional: Evita colisiones de significado semántico.
+  Condición de Borde: Optimización vec0.
+  Métrica Falsable: Dot_Product(Basis_A, Basis_B) == 0`.
+- ID: ENDO-I47
+  Invariante: INV_FIBER_LIMIT
+  Lógica / Principio: El número de preimágenes para un estado meta está acotado.
+  Implicación Operacional: Evita explosión de relaciones n-a-n en el grafo.
+  Condición de Borde: Inserción en base de datos.
+  Métrica Falsable: Preimages_Count <= 100` por estado.
+- ID: ENDO-I48
+  Invariante: INV_GIT_SENTINEL
+  Lógica / Principio: Todo commit generado incluye el hash SHA-256 de Ledger actual.
+  Implicación Operacional: Enlace bidireccional inquebrantable entre código y base.
+  Condición de Borde: Git commit trigger.
+  Métrica Falsable: Ledger_Hash in Commit_Message`.
+- ID: ENDO-I49
+  Invariante: INV_SHANNON_MAX
+  Lógica / Principio: El texto persistido debe tener una entropía superior al umbral
+    mínimo.
+  Implicación Operacional: Excluye alucinaciones vacías y respuestas enlatadas.
+  Condición de Borde: Fact commit block.
+  Métrica Falsable: Shannon_Entropy >= 1.5` bits.
+- ID: ENDO-I50
+  Invariante: INV_APOP_TRIGGER
+  Lógica / Principio: El trigger de apoptosis mata el proceso en caso de violación
+    de invariantes.
+  Implicación Operacional: Evita la persistencia de estados rotos o corrompidos.
+  Condición de Borde: Excepción crítica en Guard.
+  Métrica Falsable: Apoptosis_Fired == True` en fallo.
+- ID: ENDO-I51
+  Invariante: INV_LOOP_RESOLV
+  Lógica / Principio: Las corrutinas del loop reflexivo deben ceder control periódicamente.
+  Implicación Operacional: Previene congelamientos del event loop del Gateway.
+  Condición de Borde: Ejecución asíncrona de morfismo.
+  Métrica Falsable: Time_Between_Yields <= 100` ms.
+- ID: ENDO-I52
+  Invariante: INV_HOM_SET_CAP
+  Lógica / Principio: El número de morfismos distintos en un objeto está acotado.
+  Implicación Operacional: Previene desbordamiento de memoria por meta-conocimiento.
+  Condición de Borde: Indexado semántico en base.
+  Métrica Falsable: len(Hom(X, X)) <= 10_000`.
+- ID: ENDO-I53
+  Invariante: INV_EIGEN_VAL_OK
+  Lógica / Principio: Los autovalores del sistema de transiciones están en el rango
+    (-1, 1).
+  Implicación Operacional: Garantiza convergencia y estabilidad a largo plazo.
+  Condición de Borde: Multiplicación matricial.
+  Métrica Falsable: abs(Eigenvalues) < 1.0`.
+- ID: ENDO-I54
+  Invariante: INV_FUNCTOR_DET
+  Lógica / Principio: El mapeo functorial es determinista y no depende de variables
+    de red.
+  Implicación Operacional: Evita inconsistencias de transiciones entre entornos.
+  Condición de Borde: Mapeo inter-sistema.
+  Métrica Falsable: F(f, State) == Constant` en t.
+- ID: ENDO-I55
+  Invariante: INV_EIGEN_DIM
+  Lógica / Principio: El espacio vectorial de embeddings mantiene su dimensionalidad
+    estática.
+  Implicación Operacional: Previene colisiones por mezcla de modelos en vec0.
+  Condición de Borde: Inserción vectorial.
+  Métrica Falsable: Vector_Dimension == 1536` o 768.
+- ID: ENDO-I56
+  Invariante: INV_MONOID_UNIT
+  Lógica / Principio: La identidad `1_X` es única para cada conjunto de endomorfismos.
+  Implicación Operacional: Previene inicializaciones ambiguas del loop.
+  Condición de Borde: Carga inicial del sistema.
+  Métrica Falsable: len(Identity_Elements) == 1`.
+- ID: ENDO-I57
+  Invariante: INV_SCHED_FIFO
+  Lógica / Principio: Las tareas del cron se ejecutan en orden estrictamente temporal.
+  Implicación Operacional: Previene condiciones de carrera por reordenamiento.
+  Condición de Borde: Encolador de tareas.
+  Métrica Falsable: Execution_Order == Sorted_Timestamp`.
+- ID: ENDO-I58
+  Invariante: INV_LOG_EXERGY
+  Lógica / Principio: Los logs de traza contienen estrictamente información estructurada.
+  Implicación Operacional: Evita desperdicio de tokens en almacenamiento local.
+  Condición de Borde: Logger output check.
+  Métrica Falsable: contains("slop") == False`.
+- ID: ENDO-I59
+  Invariante: INV_SANDBOX_NET
+  Lógica / Principio: El sandbox de ejecución tiene deshabilitado el acceso a red
+    externa.
+  Implicación Operacional: Evita exfiltración de datos sensibles durante JIT compilation.
+  Condición de Borde: Configuración de sandbox.
+  Métrica Falsable: Network_Connections_Allowed == False`.
+- ID: ENDO-I60
+  Invariante: INV_MIG_ROLLBACK
+  Lógica / Principio: Todo script de migración expone obligatoriamente ruta de rollback.
+  Implicación Operacional: Permite recuperación de estado ante fallos de despliegue.
+  Condición de Borde: Declaración de migración.
+  Métrica Falsable: hasattr(Migration, "down") == True`.
+- ID: ENDO-I61
+  Invariante: INV_FD_LIMIT
+  Lógica / Principio: El loop de composición no puede exceder el 80% de descriptores
+    de archivos del host.
+  Implicación Operacional: Previene caídas catastróficas por saturación del SO.
+  Condición de Borde: Bootstrap del socket.
+  Métrica Falsable: Open_FDs < 0.8 * Max_FDs`.
+- ID: ENDO-I62
+  Invariante: INV_ISOM_PAIR
+  Lógica / Principio: El morfismo inverso `f_inv` se genera y actualiza atómicamente
+    con `f`.
+  Implicación Operacional: Evita estados intermedios no reversibles en SAGA-6.
+  Condición de Borde: Mutación de clases de lógica.
+  Métrica Falsable: hasattr(f, "inverse") == True`.
+- ID: ENDO-I63
+  Invariante: INV_RAM_GC
+  Lógica / Principio: La memoria RAM del worker se libera explícitamente tras cada
+    ciclo.
+  Implicación Operacional: Evita OOM en ejecuciones prolongadas de swarm.
+  Condición de Borde: Hook post-ejecución.
+  Métrica Falsable: RAM_Usage_After_GC <= Basal_Limit`.
+- ID: ENDO-I64
+  Invariante: INV_EPIST_RECON
+  Lógica / Principio: Dos verdades conflictivas inician reconciliación automatizada.
+  Implicación Operacional: Evita bloqueos epistémicos o loops de parálisis.
+  Condición de Borde: Guard check de coherencia.
+  Métrica Falsable: Reconciliation_Active == True`.
+- ID: ENDO-I65
+  Invariante: INV_TAINT_DEEP
+  Lógica / Principio: La copia de morfismos de estado debe realizarse vía deepcopy.
+  Implicación Operacional: Conserva metadatos de taint originales y previene desvío.
+  Condición de Borde: Copia de clases de estado.
+  Métrica Falsable: id(State_In.taint) != id(State_Out.taint)`.
+- ID: ENDO-I66
+  Invariante: INV_GIT_CLEAN
+  Lógica / Principio: El working tree del repositorio debe estar limpio antes de transicionar.
+  Implicación Operacional: Previene contaminación de commits con archivos huérfanos.
+  Condición de Borde: Pre-commit hook validation.
+  Métrica Falsable: git_status == "clean"`.
+- ID: ENDO-I67
+  Invariante: INV_CHAOTIC_LIM
+  Lógica / Principio: La divergencia de autovectores en loops está limitada por exponente
+    de Lyapunov.
+  Implicación Operacional: Garantiza predictibilidad matemática del sistema.
+  Condición de Borde: Simulación dinámica.
+  Métrica Falsable: Lyapunov_Exponent <= Threshold`.
+- ID: ENDO-I68
+  Invariante: INV_NIL_TRANS
+  Lógica / Principio: El estado nilpotent nulo no puede ser el destino final del flujo
+    principal.
+  Implicación Operacional: Evita colapso absoluto del sistema a estado cero.
+  Condición de Borde: Verificación de parada.
+  Métrica Falsable: Final_State != 0`.
+- ID: ENDO-I69
+  Invariante: INV_IDEM_GRAD
+  Lógica / Principio: Las transiciones deben aportar un delta exérgico neto mayor
+    que cero.
+  Implicación Operacional: Previene parálisis del loop en estados idempotentes.
+  Condición de Borde: Evaluación en runtime.
+  Métrica Falsable: Exergy_Yield > 0` en composición.
+- ID: ENDO-I70
+  Invariante: INV_COHOM_DET
+  Lógica / Principio: Los ciclos de cohomología están cerrados y validados criptográficamente.
+  Implicación Operacional: Garantiza coherencia distributiva sin bucles huérfanos.
+  Condición de Borde: Swarm status verification.
+  Métrica Falsable: verify_cohomology() == True`.
+- ID: ENDO-I71
+  Invariante: INV_AUT_EVOLVE
+  Lógica / Principio: El loop de automorfismos debe acoplarse con inyección de inputs
+    externos.
+  Implicación Operacional: Previene ciclos cerrados estériles sin aprendizaje.
+  Condición de Borde: Ingesta de memoria.
+  Métrica Falsable: Inputs_Processed > 0` en t.
+- ID: ENDO-I72
+  Invariante: INV_KEY_SECURE
+  Lógica / Principio: La clave de cifrado se aloja en almacenamiento de llavero del
+    SO local.
+  Implicación Operacional: Evita exposición de secretos en archivos de configuración.
+  Condición de Borde: Keyring check.
+  Métrica Falsable: Key_Source == "OS_Keyring"`.
+- ID: ENDO-I73
+  Invariante: INV_DB_CONCUR
+  Lógica / Principio: SQLite opera estrictamente con `busy_timeout` fijado en 5000ms.
+  Implicación Operacional: Previene deadlocks por colisiones de escritura concurrentes.
+  Condición de Borde: DB initialization helper.
+  Métrica Falsable: busy_timeout == 5000`.
+- ID: ENDO-I74
+  Invariante: INV_COLIM_BOUND
+  Lógica / Principio: El colímite de la base está acotado a 1 millón de registros
+    vectoriales.
+  Implicación Operacional: Previene degradación de rendimiento en vec0.
+  Condición de Borde: DB insertion hook.
+  Métrica Falsable: Total_Records <= 1_000_000`.
+- ID: ENDO-I75
+  Invariante: INV_SENTINEL_OK
+  Lógica / Principio: El Git Sentinel valida el hash Ledger en cada commit local.
+  Implicación Operacional: Evita desincronizaciones de base de datos inter-sesión.
+  Condición de Borde: Git commit verification.
+  Métrica Falsable: Verify_Sentinel_Hash() == True`.
+- ID: ENDO-I76
+  Invariante: INV_ENTROPY_MIN
+  Lógica / Principio: Las respuestas conservan un nivel mínimo de Shannon en base
+    a tokens únicos.
+  Implicación Operacional: Filtra outputs simplistas de baja exergía.
+  Condición de Borde: Cortex vault commit filter.
+  Métrica Falsable: Shannon_Entropy >= 1.2` bits.
+- ID: ENDO-I77
+  Invariante: INV_STACK_YIELD
+  Lógica / Principio: Las funciones recursivas de morfismos ejecutan un yield cada
+    5 niveles.
+  Implicación Operacional: Previene desbordamiento de pila física del runtime.
+  Condición de Borde: Intérprete check.
+  Métrica Falsable: Recursion_Depth_Since_Yield <= 5`.
+- ID: ENDO-I78
+  Invariante: INV_KEY_MEMORY
+  Lógica / Principio: Las llaves de cifrado en memoria volátil se purgan tras el uso.
+  Implicación Operacional: Previene extracción de claves vía volcados de memoria (dump).
+  Condición de Borde: Cryptography wrapper.
+  Métrica Falsable: Memory_Cleared == True` post-decrypt.
+- ID: ENDO-I79
+  Invariante: INV_MUTEX_BLOCK
+  Lógica / Principio: Todo lock de recurso compartido expone un timeout de resolución
+    máximo de 1s.
+  Implicación Operacional: Previene bloqueos mutuos permanentes.
+  Condición de Borde: Lock request logic.
+  Métrica Falsable: Lock_Timeout <= 1000` ms.
+- ID: ENDO-I80
+  Invariante: INV_BFT_QUORUM
+  Lógica / Principio: Los mensajes de consenso BFT se transmiten firmados por al menos
+    2/3 nodos.
+  Implicación Operacional: Previene ataques Sybil y desviaciones de Ledger.
+  Condición de Borde: Consensual commit step.
+  Métrica Falsable: Signers_Count >= (2/3) * N_Nodes`.
+- ID: ENDO-I81
+  Invariante: INV_FASTAPI_VAL
+  Lógica / Principio: FastAPI utiliza validadores Pydantic estrictos en todos los
+    payloads.
+  Implicación Operacional: Previene inyección de payloads deformados al backend.
+  Condición de Borde: Endpoint function definition.
+  Métrica Falsable: hasattr(endpoint, "pydantic_model")`.
+- ID: ENDO-I82
+  Invariante: INV_PORT_CHECK
+  Lógica / Principio: El script de bootstrap valida que el puerto de red está libre
+    antes de levantar.
+  Implicación Operacional: Evita colisiones de puertos con servicios zombies.
+  Condición de Borde: Server startup utility.
+  Métrica Falsable: Port_Is_Free == True`.
+- ID: ENDO-I83
+  Invariante: INV_CONN_RETRY
+  Lógica / Principio: Los reintentos de conexión inter-agente emplean algoritmo de
+    backoff con jitter.
+  Implicación Operacional: Previene colapso del Gateway por thundering herd.
+  Condición de Borde: Http client helper.
+  Métrica Falsable: Retry_Method == "Backoff_With_Jitter"`.
+- ID: ENDO-I84
+  Invariante: INV_GATEWAY_CAP
+  Lógica / Principio: El Gateway limita el tamaño máximo de los campos JSON a 1MB.
+  Implicación Operacional: Previene desbordamientos de buffer por inyección.
+  Condición de Borde: FastAPI request limits.
+  Métrica Falsable: Max_Field_Size <= 1_000_000` bytes.
+- ID: ENDO-I85
+  Invariante: INV_CORS_STRICT
+  Lógica / Principio: Las cabeceras CORS en producción excluyen explícitamente el
+    wildcard asterisco.
+  Implicación Operacional: Previene ataques de scripting malicioso.
+  Condición de Borde: API configuration middleware.
+  Métrica Falsable: CORS_Wildcard == False`.
+- ID: ENDO-I86
+  Invariante: INV_LIMIT_BLOCK
+  Lógica / Principio: Peticiones que exceden el rate limit son bloqueadas por 60 segundos.
+  Implicación Operacional: Previene ataques de fuerza bruta.
+  Condición de Borde: Rate limiter filter.
+  Métrica Falsable: Ban_Duration == 60` segundos.
+- ID: ENDO-I87
+  Invariante: INV_TLS_CIPHER
+  Lógica / Principio: Se exige TLS 1.3 con suite de cifrado AES-256-GCM en el socket.
+  Implicación Operacional: Garantiza protección del canal ante ataques criptográficos
+    modernos.
+  Condición de Borde: TLS connection handshake.
+  Métrica Falsable: Cipher_Suite == "AES-256-GCM"`.
+- ID: ENDO-I88
+  Invariante: INV_VER_COMPAT
+  Lógica / Principio: Las API del morfismo son compatibles retroactivamente hasta
+    un nivel menor (Minor).
+  Implicación Operacional: Evita rupturas del sistema durante actualizaciones parciales.
+  Condición de Borde: API gateway validation middleware.
+  Métrica Falsable: Client_Minor_Ver >= Required_Minor`.
+- ID: ENDO-I89
+  Invariante: INV_CLEAN_ERR
+  Lógica / Principio: El Gateway devuelve JSON estructurado de error sin rutas físicas
+    legibles.
+  Implicación Operacional: Evita exposición de directorios del host.
+  Condición de Borde: Exception handler global.
+  Métrica Falsable: Physical_Paths_In_Response == 0`.
+- ID: ENDO-I90
+  Invariante: INV_MONITOR_RUN
+  Lógica / Principio: El daemon de watchdog se ejecuta como proceso independiente
+    del host.
+  Implicación Operacional: Garantiza monitorización persistente e inmune a fallas
+    de API.
+  Condición de Borde: Watchdog script check.
+  Métrica Falsable: Watchdog_PID_Active == True`.
+- ID: ENDO-I91
+  Invariante: INV_CACHE_REDIS
+  Lógica / Principio: El almacenamiento Redis L1 cache tiene TTL máximo de 300 segundos.
+  Implicación Operacional: Previene consistencia degradada por caché obsoleta prolongada.
+  Condición de Borde: Redis client instantiation.
+  Métrica Falsable: Default_TTL <= 300` segundos.
+- ID: ENDO-I92
+  Invariante: INV_HOST_WHITE
+  Lógica / Principio: El proxy local del morfismo sólo enruta peticiones a dominios
+    de lista blanca.
+  Implicación Operacional: Previene desvío de tráfico sensible a redes externas.
+  Condición de Borde: API Gateway routing table.
+  Métrica Falsable: Target_Domain in Whitelist`.
+- ID: ENDO-I93
+  Invariante: INV_ASYNC_POOL
+  Lógica / Principio: El cliente httpx utiliza un único pool de conexiones cerrado.
+  Implicación Operacional: Evita el consumo desmedido de descriptores de socket TCP.
+  Condición de Borde: API gateway client helper.
+  Métrica Falsable: Pool_Closed == True` on app exit.
+- ID: ENDO-I94
+  Invariante: INV_ASGI_TIMEOUT
+  Lógica / Principio: Uvicorn timeout keep-alive está configurado a 15 segundos en
+    local.
+  Implicación Operacional: Minimiza retención de sockets inactivos.
+  Condición de Borde: ASGI command run execution.
+  Métrica Falsable: keep_alive_timeout == 15`.
+- ID: ENDO-I95
+  Invariante: INV_MIME_STRICT
+  Lógica / Principio: El parser rechaza cualquier payload que no declare Content-Type
+    válido.
+  Implicación Operacional: Previene inyecciones de payloads deformados.
+  Condición de Borde: API Gateway entry validation.
+  Métrica Falsable: Header_Content_Type == Required`.
+- ID: ENDO-I96
+  Invariante: INV_SIGN_MT
+  Lógica / Principio: Todo mensaje inter-agente incluye la firma digital Ed25519 del
+    emisor.
+  Implicación Operacional: Garantiza autenticidad y previene suplantación de nodos.
+  Condición de Borde: Message serialization handler.
+  Métrica Falsable: hasattr(Message, "Signature")`.
+- ID: ENDO-I97
+  Invariante: INV_MIG_LEDGER
+  Lógica / Principio: Las migraciones de esquema emiten un evento criptográfico al
+    Ledger.
+  Implicación Operacional: Registra la trazabilidad del cambio de estructura.
+  Condición de Borde: Database migration execution.
+  Métrica Falsable: Ledger_Event_Logged == True`.
+- ID: ENDO-I98
+  Invariante: INV_INVAR_FILE
+  Lógica / Principio: Los archivos de configuración invariantes se montan en modo
+    lectura en el Docker/SO.
+  Implicación Operacional: Previene modificaciones accidentales de directivas.
+  Condición de Borde: Container execution configuration.
+  Métrica Falsable: Mount_Mode == "read_only"`.
+- ID: ENDO-I99
+  Invariante: INV_VEC_STRICT
+  Lógica / Principio: SQLite-Vec exige concordancia de dimensiones del vector en cada
+    query.
+  Implicación Operacional: Evita fallas catastróficas de comparación.
+  Condición de Borde: SQLite query build.
+  Métrica Falsable: Query_Vector_Dimension == DB_Dim`.
+- ID: ENDO-I100
+  Invariante: INV_LAZY_CLEAN
+  Lógica / Principio: Las colas de tareas lazy se purgan por completo al detener el
+    worker.
+  Implicación Operacional: Previene persistencia de tareas huérfanas en el reinicio.
+  Condición de Borde: Shutdown lifecycle hook.
+  Métrica Falsable: Lazy_Queue_Depth == 0` on stop.
+M3_ANTIPATTERNS:
+- ID: ENDO-AP01
+  Antipatrón: Circular Dependency Loop
+  Disfunción Causal: Composición de endomorfismos cíclicos sin control de corte (Circuit
+    Breaker).
+  Señal de Presencia: Recursión infinita en logs sin yields.
+  Impacto en Robustez: Desborde de pila (StackOverflow) y OOM.
+  Refactor (Alternativa): Implementar contador Max-Hops y apoptosis.
+- ID: ENDO-AP02
+  Antipatrón: Anergy Prose Gate
+  Disfunción Causal: Intentar describir el morfismo de transformación en prosa dentro
+    del loop.
+  Señal de Presencia: Tokens de explicación en base de datos.
+  Impacto en Robustez: Desperdicio de tokens y degradación de exergía.
+  Refactor (Alternativa): Epistemic-Purge-OMEGA y colapso directo a Hash.
+- ID: ENDO-AP03
+  Antipatrón: Unsigned Hot Patching
+  Disfunción Causal: Mutar el estado interno saltándose el Write-Path Contract y la
+    firma Taint.
+  Señal de Presencia: Registros SQLite sin metadatos de taint.
+  Impacto en Robustez: Pérdida de proveniencia y auditoría rota.
+  Refactor (Alternativa): Forzar `CORTEX-TAINT` en cada INSERT/UPDATE.
+- ID: ENDO-AP04
+  Antipatrón: Wildcard CORS Route
+  Disfunción Causal: Levantar la API local del morfismo con políticas CORS abiertas
+    (`*`).
+  Señal de Presencia: Asterisco visible en la configuración de CORS.
+  Impacto en Robustez: Exfiltración de estados a través de XSS.
+  Refactor (Alternativa): Restringir CORS estrictamente a localhost.
+- ID: ENDO-AP05
+  Antipatrón: Mixed Socket Context
+  Disfunción Causal: Compartir el mismo puerto de red para flujos TLS y flujos en
+    texto plano.
+  Señal de Presencia: Ausencia de canal TLS forzado en el endpoint.
+  Impacto en Robustez: Intercepción de estados sensibles (MitM).
+  Refactor (Alternativa): Forzar puertos y certificados segregados.
+- ID: ENDO-AP06
+  Antipatrón: Nostalgic Sync Blocking
+  Disfunción Causal: Usar llamadas I/O síncronas (`time.sleep`) en loops recursivos
+    asíncronos.
+  Señal de Presencia: def` en rutas ordinarias en lugar de `async def`.
+  Impacto en Robustez: Congelamiento completo de la API del Gateway.
+  Refactor (Alternativa): Refactorizar a corrutinas asíncronas nativas.
+- ID: ENDO-AP07
+  Antipatrón: Parametric Hallucination
+  Disfunción Causal: Confiar en la memoria implícita del modelo para transiciones
+    sin verificar en disco.
+  Señal de Presencia: Morfismo generado sin fuentes locales.
+  Impacto en Robustez: Desviación de lógica y código malicioso.
+  Refactor (Alternativa): Ley de Proveniencia Obligatoria (AX-041).
+- ID: ENDO-AP08
+  Antipatrón: Loose Identity Morp
+  Disfunción Causal: Asumir que la identidad `1_X` no necesita validación explícita.
+  Señal de Presencia: Mutación accidental de estado en bootstrap.
+  Impacto en Robustez: Estado inicial corrompido en frío.
+  Refactor (Alternativa): Validar identidad con test unitario en inicio.
+- ID: ENDO-AP09
+  Antipatrón: Vector Dimension Mix
+  Disfunción Causal: Mezclar vectores de embeddings de diferentes modelos en la tabla
+    vec0.
+  Señal de Presencia: Fallas de distancia de coseno en SQLite-Vec.
+  Impacto en Robustez: Búsqueda semántica rota o degradada.
+  Refactor (Alternativa): Separar tablas virtuales por modelo de embedding.
+- ID: ENDO-AP10
+  Antipatrón: Untracked DB Migrat
+  Disfunción Causal: Modificar esquemas de SQLite sin registrar scripts de migración.
+  Señal de Presencia: Base de datos malformada en CI.
+  Impacto en Robustez: Ruptura de consistencia en despliegues.
+  Refactor (Alternativa): migrar vía `migrate.py` y registrar en git.
+- ID: ENDO-AP11
+  Antipatrón: Ghost Working Tree
+  Disfunción Causal: Dejar archivos temporales sin registrar en git en el directorio
+    del loop.
+  Señal de Presencia: Working tree sucio en CI.
+  Impacto en Robustez: Loops de commit infinitos en pre-commit.
+  Refactor (Alternativa): Excluir temporales en `.git/info/exclude`.
+- ID: ENDO-AP12
+  Antipatrón: Plaintext Key Storage
+  Disfunción Causal: Almacenar claves de cifrado en variables del entorno o JSON de
+    config.
+  Señal de Presencia: Claves legibles en repositorios.
+  Impacto en Robustez: Compromiso total del cifrado de estados.
+  Refactor (Alternativa): Integrar llavero del sistema operativo (Keyring).
+- ID: ENDO-AP13
+  Antipatrón: Unbounded Task Queue
+  Disfunción Causal: Acumular tareas perezosas en el event loop sin límite de encolamiento.
+  Señal de Presencia: Crecimiento incontrolado de memoria RAM.
+  Impacto en Robustez: Caída del Gateway por OOM.
+  Refactor (Alternativa): Forzar resolución ansiosa y paginado.
+- ID: ENDO-AP14
+  Antipatrón: Bare Exceptions Catch
+  Disfunción Causal: Capturar excepciones genéricas (`except Exception:`) en core
+    paths.
+  Señal de Presencia: Silenciamiento de bugs críticos.
+  Impacto en Robustez: Corrupción silenciosa del Ledger.
+  Refactor (Alternativa): Capturar excepciones específicas.
+- ID: ENDO-AP15
+  Antipatrón: Dynamic Route Eval
+  Disfunción Causal: Ejecutar código de ruteo dinámico sin validación criptográfica
+    previa.
+  Señal de Presencia: Inserción directa de rutas desde payloads JSON.
+  Impacto en Robustez: Secuestro de tráfico por workers maliciosos.
+  Refactor (Alternativa): Tabla de ruteo inmutable y firmada.
+- ID: ENDO-AP16
+  Antipatrón: Stack Exposure Err
+  Disfunción Causal: Retornar stack traces legibles en el JSON de respuesta HTTP de
+    error.
+  Señal de Presencia: Stack trace en responses HTTP 500.
+  Impacto en Robustez: Fugas de directorios y vulnerabilidades físicas.
+  Refactor (Alternativa): Middleware limpio de excepciones.
+- ID: ENDO-AP17
+  Antipatrón: Zombie Sockets Host
+  Disfunción Causal: Cerrar el proceso principal del morfismo sin liberar los sockets
+    locales.
+  Señal de Presencia: Address already in use error en bootstrap.
+  Impacto en Robustez: Imposibilidad de reiniciar el Gateway.
+  Refactor (Alternativa): Shutdown hooks de cierre ordenado.
+- ID: ENDO-AP18
+  Antipatrón: Cold Cache Read
+  Disfunción Causal: Leer el estado del morfismo desde caché L1 fría sin invalidación
+    activa.
+  Señal de Presencia: Datos obsoletos leídos por subagente.
+  Impacto en Robustez: Divergencia de estado lógica.
+  Refactor (Alternativa): Invalidador síncrono post-persist.
+- ID: ENDO-AP19
+  Antipatrón: DNS Poison Tunnel
+  Disfunción Causal: Configurar el proxy local para que acepte cualquier cabecera
+    Host.
+  Señal de Presencia: Peticiones locales redirigidas a internet.
+  Impacto en Robustez: Fuga de estados locales a atacantes.
+  Refactor (Alternativa): Middleware de Host de lista blanca.
+- ID: ENDO-AP20
+  Antipatrón: Mime Type Ignorance
+  Disfunción Causal: Ignorar la validación de cabecera Content-Type en peticiones
+    HTTP entrantes.
+  Señal de Presencia: FastAPI retorna error 415.
+  Impacto en Robustez: Rupturas de parser y excepciones no capturadas.
+  Refactor (Alternativa): Validar Content-Type obligatoriamente.
+M4_REDUNDANCIAS:
+- ID: ENDO-RA01
+  Redundancia C5: BFT Consensus Swarm
+  Función Topológica: Quórum de N=3 validadores para firmar transiciones de estado
+    del morfismo.
+  Riesgo Mitigado: Fallos bizantinos de workers locales.
+  Coste (Overhead): 3x tiempo de procesamiento.
+  Dependencias: cortex/consensus/
+- ID: ENDO-RA02
+  Redundancia C5: Dual Reverse Proxy
+  Función Topológica: Servidores de balanceo locales (Nginx/Uvicorn) en redundancia
+    activa.
+  Riesgo Mitigado: Caída o bloqueo del event loop ASGI.
+  Coste (Overhead): Consumo mínimo de memoria.
+  Dependencias: Nginx local.
+- ID: ENDO-RA03
+  Redundancia C5: Git Sentinel Ledger
+  Función Topológica: Vinculación del Ledger con el historial inmutable del repositorio
+    Git (DAG).
+  Riesgo Mitigado: Alteración de base de datos offline.
+  Coste (Overhead): Mínimo en cada commit.
+  Dependencias: Git CLI.
+- ID: ENDO-RA04
+  Redundancia C5: Volatile Sandbox
+  Función Topológica: Creación y destrucción de sandboxes de ejecución para JIT compilaciones.
+  Riesgo Mitigado: Escalada de privilegios y compromisos.
+  Coste (Overhead): Tiempo de bootstrap.
+  Dependencias: Docker o jail local.
+- ID: ENDO-RA05
+  Redundancia C5: Fallback DNS Hosts
+  Función Topológica: Resolución local estática de IPs en `/etc/hosts` de la máquina.
+  Riesgo Mitigado: Caída del servidor de nombres externo.
+  Coste (Overhead): Ninguno.
+  Dependencias: Permisos de lectura.
+- ID: ENDO-RA06
+  Redundancia C5: Backup Gateway Node
+  Función Topológica: Servidor local de fallback escuchando en puerto secundario.
+  Riesgo Mitigado: Puerto principal bloqueado o Zombie.
+  Coste (Overhead): Duplicidad de puertos.
+  Dependencias: FastAPI local.
+- ID: ENDO-RA07
+  Redundancia C5: Epistemic Purge L1
+  Función Topológica: Caché L1 con invalidación proactiva y limpieza de anergía en
+    memoria.
+  Riesgo Mitigado: Consistencia degradada por caché obsoleta.
+  Coste (Overhead): Latencia de invalidador.
+  Dependencias: Redis local.
+- ID: ENDO-RA08
+  Redundancia C5: Taint Signature Seal
+  Función Topológica: Generación de SHA3-256 de payload integrado con metadatos de
+    procedencia.
+  Riesgo Mitigado: Mutaciones de estado anónimas.
+  Coste (Overhead): Criptográfico por bloque.
+  Dependencias: taint_engine.py
+- ID: ENDO-RA09
+  Redundancia C5: Keyring OS Escrow
+  Función Topológica: Custodia de claves de cifrado en el llavero seguro del sistema
+    operativo.
+  Riesgo Mitigado: Robo de claves en disco duro local.
+  Coste (Overhead): MS de llamada.
+  Dependencias: API de Keyring.
+- ID: ENDO-RA10
+  Redundancia C5: compaction Backup
+  Función Topológica: Clonación inmutable de la base de datos previa a la purga y
+    compactación.
+  Riesgo Mitigado: Corrupción catastrófica de SQLite.
+  Coste (Overhead): Espacio en disco.
+  Dependencias: aiosqlite utilities.
+M5_VECTORS:
+- ID: ENDO-AV01
+  Vector Adversarial: Infinite Recursion Attack
+  Superficie de Ataque: Stack del runtime local.
+  Mecanismo de Explotación: Inyección de payload recursivo infinito ($f^n(x)$) sin
+    yield asíncrono.
+  Impacto Termodinámico: StackOverflow / Caída del proceso.
+  Defensa (Mitigación): ENDO-I77` (Stack Yield) y Circuit Breaker.
+- ID: ENDO-AV02
+  Vector Adversarial: Taint Stripping Exploit
+  Superficie de Ataque: Cabeceras de la API.
+  Mecanismo de Explotación: Envío de peticiones de mutación eliminando o alterando
+    el taint.
+  Impacto Termodinámico: Corrupción del Ledger sin rastros.
+  Defensa (Mitigación): Bloqueo estricto Write-Path (SAGA-2).
+- ID: ENDO-AV03
+  Vector Adversarial: Identity Spoofing
+  Superficie de Ataque: Identidad del monoide.
+  Mecanismo de Explotación: Modificación del morfismo identidad $1_X$ para redirigir
+    transiciones.
+  Impacto Termodinámico: Ruptura de consistencia en frío.
+  Defensa (Mitigación): Validar identidad antes de operar.
+- ID: ENDO-AV04
+  Vector Adversarial: Parameter Fuzzing
+  Superficie de Ataque: Endpoints de FastAPI.
+  Mecanismo de Explotación: Envío masivo de payloads JSON deformados para romper el
+    tipado.
+  Impacto Termodinámico: Exposición de stack trace (500).
+  Defensa (Mitigación): Tipado estricto Pydantic y try-catch.
+- ID: ENDO-AV05
+  Vector Adversarial: Origin Hijack CORS
+  Superficie de Ataque: Cabecera Origin HTTP.
+  Mecanismo de Explotación: Simulación de origen permitido desde navegadores externos
+    atacantes.
+  Impacto Termodinámico: Ejecución de transiciones cruzadas.
+  Defensa (Mitigación): CORS restrictivo acotado a localhost.
+- ID: ENDO-AV06
+  Vector Adversarial: Slowloris Sockets
+  Superficie de Ataque: Servidor ASGI Uvicorn.
+  Mecanismo de Explotación: Mantener conexiones HTTP abiertas indefinidamente con
+    bytes lentos.
+  Impacto Termodinámico: Agotamiento de descriptores de red.
+  Defensa (Mitigación): Timeout de keep-alive estricto en Uvicorn.
+- ID: ENDO-AV07
+  Vector Adversarial: Topology Flood
+  Superficie de Ataque: Grafo de ruteo del Swarm.
+  Mecanismo de Explotación: Enviar miles de cambios de topología falsificados.
+  Impacto Termodinámico: Colapso de tablas de ruteo locales.
+  Defensa (Mitigación): Firmas BFT requeridas en topology checks.
+- ID: ENDO-AV08
+  Vector Adversarial: Replay Token Attack
+  Superficie de Ataque: Endpoint de autenticación.
+  Mecanismo de Explotación: Reinyectar token firmado capturado dentro de la ventana
+    de 5s.
+  Impacto Termodinámico: Ejecución de transiciones no autorizadas.
+  Defensa (Mitigación): Timestamp estricto y nonces únicos.
+- ID: ENDO-AV09
+  Vector Adversarial: Key Extraction Dump
+  Superficie de Ataque: Memoria RAM del host.
+  Mecanismo de Explotación: Volcado de memoria RAM para extraer llaves de cifrado
+    en reposo.
+  Impacto Termodinámico: Compromiso total del cifrado de estados.
+  Defensa (Mitigación): Purgar claves tras uso en memoria.
+- ID: ENDO-AV10
+  Vector Adversarial: Environment Poisoning
+  Superficie de Ataque: Variables de entorno del host.
+  Mecanismo de Explotación: Inyectar variables de entorno falsas para desviar el proxy
+    local.
+  Impacto Termodinámico: Redirección de datos a servidor externo.
+  Defensa (Mitigación): Cuarentena estricta de variables del host.
