@@ -83,6 +83,7 @@ class GeneratorAgent(Agent):
         bias = context.get("output_bias", "novelty_over_polish")
         core_vector = context.get("core_vector", "ARTE_PURO")
         forbidden = context.get("forbidden_move", "none")
+        model = context.get("model", "qwen2.5-coder:7b")
         
         # Construcción determinista del prompt de colisión
         prompt = (
@@ -93,8 +94,8 @@ class GeneratorAgent(Agent):
             f"Output as a structured concept, code snippet, or manifesto:"
         )
 
-        # Llamada al metabolismo local
-        content = ollama_generate(prompt)
+        # Llamada al metabolismo local con el modelo dinámico
+        content = ollama_generate(prompt, model=model)
         
         is_error = content.startswith("ERROR_OLLAMA")
 
@@ -104,7 +105,7 @@ class GeneratorAgent(Agent):
             "form": "llm_structured" if not is_error else "error_fallback",
             "content": content,
             "entropy_target": 0.7 if "rupture" in bias else 0.5,
-            "model_used": "llama3"
+            "model_used": model
         }
 
         artifact["generator"] = raw
@@ -118,6 +119,7 @@ class GeneratorAgent(Agent):
                 f.write(content)
 
         return artifact
+
 
 
 class CriticAgent(Agent):
