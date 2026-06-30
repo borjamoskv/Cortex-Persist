@@ -620,7 +620,13 @@ class MOSKV1DatasetCompiler:
                 step_content = step.get("content", "")
 
                 if step_type == "USER_INPUT" and step_content:
-                    user_prompt = step_content.strip()
+                    # Clean user prompt: strip XML tags, HTML comments, metadata
+                    cleaned_prompt = _clean_transcript_prompt(step_content)
+                    # Skip system-injected or too-short prompts
+                    if len(cleaned_prompt) >= _MIN_INSTRUCTION_LENGTH:
+                        user_prompt = cleaned_prompt
+                    else:
+                        user_prompt = None
                 elif step_type == "PLANNER_RESPONSE" and user_prompt and step_content:
                     cleaned = _clean_content(step_content)
                     # Only keep high-quality pairs with structured content
