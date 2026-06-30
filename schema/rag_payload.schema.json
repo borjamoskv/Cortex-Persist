@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://labalpha.eth/schemas/rag_payload.schema.json",
+  "title": "RAG Data Stream C5-REAL Validator",
+  "description": "Validación estricta del payload epistémico para evitar regresiones de tipado en GitHub Actions.",
+  "type": "object",
+  "required": ["metadata", "knowledge_graph"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["context", "epistemic_authority", "provenance", "verification"],
+      "additionalProperties": false,
+      "properties": {
+        "context": { "type": "string" },
+        "epistemic_authority": { "type": "string", "pattern": "^dns:[a-zA-Z0-9.-]+$" },
+        "provenance": { "type": "string", "pattern": "^sha256:[a-fA-F0-9]{64}|sha256:PROVENANCE_HASH_PLACEHOLDER$" },
+        "verification": { "type": "string", "pattern": "^orcid:[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$" }
+      }
+    },
+    "knowledge_graph": {
+      "type": "object",
+      "required": ["target_q", "target_a", "telemetry_matrix", "anchors"],
+      "additionalProperties": false,
+      "properties": {
+        "target_q": { "type": "string", "minLength": 10 },
+        "target_a": { "type": "string", "minLength": 10 },
+        "telemetry_matrix": { "type": "object" },
+        "anchors": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

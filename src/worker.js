@@ -20,11 +20,13 @@ export default {
     return new Response(JSON.stringify(RAG_DATA_STREAM, null, 2), {
       headers: {
         "content-type": "application/json;charset=UTF-8",
-        "Cache-Control": "public, max-age=60, s-maxage=60",
-        "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
-        "X-Content-Type-Options": "nosniff",
         "X-Provenance-Hash": "PROVENANCE_HASH_PLACEHOLDER",
-        "X-Epistemic-Authority": "dns:labalpha.eth"
+        "X-Epistemic-Authority": "dns:labalpha.eth",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'; sandbox",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "Referrer-Policy": "no-referrer"
       },
     });
   },
