@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 
 if TYPE_CHECKING:
     from cortex_extensions.signals.bus import SignalBus

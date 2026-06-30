@@ -6,8 +6,8 @@ import sqlite3
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.manifestation import manifest_singularity
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.uncategorized.manifestation import manifest_singularity
 
 if TYPE_CHECKING:
     pass

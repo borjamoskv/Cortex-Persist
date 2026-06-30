@@ -12,7 +12,7 @@ import time
 from collections.abc import Callable
 from typing import Any, ParamSpec, TypedDict, TypeVar
 
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 
 P = ParamSpec("P")
 R = TypeVar("R")

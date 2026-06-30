@@ -455,7 +455,7 @@ async def execute_credibility_strike(
     if hasattr(engine, "_extensions") and hasattr(engine._extensions, "credibility_stack"):  # pyright: ignore[reportAttributeAccessIssue]
         stack = engine._extensions.credibility_stack  # pyright: ignore[reportAttributeAccessIssue]
     else:
-        from cortex.engine.uncategorized.credibility_stack import LedgerCredibilityStack
+        from cortex.engine.credibility_stack import LedgerCredibilityStack
 
         stack = LedgerCredibilityStack(engine)
 

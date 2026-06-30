@@ -227,7 +227,7 @@ def _register_entropy_cracker(mcp: FastMCP, ctx: _MCPContext) -> None:
             return f"❌ Path '{safe_path}' is not a valid directory."
 
         # Use the real EntropyAnnihilator
-        from cortex.engine.uncategorized.entropy import EntropyAnnihilator
+        from cortex.engine.entropy import EntropyAnnihilator
 
         annihilator = EntropyAnnihilator(safe_path)
         scan_results = annihilator.scan_ecosystem()

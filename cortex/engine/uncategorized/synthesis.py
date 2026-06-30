@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 from cortex.engine.evo.autopoiesis import AutopoiesisEngine
 from cortex.engine.swarm.swarm_10k import SwarmCommander
-from cortex.engine.crystallizer import AutoCrystallizer
+from cortex.engine.uncategorized.crystallizer import AutoCrystallizer
 from cortex.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.engine.synthesis")

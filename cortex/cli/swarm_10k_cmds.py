@@ -81,7 +81,7 @@ def swarm_10k_status(db_path):
         commander = SwarmCommander(bus_path=p)
         await commander.initialize()
 
-        from cortex.engine.uncategorized.shared_bus import SovereignSharedBus
+        from cortex.engine.shared_bus import SovereignSharedBus
 
         if isinstance(commander.bus, SovereignSharedBus):
             metrics = commander.bus.metrics

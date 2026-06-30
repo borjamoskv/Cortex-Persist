@@ -2,7 +2,7 @@
 import logging
 
 from cortex.engine.swarm.swarm_10k import SwarmCommander
-from cortex.engine.forensic_strike_config import STRIKE_V1, MissionProfile
+from cortex.engine.uncategorized.forensic_strike_config import STRIKE_V1, MissionProfile
 
 logger = logging.getLogger("forensic_commander")
 

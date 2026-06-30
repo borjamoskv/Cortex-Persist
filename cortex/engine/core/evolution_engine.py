@@ -17,7 +17,7 @@ from cortex.engine.evo.evolution_types import (
     SovereignAgent,
     SubAgent,
 )
-from cortex.engine.zero_prompting import ZeroPromptingEvolutionStrategy
+from cortex.engine.uncategorized.zero_prompting import ZeroPromptingEvolutionStrategy
 
 # ==============================================================================
 # EVOLUTIONARY STRATEGIES

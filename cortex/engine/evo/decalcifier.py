@@ -14,7 +14,7 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 
 logger = logging.getLogger("cortex.engine.evo.decalcifier")
 

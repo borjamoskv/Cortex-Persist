@@ -89,7 +89,7 @@ def compound(project: str | None, persist: bool) -> None:
     """Detect compound causal chains and report exponential Ω₁₁ yield."""
     from rich.table import Table
 
-    from cortex.engine.uncategorized.compound_yield import CompoundYieldTracker
+    from cortex.engine.compound_yield import CompoundYieldTracker
 
     try:
         tracker = CompoundYieldTracker(db_path=str(DEFAULT_DB_PATH))
@@ -144,7 +144,7 @@ def projection(years: int, base_hours: float, rate: float) -> None:
     """Project Linear vs Compound CHRONOS-1 yield over a decade."""
     from rich.table import Table
 
-    from cortex.engine.uncategorized.compound_yield import CompoundProjector
+    from cortex.engine.compound_yield import CompoundProjector
 
     try:
         report = CompoundProjector.project(

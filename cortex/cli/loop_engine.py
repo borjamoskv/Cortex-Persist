@@ -160,7 +160,7 @@ class ExecutionLoop:
 
     def _run_keter(self, task: str) -> str:
         """Execute task through KETER Engine phases."""
-        from cortex.engine.uncategorized.keter import KeterEngine
+        from cortex.engine.keter import KeterEngine
 
         async def _ignite():
             keter = KeterEngine()

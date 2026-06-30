@@ -7,7 +7,7 @@ import time
 from collections import deque
 from typing import Any
 
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.analytics.performance_tracker import PerformanceSnapshot, PerformanceTracker
 
 from .tuners import OptimizationTuners

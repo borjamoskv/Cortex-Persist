@@ -7,12 +7,14 @@ from .core import (
     bifurcation_engine,
     context_cache,
     distributed_ledger,
+    durability,
     embedding_engine,
     engine,
     evolution_engine,
     evolution_ledger,
     fact_store_core,
     memory_mixin,
+    models,
     mutation_engine,
     physics,
     rollback_engine,
@@ -108,56 +110,70 @@ from .swarm import (
     test_autopoietic_agent,
     trust_registry,
 )
-from .uncategorized import (
+from .healing import (
     anomaly_hunter,
+    circuit_breaker,
+    predictive_healer,
+)
+from .reflection import (
     apotheosis,
     apotheosis_audits_mixin,
-    capabilities,
+    genesis,
+    reflexion,
+)
+from .analytics import (
     chronos_roi,
-    circuit_breaker,
+    performance_tracker,
+    reporter,
+    reporterd,
+)
+from .scheduling import (
+    cost_scheduler,
+    enrichment_queue,
+    heartbeat,
+    watcher,
+)
+from .forgetting import (
+    forgetting_models,
+)
+from .query import (
+    query_mixin,
+    search_mixin,
+)
+from .sync import (
+    sync_mixin,
+)
+from .transaction import (
+    transaction_mixin,
+)
+from .uncategorized import (
+    capabilities,
     compound_yield,
     conscious_recurrence,
-    cost_scheduler,
     credibility_stack,
     crystallizer,
     data_surgery,
-    durability,
     endocrine,
-    enrichment_queue,
     entropy,
     event_sovereignty,
     exergy_optimizer,
     forensic_commander,
     forensic_strike_config,
-    forgetting_models,
-    genesis,
     ghost_mixin,
-    heartbeat,
     history,
     inference,
     keter,
     manifestation,
-    models,
-    performance_tracker,
     persist_executor,
-    predictive_healer,
     privacy_mixin,
-    query_mixin,
     reflex,
-    reflexion,
     rem_cycle,
-    reporter,
-    reporterd,
     sandbox_jit,
-    search_mixin,
     semantic_hash,
     shared_bus,
     slashing,
     substack_sidecar,
-    sync_mixin,
     synthesis,
-    transaction_mixin,
     video_mla_cache,
-    watcher,
     zero_prompting,
 )

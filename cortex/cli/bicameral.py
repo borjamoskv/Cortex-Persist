@@ -90,7 +90,7 @@ class BicameralConsole:
 
     def log_bio(self, message: str, signal: str = "CIRCA") -> None:
         """Logs biological system status, hormones, and circadian phases."""
-        from cortex.engine.uncategorized.endocrine import ENDOCRINE
+        from cortex.engine.endocrine import ENDOCRINE
 
         balance = ENDOCRINE.balance
         cortisol = balance.get("CORTISOL", 0)

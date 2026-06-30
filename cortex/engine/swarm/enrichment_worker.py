@@ -10,7 +10,7 @@ import asyncio
 import logging
 from typing import Any
 
-from cortex.engine.capabilities import CapabilityRegistry
+from cortex.engine.uncategorized.capabilities import CapabilityRegistry
 
 logger = logging.getLogger("cortex.enrichment")
 

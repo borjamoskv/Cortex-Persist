@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from cortex.cli.common import _run_async, cli
-from cortex.engine.uncategorized.keter import KeterEngine
+from cortex.engine.keter import KeterEngine
 from cortex.utils.errors import CortexError
 
 console = Console()

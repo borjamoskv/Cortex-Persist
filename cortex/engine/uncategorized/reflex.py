@@ -11,7 +11,7 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 from cortex_extensions.signals.bus import SignalBus
 
 logger = logging.getLogger(__name__)

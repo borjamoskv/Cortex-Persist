@@ -8,7 +8,7 @@ import re
 import aiosqlite
 
 from cortex.database.core import connect as db_connect
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 
 try:
     from cortex_extensions.signals.bus import AsyncSignalBus, SignalBus

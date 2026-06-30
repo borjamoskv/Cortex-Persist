@@ -5,7 +5,7 @@ from typing import Any
 
 from cortex.engine.mixins.deterministic_induction_mixin import DeterministicInductionMixin
 from cortex.engine.swarm.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 
 logger = logging.getLogger("cortex.nemesis_agent")
 

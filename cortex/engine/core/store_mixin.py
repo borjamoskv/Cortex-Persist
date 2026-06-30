@@ -33,9 +33,9 @@ from cortex.engine.core.store_mutation import (
 from cortex.engine.core.store_quarantine_mixin import QuarantineMixin
 from cortex.engine.core.store_validation import run_store_validation_logic
 from cortex.engine.core.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
-from cortex.engine.capabilities import CapabilityRegistry
-from cortex.engine.ghost_mixin import GhostMixin
-from cortex.engine.privacy_mixin import PrivacyMixin
+from cortex.engine.uncategorized.capabilities import CapabilityRegistry
+from cortex.engine.uncategorized.ghost_mixin import GhostMixin
+from cortex.engine.uncategorized.privacy_mixin import PrivacyMixin
 from cortex.guards.thermodynamic import AgentMode, ThermodynamicCounters
 from cortex.ipc.server import IPCServer
 
