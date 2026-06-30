@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"
 
 import asyncio
 import json
+import sqlite3
 from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi import Request
@@ -53,7 +54,6 @@ async def test_billing_middleware_success_db_lookup():
     # 1. Setup mocks
     api_key = "ctx_cloud_abcdef123"
     tenant_id = "tenant_test_123"
-    sub_item_id = "si_prod_item_999"
 
     mock_auth_result = AuthResult(
         authenticated=True, tenant_id=tenant_id, permissions=["write"], role="user"
@@ -63,55 +63,54 @@ async def test_billing_middleware_success_db_lookup():
     mock_auth_manager.authenticate_async = AsyncMock(return_value=mock_auth_result)
 
     mock_request = MagicMock(spec=Request)
-    mock_pool = FakePool(json.dumps({"stripe_subscription_item_id": sub_item_id}))
-    mock_request.app.state.pool = mock_pool
-
     middleware = CortexBillingMiddleware(MagicMock())
 
-    # 2. Patch AuthManager and stripe to simulate production mode
+    # 2. Patch AuthManager and AsyncStripeSyncer.queue_usage
     with (
-        patch("cortex.auth.manager.get_auth_manager", return_value=mock_auth_manager),
-        patch("stripe.SubscriptionItem.create_usage_record", create=True) as mock_stripe_call,
+        patch("babylon60.auth.manager.get_auth_manager", return_value=mock_auth_manager),
+        patch("babylon60.extensions.billing.metering.AsyncStripeSyncer.queue_usage", new_callable=AsyncMock) as mock_queue_call,
     ):
-        # Inject STRIPE_SECRET_KEY
-        from babylon60.core import config
+        await middleware._report_usage(api_key, mock_request)
 
-        with patch.object(config, "STRIPE_SECRET_KEY", "sk_live_prodkey"):
-            await middleware._report_usage(api_key, mock_request)
-
-        # 3. Assert stripe call is made with the ID fetched from the database config
-        mock_stripe_call.assert_called_once_with(
-            sub_item_id, quantity=1, timestamp="now", action="increment"
-        )
+        # 3. Assert queue_usage is called with ssu_cost=1
+        mock_queue_call.assert_called_once_with(api_key, tenant_id, ssu_cost=1)
 
 
 @pytest.mark.asyncio
-async def test_billing_middleware_bypass_prevention_no_item_in_db():
-    # Verify that if no stripe_subscription_item_id is in DB, it returns early and does NOT call Stripe.
-    api_key = "ctx_cloud_abcdef123"
-    tenant_id = "tenant_test_123"
+async def test_billing_middleware_bypass_prevention_no_item_in_db(tmp_path: Path):
+    # Directly test the AsyncStripeSyncer._report_batch function with database lookup
+    from babylon60.extensions.billing.metering import AsyncStripeSyncer
+    
+    db_file = str(tmp_path / "billing_test.db")
+    
+    # Setup mock tenants table with no stripe_subscription_item_id
+    conn = sqlite3.connect(db_file)
+    conn.execute("CREATE TABLE tenants (id TEXT PRIMARY KEY, config TEXT)")
+    conn.execute("INSERT INTO tenants (id, config) VALUES ('tenant_no_stripe', '{}')")
+    conn.commit()
+    conn.close()
 
-    mock_auth_result = AuthResult(
-        authenticated=True, tenant_id=tenant_id, permissions=["write"], role="user"
-    )
-
-    mock_auth_manager = MagicMock()
-    mock_auth_manager.authenticate_async = AsyncMock(return_value=mock_auth_result)
-
-    mock_request = MagicMock(spec=Request)
-    mock_pool = FakePool(json.dumps({}))  # Empty config
-    mock_request.app.state.pool = mock_pool
-
-    middleware = CortexBillingMiddleware(MagicMock())
-
+    # Patch DB_PATH in metering config
+    from babylon60.core import config
+    
+    # We patch DB_PATH and stripe_lib
+    mock_stripe_lib = MagicMock()
+    mock_stripe_lib.api_key = "sk_live_prodkey"
+    
+    syncer = AsyncStripeSyncer()
+    
     with (
-        patch("cortex.auth.manager.get_auth_manager", return_value=mock_auth_manager),
-        patch("stripe.SubscriptionItem.create_usage_record", create=True) as mock_stripe_call,
+        patch("babylon60.core.config.DB_PATH", db_file),
+        patch.object(config, "STRIPE_SECRET_KEY", "sk_live_prodkey")
     ):
-        from babylon60.core import config
+        await syncer._report_batch(
+            api_key="ctx_cloud_abcdef123",
+            tenant_id="tenant_no_stripe",
+            amount=10,
+            stripe_lib=mock_stripe_lib
+        )
+        
+        # In production mode (not sk_test_mock), if no stripe subscription item ID exists, 
+        # it returns early and does NOT call SubscriptionItem.create_usage_record
+        mock_stripe_lib.SubscriptionItem.create_usage_record.assert_not_called()
 
-        with patch.object(config, "STRIPE_SECRET_KEY", "sk_live_prodkey"):
-            await middleware._report_usage(api_key, mock_request)
-
-        # Assert no stripe call is made
-        mock_stripe_call.assert_not_called()
