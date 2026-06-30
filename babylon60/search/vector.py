@@ -163,8 +163,8 @@ def _build_semantic_query(
 
     if tags:
         for tag in tags:
-            sql += " AND json_extract(f.tags, '$') LIKE ?"
-            params.append(f"%{tag}%")
+            sql += " AND EXISTS (SELECT 1 FROM json_each(f.tags) WHERE value = ?)"
+            params.append(tag)
 
     if confidence:
         sql += " AND f.confidence >= ?"

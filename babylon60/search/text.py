@@ -165,8 +165,8 @@ async def _fts5_search(
         params.append(fact_type)
     if tags:
         for tag in tags:
-            sql += " AND json_extract(f.tags, '$') LIKE ?"
-            params.append(f"%{tag}%")
+            sql += " AND EXISTS (SELECT 1 FROM json_each(f.tags) WHERE value = ?)"
+            params.append(tag)
     if confidence:
         sql += " AND f.confidence >= ?"
         params.append(confidence)
@@ -210,8 +210,8 @@ async def _like_search(
         params.append(fact_type)
     if tags:
         for tag in tags:
-            sql += " AND json_extract(f.tags, '$') LIKE ?"
-            params.append(f"%{tag}%")
+            sql += " AND EXISTS (SELECT 1 FROM json_each(f.tags) WHERE value = ?)"
+            params.append(tag)
     if confidence:
         sql += " AND f.confidence >= ?"
         params.append(confidence)

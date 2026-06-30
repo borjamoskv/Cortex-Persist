@@ -88,7 +88,7 @@ def test_build_semantic_query_dynamic_filtering():
     # Base query without dynamic filters
     sql, params = _build_semantic_query(tenant_id, embedding_json, top_k, project, as_of, confidence)
     assert "AND f.fact_type = ?" not in sql
-    assert "json_extract(f.tags, '$') LIKE ?" not in sql
+    assert "EXISTS (SELECT 1 FROM json_each(f.tags) WHERE value = ?)" not in sql
 
     # With fact_type and tags filters
     sql, params = _build_semantic_query(
@@ -103,12 +103,12 @@ def test_build_semantic_query_dynamic_filtering():
     )
 
     assert "AND f.fact_type = ?" in sql
-    assert "json_extract(f.tags, '$') LIKE ?" in sql
+    assert "EXISTS (SELECT 1 FROM json_each(f.tags) WHERE value = ?)" in sql
     
     # Verify parameter order
     # Base params: [tenant_id, embedding_json, top_k*3, project] -> length 4
     # Plus fact_type, plus tag1, plus tag2 -> total length 7
     assert len(params) == 7
     assert params[4] == "decision"
-    assert params[5] == "%exergy%"
-    assert params[6] == "%cortex%"
+    assert params[5] == "exergy"
+    assert params[6] == "cortex"
