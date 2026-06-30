@@ -40,7 +40,7 @@ class SwarmOrchestrator:
         Fase 1: Planificación (Gemini 3 Pro)
         Genera el Implementation Plan.
         """
-        model = constraints.get("planning_model", "Unknown Planner")
+        model = constraints["planning_model"]
         logger.info(f"[{domain.upper()}] Invocando Planner ({model}) para estructurar la tarea...")
         # Simulación asíncrona no bloqueante (LL-AC-02)
         await asyncio.sleep(0.5) 
@@ -53,7 +53,7 @@ class SwarmOrchestrator:
         Fase 2a: Ejecución (Claude 4.6 / 3.5 Sonnet)
         Mutación del AST físico.
         """
-        model = constraints.get("execution_model", "Unknown Executor")
+        model = constraints["execution_model"]
         logger.info(f"[{domain.upper()}] Invocando Executor ({model}) aplicando {plan_hash}...")
         await asyncio.sleep(0.5)
         diff_hash = f"diff_{hash(plan_hash)}"
@@ -65,7 +65,7 @@ class SwarmOrchestrator:
         Fase 2b: Validación (Gemini 3.5 Flash)
         Creación paralela de la suite de validación.
         """
-        model = constraints.get("testing_model", "Unknown Tester")
+        model = constraints["testing_model"]
         logger.info(f"[{domain.upper()}] Invocando Tester ({model}) basándose en {plan_hash}...")
         await asyncio.sleep(0.5)
         logger.info(f"[{domain.upper()}] Pruebas generadas y validadas.")
@@ -75,11 +75,8 @@ class SwarmOrchestrator:
         """
         Inicia la tubería completa para un dominio específico.
         """
-        if domain not in self.nexus_config.get("workspaces", {}):
-            logger.error(f"El dominio '{domain}' no está registrado en el Nexus.")
-            return
-
-        constraints = self.nexus_config["workspaces"][domain].get("routing_constraints", {})
+        workspace_cfg = self.nexus_config["workspaces"][domain]
+        constraints = workspace_cfg["routing_constraints"]
         
         # 1. Planificación (Secuencial inicial)
         plan_hash = await self.run_planning_phase(domain, task, constraints)
