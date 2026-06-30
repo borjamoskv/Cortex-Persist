@@ -8,9 +8,10 @@ import logging
 from typing import Any
 
 import aiosqlite
-from cortex.crypto import get_default_encrypter
-from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
-from cortex.storage.classifier import (
+
+from babylon60.crypto import get_default_encrypter
+from babylon60.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
+from babylon60.storage.classifier import (
     COMPOSITION_RULES,
     classify_content,
     detect_correlation_signals,
@@ -87,7 +88,8 @@ class PrivacyMixin(EngineMixinBase):
                         if rule_keys.issubset(combined_keys):
                             # Ensure we are not matching identical signals of the same value
                             triggered_keys = {
-                                k for k in rule_keys
+                                k
+                                for k in rule_keys
                                 if (k in incoming_signals and k not in stored_signals)
                                 or (k in stored_signals and k not in incoming_signals)
                                 or (incoming_signals.get(k) != stored_signals.get(k))
@@ -120,21 +122,23 @@ class PrivacyMixin(EngineMixinBase):
                     with causal_write(conn):
                         for stored_fact, category in flagged_stored_facts:
                             stored_id = stored_fact["id"]
-                            
+
                             async with conn.execute(
                                 "SELECT metadata FROM facts WHERE id = ? AND tenant_id = ?",
                                 (stored_id, tenant_id),
                             ) as c:
                                 meta_row = await c.fetchone()
-                            
+
                             raw_meta = meta_row[0] if meta_row else None
                             stored_meta: dict[str, Any] = {}
                             is_encrypted = False
-                            
+
                             if raw_meta:
                                 if isinstance(raw_meta, str) and raw_meta.startswith(enc.PREFIX):
                                     is_encrypted = True
-                                    stored_meta = enc.decrypt_json(raw_meta, tenant_id=tenant_id) or {}
+                                    stored_meta = (
+                                        enc.decrypt_json(raw_meta, tenant_id=tenant_id) or {}
+                                    )
                                 else:
                                     try:
                                         stored_meta = json.loads(raw_meta) or {}
@@ -145,10 +149,12 @@ class PrivacyMixin(EngineMixinBase):
                             stored_meta["privacy_flagged"] = True
                             stored_meta["composition_leakage"] = True
                             stored_meta["composition_category"] = category
-                            
+
                             updated_meta_json = json.dumps(stored_meta)
                             if is_encrypted:
-                                updated_meta_json = enc.encrypt_json(stored_meta, tenant_id=tenant_id)
+                                updated_meta_json = enc.encrypt_json(
+                                    stored_meta, tenant_id=tenant_id
+                                )
 
                             await conn.execute(
                                 "UPDATE facts SET metadata = ? WHERE id = ? AND tenant_id = ?",
@@ -159,4 +165,3 @@ class PrivacyMixin(EngineMixinBase):
             logger.warning("Suppressed exception: %s", exc)
 
         return meta
-

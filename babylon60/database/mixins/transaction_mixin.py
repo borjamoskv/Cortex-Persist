@@ -7,8 +7,9 @@ import sqlite3
 from typing import Any, cast
 
 import aiosqlite
-from cortex.engine.mixins.base import EngineMixinBase
-from cortex.memory.temporal import now_iso
+
+from babylon60.engine.mixins.base import EngineMixinBase
+from babylon60.memory.temporal import now_iso
 
 __all__ = ["TransactionMixin"]
 

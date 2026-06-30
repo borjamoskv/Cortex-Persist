@@ -6,10 +6,10 @@ import logging
 import sqlite3
 from typing import TYPE_CHECKING, Any
 
-from cortex.engine.mixins.base import EngineMixinBase
+from babylon60.engine.mixins.base import EngineMixinBase
 
 if TYPE_CHECKING:
-    from cortex.search.causal_gap import CausalGap
+    from babylon60.search.causal_gap import CausalGap
 
 
 __all__ = ["SearchMixin"]

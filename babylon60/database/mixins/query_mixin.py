@@ -11,11 +11,11 @@ import logging
 import sqlite3
 from typing import TYPE_CHECKING, Any
 
-from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
-from cortex.memory.temporal import build_temporal_filter_params, time_travel_filter
+from babylon60.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
+from babylon60.memory.temporal import build_temporal_filter_params, time_travel_filter
 
 if TYPE_CHECKING:
-    from cortex.search import SearchResult
+    from babylon60.search import SearchResult
 __all__ = ["QueryMixin"]
 logger = logging.getLogger("cortex")
 
