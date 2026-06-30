@@ -139,7 +139,11 @@ def _verify_merkle_roots(conn: sqlite3.Connection) -> list[dict[str, Any]]:
                 "WHERE tenant_id = ? AND id >= ? AND id <= ? ORDER BY id",
                 (root_tenant_id, root["tx_start_id"], root["tx_end_id"]),
             ).fetchall()
-        computed_root = MerkleTree([row["hash"] for row in rows]).root_hash
+        hashes = [row["hash"] for row in rows]
+        if not hashes and root["root_hash"] == "GENESIS":
+            computed_root = "GENESIS"
+        else:
+            computed_root = MerkleTree(hashes).root_hash
         if computed_root != root["root_hash"]:
             violations.append(
                 {

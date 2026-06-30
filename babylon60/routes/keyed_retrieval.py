@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends
+from typing import Any
+
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Any
+
 from babylon60.memory.keyed_retrieval import KeyedRetrievalIndex
 
 router = APIRouter(prefix="/krgs", tags=["memory", "krgs"])
@@ -9,11 +11,11 @@ router = APIRouter(prefix="/krgs", tags=["memory", "krgs"])
 krgs_index = KeyedRetrievalIndex()
 
 class RegisterNodeRequest(BaseModel):
-    keys: List[str]
-    node: Dict[str, Any]
+    keys: list[str]
+    node: dict[str, Any]
 
 class ResolveContextRequest(BaseModel):
-    required_keys: List[str]
+    required_keys: list[str]
 
 @router.post("/register")
 async def register_keyed_node(request: RegisterNodeRequest):

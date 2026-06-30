@@ -1,4 +1,9 @@
-from .azkartu_retrain_loop import AzkartuRetrainDaemon, ExperienceReplay, ActorCriticTrainer, HotSwapManager
+from .azkartu_retrain_loop import (
+    ActorCriticTrainer,
+    AzkartuRetrainDaemon,
+    ExperienceReplay,
+    HotSwapManager,
+)
 
 __all__ = [
     "AzkartuRetrainDaemon",

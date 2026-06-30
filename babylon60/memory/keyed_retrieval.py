@@ -1,7 +1,8 @@
-import os
-import msgpack
-from typing import Dict, List, Set, Any
 import logging
+import os
+from typing import Any
+
+import msgpack
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +17,9 @@ class KeyedRetrievalIndex:
         self.graph_path = os.path.join(storage_dir, "graph.msgpack")
         
         # Mapeo directo O(1): Clave -> Set de Hashes de Nodos
-        self._index: Dict[str, Set[str]] = {}
+        self._index: dict[str, set[str]] = {}
         # Grafo local en RAM de hashes -> Nodos (Dict)
-        self._memory_graph: Dict[str, Dict[str, Any]] = {}
+        self._memory_graph: dict[str, dict[str, Any]] = {}
         
         os.makedirs(self.storage_dir, exist_ok=True)
         self._load_from_disk()
@@ -47,7 +48,7 @@ class KeyedRetrievalIndex:
         with open(self.graph_path, "wb") as f:
             msgpack.pack(self._memory_graph, f, use_bin_type=True)
 
-    def register_node(self, keys: List[str], node: Dict[str, Any]):
+    def register_node(self, keys: list[str], node: dict[str, Any]):
         """Indexa un nodo bajo múltiples claves conceptuales y lo persiste."""
         node_hash = node.get("hash_id")
         if not node_hash:
@@ -61,12 +62,12 @@ class KeyedRetrievalIndex:
                 self._index[clean_key] = set()
             self._index[clean_key].add(node_hash)
 
-    def resolve_context(self, required_keys: List[str]) -> List[Dict[str, Any]]:
+    def resolve_context(self, required_keys: list[str]) -> list[dict[str, Any]]:
         """
         Resuelve el subgrafo mínimo necesario combinando las claves solicitadas.
         Garantiza una carga selectiva en RAM O(1).
         """
-        target_hashes: Set[str] = set()
+        target_hashes: set[str] = set()
         
         # Unión de hashes que coinciden con las claves solicitadas
         for key in required_keys:

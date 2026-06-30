@@ -1,14 +1,13 @@
 import asyncio
 import logging
-import time
 import os
-from typing import Dict, List, Any
+import time
+from typing import Any
 
 import numpy as np
 
 # C5-REAL: Azkartu O(1) buffer from Rust FFI
 import cortex_rs
-from babylon60.engine.core.ultrathink_physics import LegionFormation
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +15,7 @@ class ExperienceReplay:
     """O(1) Experience Replay Buffer for Legion-10k Off-Policy Training."""
     def __init__(self, capacity: int = 1_000_000):
         self.capacity = capacity
-        self.buffer: List[Dict[str, Any]] = []
+        self.buffer: list[dict[str, Any]] = []
         self.position = 0
 
     def push(self, state: np.ndarray, action: np.ndarray, reward: float, next_state: np.ndarray, done: bool):
@@ -27,7 +26,7 @@ class ExperienceReplay:
             self.buffer[self.position] = experience
         self.position = (self.position + 1) % self.capacity
 
-    def sample(self, batch_size: int) -> List[Dict[str, Any]]:
+    def sample(self, batch_size: int) -> list[dict[str, Any]]:
         indices = np.random.choice(len(self.buffer), batch_size, replace=False)
         return [self.buffer[i] for i in indices]
 
@@ -73,7 +72,7 @@ class ActorCriticTrainer:
         returns = advantages + values
         return returns, advantages
 
-    def update_model(self, batch: List[Dict[str, Any]]):
+    def update_model(self, batch: list[dict[str, Any]]):
         """Executes the SGD step for Actor-Critic."""
         self.optimizing = True
         try:
@@ -131,7 +130,7 @@ class AzkartuRetrainDaemon:
         
         pending = self.ring.fetch_pending()
         ingested = 0
-        for _idx, _ts, rec_id, payload_bytes in pending:
+        for _idx, _ts, _rec_id, payload_bytes in pending:
             try:
                 payload_str = payload_bytes.decode("utf-8").strip("\x00")
                 if ":" not in payload_str:
