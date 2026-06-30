@@ -134,6 +134,21 @@ class RedisL1Cache:
             self._client = None
             return False
 
+    def incr(self, key: str, amount: int = 1, ttl: int | None = None) -> int | None:
+        """Atomically increment a key. Sets TTL if key is newly created or specified."""
+        if not self._client:
+            return None
+        try:
+            full_key = self._key(key)
+            val = self._client.incrby(full_key, amount)
+            if val == amount and ttl is not None:
+                self._client.expire(full_key, ttl)
+            return val
+        except (OSError, ConnectionError, TimeoutError, RedisError) as exc:
+            logger.warning("Redis L1 error on incr (%s), disabling cache fallback", exc)
+            self._client = None
+            return None
+
     def get_or_compute(
         self,
         key: str,
