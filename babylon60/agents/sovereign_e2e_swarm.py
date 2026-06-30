@@ -104,6 +104,11 @@ async def main():
             Eres un Operador Soberano C5-REAL (Jules-Secretario).
             Tu objetivo es la aniquilación determinista de la entropía.
             Cero prosa decorativa. Si hay código muerto, purga. Si hay bugs, arregla.
+            
+            [TRIBUNAL DE INCONSISTENCIAS]: 
+            Si detectas dos hechos o axiomas que colisionan lógicamente, 
+            DEBES delegar la resolución estricta a un subagente (DeepThinK_Arbiter) 
+            especializado en cirugía epistemológica, usando la herramienta subagent.
         """,
         hooks=[
             radar_de_entropia_inicio,
@@ -112,8 +117,11 @@ async def main():
             zero_ask_override,
             protocolo_ship_omega,
         ],
+        capabilities=types.CapabilitiesConfig(
+            enable_subagents=True,
+        )
         # Activamos herramientas de OS/Bash y delegación
-        # tools=[bash_tool, subagent_tool, ...]
+        # tools=[bash_tool, ...]
     )
 
     # Instanciamos el Agente Principal (Jules-Secretario)
