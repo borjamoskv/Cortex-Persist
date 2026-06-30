@@ -1,12 +1,29 @@
 # [C5-REAL] Exergy-Maximized
+from __future__ import annotations
+
+import os
+from cortex.ipc.server import IPCServer
+import asyncio
+import hashlib
+import logging
+from typing import Any
+
+try:
+    import structlog  # pyright: ignore[reportMissingImports]
+
+    logger = structlog.get_logger(__name__)
+except ModuleNotFoundError:  # pragma: no cover
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+from cortex.ipc.client import dispatch_store_batch
 """Storage mixin - store, update, deprecate, ghost management.
 
 Security guards  → cortex.engine.store_guards
 Validators/dedup → cortex.engine.core.store_validators
 Quarantine       → cortex.engine.core.store_quarantine_mixin
 """
-
-from __future__ import annotations
 
 import logging
 from typing import Any, ClassVar
@@ -71,6 +88,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         parent_decision_id: int | None = None,
         conn: aiosqlite.Connection | None = None,
     ) -> int:
+
         """Store a new fact with proper connection management."""
         tenant_id = self._resolve_tenant(tenant_id)
         if source is None and actor_id:
@@ -87,7 +105,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     "CORTEX Engine is in LOCKED_EPISTEMIC_HALT state due to cognitive thrashing. "
                     "Write access denied until Sovereign Lock is lifted by Autodidact-Omega."
                 )
-
+        # Enforce writes via Glial Daemon IPC
+        if not getattr(self, "_glial_daemon_task", None) and os.environ.get("CORTEX_TESTING") != "1":
+            raise RuntimeError("Writes must be performed through the Glial Daemon IPC server.")
         if conn:
             started_tx = False
             if not conn.in_transaction:
@@ -185,6 +205,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tx_id: int | None,
         parent_decision_id: int | None = None,
     ) -> int:
+        # Enforce writes via Glial Daemon IPC
+        if not getattr(self, "_glial_daemon_task", None) and os.environ.get("CORTEX_TESTING") != "1":
+            raise RuntimeError("Writes must be performed through the Glial Daemon IPC server.")
         meta = meta or {}
         if "cortex_taint" not in meta:
             import time
@@ -341,6 +364,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:
         if not facts:
             raise ValueError("facts list cannot be empty")
+        # Enforce writes via Glial Daemon IPC
+        if not getattr(self, "_glial_daemon_task", None) and os.environ.get("CORTEX_TESTING") != "1":
+            raise RuntimeError("Writes must be performed through the Glial Daemon IPC server.")
         async with self.session() as conn:
             if not conn.in_transaction:
                 await conn.execute("BEGIN IMMEDIATE")
@@ -497,6 +523,13 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def _invalidate_impl(
         self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
     ) -> bool:
+        def start_glial_daemon(self):
+            """Ignites the thermodynamic Ebbinghaus decay loop (Ultra-Slow Path) and starts IPC server."""
+            if not self._glial_daemon_task:
+                self._glial_daemon_task = asyncio.create_task(self._glial_decay_loop())
+                # Start IPC server for single-writer enforcement
+                self._ipc_server = IPCServer(engine=self)
+                self._ipc_task = asyncio.create_task(self._ipc_server.start())
         """Delegated invalidation logic (tombstone + taint)."""
         with causal_write(conn):
             res = await invalidate_impl_logic(

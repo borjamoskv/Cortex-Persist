@@ -31,8 +31,9 @@ import asyncio
 import logging
 import sys
 from typing import Any, TypeVar
+from cortex.ipc.server import IPCServer
 
-__all__ = ["install_uvloop", "sovereign_run"]
+__all__ = ["install_uvloop", "sovereign_run", "get_loop_info", "start_glial_daemon", "stop_glial_daemon"]
 
 logger = logging.getLogger("cortex.event_loop")
 
@@ -62,7 +63,7 @@ def install_uvloop() -> bool:
 
         _uvloop_installed = True
         logger.info(
-            "Sovereign loop: uvloop %s detected (use sovereign_run() for activation)",
+            "Sovereign loop: uvloop %s detected (activation delegated to sovereign_run)",
             getattr(uvloop, "__version__", "?"),
         )
         return True
@@ -132,3 +133,42 @@ def get_loop_info() -> dict[str, Any]:
         info["loop_running"] = False
 
     return info
+
+async def start_glial_daemon(engine) -> None:
+    """Start the Glial Daemon IPC server for single-writer enforcement.
+
+    Args:
+        engine: The Cortex engine instance that the IPC server will use to
+            forward store requests.
+    """
+    ipc_server = IPCServer(engine=engine)
+    globals()["_glial_ipc_server"] = ipc_server
+    await ipc_server.start()
+    
+    async def daemon_run_loop():
+        try:
+            while True:
+                await asyncio.sleep(3600)
+        except asyncio.CancelledError:
+            pass
+
+    task = asyncio.create_task(daemon_run_loop())
+    globals()["_glial_ipc_task"] = task
+    engine._glial_daemon_task = task
+
+async def stop_glial_daemon() -> None:
+    """Stop the Glial Daemon IPC server if it is running."""
+    server = globals().get("_glial_ipc_server")
+    task = globals().get("_glial_ipc_task")
+    if server:
+        if hasattr(server.engine, "_glial_daemon_task"):
+            delattr(server.engine, "_glial_daemon_task")
+        await server.stop()
+    if task:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+    globals().pop("_glial_ipc_server", None)
+    globals().pop("_glial_ipc_task", None)

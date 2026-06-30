@@ -159,6 +159,7 @@ class MemoryMixin(EngineMixinBase):
                 hdc_l2=hdc_l2,
                 hdc_encoder=hdc_encoder,
                 bus=bus,
+                engine=self,
             )
         except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.warning("Memory manager unavailable: %s", e)

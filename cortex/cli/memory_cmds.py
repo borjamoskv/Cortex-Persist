@@ -176,8 +176,9 @@ def store(
 @click.argument("file_path", type=click.Path(exists=True))
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def store_batch(file_path, db) -> None:
-    """Store multiple facts from a JSON file in CORTEX."""
+    """Store multiple facts from a JSON file in CORTEX via Single-Writer IPC."""
     import sys
+    from cortex.ipc.client import dispatch_store_batch
 
     with open(file_path, encoding="utf-8") as f:
         facts = json.load(f)
@@ -186,49 +187,47 @@ def store_batch(file_path, db) -> None:
         console.print("[red]Error: JSON content must be a list of facts.[/]")
         sys.exit(1)
 
-    engine = get_engine(db)
-    stored_count = 0
+    normalized_facts = []
+    for idx, fact in enumerate(facts):
+        project = fact.get("project")
+        content = fact.get("content")
+        if not project or not content:
+            console.print(f"[yellow]Skipping fact at index {idx}: missing project or content[/]")
+            continue
+            
+        fact_type = fact.get("fact_type", fact.get("type", "knowledge"))
+        tags = fact.get("tags")
+        if isinstance(tags, str):
+            tags = [t.strip() for t in tags.split(",") if t.strip()]
+            
+        source = fact.get("source") or _detect_agent_source()
+        meta = fact.get("metadata", fact.get("meta")) or {}
+        _inject_cli_taint(content, meta, source)
+        
+        normalized_facts.append({
+            "project": project,
+            "content": content,
+            "fact_type": fact_type,
+            "tags": tags,
+            "confidence": fact.get("confidence", "stated"),
+            "source": source,
+            "meta": meta,
+            "parent_decision_id": fact.get("parent_decision_id", fact.get("parent_id"))
+        })
+
+    if not normalized_facts:
+        console.print("[yellow]No valid facts to store.[/]")
+        return
+        
     try:
-        for idx, fact in enumerate(facts):
-            project = fact.get("project")
-            content = fact.get("content")
-            if not project or not content:
-                console.print(
-                    f"[yellow]Skipping fact at index {idx}: missing project or content[/]"
-                )
-                continue
-
-            fact_type = fact.get("fact_type", fact.get("type", "knowledge"))
-            tags = fact.get("tags")
-            if isinstance(tags, str):
-                tags = [t.strip() for t in tags.split(",") if t.strip()]
-            confidence = fact.get("confidence", "stated")
-            source = fact.get("source") or _detect_agent_source()
-            meta = fact.get("metadata", fact.get("meta"))
-            parent_id = fact.get("parent_decision_id", fact.get("parent_id"))
-
-            meta = meta or {}
-            _inject_cli_taint(content, meta, source)
-
-            fact_id = _run_async(
-                engine.store(
-                    project=project,
-                    content=content,
-                    fact_type=fact_type,
-                    tags=tags,
-                    confidence=confidence,
-                    source=source,
-                    meta=meta,
-                    parent_decision_id=parent_id,
-                )
-            )
-            stored_count += 1
-            console.print(
-                f"[[noir.cyber]✓[/]] Stored fact [[noir.gold]#{fact_id}[/]] in [[noir.yinmn]{project}[/]]"
-            )
-        console.print(f"[bold green]Successfully stored {stored_count} facts.[/]")
-    finally:
-        _run_async(engine.close())
+        response = _run_async(dispatch_store_batch(normalized_facts))
+        if response.get("status") == "ok":
+            console.print(f"[[noir.cyber]✓[/]] [bold green]Successfully stored {response.get('stored', 0)} facts via IPC Daemon.[/]")
+        else:
+            console.print(f"[bold red]Error from IPC daemon:[/] {response.get('reason')}")
+    except Exception as e:
+        console.print(f"[bold red]IPC Failure:[/] {e}")
+        sys.exit(1)
 
 
 @memory_cmds.command("search")

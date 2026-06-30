@@ -112,6 +112,7 @@ class CortexMemoryManager:
         router: Any | None = None,
         bus: Any | None = None,
         max_bg_tasks: int = DEFAULT_MAX_BG_TASKS,
+        engine: Any | None = None,
     ) -> None:
         self._l1 = l1
         self._l2 = l2
@@ -135,7 +136,7 @@ class CortexMemoryManager:
         self.metamemory = init_metamemory()
 
         self._mem0_pipeline = Mem0Pipeline()
-        self._memory_os = MemoryOS() if MemoryOS else None
+        self._memory_os = MemoryOS(engine=engine) if MemoryOS else None
         if self._memory_os and hasattr(self._memory_os, "start_glial_daemon"):
             self._memory_os.start_glial_daemon()
 

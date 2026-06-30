@@ -31,7 +31,8 @@ class MemoryOS:
     memory variants to prevent Entropic Decay.
     """
 
-    def __init__(self):
+    def __init__(self, engine=None):
+        self._engine = engine
         self._working_memory: dict[str, Any] = {}
         # Fixed-size physical tensor array
         self._episodic_vsa_tensor: list[float] = [0.0] * VSA_DIMENSION
@@ -74,10 +75,44 @@ class MemoryOS:
             self._episodic_traces.append({"key": key, "value": value})
             return True
         if tier == MemoryTier.SEMANTIC:
-            # Requires Maxwell's Demon (Mem0 pipeline)
-            raise NotImplementedError(
-                "Semantic writes must pass through mem0_pipeline for exergy validation."
-            )
+            # Dispatch batch to Glial Daemon IPC first
+            try:
+                from cortex.ipc.client import dispatch_store_batch
+                fact = {
+                    "project": key,
+                    "content": value,
+                    "fact_type": "knowledge",
+                    "meta": {},
+                    "tags": []
+                }
+                response = await dispatch_store_batch([fact])
+                if response.get("status") == "ok":
+                    return True
+                else:
+                    logger.error("IPC semantic write failed: %s", response.get("reason"))
+                    return False
+            except Exception as exc:
+                logger.warning("Glial Daemon IPC unreachable (%s). Falling back to direct database write.", exc)
+                if self._engine:
+                    # Direct database write fallback
+                    old_task = getattr(self._engine, "_glial_daemon_task", None)
+                    try:
+                        self._engine._glial_daemon_task = "local_fallback"
+                        await self._engine.facts.store(
+                            project=key,
+                            content=value,
+                            fact_type="knowledge",
+                            source="agent:memory_os"
+                        )
+                        return True
+                    finally:
+                        if old_task is None:
+                            if hasattr(self._engine, "_glial_daemon_task"):
+                                delattr(self._engine, "_glial_daemon_task")
+                        else:
+                            self._engine._glial_daemon_task = old_task
+                else:
+                    raise NotImplementedError("Semantic writes must pass through mem0_pipeline for exergy validation.")
         return False
 
     async def read(self, tier: MemoryTier, query: str) -> Any | None:
