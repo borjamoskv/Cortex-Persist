@@ -84,7 +84,6 @@ async def main():
         fallback_providers = [
             LLMProvider("cerebras"),
             LLMProvider("openrouter"),
-            LLMProvider("deepseek"),
             LLMProvider("ollama"),
         ]
         router = CortexLLMRouter(primary=primary_provider, fallbacks=fallback_providers)
