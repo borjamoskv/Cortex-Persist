@@ -253,10 +253,7 @@ class SystemsConsolidator:
             apoptosis_where_clause = """
                 WHERE tenant_id = ?
                   AND json_extract(metadata, '$.state') = 'silent'
-                  AND (
-                      json_extract(metadata, '$.contradiction_count') > 0
-                      OR success_rate <= 0.0
-                  )
+                  AND json_extract(metadata, '$.contradiction_count') > 0
             """
 
             # Extract doomed facts for Weaponized Forgetting (L3 Cold Storage)

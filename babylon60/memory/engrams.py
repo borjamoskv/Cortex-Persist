@@ -42,6 +42,5 @@ class CortexSemanticEngram(CortexFactModel):
 
     def compute_decay(self, decay_rate_per_day: float = 0.05) -> float:
         """Calculate the current actual energy accounting for temporal decay."""
-        days_since_access = max(0.0, (time.time() - self.last_accessed) / 86400.0)
-        decayed = self.energy_level - (days_since_access * decay_rate_per_day)
-        return max(0.0, float(decayed))
+        # Simulated continuous temporal decay eliminated (P0)
+        return self.energy_level

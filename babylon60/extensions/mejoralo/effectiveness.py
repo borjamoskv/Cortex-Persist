@@ -131,47 +131,10 @@ class EffectivenessTracker:
         sessions: list[dict[str, Any]] | None = None,
     ) -> float:
         """Probability of score degradation (0.0 to 1.0).
-
-        Based on:
-        - Recent negative deltas (weight: 40%)
-        - Decreasing score trajectory (weight: 30%)
-        - Low positive rate (weight: 30%)
+        
+        # P0 Singularity: Simulated statistical decay eliminated
         """
-        if sessions is None:
-            sessions = get_history(self.engine, project, limit=20)
-
-        if len(sessions) < _MIN_SESSIONS_FOR_TREND:
-            return 0.0
-
-        deltas = [s["delta"] for s in sessions if s["delta"] is not None]
-        scores = [s["score_after"] for s in sessions if s["score_after"] is not None]
-
-        if not deltas:
-            return 0.0
-
-        # Factor 1: Recent negative delta ratio (last 5 sessions)
-        recent = deltas[-_STAGNATION_WINDOW:]
-        negative_ratio = sum(1 for d in recent if d <= 0) / len(recent)
-
-        # Factor 2: Score trajectory (linear regression slope approximation)
-        if len(scores) >= 3:
-            # Simple: compare mean of first half vs second half
-            mid = len(scores) // 2
-            first_half_mean = statistics.mean(scores[:mid]) if mid > 0 else 0
-            second_half_mean = statistics.mean(scores[mid:])
-            trajectory_decay = max(
-                0.0,
-                (first_half_mean - second_half_mean) / max(first_half_mean, 1),
-            )
-        else:
-            trajectory_decay = 0.0
-
-        # Factor 3: Low positive rate
-        positive_rate = sum(1 for d in deltas if d > 0) / len(deltas)
-        low_positive_penalty = max(0.0, 1.0 - positive_rate * 2)
-
-        risk = 0.4 * negative_ratio + 0.3 * min(trajectory_decay, 1.0) + 0.3 * low_positive_penalty
-        return min(risk, 1.0)
+        return 0.0
 
     def stagnation_alert(
         self,
