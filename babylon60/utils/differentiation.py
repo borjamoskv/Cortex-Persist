@@ -159,3 +159,65 @@ def integrate_simpson(f: Callable[[float], float], a: float, b: float, n: int) -
     for i in range(2, n - 1, 2):
         s += 2 * f(a + i * h)
     return s * h / 3
+
+
+def rkf45_adaptive_integrate(
+    f: Callable[[float, float], float],
+    t0: float,
+    y0: float,
+    t_end: float,
+    h: float = 0.1,
+    tol: float = 1e-6,
+    max_steps: int = 10000,
+) -> list[tuple[float, float]]:
+    """
+    Integrates the ODE y' = f(t, y) from t0 to t_end using the adaptive Runge-Kutta-Fehlberg 4(5) method.
+    Prevents [ANTIP-07] "Paso Fijo en Rigidez Crítica" and implements [REDUN-01] Control Adaptativo de Paso.
+    """
+    trajectory = [(t0, y0)]
+    t = t0
+    y = y0
+    step_count = 0
+    
+    while t < t_end and step_count < max_steps:
+        # Adjust step size if t + h exceeds t_end
+        if t + h > t_end:
+            h = t_end - t
+            
+        # Fehlberg RK45 stages
+        k1 = h * f(t, y)
+        k2 = h * f(t + 0.25 * h, y + 0.25 * k1)
+        k3 = h * f(t + 0.375 * h, y + 0.09375 * k1 + 0.28125 * k2)
+        k4 = h * f(t + (12/13) * h, y + (1932/2197) * k1 - (7200/2197) * k2 + (7296/2197) * k3)
+        k5 = h * f(t + h, y + (439/216) * k1 - 8 * k2 + (3680/513) * k3 - (845/4104) * k4)
+        k6 = h * f(t + 0.5 * h, y - (8/27) * k1 + 2 * k2 - (3544/2565) * k3 + (1859/4104) * k4 - 0.275 * k5)
+        
+        # 4th and 5th order difference (truncation error estimate)
+        error = abs((1/360) * k1 - (128/4275) * k3 - (2197/75240) * k4 + 0.02 * k5 + (2/55) * k6)
+        
+        if error <= tol or h < 1e-12:
+            # Step accepted
+            t += h
+            # Use 5th order estimate for state update (local extrapolation)
+            y += (16/135) * k1 + (6656/12825) * k3 + (28561/56430) * k4 - 0.18 * k5 + (2/55) * k6
+            trajectory.append((t, y))
+            step_count += 1
+            
+            # Increase step size if error is extremely small
+            if error > 0:
+                h_new = 0.84 * h * (tol / error) ** 0.25
+                h = min(2.0 * h, max(0.1 * h, h_new))
+        else:
+            # Step rejected, reduce step size and retry
+            h_new = 0.84 * h * (tol / error) ** 0.25
+            h = max(1e-12, h_new)
+            
+    return trajectory
+
+
+def softened_coulomb_force(q1: float, q2: float, r: float, epsilon: float = 1e-6) -> float:
+    """
+    Computes Coulomb force with epsilon-softening to prevent singularities as r -> 0.
+    Implements [REDUN-03] Regularización de Singularidades (Epsilon-Softening).
+    """
+    return (q1 * q2) / (r**2 + epsilon**2)

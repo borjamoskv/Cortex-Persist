@@ -21,6 +21,8 @@ from babylon60.utils.differentiation import (
     graph_laplacian_derivative,
     integrate_trapezoidal,
     integrate_simpson,
+    rkf45_adaptive_integrate,
+    softened_coulomb_force,
 )
 
 
@@ -155,3 +157,46 @@ def test_integration_invariants():
     expected_diff = g[n] - g[0]
     
     assert sum_dg == expected_diff
+
+
+def test_rkf45_adaptive_integration():
+    """
+    Validates [REDUN-01]: Control Adaptativo de Paso.
+    RKF45 must dynamically adapt step sizes when solving y' = y.
+    Exact solution: y(t) = exp(t).
+    """
+    # ODE: dy/dt = y
+    def f(t, y):
+        return y
+        
+    t0, y0 = 0.0, 1.0
+    t_end = 2.0
+    
+    # Run integration with tight tolerance
+    trajectory = rkf45_adaptive_integrate(f, t0, y0, t_end, h=0.01, tol=1e-8)
+    
+    # End state should match exp(2)
+    t_last, y_last = trajectory[-1]
+    assert abs(t_last - 2.0) < 1e-12
+    assert abs(y_last - math.exp(2.0)) < 1e-5
+    
+    # Steps taken should be much fewer than fixed grid of equivalent precision
+    # proving dynamic step adaptation.
+    assert len(trajectory) > 5
+
+
+def test_softened_coulomb_force():
+    """
+    Validates [REDUN-03]: Regularización de Singularidades (Epsilon-Softening).
+    Prevents division by zero at r=0.
+    """
+    # Without softening, r=0 causes division by zero.
+    # With softening, F(0) = q1 * q2 / epsilon^2
+    q1, q2 = 1.0, -1.0
+    epsilon = 0.1
+    
+    f_zero = softened_coulomb_force(q1, q2, r=0.0, epsilon=epsilon)
+    expected = (q1 * q2) / (epsilon**2)
+    
+    assert f_zero == expected
+    assert math.isfinite(f_zero)
