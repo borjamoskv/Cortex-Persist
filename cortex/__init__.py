@@ -27,7 +27,7 @@ class _CortexCompat(types.ModuleType):
 
 
 # Install the compatibility redirect
-import babylon60  # noqa: E402
+import babylon60 as babylon60  # noqa: E402
 
 _compat = _CortexCompat(__name__)
 _compat.__path__ = [__path__[0]] if "__path__" in dir() else []
@@ -41,6 +41,19 @@ sys.modules[__name__] = _compat
 # Also install a meta_path finder for deep submodule imports
 class _CortexFinder:
     """Meta path finder that redirects cortex.* to babylon60.*."""
+
+    def find_spec(self, fullname, path, target=None):
+        if fullname == "cortex" or fullname.startswith("cortex."):
+            from importlib.machinery import ModuleSpec
+            return ModuleSpec(fullname, self)
+        return None
+
+    def create_module(self, spec):
+        target = spec.name.replace("cortex", "babylon60", 1)
+        return importlib.import_module(target)
+
+    def exec_module(self, module):
+        pass
 
     def find_module(self, fullname, path=None):
         if fullname == "cortex" or fullname.startswith("cortex."):
