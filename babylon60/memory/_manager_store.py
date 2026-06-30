@@ -12,8 +12,8 @@ from babylon60.memory.engrams import CortexSemanticEngram
 logger = logging.getLogger("babylon60.memory._manager_store")
 
 
-async def check_deduplication(l2: Any, tenant_id: str, project_id: str, content: str) -> str | None:
-    """Return deduplicated ID if fact exists, else None (async)."""
+async def check_deduplication(l2: Any, tenant_id: str, project_id: str, content: str, vector: list[float] | None = None) -> str | None:
+    """Return deduplicated ID if fact exists (exact or semantic), else None (async)."""
     if not content or not content.strip():
         logger.warning("CortexMemoryManager: Rejected empty fact pipeline.")
         return "empty"
@@ -24,22 +24,48 @@ async def check_deduplication(l2: Any, tenant_id: str, project_id: str, content:
             try:
                 conn = l2._get_conn()
                 cursor = conn.cursor()
+                # 1. Exact string match check
                 cursor.execute(
                     "SELECT id FROM facts_meta WHERE tenant_id = ? AND "
                     "project_id = ? AND content = ?",
                     (tenant_id, project_id, content),
                 )
                 row = cursor.fetchone()
-                conn.rollback()
                 if row:
+                    conn.rollback()
                     return str(row["id"])
+                    
+                # 2. Semantic vector deduplication (>90% similarity -> cosine distance < 0.10)
+                if vector:
+                    import numpy as np
+
+                    from babylon60.utils.turboquant import encode_query_qjl
+                    
+                    rotated_query = encode_query_qjl(vector)
+                    embedding_bytes = np.array(rotated_query, dtype=np.float32).tobytes()
+                    
+                    cursor.execute(
+                        "SELECT m.id, v.distance "
+                        "FROM vec_facts v "
+                        "JOIN facts_meta m ON m.rowid = v.rowid "
+                        "WHERE v.embedding MATCH ? AND k = 3 "
+                        "AND m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1) "
+                        "ORDER BY v.distance ASC LIMIT 1",
+                        (embedding_bytes, tenant_id, project_id)
+                    )
+                    semantic_row = cursor.fetchone()
+                    if semantic_row and semantic_row["distance"] < 0.10:
+                        logger.info(f"CortexMemoryManager: Fact deduplicated via Semantic Similarity (distance={semantic_row['distance']:.3f}).")
+                        conn.rollback()
+                        return str(semantic_row["id"])
+                        
+                conn.rollback()
             except (OSError, RuntimeError, ValueError) as e:
                 logger.warning("CortexMemoryManager: Deduplication check failed: %s", e)
             return None
 
         dedup_id = await asyncio.to_thread(_sync_dedup)
         if dedup_id:
-            logger.info("CortexMemoryManager: Fact deduplicated (exact match).")
             return dedup_id
     return None
 
@@ -157,6 +183,12 @@ async def store_fact(
         _meta.update({"active_schema": matched_schema.name})
 
     vector = await manager._encoder.encode(content)
+    
+    # Ouroboros Anti-Rot: Semantic Deduplication
+    dedup_id_semantic = await manager._check_deduplication(tenant_id, project_id, content, vector=vector)
+    if dedup_id_semantic:
+        return f"deduplicated_semantic:{dedup_id_semantic}"
+
     fact_id = str(uuid.uuid4())
 
     try:

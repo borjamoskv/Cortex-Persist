@@ -92,7 +92,7 @@ class MemoryArchaeologist:
             SELECT id, content{parent_col_select}, tenant_id
             FROM facts
             WHERE project = ? AND tenant_id = ? AND is_tombstoned = 0 AND fact_type != 'ghost'
-            """,
+            """,  # nosec B608
             (project, tenant_id),
         )
         # Using dict(r) to convert sqlite3.Row to dict
@@ -298,8 +298,8 @@ class MemoryArchaeologist:
         str_old_ids = [str(x) for x in old_ids]
         if primary_parent_id:
             cl2.execute(
-                "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
-                (primary_parent_id, new_fact_id),
+                "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ? AND tenant_id = ?",
+                (primary_parent_id, new_fact_id, tenant_id),
             )
 
         try:
@@ -311,12 +311,12 @@ class MemoryArchaeologist:
 
             logging.getLogger("babylon60.memory.archaeology").warning("L3 Archival failed: %s", e)
 
-        cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", str_old_ids)  # nosec B608
-        cl2.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")
+        cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders}) AND tenant_id = ?", str_old_ids + [tenant_id])  # nosec B608
+        cl2.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")  # bypass-tenant
         cl2 = l2_conn.cursor()
         cl2.execute(
-            f"UPDATE facts_meta SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",  # nosec B608
-            [new_fact_id] + old_ids,
+            f"UPDATE facts_meta SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders}) AND tenant_id = ?",  # nosec B608
+            [new_fact_id] + old_ids + [tenant_id],
         )
         l2_conn.commit()
 

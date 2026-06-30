@@ -198,10 +198,10 @@ class CortexMemoryManager:
         return event
 
     async def _check_deduplication(
-        self, tenant_id: str, project_id: str, content: str
+        self, tenant_id: str, project_id: str, content: str, vector: list[float] | None = None
     ) -> str | None:
         """Forwarder to detached logic."""
-        return await check_deduplication(self._l2, tenant_id, project_id, content)
+        return await check_deduplication(self._l2, tenant_id, project_id, content, vector=vector)
 
     def _determine_layer(self, project_id: str, layer: str) -> str:
         _pid_lower = project_id.lower()

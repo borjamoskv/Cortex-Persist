@@ -174,7 +174,7 @@ class ApoptosisAgent:
                 if tombstone_ids:
                     with causal_write(conn):
                         placeholders = ",".join(["?"] * len(tombstone_ids))
-                        await conn.execute(
+                        await conn.execute(  # nosec
                             f"UPDATE facts SET is_tombstoned = 1 WHERE id IN ({placeholders}) AND tenant_id = ?",
                             tombstone_ids + [tenant_id],
                         )

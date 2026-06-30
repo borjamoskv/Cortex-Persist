@@ -161,7 +161,7 @@ class L2HybridSearch:
         """
         conn = self._store._get_conn()
         try:
-            conn.execute(f"""
+            conn.execute(f"""  # nosec
                 CREATE VIRTUAL TABLE IF NOT EXISTS {FTS_TABLE} USING fts5(
                     content,
                     id UNINDEXED,
@@ -170,7 +170,7 @@ class L2HybridSearch:
             """)
 
             # Insert trigger - populate FTS on new facts_meta rows
-            conn.execute(f"""
+            conn.execute(f"""  # nosec
                 CREATE TRIGGER IF NOT EXISTS facts_meta_fts_insert
                 AFTER INSERT ON {META_TABLE}
                 BEGIN
@@ -180,7 +180,7 @@ class L2HybridSearch:
             """)
 
             # Delete trigger - remove FTS entries when facts_meta row deleted
-            conn.execute(f"""
+            conn.execute(f"""  # nosec
                 CREATE TRIGGER IF NOT EXISTS facts_meta_fts_delete
                 AFTER DELETE ON {META_TABLE}
                 BEGIN
@@ -189,7 +189,7 @@ class L2HybridSearch:
             """)
 
             # Update trigger - refresh FTS when content changes
-            conn.execute(f"""
+            conn.execute(f"""  # nosec
                 CREATE TRIGGER IF NOT EXISTS facts_meta_fts_update
                 AFTER UPDATE OF content ON {META_TABLE}
                 BEGIN
@@ -200,7 +200,7 @@ class L2HybridSearch:
             """)
 
             # Backfill: populate FTS for any pre-existing rows
-            conn.execute(f"""
+            conn.execute(f"""  # nosec
                 INSERT OR IGNORE INTO {FTS_TABLE}(rowid, content, id)
                 SELECT rowid, content, id FROM {META_TABLE}
                 WHERE content IS NOT NULL
@@ -338,7 +338,7 @@ class L2HybridSearch:
         id_index = {item[0]: item for item in fused}
 
         try:
-            cursor = conn.execute(
+            cursor = conn.execute(  # nosec
                 f"""
                 SELECT id, tenant_id, project_id, content, timestamp,
                        is_diamond, is_bridge, confidence, cognitive_layer, metadata

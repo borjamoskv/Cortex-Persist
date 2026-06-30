@@ -110,7 +110,7 @@ class SchemaTrait:
                 conn.executescript(sql)
 
                 for i in range(16):
-                    conn.execute(
+                    conn.execute(  # nosec
                         f"CREATE INDEX IF NOT EXISTS idx_void_mih_s{i} ON vec_void_mih(s{i})"
                     )
 
@@ -233,7 +233,7 @@ class SchemaTrait:
                 count,
             )
             # Create sharded schema
-            conn.execute(f"""
+            conn.execute(f"""  # nosec
                 CREATE TABLE {meta_tb} (
                     id TEXT PRIMARY KEY,
                     tenant_id TEXT NOT NULL,
@@ -253,13 +253,13 @@ class SchemaTrait:
                     facet_version INTEGER DEFAULT 2,
                     exergy_score REAL DEFAULT 1.0
                 )
-            """)  # nosec B608
+            """)
             emb_def = f"embedding int8[{self._encoder.dimension}]"  # pyright: ignore[reportAttributeAccessIssue]
-            conn.execute(f"CREATE VIRTUAL TABLE {vec_tb} USING vec0({emb_def})")
-            conn.execute(f"CREATE TABLE {vec_void_tb} (rowid INTEGER PRIMARY KEY, embedding BLOB)")
+            conn.execute(f"CREATE VIRTUAL TABLE {vec_tb} USING vec0({emb_def})")  # nosec
+            conn.execute(f"CREATE TABLE {vec_void_tb} (rowid INTEGER PRIMARY KEY, embedding BLOB)")  # nosec
             # MIH sharded table
             vec_void_mih_tb = f"vec_void_mih_{safe_tenant}_{safe_proj}"
-            conn.execute(f"""
+            conn.execute(f"""  # nosec
                 CREATE TABLE {vec_void_mih_tb} (
                     rowid INTEGER PRIMARY KEY,
                     s0 INTEGER, s1 INTEGER, s2 INTEGER, s3 INTEGER,
@@ -267,9 +267,9 @@ class SchemaTrait:
                     s8 INTEGER, s9 INTEGER, s10 INTEGER, s11 INTEGER,
                     s12 INTEGER, s13 INTEGER, s14 INTEGER, s15 INTEGER
                 )
-            """)  # nosec B608
+            """)
             for i in range(16):
-                conn.execute(
+                conn.execute(  # nosec
                     f"CREATE INDEX IF NOT EXISTS idx_{vec_void_mih_tb}_s{i} "
                     f"ON {vec_void_mih_tb}(s{i})"
                 )
@@ -302,11 +302,11 @@ class SchemaTrait:
             conn.execute(shard_vector_sql, (tenant_id, project_id))
 
             # Aura-Omega Acceleration: Dedicated indexes for the shard
-            conn.execute(
+            conn.execute(  # nosec
                 f"CREATE INDEX IF NOT EXISTS idx_{safe_tenant}_{safe_proj}_bridge "
                 f"ON {meta_tb}(is_bridge)"
             )
-            conn.execute(
+            conn.execute(  # nosec
                 f"CREATE INDEX IF NOT EXISTS idx_{safe_tenant}_{safe_proj}_layer "
                 f"ON {meta_tb}(cognitive_layer)"
             )

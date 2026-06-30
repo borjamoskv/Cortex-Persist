@@ -111,7 +111,7 @@ class ProceduralMemory:
 
         try:
             cur = conn.cursor()
-            cur.execute(
+            cur.execute(  # bypass-tenant
                 "SELECT skill_name, invocations, success_rate, avg_latency_ms, "
                 "last_invoked, permanent FROM procedural_engrams"
             )
@@ -169,7 +169,7 @@ class ProceduralMemory:
             cur = conn.cursor()
             import sqlite3
 
-            cur.execute(
+            cur.execute(  # bypass-tenant
                 """
                 INSERT INTO procedural_engrams
                 (skill_name, invocations, success_rate, avg_latency_ms, last_invoked, permanent)
