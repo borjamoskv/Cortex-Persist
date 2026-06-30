@@ -33,38 +33,26 @@ from cortex.delivery.manager import DeliveryManager
 class TestVSAAdapter:
     """Test VSA context adapter integration."""
 
-    def test_adapter_graceful_when_unavailable(self):
-        """Adapter returns empty results when VSA engine not importable."""
-        from cortex.context.vsa_adapter import VSAContextAdapter
+    def test_vsa_bridge_basic_flow(self):
+        """Test basic query, ingest, and persist flow of VSAPipelineBridge."""
+        from cortex.memory.vsa import VSAPipelineBridge
 
-        adapter = VSAContextAdapter.__new__(VSAContextAdapter)
-        adapter._available = False
-        adapter._mem = None
-        adapter._agent_id = "test"
-        adapter._D = 10000
-        adapter._decay_lambda = 0.05
-        adapter._memory_dir = None
+        bridge = VSAPipelineBridge(agent_id="test_agent_temp")
+        rid = bridge.ingest("algebraic context test", record_id="vsa-test-1")
+        assert rid == "vsa-test-1"
 
-        results = adapter.query("test query")
-        assert results == []
-        assert adapter.ingest("test") is False
-        report = adapter.consolidate()
-        assert report["persisted"] is False
+        results = bridge.query("algebraic context")
+        assert len(results) > 0
+        assert results[0]["id"] == "vsa-test-1"
+        assert results[0]["content"] == "algebraic context test"
 
-    def test_adapter_diagnostics_unavailable(self):
-        """Diagnostics report unavailable state."""
-        from cortex.context.vsa_adapter import VSAContextAdapter
-
-        adapter = VSAContextAdapter.__new__(VSAContextAdapter)
-        adapter._available = False
-        adapter._mem = None
-        adapter._agent_id = "test"
-        adapter._D = 10000
-        adapter._decay_lambda = 0.05
-        adapter._memory_dir = None
-
-        diag = adapter.diagnostics()
-        assert diag["available"] is False
+        # Persist and clean up
+        hash_val = bridge.persist()
+        assert len(hash_val) > 0
+        
+        # Clean up files created
+        if bridge._memory._persistence_path.exists():
+            bridge._memory._persistence_path.unlink()
 
     def test_assembler_with_vsa_bridge(self):
         """ContextAssembler uses VSA bridge when provided."""
