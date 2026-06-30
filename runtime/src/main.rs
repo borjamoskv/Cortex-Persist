@@ -6,6 +6,8 @@ use sha2::{Digest, Sha256};
 use std::collections::{HashMap, VecDeque};
 use std::env;
 use std::fs;
+use std::net::TcpStream;
+use tungstenite::{connect, stream::MaybeTlsStream, WebSocket};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 enum B60Type {
@@ -70,6 +72,7 @@ struct Coroutine {
     pc: usize,
     state: CoroutineState,
     r: Vec<Register>,
+    depth: usize,
 }
 
 #[derive(Serialize)]
@@ -114,6 +117,9 @@ struct Machine {
     lines: Vec<String>,
     next_cid: usize,
     emitted_events: std::collections::HashSet<String>,
+    ws: Option<WebSocket<MaybeTlsStream<TcpStream>>>,
+    max_nesting: usize,
+    last_entropy: f64,
 }
 
 fn parse_b60_digit(token: &str) -> i64 {
@@ -152,6 +158,163 @@ fn get_reg_index(reg_str: &str) -> usize {
 }
 
 impl Machine {
+    fn compute_mccabe(&self) -> usize {
+        let mut branches = 0;
+        for line in &self.lines {
+            let line_trimmed = line.trim();
+            if line_trimmed.is_empty() || line_trimmed.starts_with('#') {
+                continue;
+            }
+            let first_token = line_trimmed.split_whitespace().next().unwrap_or("");
+            if matches!(first_token, "FORK" | "AFTER" | "AWAIT" | "GIN") {
+                branches += 1;
+            }
+        }
+        1 + branches
+    }
+
+    fn compute_dead_code(&self) -> usize {
+        let mut reachable = vec![false; self.lines.len()];
+        let mut queue = VecDeque::new();
+        
+        if !self.lines.is_empty() {
+            reachable[0] = true;
+            queue.push_back(0);
+        }
+        
+        while let Some(pc) = queue.pop_front() {
+            if pc >= self.lines.len() {
+                continue;
+            }
+            let line = self.lines[pc].trim();
+            if line.is_empty() || line.starts_with('#') || line == "DUB" || line.starts_with("MUB ") {
+                let next_pc = pc + 1;
+                if next_pc < self.lines.len() && !reachable[next_pc] {
+                    reachable[next_pc] = true;
+                    queue.push_back(next_pc);
+                }
+                continue;
+            }
+            
+            let tokens: Vec<&str> = line.split_whitespace().collect();
+            if tokens.is_empty() {
+                continue;
+            }
+            
+            let cmd = tokens[0];
+            match cmd {
+                "HALT" => {}
+                "GIN" | "FORK" | "AFTER" | "AWAIT" => {
+                    let label_token = if cmd == "AWAIT" || cmd == "AFTER" {
+                        tokens.get(2)
+                    } else {
+                        tokens.get(1)
+                    };
+                    
+                    if let Some(&label) = label_token {
+                        let label_clean = label.trim_matches('"');
+                        if let Some(&target_pc) = self.labels.get(label_clean) {
+                            if !reachable[target_pc] {
+                                reachable[target_pc] = true;
+                                queue.push_back(target_pc);
+                            }
+                        }
+                    }
+                    
+                    if cmd != "GIN" {
+                        let next_pc = pc + 1;
+                        if next_pc < self.lines.len() && !reachable[next_pc] {
+                            reachable[next_pc] = true;
+                            queue.push_back(next_pc);
+                        }
+                    }
+                }
+                _ => {
+                    let next_pc = pc + 1;
+                    if next_pc < self.lines.len() && !reachable[next_pc] {
+                        reachable[next_pc] = true;
+                        queue.push_back(next_pc);
+                    }
+                }
+            }
+        }
+        
+        let mut dead_tokens = 0;
+        for (i, line) in self.lines.iter().enumerate() {
+            if !reachable[i] {
+                let trimmed = line.trim();
+                if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with("MUB ") || trimmed == "DUB" {
+                    continue;
+                }
+                dead_tokens += trimmed.split_whitespace().count();
+            }
+        }
+        dead_tokens
+    }
+
+    fn compute_entropy(&self) -> f64 {
+        let mut counts = HashMap::new();
+        let mut total = 0;
+        for coro in &self.q {
+            for reg in &coro.r {
+                if reg.typ != B60Type::Unallocated {
+                    let sig = format!("{}:{}", reg.val.num, reg.val.scale);
+                    *counts.entry(sig).or_insert(0) += 1;
+                    total += 1;
+                }
+            }
+        }
+        if total == 0 {
+            return 0.0;
+        }
+        let mut entropy = 0.0;
+        for &count in counts.values() {
+            let p = count as f64 / total as f64;
+            entropy -= p * p.log2();
+        }
+        entropy
+    }
+
+    fn send_telemetry(&mut self, log_module: &str, log_text: &str, log_type: &str) {
+        if self.ws.is_none() {
+            return;
+        }
+
+        let mccabe = self.compute_mccabe();
+        let deadcode = self.compute_dead_code();
+        let current_entropy = self.compute_entropy();
+        let entropy_gradient = current_entropy - self.last_entropy;
+        self.last_entropy = current_entropy;
+
+        let total_lines = self.lines.len() as f64;
+        let dead_ratio = if total_lines > 0.0 { (deadcode as f64) / (total_lines * 5.0) } else { 0.0 };
+        let anergy = (dead_ratio * 30.0 + current_entropy * 10.0).min(99.0).max(1.0);
+        let exergy = 100.0 - anergy;
+        let exergy_yield = exergy / 50.0;
+
+        let payload = serde_json::json!({
+            "type": "telemetry",
+            "mccabe": mccabe,
+            "nesting": self.max_nesting,
+            "deadcode": deadcode,
+            "entropy": entropy_gradient,
+            "exergy": exergy,
+            "anergy": anergy,
+            "yield": exergy_yield,
+            "log": {
+                "module": log_module,
+                "text": log_text,
+                "type": log_type,
+                "metric": format!("{:.2}ms", current_entropy)
+            }
+        });
+
+        let msg = payload.to_string();
+        if let Some(ref mut socket) = self.ws {
+            let _ = socket.send(tungstenite::Message::text(msg));
+        }
+    }
+
     fn eval_expr(&self, expr: &str, r: &[Register]) -> F60 {
         if expr.starts_with('[') {
             parse_b60_number(expr)
@@ -225,6 +388,8 @@ impl Machine {
     }
 
     fn run(&mut self) {
+        self.send_telemetry("B60_VM", "Sovereign VM initialized", "stable");
+
         while !self.q.is_empty() {
             let mut only_waiting = true;
             for qco in &self.q {
@@ -234,6 +399,7 @@ impl Machine {
                 }
             }
             if only_waiting {
+                self.send_telemetry("B60_VM", "CRITICAL ERROR: Global deadlock detected.", "critical");
                 eprintln!("CRITICAL ERROR: Global deadlock detected. All coroutines are awaiting unresolved signals.");
                 std::process::exit(1);
             }
@@ -315,6 +481,10 @@ impl Machine {
                 continue;
             }
 
+            if self.ws.is_some() {
+                std::thread::sleep(std::time::Duration::from_millis(150));
+            }
+
             let cmd = tokens[0].as_str();
             match cmd {
                 "ALLOC" => {
@@ -325,6 +495,7 @@ impl Machine {
                         "F60" => B60Type::F60,
                         _ => B60Type::I64,
                     };
+                    self.send_telemetry("B60_VM", &format!("ALLOC Register R{} as {:?}", idx, coro.r[idx].typ), "stable");
                 }
                 "NIG" => {
                     let idx = get_reg_index(&tokens[1]);
@@ -333,12 +504,14 @@ impl Machine {
                         let mult = self.eval_expr(&tokens[3], &coro.r);
                         coro.r[idx].val.num *= mult.num;
                     }
+                    self.send_telemetry("B60_VM", &format!("NIG Register R{} = {:?}", idx, coro.r[idx].val), "stable");
                 }
                 "BA.EXACT" => {
                     let idx1 = get_reg_index(&tokens[1]);
                     let val2 = self.eval_expr(&tokens[2], &coro.r);
 
                     if val2.num.is_zero() {
+                        self.send_telemetry("B60_ALU", "DIVIDE_BY_ZERO Error", "critical");
                         self.critical_halt("DIVIDE_BY_ZERO");
                     }
 
@@ -349,12 +522,13 @@ impl Machine {
                         num *= 60u64;
                         scale += 1;
                         if scale > 20 {
-                            // Saturation limit
+                            self.send_telemetry("B60_ALU", "FALSATION ERROR: TRUNCATION limit reached", "critical");
                             self.critical_halt("FALSATION_ERROR: TRUNCATION (Blowup de Numerador excedió límite de Escala F60)");
                         }
                     }
 
                     coro.r[idx1].val = F60::new(num / val2.num, scale);
+                    self.send_telemetry("B60_ALU", &format!("BA.EXACT exact division resolved (scale: {})", scale), "stable");
                 }
                 "FORK" => {
                     if self.next_cid > 10000 {
@@ -368,7 +542,9 @@ impl Machine {
                             pc: target,
                             state: CoroutineState::Ready,
                             r: coro.r.clone(),
+                            depth: coro.depth + 1,
                         };
+                        self.max_nesting = std::cmp::max(self.max_nesting, new_coro.depth);
                         self.next_cid += 1;
                         self.q.push_back(new_coro);
 
@@ -377,6 +553,7 @@ impl Machine {
                             symbol: label.clone(),
                             status: "RESOLVED".to_string(),
                         });
+                        self.send_telemetry("B60_VM", &format!("FORK to label {}", label), "stable");
                     }
                 }
                 "AFTER" => {
@@ -388,6 +565,7 @@ impl Machine {
                         coro.pc = target;
                         self.q.push_back(coro);
                         self.c += 1;
+                        self.send_telemetry("B60_VM", &format!("AFTER {} ticks branch to {}", ticks, label), "stable");
                         continue;
                     }
                 }
@@ -404,6 +582,7 @@ impl Machine {
                         });
                         self.q.push_back(coro);
                         self.c += 1;
+                        self.send_telemetry("B60_LEDGER", &format!("AWAIT event \"{}\" to branch {}", sym, label), "stable");
                         continue;
                     }
                 }
@@ -416,6 +595,7 @@ impl Machine {
                         symbol: action.clone(),
                         status: "RESOLVED".to_string(),
                     });
+                    self.send_telemetry("B60_LEDGER", &format!("EXECUTE event \"{}\"", action), "stable");
                 }
                 "SAR.B60" => {
                     let idx = get_reg_index(&tokens[1]);
@@ -423,6 +603,7 @@ impl Machine {
                         "SAR (B60): num={} scale={}",
                         coro.r[idx].val.num, coro.r[idx].val.scale
                     );
+                    self.send_telemetry("B60_VM", &format!("SAR.B60 trace register R{}", idx), "stable");
                 }
                 "GIN" => {
                     let label = &tokens[1];
@@ -431,6 +612,7 @@ impl Machine {
                         coro.state = CoroutineState::Ready;
                         self.q.push_back(coro);
                         self.c += 1;
+                        self.send_telemetry("B60_VM", &format!("GIN branch to label {}", label), "stable");
                         continue;
                     }
                 }
@@ -438,6 +620,7 @@ impl Machine {
                     coro.state = CoroutineState::Halted;
                     self.q.push_back(coro);
                     self.c += 1;
+                    self.send_telemetry("B60_VM", "HALT execution state reached", "stable");
                     continue;
                 }
                 _ => {}
@@ -457,6 +640,7 @@ impl Machine {
             self.c += 1;
         }
 
+        self.send_telemetry("B60_VM", "VM Execution finished cleanly", "stable");
         self.export_artifact();
     }
 }
@@ -491,6 +675,15 @@ fn main() {
         pc: 0,
         state: CoroutineState::Ready,
         r: initial_r,
+        depth: 1,
+    };
+
+    let ws = match connect("ws://127.0.0.1:8001") {
+        Ok((socket, _)) => {
+            println!("[CORTEX] Telemetry link established on ws://127.0.0.1:8001");
+            Some(socket)
+        }
+        Err(_) => None,
     };
 
     let mut machine = Machine {
@@ -503,6 +696,9 @@ fn main() {
         lines,
         next_cid: 1,
         emitted_events: std::collections::HashSet::new(),
+        ws,
+        max_nesting: 1,
+        last_entropy: 0.0,
     };
 
     machine.run();
