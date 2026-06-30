@@ -4,7 +4,7 @@ import tempfile
 import json
 import pytest
 from concurrent.futures import ProcessPoolExecutor
-from cortex.consensus.sync_protocol import BFTMerger
+from babylon60.consensus.sync_protocol import BFTMerger
 
 def simulate_agent_merge(args):
     agent_id, shared_ledger, remote_ledger = args

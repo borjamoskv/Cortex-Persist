@@ -114,7 +114,7 @@ class TestMarkdownIntegrity:
 
 class TestForgeIdempotency:
     def test_forge_parse_roundtrip(self) -> None:
-        from cortex.agents.primitives.apex_forge import (
+        from babylon60.agents.primitives.apex_forge import (
             parse_apex_core,
             select_canonical,
         )

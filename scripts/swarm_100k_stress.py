@@ -15,7 +15,7 @@ import os
 import time
 from pathlib import Path
 
-from cortex.engine.swarm.swarm_10k import SwarmCommander
+from babylon60.engine.swarm.swarm_10k import SwarmCommander
 
 
 async def run_stress_test():

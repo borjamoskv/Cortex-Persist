@@ -5,10 +5,10 @@ import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
-from cortex.crypto.keys import KeyManager, Signer, Verifier
-from cortex.swarm.byzantine_judge import ByzantineJudge
-from cortex.swarm.exergy import ExergyBank
-from cortex.engine.core.sandbox_jit import JITSandboxViolation, SandboxJIT
+from babylon60.crypto.keys import KeyManager, Signer, Verifier
+from babylon60.swarm.byzantine_judge import ByzantineJudge
+from babylon60.swarm.exergy import ExergyBank
+from babylon60.engine.core.sandbox_jit import JITSandboxViolation, SandboxJIT
 
 # We will test both real execution and simulated host crashes.
 # To simulate a host crash, we can monkeypatch SandboxJIT.execute to raise a base Exception.

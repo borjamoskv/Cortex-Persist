@@ -1,5 +1,5 @@
 import pytest
-from cortex.guards.exergy_guard import ExergyGuard, LandauerGuard
+from babylon60.guards.exergy_guard import ExergyGuard, LandauerGuard
 
 
 def test_exergy_guard_approves_dense_invariant():

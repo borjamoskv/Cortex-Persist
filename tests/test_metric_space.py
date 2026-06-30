@@ -5,8 +5,8 @@ Verification tests for Metric Space Execution (Epoch 10).
 
 import pytest
 
-from cortex.engine.temporal.divergence import DivergenceMap
-from cortex.engine.meta.arbiter import MetaArbiter
+from babylon60.engine.temporal.divergence import DivergenceMap
+from babylon60.engine.meta.arbiter import MetaArbiter
 
 
 def test_divergence_map_identical():

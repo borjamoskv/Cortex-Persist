@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 
-from cortex.engine.core.store_validators import validate_content, check_dedup
+from babylon60.engine.core.store_validators import validate_content, check_dedup
 
 
 def test_validate_content_decision_replacement():

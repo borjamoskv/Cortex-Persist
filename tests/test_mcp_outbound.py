@@ -3,7 +3,7 @@
 import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from cortex.pipeline.mcp_outbound import MCPOutboundClient, MCPToolSpec
+from babylon60.pipeline.mcp_outbound import MCPOutboundClient, MCPToolSpec
 
 
 @pytest.fixture

@@ -23,7 +23,7 @@ test-slow: ## Run only slow tests
  --tb=short
 
 lint: ## Run linter
-	ruff check cortex/ tests/
+	ruff check babylon60/ tests/
 
 repo-health: ## Check changed/untracked files for conflict markers and Python syntax errors
 	python3 scripts/repo_health_changed.py
@@ -35,13 +35,13 @@ smoke-api: ## Smoke-check API import, engine init, and CLI help
 	python3 scripts/smoke_test_api.py
 
 format: ## Auto-format code
-	ruff format cortex/ tests/
+	ruff format babylon60/ tests/
 
 build: ## Build distribution package
 	python -m build
 
 serve: ## Start CORTEX API server (development)
-	uvicorn cortex.api.core:app --reload --host 0.0.0.0 --port 8000
+	uvicorn babylon60.api.core:app --reload --host 0.0.0.0 --port 8000
 
 docs: ## Build documentation
 	mkdocs build
@@ -66,10 +66,10 @@ bench-fast: ## Run quick benchmarks (import time + source size)
 	.venv/bin/python benchmarks/bench_repo.py --quick
 
 docker: ## Build Docker image
-	docker build -t cortex:latest .
+	docker build -t babylon60:latest .
 
 docker-run: ## Run CORTEX in Docker
-	docker run -d --name cortex -p 8000:8000 -v cortex-data:/data cortex:latest
+	docker run -d --name babylon60 -p 8000:8000 -v babylon60-data:/data babylon60:latest
 
 ship: ## Ship gate — blocks deploy if quality checks fail
 	@echo "🚢 Running Ship Gate..."
@@ -80,7 +80,7 @@ ship-fast: ## Ship gate (fast — skip slow tests)
 	.venv/bin/python scripts/ship_gate.py --fast
 
 typecheck: ## Run type checker
-	.venv/bin/mypy cortex/ --ignore-missing-imports --no-error-summary 2>&1 | tail -20
+	.venv/bin/mypy babylon60/ --ignore-missing-imports --no-error-summary 2>&1 | tail -20
 
 mcp: ## Start MCP server
 	python run_mcp_server.py

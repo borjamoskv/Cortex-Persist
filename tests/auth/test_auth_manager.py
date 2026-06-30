@@ -19,9 +19,9 @@ from unittest.mock import patch
 import aiosqlite
 import pytest
 
-from cortex.auth.manager import AuthManager, reset_auth_manager
-from cortex.auth.models import APIKey, AuthResult
-from cortex.auth.rbac import (
+from babylon60.auth.manager import AuthManager, reset_auth_manager
+from babylon60.auth.models import APIKey, AuthResult
+from babylon60.auth.rbac import (
     DEFAULT_POLICIES,
     RBAC,
     Permission,
@@ -29,7 +29,7 @@ from cortex.auth.rbac import (
     Role,
     ROLE_HIERARCHY,
 )
-from cortex.auth.cache import AUTH_CACHE, CacheEntry, PermissionCache
+from babylon60.auth.cache import AUTH_CACHE, CacheEntry, PermissionCache
 
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
@@ -328,7 +328,7 @@ class TestRBAC:
 
     def test_authorize_raises_on_denial(self):
         """authorize() must raise PermissionDeniedError on missing permission."""
-        from cortex.utils.errors import PermissionDeniedError
+        from babylon60.utils.errors import PermissionDeniedError
 
         with pytest.raises(PermissionDeniedError):
             RBAC.authorize("viewer", Permission.WRITE_FACTS)

@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from cortex.verification.extractor import extract_constraints, SMTModelExtractor
+from babylon60.verification.extractor import extract_constraints, SMTModelExtractor
 
 
 def test_extract_constraints_syntax_error():

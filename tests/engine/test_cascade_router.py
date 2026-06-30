@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch, AsyncMock
 
 import pytest
 
-from cortex.engine.flow.cascade_router import CascadeRouter
+from babylon60.engine.flow.cascade_router import CascadeRouter
 
 
 class TestCascadeRouter:

@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.engine.meta.meta_arbiter import (
+from babylon60.engine.meta.meta_arbiter import (
     ArbiterVerdict,
     ConflictPair,
     LayerID,

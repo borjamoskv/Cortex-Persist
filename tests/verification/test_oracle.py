@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from cortex.verification.oracle import VerificationOracle, VerificationOracleResult
+from babylon60.verification.oracle import VerificationOracle, VerificationOracleResult
 
 
 @pytest.fixture

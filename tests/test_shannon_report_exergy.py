@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.extensions.shannon.report import EntropyReport
+from babylon60.extensions.shannon.report import EntropyReport
 
 
 def _make_scanner_mock() -> MagicMock:

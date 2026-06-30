@@ -185,9 +185,9 @@ async def run_encb(
     pool = None
 
     try:
-        from cortex.database.pool import CortexConnectionPool
-        from cortex.database.schema import ALL_SCHEMA  # pyright: ignore[reportMissingImports]
-        from cortex.engine import CortexEngine as AsyncCortexEngine
+        from babylon60.database.pool import CortexConnectionPool
+        from babylon60.database.schema import ALL_SCHEMA  # pyright: ignore[reportMissingImports]
+        from babylon60.engine import CortexEngine as AsyncCortexEngine
 
         cortex_available = True
         console.print("[green]✅ CORTEX imports successful[/]")

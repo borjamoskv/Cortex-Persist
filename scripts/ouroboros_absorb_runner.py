@@ -20,14 +20,14 @@ import time
 from pathlib import Path
 
 # CORTEX imports
-from cortex.extensions.llm.sovereign import SovereignLLM
-from cortex.ledger.models import LedgerEvent
-from cortex.ledger.writer import LedgerWriter
+from babylon60.extensions.llm.sovereign import SovereignLLM
+from babylon60.ledger.models import LedgerEvent
+from babylon60.ledger.writer import LedgerWriter
 
 # Try to import store and queue, fallback if paths differ
 try:
-    from cortex.ledger.queue import EnrichmentQueue
-    from cortex.ledger.store import LedgerStore
+    from babylon60.ledger.queue import EnrichmentQueue
+    from babylon60.ledger.store import LedgerStore
 except ImportError:
     LedgerStore = None
     EnrichmentQueue = None

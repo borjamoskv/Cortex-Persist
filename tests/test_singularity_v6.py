@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 
-from cortex.swarm.swarm_10k import CenturionSuperv
-from cortex.extensions.llm._cascade import CascadeManager, IntentProfile
-from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
+from babylon60.swarm.swarm_10k import CenturionSuperv
+from babylon60.extensions.llm._cascade import CascadeManager, IntentProfile
+from babylon60.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 
 @pytest.mark.asyncio

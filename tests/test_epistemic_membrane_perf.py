@@ -3,7 +3,7 @@ import pytest
 import torch
 
 torchhd = pytest.importorskip("torchhd")
-from cortex.memory.epistemic_membrane import EpistemicMembrane, MerkleLedger
+from babylon60.memory.epistemic_membrane import EpistemicMembrane, MerkleLedger
 
 
 def test_ledger_performance_o1():

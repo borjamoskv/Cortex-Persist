@@ -1,6 +1,6 @@
 import sqlite3
 import pytest
-from cortex.database.core import CortexConnection
+from babylon60.database.core import CortexConnection
 
 
 def test_verify():

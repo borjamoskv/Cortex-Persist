@@ -7,7 +7,7 @@ import sqlite3
 
 import pytest
 
-from cortex.engine.flow.causality import (
+from babylon60.engine.flow.causality import (
     CONFIDENCE_LEVELS,
     EDGE_DERIVED_FROM,
     TaintReport,
@@ -100,7 +100,7 @@ async def test_propagate_taint_single_child() -> None:
     conn = await aiosqlite.connect(":memory:")
     await conn.execute("PRAGMA journal_mode=WAL")
 
-    from cortex.engine.flow.causality import AsyncCausalGraph
+    from babylon60.engine.flow.causality import AsyncCausalGraph
 
     graph = AsyncCausalGraph(conn)
     await graph.ensure_table()

@@ -151,17 +151,17 @@ all = [
 ]
 
 [project.scripts]
-cortex = "cortex.cli:cli"
-moskv-daemon = "cortex.daemon_cli:main"
-cortex-adk = "cortex.adk.runner:main"
-cortex-mcp = "cortex.mcp_server.server:run_server"
+cortex = "babylon60.cli:cli"
+moskv-daemon = "babylon60.daemon_cli:main"
+cortex-adk = "babylon60.adk.runner:main"
+cortex-mcp = "babylon60.mcp_server.server:run_server"
 
 [build-system]
 requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["cortex", "cortex.*", "cortex_extensions", "cortex_extensions.*", "babylon60", "babylon60.*"]
+include = ["babylon60", "babylon60.*"]
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
@@ -187,7 +187,7 @@ exclude_commit_patterns = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "--timeout=30 -p cortex.shannon.ledger.pytest_plugin"
+addopts = "--timeout=30 -p babylon60.shannon.ledger.pytest_plugin"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 markers = [
@@ -217,9 +217,9 @@ ignore = ["E501", "E402", "B008", "W291", "W293", "S", "UP045", "TID251", "G004"
 "open-cortex/tests/**/*.py" = ["S", "E402", "F821", "BLE001", "T20"]
 "scripts/**/*.py" = ["S", "T20"]
 "sdks/**/*.py" = ["S", "T20"]
-"cortex/**/__init__.py" = ["F401"]
-"cortex/cli/__init__.py" = ["F401", "E402"]
-"cortex/daemon/core.py" = ["E701", "E702", "I001"]
+"babylon60/**/__init__.py" = ["F401"]
+"babylon60/cli/__init__.py" = ["F401", "E402"]
+"babylon60/daemon/core.py" = ["E701", "E702", "I001"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "time.sleep" = { msg = "CORTEX Anti-Pattern: Usa asyncio.sleep() en este repositorio para no bloquear el event loop." }
@@ -235,7 +235,7 @@ exclude = [
     "experimental",
     "cortex/moltbook",
     "scripts",
-    "cortex.agents",
+    "babylon60.agents",
     ".scratch",
     ".venv"
 ]
@@ -249,7 +249,7 @@ exclude = [
     "experimental/",
     "tests/",
     "scripts/",
-    "cortex_mev_base/",
+    "babylon60_mev_base/",
 ]
 
 [tool.bumpversion]
@@ -264,7 +264,7 @@ search = "version = \"{current_version}\""
 replace = "version = \"{new_version}\""
 
 [[tool.bumpversion.files]]
-filename = "cortex/__init__.py"
+filename = "babylon60/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 

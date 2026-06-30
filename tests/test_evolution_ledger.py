@@ -19,7 +19,7 @@ import time
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from cortex.engine.core.evolution_ledger import (
+from babylon60.engine.core.evolution_ledger import (
     ControlVector,
     EvolutionLedger,
     MutationRecord,
@@ -277,7 +277,7 @@ def test_checkpoint_merkle():
 
 def test_checkpoint_manager():
     """Test generating and verifying checkpoints via CheckpointManager."""
-    from cortex.engine.flow.checkpoint import CheckpointManager
+    from babylon60.engine.flow.checkpoint import CheckpointManager
 
     with tempfile.TemporaryDirectory() as tmpdir:
         log_path = os.path.join(tmpdir, "test_checkpoints.jsonl")
@@ -314,11 +314,11 @@ def test_checkpoint_manager():
 def test_substrate_integration():
     """Test that UltramapSubstrate emits ledger events on update_control_vector."""
     # Import substrate
-    from cortex.engine.ultramap.ultramap import UltramapSubstrate
+    from babylon60.engine.ultramap.ultramap import UltramapSubstrate
 
     with tempfile.TemporaryDirectory() as tmpdir:
         # Override DB_PATH for isolation
-        import cortex.engine.ultramap.ultramap as um_module
+        import babylon60.engine.ultramap.ultramap as um_module
 
         original_db_path = um_module.DB_PATH
         um_module.DB_PATH = os.path.join(tmpdir, "test.db")

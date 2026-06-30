@@ -10,8 +10,8 @@ import json
 import aiosqlite
 import pytest
 
-from cortex.crypto.aes import CortexEncrypter
-from cortex.engine.flow.causality import EDGE_DERIVED_FROM, AsyncCausalGraph, TaintStatus
+from babylon60.crypto.aes import CortexEncrypter
+from babylon60.engine.flow.causality import EDGE_DERIVED_FROM, AsyncCausalGraph, TaintStatus
 
 # Use a fixed 32-byte master key for deterministic testing
 TEST_MASTER_KEY = b"0" * 32

@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.extensions.ui_control.mouse import MouseEngine
+from babylon60.extensions.ui_control.mouse import MouseEngine
 
 
 @pytest.fixture
@@ -88,7 +88,7 @@ class TestMouseDrag:
     async def test_drag_and_drop(self, mouse):
         """drag_and_drop delegates to drag with converted parameters."""
         with patch.object(mouse, "drag", new_callable=AsyncMock) as mock_drag:
-            from cortex.extensions.ui_control.models import InteractionResult
+            from babylon60.extensions.ui_control.models import InteractionResult
 
             mock_drag.return_value = InteractionResult(success=True)
             result = await mouse.drag_and_drop(10, 20, 30, 40, duration_ms=100)
@@ -131,7 +131,7 @@ class TestMouseRightClick:
     async def test_right_click_delegates(self, mouse):
         """right_click delega a click(button='right')."""
         with patch.object(mouse, "click", new_callable=AsyncMock) as mock_click:
-            from cortex.extensions.ui_control.models import InteractionResult
+            from babylon60.extensions.ui_control.models import InteractionResult
 
             mock_click.return_value = InteractionResult(success=True)
             result = await mouse.right_click(50, 60)

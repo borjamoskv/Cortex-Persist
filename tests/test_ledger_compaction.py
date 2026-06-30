@@ -8,7 +8,7 @@ import aiosqlite
 import pytest
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from cortex.audit.ledger import EnterpriseAuditLedger
+from babylon60.audit.ledger import EnterpriseAuditLedger
 
 
 @pytest.fixture

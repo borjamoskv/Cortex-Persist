@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import aiosqlite
 import pytest
 
-from cortex.worker.enrichment import EnrichmentWorker
+from babylon60.worker.enrichment import EnrichmentWorker
 
 # ─── Schema helpers ───────────────────────────────────────────────────
 

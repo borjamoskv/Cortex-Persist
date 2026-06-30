@@ -6,9 +6,9 @@ import pytest
 import aiosqlite
 from datetime import datetime, timezone
 
-from cortex.swarm.supervisor import SwarmSupervisor, DummyAgent
-from cortex.swarm.legion import SwarmSignal
-from cortex.swarm.state_store import CausalStateStore
+from babylon60.swarm.supervisor import SwarmSupervisor, DummyAgent
+from babylon60.swarm.legion import SwarmSignal
+from babylon60.swarm.state_store import CausalStateStore
 
 
 async def setup_db(db_path: str) -> aiosqlite.Connection:
@@ -60,7 +60,7 @@ def mock_causal_guard(monkeypatch):
         def verify_closure(self, proposal):
             pass
 
-    import cortex.swarm.state_store
+    import babylon60.swarm.state_store
 
     monkeypatch.setattr(cortex.swarm.state_store, "CausalClosureGuard", MockGuard)
 
@@ -150,7 +150,7 @@ async def test_lease_locks_and_ghost_recovery():
     """Test SANEDRIN VECTOR 3: Lease locks and IN_FLIGHT recovery"""
     db_path = f"/tmp/supervisor_test_lease_{uuid.uuid4().hex}.db"
 
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     engine = CortexEngine(db_path=db_path, auto_embed=False)
     await engine.init_db()
@@ -201,7 +201,7 @@ async def test_lease_locks_and_ghost_recovery():
 
     try:
         # Verify task was recovered to ACTIVE
-        from cortex.database.core import connect_async
+        from babylon60.database.core import connect_async
 
         verify_db = await connect_async(db_path)
         async with verify_db.execute(

@@ -1,9 +1,9 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from cortex.guards.causal_closure_guard import CausalClosureGuard, SwarmProposal
-from cortex.engine.cognitive.entropy import EntropyAnnihilator
-from cortex.engine.cognitive.crystallizer import AutoCrystallizer
+from babylon60.guards.causal_closure_guard import CausalClosureGuard, SwarmProposal
+from babylon60.engine.cognitive.entropy import EntropyAnnihilator
+from babylon60.engine.cognitive.crystallizer import AutoCrystallizer
 
 
 # 1. Test: Cheap Hallucination

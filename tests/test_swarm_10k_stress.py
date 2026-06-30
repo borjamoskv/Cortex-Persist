@@ -4,7 +4,7 @@ import shutil
 import time
 from pathlib import Path
 
-from cortex.swarm.swarm_10k import SwarmCommander
+from babylon60.swarm.swarm_10k import SwarmCommander
 
 
 async def run_10k_stress():

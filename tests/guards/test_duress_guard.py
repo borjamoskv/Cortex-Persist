@@ -3,8 +3,8 @@ import os
 import pytest
 from unittest import mock
 
-from cortex.guards.duress_guard import DuressGuard
-from cortex.security.types import GuardViolation
+from babylon60.guards.duress_guard import DuressGuard
+from babylon60.security.types import GuardViolation
 
 
 @pytest.fixture(autouse=True)

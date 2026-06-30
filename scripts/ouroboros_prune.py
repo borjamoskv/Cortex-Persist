@@ -18,7 +18,7 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from cortex.database.core import connect
+from babylon60.database.core import connect
 
 # ─── Thermodynamic Constants ─────────────────────────────────────────
 MIN_EXERGY_THRESHOLD = 0.125  # 3 half-lives → tombstone

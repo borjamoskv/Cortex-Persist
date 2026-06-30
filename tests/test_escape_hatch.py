@@ -10,8 +10,8 @@ import aiosqlite
 import pytest
 from click.testing import CliRunner
 
-from cortex.cli import cli
-from cortex.ledger.escape_hatch import (
+from babylon60.cli import cli
+from babylon60.ledger.escape_hatch import (
     LIVENESS_KEY,
     is_dead_man_switch_triggered,
     record_liveness,

@@ -1,7 +1,7 @@
 import pytest
 import asyncio
-from cortex.agents.maxwell_router import create_maxwell_router
-from cortex.agents.bus import SqliteMessageBus
+from babylon60.agents.maxwell_router import create_maxwell_router
+from babylon60.agents.bus import SqliteMessageBus
 import uuid
 
 
@@ -9,7 +9,7 @@ def _uid():
     return f":memory:{uuid.uuid4().hex}:"
 
 
-from cortex.agents.message_schema import new_message, MessageKind
+from babylon60.agents.message_schema import new_message, MessageKind
 
 
 @pytest.mark.asyncio

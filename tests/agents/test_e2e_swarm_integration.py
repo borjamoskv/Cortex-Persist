@@ -15,15 +15,15 @@ from typing import Any
 
 import pytest
 
-from cortex.agents.base import BaseAgent
-from cortex.agents.bus import SqliteMessageBus
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import MessageKind, new_message, AgentMessage
-from cortex.agents.state import AgentStatus
-from cortex.agents.supervisor import Supervisor
-from cortex.database.pool import CortexConnectionPool
-from cortex.engine.causal.topological_arbitrage import TopologyIndex
-from cortex.database.schema import get_all_schema
+from babylon60.agents.base import BaseAgent
+from babylon60.agents.bus import SqliteMessageBus
+from babylon60.agents.manifest import AgentManifest
+from babylon60.agents.message_schema import MessageKind, new_message, AgentMessage
+from babylon60.agents.state import AgentStatus
+from babylon60.agents.supervisor import Supervisor
+from babylon60.database.pool import CortexConnectionPool
+from babylon60.engine.causal.topological_arbitrage import TopologyIndex
+from babylon60.database.schema import get_all_schema
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ def _unique_db() -> str:
 
 async def setup_db_for_topology(db_path: str):
     """Setup schema for topological arbitrage."""
-    from cortex.database.core import causal_write
+    from babylon60.database.core import causal_write
     import os
 
     pool = CortexConnectionPool(db_path, read_only=False)

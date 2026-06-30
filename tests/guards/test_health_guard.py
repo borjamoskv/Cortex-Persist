@@ -2,8 +2,8 @@
 
 import pytest
 
-from cortex.extensions.health.models import Grade, HealthScore, HealthSLA, HealthSLAViolation
-from cortex.guards.health_guard import HealthGuard
+from babylon60.extensions.health.models import Grade, HealthScore, HealthSLA, HealthSLAViolation
+from babylon60.guards.health_guard import HealthGuard
 
 
 def test_health_sla_evaluate_passes() -> None:

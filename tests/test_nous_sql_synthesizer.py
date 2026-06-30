@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 """Tests for NOUS SQL Synthesizer."""
 
-from cortex.extensions.nous.models import NousAST, NousMetadata, NousOperation
-from cortex.extensions.nous.sql_synthesizer import SQLSynthesizer
+from babylon60.extensions.nous.models import NousAST, NousMetadata, NousOperation
+from babylon60.extensions.nous.sql_synthesizer import SQLSynthesizer
 
 
 def test_sql_synthesizer() -> None:

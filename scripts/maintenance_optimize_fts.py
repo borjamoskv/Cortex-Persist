@@ -15,7 +15,7 @@ import logging
 import sqlite3
 from pathlib import Path
 
-from cortex.database.core import connect
+from babylon60.database.core import connect
 
 logging.basicConfig(
     level=logging.INFO,

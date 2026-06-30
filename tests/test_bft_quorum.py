@@ -1,7 +1,7 @@
 import pytest
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from cortex.consensus.bft_quorum import BFTQuorumGuard
+from babylon60.consensus.bft_quorum import BFTQuorumGuard
 
 
 @pytest.fixture

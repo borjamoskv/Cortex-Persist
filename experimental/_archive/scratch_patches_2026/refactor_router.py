@@ -35,7 +35,7 @@ config_lines = [
     '"""\n',
     '\n',
     'from typing import Any\n',
-    'from cortex.audit.cognitive_classifier import SafetyClassifier\n',
+    'from babylon60.audit.cognitive_classifier import SafetyClassifier\n',
     '\n'
 ] + lines[30:45] + ['\n'] + lines[233:281]
 config_lines = [line.replace('    DEFAULT_ROUTING_POLICY = {', 'DEFAULT_ROUTING_POLICY = {') if 'DEFAULT_ROUTING_POLICY = {' in line else line for line in config_lines]
@@ -80,8 +80,8 @@ debugger_lines = [
     'import json\n',
     'from typing import Any\n',
     '\n',
-    'from cortex.audit.cognitive_classifier import cosine_similarity\n',
-    'from cortex.audit.cognitive_router import CognitiveRouter\n',
+    'from babylon60.audit.cognitive_classifier import cosine_similarity\n',
+    'from babylon60.audit.cognitive_router import CognitiveRouter\n',
     '\n'
 ] + lines[561:697]
 
@@ -91,10 +91,10 @@ with open(os.path.join(base_dir, "cognitive_debugger.py"), "w") as f:
 # Create new cognitive_router.py
 router_lines = lines[:29] # header and imports
 import_additions = [
-    'from cortex.audit.cognitive_classifier import SafetyClassifier, cosine_similarity\n',
-    'from cortex.audit.cognitive_config import _CREATE_ROUTER_LOG_SQL, DEFAULT_ROUTING_POLICY\n',
-    'from cortex.audit.cognitive_debugger import RoutingReplayDebugger\n',
-    'from cortex.audit.cognitive_simulator import AdversarialPromptSimulator\n',
+    'from babylon60.audit.cognitive_classifier import SafetyClassifier, cosine_similarity\n',
+    'from babylon60.audit.cognitive_config import _CREATE_ROUTER_LOG_SQL, DEFAULT_ROUTING_POLICY\n',
+    'from babylon60.audit.cognitive_debugger import RoutingReplayDebugger\n',
+    'from babylon60.audit.cognitive_simulator import AdversarialPromptSimulator\n',
     '\n',
     '__all__ = ["CognitiveRouter", "RoutingDecision", "SafetyClassifier", "RoutingReplayDebugger", "AdversarialPromptSimulator", "cosine_similarity"]\n',
     '\n'

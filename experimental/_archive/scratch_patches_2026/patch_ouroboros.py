@@ -10,9 +10,9 @@ new_log_scaling = """
         import json
         import time
         from datetime import datetime, timezone
-        from cortex.database.core import connect_async_ctx
-        from cortex.engine.core.fact_store_core import insert_fact_record
-        from cortex.database.core import causal_write
+        from babylon60.database.core import connect_async_ctx
+        from babylon60.engine.core.fact_store_core import insert_fact_record
+        from babylon60.database.core import causal_write
 
         # Extract db path from the sync connection if possible, or fallback
         # In sqlite3, you can get the DB name from pragma database_list or assuming it's cortex.db

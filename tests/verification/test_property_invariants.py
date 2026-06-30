@@ -7,8 +7,8 @@ import pytest
 from hypothesis import given, settings, strategies as st
 from hypothesis.stateful import RuleBasedStateMachine, initialize, rule
 
-from cortex.engine.core.cortex_engine import CortexEngine
-from cortex.engine.flow.storage_guard import GuardViolation
+from babylon60.engine.core.cortex_engine import CortexEngine
+from babylon60.engine.flow.storage_guard import GuardViolation
 
 
 @settings(max_examples=25, deadline=None)

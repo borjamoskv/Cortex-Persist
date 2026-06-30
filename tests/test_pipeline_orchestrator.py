@@ -14,7 +14,7 @@ import time
 
 import pytest
 
-from cortex.pipeline import (
+from babylon60.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -24,8 +24,8 @@ from cortex.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from cortex.pipeline.orchestrator import CortexOrchestrator
-from cortex.pipeline._orchestrator_exceptions import (
+from babylon60.pipeline.orchestrator import CortexOrchestrator
+from babylon60.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )

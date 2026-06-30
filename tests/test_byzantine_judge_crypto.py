@@ -2,16 +2,16 @@ import pytest
 import hashlib
 from datetime import datetime, timezone
 
-from cortex.crypto.keys import KeyManager, Signer, Verifier
-from cortex.swarm.byzantine_judge import ByzantineJudge
-from cortex.engine.core.sandbox_jit import SandboxJIT
+from babylon60.crypto.keys import KeyManager, Signer, Verifier
+from babylon60.swarm.byzantine_judge import ByzantineJudge
+from babylon60.engine.core.sandbox_jit import SandboxJIT
 
 
 # To mock SandboxJIT successfully since we don't need real execution logic here
 class MockSandboxJIT:
     def execute(self, code, context):
         if "VIOLATION" in code:
-            from cortex.engine.core.sandbox_jit import JITSandboxViolation
+            from babylon60.engine.core.sandbox_jit import JITSandboxViolation
 
             raise JITSandboxViolation("Mock violation")
         return context
@@ -97,7 +97,7 @@ def test_byzantine_judge_spoofed_signature(judge, km):
 
     # The agent should have been slashed
     wallet = judge.bank.register_agent(agent_id)
-    from cortex.swarm.exergy import ExergyBank
+    from babylon60.swarm.exergy import ExergyBank
 
     assert wallet.failed_commits > 0 or wallet.balance < ExergyBank.INITIAL_EXERGY
 

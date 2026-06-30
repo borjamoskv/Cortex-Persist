@@ -8,15 +8,15 @@ import json
 import pytest
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from cortex.integration.rustchain.client import RustChainClient
-from cortex.integration.rustchain.wallet import RustChainWallet
-from cortex.integration.rustchain.staking import (
+from babylon60.integration.rustchain.client import RustChainClient
+from babylon60.integration.rustchain.wallet import RustChainWallet
+from babylon60.integration.rustchain.staking import (
     stake_and_acquire,
     StakingError,
     GateUnavailableError,
 )
-from cortex.integration.rustchain.mcp_tool import register_rustchain_tools
-from cortex.integration.rustchain.judge import (
+from babylon60.integration.rustchain.mcp_tool import register_rustchain_tools
+from babylon60.integration.rustchain.judge import (
     Judge,
     ASTLintJudge,
     TestRunnerJudge,

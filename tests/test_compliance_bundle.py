@@ -4,7 +4,7 @@ import json
 import zipfile
 import pytest
 from pathlib import Path
-from cortex.audit.compliance_bundle import ComplianceBundler
+from babylon60.audit.compliance_bundle import ComplianceBundler
 
 
 @pytest.fixture

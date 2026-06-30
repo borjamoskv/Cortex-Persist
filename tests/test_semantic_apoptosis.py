@@ -4,7 +4,7 @@ Unit tests for the SemanticApoptosisGuard (Information Bottleneck).
 """
 
 import pytest
-from cortex.guards.semantic_apoptosis_guard import SemanticApoptosisGuard, SemanticApoptosisError
+from babylon60.guards.semantic_apoptosis_guard import SemanticApoptosisGuard, SemanticApoptosisError
 
 
 def test_semantic_apoptosis_pure_code_or_data():

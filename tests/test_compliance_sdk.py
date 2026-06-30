@@ -22,7 +22,7 @@ pytestmark = [
 @pytest.fixture
 def tracker(tmp_path: Path):
     """Create a ComplianceTracker with a temp database."""
-    from cortex.compliance import ComplianceTracker
+    from babylon60.compliance import ComplianceTracker
 
     t = ComplianceTracker(db_path=str(tmp_path / "compliance_test.db"), project="test-agent")
     t._ensure_init()
@@ -57,7 +57,7 @@ class TestLogDecision:
         conn.close()
         assert row is not None
 
-        from cortex.crypto import get_default_encrypter
+        from babylon60.crypto import get_default_encrypter
 
         enc = get_default_encrypter()
         meta = enc.decrypt_json(row[0], tenant_id="default")
@@ -79,7 +79,7 @@ class TestLogDecision:
         row = cursor.fetchone()
         conn.close()
 
-        from cortex.crypto import get_default_encrypter
+        from babylon60.crypto import get_default_encrypter
 
         enc = get_default_encrypter()
         meta = enc.decrypt_json(row[0], tenant_id="default")
@@ -204,7 +204,7 @@ class TestExportAudit:
 
 class TestContextManager:
     def test_context_manager_works(self, tmp_path: Path):
-        from cortex.compliance import ComplianceTracker
+        from babylon60.compliance import ComplianceTracker
 
         with ComplianceTracker(
             db_path=str(tmp_path / "ctx_test.db"),

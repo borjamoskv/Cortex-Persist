@@ -5,7 +5,7 @@ Verification tests for Host Identity Containment (Epoch 13).
 
 import pytest
 
-from cortex.engine.causal.taint_engine import enforce_taint_check, TaintValidationError
+from babylon60.engine.causal.taint_engine import enforce_taint_check, TaintValidationError
 
 
 @pytest.mark.asyncio

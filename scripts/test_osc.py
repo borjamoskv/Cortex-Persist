@@ -10,7 +10,7 @@ exergy_tier: P2
 
 import asyncio
 
-from cortex.extensions.bci.osc_bridge import AetherOscBridge
+from babylon60.extensions.bci.osc_bridge import AetherOscBridge
 
 
 async def test_osc():

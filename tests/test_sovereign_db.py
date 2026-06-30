@@ -19,7 +19,7 @@ from pathlib import Path
 
 import pytest
 
-from cortex.database.sovereign_db import SovereignDB, SovereignCursor
+from babylon60.database.sovereign_db import SovereignDB, SovereignCursor
 
 
 @pytest.fixture

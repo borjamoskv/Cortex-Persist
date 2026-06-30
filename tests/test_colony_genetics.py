@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
-from cortex.sica.strategy import default_genome, Heuristic
-from cortex.sica.colony.genetics import GenomeMutator
+from babylon60.sica.strategy import default_genome, Heuristic
+from babylon60.sica.colony.genetics import GenomeMutator
 
 
 def test_genome_mutator_spontaneous_injection():

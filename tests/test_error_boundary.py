@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.extensions.immune.error_boundary import ErrorBoundary, error_boundary
+from babylon60.extensions.immune.error_boundary import ErrorBoundary, error_boundary
 
 # ── Fixtures ──────────────────────────────────────────────────────────
 

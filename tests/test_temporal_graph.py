@@ -1,7 +1,7 @@
 import pytest
 import aiosqlite
-from cortex.engine.flow.causality import AsyncCausalGraph
-from cortex.migrations.mig_temporal_kg import _migration_027_temporal_kg
+from babylon60.engine.flow.causality import AsyncCausalGraph
+from babylon60.migrations.mig_temporal_kg import _migration_027_temporal_kg
 
 
 @pytest.mark.asyncio

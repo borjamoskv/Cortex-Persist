@@ -1,5 +1,5 @@
 import pytest
-from cortex.security.memory_firewall import MemoryFirewall, RiskLevel, SecretRedactor
+from babylon60.security.memory_firewall import MemoryFirewall, RiskLevel, SecretRedactor
 
 
 def test_secret_redactor_string():
@@ -54,7 +54,7 @@ def test_memory_firewall_prompt_injection():
 
 def test_host_pii_containment_and_logging():
     # 1. Verification of TaintEngine raising TaintValidationError for prohibited PII
-    from cortex.engine.causal.taint_engine import enforce_taint_check, TaintValidationError
+    from babylon60.engine.causal.taint_engine import enforce_taint_check, TaintValidationError
 
     class MockConn:
         def cursor(self):

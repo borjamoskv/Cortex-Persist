@@ -13,7 +13,7 @@ pytestmark = pytest.mark.slow
 @pytest.fixture
 async def engine(tmp_path: Path, monkeypatch):
     """Create a CortexEngine with a temp database, close after test."""
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
     db = str(tmp_path / "test_concurrency.db")
@@ -21,7 +21,7 @@ async def engine(tmp_path: Path, monkeypatch):
     await e.init_db()
 
     # Ensure causal_edges exists
-    from cortex.engine.flow.causality import AsyncCausalGraph
+    from babylon60.engine.flow.causality import AsyncCausalGraph
 
     async with e.session() as conn:
         cg = AsyncCausalGraph(conn)
@@ -35,7 +35,7 @@ async def run_concurrent_appends(engine, n_writers: int) -> list[int]:
     """Spawn concurrent appends to log transactions under stress."""
 
     async def append_one(i: int) -> int:
-        from cortex.engine.core.store_mixin import causal_write
+        from babylon60.engine.core.store_mixin import causal_write
 
         async with engine.session() as conn:
             with causal_write(conn):

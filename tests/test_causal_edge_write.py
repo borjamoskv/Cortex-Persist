@@ -12,7 +12,7 @@ import json
 import aiosqlite
 import pytest
 
-from cortex.engine.core.fact_store_core import insert_fact_record
+from babylon60.engine.core.fact_store_core import insert_fact_record
 
 # ── Helpers ─────────────────────────────────────────────────────────────
 

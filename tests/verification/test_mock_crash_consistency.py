@@ -5,7 +5,7 @@ from unittest.mock import patch, AsyncMock
 import logging
 import os
 from pathlib import Path
-from cortex.database.core import causal_write
+from babylon60.database.core import causal_write
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class InducedCrashError(Exception):
 @pytest.fixture
 async def engine(tmp_path: Path, monkeypatch):
     """Create a CortexEngine with a temp database, close after test."""
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
     monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
@@ -28,7 +28,7 @@ async def engine(tmp_path: Path, monkeypatch):
     await e.init_db()
 
     # Ensure causal_edges exists
-    from cortex.engine.flow.causality import AsyncCausalGraph
+    from babylon60.engine.flow.causality import AsyncCausalGraph
 
     async with e.session() as conn:
         cg = AsyncCausalGraph(conn)
@@ -69,7 +69,7 @@ async def test_crash_after_ledger_before_db_write(engine):
     Test scenario where Ledger (transaction) is updated but crash occurs before DB fact write completes.
     Since they share the same SQLite connection (and transaction), the crash should rollback the Ledger write.
     """
-    from cortex.engine.core import store_mixin
+    from babylon60.engine.core import store_mixin
 
     async def crashing_insert_fact_record(*args, **kwargs):
         raise InducedCrashError("Crash inside db insert")

@@ -10,11 +10,11 @@ CORTEX policy: FTS indexes the PLAINTEXT provided at ingestion.
 import aiosqlite
 import pytest
 
-from cortex.crypto.aes import CortexEncrypter
-from cortex.database.schema import CREATE_FACTS
-from cortex.database.schema_extensions import CREATE_FACTS_FTS
-from cortex.engine.core.fact_store_core import insert_fact_record
-from cortex.search.hybrid import hybrid_search
+from babylon60.crypto.aes import CortexEncrypter
+from babylon60.database.schema import CREATE_FACTS
+from babylon60.database.schema_extensions import CREATE_FACTS_FTS
+from babylon60.engine.core.fact_store_core import insert_fact_record
+from babylon60.search.hybrid import hybrid_search
 
 # Fixed key for testing
 TEST_MASTER_KEY = b"1" * 32

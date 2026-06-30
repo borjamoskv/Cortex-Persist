@@ -7,9 +7,9 @@ import os
 os.environ.setdefault("CORTEX_TESTING", "1")
 
 import pytest
-from cortex.extensions.llm._models import BaseProvider, IntentProfile, ReasoningMode, CortexPrompt
-from cortex.extensions.llm.router import CortexLLMRouter
-from cortex.config import LLM_LOCAL_FIRST
+from babylon60.extensions.llm._models import BaseProvider, IntentProfile, ReasoningMode, CortexPrompt
+from babylon60.extensions.llm.router import CortexLLMRouter
+from babylon60.config import LLM_LOCAL_FIRST
 
 
 class MockProvider(BaseProvider):

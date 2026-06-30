@@ -8,7 +8,7 @@ Reality Level: C5-REAL
 import pytest
 import sqlite3
 from pathlib import Path
-from cortex.utils.tda_routing import HodgeMemoryRouter
+from babylon60.utils.tda_routing import HodgeMemoryRouter
 
 
 def test_memory_routing_discrete(tmp_path):

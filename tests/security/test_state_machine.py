@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 
-from cortex.security.policy import (
+from babylon60.security.policy import (
     assert_not_mutated,
     can_transition,
     classify_risk,
@@ -11,7 +11,7 @@ from cortex.security.policy import (
     seal_artifact,
     transition_artifact,
 )
-from cortex.security.types import (
+from babylon60.security.types import (
     ImmuneArtifact,
     ImmunityState,
     PathogenProfile,

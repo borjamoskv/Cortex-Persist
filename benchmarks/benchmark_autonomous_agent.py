@@ -24,10 +24,10 @@ from typing import Any
 # Adjust path to import cortex module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cortex.agents.autonomous import AutonomousAgent, create_autonomous_agent
-from cortex.agents.builtin_tools import register_all_builtin_tools
-from cortex.agents.message_schema import AgentMessage
-from cortex.agents.tools import ToolRegistry
+from babylon60.agents.autonomous import AutonomousAgent, create_autonomous_agent
+from babylon60.agents.builtin_tools import register_all_builtin_tools
+from babylon60.agents.message_schema import AgentMessage
+from babylon60.agents.tools import ToolRegistry
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")

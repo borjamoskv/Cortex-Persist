@@ -4,7 +4,7 @@ import uuid
 import time
 from unittest.mock import patch
 import pytest
-from cortex.memory.reconsolidation import (
+from babylon60.memory.reconsolidation import (
     ReconsolidationTracker,
     ReconsolidationOutcome,
     LabilizationRecord,

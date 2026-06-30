@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-from cortex.extensions.aether.models import AgentTask, TaskStatus
-from cortex.extensions.aether.queue import TaskQueue
+from babylon60.extensions.aether.models import AgentTask, TaskStatus
+from babylon60.extensions.aether.queue import TaskQueue
 
 
 @pytest.fixture

@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-from cortex.guards.thermodynamic import ThermodynamicCounters, should_enter_decorative_mode
+from babylon60.guards.thermodynamic import ThermodynamicCounters, should_enter_decorative_mode
 
 
 def test_decorative_mode_triggers():

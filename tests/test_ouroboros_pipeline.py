@@ -2,16 +2,16 @@ import pytest
 import hashlib
 from datetime import datetime, timezone
 
-from cortex.crypto.keys import KeyManager, Signer
-from cortex.swarm.byzantine_judge import ByzantineJudge
-from cortex.swarm.gatekeeper import ZeroKnowledgeGatekeeper
+from babylon60.crypto.keys import KeyManager, Signer
+from babylon60.swarm.byzantine_judge import ByzantineJudge
+from babylon60.swarm.gatekeeper import ZeroKnowledgeGatekeeper
 
 
 # Mocking SandboxJIT again for pipeline testing
 class MockSandboxJIT:
     def execute(self, code, context):
         if "VIOLATION" in code:
-            from cortex.engine.core.sandbox_jit import JITSandboxViolation
+            from babylon60.engine.core.sandbox_jit import JITSandboxViolation
 
             raise JITSandboxViolation("Pipeline violation")
         return context

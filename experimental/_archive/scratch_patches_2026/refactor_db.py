@@ -122,7 +122,7 @@ import json
 import logging
 from typing import Any
 
-from cortex.audit.cognitive_config import _CREATE_ROUTER_LOG_SQL
+from babylon60.audit.cognitive_config import _CREATE_ROUTER_LOG_SQL
 
 logger = logging.getLogger("cortex.audit.cognitive_db")
 
@@ -234,7 +234,7 @@ async def ensure_table_for_router(router: Any) -> None:
     # 2. replace in router
     replacement = """    async def ensure_table(self) -> None:
         \"\"\"Ensures log table existence and migrates old schemas to support unique constraints.\"\"\"
-        from cortex.audit.cognitive_db import ensure_table_for_router
+        from babylon60.audit.cognitive_db import ensure_table_for_router
         await ensure_table_for_router(self)
 """
     router_code = router_code.replace(ensure_table_code, replacement)

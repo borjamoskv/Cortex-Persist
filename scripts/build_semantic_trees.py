@@ -17,7 +17,7 @@ import aiosqlite
 # Ensure we can import cortex
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from cortex.engine.logic.atms import AtmsAdapter
+from babylon60.engine.logic.atms import AtmsAdapter
 
 from babylon60.database.core import connect_async
 

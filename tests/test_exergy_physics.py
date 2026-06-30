@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
+from babylon60.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
 
 import pytest
 
@@ -86,7 +86,7 @@ def test_blast_radius_type_safety():
 
 def test_ultrathink_arsenal_path_resolution():
     """Verify that SYS_OPERATOR placeholders are resolved dynamically at runtime (VM-04)."""
-    from cortex.agents.primitives.ultrathink_arsenal import get_ultrathink_arsenal
+    from babylon60.agents.primitives.ultrathink_arsenal import get_ultrathink_arsenal
     import getpass
 
     current_user = getpass.getuser()

@@ -2,8 +2,8 @@ import pytest
 import hashlib
 from datetime import datetime, timezone
 
-from cortex.crypto.keys import KeyManager, Signer
-from cortex.swarm.gatekeeper import ZeroKnowledgeGatekeeper, SecurityViolationError
+from babylon60.crypto.keys import KeyManager, Signer
+from babylon60.swarm.gatekeeper import ZeroKnowledgeGatekeeper, SecurityViolationError
 
 
 @pytest.fixture

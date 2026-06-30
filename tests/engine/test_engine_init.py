@@ -2,7 +2,7 @@
 import pytest
 import asyncio
 from pathlib import Path
-from cortex.engine import CortexEngine
+from babylon60.engine import CortexEngine
 
 
 @pytest.mark.asyncio

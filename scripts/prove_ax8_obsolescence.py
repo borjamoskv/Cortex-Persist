@@ -12,7 +12,7 @@ exergy_tier: P2
 import asyncio
 import logging
 
-from cortex.engine.legion import Squadron, SwarmAgent, SwarmSignal
+from babylon60.engine.legion import Squadron, SwarmAgent, SwarmSignal
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("AX8-Simulator")

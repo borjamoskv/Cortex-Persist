@@ -14,9 +14,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.memory.compression import CompressionResult, SemanticCompressor
-from cortex.memory.models import MemoryEvent
-from cortex.memory.working import WorkingMemoryL1
+from babylon60.memory.compression import CompressionResult, SemanticCompressor
+from babylon60.memory.models import MemoryEvent
+from babylon60.memory.working import WorkingMemoryL1
 
 # ─── Helpers ─────────────────────────────────────────────────────────────
 
@@ -233,7 +233,7 @@ class TestThalamusGate:
 
     @pytest.mark.asyncio
     async def test_low_density_rejected(self, mock_manager):
-        from cortex.memory.thalamus import ThalamusGate
+        from babylon60.memory.thalamus import ThalamusGate
 
         gate = ThalamusGate(mock_manager, min_density=10)
         should, action, _ = await gate.filter(
@@ -246,7 +246,7 @@ class TestThalamusGate:
 
     @pytest.mark.asyncio
     async def test_normal_content_passes(self, mock_manager):
-        from cortex.memory.thalamus import ThalamusGate
+        from babylon60.memory.thalamus import ThalamusGate
 
         gate = ThalamusGate(mock_manager, min_density=5)
 
@@ -266,7 +266,7 @@ class TestThalamusGate:
 
     @pytest.mark.asyncio
     async def test_identical_content_rejected(self, mock_manager):
-        from cortex.memory.thalamus import ThalamusGate
+        from babylon60.memory.thalamus import ThalamusGate
 
         gate = ThalamusGate(mock_manager, min_density=5)
 
@@ -291,7 +291,7 @@ class TestThalamusGate:
 
     @pytest.mark.asyncio
     async def test_graceful_degradation_on_retrieval_error(self, mock_manager):
-        from cortex.memory.thalamus import ThalamusGate
+        from babylon60.memory.thalamus import ThalamusGate
 
         gate = ThalamusGate(mock_manager, min_density=5)
 
@@ -318,7 +318,7 @@ class TestAdaptiveResonanceGate:
 
     @pytest.fixture
     def mock_engram(self):
-        from cortex.memory.engrams import CortexSemanticEngram
+        from babylon60.memory.engrams import CortexSemanticEngram
 
         return CortexSemanticEngram(
             id="new_1",
@@ -340,7 +340,7 @@ class TestAdaptiveResonanceGate:
 
     @pytest.mark.asyncio
     async def test_reset_on_no_neighbors(self, mock_engram, mock_vector_store):
-        from cortex.memory.resonance import AdaptiveResonanceGate
+        from babylon60.memory.resonance import AdaptiveResonanceGate
 
         gate = AdaptiveResonanceGate(vector_store=mock_vector_store, rho=0.85)
         status, engram = await gate.gate(mock_engram)
@@ -351,8 +351,8 @@ class TestAdaptiveResonanceGate:
 
     @pytest.mark.asyncio
     async def test_resonance_on_matching_neighbor(self, mock_engram, mock_vector_store):
-        from cortex.memory.engrams import CortexSemanticEngram
-        from cortex.memory.resonance import AdaptiveResonanceGate
+        from babylon60.memory.engrams import CortexSemanticEngram
+        from babylon60.memory.resonance import AdaptiveResonanceGate
 
         existing = CortexSemanticEngram(
             id="existing_1",
@@ -377,8 +377,8 @@ class TestAdaptiveResonanceGate:
 
     @pytest.mark.asyncio
     async def test_precision_mode_raises_vigilance(self, mock_engram, mock_vector_store):
-        from cortex.memory.engrams import CortexSemanticEngram
-        from cortex.memory.resonance import AdaptiveResonanceGate
+        from babylon60.memory.engrams import CortexSemanticEngram
+        from babylon60.memory.resonance import AdaptiveResonanceGate
 
         # Engram that would match at rho=0.85 but NOT at rho=0.95
         marginal = CortexSemanticEngram(
@@ -400,7 +400,7 @@ class TestAdaptiveResonanceGate:
 
     @pytest.mark.asyncio
     async def test_no_vector_store_search_graceful(self, mock_engram):
-        from cortex.memory.resonance import AdaptiveResonanceGate
+        from babylon60.memory.resonance import AdaptiveResonanceGate
 
         # Vector store without search_similar
         bare_vs = MagicMock(spec=[])
@@ -418,26 +418,26 @@ class TestCosineSimilarity:
     """Tests for the cosine_similarity utility in resonance module."""
 
     def test_identical_vectors(self):
-        from cortex.memory.resonance import cosine_similarity
+        from babylon60.memory.resonance import cosine_similarity
 
         assert cosine_similarity([1.0, 0.0], [1.0, 0.0]) == pytest.approx(1.0)
 
     def test_orthogonal_vectors(self):
-        from cortex.memory.resonance import cosine_similarity
+        from babylon60.memory.resonance import cosine_similarity
 
         assert cosine_similarity([1.0, 0.0], [0.0, 1.0]) == pytest.approx(0.0)
 
     def test_empty_vectors(self):
-        from cortex.memory.resonance import cosine_similarity
+        from babylon60.memory.resonance import cosine_similarity
 
         assert cosine_similarity([], []) == 0.0
 
     def test_mismatched_lengths(self):
-        from cortex.memory.resonance import cosine_similarity
+        from babylon60.memory.resonance import cosine_similarity
 
         assert cosine_similarity([1.0], [1.0, 0.0]) == 0.0
 
     def test_zero_vector(self):
-        from cortex.memory.resonance import cosine_similarity
+        from babylon60.memory.resonance import cosine_similarity
 
         assert cosine_similarity([0.0, 0.0], [1.0, 0.0]) == 0.0

@@ -5,7 +5,7 @@ Validates epistemic rigidity against Bot Inflation and Sensor Drift.
 """
 
 import pytest
-from cortex.guards.substack_crawler_guard import SubstackCrawlerGuard
+from babylon60.guards.substack_crawler_guard import SubstackCrawlerGuard
 
 
 @pytest.fixture

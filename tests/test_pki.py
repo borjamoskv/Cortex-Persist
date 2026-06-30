@@ -4,7 +4,7 @@ import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from cortex.consensus.pki import TrustMatrix
+from babylon60.consensus.pki import TrustMatrix
 
 
 @pytest.fixture

@@ -22,8 +22,8 @@ from typing import Any
 # Ensure repository root is in sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cortex.extensions.llm._models import CortexPrompt, IntentProfile
-from cortex.extensions.llm.provider import LLMProvider
+from babylon60.extensions.llm._models import CortexPrompt, IntentProfile
+from babylon60.extensions.llm.provider import LLMProvider
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")

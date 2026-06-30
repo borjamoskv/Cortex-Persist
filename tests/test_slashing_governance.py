@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 
-from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.engine.forensic.slashing import SlashingPenalty
+from babylon60.engine import CortexEngine as AsyncCortexEngine
+from babylon60.engine.forensic.slashing import SlashingPenalty
 
 
 @pytest.mark.asyncio

@@ -10,8 +10,8 @@ from __future__ import annotations
 import aiosqlite
 import pytest
 
-from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.models import MemoryEvent
+from babylon60.memory.ledger import EventLedgerL3
+from babylon60.memory.models import MemoryEvent
 
 # ─── Fixtures ────────────────────────────────────────────────────────────
 

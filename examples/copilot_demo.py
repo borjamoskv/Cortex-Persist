@@ -25,18 +25,18 @@ from pathlib import Path
 # Ensure project root on path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from cortex.agents.builtins.copilot_agent import (
+from babylon60.agents.builtins.copilot_agent import (
     CopilotAgent,
     create_copilot_agent,
 )
-from cortex.agents.copilot_contracts import (
+from babylon60.agents.copilot_contracts import (
     CopilotContextPayload,
     CursorContext,
     ProjectContext,
     SuggestionStatus,
     SuggestionVerdict,
 )
-from cortex.agents.message_schema import MessageKind, new_message
+from babylon60.agents.message_schema import MessageKind, new_message
 
 logging.basicConfig(
     level=logging.INFO,

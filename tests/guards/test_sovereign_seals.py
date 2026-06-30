@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock, AsyncMock
-from cortex.guards.sovereign_seals import (
+from babylon60.guards.sovereign_seals import (
     _resolve_git_hook_path,
     _parse_pyproject_deps,
     _extract_imports,
@@ -42,7 +42,7 @@ def test_extract_imports():
 import os
 from pathlib import Path
 import json, sys
-from cortex.guards import seals
+from babylon60.guards import seals
 """
     imports = _extract_imports(source)
     assert "os" in imports

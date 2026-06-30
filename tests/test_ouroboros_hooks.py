@@ -1,9 +1,9 @@
 import pytest
 import asyncio
 import sqlite3
-from cortex.ledger.ledger_core import SovereignLedger
-from cortex.storage.turbopuffer import TurbopufferVectorBackend
-from cortex.extensions.daemon.monitors.epistemic import EpistemicMonitor
+from babylon60.ledger.ledger_core import SovereignLedger
+from babylon60.storage.turbopuffer import TurbopufferVectorBackend
+from babylon60.extensions.daemon.monitors.epistemic import EpistemicMonitor
 from dataclasses import dataclass
 
 # [OUROBOROS] Vector P1.2 Integration Tests

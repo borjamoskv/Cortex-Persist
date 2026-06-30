@@ -6,8 +6,8 @@ Verification tests for Cryptographic Trajectory Verification (Epoch 15).
 import pytest
 import hashlib
 
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.engine.forensic.replay import ReplayEngine
+from babylon60.audit.ledger import EnterpriseAuditLedger
+from babylon60.engine.forensic.replay import ReplayEngine
 
 
 class MockLedgerConnection:

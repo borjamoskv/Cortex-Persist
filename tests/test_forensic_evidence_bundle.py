@@ -7,8 +7,8 @@ import sqlite3
 import aiosqlite
 import pytest
 
-from cortex.database.core import _original_sqlite3_connect
-from cortex.forensics.evidence_bundle import (
+from babylon60.database.core import _original_sqlite3_connect
+from babylon60.forensics.evidence_bundle import (
     EVIDENCE_COMMIT_ACTION,
     build_evidence_manifest,
     canonical_json_bytes,
@@ -17,8 +17,8 @@ from cortex.forensics.evidence_bundle import (
     verify_evidence_commit,
     verify_evidence_manifest,
 )
-from cortex.ledger import SovereignLedger
-from cortex.utils.canonical import canonical_json, compute_tx_hash, now_iso
+from babylon60.ledger import SovereignLedger
+from babylon60.utils.canonical import canonical_json, compute_tx_hash, now_iso
 
 FIXED_TS = "2026-05-05T00:00:00+00:00"
 

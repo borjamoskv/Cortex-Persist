@@ -3,7 +3,7 @@
 
 import pytest
 
-from cortex.guards.causal_closure_guard import CausalClosureGuard, SwarmProposal
+from babylon60.guards.causal_closure_guard import CausalClosureGuard, SwarmProposal
 
 
 @pytest.fixture

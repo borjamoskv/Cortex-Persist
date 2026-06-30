@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex.extensions.swarm.crystal_synthesis import synthesize_crystals
-from cortex.utils.result import Ok
+from babylon60.extensions.swarm.crystal_synthesis import synthesize_crystals
+from babylon60.utils.result import Ok
 
 
 @pytest.mark.asyncio

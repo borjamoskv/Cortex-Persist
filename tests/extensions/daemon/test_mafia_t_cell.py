@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 import re
-from cortex.engine.causal.taint_engine import MHCAntigenRouter
-from cortex.extensions.daemon.t_cell_ihelp_purge import IHelpPurgeDaemon
-from cortex.routes.telemetry import BASE_MAFIA_NODES
+from babylon60.engine.causal.taint_engine import MHCAntigenRouter
+from babylon60.extensions.daemon.t_cell_ihelp_purge import IHelpPurgeDaemon
+from babylon60.routes.telemetry import BASE_MAFIA_NODES
 
 
 def test_t_cell_ihelp_purge_signature_construction():
@@ -91,7 +91,7 @@ async def test_t_cell_ihelp_purge_scan_telemetry_targets(monkeypatch, tmp_path):
     import asyncio
     from unittest.mock import AsyncMock, patch, MagicMock
     import httpx
-    from cortex.database.core import connect_async
+    from babylon60.database.core import connect_async
 
     db_file = tmp_path / "cortex_test_scan.db"
     monkeypatch.setenv("CORTEX_DB_PATH", str(db_file))

@@ -2,8 +2,8 @@ import os
 import json
 import pytest
 from click.testing import CliRunner
-from cortex.cli import cli
-from cortex.engine import CortexEngine
+from babylon60.cli import cli
+from babylon60.engine import CortexEngine
 
 def test_cli_apoptosis_aof(tmp_path):
     """

@@ -5,7 +5,7 @@ import pytest
 from pathlib import Path
 import json
 
-from cortex.engine import CortexEngine
+from babylon60.engine import CortexEngine
 
 pytestmark = pytest.mark.asyncio
 
@@ -88,7 +88,7 @@ async def test_ataque_c_wal_injection(tmp_path):
 
     async with engine:
         # 1. Ghost mutation (we force corruption by enabling context)
-        from cortex.database.core import CortexConnection
+        from babylon60.database.core import CortexConnection
 
         external_conn = sqlite3.connect(db_path, factory=CortexConnection)
         external_conn.authorize_causal_writes()

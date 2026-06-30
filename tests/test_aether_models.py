@@ -6,7 +6,7 @@ No I/O, no network, no database. Pure unit tests.
 
 from __future__ import annotations
 
-from cortex.extensions.aether.models import (
+from babylon60.extensions.aether.models import (
     AetherAlert,
     AetherTestResult,
     AgentTask,

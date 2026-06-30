@@ -9,8 +9,8 @@ import json
 import os
 from pathlib import Path
 
-from cortex.engine.core.canonical import compute_object_hash
-from cortex.engine.core.epistemic_object import Assertion, SupportRelation
+from babylon60.engine.core.canonical import compute_object_hash
+from babylon60.engine.core.epistemic_object import Assertion, SupportRelation
 
 VECTORS_DIR = Path(__file__).parent.parent / "spec" / "vectors"
 

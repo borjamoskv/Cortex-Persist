@@ -15,7 +15,7 @@ import sys
 # Ensure CORTEX is in path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from cortex.storage.turbopuffer import TurbopufferVectorBackend
+from babylon60.storage.turbopuffer import TurbopufferVectorBackend
 
 
 async def test_turbopuffer_backend():

@@ -25,7 +25,7 @@ def log_to_ledger(action: str, resource: str, status: str):
     Synchronous wrapper to log an action to the CORTEX SQLite Audit Ledger.
     """
     try:
-        from cortex.audit.ledger import EnterpriseAuditLedger
+        from babylon60.audit.ledger import EnterpriseAuditLedger
     except ImportError:
         print("⚠️ Warning: Could not import EnterpriseAuditLedger. Skipping audit log.")
         return

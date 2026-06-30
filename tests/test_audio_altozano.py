@@ -6,7 +6,7 @@ import pytest
 import soundfile as sf
 
 try:
-    from cortex.extensions.audio.altozano import AltozanoAnalyzer
+    from babylon60.extensions.audio.altozano import AltozanoAnalyzer
 except ImportError:
     pass
 

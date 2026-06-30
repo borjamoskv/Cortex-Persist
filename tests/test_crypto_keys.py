@@ -1,6 +1,6 @@
 import pytest
 import base64
-from cortex.crypto.keys import KeyManager, Signer, Verifier
+from babylon60.crypto.keys import KeyManager, Signer, Verifier
 
 
 @pytest.fixture

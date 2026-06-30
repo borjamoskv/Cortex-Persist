@@ -14,10 +14,10 @@ import pytest
 import sys
 from pathlib import Path
 
-from cortex.core import config
-from cortex.extensions.billing.models import BillingEvent, FailureType, StripeInvoice
-from cortex.extensions.billing.gateway import StripeBillingGateway
-from cortex.extensions.billing.metering import CausalMetering
+from babylon60.core import config
+from babylon60.extensions.billing.models import BillingEvent, FailureType, StripeInvoice
+from babylon60.extensions.billing.gateway import StripeBillingGateway
+from babylon60.extensions.billing.metering import CausalMetering
 
 
 @pytest.fixture
@@ -84,7 +84,7 @@ def test_stripe_invoice_serialization():
 
 def test_gateway_mock_creation(monkeypatch):
     """StripeBillingGateway should initialize and handle mock mode."""
-    import cortex.extensions.billing.gateway as gw
+    import babylon60.extensions.billing.gateway as gw
 
     monkeypatch.setattr(gw.config, "STRIPE_SECRET_KEY", "sk_test_mock_123")
     monkeypatch.setattr(gw.config, "STRIPE_WEBHOOK_SECRET", "whsec_mock_456")
@@ -158,7 +158,7 @@ def test_exergy_evaluation():
 
 def test_record_and_quarantine_flow(tmp_db, monkeypatch):
     """CausalMetering should save records and quarantine F2 events."""
-    import cortex.extensions.billing.gateway as gw
+    import babylon60.extensions.billing.gateway as gw
 
     monkeypatch.setattr(gw.config, "STRIPE_SECRET_KEY", "sk_test_mock_123")
     gateway = StripeBillingGateway()

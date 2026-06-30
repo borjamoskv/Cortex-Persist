@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 from unittest.mock import AsyncMock, patch
-from cortex.storage.turbopuffer import TurbopufferVectorBackend
+from babylon60.storage.turbopuffer import TurbopufferVectorBackend
 
 
 @pytest.mark.asyncio
@@ -28,7 +28,7 @@ async def test_ouroboros_prune():
 @pytest.mark.asyncio
 async def test_ouroboros_hook_dynamic_threshold():
     """Verify dynamic threshold fetching from SQLite facts table."""
-    from cortex.extensions.evolution.ouroboros_hook import get_dynamic_threshold
+    from babylon60.extensions.evolution.ouroboros_hook import get_dynamic_threshold
 
     conn = AsyncMock()
 

@@ -2,8 +2,8 @@ import asyncio
 import os
 import tempfile
 import pytest
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.database.core import connect_async_ctx, connect
+from babylon60.audit.ledger import EnterpriseAuditLedger
+from babylon60.database.core import connect_async_ctx, connect
 
 
 @pytest.mark.asyncio

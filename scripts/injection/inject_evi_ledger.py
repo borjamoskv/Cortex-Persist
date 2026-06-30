@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath('.'))
 
-from cortex.audit.ledger import EnterpriseAuditLedger
+from babylon60.audit.ledger import EnterpriseAuditLedger
 
 import cortex_rs
 from babylon60.database.core import connect_async
@@ -41,7 +41,7 @@ async def inject_primitives():
     db_path = os.getenv("CORTEX_DB_PATH", "cortex_reality.db")
     
     # We must use the factory pattern since the database has the CortexConnection guard
-    from cortex.database.core import CortexConnection
+    from babylon60.database.core import CortexConnection
     
     async with connect_async(db_path, factory=CortexConnection) as conn:
         # Since we are writing to the audit ledger, we MUST explicitly authorize causal writes

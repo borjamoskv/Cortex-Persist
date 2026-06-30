@@ -1,9 +1,9 @@
 import asyncio
 
-from cortex.audit.compliance_bundle import ComplianceBundler
-from cortex.audit.compliance_verifier import ComplianceVerifier
-from cortex.audit.ledger import MasterLedger
-from cortex.crypto.keys import KeyManager
+from babylon60.audit.compliance_bundle import ComplianceBundler
+from babylon60.audit.compliance_verifier import ComplianceVerifier
+from babylon60.audit.ledger import MasterLedger
+from babylon60.crypto.keys import KeyManager
 
 
 async def test_e2e():

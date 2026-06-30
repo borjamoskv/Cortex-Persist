@@ -4,7 +4,7 @@ import sqlite3
 import time
 from pathlib import Path
 from unittest.mock import patch
-from cortex.extensions.swarm.budget import SwarmBudgetManager, HARD_LIMIT_USD, get_budget_manager
+from babylon60.extensions.swarm.budget import SwarmBudgetManager, HARD_LIMIT_USD, get_budget_manager
 
 
 @pytest.fixture
@@ -89,7 +89,7 @@ def test_list_missions(budget_manager):
 
 
 def test_get_budget_manager():
-    import cortex.extensions.swarm.budget
+    import babylon60.extensions.swarm.budget
 
     # Reset singleton for test
     cortex.extensions.swarm.budget._instance = None

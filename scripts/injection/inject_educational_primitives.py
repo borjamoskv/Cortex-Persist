@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath('.'))
 
-from cortex.audit.ledger import EnterpriseAuditLedger
+from babylon60.audit.ledger import EnterpriseAuditLedger
 
 import cortex_rs
 from babylon60.database.core import connect_async

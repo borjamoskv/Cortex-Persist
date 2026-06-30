@@ -16,7 +16,7 @@ def test_cli_lazy_loading_invariant():
     # all loaded modules that end with '_cmds'.
     code = (
         "import sys\n"
-        "import cortex.cli.main\n"
+        "import babylon60.cli.main\n"
         "loaded_cmds = [m for m in sys.modules if m.startswith('cortex.cli.') and m.endswith('_cmds')]\n"
         "print(','.join(loaded_cmds))\n"
     )
@@ -39,7 +39,7 @@ def test_cli_lazy_loader_works():
     """
     code = (
         "import sys\n"
-        "import cortex.cli.main\n"
+        "import babylon60.cli.main\n"
         "cmd = cortex.cli.main.cli.get_command(None, 'agent')\n"
         "loaded_cmds = [m for m in sys.modules if m.startswith('cortex.cli.') and m.endswith('_cmds')]\n"
         "print(','.join(loaded_cmds))\n"

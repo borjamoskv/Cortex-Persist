@@ -10,7 +10,7 @@ import pytest
 pytest.importorskip("qdrant_client")
 from unittest.mock import AsyncMock, MagicMock
 
-from cortex.storage.qdrant import (
+from babylon60.storage.qdrant import (
     QdrantVectorBackend,
     VectorBackend,
     init_vector_backend,

@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized Benchmark for CTRE Concurrency
 import time
 
-from cortex.guards.ctre_guard import HAS_RUST_CTRE, CTREGuard
+from babylon60.guards.ctre_guard import HAS_RUST_CTRE, CTREGuard
 
 
 def run_ctre_benchmark(iterations=1000):

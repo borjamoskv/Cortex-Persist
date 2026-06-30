@@ -3,8 +3,8 @@ from __future__ import annotations
 
 
 def test_queue_retries_on_provider_failure(tmp_path):
-    from cortex.ledger.queue import EnrichmentQueue
-    from cortex.ledger.store import LedgerStore
+    from babylon60.ledger.queue import EnrichmentQueue
+    from babylon60.ledger.store import LedgerStore
 
     db = tmp_path / "ledger.db"
     store = LedgerStore(db)

@@ -4,8 +4,8 @@ pytestmark = pytest.mark.chaos
 import sqlite3
 import aiosqlite
 import hashlib
-from cortex.database.core import connect, connect_async
-from cortex.audit.ledger import EnterpriseAuditLedger
+from babylon60.database.core import connect, connect_async
+from babylon60.audit.ledger import EnterpriseAuditLedger
 
 # [Level 20: Physical Claims Audit - Storage Boundary]
 # Destructive tests to measure Causal Surface Area at the DB level
@@ -23,7 +23,7 @@ def test_ataque_b_sql_direct(test_db_path):
     """
     # 1. Bypass factory entirely (cortex.database.core patches sqlite3.connect)
     with pytest.raises(RuntimeError, match=r"Direct sqlite3.connect\(\) is structurally forbidden"):
-        import cortex.database.core
+        import babylon60.database.core
 
         cortex.database.core.sqlite3.connect(test_db_path)
 

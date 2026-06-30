@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from cortex.engine.core import shared_bus as shared_bus_module
-from cortex.swarm.swarm_10k import SwarmCommander
-from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
+from babylon60.engine.core import shared_bus as shared_bus_module
+from babylon60.swarm.swarm_10k import SwarmCommander
+from babylon60.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 
 @pytest.fixture(autouse=True)

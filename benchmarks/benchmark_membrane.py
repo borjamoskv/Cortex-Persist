@@ -9,7 +9,7 @@ import torchhd  # pyright: ignore[reportMissingImports]
 # Adjust path to import cortex module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cortex.memory.epistemic_membrane import EpistemicMembrane
+from babylon60.memory.epistemic_membrane import EpistemicMembrane
 
 # Configure logging to write to stdout
 logging.basicConfig(level=logging.INFO, format="%(message)s")

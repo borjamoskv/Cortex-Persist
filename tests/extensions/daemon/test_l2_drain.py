@@ -1,7 +1,7 @@
 import pytest
 import time
 from unittest.mock import AsyncMock, MagicMock
-from cortex.extensions.daemon.monitors.l2_drain import L2DrainMonitor, MAX_AGE_SECONDS
+from babylon60.extensions.daemon.monitors.l2_drain import L2DrainMonitor, MAX_AGE_SECONDS
 
 
 @pytest.mark.asyncio

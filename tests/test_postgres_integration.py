@@ -16,9 +16,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from cortex.api.core import app
-from cortex.auth.deps import require_auth, require_permission
-from cortex.storage import StorageMode
+from babylon60.api.core import app
+from babylon60.auth.deps import require_auth, require_permission
+from babylon60.storage import StorageMode
 
 
 class MockPostgresRecord(dict):

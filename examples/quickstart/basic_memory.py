@@ -23,7 +23,7 @@ async def main() -> None:
     db_path = Path(tempfile.mkdtemp()) / "quickstart.db"
 
     # Import CortexEngine - the single entry point for all operations
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     engine = CortexEngine(db_path=str(db_path))
 

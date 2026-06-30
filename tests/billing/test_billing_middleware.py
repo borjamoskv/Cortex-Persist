@@ -9,8 +9,8 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi import Request
-from cortex.api.middleware import CortexBillingMiddleware
-from cortex.auth.models import AuthResult
+from babylon60.api.middleware import CortexBillingMiddleware
+from babylon60.auth.models import AuthResult
 
 
 class FakePool:
@@ -74,7 +74,7 @@ async def test_billing_middleware_success_db_lookup():
         patch("stripe.SubscriptionItem.create_usage_record", create=True) as mock_stripe_call,
     ):
         # Inject STRIPE_SECRET_KEY
-        from cortex.core import config
+        from babylon60.core import config
 
         with patch.object(config, "STRIPE_SECRET_KEY", "sk_live_prodkey"):
             await middleware._report_usage(api_key, mock_request)
@@ -108,7 +108,7 @@ async def test_billing_middleware_bypass_prevention_no_item_in_db():
         patch("cortex.auth.manager.get_auth_manager", return_value=mock_auth_manager),
         patch("stripe.SubscriptionItem.create_usage_record", create=True) as mock_stripe_call,
     ):
-        from cortex.core import config
+        from babylon60.core import config
 
         with patch.object(config, "STRIPE_SECRET_KEY", "sk_live_prodkey"):
             await middleware._report_usage(api_key, mock_request)

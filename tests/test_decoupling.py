@@ -7,10 +7,10 @@ is delayed or failing.
 
 import pytest
 
-from cortex.core.config import CortexConfig
-from cortex.engine import CortexEngine
-from cortex.enrichment.worker import EnrichmentWorker
-from cortex.verification.oracle import VerificationOracle
+from babylon60.core.config import CortexConfig
+from babylon60.engine import CortexEngine
+from babylon60.enrichment.worker import EnrichmentWorker
+from babylon60.verification.oracle import VerificationOracle
 
 
 @pytest.fixture

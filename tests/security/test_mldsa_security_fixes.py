@@ -5,9 +5,9 @@ import stat
 import pytest
 from unittest.mock import patch, MagicMock
 
-from cortex.ledger.store import LedgerStore
-from cortex.ledger.verifier import LedgerVerifier
-from cortex.crypto.aes import reset_default_encrypter
+from babylon60.ledger.store import LedgerStore
+from babylon60.ledger.verifier import LedgerVerifier
+from babylon60.crypto.aes import reset_default_encrypter
 
 
 @pytest.fixture

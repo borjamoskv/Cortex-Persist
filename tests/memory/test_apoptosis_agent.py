@@ -8,9 +8,9 @@ import sqlite3
 import pytest
 from unittest.mock import AsyncMock
 
-from cortex.memory.apoptosis import ApoptosisAgent
-from cortex.database.schema import CREATE_FACTS
-from cortex.database.core import connect_async_ctx, causal_write
+from babylon60.memory.apoptosis import ApoptosisAgent
+from babylon60.database.schema import CREATE_FACTS
+from babylon60.database.core import connect_async_ctx, causal_write
 
 
 @pytest.fixture

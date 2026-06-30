@@ -16,7 +16,7 @@ import pytest
 
 @pytest.fixture
 def pipeline():
-    from cortex.engine.flow.guard_pipeline import GuardPipeline
+    from babylon60.engine.flow.guard_pipeline import GuardPipeline
 
     return GuardPipeline()
 

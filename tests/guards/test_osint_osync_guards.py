@@ -15,8 +15,8 @@ try:
 except ImportError:
     Image = None
 
-from cortex.guards.osint_guard import OSINTGuard, OSINTViolationError
-from cortex.guards.osync_guard import OSYNCGuard, OSYNCViolationError
+from babylon60.guards.osint_guard import OSINTGuard, OSINTViolationError
+from babylon60.guards.osync_guard import OSYNCGuard, OSYNCViolationError
 
 
 def test_osint_guard_verify_clean_text() -> None:

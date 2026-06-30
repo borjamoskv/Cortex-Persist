@@ -10,7 +10,7 @@ exergy_tier: P2
 
 import hashlib
 
-from cortex.compaction.pruner import FactRecord, MerklePruner
+from babylon60.compaction.pruner import FactRecord, MerklePruner
 
 
 def test_pruner():

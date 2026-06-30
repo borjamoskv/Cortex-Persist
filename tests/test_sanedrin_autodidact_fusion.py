@@ -1,9 +1,9 @@
 import asyncio
 import json
 import pytest
-from cortex.swarm.supervisor import SwarmSupervisor
-from cortex.database.core import connect_async, causal_write
-from cortex.config import DB_PATH
+from babylon60.swarm.supervisor import SwarmSupervisor
+from babylon60.database.core import connect_async, causal_write
+from babylon60.config import DB_PATH
 
 
 @pytest.mark.asyncio
@@ -14,7 +14,7 @@ async def test_epistemic_breaker_rejects_narrative(tmp_path):
     """
     db_path = str(tmp_path / "cortex_test.db")
 
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     engine = CortexEngine(db_path=db_path, auto_embed=False)
     await engine.init_db()

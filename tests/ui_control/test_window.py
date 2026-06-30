@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex.extensions.ui_control.models import AppTarget
-from cortex.extensions.ui_control.window import WindowEngine
+from babylon60.extensions.ui_control.models import AppTarget
+from babylon60.extensions.ui_control.window import WindowEngine
 
 
 @pytest.fixture

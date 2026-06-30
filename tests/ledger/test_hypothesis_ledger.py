@@ -3,7 +3,7 @@ import json
 
 from hypothesis import given, settings, strategies as st
 
-from cortex.audit.ledger import EnterpriseAuditLedger
+from babylon60.audit.ledger import EnterpriseAuditLedger
 
 # We use async sqlite3 memory DB for property-based testing of core ledger invariants
 

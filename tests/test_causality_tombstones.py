@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-from cortex.engine.flow.causality import (
+from babylon60.engine.flow.causality import (
     CausalGraph,
     EpistemicStatus,
     LedgerEvent,

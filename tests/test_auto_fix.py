@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from cortex.extensions.swarm.auto_fix import (
+from babylon60.extensions.swarm.auto_fix import (
     AutoFixPipeline,
     GhostClass,
     GhostProtocol,

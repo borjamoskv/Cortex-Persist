@@ -7,8 +7,8 @@ import pytest
 import aiosqlite
 from hypothesis import given, settings, strategies as st
 
-from cortex.config import DB_PATH
-from cortex.engine.causal.topological_arbitrage import TopologyIndex
+from babylon60.config import DB_PATH
+from babylon60.engine.causal.topological_arbitrage import TopologyIndex
 
 
 # --- SETUP IN-MEMORY WAL DB ---

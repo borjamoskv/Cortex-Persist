@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch, AsyncMock
-from cortex.guards.heuristic_seals import (
+from babylon60.guards.heuristic_seals import (
     check_gate_10_prompt_size,
     check_gate_11_cobbler,
     check_gate_12_determinism,

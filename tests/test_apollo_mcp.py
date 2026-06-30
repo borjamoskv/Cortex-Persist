@@ -4,7 +4,7 @@ import os
 import pytest
 from unittest.mock import patch, MagicMock
 
-from cortex.mcp_server.apollo_tools import register_apollo_tools
+from babylon60.mcp_server.apollo_tools import register_apollo_tools
 
 
 class MockFastMCP:

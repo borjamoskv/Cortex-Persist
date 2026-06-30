@@ -1,6 +1,6 @@
 import pytest
 
-from cortex.guards.homoglyph_guard import AntiHomoglyphGuard
+from babylon60.guards.homoglyph_guard import AntiHomoglyphGuard
 
 
 def test_homoglyph_guard_clean_code():
@@ -67,7 +67,7 @@ def test_homoglyph_guard_skips_invalid_syntax():
 
 
 def test_vector1_homoglyph_attack_rejected():
-    from cortex.guards.homoglyph_guard import cassandra_validate_identifiers, SecurityViolation
+    from babylon60.guards.homoglyph_guard import cassandra_validate_identifiers, SecurityViolation
     import ast
 
     # Cyrillic 'е' U+0435 in 'lеa_omega_purge'
@@ -81,7 +81,7 @@ def lеa_omega_purge():
 
 
 def test_vector1_clean_ascii_accepted():
-    from cortex.guards.homoglyph_guard import cassandra_validate_identifiers
+    from babylon60.guards.homoglyph_guard import cassandra_validate_identifiers
     import ast
 
     code = """

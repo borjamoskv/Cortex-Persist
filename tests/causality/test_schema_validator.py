@@ -28,7 +28,7 @@ os.environ.setdefault(
 
 import pytest
 
-from cortex.engine.causal.schema_validator import (
+from babylon60.engine.causal.schema_validator import (
     LEVEL_MAP,
     L0L6SchemaValidator,
     ValidationResult,
@@ -426,7 +426,7 @@ class TestAuditPipelineIntegration:
 
     @pytest.fixture
     def pipeline(self):
-        from cortex.engine.causal.audit_pipeline import CortexAuditPipeline
+        from babylon60.engine.causal.audit_pipeline import CortexAuditPipeline
 
         return CortexAuditPipeline()
 

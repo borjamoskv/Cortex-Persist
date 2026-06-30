@@ -30,7 +30,7 @@ class TestFactToDict:
     """Tests for the fact_to_dict serializer."""
 
     def test_basic_serialization(self):
-        from cortex.memory.memory_retrieval import fact_to_dict
+        from babylon60.memory.memory_retrieval import fact_to_dict
 
         fact = FakeFact(id="f1", content="hello", timestamp=1.0, metadata={"k": "v"})
         d = fact_to_dict(fact)
@@ -40,14 +40,14 @@ class TestFactToDict:
         assert d["metadata"] == {"k": "v"}
 
     def test_explicit_rrf_score(self):
-        from cortex.memory.memory_retrieval import fact_to_dict
+        from babylon60.memory.memory_retrieval import fact_to_dict
 
         fact = FakeFact(id="f1")
         d = fact_to_dict(fact, rrf_score=0.42)
         assert d["score"] == 0.42
 
     def test_fallback_to_recall_score(self):
-        from cortex.memory.memory_retrieval import fact_to_dict
+        from babylon60.memory.memory_retrieval import fact_to_dict
 
         fact = FakeFact(id="f1", _recall_score=0.99)
         d = fact_to_dict(fact)
@@ -61,12 +61,12 @@ class TestApplyRRF:
     """Tests for Reciprocal Rank Fusion."""
 
     def test_empty_lists_return_empty(self):
-        from cortex.memory.memory_retrieval import apply_rrf
+        from babylon60.memory.memory_retrieval import apply_rrf
 
         assert apply_rrf([], []) == []
 
     def test_single_source_dense_only(self):
-        from cortex.memory.memory_retrieval import apply_rrf
+        from babylon60.memory.memory_retrieval import apply_rrf
 
         dense = [FakeFact(id="a"), FakeFact(id="b")]
         result = apply_rrf(dense, [], limit=5)
@@ -74,7 +74,7 @@ class TestApplyRRF:
         assert result[0]["id"] == "a"  # rank 0 → higher RRF
 
     def test_single_source_hdc_only(self):
-        from cortex.memory.memory_retrieval import apply_rrf
+        from babylon60.memory.memory_retrieval import apply_rrf
 
         hdc = [FakeFact(id="x"), FakeFact(id="y")]
         result = apply_rrf([], hdc, limit=5)
@@ -82,7 +82,7 @@ class TestApplyRRF:
         assert result[0]["id"] == "x"
 
     def test_overlap_boosts_score(self):
-        from cortex.memory.memory_retrieval import apply_rrf
+        from babylon60.memory.memory_retrieval import apply_rrf
 
         shared = FakeFact(id="shared")
         dense_only = FakeFact(id="dense_only")
@@ -96,14 +96,14 @@ class TestApplyRRF:
         assert result[0]["score"] > result[1]["score"]
 
     def test_limit_respected(self):
-        from cortex.memory.memory_retrieval import apply_rrf
+        from babylon60.memory.memory_retrieval import apply_rrf
 
         facts = [FakeFact(id=f"f{i}") for i in range(10)]
         result = apply_rrf(facts, [], limit=3)
         assert len(result) == 3
 
     def test_rrf_scores_decrease_with_rank(self):
-        from cortex.memory.memory_retrieval import apply_rrf
+        from babylon60.memory.memory_retrieval import apply_rrf
 
         facts = [FakeFact(id=f"f{i}") for i in range(5)]
         result = apply_rrf(facts, [], limit=5, k=60)
@@ -120,7 +120,7 @@ class TestHebbianBoost:
     def test_no_stdp_engine_passthrough(self):
         from unittest.mock import MagicMock
 
-        from cortex.memory.memory_retrieval import _apply_hebbian_boost
+        from babylon60.memory.memory_retrieval import _apply_hebbian_boost
 
         manager = MagicMock(spec=[])
         results = [{"id": "a", "score": 1.0}, {"id": "b", "score": 0.5}]
@@ -130,7 +130,7 @@ class TestHebbianBoost:
     def test_single_result_passthrough(self):
         from unittest.mock import MagicMock
 
-        from cortex.memory.memory_retrieval import _apply_hebbian_boost
+        from babylon60.memory.memory_retrieval import _apply_hebbian_boost
 
         manager = MagicMock()
         manager._stdp_engine = MagicMock()
@@ -141,7 +141,7 @@ class TestHebbianBoost:
     def test_strong_edge_boosts_score(self):
         from unittest.mock import MagicMock
 
-        from cortex.memory.memory_retrieval import _apply_hebbian_boost
+        from babylon60.memory.memory_retrieval import _apply_hebbian_boost
 
         manager = MagicMock()
         stdp = MagicMock()

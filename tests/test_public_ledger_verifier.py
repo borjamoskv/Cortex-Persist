@@ -7,8 +7,8 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from cortex.cli import cli
-from cortex.ledger.public_verifier import verify_export
+from babylon60.cli import cli
+from babylon60.ledger.public_verifier import verify_export
 
 FIXTURES = Path(__file__).parent / "fixtures" / "ledger_verifier"
 STRICT = FIXTURES / "public_v1_strict"

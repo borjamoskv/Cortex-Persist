@@ -9,16 +9,16 @@ from decimal import Decimal
 
 import pytest
 
-from cortex.agents.bus import SqliteMessageBus
-from cortex.agents.boltzmann_engine import (
+from babylon60.agents.bus import SqliteMessageBus
+from babylon60.agents.boltzmann_engine import (
     ExergyGradient,
     BoltzmannEngineAgent,
     create_boltzmann_engine,
 )
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import MessageKind, new_message
-from cortex.agents.planner import StepStatus
-from cortex.agents.tools import ToolRegistry
+from babylon60.agents.manifest import AgentManifest
+from babylon60.agents.message_schema import MessageKind, new_message
+from babylon60.agents.planner import StepStatus
+from babylon60.agents.tools import ToolRegistry
 
 
 def _unique_db() -> str:

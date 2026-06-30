@@ -18,8 +18,8 @@ def db_path(tmp_path):
 
 async def setup_ledger(db_path):
     import aiosqlite
-    from cortex.database.core import connect_async
-    from cortex.audit.ledger import EnterpriseAuditLedger
+    from babylon60.database.core import connect_async
+    from babylon60.audit.ledger import EnterpriseAuditLedger
 
     conn = await connect_async(db_path)
     await conn.execute(
@@ -35,7 +35,7 @@ async def setup_ledger(db_path):
 @pytest.mark.asyncio
 async def test_property_a_commit_persists_both(db_path):
     """Propiedad A (Happy Path): commit de negocio + log_action -> Ambos persisten."""
-    from cortex.database.core import causal_write
+    from babylon60.database.core import causal_write
 
     conn, ledger = await setup_ledger(db_path)
 
@@ -62,7 +62,7 @@ async def test_property_a_commit_persists_both(db_path):
 @pytest.mark.asyncio
 async def test_property_b_exception_intermediate(db_path):
     """Property B: Exception before commit -> None persist."""
-    from cortex.database.core import causal_write
+    from babylon60.database.core import causal_write
 
     conn, ledger = await setup_ledger(db_path)
 
@@ -93,7 +93,7 @@ async def test_property_b_exception_intermediate(db_path):
 @pytest.mark.asyncio
 async def test_property_c_rollback(db_path):
     """Property C: Explicit Rollback -> None persist."""
-    from cortex.database.core import causal_write
+    from babylon60.database.core import causal_write
 
     conn, ledger = await setup_ledger(db_path)
 
@@ -120,8 +120,8 @@ async def test_property_c_rollback(db_path):
 def _run_crash_target(db_path):
     async def target():
         import aiosqlite
-        from cortex.database.core import connect_async, causal_write
-        from cortex.audit.ledger import EnterpriseAuditLedger
+        from babylon60.database.core import connect_async, causal_write
+        from babylon60.audit.ledger import EnterpriseAuditLedger
 
         conn = await connect_async(db_path)
         await conn.execute(

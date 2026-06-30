@@ -10,9 +10,9 @@ Demonstrates:
 import tempfile
 import pytest
 
-from cortex.shannon.env.trace import EpisodeTrace, StepTrace
-from cortex.runtime.invariants.cross_system import CrossSystemInvariantCompiler
-from cortex.engine.core.evolution_ledger import ControlVector, MutationRecord, EvolutionLedger
+from babylon60.shannon.env.trace import EpisodeTrace, StepTrace
+from babylon60.runtime.invariants.cross_system import CrossSystemInvariantCompiler
+from babylon60.engine.core.evolution_ledger import ControlVector, MutationRecord, EvolutionLedger
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def base_shannon_trace() -> EpisodeTrace:
             timestamp=1718000001.0,
         ),
     ]
-    from cortex.shannon.env.trace import compute_trace_checksum
+    from babylon60.shannon.env.trace import compute_trace_checksum
 
     checksum = compute_trace_checksum("genesis-v1", "000000", steps)
     return EpisodeTrace(

@@ -3,9 +3,9 @@ import asyncio
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 
-from cortex.extensions.llm._models import CortexPrompt
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexLLMRouter
+from babylon60.extensions.llm._models import CortexPrompt
+from babylon60.extensions.llm.provider import LLMProvider
+from babylon60.extensions.llm.router import CortexLLMRouter
 
 
 class TestAutonomousSwarm(unittest.IsolatedAsyncioTestCase):
@@ -54,8 +54,8 @@ class TestAutonomousSwarm(unittest.IsolatedAsyncioTestCase):
         router._ordered_fallbacks = MagicMock(return_value=[MagicMock(provider_name="p2")])
 
         # Mock HedgedRequestStrategy.race
-        from cortex.extensions.llm._hedging import HedgedRequestStrategy
-        from cortex.extensions.llm._models import HedgedResult
+        from babylon60.extensions.llm._hedging import HedgedRequestStrategy
+        from babylon60.extensions.llm._models import HedgedResult
 
         HedgedRequestStrategy.race = AsyncMock()
         HedgedRequestStrategy.race.return_value = (

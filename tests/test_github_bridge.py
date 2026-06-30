@@ -12,7 +12,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-from cortex.extensions.sync.github_bridge import GitHubCortexBridge, _github_key
+from babylon60.extensions.sync.github_bridge import GitHubCortexBridge, _github_key
 
 pytestmark = pytest.mark.slow
 
@@ -69,7 +69,7 @@ def _mock_transport(routes: dict[str, list]) -> httpx.MockTransport:
 @pytest.fixture
 async def engine(tmp_path: Path):
     """Create a CortexEngine with a temp database."""
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     db = str(tmp_path / "test_gh_bridge.db")
     e = CortexEngine(db_path=db, auto_embed=False)

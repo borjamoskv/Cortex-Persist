@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from cortex.utils.errors import CortexError
-from cortex.guards.virgo import VirgoValidationError, ContextPoisoningError
+from babylon60.utils.errors import CortexError
+from babylon60.guards.virgo import VirgoValidationError, ContextPoisoningError
 
 # Mark all tests in this module as slow due to CortexEngine.init_db()
 pytestmark = pytest.mark.slow
@@ -34,7 +34,7 @@ def mock_omega_auditor(monkeypatch):
 @pytest.fixture
 async def engine(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Create a CortexEngine with a temp database, close after test."""
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     # Unblock tests from thermodynamic enforcement
     monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
@@ -293,7 +293,7 @@ class TestVirgoStrictMode:
 
     async def test_virgo_strict_accepts_valid_ed25519(self, engine):
         """Verifies that in STRICT mode, valid Ed25519 signature is accepted."""
-        from cortex.crypto.keys import KeyManager, Signer
+        from babylon60.crypto.keys import KeyManager, Signer
 
         km = KeyManager("cortex_test_enterprise")
         agent_id = "agent_strict_ed25519"
@@ -323,7 +323,7 @@ class TestVirgoStrictMode:
 
     async def test_virgo_strict_rejects_altered_signature(self, engine):
         """Verifies that in STRICT mode, tampered Ed25519 signature is rejected."""
-        from cortex.crypto.keys import KeyManager, Signer
+        from babylon60.crypto.keys import KeyManager, Signer
 
         km = KeyManager("cortex_test_enterprise")
         agent_id = "agent_strict_altered"
@@ -353,7 +353,7 @@ class TestVirgoStrictMode:
 
     async def test_virgo_strict_rejects_altered_message(self, engine):
         """Verifies that in STRICT mode, tampered message content is rejected."""
-        from cortex.crypto.keys import KeyManager, Signer
+        from babylon60.crypto.keys import KeyManager, Signer
 
         km = KeyManager("cortex_test_enterprise")
         agent_id = "agent_strict_altered_msg"
@@ -380,7 +380,7 @@ class TestVirgoStrictMode:
 
     async def test_virgo_strict_rejects_different_agent_signature(self, engine):
         """Verifies that in STRICT mode, signature from another agent's key is rejected."""
-        from cortex.crypto.keys import KeyManager, Signer
+        from babylon60.crypto.keys import KeyManager, Signer
 
         km = KeyManager("cortex_test_enterprise")
 
@@ -414,7 +414,7 @@ class TestVirgoStrictMode:
 
     async def test_virgo_strict_rejects_tenant_mismatch(self, engine):
         """Verifies that in STRICT mode, mismatched tenant metadata causes rollback."""
-        from cortex.crypto.keys import KeyManager, Signer
+        from babylon60.crypto.keys import KeyManager, Signer
 
         km = KeyManager("cortex_test_enterprise")
         agent_id = "agent_strict_tenant"

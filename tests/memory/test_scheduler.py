@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from typing import Any
 import pytest
 
-from cortex.memory.scheduler import MemoryScheduler, SchedulerConfig
+from babylon60.memory.scheduler import MemoryScheduler, SchedulerConfig
 from babylon60.extensions.hypervisor.belief_object import (
     BeliefConfidence,
     BeliefObject,

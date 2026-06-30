@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-from cortex.agents.bus import SqliteMessageBus
+from babylon60.agents.bus import SqliteMessageBus
 import uuid
 
 
@@ -8,7 +8,7 @@ def _uid():
     return f":memory:{uuid.uuid4().hex}:"
 
 
-from cortex.agents.landauer_daemon import create_landauer_daemon
+from babylon60.agents.landauer_daemon import create_landauer_daemon
 
 
 @pytest.mark.asyncio

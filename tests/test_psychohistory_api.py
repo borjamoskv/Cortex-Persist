@@ -4,12 +4,12 @@ from unittest.mock import AsyncMock
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from cortex.api.core import app
-from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.auth.deps import require_auth
-from cortex.extensions.swarm.psychohistory import AGENT_BIASES
-from cortex.utils.result import Ok
+from babylon60.api.core import app
+from babylon60.api.deps import get_async_engine
+from babylon60.auth import AuthResult, require_permission
+from babylon60.auth.deps import require_auth
+from babylon60.extensions.swarm.psychohistory import AGENT_BIASES
+from babylon60.utils.result import Ok
 
 # Mock Auth
 mock_auth = AuthResult("test_key", "test_hash")

@@ -3,11 +3,11 @@ import os
 
 import pytest
 
-from cortex.ledger.models import ActionResult, ActionTarget, LedgerEvent
-from cortex.ledger.queue import EnrichmentQueue
-from cortex.ledger.store import LedgerStore
-from cortex.ledger.verifier import LedgerVerifier
-from cortex.ledger.writer import LedgerWriter
+from babylon60.ledger.models import ActionResult, ActionTarget, LedgerEvent
+from babylon60.ledger.queue import EnrichmentQueue
+from babylon60.ledger.store import LedgerStore
+from babylon60.ledger.verifier import LedgerVerifier
+from babylon60.ledger.writer import LedgerWriter
 
 
 @pytest.fixture
@@ -47,7 +47,7 @@ def test_ledger_integrity_chain(test_db):
         # Find the 3rd event by rowid
         cursor = conn.execute("SELECT event_id FROM ledger_events LIMIT 1 OFFSET 2")
         ev_id = cursor.fetchone()["event_id"]
-        from cortex.database.core import causal_write
+        from babylon60.database.core import causal_write
 
         with causal_write(conn):
             conn.execute("UPDATE ledger_events SET hash = 'BADHASH' WHERE event_id = ?", (ev_id,))
@@ -75,7 +75,7 @@ def test_ledger_chain_break(test_db):
     with store.tx() as conn:
         cursor = conn.execute("SELECT event_id FROM ledger_events LIMIT 1 OFFSET 1")
         ev_id = cursor.fetchone()["event_id"]
-        from cortex.database.core import causal_write
+        from babylon60.database.core import causal_write
 
         with causal_write(conn):
             conn.execute(

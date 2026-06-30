@@ -7,11 +7,11 @@ import datetime
 from typing import Any
 import pytest
 
-from cortex.search.models import SearchResult
-from cortex.search.text import text_search
-from cortex.search.vector import semantic_search
-from cortex.search.hybrid import hybrid_search
-from cortex.storage import StorageMode
+from babylon60.search.models import SearchResult
+from babylon60.search.text import text_search
+from babylon60.search.vector import semantic_search
+from babylon60.search.hybrid import hybrid_search
+from babylon60.storage import StorageMode
 
 
 class MockPostgresConn:

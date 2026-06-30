@@ -8,8 +8,8 @@ from __future__ import annotations
 import pytest
 from click.testing import CliRunner
 
-from cortex.cli import cli
-from cortex.engine import CortexEngine
+from babylon60.cli import cli
+from babylon60.engine import CortexEngine
 
 
 @pytest.fixture

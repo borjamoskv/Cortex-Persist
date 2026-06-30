@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from cortex.router.contract import (
+from babylon60.router.contract import (
     CognitiveMode,
     InformationState,
     RoutingContext,
@@ -207,7 +207,7 @@ class TestAdapterLoading:
 
     def test_load_default_yaml(self) -> None:
         """Default YAML loads without error if it exists."""
-        from cortex.router.adapter import ExergyConfigAdapter
+        from babylon60.router.adapter import ExergyConfigAdapter
 
         yaml_path = (
             Path.home() / ".gemini/config/skills/Exergy-Engine-OMEGA/cognitive_routing_matrix.yaml"
@@ -221,14 +221,14 @@ class TestAdapterLoading:
 
     def test_load_missing_yaml_raises(self, tmp_path: Path) -> None:
         """Missing YAML file raises FileNotFoundError."""
-        from cortex.router.adapter import ExergyConfigAdapter
+        from babylon60.router.adapter import ExergyConfigAdapter
 
         with pytest.raises(FileNotFoundError):
             ExergyConfigAdapter(path=tmp_path / "nonexistent.yaml")
 
     def test_load_invalid_schema_version(self, tmp_path: Path) -> None:
         """Unsupported schema_version raises AdapterSchemaError."""
-        from cortex.router.adapter import AdapterSchemaError, ExergyConfigAdapter
+        from babylon60.router.adapter import AdapterSchemaError, ExergyConfigAdapter
 
         bad_yaml = tmp_path / "bad.yaml"
         bad_yaml.write_text(
@@ -239,7 +239,7 @@ class TestAdapterLoading:
 
     def test_load_missing_rules(self, tmp_path: Path) -> None:
         """Empty routing_rules raises AdapterSchemaError."""
-        from cortex.router.adapter import AdapterSchemaError, ExergyConfigAdapter
+        from babylon60.router.adapter import AdapterSchemaError, ExergyConfigAdapter
 
         bad_yaml = tmp_path / "bad.yaml"
         bad_yaml.write_text("schema_version: '2026.2'\nrouting_rules: []\n")
@@ -248,7 +248,7 @@ class TestAdapterLoading:
 
     def test_load_invalid_mode(self, tmp_path: Path) -> None:
         """Invalid result mode in rule raises AdapterSchemaError."""
-        from cortex.router.adapter import AdapterSchemaError, ExergyConfigAdapter
+        from babylon60.router.adapter import AdapterSchemaError, ExergyConfigAdapter
 
         bad_yaml = tmp_path / "bad.yaml"
         bad_yaml.write_text(
@@ -273,7 +273,7 @@ class TestAdapterContractEquivalence:
 
     @pytest.fixture
     def adapter(self):
-        from cortex.router.adapter import ExergyConfigAdapter
+        from babylon60.router.adapter import ExergyConfigAdapter
 
         yaml_path = (
             Path.home() / ".gemini/config/skills/Exergy-Engine-OMEGA/cognitive_routing_matrix.yaml"

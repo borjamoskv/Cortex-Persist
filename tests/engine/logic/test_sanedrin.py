@@ -3,8 +3,8 @@ import json
 import pytest
 from unittest.mock import patch, AsyncMock
 
-from cortex.engine.logic.sanedrin import SanedrinCouncil, SanedrinNode
-from cortex.swarm.trust_registry import global_trust_registry
+from babylon60.engine.logic.sanedrin import SanedrinCouncil, SanedrinNode
+from babylon60.swarm.trust_registry import global_trust_registry
 
 
 @pytest.fixture

@@ -10,7 +10,7 @@ import logging
 import time
 
 import pytest
-from cortex.swarm.gossip_bus import GossipBus
+from babylon60.swarm.gossip_bus import GossipBus
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cortex.swarm.test_gossip_stress")

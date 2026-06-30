@@ -13,15 +13,15 @@ import atheris
 # Only run if Atheris is successfully imported (Linux-only, typical for oss-fuzz)
 def initialize_ledger():
     conn = sqlite3.connect(":memory:")
-    from cortex.audit.ledger import EnterpriseAuditLedger
+    from babylon60.audit.ledger import EnterpriseAuditLedger
 
     return conn, EnterpriseAuditLedger(conn)
 
 
 try:
     with atheris.instrument_imports():
-        import cortex.engine.causal.taint_engine as taint_engine
-        import cortex.audit.ledger as ledger_engine
+        import babylon60.engine.causal.taint_engine as taint_engine
+        import babylon60.audit.ledger as ledger_engine
 except ImportError:
     pass
 

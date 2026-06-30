@@ -1,6 +1,6 @@
 import pytest
-from cortex.swarm.router import SwarmRouter, _evaluate_entropy
-from cortex.swarm.registry import AgentRegistry
+from babylon60.swarm.router import SwarmRouter, _evaluate_entropy
+from babylon60.swarm.registry import AgentRegistry
 
 
 def test_evaluate_entropy():

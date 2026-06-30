@@ -14,9 +14,9 @@ from unittest.mock import patch
 import aiosqlite
 import pytest
 
-from cortex.crypto.keys import ZKSwarmIdentity
-from cortex.database.core import connect, connect_async_ctx, causal_write
-from cortex.engine.causal.taint_engine import (
+from babylon60.crypto.keys import ZKSwarmIdentity
+from babylon60.database.core import connect, connect_async_ctx, causal_write
+from babylon60.engine.causal.taint_engine import (
     TaintValidationError,
     canonicalize_content,
     _fast_sha3,
@@ -214,7 +214,7 @@ async def test_verify_taint_token_expired(sqlite_conn: sqlite3.Connection) -> No
     content_hash = _fast_sha3(canonical_content)
     canonical_payload = f"agent_id=agent_1&session_id=session_1&timestamp={timestamp}&nonce={nonce}&content_hash={content_hash}"
 
-    from cortex.crypto.keys import Signer
+    from babylon60.crypto.keys import Signer
 
     signature = Signer.sign_raw_content(keypair.private_key_b64, canonical_payload)
     token = f"taint:agent_1:session_1:{timestamp}:{nonce}:{signature}"

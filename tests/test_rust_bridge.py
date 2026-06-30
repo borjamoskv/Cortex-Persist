@@ -8,7 +8,7 @@ def setup_test_env(monkeypatch):
 
 
 def test_rust_bridge_initialization():
-    from cortex.embeddings.rust_bridge import RustNativeEmbeddings
+    from babylon60.embeddings.rust_bridge import RustNativeEmbeddings
 
     # Should not raise FileNotFoundError because CORTEX_TESTING is set
     engine = RustNativeEmbeddings(
@@ -20,7 +20,7 @@ def test_rust_bridge_initialization():
 
 
 def test_rust_bridge_generation():
-    from cortex.embeddings.rust_bridge import RustNativeEmbeddings
+    from babylon60.embeddings.rust_bridge import RustNativeEmbeddings
 
     engine = RustNativeEmbeddings(
         model_path="dummy_model.onnx", tokenizer_path="dummy_tokenizer.json"

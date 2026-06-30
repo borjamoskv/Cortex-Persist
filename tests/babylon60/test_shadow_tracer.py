@@ -23,7 +23,7 @@ def test_shadow_tracer_collection():
 
     try:
         # Import something that triggers the tracer
-        import cortex.core
+        import babylon60.core
 
         # Verify that it is recorded in the import graph
         # The key is likely this module's name

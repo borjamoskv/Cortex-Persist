@@ -11,7 +11,7 @@ import math
 import numpy as np
 import pytest
 
-from cortex.embeddings.obfuscation import obfuscate_vector, derive_pad_vector
+from babylon60.embeddings.obfuscation import obfuscate_vector, derive_pad_vector
 
 
 def cosine_similarity(v1: list[float] | np.ndarray, v2: list[float] | np.ndarray) -> float:
@@ -105,7 +105,7 @@ async def test_cortex_engine_end_to_end_obfuscation(monkeypatch, tmp_path):
     monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
     monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
 
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     db = str(tmp_path / "test_obfuscate.db")
     engine = CortexEngine(db_path=db, auto_embed=True)

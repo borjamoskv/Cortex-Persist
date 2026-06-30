@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
-from cortex.extensions.daemon.apoptosis_daemon import ApoptosisDaemon
+from babylon60.extensions.daemon.apoptosis_daemon import ApoptosisDaemon
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def dummy_repo(tmp_path):
 
     # Create protected file that references consumer
     init_file = cortex_dir / "__init__.py"
-    init_file.write_text("import cortex.consumer\n", encoding="utf-8")
+    init_file.write_text("import babylon60.consumer\n", encoding="utf-8")
 
     # Create an active module
     active_module = cortex_dir / "active_engine.py"
@@ -23,7 +23,7 @@ def dummy_repo(tmp_path):
 
     # Create a consumer that references ActiveEngine
     consumer = cortex_dir / "consumer.py"
-    consumer.write_text("from cortex.active_engine import ActiveEngine\n", encoding="utf-8")
+    consumer.write_text("from babylon60.active_engine import ActiveEngine\n", encoding="utf-8")
 
     # Create a completely dead module
     dead_module = cortex_dir / "dead_logic.py"

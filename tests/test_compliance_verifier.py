@@ -4,8 +4,8 @@ import base64
 import hashlib
 import pytest
 from pathlib import Path
-from cortex.crypto.keys import KeyManager, Signer
-from cortex.audit.compliance_verifier import ComplianceVerifier
+from babylon60.crypto.keys import KeyManager, Signer
+from babylon60.audit.compliance_verifier import ComplianceVerifier
 
 
 @pytest.fixture

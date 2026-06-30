@@ -4,7 +4,7 @@ import tempfile
 
 import pytest
 
-from cortex.extensions.nexus.symlink_engine import SymlinkEngine
+from babylon60.extensions.nexus.symlink_engine import SymlinkEngine
 
 
 @pytest.fixture

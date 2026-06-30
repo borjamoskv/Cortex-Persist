@@ -8,8 +8,8 @@ import os
 from pathlib import Path
 import pytest
 
-from cortex.engine import CortexEngine
-from cortex.extensions.security.signatures import get_default_signer
+from babylon60.engine import CortexEngine
+from babylon60.extensions.security.signatures import get_default_signer
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ async def engine(tmp_path: Path, monkeypatch):
     await e.init_db()
 
     # Ensure causal_edges exists
-    from cortex.engine.flow.causality import AsyncCausalGraph
+    from babylon60.engine.flow.causality import AsyncCausalGraph
 
     async with e.session() as conn:
         cg = AsyncCausalGraph(conn)

@@ -4,7 +4,7 @@ import asyncio
 import json
 from unittest.mock import MagicMock
 
-from cortex.swarm.auth_gateway import QuorumGateway
+from babylon60.swarm.auth_gateway import QuorumGateway
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 import base64
 

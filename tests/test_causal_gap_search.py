@@ -14,7 +14,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 os.environ.setdefault("CORTEX_TESTING", "1")
 
-from cortex.search.causal_gap import (
+from babylon60.search.causal_gap import (
     CausalGap,
     SearchCandidate,
     compute_candidate_score,

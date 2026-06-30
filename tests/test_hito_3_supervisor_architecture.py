@@ -7,10 +7,10 @@ import pytest
 import aiosqlite
 from datetime import datetime, timezone
 
-from cortex.swarm.supervisor import SwarmSupervisor
-from cortex.swarm.legion import SwarmAgent, SwarmSignal
-from cortex.swarm.state_store import CausalStateStore
-from cortex.database.schema import CREATE_FACTS
+from babylon60.swarm.supervisor import SwarmSupervisor
+from babylon60.swarm.legion import SwarmAgent, SwarmSignal
+from babylon60.swarm.state_store import CausalStateStore
+from babylon60.database.schema import CREATE_FACTS
 
 
 # Mock Agent for testing
@@ -36,7 +36,7 @@ def mock_causal_guard(monkeypatch):
         def verify_closure(self, proposal):
             pass
 
-    import cortex.swarm.state_store
+    import babylon60.swarm.state_store
 
     monkeypatch.setattr(cortex.swarm.state_store, "CausalClosureGuard", MockGuard)
 

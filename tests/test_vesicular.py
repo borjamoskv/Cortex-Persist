@@ -1,6 +1,6 @@
 import os
 import pytest
-from cortex.swarm.vesicular import VesicularRuntime
+from babylon60.swarm.vesicular import VesicularRuntime
 
 
 @pytest.fixture

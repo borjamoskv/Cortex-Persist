@@ -2,8 +2,8 @@ import pytest
 import sqlite3
 import asyncio
 from unittest.mock import patch
-from cortex.engine.core.cortex_engine import CortexEngine
-from cortex.database.core import causal_write
+from babylon60.engine.core.cortex_engine import CortexEngine
+from babylon60.database.core import causal_write
 
 from pathlib import Path
 import os
@@ -14,7 +14,7 @@ os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
 
 @pytest.fixture
 async def engine(tmp_path: Path):
-    from cortex.engine.core.cortex_engine import CortexEngine
+    from babylon60.engine.core.cortex_engine import CortexEngine
 
     db_path = str(tmp_path / "cortex_crash.db")
     eng = CortexEngine(db_path=db_path, auto_embed=False)

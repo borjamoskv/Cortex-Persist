@@ -2,7 +2,7 @@
 import asyncio
 import logging
 
-from cortex.engine.forensic_commander import ForensicCommander
+from babylon60.engine.forensic_commander import ForensicCommander
 
 logger = logging.getLogger("sky_stalker")
 

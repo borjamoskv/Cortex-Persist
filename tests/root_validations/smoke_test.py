@@ -62,7 +62,7 @@ async def main():
         os.environ["PATH"] = (
             f"~/10_PROJECTS/cortex-persist/tests/mock-bin:{os.environ.get('PATH', '')}"
         )
-        from cortex.engine.cascade_router import CascadeRouter
+        from babylon60.engine.cascade_router import CascadeRouter
 
         router = CascadeRouter()
         result = await router.route_task(

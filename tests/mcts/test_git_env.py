@@ -3,7 +3,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from cortex.mcts.git_env import MCTSGitEnvironment
+from babylon60.mcts.git_env import MCTSGitEnvironment
 
 
 @pytest.fixture

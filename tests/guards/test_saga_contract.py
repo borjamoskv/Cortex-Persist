@@ -3,7 +3,7 @@
 
 import pytest
 
-from cortex.guards.saga_contract import SagaWriteProposal, SagaValidationError
+from babylon60.guards.saga_contract import SagaWriteProposal, SagaValidationError
 
 
 class TestSagaWriteProposal:

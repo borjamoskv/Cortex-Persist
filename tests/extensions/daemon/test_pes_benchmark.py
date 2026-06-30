@@ -8,10 +8,10 @@ import numpy as np
 from unittest.mock import AsyncMock, MagicMock
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from cortex.engine.temporal.event_sovereignty import EventSovereigntyRuntime
-from cortex.swarm.auth_gateway import QuorumGateway
-from cortex.engine.causal.anomaly_bridge import AnomalyBridge
-from cortex.extensions.security.signatures import Ed25519Signer
+from babylon60.engine.temporal.event_sovereignty import EventSovereigntyRuntime
+from babylon60.swarm.auth_gateway import QuorumGateway
+from babylon60.engine.causal.anomaly_bridge import AnomalyBridge
+from babylon60.extensions.security.signatures import Ed25519Signer
 
 
 # Fixtures for crypto

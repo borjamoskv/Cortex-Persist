@@ -2,7 +2,7 @@
 import asyncio
 import time
 
-from cortex.extensions.federation.gossip import GossipNode
+from babylon60.extensions.federation.gossip import GossipNode
 
 
 async def run_gossip_benchmark(node_count=6):

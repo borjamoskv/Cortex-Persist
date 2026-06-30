@@ -23,11 +23,11 @@ import pytest
 from pathlib import Path
 from typing import Any
 
-from cortex.utils.errors import CortexError
-from cortex.guards.virgo import VirgoValidationError, ContextPoisoningError
-from cortex.guards.zk_guard import ZKSwarmGuard, VoidStateSecurityError
-from cortex.guards.contradiction_guard import detect_contradictions, ConflictReport
-from cortex.crypto.keys import ZKSwarmIdentity
+from babylon60.utils.errors import CortexError
+from babylon60.guards.virgo import VirgoValidationError, ContextPoisoningError
+from babylon60.guards.zk_guard import ZKSwarmGuard, VoidStateSecurityError
+from babylon60.guards.contradiction_guard import detect_contradictions, ConflictReport
+from babylon60.crypto.keys import ZKSwarmIdentity
 
 
 # Enable testing mode and auto-mock auditors
@@ -47,7 +47,7 @@ def mock_omega_auditor(monkeypatch):
 @pytest.fixture
 async def engine(tmp_path: Path, monkeypatch):
     """Initialize a clean test instance of the CortexEngine."""
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     monkeypatch.setenv("CORTEX_SKIP_EXERGY_VALIDATION", "1")
     monkeypatch.setenv("CORTEX_STRICT_GUARDS", "1")
@@ -248,7 +248,7 @@ async def test_event_sourcing_state_replay(engine):
         stored_ids.append(fid)
 
     # 2. Extract event stream (raw facts query from SQLite)
-    from cortex.crypto import get_default_encrypter
+    from babylon60.crypto import get_default_encrypter
 
     enc = get_default_encrypter()
 

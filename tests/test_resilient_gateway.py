@@ -6,14 +6,14 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex.mcp_server.resilient_gateway import (
+from babylon60.mcp_server.resilient_gateway import (
     _HAS_BS4,
     _HAS_MARKDOWNIFY,
     ResilientFetcher,
     _extract_with_selector,
     _html_to_markdown,
 )
-from cortex.utils.pulmones import CircuitBreaker
+from babylon60.utils.pulmones import CircuitBreaker
 
 # ─── Fixtures ────────────────────────────────────────────────────────
 

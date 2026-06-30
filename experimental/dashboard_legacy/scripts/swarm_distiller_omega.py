@@ -7,7 +7,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 try:
     from db import get_bounties
-    from cortex.extensions.skills.autodidact.synthesis import execute_cognitive_synthesis
+    from babylon60.extensions.skills.autodidact.synthesis import execute_cognitive_synthesis
 except ImportError:
     print("[!] Failed to import CORTEX components. Check PYTHONPATH.")
     sys.exit(1)

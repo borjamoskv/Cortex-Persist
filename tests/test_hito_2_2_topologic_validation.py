@@ -8,10 +8,10 @@ from unittest.mock import patch
 import pytest
 import aiosqlite
 
-from cortex.config import DB_PATH
-from cortex.engine.causal.topological_arbitrage import TopologyIndex
-from cortex.swarm.swarm_10k import SwarmCommander
-from cortex.swarm.legion import SwarmSignal, AsyncSignalBus
+from babylon60.config import DB_PATH
+from babylon60.engine.causal.topological_arbitrage import TopologyIndex
+from babylon60.swarm.swarm_10k import SwarmCommander
+from babylon60.swarm.legion import SwarmSignal, AsyncSignalBus
 
 
 # Helper function to set up in-memory DB for tests
@@ -200,7 +200,7 @@ async def test_scheduler_determinism():
 @pytest.mark.asyncio
 async def test_cascade_death_concurrent_drops(caplog):
     """Test that SwarmSignal for an INVALIDATED hypothesis is dropped by SwarmStateStore."""
-    from cortex.swarm.state_store import CausalStateStore
+    from babylon60.swarm.state_store import CausalStateStore
     import tempfile
     import logging
 

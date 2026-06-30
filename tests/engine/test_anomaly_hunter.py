@@ -4,8 +4,8 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from cortex.engine.forensic.anomaly_hunter import AnomalyHunterEngine
-from cortex.engine.cognitive.models import Fact
+from babylon60.engine.forensic.anomaly_hunter import AnomalyHunterEngine
+from babylon60.engine.cognitive.models import Fact
 
 
 @pytest.fixture

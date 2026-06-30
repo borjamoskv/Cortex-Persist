@@ -11,8 +11,8 @@ import tempfile
 import time
 from typing import Any
 
-from cortex.engine.checkpoint import CheckpointManager
-from cortex.engine.evolution_ledger import ControlVector, EvolutionLedger
+from babylon60.engine.checkpoint import CheckpointManager
+from babylon60.engine.evolution_ledger import ControlVector, EvolutionLedger
 
 
 def worker_task(ledger: EvolutionLedger, agent_idx: int, mutations_per_worker: int) -> list[float]:

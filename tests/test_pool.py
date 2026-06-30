@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from cortex.database.pool import CortexConnectionPool
+from babylon60.database.pool import CortexConnectionPool
 
 
 @pytest.fixture

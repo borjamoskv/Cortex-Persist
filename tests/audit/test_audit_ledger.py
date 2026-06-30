@@ -25,7 +25,7 @@ import pytest
 @pytest.fixture
 async def audit_conn(tmp_path):
     """Provides a fresh aiosqlite connection for each test."""
-    from cortex.database.core import connect_async
+    from babylon60.database.core import connect_async
 
     db_path = str(tmp_path / "audit_test.db")
     conn = await connect_async(db_path)
@@ -42,7 +42,7 @@ async def ledger(audit_conn, tmp_path):
         "cortex.audit.ledger.os.path.exists",
         side_effect=lambda p: False if p == pem_path else os.path.exists(p),
     ):
-        from cortex.audit.ledger import EnterpriseAuditLedger
+        from babylon60.audit.ledger import EnterpriseAuditLedger
 
         ledger = object.__new__(EnterpriseAuditLedger)
         # Manually init to avoid writing PEM to test source tree
@@ -164,7 +164,7 @@ class TestEnterpriseAuditLedger:
             batch1_rows = await cursor2.fetchall()
             batch1_ids = [r[0] for r in batch1_rows]
 
-            from cortex.audit.smt import SparseMerkleTree
+            from babylon60.audit.smt import SparseMerkleTree
 
             smt_state = SparseMerkleTree()
             for aid in batch1_ids:
@@ -249,7 +249,7 @@ class TestEnterpriseAuditLedger:
     @pytest.mark.asyncio
     async def test_run_scan_stub(self, ledger):
         """run_scan currently returns a stub; verify the expected shape."""
-        from cortex.audit.analyst import AuditAnalystGrok
+        from babylon60.audit.analyst import AuditAnalystGrok
 
         analyst = AuditAnalystGrok(ledger)
         result = await analyst.run_scan()
@@ -321,7 +321,7 @@ class TestEnterpriseAuditLedger:
         """When table has existing rows, ensure_table should load last signature as _last_hash."""
         from cryptography.hazmat.primitives.asymmetric import ed25519
 
-        from cortex.audit.ledger import EnterpriseAuditLedger
+        from babylon60.audit.ledger import EnterpriseAuditLedger
 
         # Build first ledger manually
         l1 = object.__new__(EnterpriseAuditLedger)
@@ -370,7 +370,7 @@ class TestAuditAnalystGrok:
 
     @pytest.fixture
     async def analyst(self, ledger):
-        from cortex.audit.analyst import AuditAnalystGrok
+        from babylon60.audit.analyst import AuditAnalystGrok
 
         return AuditAnalystGrok(ledger)
 
@@ -413,7 +413,7 @@ class TestAuditAnalystGrok:
     @pytest.mark.asyncio
     async def test_analyst_stores_ledger_ref(self, ledger):
         """AuditAnalystGrok must hold a reference to the provided ledger."""
-        from cortex.audit.analyst import AuditAnalystGrok
+        from babylon60.audit.analyst import AuditAnalystGrok
 
         analyst = AuditAnalystGrok(ledger)
         assert analyst.ledger is ledger
@@ -421,7 +421,7 @@ class TestAuditAnalystGrok:
     @pytest.mark.asyncio
     async def test_analyst_initial_threat_score(self, ledger):
         """Initial threat score must be 0.0."""
-        from cortex.audit.analyst import AuditAnalystGrok
+        from babylon60.audit.analyst import AuditAnalystGrok
 
         analyst = AuditAnalystGrok(ledger)
         assert analyst._threat_score == 0.0

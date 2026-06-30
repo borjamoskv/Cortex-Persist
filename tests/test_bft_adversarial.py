@@ -11,7 +11,7 @@ import base64
 import time
 from unittest.mock import MagicMock, patch
 
-from cortex.swarm.auth_gateway import QuorumGateway
+from babylon60.swarm.auth_gateway import QuorumGateway
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives import serialization
 

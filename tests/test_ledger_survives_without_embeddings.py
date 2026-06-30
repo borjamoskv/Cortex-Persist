@@ -3,10 +3,10 @@ from __future__ import annotations
 
 
 def test_ledger_append_survives_without_embeddings(tmp_path):
-    from cortex.ledger.queue import EnrichmentQueue
-    from cortex.ledger.store import LedgerStore
-    from cortex.ledger.writer import LedgerWriter
-    from cortex.mac_maestro.events import build_mac_maestro_event
+    from babylon60.ledger.queue import EnrichmentQueue
+    from babylon60.ledger.store import LedgerStore
+    from babylon60.ledger.writer import LedgerWriter
+    from babylon60.mac_maestro.events import build_mac_maestro_event
 
     db = tmp_path / "ledger.db"
     store = LedgerStore(db)

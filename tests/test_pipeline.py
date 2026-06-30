@@ -21,7 +21,7 @@ def _mock_schema():
 
 def _build_pipeline():
     """Build a NeuromorphicPipeline with all subsystems mocked."""
-    from cortex.memory.pipeline import NeuromorphicPipeline
+    from babylon60.memory.pipeline import NeuromorphicPipeline
 
     return NeuromorphicPipeline()
 
@@ -33,7 +33,7 @@ class TestAssessQuery:
     """Tests for the query assessment path."""
 
     def test_basic_query_returns_query_result(self):
-        from cortex.memory.pipeline import QueryResult
+        from babylon60.memory.pipeline import QueryResult
 
         pipe = _build_pipeline()
         result = pipe.assess_query(
@@ -55,7 +55,7 @@ class TestAssessQuery:
         assert hasattr(result, "safe_to_respond")
 
     def test_schema_applied_when_matched(self):
-        from cortex.memory.pipeline import NeuromorphicPipeline
+        from babylon60.memory.pipeline import NeuromorphicPipeline
 
         mock_schema_engine = MagicMock()
         mock_schema_engine.match_schema.return_value = _mock_schema()
@@ -96,7 +96,7 @@ class TestProcessStore:
     """Tests for the store processing path."""
 
     def test_basic_store_returns_store_result(self):
-        from cortex.memory.pipeline import StoreResult
+        from babylon60.memory.pipeline import StoreResult
 
         pipe = _build_pipeline()
         result = pipe.process_store(content="The sky is blue", fact_type="knowledge")
@@ -152,7 +152,7 @@ class TestPipelineProperties:
         assert "stdp_edges=" in r
 
     def test_metamemory_property(self):
-        from cortex.memory.metamemory import MetamemoryMonitor
+        from babylon60.memory.metamemory import MetamemoryMonitor
 
         pipe = _build_pipeline()
         assert type(pipe.metamemory).__name__ == "MetamemoryMonitor"

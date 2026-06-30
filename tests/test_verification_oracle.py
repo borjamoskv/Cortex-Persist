@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from cortex.verification.oracle import VerificationOracle
+from babylon60.verification.oracle import VerificationOracle
 
 
 @pytest.fixture

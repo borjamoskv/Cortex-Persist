@@ -6,7 +6,7 @@ Unit tests for MemoryFirewallGuard.
 from __future__ import annotations
 
 import pytest
-from cortex.guards.memory_firewall import MemoryFirewallGuard
+from babylon60.guards.memory_firewall import MemoryFirewallGuard
 
 
 def test_memory_firewall_guard_empty_fact() -> None:

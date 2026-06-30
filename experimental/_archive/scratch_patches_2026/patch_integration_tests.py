@@ -3,8 +3,8 @@ import re
 with open("tests/test_integration_engine.py") as f:
     code = f.read()
 
-if "from cortex.database.core import causal_write" not in code:
-    code = code.replace("import pytest", "import pytest\nfrom cortex.database.core import causal_write")
+if "from babylon60.database.core import causal_write" not in code:
+    code = code.replace("import pytest", "import pytest\nfrom babylon60.database.core import causal_write")
 
 code = re.sub(
     r'(await conn\.execute\(\s*"INSERT INTO facts.*?\)[\s\n]+await conn\.commit\(\))',

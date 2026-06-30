@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from cortex.engine import CortexEngine
-from cortex.engine.flow.causality import EDGE_DERIVED_FROM, AsyncCausalGraph
+from babylon60.engine import CortexEngine
+from babylon60.engine.flow.causality import EDGE_DERIVED_FROM, AsyncCausalGraph
 
 
 @pytest.fixture

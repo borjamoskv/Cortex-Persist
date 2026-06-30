@@ -4,7 +4,7 @@ Unit tests for the ZKSwarmGuard formal verification & fast-path eligibility.
 """
 
 import pytest
-from cortex.guards.zk_guard import ZKSwarmGuard, VoidStateSecurityError
+from babylon60.guards.zk_guard import ZKSwarmGuard, VoidStateSecurityError
 
 
 @pytest.fixture

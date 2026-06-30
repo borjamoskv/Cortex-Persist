@@ -2,14 +2,14 @@ import pytest
 from dataclasses import replace
 import logging
 
-from cortex.extensions.hypervisor.belief_object import (
+from babylon60.extensions.hypervisor.belief_object import (
     BeliefConfidence,
     BeliefObject,
     BeliefStatus,
     BeliefVerdict,
     VerdictAction,
 )
-from cortex.extensions.hypervisor.belief_engine import BeliefEngine
+from babylon60.extensions.hypervisor.belief_engine import BeliefEngine
 
 
 class MockFact:

@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 
-from cortex.engine.core.cortex_engine import CortexEngine
+from babylon60.engine.core.cortex_engine import CortexEngine
 
 
 @pytest.mark.asyncio

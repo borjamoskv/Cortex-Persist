@@ -12,11 +12,11 @@ import tempfile
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from cortex.core import config
-from cortex.routes.stripe import CheckoutRequest, create_checkout_session
-from cortex.ledger.billing_gateway import BillingIntegrityGateway
-from cortex.extensions.metering.quotas import PlanQuota, QuotaEnforcer
-from cortex.extensions.metering.tracker import UsageTracker, UsageRecord
+from babylon60.core import config
+from babylon60.routes.stripe import CheckoutRequest, create_checkout_session
+from babylon60.ledger.billing_gateway import BillingIntegrityGateway
+from babylon60.extensions.metering.quotas import PlanQuota, QuotaEnforcer
+from babylon60.extensions.metering.tracker import UsageTracker, UsageRecord
 
 
 @pytest.fixture
@@ -65,7 +65,7 @@ async def test_checkout_dynamic_price_data(monkeypatch):
     mock_session.url = "https://checkout.stripe.com/sess_123"
     mock_stripe.checkout.Session.create.return_value = mock_session
 
-    import cortex.routes.stripe as stripe_module
+    import babylon60.routes.stripe as stripe_module
 
     monkeypatch.setattr(stripe_module, "config", config)
     monkeypatch.setattr(stripe_module, "_get_stripe", lambda: mock_stripe)
@@ -103,7 +103,7 @@ async def test_checkout_dynamic_price_data(monkeypatch):
 async def test_billing_gateway_pwyw_scaling(tmp_db, monkeypatch):
     """BillingIntegrityGateway should scale quota limits based on paid amount."""
     import aiosqlite
-    from cortex.database.schema import CREATE_TENANTS
+    from babylon60.database.schema import CREATE_TENANTS
 
     async with aiosqlite.connect(tmp_db) as conn:
         await conn.execute(CREATE_TENANTS)
@@ -115,7 +115,7 @@ async def test_billing_gateway_pwyw_scaling(tmp_db, monkeypatch):
     # Mock auth manager key creation
     mock_auth_manager = AsyncMock()
     import babylon60.api.state as api_state_b60
-    import cortex.api.state as api_state_ctx
+    import babylon60.api.state as api_state_ctx
 
     monkeypatch.setattr(api_state_b60, "auth_manager", mock_auth_manager)
     monkeypatch.setattr(api_state_ctx, "auth_manager", mock_auth_manager)

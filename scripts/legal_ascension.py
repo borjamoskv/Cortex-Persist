@@ -20,8 +20,8 @@ logger = logging.getLogger("legal_ascension")
 
 # CORTEX native imports
 try:
-    from cortex.database.core import causal_write, connect
-    from cortex.engine.entropy import entropy_annihilator
+    from babylon60.database.core import causal_write, connect
+    from babylon60.engine.entropy import entropy_annihilator
 except ImportError:
     # If not running within the right env, we fallback gracefully
     logger.error("Failed to import CORTEX modules. Are you in the .venv?")
@@ -69,7 +69,7 @@ async def ascend_node(post_id: int):
         
     # 4. Secure State Commit via CORTEX-TAINT SAGA Pipeline
     try:
-        from cortex.engine.causal.taint_engine import secure_state_commit
+        from babylon60.engine.causal.taint_engine import secure_state_commit
         frozen_state, ledger_hash = secure_state_commit(compressed, metadata)
         logger.info(f"[C5-REAL] SAGA pipeline completed successfully. Hash: {ledger_hash}")
     except Exception as e:

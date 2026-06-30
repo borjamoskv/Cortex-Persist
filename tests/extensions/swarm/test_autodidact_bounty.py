@@ -6,7 +6,7 @@ Tests the Yield Inversion for Vulnerabilities (Bounty Exergy).
 
 import pytest
 
-from cortex.extensions.swarm.autodidact_actuator import autodidact_ingest
+from babylon60.extensions.swarm.autodidact_actuator import autodidact_ingest
 
 
 @pytest.mark.asyncio

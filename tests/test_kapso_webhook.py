@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from cortex.api.core import app
+from babylon60.api.core import app
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from cortex.extensions.skills.autodidact.epistemology import (
+from babylon60.extensions.skills.autodidact.epistemology import (
     Derived,
     EvidenceSource,
     Hypothesis,

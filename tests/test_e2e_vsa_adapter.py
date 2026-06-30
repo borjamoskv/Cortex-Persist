@@ -7,7 +7,7 @@ Tests the full pipeline flow: Ingress → Context → Plan → Execute → Persi
 import pytest
 import time
 
-from cortex.pipeline import (
+from babylon60.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -17,14 +17,14 @@ from cortex.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from cortex.pipeline.orchestrator import CortexOrchestrator
-from cortex.pipeline._orchestrator_exceptions import (
+from babylon60.pipeline.orchestrator import CortexOrchestrator
+from babylon60.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )
-from cortex.router.router import AgentRouter, AgentCapability
-from cortex.context.assembler import ContextAssembler
-from cortex.delivery.manager import DeliveryManager
+from babylon60.router.router import AgentRouter, AgentCapability
+from babylon60.context.assembler import ContextAssembler
+from babylon60.delivery.manager import DeliveryManager
 
 
 # ── VSA Adapter Tests ──
@@ -35,7 +35,7 @@ class TestVSAAdapter:
 
     def test_vsa_bridge_basic_flow(self):
         """Test basic query, ingest, and persist flow of VSAPipelineBridge."""
-        from cortex.memory.vsa import VSAPipelineBridge
+        from babylon60.memory.vsa import VSAPipelineBridge
 
         bridge = VSAPipelineBridge(agent_id="test_agent_temp")
         rid = bridge.ingest("algebraic context test", record_id="vsa-test-1")

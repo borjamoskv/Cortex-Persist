@@ -20,9 +20,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from cortex.engine import CortexEngine
-from cortex.engine.swarm_10k import SwarmCommander
-from cortex.extensions.swarm.auto_fix import AutoFixPipeline
+from babylon60.engine import CortexEngine
+from babylon60.engine.swarm_10k import SwarmCommander
+from babylon60.extensions.swarm.auto_fix import AutoFixPipeline
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ignite_swarm")

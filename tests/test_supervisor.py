@@ -20,14 +20,14 @@ import pytest
 import time
 from pathlib import Path
 
-from cortex.engine.supervisor import (
+from babylon60.engine.supervisor import (
     CortexSupervisor,
     SupervisorConfig,
     AgentStatus,
 )
-from cortex.engine.evo._autocurative_config import AutoCurativeConfig
-from cortex.engine.self_optimizer import OptimizerConfig
-from cortex.engine.forensic.predictive_healer import Prediction, PredictionType
+from babylon60.engine.evo._autocurative_config import AutoCurativeConfig
+from babylon60.engine.self_optimizer import OptimizerConfig
+from babylon60.engine.forensic.predictive_healer import Prediction, PredictionType
 
 
 # ─── Fixtures ─────────────────────────────────────────────────────

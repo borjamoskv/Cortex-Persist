@@ -17,13 +17,13 @@ import aiosqlite
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.engine.causal.taint_engine import (
+from babylon60.audit.ledger import EnterpriseAuditLedger
+from babylon60.engine.causal.taint_engine import (
     TaintValidationError,
     generate_secure_taint_token,
     enforce_taint_check,
 )
-from cortex.guards.contradiction_guard import detect_contradictions
+from babylon60.guards.contradiction_guard import detect_contradictions
 
 
 # Configure tests
@@ -34,7 +34,7 @@ CONCURRENCY_LEVEL = 20
 @pytest.fixture
 async def engine(tmp_path: Path):
     """Initialize a clean test instance of the CortexEngine."""
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     db = str(tmp_path / "test_stress_frontier.db")
     e = CortexEngine(db_path=db, auto_embed=False)
@@ -124,7 +124,7 @@ async def test_ledger_concurrency_bombing(ledger_db):
 
             # Verify cryptographic integrity of the block
             batch_audit_ids = [row[0] for row in block]
-            from cortex.audit.smt import SparseMerkleTree
+            from babylon60.audit.smt import SparseMerkleTree
 
             local_smt = SparseMerkleTree()
             for aid in batch_audit_ids:

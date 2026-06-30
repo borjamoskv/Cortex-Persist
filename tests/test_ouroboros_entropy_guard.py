@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from cortex.guards.ouroboros_entropy_guard import OuroborosEntropyGuard
+from babylon60.guards.ouroboros_entropy_guard import OuroborosEntropyGuard
 
 
 @pytest.mark.asyncio
