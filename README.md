@@ -63,11 +63,11 @@ BABYLON-60 intercepts that output, enforces a deterministic shield via **Z3 SMT 
 ## ▀▄ QUICK START
 
 ```bash
-pip install cortex-persist
+pip install babylon60
 ```
 
 ```python
-from cortex import CortexEngine
+from babylon60 import CortexEngine
 
 engine = CortexEngine()
 
@@ -84,7 +84,7 @@ print(proof.verify())  # True — tamper-evident by construction
 Or use the **magic decorator** — zero-friction drop-in for any existing agent:
 
 ```python
-from cortex.magic import sovereign_persist
+from babylon60.magic import sovereign_persist
 
 @sovereign_persist(strict=True)
 async def apex_agent(prompt: str):
@@ -160,10 +160,10 @@ BABYLON-60 enforces a rigid Thermodynamic Routing matrix based on Exergy constra
 
 ## ▀▄ INSTALLATION & TOPOLOGICAL DEPLOYMENT
 
-**Default Stance:** Zero daemons. Core `cortex-persist` installs the `SQLite WAL` engine, SAGA guards, and cryptographic ledgers.
+**Default Stance:** Zero daemons. Core `babylon60` installs the `SQLite WAL` engine, SAGA guards, and cryptographic ledgers.
 
 ```bash
-pip install cortex-persist
+pip install babylon60
 ```
 
 ### ⚙️ Domain Substrates (Expansion Vectors)
@@ -181,7 +181,7 @@ pip install cortex-persist
 
 ```bash
 # Example: Injecting full physical capabilities
-pip install "cortex-persist[embeddings,secure,acceleration]"
+pip install "babylon60[embeddings,secure,acceleration]"
 ```
 
 ---

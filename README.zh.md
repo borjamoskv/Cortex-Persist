@@ -138,15 +138,15 @@ graph TD
 ### 1. 安装
 本地优先引擎需要 Python 3.10+，无需外部守护进程：
 ```bash
-pip install cortex-persist
+pip install babylon60
 ```
 
 获取高级功能：
 ```bash
-pip install "cortex-persist[embeddings]"     # 本地语义嵌入
-pip install "cortex-persist[knowledge]"      # Chroma 备份的知识同步
+pip install "babylon60[embeddings]"     # 本地语义嵌入
+pip install "babylon60[knowledge]"      # Chroma 备份的知识同步
 ...
-pip install "cortex-persist[api,mcp,daemon]" # Web 服务器及 MCP 端点
+pip install "babylon60[api,mcp,daemon]" # Web 服务器及 MCP 端点
 ```
 
 ### 2. 运行规范 Demo
@@ -168,7 +168,7 @@ python examples/demo_canonical.py
 
 ```python
 import asyncio
-from cortex.magic import sovereign_persist
+from babylon60.magic import sovereign_persist
 
 @sovereign_persist(memory="cortex-cloud", strict=True)
 async def my_agent_chain(user_prompt: str):

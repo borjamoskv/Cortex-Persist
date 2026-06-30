@@ -138,15 +138,15 @@ El daemon de persistencia opera bajo estrictas restricciones termodinámicas (Jo
 ### 1. Instalación
 El motor local first requiere Python 3.10+ y no requiere de ningún daemon externo:
 ```bash
-pip install cortex-persist
+pip install babylon60
 ```
 
 Para características avanzadas:
 ```bash
-pip install "cortex-persist[embeddings]"     # Embeddings semánticos locales
-pip install "cortex-persist[knowledge]"      # Sincronización de conocimiento respaldada por Chroma
+pip install "babylon60[embeddings]"     # Embeddings semánticos locales
+pip install "babylon60[knowledge]"      # Sincronización de conocimiento respaldada por Chroma
 ...
-pip install "cortex-persist[api,mcp,daemon]" # Servidor Web y endpoints MCP
+pip install "babylon60[api,mcp,daemon]" # Servidor Web y endpoints MCP
 ```
 
 ### 2. Ejecución de la Demo Canónica
@@ -168,7 +168,7 @@ Integra el sustrato de memoria BABYLON-60 en cualquier pipeline de agentes exist
 
 ```python
 import asyncio
-from cortex.magic import sovereign_persist
+from babylon60.magic import sovereign_persist
 
 @sovereign_persist(memory="cortex-cloud", strict=True)
 async def my_agent_chain(user_prompt: str):
