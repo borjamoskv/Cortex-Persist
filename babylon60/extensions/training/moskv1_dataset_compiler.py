@@ -553,6 +553,8 @@ class MOSKV1DatasetCompiler:
                     source_file=str(py_file),
                 )):
                     count += 1
+            elif module_doc:
+                self._filter_reason("pre_short_module_doc")
 
             # Extract class docstrings
             for class_name, class_doc in self._extract_class_docstrings(content):
@@ -567,6 +569,8 @@ class MOSKV1DatasetCompiler:
                         source_file=str(py_file),
                     )):
                         count += 1
+                else:
+                    self._filter_reason("pre_short_class_doc")
 
         logger.info("Extracted %d entries from Python modules", count)
         return count
