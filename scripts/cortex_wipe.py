@@ -7,11 +7,12 @@ CLI Utility for Safe Device Sanitization complying with NIST SP 800-88 guideline
 Distinguishes Rotational HDDs from NAND SSDs to execute correct hardware-level erase.
 """
 
-import os
-import sys
 import argparse
-import subprocess
 import json
+import os
+import subprocess
+import sys
+
 
 def get_device_info(device_path):
     """
@@ -27,7 +28,7 @@ def get_device_info(device_path):
         if not os.path.exists(sys_path):
             raise FileNotFoundError(f"Cannot determine physical properties for: {device_path}")
 
-    with open(sys_path, "r") as f:
+    with open(sys_path) as f:
         is_rotational = f.read().strip() == "1"
     
     return {
@@ -43,7 +44,7 @@ def execute_command(cmd, dry_run=True):
         return 0
     
     try:
-        res = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        res = subprocess.run(cmd, check=True, capture_output=True)
         print(res.stdout.decode())
         return res.returncode
     except subprocess.CalledProcessError as e:

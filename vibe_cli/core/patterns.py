@@ -1,6 +1,5 @@
 def detect_pattern(state):
     files_lower = [f.lower() for f in state.files]
-    structure = state.code_structure
     modules = state.current_architecture.get("modules_detected", [])
     modules_lower = [m.lower() for m in modules]
 

@@ -19,7 +19,6 @@ import asyncio
 import sqlite3
 
 from babylon60.config import DEFAULT_DB_PATH
-
 from cortex import CortexEngine
 
 

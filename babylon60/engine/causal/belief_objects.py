@@ -5,7 +5,9 @@ Belief Objects Schemas for CORTEX causal engine.
 
 import enum
 from datetime import datetime
+
 from pydantic import BaseModel, Field
+
 
 class BeliefState(str, enum.Enum):
     PROPOSED = "PROPOSED"

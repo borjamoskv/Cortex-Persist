@@ -1,5 +1,4 @@
 import json
-import itertools
 from pathlib import Path
 
 # The 10 Fundamental Theories

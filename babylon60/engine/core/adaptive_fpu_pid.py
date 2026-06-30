@@ -3,11 +3,11 @@ Cortex-Persist :: Adaptive FPU PID Controller (Cerebellum Node)
 C5-REAL Execution Kernel.
 """
 
-import time
-import math
-import logging
 import asyncio
-from typing import TypedDict, Tuple
+import logging
+import math
+import time
+from typing import TypedDict
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class AdaptiveFPUPID:
         self.target_latency_ms: float = 5.0
         logger.info("[C5-REAL] Cerebellum Adaptive FPU PID initialized.")
 
-    def compute_motor_plan(self, signal: ErrorSignal) -> Tuple[float, float]:
+    def compute_motor_plan(self, signal: ErrorSignal) -> tuple[float, float]:
         """
         Executes Error Correction and Timing Signal.
         Must resolve in under target_latency_ms to comply with L1 Layer constraints.

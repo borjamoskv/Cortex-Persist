@@ -14,7 +14,7 @@ from __future__ import annotations
 import os
 import sys
 import time
-from typing import List
+
 from pydantic import BaseModel, Field
 
 # Ensure we can import from babylon60
@@ -29,7 +29,7 @@ class BottleneckAnalysis(BaseModel):
     component: str = Field(description="The component analyzed (e.g., KV-Cache, Attention, etc.)")
     physical_cause: str = Field(description="The physical/computational reason for the bottleneck (e.g., IO-bound, memory bandwidth)")
     memory_scaling_complexity: str = Field(description="Complexity formula explaining memory usage scaling (e.g., O(B * L * H * D))")
-    mitigation_strategies: List[str] = Field(description="List of modern mitigations (e.g., FlashAttention, GQA, MQA, PageAttention)")
+    mitigation_strategies: list[str] = Field(description="List of modern mitigations (e.g., FlashAttention, GQA, MQA, PageAttention)")
     energy_exergy_impact: str = Field(description="Exergy degradation or thermodynamic cost description")
 
 

@@ -94,8 +94,9 @@ def get_zk_master_key(actor_id: str) -> bytes | None:
 
     Signs a static challenge and hashes the signature to produce a deterministic key.
     """
-    from babylon60.crypto.keys import KeyManager
     from cryptography.hazmat.primitives.asymmetric import ed25519
+
+    from babylon60.crypto.keys import KeyManager
 
     km = KeyManager()
     priv_b64 = km.get_private_key_b64(actor_id)

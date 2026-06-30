@@ -1,8 +1,9 @@
-from agents.scout import ScoutAgent
-from agents.structure import StructureAgent
 from agents.analyst import AnalystAgent
 from agents.architect import ArchitectAgent
 from agents.planner import PlannerAgent
+from agents.scout import ScoutAgent
+from agents.structure import StructureAgent
+
 
 class VibeConductor:
     def __init__(self):

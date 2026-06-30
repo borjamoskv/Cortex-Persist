@@ -1,5 +1,7 @@
 from pathlib import Path
+
 from core.parser import CodeParser
+
 
 class StructureAgent:
     def __init__(self):
@@ -18,7 +20,7 @@ class StructureAgent:
                 elif file.endswith((".js", ".ts", ".tsx", ".jsx")):
                     state.code_structure[file] = self.parser.parse_js(content)
 
-            except:
+            except Exception:
                 continue
 
         return state

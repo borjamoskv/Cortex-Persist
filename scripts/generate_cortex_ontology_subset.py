@@ -4,6 +4,7 @@
 import os
 import re
 
+
 def parse_table_rows(file_path: str, prefix: str, limit: int) -> list:
     if not os.path.exists(file_path):
         print(f"Error: {file_path} no encontrado.")
@@ -11,7 +12,7 @@ def parse_table_rows(file_path: str, prefix: str, limit: int) -> list:
         
     rows = []
     headers = []
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, encoding="utf-8") as f:
         for line in f:
             stripped = line.strip()
             if stripped.startswith("|"):

@@ -1,10 +1,11 @@
 # [C5-REAL] Simulación del Pipeline Defensivo Write-Path: Detección, Taint y Persistencia Causal
-import math
 import collections
-import sqlite3
 import hashlib
+import math
+import sqlite3
 from datetime import datetime, timezone
-from typing import Dict, Any, Tuple
+from typing import Any
+
 
 def calcular_entropia_shannon(texto: str) -> float:
     """Calcula la entropía de Shannon a nivel de caracteres de una cadena.
@@ -24,7 +25,7 @@ def generar_taint_mock(agent_id: str, session_id: str, payload_hash: str) -> str
     """
     timestamp = datetime.now(timezone.utc).isoformat()
     # Atribución basada en hash para cumplir con el Write-Path Contract
-    signature = hashlib.sha256(f"signature:{agent_id}:{session_id}:{timestamp}:{payload_hash}".encode("utf-8")).hexdigest()[:16]
+    signature = hashlib.sha256(f"signature:{agent_id}:{session_id}:{timestamp}:{payload_hash}".encode()).hexdigest()[:16]
     return f"taint:{agent_id}:{session_id}:{timestamp}:{signature}"
 
 def inicializar_base_datos_simulada() -> sqlite3.Connection:
@@ -51,7 +52,7 @@ def procesar_escritura_causal(
     session_id: str,
     content: str,
     umbral_entropia: float = 4.0
-) -> Tuple[bool, Dict[str, Any]]:
+) -> tuple[bool, dict[str, Any]]:
     """Aplica el Write-Path Contract: evalúa entropía, genera taint token y persiste.
     """
     entropy = calcular_entropia_shannon(content)

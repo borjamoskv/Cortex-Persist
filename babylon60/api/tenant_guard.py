@@ -8,12 +8,12 @@ and consumption quotas per tenant. Enforces Zero-Anergy fail-fast.
 
 import time
 from datetime import datetime, timezone
-from typing import Any
 
 from fastapi import HTTPException
 
 from babylon60.cache.redis_l1 import RedisL1Cache
 from babylon60.routes.stripe import PLAN_CONFIG
+
 
 class TenantGuard:
     """O(1) Rate Limit and Quota enforcement engine."""

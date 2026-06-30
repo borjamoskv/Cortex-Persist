@@ -4,7 +4,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # C5-REAL Constraints
 # LL-AC-01: Strict Typing
@@ -25,17 +25,17 @@ class SwarmOrchestrator:
 
     def __init__(self, nexus_path: Path) -> None:
         self.nexus_path: Path = nexus_path
-        self.nexus_config: Dict[str, Any] = self._load_nexus()
+        self.nexus_config: dict[str, Any] = self._load_nexus()
 
-    def _load_nexus(self) -> Dict[str, Any]:
+    def _load_nexus(self) -> dict[str, Any]:
         """Carga determinista del mapa topológico."""
         if not self.nexus_path.exists():
             logger.error(f"Nexus file not found at {self.nexus_path}")
             sys.exit(1)
-        with open(self.nexus_path, "r", encoding="utf-8") as f:
+        with open(self.nexus_path, encoding="utf-8") as f:
             return json.load(f)
 
-    async def run_planning_phase(self, domain: str, task: str, constraints: Dict[str, str]) -> str:
+    async def run_planning_phase(self, domain: str, task: str, constraints: dict[str, str]) -> str:
         """
         Fase 1: Planificación (Gemini 3 Pro)
         Genera el Implementation Plan.
@@ -48,7 +48,7 @@ class SwarmOrchestrator:
         logger.info(f"[{domain.upper()}] Planificación completada. Hash del plan: {plan_hash}")
         return plan_hash
 
-    async def run_execution_phase(self, domain: str, plan_hash: str, constraints: Dict[str, str]) -> str:
+    async def run_execution_phase(self, domain: str, plan_hash: str, constraints: dict[str, str]) -> str:
         """
         Fase 2a: Ejecución (Claude 4.6 / 3.5 Sonnet)
         Mutación del AST físico.
@@ -60,7 +60,7 @@ class SwarmOrchestrator:
         logger.info(f"[{domain.upper()}] Ejecución completada. Diff generado: {diff_hash}")
         return diff_hash
 
-    async def run_testing_phase(self, domain: str, plan_hash: str, constraints: Dict[str, str]) -> bool:
+    async def run_testing_phase(self, domain: str, plan_hash: str, constraints: dict[str, str]) -> bool:
         """
         Fase 2b: Validación (Gemini 3.5 Flash)
         Creación paralela de la suite de validación.

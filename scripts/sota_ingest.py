@@ -5,17 +5,16 @@ SOTA Vector Engine Ingestor (V3)
 Ingests C5-REAL Frontier_Node signals into a local ChromaDB vector space.
 """
 
-import os
-import sys
-import json
-import yaml
 import argparse
+import json
+import sys
 from pathlib import Path
-from typing import List, Optional, Any, Dict
-from pydantic import BaseModel, Field, ValidationError
+from typing import Optional
 
 import chromadb
+import yaml
 from chromadb.config import Settings
+from pydantic import BaseModel, ValidationError
 from sentence_transformers import SentenceTransformer
 
 # -----------------------------------------------------------------------------
@@ -37,19 +36,19 @@ class CapabilityDelta(BaseModel):
 class IntegrationVector(BaseModel):
     Target_System: str
     Integration_Path: str
-    Dependencies: List[str]
-    Constraints: List[str]
+    Dependencies: list[str]
+    Constraints: list[str]
 
 class VerificationNode(BaseModel):
     C5_REAL_Status: str
-    Verified_Claims: List[str]
-    Open_Uncertainties: List[str]
+    Verified_Claims: list[str]
+    Open_Uncertainties: list[str]
 
 class FrontierNode(BaseModel):
     Domain: str
     Subdomain: str
     Core_Insight: str
-    Evidence: List[EvidenceNode]
+    Evidence: list[EvidenceNode]
     Mechanism: str
     Capability_Delta: CapabilityDelta
     Integration_Vector: IntegrationVector

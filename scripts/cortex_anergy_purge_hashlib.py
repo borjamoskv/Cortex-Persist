@@ -1,7 +1,7 @@
 import os
 import re
-import sys
 from pathlib import Path
+
 
 def process_file(filepath: Path) -> bool:
     content = filepath.read_text("utf-8")

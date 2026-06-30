@@ -5,24 +5,23 @@ Scans all conversations in the Antigravity brain via parallel ThreadPool,
 merges with existing state, and consolidates directives under CORTEX-TAINT.
 """
 
-import os
-import json
-import re
 import hashlib
-from pathlib import Path
-from typing import Set, List
+import json
+import os
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 
 # Pre-compile regex for O(1) loop efficiency
 PATTERN = re.compile(r'(?:\[P[0-2]\]|Rule:|Directive:|MUST|NEVER|INVARIANT|CRITICAL)\s*(.*?)(?:\n|$)', re.IGNORECASE)
 
-def load_existing_directives(target_path: Path) -> Set[str]:
+def load_existing_directives(target_path: Path) -> set[str]:
     """Loads existing directives to prevent state loss (Ouroboros loop safety)."""
-    existing: Set[str] = set()
+    existing: set[str] = set()
     if not target_path.exists():
         return existing
         
-    with open(target_path, 'r', encoding='utf-8') as f:
+    with open(target_path, encoding='utf-8') as f:
         for line in f:
             match = re.match(r'^\s*-\s*rule:\s*"(.*)"$', line)
             if match:
@@ -39,11 +38,11 @@ def scrub_pii(text: str) -> str:
         text = text.replace(term, "[SYS_ID_REDACTED]")
     return text
 
-def process_transcript(transcript_path: Path) -> Set[str]:
+def process_transcript(transcript_path: Path) -> set[str]:
     """Processes a single transcript file and returns found directives."""
     local_directives = set()
     try:
-        with open(transcript_path, 'r', encoding='utf-8') as f:
+        with open(transcript_path, encoding='utf-8') as f:
             for line in f:
                 try:
                     data = json.loads(line)
@@ -59,7 +58,7 @@ def process_transcript(transcript_path: Path) -> Set[str]:
         pass
     return local_directives
 
-def generate_taint(directives: List[str]) -> str:
+def generate_taint(directives: list[str]) -> str:
     """Generates a CORTEX-TAINT SHA3-256 hash for the cryptographic audit trail."""
     payload = "".join(directives).encode('utf-8')
     hash_hex = hashlib.sha3_256(payload).hexdigest()
@@ -71,7 +70,7 @@ def extract_all() -> None:
     brain_dir: Path = Path(home_dir) / ".gemini" / "antigravity" / "brain"
     target_path: Path = Path(home_dir) / "30_CORTEX" / "cortex_directives.yaml"
     
-    directives: Set[str] = load_existing_directives(target_path)
+    directives: set[str] = load_existing_directives(target_path)
     initial_count: int = len(directives)
     print(f"[C5-REAL] Loaded {initial_count} existing directives.")
     

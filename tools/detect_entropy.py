@@ -22,7 +22,6 @@ import argparse
 import json
 import os
 import sys
-import math
 from pathlib import Path
 from typing import Any
 

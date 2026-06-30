@@ -3,6 +3,7 @@
 
 import sys
 
+
 def calculate_finance(tokens: int = 1000000) -> dict:
     # 1. Parámetros del Transformer (Llama-3-70B GQA)
     layers = 80

@@ -1,6 +1,4 @@
 # [C5-REAL] Simulación de Ataques Adversarios: Inferencia de Membresía y Extracción de Modelo
-import math
-from typing import List, Dict, Any, Tuple
 
 # --- CONFIGURACIÓN DEL MODELO ORÁCULO ---
 # El Oráculo representa el clasificador defensivo lineal de seguridad: f(h, r) = 2.5 * h + 4.0 * r - 12.0
@@ -14,7 +12,7 @@ def oraculo_inferencia(h: float, r: float) -> float:
     return PESOS_REALES[0] * h + PESOS_REALES[1] * r + SESGO_REAL
 
 # --- SIMULACIÓN DE ATAQUE DE EXTRACCIÓN DE MODELO (Model Extraction) ---
-def simular_extraccion_modelo() -> Tuple[List[float], float]:
+def simular_extraccion_modelo() -> tuple[list[float], float]:
     """Extrae/Aproxima los pesos del clasificador lineal del oráculo 
     mediante consultas estratégicas a la API de caja negra.
     Utiliza un sistema de ecuaciones lineales simple a partir de 3 consultas.

@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 
+
 def detect_routers(files: list):
     routers = []
 
@@ -34,7 +35,7 @@ def detect_routers(files: list):
                     "file": file
                 })
 
-        except:
+        except Exception:
             continue
 
     return routers

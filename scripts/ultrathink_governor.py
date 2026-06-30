@@ -11,19 +11,19 @@ from __future__ import annotations
 
 import os
 import re
-import sys
 import subprocess
-from typing import Dict, List, Set, Optional, Tuple
+import sys
+from typing import Optional
 
 # Insert workspace root in path to ensure imports resolve
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from babylon60.engine.core.ultrathink_physics import UltrathinkPhysicsEngine, LegionFormation
+from babylon60.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
 
 
-def build_dependency_graph(root_dir: str) -> Dict[str, List[str]]:
+def build_dependency_graph(root_dir: str) -> dict[str, list[str]]:
     """Builds a dependency graph of all python modules in the package."""
-    graph: Dict[str, List[str]] = {}
+    graph: dict[str, list[str]] = {}
     # Matches: import babylon60.xxx or from babylon60.xxx import ...
     import_pat = re.compile(r"^\s*(?:import\s+(babylon60\.[a-zA-Z0-9_\.]+)|from\s+(babylon60\.[a-zA-Z0-9_\.]+)\s+import)")
 
@@ -36,9 +36,9 @@ def build_dependency_graph(root_dir: str) -> Dict[str, List[str]]:
             rel_path = os.path.relpath(path, os.path.dirname(root_dir))
             mod_name = os.path.splitext(rel_path)[0].replace(os.sep, ".")
 
-            imports: List[str] = []
+            imports: list[str] = []
             try:
-                with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                with open(path, encoding="utf-8", errors="ignore") as f:
                     for line in f:
                         match = import_pat.match(line)
                         if match:
@@ -51,7 +51,7 @@ def build_dependency_graph(root_dir: str) -> Dict[str, List[str]]:
     return graph
 
 
-def get_git_diff() -> Tuple[str, List[str]]:
+def get_git_diff() -> tuple[str, list[str]]:
     """Retrieves the git diff text and list of modified files."""
     try:
         # Diff against main

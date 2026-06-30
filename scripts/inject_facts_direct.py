@@ -22,8 +22,6 @@ if _repo not in sys.path:
 # Must import after env is set
 from babylon60.engine.core._engine import CortexEngine  # noqa: E402
 
-
-
 SESSION_FACTS = [
     {
         "project": "BABYLON-60",

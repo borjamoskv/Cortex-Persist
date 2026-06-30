@@ -2,6 +2,7 @@ from core.graph import detect_cycles
 from core.patterns import detect_pattern
 from core.routers import detect_routers
 
+
 class ArchitectAgent:
 
     def run(self, state):

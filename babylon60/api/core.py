@@ -374,6 +374,7 @@ app.include_router(events_router.router)
 
 # FSM Real-Time UI Observer (Causal FSM Watcher)
 from babylon60.api.fsm_streamer import router as fsm_router
+
 app.include_router(fsm_router)
 
 # V5 LLM Proxy Middleware (Exergy Labyrinth)

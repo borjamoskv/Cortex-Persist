@@ -3,6 +3,7 @@
 
 import sys
 
+
 def run_simulation(input_tokens: int = 900000, output_tokens: int = 100000) -> list:
     # 2026 Verified Pricing Matrix (per million tokens)
     models = {
@@ -13,7 +14,6 @@ def run_simulation(input_tokens: int = 900000, output_tokens: int = 100000) -> l
     }
     
     results = []
-    total_tokens = input_tokens + output_tokens
     
     for name, rates in models.items():
         cost_in = (input_tokens / 1000000.0) * rates["input"]

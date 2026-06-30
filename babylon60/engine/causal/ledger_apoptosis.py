@@ -6,6 +6,7 @@ import tempfile
 
 from babylon60.telemetry.metrics import metrics
 
+
 class ThermodynamicLedgerApoptosis:
     """Motor de Poda Semántica de Entropía (C5-REAL).
 

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 class AnalystAgent:
     def run(self, state):
         for file in state.files[:100]:
@@ -23,7 +24,7 @@ class AnalystAgent:
                 if "todo" in lc:
                     state.technical_debt.append({"type": "TODO_found", "file": file})
 
-            except:
+            except Exception:
                 continue
 
         return state

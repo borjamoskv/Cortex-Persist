@@ -3,6 +3,7 @@
 
 import sys
 
+
 def calculate_migration(monthly_tokens: int = 25000000000) -> dict:
     # 1. Consumo de Energía y Costos del Transformer (8x A100)
     # 8x A100 consume ~2.4 kW/h (300W por GPU + overhead del servidor de 400W)
@@ -60,15 +61,15 @@ if __name__ == "__main__":
             
     res = calculate_migration(t)
     print(f"VOLUMEN MENSUAL: {res['monthly_tokens']} tokens")
-    print(f"TRANSFORMER (8x A100):")
+    print("TRANSFORMER (8x A100):")
     print(f"  - Horas activas: {res['transformer']['hours']} hrs")
     print(f"  - Energía: {res['transformer']['energy_kwh']} kWh")
     print(f"  - Costo: ${res['transformer']['cost_usd']} USD")
-    print(f"MAMBA (1x A10G):")
+    print("MAMBA (1x A10G):")
     print(f"  - Horas activas: {res['mamba']['hours']} hrs")
     print(f"  - Energía: {res['mamba']['energy_kwh']} kWh")
     print(f"  - Costo: ${res['mamba']['cost_usd']} USD")
-    print(f"AHORROS DE LA MIGRACIÓN:")
+    print("AHORROS DE LA MIGRACIÓN:")
     print(f"  - Energía neta salvada: {res['savings']['energy_kwh']} kWh/mes")
     print(f"  - Reducción CO2: {res['savings']['co2_metric_tons']} Toneladas Métricas/mes")
     print(f"  - Ahorro financiero neto: ${res['savings']['cost_usd']} USD/mes")

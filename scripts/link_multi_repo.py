@@ -7,8 +7,8 @@ and the newly created multi-repo workspace folders, preventing
 physical duplication of context.
 """
 
-import os
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("link_multi_repo")

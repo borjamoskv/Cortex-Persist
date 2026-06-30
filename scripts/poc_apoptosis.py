@@ -4,8 +4,9 @@ Proof of Concept (PoC): Tolerancia Bizantina-Biológica (Apoptosis P100)
 Demuestra la invocación directa del Guard pre-ejecución, simulando el hook del SDK.
 """
 
-import os
 import logging
+import os
+
 from babylon60.guards.duress_guard import DuressGuard
 from babylon60.security.types import GuardViolation
 

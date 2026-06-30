@@ -3,6 +3,7 @@
 # Licencia: Apache-2.0
 
 import math
+
 import numpy as np
 
 # Constantes Físicas Universales

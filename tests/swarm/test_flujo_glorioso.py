@@ -1,4 +1,5 @@
 import pytest
+import json
 from babylon60.swarm.flujo_glorioso import DecaCoreOrchestrator
 from babylon60.engine.causal.belief_objects import BeliefObject
 
@@ -8,9 +9,8 @@ def test_flujo_glorioso_concepcion():
     result = orchestrator.concepcion(input_data)
     
     assert isinstance(result, BeliefObject)
-    assert result.phase == "concepcion"
-    assert result.data["status"] == "completed"
-    assert result.data["input"] == input_data
+    assert result.payload.context_hash == "concepcion_ctx"
+    assert json.loads(result.payload.content) == input_data
 
 def test_flujo_glorioso_full_pipeline():
     orchestrator = DecaCoreOrchestrator()
@@ -32,5 +32,5 @@ def test_flujo_glorioso_full_pipeline():
     for phase_func in phases:
         result = phase_func(data)
         assert isinstance(result, BeliefObject)
-        assert result.data["status"] == "completed"
-        data = result.data
+        assert "ctx" in result.payload.context_hash
+        data = json.loads(result.payload.content)

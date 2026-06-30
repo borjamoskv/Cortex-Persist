@@ -44,8 +44,8 @@ class SQLQueryVisitor(ast.NodeVisitor):
         return ""
 
     def _is_bypass(self, start_line: int, end_line: int) -> bool:
-        for l in range(start_line - 1, end_line + 1):
-            snippet = self._get_line_snippet(l)
+        for line_num in range(start_line - 1, end_line + 1):
+            snippet = self._get_line_snippet(line_num)
             if "# nosec" in snippet or "# bypass-tenant" in snippet:
                 return True
         return False

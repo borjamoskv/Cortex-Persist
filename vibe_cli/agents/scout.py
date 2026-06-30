@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 class ScoutAgent:
     def run(self, state):
         root = Path(state.root_path)
@@ -28,7 +29,7 @@ class ScoutAgent:
                         state.stack["fastapi"] = True
                     if "from django" in content or "import django" in content:
                         state.stack["django"] = True
-                except:
+                except Exception:
                     pass
 
             if f.endswith(".json") and "package.json" in f:
@@ -38,7 +39,7 @@ class ScoutAgent:
                         state.stack["nextjs"] = True
                     if "express" in content:
                         state.stack["express"] = True
-                except:
+                except Exception:
                     pass
 
         return state

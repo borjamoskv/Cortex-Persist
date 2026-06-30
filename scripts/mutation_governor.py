@@ -13,10 +13,10 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
-from typing import Dict, List, Set, Final
+from typing import Final
 
 # Mandated directories where AST and security validations are critical
-MANDATORY_PATHS: Final[List[str]] = [
+MANDATORY_PATHS: Final[list[str]] = [
     "babylon60/engine/causal/",
     "babylon60/crypto/",
     "babylon60/database/",
@@ -25,7 +25,7 @@ MANDATORY_PATHS: Final[List[str]] = [
 ]
 
 # Paths allowed to bypass the expensive mutation checks
-BYPASS_EXTENSIONS: Final[Set[str]] = {
+BYPASS_EXTENSIONS: Final[set[str]] = {
     ".md",
     ".json",
     ".yml",
@@ -40,7 +40,7 @@ BYPASS_EXTENSIONS: Final[Set[str]] = {
     ".html",
 }
 
-BYPASS_DIRS: Final[List[str]] = [
+BYPASS_DIRS: Final[list[str]] = [
     "cortex_ui/",
     "public/",
     "src/",
@@ -51,7 +51,7 @@ BYPASS_DIRS: Final[List[str]] = [
 ]
 
 
-def get_changed_files() -> List[str]:
+def get_changed_files() -> list[str]:
     """Retrieves all modified and staged files in the git workspace."""
     try:
         # Detect uncommitted and staged changes compared to main
@@ -77,11 +77,11 @@ def get_changed_files() -> List[str]:
         return []
 
 
-def evaluate_mutation_necessity(files: List[str]) -> Dict[str, any]:
+def evaluate_mutation_necessity(files: list[str]) -> dict[str, any]:
     """Evaluates the thermodynamic decision matrix for the list of changes."""
-    mandatory_triggers: List[str] = []
-    bypassable_changes: List[str] = []
-    undetermined_changes: List[str] = []
+    mandatory_triggers: list[str] = []
+    bypassable_changes: list[str] = []
+    undetermined_changes: list[str] = []
 
     for file in files:
         # Check bypass conditions

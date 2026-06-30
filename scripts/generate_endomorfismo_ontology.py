@@ -352,7 +352,9 @@ print("[C5-REAL] Todos los archivos de la ontología Endomorfismo guardados con 
 
 # ----------------- PARSER Y COMPILADOR A JSON/YAML -----------------
 import json
+
 import yaml
+
 
 def parse_markdown_tables(filepath):
     all_tables = []

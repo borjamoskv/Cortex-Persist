@@ -4,8 +4,10 @@ SQLite-Vec client for Belief Objects.
 """
 
 import json
-from babylon60.engine.causal.belief_objects import BeliefObject
+
 from babylon60.database.sovereign_db import SovereignDB
+from babylon60.engine.causal.belief_objects import BeliefObject
+
 
 class BeliefStore:
     def __init__(self, db: SovereignDB):

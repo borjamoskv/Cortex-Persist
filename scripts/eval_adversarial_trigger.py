@@ -1,7 +1,8 @@
 # [C5-REAL] Detector y Auditor de Triggers Adversarios por Entropía
-import math
 import collections
-from typing import List, Dict, Any
+import math
+from typing import Any
+
 
 def calcular_entropia_shannon(texto: str) -> float:
     """Calcula la entropía de Shannon a nivel de caracteres de una cadena.
@@ -20,7 +21,7 @@ def calcular_entropia_shannon(texto: str) -> float:
         
     return entropia
 
-def auditar_entradas(entradas: List[str], umbral: float = 4.8) -> List[Dict[str, Any]]:
+def auditar_entradas(entradas: list[str], umbral: float = 4.8) -> list[dict[str, Any]]:
     """Audita un lote de entradas y clasifica su nivel de riesgo.
     """
     reporte = []

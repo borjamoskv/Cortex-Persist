@@ -1,11 +1,11 @@
-import sys
 import json
+import sys
 from pathlib import Path
 
-from core.state import ProjectState
-from core.mermaid import generate_mermaid
-from core.health import score_project
 from conductor import VibeConductor
+from core.health import score_project
+from core.mermaid import generate_mermaid
+from core.state import ProjectState
 
 
 def generate_markdown(state, health):
@@ -88,13 +88,13 @@ def main():
         generate_markdown(state, health)
     )
 
-    print(f"\n✅ Consolidation complete.")
+    print("\n✅ Consolidation complete.")
     print(f"Health: {health['score']}/100 {health['label']}")
     print(f"Pattern: {state.recommended_architecture['pattern']}")
     print(f"Files analyzed: {state.current_architecture['files_analyzed']}")
     print(f"Functions found: {state.current_architecture['total_functions']}")
     print(f"Classes found: {state.current_architecture['total_classes']}")
-    print(f"\nOutputs saved in /outputs")
+    print("\nOutputs saved in /outputs")
 
 
 if __name__ == "__main__":

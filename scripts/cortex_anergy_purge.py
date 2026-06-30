@@ -96,9 +96,9 @@ def scan_and_purge():
 async def perform_ledger_apoptosis():
     print("[C5-REAL] Iniciando purga termodinámica de Ledger (Apoptosis)...")
     try:
-        from babylon60.database.core import connect_async_ctx
         from babylon60.audit.ledger import EnterpriseAuditLedger
         from babylon60.audit.ledger_compactor import compact_ledger
+        from babylon60.database.core import connect_async_ctx
         
         db_path = str(workspace_root / "cortex_ledger.db")
         if not os.path.exists(db_path):

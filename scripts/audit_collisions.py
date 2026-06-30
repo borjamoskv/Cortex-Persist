@@ -4,7 +4,7 @@ from collections import defaultdict
 collisions = defaultdict(list)
 primitives = []
 
-with open('babylon60/agents/primitives/ONTOLOGIA_BLUEPRINT_1000.jsonl', 'r') as f:
+with open('babylon60/agents/primitives/ONTOLOGIA_BLUEPRINT_1000.jsonl') as f:
     for line in f:
         p = json.loads(line)
         primitives.append(p)

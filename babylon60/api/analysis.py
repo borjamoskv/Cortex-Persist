@@ -156,7 +156,7 @@ def _query_db_worker(query: str) -> list[FactNode]:
             col_names = [description[0] for description in cursor.description]
 
             for row in rows:
-                row_dict = dict(zip(col_names, row))
+                row_dict = dict(zip(col_names, row, strict=True))
                 entity_id = row_dict.get("id", "UNKNOWN")
                 
                 content_parts = []

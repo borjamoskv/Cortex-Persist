@@ -1,7 +1,15 @@
-from typing import Dict, Any, List
 import json
-from datetime import datetime
-from babylon60.engine.causal.belief_objects import BeliefObject, BeliefState, RelationType, ProvenanceEnvelope, PropositionPayload
+from datetime import datetime, timezone
+from typing import Any
+
+from babylon60.engine.causal.belief_objects import (
+    BeliefObject,
+    BeliefState,
+    PropositionPayload,
+    ProvenanceEnvelope,
+    RelationType,
+)
+
 
 class DecaCoreOrchestrator:
     """
@@ -9,7 +17,7 @@ class DecaCoreOrchestrator:
     Operando bajo modo C5-REAL (Fail-Fast Termodinámico).
     """
 
-    def _execute_phase(self, phase_name: str, input_data: Dict[str, Any]) -> BeliefObject:
+    def _execute_phase(self, phase_name: str, input_data: dict[str, Any]) -> BeliefObject:
         """Ejecuta una fase atómica sin programación defensiva."""
         # Se asume input_data perfecto. Fail-Fast si hay problemas.
         data_str = json.dumps(input_data, sort_keys=True)
@@ -20,7 +28,7 @@ class DecaCoreOrchestrator:
             provenance=ProvenanceEnvelope(
                 agent_id="DecaCore_Musa",
                 session_id="flujo_glorioso_session",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 signature=f"CORTEX-TAINT:deca:{hash(data_str)}"
             ),
             payload=PropositionPayload(
@@ -30,32 +38,32 @@ class DecaCoreOrchestrator:
             )
         )
 
-    def concepcion(self, input_data: Dict[str, Any]) -> BeliefObject:
+    def concepcion(self, input_data: dict[str, Any]) -> BeliefObject:
         return self._execute_phase("concepcion", input_data)
 
-    def visualizacion(self, input_data: Dict[str, Any]) -> BeliefObject:
+    def visualizacion(self, input_data: dict[str, Any]) -> BeliefObject:
         return self._execute_phase("visualizacion", input_data)
 
-    def sonido(self, input_data: Dict[str, Any]) -> BeliefObject:
+    def sonido(self, input_data: dict[str, Any]) -> BeliefObject:
         return self._execute_phase("sonido", input_data)
 
-    def animacion(self, input_data: Dict[str, Any]) -> BeliefObject:
+    def animacion(self, input_data: dict[str, Any]) -> BeliefObject:
         return self._execute_phase("animacion", input_data)
 
-    def voz(self, input_data: Dict[str, Any]) -> BeliefObject:
+    def voz(self, input_data: dict[str, Any]) -> BeliefObject:
         return self._execute_phase("voz", input_data)
 
-    def lipsync(self, input_data: Dict[str, Any]) -> BeliefObject:
+    def lipsync(self, input_data: dict[str, Any]) -> BeliefObject:
         return self._execute_phase("lipsync", input_data)
 
-    def edicion(self, input_data: Dict[str, Any]) -> BeliefObject:
+    def edicion(self, input_data: dict[str, Any]) -> BeliefObject:
         return self._execute_phase("edicion", input_data)
 
-    def vfx(self, input_data: Dict[str, Any]) -> BeliefObject:
+    def vfx(self, input_data: dict[str, Any]) -> BeliefObject:
         return self._execute_phase("vfx", input_data)
 
-    def upscaling(self, input_data: Dict[str, Any]) -> BeliefObject:
+    def upscaling(self, input_data: dict[str, Any]) -> BeliefObject:
         return self._execute_phase("upscaling", input_data)
 
-    def despliegue(self, input_data: Dict[str, Any]) -> BeliefObject:
+    def despliegue(self, input_data: dict[str, Any]) -> BeliefObject:
         return self._execute_phase("despliegue", input_data)

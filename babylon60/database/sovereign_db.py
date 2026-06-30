@@ -129,11 +129,8 @@ class SovereignDB:
             conn.execute("PRAGMA busy_timeout=5000")
             conn.execute("PRAGMA foreign_keys=ON")
 
-            try:
-                from babylon60.database.core import load_sqlite_vec
-                load_sqlite_vec(conn)
-            except Exception as e:
-                pass
+            from babylon60.database.core import load_sqlite_vec
+            load_sqlite_vec(conn)
 
             self._conn = conn
             self._init_event.set()

@@ -13,14 +13,10 @@ Reality Level: C5-REAL
 from __future__ import annotations
 
 import ast
-import math
-import os
-import re
 import statistics
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
-from typing import Optional
 
 # ---------------------------------------------------------------------------
 # Constants — Dynamic home resolution to prevent PII Bleed
@@ -485,9 +481,9 @@ def render_inventory(components: list[Component]) -> str:
         " WORKFLOWS, and PLUGIN SKILLS in the CORTEX ecosystem."
     )
     lines.append("")
-    lines.append(f"* **Reality Level**: C5-REAL (Dynamic AST + code-block telemetry)")
+    lines.append("* **Reality Level**: C5-REAL (Dynamic AST + code-block telemetry)")
     lines.append(f"* **Date**: {date.today().isoformat()}")
-    lines.append(f"* **Compiler**: `scripts/compile_exergy_inventory.py` v2.0")
+    lines.append("* **Compiler**: `scripts/compile_exergy_inventory.py` v2.0")
     lines.append("")
 
     # Summary statistics
@@ -499,10 +495,10 @@ def render_inventory(components: list[Component]) -> str:
     lines.append(f"exergy_median: {median_score:.1f}")
     lines.append(f"exergy_min: {min_score:.1f}")
     lines.append(f"exergy_max: {max_score:.1f}")
-    lines.append(f"type_distribution:")
+    lines.append("type_distribution:")
     for t, count in sorted(type_counts.items()):
         lines.append(f"  {t}: {count}")
-    lines.append(f"status_distribution:")
+    lines.append("status_distribution:")
     for s, count in sorted(status_counts.items()):
         lines.append(f"  {s}: {count}")
     lines.append("```")

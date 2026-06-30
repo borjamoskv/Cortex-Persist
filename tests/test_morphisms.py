@@ -244,8 +244,8 @@ def test_morphism_functor():
     # Test morphisms (functions) in the source category
     # Morphism 1: f(x) = 2x
     # Morphism 2: g(x) = x + 3
-    f_double = lambda x: x * 2.0
-    g_add_three = lambda x: x + 3.0
+    def f_double(x): return x * 2.0
+    def g_add_three(x): return x + 3.0
 
     morphisms = [(g_add_three, f_double)]
 

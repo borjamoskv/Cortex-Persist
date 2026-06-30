@@ -2,6 +2,7 @@
 import time
 
 import numpy as np
+
 from babylon60.utils import void_vec
 
 # CORTEX - Operation VOID-MAX: Batch SIMD Benchmark
