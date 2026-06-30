@@ -129,3 +129,33 @@ def graph_laplacian_derivative(adjacency_matrix: Sequence[Sequence[float]], node
         off_diag_term = sum(adjacency_matrix[i][j] * node_signals[j] for j in range(n))
         result[i] = diag_term - off_diag_term
     return result
+
+
+def integrate_trapezoidal(f: Callable[[float], float], a: float, b: float, n: int) -> float:
+    """
+    Computes the definite integral of f from a to b using the composite trapezoidal rule.
+    Approximation error is O(h^2).
+    """
+    if n <= 0:
+        raise ValueError("Number of intervals n must be positive.")
+    h = (b - a) / n
+    s = 0.5 * (f(a) + f(b))
+    for i in range(1, n):
+        s += f(a + i * h)
+    return s * h
+
+
+def integrate_simpson(f: Callable[[float], float], a: float, b: float, n: int) -> float:
+    """
+    Computes the definite integral of f from a to b using the composite Simpson's rule.
+    n must be even. Approximation error is O(h^4).
+    """
+    if n <= 0 or n % 2 != 0:
+        raise ValueError("Number of intervals n must be positive and even for Simpson's rule.")
+    h = (b - a) / n
+    s = f(a) + f(b)
+    for i in range(1, n, 2):
+        s += 4 * f(a + i * h)
+    for i in range(2, n - 1, 2):
+        s += 2 * f(a + i * h)
+    return s * h / 3

@@ -19,6 +19,8 @@ from babylon60.utils.differentiation import (
     complex_step_derivative,
     richardson_central_difference,
     graph_laplacian_derivative,
+    integrate_trapezoidal,
+    integrate_simpson,
 )
 
 
@@ -110,3 +112,46 @@ def test_graph_laplacian_derivative():
     signals = [1.0, 2.0, 4.0]
     result = graph_laplacian_derivative(adj, signals)
     assert result == [-1.0, -1.0, 2.0]
+
+
+def test_integration_invariants():
+    """
+    Validates [INVT-01]: Discrete isomorphism of the Fundamental Theorem of Calculus,
+    and convergence rates of Trapezoidal (O(h^2)) and Simpson's (O(h^4)) rules.
+    """
+    # f(x) = sin(x), F(x) = -cos(x)
+    # Integral from 0 to pi of sin(x) dx = -cos(pi) - (-cos(0)) = 1 - (-1) = 2.0
+    f = math.sin
+    exact = 2.0
+    
+    # Test Trapezoidal rule at different step sizes
+    t_10 = integrate_trapezoidal(f, 0.0, math.pi, 10)
+    t_20 = integrate_trapezoidal(f, 0.0, math.pi, 20)
+    
+    err_t_10 = abs(t_10 - exact)
+    err_t_20 = abs(t_20 - exact)
+    
+    # Error should scale by approximately 4x (since O(h^2))
+    ratio_t = err_t_10 / err_t_20
+    assert 3.8 < ratio_t < 4.2
+    
+    # Test Simpson's rule at different step sizes
+    s_10 = integrate_simpson(f, 0.0, math.pi, 10)
+    s_20 = integrate_simpson(f, 0.0, math.pi, 20)
+    
+    err_s_10 = abs(s_10 - exact)
+    err_s_20 = abs(s_20 - exact)
+    
+    # Error should scale by approximately 16x (since O(h^4))
+    ratio_s = err_s_10 / err_s_20
+    assert 15.0 < ratio_s < 17.0
+    
+    # Validate FTC on a discrete sequence: sum_{i=0}^{n-1} (g_{i+1} - g_i) = g_n - g_0
+    g = [i**3 - 3 * (i**2) + 12 for i in range(50)]
+    dg = [g[i+1] - g[i] for i in range(len(g) - 1)]
+    
+    n = 40
+    sum_dg = sum(dg[:n])
+    expected_diff = g[n] - g[0]
+    
+    assert sum_dg == expected_diff
