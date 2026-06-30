@@ -331,6 +331,42 @@ class TestBaseAgent:
         with pytest.raises(PermissionError):
             await agent.use_tool("forbidden_tool")
 
+    @pytest.mark.asyncio
+    async def test_project_boundary_enforcement(self, bus):
+        from babylon60.agents.builtin_tools import FileSystemTool, ShellTool
+        from babylon60.agents.manifest import AgentManifest
+
+        manifest_ui = AgentManifest(
+            agent_id="agent-ui-1",
+            purpose="test",
+            tools_allowed=["filesystem", "shell"],
+            project_id="cortex_ui"
+        )
+
+        registry = ToolRegistry()
+        registry.register(FileSystemTool())
+        registry.register(ShellTool())
+
+        agent_ui = EchoAgent(manifest_ui, bus, tool_registry=registry)
+
+        # Allowed path (inside cortex_ui)
+        # Forbidden paths (outside cortex_ui)
+        forbidden_path = "/Users/borjafernandezangulo/30_BABYLON-60/babylon60/some_file.txt"
+        forbidden_root_path = "/Users/borjafernandezangulo/30_BABYLON-60/some_file.txt"
+
+        with pytest.raises(PermissionError) as exc:
+            await agent_ui.use_tool("filesystem", action="exists", path=forbidden_path)
+        assert "Project boundary violation" in str(exc.value)
+
+        with pytest.raises(PermissionError) as exc:
+            await agent_ui.use_tool("filesystem", action="exists", path=forbidden_root_path)
+        assert "Project boundary violation" in str(exc.value)
+
+        # Validate shell tool CWD containment
+        with pytest.raises(PermissionError) as exc:
+            await agent_ui.use_tool("shell", cmd="pwd", cwd="/Users/borjafernandezangulo/30_BABYLON-60/babylon60")
+        assert "Project boundary violation" in str(exc.value)
+
 
 # ── Supervisor Tests ─────────────────────────────────────────────
 

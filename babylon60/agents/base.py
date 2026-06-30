@@ -188,7 +188,44 @@ class BaseAgent:
     # ── Tool access (policy-governed) ────────────────────────────
 
     async def use_tool(self, tool_name: str, **kwargs: Any) -> Any:
-        """Invoke a tool respecting manifest policy."""
+        """Invoke a tool respecting manifest policy and project boundaries."""
+        from pathlib import Path
+
+        project_id = self.manifest.project_id
+        workspace_base = Path(__file__).resolve().parents[2]
+
+
+        if project_id == "cortex_ui":
+            project_root = (workspace_base / "cortex_ui").resolve()
+        elif project_id == "babylon60":
+            project_root = (workspace_base / "babylon60").resolve()
+        else:
+            project_root = workspace_base
+
+        # Project boundary enforcement for filesystem tool
+        if tool_name == "filesystem":
+            path_str = kwargs.get("path")
+            if path_str:
+                target_path = Path(path_str).resolve()
+                if not (target_path == project_root or project_root in target_path.parents):
+                    raise PermissionError(
+                        f"Project boundary violation (borjamoskv): Path '{path_str}' is outside "
+                        f"the root of project '{project_id}' ({project_root})"
+                    )
+
+        # Project boundary enforcement for shell tool
+        elif tool_name == "shell":
+            cwd_str = kwargs.get("cwd")
+            if cwd_str:
+                target_cwd = Path(cwd_str).resolve()
+                if not (target_cwd == project_root or project_root in target_cwd.parents):
+                    raise PermissionError(
+                        f"Project boundary violation (borjamoskv): Working directory '{cwd_str}' "
+                        f"is outside the root of project '{project_id}' ({project_root})"
+                    )
+            else:
+                kwargs["cwd"] = str(project_root)
+
         tool = self.tools.get(tool_name, allowed=self.manifest.tools_allowed or None)
         return await tool.execute(**kwargs)
 

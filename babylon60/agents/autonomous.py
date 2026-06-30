@@ -467,6 +467,7 @@ def create_autonomous_agent(
     step_timeout_s: float = 30.0,
     budget_tokens: int = 100_000,
     max_consecutive_errors: int = 5,
+    project_id: str = "default",
 ) -> AutonomousAgent:
     """Factory function to create a fully configured AutonomousAgent.
 
@@ -499,6 +500,7 @@ def create_autonomous_agent(
         max_consecutive_errors=max_consecutive_errors,
         confidence_floor="C4",
         trust_level="C4",
+        project_id=project_id,
     )
 
     return AutonomousAgent(
