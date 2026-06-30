@@ -43,7 +43,7 @@ This is a formal notice of non-compliance and a mandate for the immediate erasur
 **1. Context and Legal Standing:**
 I am the lawful owner and sole creator of the artistic identity, brand, and intellectual property operating under the pseudonym **"Borja Moskv"** (also known as **"Bakala de Troya"**). 
 
-Your platform is currently indexing, aggregating, and publicly displaying personal data that explicitly and publicly links my artistic pseudonym to my real legal identity, **"Borja Fernández Angulo"**. 
+Your platform is currently indexing, aggregating, and publicly displaying personal data that explicitly and publicly links my artistic pseudonym to my real legal identity, **"[REDACTED_LEGAL_PII]"**. 
 
 **2. Ground for Erasure (Lack of Consent and Profiling):**
 I have never provided explicit, unambiguous, or informed consent for your platform to scrape, process, cross-reference, or publicly broadcast the association between my legal name and my pseudonym. Your processing of this metadata violates the core principles of **Article 5 (Data Minimization and Purpose Limitation)** and lacks any lawful basis under **Article 6** of the GDPR.
@@ -52,7 +52,7 @@ Furthermore, under the jurisprudence of the Court of Justice of the European Uni
 
 **3. Direct Demands:**
 I demand that your organization immediately executes the following actions:
-1. **Permanent Erasure:** Completely delete and scrub all records containing my legal name ("Borja Fernández Angulo") from all public-facing profiles, underlying databases, and associative metadata records linked to "Borja Moskv" (URL: `[INSERT PROFILE URL HERE]`).
+1. **Permanent Erasure:** Completely delete and scrub all records containing my legal name ("[REDACTED_LEGAL_PII]") from all public-facing profiles, underlying databases, and associative metadata records linked to "Borja Moskv" (URL: `[INSERT PROFILE URL HERE]`).
 2. **De-indexing:** Request the removal of cached versions of the affected pages from global search engines (Google, Brave, Bing) using their webmaster tools once the erasure is complete.
 
 **4. Penalty and Litigation Warning:**
@@ -66,5 +66,5 @@ I expect your prompt compliance.
 
 Sincerely,
 
-**Borja Fernández Angulo**  
+**[REDACTED_LEGAL_PII]**  
 *Signature / Date:* ___________________________

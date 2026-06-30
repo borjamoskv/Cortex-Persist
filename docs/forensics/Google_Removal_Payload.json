@@ -7,7 +7,7 @@
       "type": "AGGREGATOR",
       "platform": "Viberate",
       "url": "https://www.viberate.com/artist/borja-moskv/",
-      "reason": "Exposes legal PII (Borja Fernández Angulo) crossed with pseudonym without consent."
+      "reason": "Exposes legal PII ([REDACTED_LEGAL_PII]) crossed with pseudonym without consent."
     },
     {
       "type": "STREAMING_CREDITS",

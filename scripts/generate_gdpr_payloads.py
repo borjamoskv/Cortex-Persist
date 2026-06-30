@@ -29,21 +29,21 @@ TO THE DATA PROTECTION OFFICER / PRIVACY TEAM:
 I am writing to you to formally request the erasure of personal data concerning me under Article 17 of the General Data Protection Regulation (GDPR) and the equivalent provisions of the CCPA, if applicable.
 
 Identification Details:
-- Legal Name: Borja Fernández Angulo
+- Legal Name: [REDACTED_LEGAL_PII]
 - Public/Artistic Alias: Borja Moskv
 - Target URL: {target_url}
 
 Nature of the Breach:
-Your platform is currently scraping, linking, and publicly exposing my legal identity ("Borja Fernández Angulo") inextricably bound to my artistic pseudonym ("Borja Moskv"). I have not granted explicit, informed consent for your platform to index, aggregate, or distribute this cross-linked Personal Identifiable Information (PII) on the open web.
+Your platform is currently scraping, linking, and publicly exposing my legal identity ("[REDACTED_LEGAL_PII]") inextricably bound to my artistic pseudonym ("Borja Moskv"). I have not granted explicit, informed consent for your platform to index, aggregate, or distribute this cross-linked Personal Identifiable Information (PII) on the open web.
 
 Required Action (Erasure):
-I request that you permanently delete the profile, or completely scrub my legal name ("Borja Fernández Angulo") from all public-facing pages, metadata tags, and internal databases associated with the pseudonym "Borja Moskv".
+I request that you permanently delete the profile, or completely scrub my legal name ("[REDACTED_LEGAL_PII]") from all public-facing pages, metadata tags, and internal databases associated with the pseudonym "Borja Moskv".
 
 Please confirm in writing within 30 days that you have complied with this request, as mandated by GDPR Article 12(3).
 
 Sincerely,
 
-Borja Fernández Angulo
+[REDACTED_LEGAL_PII]
 """
 
 def main():

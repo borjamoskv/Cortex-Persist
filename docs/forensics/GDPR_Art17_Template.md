@@ -16,7 +16,7 @@ This email constitutes a formal request under Article 17 of the General Data Pro
 
 I am the lawful owner of the artistic identity and associated intellectual property operating under the pseudonym **"[Nombre Artístico, e.g., Borja Moskv]"**. 
 
-Your platform is currently indexing, aggregating, and publicly displaying personally identifiable information (PII) that explicitly links my pseudonym to my legal name, **"[Nombre Legal, e.g., Borja Fernández Angulo]"**.
+Your platform is currently indexing, aggregating, and publicly displaying personally identifiable information (PII) that explicitly links my pseudonym to my legal name, **"[Nombre Legal, e.g., [REDACTED_LEGAL_PII]]"**.
 
 **Affected URLs / Profiles on your platform:**
 - [Inserta URL 1 del perfil en la plataforma]

@@ -7,7 +7,7 @@
 
 ## 1. Anatomía de la Fuga de PII en Música
 Los agregadores y plataformas analíticas (e.g., Spotify, Apple Music, Viberate, Musixmatch) obtienen sus datos directamente de los feeds **DDEX XML** de las distribuidoras digitales. 
-*   **El Vínculo Crítico:** La asociación entre tu nombre legal (`Borja Fernández Angulo`) y tu alias (`Borja Moskv`) se origina en la sección **"Songwriter Credits"** (Créditos de Compositor/Autor).
+*   **El Vínculo Crítico:** La asociación entre tu nombre legal (`[REDACTED_LEGAL_PII]`) y tu alias (`Borja Moskv`) se origina en la sección **"Songwriter Credits"** (Créditos de Compositor/Autor).
 *   **Limitación de Solución:** No puedes exigir a Spotify o Apple Music que borren esta información a través de solicitudes de privacidad estándar; responderán que los datos provienen de tu distribuidora. El cambio **debe originarse en la distribuidora** y propagarse como un "Metadata Update".
 
 ---
