@@ -288,7 +288,7 @@ class LLMProvider(BaseProvider):
         except httpx.HTTPStatusError as e:
             try:
                 err_text = e.response.content.decode("utf-8", errors="replace")[:500]
-            except Exception:  # noqa: BLE001
+            except (ValueError, TypeError, UnicodeDecodeError, AttributeError):
                 err_text = "<unreadable_response>"
 
             logger.error(
@@ -328,7 +328,7 @@ class LLMProvider(BaseProvider):
             from babylon60.routes.notch_ws import notify_notch_halo
 
             asyncio.create_task(notify_notch_halo(color, True))
-        except Exception:  # noqa: BLE001
+        except (ImportError, ValueError, RuntimeError, OSError):
             pass
 
         try:
@@ -343,7 +343,7 @@ class LLMProvider(BaseProvider):
                     usage = data["usage"]
                     prompt.prompt_tokens = usage.get("prompt_tokens")
                     prompt.completion_tokens = usage.get("completion_tokens")
-                except Exception as e:  # noqa: BLE001
+                except (KeyError, TypeError, ValueError, AttributeError) as e:
                     logger.warning("Failed to extract usage metrics from response: %s", e)
             return sanitize_response(data["choices"][0]["message"]["content"])
         finally:

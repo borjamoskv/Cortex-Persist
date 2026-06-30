@@ -88,12 +88,25 @@ class ZKInvariantTransformer(ast.NodeTransformer):
                 )
         return node
 
+    def visit_BinOp(self, node: ast.BinOp) -> ast.AST:
+        """Transforms bitwise CPU operations into Jolt/Lasso lookups."""
+        self.generic_visit(node)
+        if isinstance(node.op, (ast.BitXor, ast.BitAnd, ast.BitOr, ast.LShift, ast.RShift)):
+            self.applied_invariants.add("LassoLookup")
+            return ast.Call(
+                func=ast.Name(id='LassoLookup', ctx=ast.Load()),
+                args=[node.left, node.right],
+                keywords=[]
+            )
+        return node
+
 class AsymmetricZKCompiler:
     def __init__(self) -> None:
         self.cost_reductions: Dict[str, float] = {
             "GKR": 0.60,
             "Nova": 0.50,
             "LogUp": 0.45,
+            "LassoLookup": 0.80, # Arithmetizes instruction sets via giant lookups instead of gates
             "CurveCycle": 0.85, # Avoids O(N log N) non-native field simulation
             "ConsensusProofFolding": 0.90, # Aggregates N bridge headers into 1 O(1) proof
             "BLSBatching": 0.75, # Random linear combination of N signatures -> 1 pairing check
@@ -166,3 +179,6 @@ if __name__ == "__main__":
     
     bridge_sig_circuit = "def check_validators(sigs, pubkeys, msg): return verify_bls_signatures(sigs, pubkeys, msg)"
     print(compiler.compile_circuit("ZK_Bridge_BLS_Batch", bridge_sig_circuit))
+    
+    lasso_circuit = "def cpu_alu(a, b): return (a ^ b) & (a | b)"
+    print(compiler.compile_circuit("ZKVM_ALU_Jolt", lasso_circuit))
