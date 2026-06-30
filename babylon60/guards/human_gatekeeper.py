@@ -3,6 +3,9 @@ import time
 from typing import Any
 
 from babylon60.crypto.hash_registry import cortex_hash
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class HumanGatekeeper:
@@ -35,8 +38,8 @@ class HumanGatekeeper:
 
         # En C5-REAL, esto dispara un log estructurado / UI Event al Operador
         # y suspende la corrutina sin bloquear el Event Loop (OUROBOROS-031).
-        print(f"ALERTA P0: Firma requerida para mutación. Hash: {taint_hash}")
-        print(f"Riesgo: {risk_level}")
+        logger.warning(f"ALERTA P0: Firma requerida para mutación. Hash: {taint_hash}")
+        logger.warning(f"Riesgo: {risk_level}")
 
         # Simulación de suspensión (await_signal real dependería del framework asíncrono)
         return taint_hash
@@ -62,7 +65,7 @@ class LegionSwarm:
 
         # Válvula de Autorización (HitL)
         taint_hash = await self.gatekeeper.request_authorization(extracted_poc)
-        print(f"Pending authorization for: {taint_hash}")
+        logger.info(f"Pending authorization for: {taint_hash}")
 
         # El flujo se detiene aquí hasta que `gatekeeper.sign()` es llamado externamente
         # Si se aprueba -> OP_LEDGER_EMIT (Submit Immunefi)
