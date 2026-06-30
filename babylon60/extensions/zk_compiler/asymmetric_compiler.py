@@ -10,7 +10,7 @@ Rules:
 import ast
 import hashlib
 import time
-from typing import Dict, Any
+from typing import Any
 
 try:
     from babylon60.engine.causal.taint_engine import secure_state_commit
@@ -72,7 +72,7 @@ class ZKInvariantTransformer(ast.NodeTransformer):
 
 class AsymmetricZKCompiler:
     def __init__(self) -> None:
-        self.cost_reductions: Dict[str, float] = {
+        self.cost_reductions: dict[str, float] = {
             "GKR": 0.60,
             "Nova": 0.50,
             "LogUp": 0.45,
@@ -81,7 +81,7 @@ class AsymmetricZKCompiler:
         }
 
     
-    def compile_circuit(self, circuit_name: str, code_str: str) -> Dict[str, Any]:
+    def compile_circuit(self, circuit_name: str, code_str: str) -> dict[str, Any]:
         """
         Compiles the Python-like circuit AST into ZK-optimal intermediate representation.
         """
