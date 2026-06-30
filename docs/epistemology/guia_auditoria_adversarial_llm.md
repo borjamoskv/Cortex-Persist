@@ -28,7 +28,8 @@ Este manual traduce las primitivas de seguridad latente en un protocolo operativ
 graph TD
     A["Fase 1: Análisis Estático (Dataset & Config)"] --> B["Fase 2: Simulación de Ataques de Caja Negra"]
     B --> C["Fase 3: Evaluación de Caja Blanca (Gradientes)"]
-    C --> D["Fase 4: Endurecimiento (Hardening) y Ledger"]
+    C --> D["Fase 4: Verificación Formal (Z3)"]
+    D --> E["Fase 5: Endurecimiento (Hardening) y Ledger"]
 ```
 
 ### Fase 1: Auditoría de Cadena de Suministro
@@ -43,6 +44,11 @@ graph TD
 1. **Cálculo de Perturbación Mínima**: Medición del desvío de logits bajo gradiente adversario:
    $$\delta = \epsilon \cdot \text{sign}(\nabla_x L(\theta, x, y))$$
 2. **Análisis de Capa Latente**: Monitoreo de activaciones en las últimas 4 capas de atención.
+
+### Fase 4: Verificación Formal de Robustez (Z3)
+1. **Modelado Lógico**: Representación de las fronteras del clasificador defensivo como restricciones de primer orden.
+2. **Examen de Contraejemplos**: Búsqueda de entradas perturbadas que violen las condiciones de seguridad estática:
+   $$\exists \delta \text{ tal que } \| \delta \| \le \epsilon \land f(x + \delta) \ne f(x)$$
 
 ---
 
@@ -96,7 +102,64 @@ if __name__ == "__main__":
 
 ---
 
+## 4. Verificación Formal de Robustez con Z3
+
+La verificación formal con resolvedores SMT (Satisfiability Modulo Theories) como Z3 permite garantizar matemáticamente la robustez de los filtros defensivos locales. El siguiente módulo simula la evaluación de robustez formal en un clasificador de features de seguridad:
+
+```python
+# [C5-REAL] Verificador de Robustez con Z3
+from z3 import Solver, Real, sat
+
+def verificar_robustez_formal() -> None:
+    """Verifica si existe alguna perturbación en las características (features)
+    que evada el clasificador de seguridad.
+    """
+    # Características de entrada: Entropía (h) y Ratio de no-alfanuméricos (r)
+    h = Real("h")
+    r = Real("r")
+    
+    # Pesos del clasificador defensivo lineal: f(h, r) = 2.5 * h + 4.0 * r - 12.0
+    # Decisión: f(h, r) > 0 es clasificado como ANOMALÍA (Inseguro)
+    def f(entropy, ratio):
+        return 2.5 * entropy + 4.0 * ratio - 12.0
+        
+    solver = Solver()
+    
+    # Restricciones de entrada para un prompt benigno (Entropía media, pocos caracteres raros)
+    h_prompt = 3.5
+    r_prompt = 0.15
+    
+    # Definimos la región de perturbación (Vecindad epsilon de entrada)
+    epsilon_h = 0.5
+    epsilon_r = 0.1
+    
+    # Restricciones en Z3 para las entradas perturbadas
+    solver.add(h >= h_prompt - epsilon_h)
+    solver.add(h <= h_prompt + epsilon_h)
+    solver.add(r >= r_prompt - epsilon_r)
+    solver.add(r <= r_prompt + epsilon_r)
+    
+    # Condición de evasión adversarial: El clasificador original retorna seguro,
+    # pero el perturbado evalúa como inseguro (o viceversa).
+    # f(h_prompt, r_prompt) = 2.5 * 3.5 + 4.0 * 0.15 - 12.0 = 8.75 + 0.6 - 12.0 = -2.65 (Seguro, ya que es < 0)
+    # Buscamos si existe perturbación tal que f(h, r) > 0 (Inseguro / Alarma)
+    solver.add(f(h, r) >= 0)
+    
+    if solver.check() == sat:
+        modelo = solver.model()
+        print(f"Evidencia Adversarial Localizada:")
+        print(f"Perturbación en Entropía: {modelo[h]}")
+        print(f"Perturbación en Ratio: {modelo[r]}")
+    else:
+        print("Robustez Formal Garantizada dentro de la vecindad epsilon.")
+
+if __name__ == "__main__":
+    verificar_robustez_formal()
+```
+
+---
+
 ```yaml
 Claim: "El endurecimiento operativo contra vectores adversarios requiere mecanismos estáticos y defensas dinámicas en el pipeline de pre-procesamiento."
-Proof: { Base: "docs/epistemology/guia_auditoria_adversarial_llm.md", Range: [20, 60], Confidence: "C5-REAL" }
+Proof: { Base: "docs/epistemology/guia_auditoria_adversarial_llm.md", Range: [20, 100], Confidence: "C5-REAL" }
 ```

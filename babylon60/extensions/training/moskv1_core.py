@@ -148,6 +148,7 @@ class MOSKV1Core:
         self._mlx_tokenizer = None
         self._mlx_base_model_path = "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"
         self._mlx_loaded_mtime = 0.0
+        self._mlx_is_reloading = False
 
     async def warmup(self) -> bool:
         """Pre-warm model weights into unified memory asynchronously."""
@@ -639,17 +640,18 @@ class MOSKV1Core:
         try:
             current_mtime = adapter_file.stat().st_mtime
             
-            # Hot reload weights if file was modified after loading
+            # Hot reload weights asynchronously if file was modified after loading
             if self._mlx_model is not None and current_mtime > self._mlx_loaded_mtime:
-                logger.info("Hot Reload: New adapter weights detected. Invaliding model cache.")
-                self._mlx_model = None
-                self._mlx_tokenizer = None
+                if not self._mlx_is_reloading:
+                    logger.info("Hot Reload: New adapter weights detected. Triggering zero-downtime background reload.")
+                    self._mlx_is_reloading = True
+                    asyncio.create_task(self._async_reload_weights(current_mtime))
 
             import asyncio
             from concurrent.futures import ThreadPoolExecutor
 
             def _load_and_gen():
-                # Lazy-load MLX model and tokenizer
+                # Lazy-load MLX model and tokenizer (synchronous load if never loaded)
                 if self._mlx_model is None:
                     from mlx_lm import load
                     logger.info("Loading base model and LoRA adapter into MLX...")
@@ -687,8 +689,9 @@ class MOSKV1Core:
             loop = asyncio.get_running_loop()
             with ThreadPoolExecutor(max_workers=1) as pool:
                 response = await loop.run_in_executor(pool, _load_and_gen)
-                # Update mtime after successful run
-                self._mlx_loaded_mtime = current_mtime
+                # Update mtime if this was a synchronous load
+                if not self._mlx_is_reloading:
+                    self._mlx_loaded_mtime = current_mtime
                 return response
 
         except ImportError as e:
@@ -697,6 +700,33 @@ class MOSKV1Core:
         except Exception as e:
             logger.error("Native MLX inference failed: %s", e)
             return f"[ERROR] MLX inference exception: {e}"
+
+    async def _async_reload_weights(self, target_mtime: float) -> None:
+        """Asynchronously loads the new LoRA weights and swaps them atomically in memory."""
+        try:
+            import asyncio
+            from concurrent.futures import ThreadPoolExecutor
+            
+            def _load_new():
+                from mlx_lm import load
+                logger.info("Background Reload: Loading base model and new LoRA adapter...")
+                return load(
+                    self._mlx_base_model_path,
+                    adapter_path=str(self._adapter_path)
+                )
+
+            loop = asyncio.get_running_loop()
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                model, tokenizer = await loop.run_in_executor(pool, _load_new)
+                if model and tokenizer:
+                    self._mlx_model = model
+                    self._mlx_tokenizer = tokenizer
+                    self._mlx_loaded_mtime = target_mtime
+                    logger.info("Background Reload: Success! Atomic model weights swap complete.")
+        except Exception as e:
+            logger.error("Background weight reload failed: %s", e)
+        finally:
+            self._mlx_is_reloading = False
 
     # ─── Ollama Model Management ────────────────────────────────────────
 

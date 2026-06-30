@@ -14,7 +14,9 @@ from __future__ import annotations
 
 import math
 import pytest
+import numpy as np
 
+from babylon60.memory.memory_archaeology import MemoryArchaeologist
 from babylon60.utils.differentiation import Dual
 from babylon60.utils.morphisms import MorphismVerifier
 
@@ -170,3 +172,51 @@ def test_dual_transcendental_extended():
 
     assert d4.tanh().val == 0.0
     assert d4.tanh().der == 1.0  # (1 - tanh^2(0)) * 1
+
+
+def test_archaeologist_clustering_idempotence():
+    """
+    Validates the idempotency property of the Memory Archaeologist semantic clustering:
+    f(f(X)) == f(X).
+    Applying clustering once groups duplicates. Applying it again on the condensed
+    set yields zero duplicates (no-op).
+    """
+    archaeologist = MemoryArchaeologist(engine=None)
+
+    # Input: 5 facts where (0,1) are highly similar, (2,3) are highly similar, and 4 is isolated.
+    facts = [{"id": str(i)} for i in range(5)]
+    vecs_matrix = np.array(
+        [
+            [1.0, 0.0, 0.0],
+            [0.98, 0.1, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 0.97, 0.1],
+            [0.0, 0.0, 1.0],
+        ]
+    )
+
+    # 1. Apply clustering once: f(X)
+    clusters = archaeologist._build_clusters(facts, vecs_matrix, threshold=0.9)
+    assert len(clusters) == 2
+    # Expect clusters to group {0, 1} and {2, 3}
+    assert {0, 1} in [set(c) for c in clusters]
+    assert {2, 3} in [set(c) for c in clusters]
+
+    # Create representatives of f(X)
+    # Cluster 1 represented by fact "0", Cluster 2 by "2", and isolated fact "4"
+    condensed_facts = [{"id": "0"}, {"id": "2"}, {"id": "4"}]
+    condensed_vecs = np.array(
+        [
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 0.0, 1.0],
+        ]
+    )
+
+    # 2. Apply clustering again: f(f(X))
+    second_pass_clusters = archaeologist._build_clusters(
+        condensed_facts, condensed_vecs, threshold=0.9
+    )
+    # Should result in 0 new clusters (every node is isolated under the threshold)
+    assert len(second_pass_clusters) == 0
+
