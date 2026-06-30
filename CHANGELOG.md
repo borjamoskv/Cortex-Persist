@@ -12,6 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 📚 Documentation (Architecture Overhaul)
+
+- **feat(docs):** Rewrote `ARCHITECTURE.md` to establish MOSKV-1 APEX as a Sovereign C5-REAL Kernel.
+- **feat(docs):** Formalized the Tripartite Memory hierarchy (L1/L2/L3) in `docs/memory_architecture.md`.
+- **feat(docs):** Created strict migration protocol from probabilistic wrappers to deterministic execution in `docs/migration_v4_to_v5.md` (including the Cloudflare deployment edict).
+
+### 🧪 Test Stability
+
+- **fix(tests):** Stabilized the daemon test suite by replacing flaky `asyncio.sleep()` timeouts with deterministic polling loops across `test_omega_daemon.py`, `test_nightshift_daemon.py`, and `test_landauer_daemon.py`.
+- **fix(tests):** Resolved asymmetric namespace collision (`cortex.` vs `babylon60.`) in `test_taint_enforcement.py` that caused False Positives on `TaintValidationError` assertions.
+
 ## [1.0.2] — 2026-06-28
 
 ### 🐛 Bugfixes
