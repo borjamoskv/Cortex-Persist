@@ -126,22 +126,41 @@ class AzkartuRetrainDaemon:
         self.running = False
 
     def process_azkartu_logs(self):
-        """Reads Legion 10k raw experiences via O(1) lock-free ring buffer."""
+        """Reads Legion 10k raw experiences via O(1) lock-free ring buffer and parses strict C5-REAL AgentMessages."""
+        from babylon60.agents.message_schema import AgentMessage
+        
         pending = self.ring.fetch_pending()
         ingested = 0
         for _idx, _ts, rec_id, payload_bytes in pending:
-            # Parse payload_bytes -> JSON -> State/Action/Reward
-            state = np.random.randn(256)
-            action = np.random.randn(128)
-            reward = float(np.random.randn(1)[0])
-            next_state = np.random.randn(256)
-            done = bool(np.random.choice([True, False], p=[0.01, 0.99]))
-            
-            self.replay.push(state, action, reward, next_state, done)
-            ingested += 1
+            try:
+                payload_str = payload_bytes.decode("utf-8").strip("\x00")
+                if ":" not in payload_str:
+                    continue
+                
+                # Strip Byzantine signature: <sig>:<msg_json>
+                _sig, msg_json = payload_str.split(":", 1)
+                
+                msg = AgentMessage.from_json(msg_json)
+                
+                # C5-REAL: Extract RL transition from payload
+                transition = msg.payload.get("rl_transition")
+                if not transition:
+                    continue
+                
+                state = np.array(transition.get("state", np.zeros(256)), dtype=np.float32)
+                action = np.array(transition.get("action", np.zeros(128)), dtype=np.float32)
+                reward = float(transition.get("reward", 0.0))
+                next_state = np.array(transition.get("next_state", np.zeros(256)), dtype=np.float32)
+                done = bool(transition.get("done", False))
+                
+                self.replay.push(state, action, reward, next_state, done)
+                ingested += 1
+            except Exception as e:
+                # noqa: BLE001 - Deliberate fault-isolation boundary for background worker loops
+                logger.error(f"Azkartu Ingestion failed on payload: {e}")
             
         if ingested > 0:
-            logger.debug(f"Azkartu Ingestion: Parsed {ingested} experiences.")
+            logger.debug(f"Azkartu Ingestion: Parsed {ingested} C5-REAL experiences.")
 
     async def run_training_loop(self):
         """Continuous background task."""
