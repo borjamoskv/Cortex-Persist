@@ -336,6 +336,19 @@ To prevent PR review rejection and build failures:
 5. **Context Guard Leakage Bypass:** If the local pre-commit hook aborts a commit with an "Active Repo" vs "Current Repo" conflict (Context Leakage Detected), the agent must prepend the commit message with the `[bridge]` tag and append the `--no-verify` flag to the command execution (e.g., `git commit --no-verify -m "[bridge] <msg>"`).
 6. **Verification of Knowledge Citations:** Before writing or updating any epistemology or knowledge node, the agent must perform a dynamic web verification to ensure all academic papers, authors, years, and arXiv/venue identifiers are fully real. Fictitious papers, benchmarks, or probabilities (hallucinated sources) are strictly forbidden under C5-REAL specifications.
 
+### 6.2.2 Mutation Sandbox Governance (SAGA-MS)
+
+To optimize exergy and avoid computational anergy (O(M * T) complexity), the execution of mutation testing or sandboxed code evolution MUST adhere strictly to the following thermodynamic decision matrix:
+
+*   **🟢 MANDATORY (SÍ usar):**
+    1. **Self-Healing Code Modifications:** When any autonomous agent has authority to re-write, refactor, or optimize its own Python code blocks (AST mutations).
+    2. **Cryptographic & Consensus Core:** Any modifications to key derivation, consensus engines, tenant isolation filters, or taint verification paths (e.g., `babylon60/engine/causal/taint_engine.py`).
+    3. **Semantic Verification & Zero-Leakage:** To expose false-green coverage metrics where tests pass but lack deep logical assertions.
+*   **🔴 FORBIDDEN (NO usar):**
+    1. **Stochastic & External I/O Integrations:** Scrapers, API clients, or network boundaries (e.g., `grok_client.py`). Avoids rate-limits, false-negative runs, and token drain.
+    2. **Cosmetic & Frontend (Astro/React):** UI presentation layers, styling, and design templates.
+    3. **Prototyping & High-Velocity Loops:** Early alpha stages where signatures and API contracts change on a high-frequency basis.
+
 ### 6.3 PR & Change Acceptance Gate
 
 A change is **INCOMPLETE** if any applicable step is missing:
