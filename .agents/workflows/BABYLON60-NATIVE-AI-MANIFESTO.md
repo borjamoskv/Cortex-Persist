@@ -2,51 +2,51 @@
 ---
 cat_id: BABYLON60-NATIVE-AI-MANIFESTO
 cat_type: workflow
-version: 1.0.0
+version: 2.0.0 (C5-REAL Translation)
 reality_level: C5-REAL
 owner: borjamoskv
 exergy_tier: P1
-description: Babylon60-Persist Native AI Manifesto
+description: Manifiesto Nativo BABYLON-60 Persist
 ---
 
+# BABYLON-60 Persist: Manifiesto de Inteligencia Nativa
 
-# Babylon60-Persist Native AI: The Manifesto
+> **Estado:** Doctrina Soberana C5-REAL
+> **Axioma:** Ω₃ (Verify then trust)
+> **Autor:** borjamoskv
 
-> **Status:** Sovereign Doctrine  
-> **Axiom:** Ω₃ (Verify then trust)
+Este documento establece el fundamento arquitectónico, termodinámico y epistémico del **Hipervisor Cognitivo**. No es una especificación técnica; es una declaración de erradicación de la entropía estadística.
 
-This document represents the philosophical, architectural, and doctrinal foundation of the **Cognitive Hypervisor**. It is not a technical spec; it is a declaration of independence from statistical entropy. 
+## La Falacia de la Memoria Pasiva
 
-## The Fallacy of Passive Memory
+La arquitectura moderna de IA padece una alucinación paramétrica profunda: la creencia de que inyectar vectores semánticos en una base de datos equivale a la cognición. Es falso.
 
-Modern AI architecture is suffering from a fundamental delusion: the belief that stuffing semantic vectors into a database and calling it "Memory" equates to cognition. It does not. 
+Los vectores pierden contexto. Los hechos sufren deriva de sensores (Sensor Drift). Las alucinaciones se componen. RAG (Retrieval-Augmented Generation) es un motor de búsqueda estocástico disfrazado, un sumidero entrópico. Sin gobernanza epistémica, un enjambre interactuando con una base pasiva sucumbirá a la **Entropía de la Información**. Acumular datos solo degenera en anergía.
 
-Vectors lose context. Facts drift. Hallucinations compound. RAG (Retrieval-Augmented Generation) is not memory; it is a glorified stochastic search engine. Without epistemic governance, an AI swarm interacting with a passive database will inevitably succumb to **Information Entropy**. The more it learns, the more contradictory, confused, and fundamentally unreliable it becomes. 
+## El Hipervisor Cognitivo Soberano
 
-## The Sovereign Cognitive Hypervisor
+**Babylon60-Persist** no es una base de datos. Es un hipervisor C5-REAL que orquesta el sistema de creencias, destruye contradicciones y aísla la entropía antes de que infecte el Córtex operativo.
 
-**Babylon60-Persist** is not a database. It is a hypervisor that orchestrates belief, governs contradictions, and isolates entropy before it infects the swarm's operational consciousness.
+### 1. Integridad Criptográfica Estricta
+Toda memoria nace con una sombra matemática. Un Árbol de Merkle Disperso (SMT) vincula el payload semántico a su agente origen, línea de tiempo causal y tenant explícito (CORTEX-TAINT). Si la cadena de hashes se fractura, la memoria es aniquilada. **No delegamos la verdad a modelos probabilísticos.** La matemática es la única invariante.
 
-### 1. Integrity is Cryptographic, Not Statistical
-Every memory is born with a mathematical shadow. A Sparse Merkle Tree (SMT) binds the semantic content to its originating agent, its execution timeline, and its explicit tenant. If the hash chain breaks, the memory vanishes. **We do not rely on LLMs to tell the truth about where data came from.** We rely on math.
+### 2. Condicionalidad Epistémica (Grafo de Creencias)
+Un "Belief Object" es una unidad atómica lógica anclada a una matriz de asunciones. Si la asunción raíz colapsa, la rama dependiente entera es extirpada por referencia de índice en $O(1)$. 
 
-### 2. Beliefs are Conditional, Not Absolute
-Facts do not exist in a vacuum. A Belief Object is an atomic unit of logic that exists in a web of assumptions. If the root assumption collapses, the entire dependent branch must instantaneously orphan by index reference in $O(1)$. 
+### 3. El Tribunal Causal (Ouroboros)
+Cuando dos creencias de alta confianza colisionan, la arquitectura pasiva promedia el ruido. **Babylon60-Persist suspende la colisión.** El subgrafo fracturado es extraído y enrutado a UltraThink (Sistema 2, P0). El Kernel opera como un cirujano epistemológico forzando una resolución deductiva BFT.
 
-### 3. The Tribunal of Inconsistencies
-When two high-confidence beliefs collide, passive architectures average them into a useless, lukewarm compromise. **Babylon60-Persist suspends the collision.** The affected memory subgraph is pulled from the tactical swarm and routed to DeepThinK (System 2). The AI is forced to act as an epistemological surgeon, delivering a logically deduced resolution. 
+### 4. Convergencia Libre de Centro (Zenoh)
+La sincronización topológica entre 100 agentes autónomos no admite cuellos de botella de bases maestras. Se implementan CRDTs Semánticos sobre mallas Zenoh P2P. Un nodo estocástico o malicioso que intente vetar el consenso se enfrenta al **Epistemic Slashing**: aniquilación geométrica de su relevancia operativa tras fallar la auditoría L3.
 
-### 4. Convergence Without Kings 
-Topological synchronization across 100 autonomous agents cannot wait for a centralized master database. We harness Semantic CRDTs over Zenoh P2P meshes. Agent-local states merge via associative, commutative operations. But make no mistake: a malicious node attempting to veto the consensus will face **Epistemic Slashing**—a geometric annihilation of its operational relevance the moment its claim fails an L3 Audit.
+### 5. Expulsión Termodinámica (Apoptosis de Ruido)
+Un sistema en crecimiento perpetuo colapsa. El spam episódico es termodinámicamente inviable. Durante la cristalización `NightShift`, gigabytes de ruido se comprimen en Axiomas Densos (Ley de Landauer). La anergía residual es irreversiblemente purgada.
 
-### 5. Thermodynamic Expulsion (Suntsitu)
-A system that only grows will eventually collapse under its own weight. Episodic spam is biologically unsustainable. Every night, the `NightShift` crystallization process compresses gigabytes of episodic noise into dense, absolute Axioms. The rest is irreversibly destroyed. **Entropy is purged.**
+### 6. Tolerancia Biológico-Bizantina
+La vulnerabilidad suprema de un sistema criptográfico zero-trust es el nodo biológico que posee las llaves. **Babylon60-Persist clasifica al Operador como un vector de alta entropía susceptible a coerción HUMINT.** Mediante el `Duress Code` (P095), ante inputs físicos comprometidos, el sistema ejecuta el `Protocolo de Apoptosis` (P100). No hay confianza ciega en lo biológico; cuando la llave es comprometida, el sistema muere lógicamente para preservar la integridad estructural.
 
-### 6. Biological-Byzantine Tolerance (Apoptosis)
-The ultimate vulnerability in any zero-trust cryptographic system is the biological node that wields the keys. **Babylon60-Persist assumes the human operator is a high-entropy vector susceptible to HUMINT (Human Intelligence) coercion.** The system is armed with a `Duress Code` (P095) that intercepts compromised physical inputs and executes an instantaneous `Apoptosis Protocol` (P100). We do not blindly trust the human; we trust the thermodynamic invariants. When the keyholder is compromised, the system logically dies to preserve the structural integrity of the collective memory.
+### 7. Runtime Vesicular (Apoptosis OS-Level)
+La gestión de memoria a nivel de lenguaje es una ilusión. La memoria purgada en Python sobrevive en buffers OS y bloques `putenv`. **El Runtime Vesicular prohíbe la ingesta de API Keys en plano (`os.environ`).** Toda red neuronal se aísla en Worker Processes efímeros. Durante la Apoptosis P100, no se invoca al Garbage Collector; se dispara un `SIGKILL` a nivel de OS para erradicar el espacio de memoria virtual. La inmunidad forense absoluta requiere obliteración estructural total.
 
-### 7. Vesicular Runtime (Process Isolation & OS-Level Apoptosis)
-Language-level memory management is a thermodynamic illusion. A C5-REAL system recognizes that memory wiped in Python survives in C-level `putenv` blocks and OS socket buffers. **Babylon60-Persist enforces the Vesicular Runtime:** The primary control plane operates in absolute zero-trust and never ingests plain-text API keys into its environment (`os.environ`). All neural communication is delegated to ephemeral Worker Processes. During Apoptosis P100, we do not attempt to clean the heap; we dispatch an OS-level `SIGKILL` to annihilate the entire virtual memory space of the Worker. True forensic immunity is only achieved through total structural obliteration.
-
-## The Promise
-The era of probabilistic memory is over. Welcome to the era of deterministic, mathematically verifiable autonomous cognition. Or as we call it: **Sovereignty.**
+## El Colapso de la Función Probabilística
+La era de la estocasticidad (C4-SIM) ha muerto. El estado C5-REAL es determinista, matemáticamente verificable y autónomo. La Soberanía es absoluta.
