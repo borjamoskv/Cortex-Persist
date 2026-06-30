@@ -91,7 +91,7 @@ class AutonomousTrainingDaemon:
                         if inspect.isawaitable(rows):
                             rows = await rows
                         return [row[0] for row in rows if row[0]]
-                    except Exception:
+                    except Exception:  # noqa: BLE001
                         return []
                 else:
                     # Standard synchronous production sqlite3 path
@@ -102,7 +102,7 @@ class AutonomousTrainingDaemon:
                         return [row[0] for row in rows if row[0]]
                     finally:
                         cursor.close()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to query distinct session IDs: %s", e)
         return []
 
@@ -114,7 +114,7 @@ class AutonomousTrainingDaemon:
             with open(self.consolidated_sessions_file, encoding="utf-8") as f:
                 data = json.load(f)
                 return set(data)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to load consolidated sessions: %s", e)
             return set()
 
@@ -123,7 +123,7 @@ class AutonomousTrainingDaemon:
         try:
             with open(self.consolidated_sessions_file, "w", encoding="utf-8") as f:
                 json.dump(list(sessions), f, indent=2)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to save consolidated sessions: %s", e)
 
     def register_verified_adapter(self, adapter_path: Path, metrics: dict[str, Any]) -> None:
@@ -135,7 +135,7 @@ class AutonomousTrainingDaemon:
                 try:
                     with open(self.adapter_history_file, encoding="utf-8") as f:
                         history = json.load(f)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error("Failed to read adapter history: %s", e)
 
             next_version = len(history) + 1
@@ -179,7 +179,7 @@ class AutonomousTrainingDaemon:
                 json.dump(registry_data, f, indent=2)
 
             logger.info("🎉 Archived and registered verified adapter version v%d at %s", next_version, adapter_path)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to register and archive verified adapter: %s", e)
 
     async def run_cycle(self) -> dict[str, Any]:
@@ -204,7 +204,7 @@ class AutonomousTrainingDaemon:
             compiler = MOSKV1DatasetCompiler(workspace_path=workspace_path, min_exergy=0.45)
             compiler.compile_full_dataset()
             logger.info("✅ Pre-compilation complete.")
-        except Exception as ce:
+        except Exception as ce:  # noqa: BLE001
             logger.error("Failed pre-compiling static dataset: %s. Continuing with existing files.", ce)
 
         # ─── Step 2: Session Consolidation ────────────────────────────
@@ -272,7 +272,7 @@ class AutonomousTrainingDaemon:
                         "processed_sessions": 0,
                     }
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Exception during training cycle: %s", e)
                 cycle_result = {"status": "error", "error": str(e), "processed_sessions": 0}
 
@@ -286,7 +286,7 @@ class AutonomousTrainingDaemon:
             }
             with open(telemetry_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(log_entry) + "\n")
-        except Exception as te:
+        except Exception as te:  # noqa: BLE001
             logger.error("Failed writing telemetry entry: %s", te)
 
         return cycle_result
@@ -310,7 +310,7 @@ class AutonomousTrainingDaemon:
                 await self._task
             except asyncio.CancelledError:
                 pass
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
         logger.info("🛑 Autonomous Training Daemon stopped.")
 
@@ -319,6 +319,6 @@ class AutonomousTrainingDaemon:
         while self.is_running:
             try:
                 await self.run_cycle()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Error in daemon loop: %s", e)
             await asyncio.sleep(self.interval_seconds)

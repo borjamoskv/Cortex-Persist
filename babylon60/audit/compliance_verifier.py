@@ -58,7 +58,7 @@ class ComplianceVerifier:
 
                 return self._verify_chain(export_data)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"[ComplianceVerifier] Error during verification: {e}")
             return {"status": "ERROR", "reason": str(e)}
 

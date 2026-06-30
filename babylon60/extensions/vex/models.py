@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """VEX Data Models - Cryptographically verifiable execution primitives.
 
@@ -183,7 +184,7 @@ class ExecutionReceipt:
     steps: list[StepResult] = field(default_factory=list)
     merkle_root: str | None = None
     total_duration_ms: int = 0
-    consensus_score: float = 1.0
+    consensus_score: Decimal = 1.0
     created_at: str = field(default_factory=_now_iso)
     completed_at: str | None = None
     model: str = ""

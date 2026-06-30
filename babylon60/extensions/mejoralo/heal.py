@@ -175,7 +175,7 @@ def _run_functional_inquisitor(
             if engine and project:
                 engine.record_scar(project, top_file_rel, f"Inquisidor: Eliminó {deleted}")
             return False
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Suppressed exception: %s", exc)
     return True
 

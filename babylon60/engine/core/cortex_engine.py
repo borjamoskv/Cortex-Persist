@@ -173,7 +173,7 @@ class CortexEngine(
                     reason,
                 )
                 return False
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to process anomaly report: %s", e)
             return False
 
@@ -229,7 +229,7 @@ class CortexEngine(
         try:
             if self.embeddings:
                 await self.embeddings.check_and_reindex()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Re-indexing check skipped/failed: %s", e)
 
         logger.info("🚀 [CORTEX] Sovereign Engine ignited (Ω₀-Ω₆).")

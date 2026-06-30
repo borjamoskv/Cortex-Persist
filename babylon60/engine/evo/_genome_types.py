@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """FitnessRecord, Lineage, MutationType, and StrategyGenome definition.
 
@@ -29,7 +30,7 @@ logger = logging.getLogger("babylon60.engine.evo.genome")
 class FitnessRecord:
     """Single fitness measurement from an evaluation run."""
 
-    score: float
+    score: Decimal
     latency_ms: float
     success: bool
     error_rate: float

@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # Author: borjamoskv
 # License: Apache-2.0
@@ -91,7 +92,7 @@ class RetrievedContext:
 
     facts: list[dict[str, Any]]
     total_tokens_estimate: int
-    retrieval_score: float
+    retrieval_score: Decimal
     vault_entries: list[str] = field(default_factory=list)
 
 
@@ -186,7 +187,7 @@ class MOSKV1Core:
                 )
                 model, tokenizer = res[0], res[1]
                 return model, tokenizer
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Warmup failed: %s", e)
                 return None, None
 
@@ -267,7 +268,7 @@ class MOSKV1Core:
                         }
                     )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Hybrid search failed, trying ContextAssembler: %s", e)
             try:
                 from babylon60.context.assembler import ContextAssembler
@@ -289,7 +290,7 @@ class MOSKV1Core:
                                 "source": "context_assembler",
                             }
                         )
-            except Exception as e2:
+            except Exception as e2:  # noqa: BLE001
                 logger.warning("ContextAssembler also failed: %s", e2)
 
         # Inject Memory Vault entries if available
@@ -558,7 +559,7 @@ class MOSKV1Core:
         except aiohttp.ClientError as e:
             logger.error("Ollama connection error: %s", e)
             return f"[ERROR] Connection failed: {e}"
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Ollama inference failed: %s", e)
             return f"[ERROR] Inference failed: {e}"
 
@@ -605,7 +606,7 @@ class MOSKV1Core:
                                 return
                         except json.JSONDecodeError:
                             continue
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Ollama streaming failed: %s", e)
             yield f"[ERROR] Stream failed: {e}"
 
@@ -637,7 +638,7 @@ class MOSKV1Core:
             )
             return result.content
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("SovereignLLM fallback failed: %s", e)
             return f"[ERROR] All inference backends failed: {e}"
 
@@ -713,7 +714,7 @@ class MOSKV1Core:
         except ImportError as e:
             logger.warning("mlx_lm not available for native inference: %s", e)
             return f"[ERROR] mlx_lm import failed: {e}"
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Native MLX inference failed: %s", e)
             return f"[ERROR] MLX inference exception: {e}"
 
@@ -736,7 +737,7 @@ class MOSKV1Core:
                 self._mlx_tokenizer = tokenizer
                 self._mlx_loaded_mtime = target_mtime
                 logger.info("Background Reload: Success! Atomic model weights swap complete.")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Background weight reload failed: %s", e)
         finally:
             self._mlx_is_reloading = False
@@ -808,7 +809,7 @@ TEMPLATE \"\"\"{{{{ if .System }}}}<|im_start|>system
                     error = await resp.text()
                     logger.error("Failed to create Ollama model: %s", error[:200])
                     return False
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Ollama model creation failed: %s", e)
             return False
 

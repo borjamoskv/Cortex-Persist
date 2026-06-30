@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # Author: borjamoskv
 # License: Apache-2.0
@@ -281,7 +282,7 @@ class DatasetEntry:
     category: str = "general"
     source_file: str = ""
     content_hash: str = ""
-    exergy_score: float = 0.0
+    exergy_score: Decimal = 0.0
 
     def to_sharegpt(self) -> dict[str, Any]:
         """Convert to ShareGPT format for MLX-LM compatibility."""
@@ -321,7 +322,7 @@ class CompilationStats:
     total_bytes_output: int = 0
     categories: dict[str, int] = field(default_factory=dict)
     filter_reasons: dict[str, int] = field(default_factory=dict)
-    avg_exergy_score: float = 0.0
+    avg_exergy_score: Decimal = 0.0
 
     @property
     def compression_ratio(self) -> float:
@@ -436,7 +437,7 @@ class MOSKV1DatasetCompiler:
 
         try:
             content = file_path.read_text(encoding="utf-8")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Failed to read markdown directive file %s: %s", file_path, e)
             return 0
         if len(content.strip()) < 100:
@@ -498,7 +499,7 @@ class MOSKV1DatasetCompiler:
             for skill_md in sdir.rglob("SKILL.md"):
                 try:
                     content = skill_md.read_text(encoding="utf-8")
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning("Failed to read skill file %s: %s", skill_md, e)
                     continue
                 self.stats.total_files_scanned += 1

@@ -74,7 +74,7 @@ class HeartbeatDaemon:
                 async with connect_async_ctx(CORTEX_DB) as conn:  # pyright: ignore
                     await decalcifier.decalcify_cycle(conn)
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("🧬 [Ω₃-E+] Decalcifier hourly loop error: %s", e)
 
     async def start(self) -> None:
@@ -133,7 +133,7 @@ class HeartbeatDaemon:
 
             except asyncio.CancelledError:
                 raise
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Heartbeat loop error: %s", e)
                 await asyncio.sleep(10.0)
 

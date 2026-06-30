@@ -293,7 +293,7 @@ class BoltzmannEngineAgent(BaseAgent):
             step.mark_completed(result)
             self.current_plan.record_step_result(step)
             self.replan_count = 0  # Reset replan count on successful action execution
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             step.mark_failed(str(exc))
             self.current_plan.record_step_result(step)
             logger.warning("[%s] Step execution failed: %s", self.agent_id, exc)

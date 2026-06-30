@@ -1,3 +1,4 @@
+from decimal import Decimal
 import logging
 
 from babylon60.agents.primitives.dispatcher import apex_dispatcher
@@ -43,7 +44,7 @@ class EntropyAnnihilator:
 
         return sacred_fact
 
-    def execute_apoptosis_on_rot(self, rot_score: float, threshold: float = 0.9) -> None:
+    def execute_apoptosis_on_rot(self, rot_score: Decimal, threshold: float = 0.9) -> None:
         """
         If memory rot exceeds threshold, triggers OP_APOPTOSIS through ApexDispatcher.
         """

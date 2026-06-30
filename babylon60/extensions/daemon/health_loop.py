@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Health monitoring loop for moskv-daemon.
 
@@ -88,7 +89,7 @@ class HealthLoop:
                 "metrics": [{"name": m.name, "value": m.value} for m in metrics],
             }
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Health tick failed: %s", e)
             return None
 
@@ -96,7 +97,7 @@ class HealthLoop:
         self,
         old: Grade,
         new: Grade,
-        score: float,
+        score: Decimal,
     ) -> None:
         """Handle grade transitions via enum ordering."""
         if new < old:
@@ -120,7 +121,7 @@ class HealthLoop:
 
     def _alert_degraded(
         self,
-        score: float,
+        score: Decimal,
         grade: Grade,
     ) -> None:
         """Alert on sustained degradation (rate-limited)."""
@@ -142,7 +143,7 @@ class HealthLoop:
         if self._notify_fn:
             try:
                 self._notify_fn(title, body)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug("Notification failed: %s", e)
             return
         try:
@@ -172,5 +173,5 @@ class HealthLoop:
                 meta=data,
                 confidence="C5",
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("Health persist failed: %s", e)

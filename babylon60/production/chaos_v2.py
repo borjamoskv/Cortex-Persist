@@ -29,7 +29,7 @@ class ChaosLayerV2:
             victim = random.choice(snapshots)
             try:
                 victim.unlink()
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 import logging
 
                 logging.warning("Suppressed exception: %s", exc)

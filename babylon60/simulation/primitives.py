@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from dataclasses import dataclass, field
 from typing import Any
@@ -17,8 +18,8 @@ class MemoryParticle:
 class MemoryTrajectory:
     particles: list[MemoryParticle] = field(default_factory=list)
     confidence: float = 1.0
-    total_score: float = 0.0
-    coherence_score: float = 1.0
+    total_score: Decimal = 0.0
+    coherence_score: Decimal = 1.0
     entropy_penalty: float = 0.0
 
 

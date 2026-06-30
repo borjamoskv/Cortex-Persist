@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
@@ -160,7 +161,7 @@ class ConsensusMixin(EngineMixinBase):
             )
 
     @staticmethod
-    def _resolve_confidence(score: float) -> str:
+    def _resolve_confidence(score: Decimal) -> str:
         """Determine confidence label from score."""
         if score >= 1.5:
             return "verified"

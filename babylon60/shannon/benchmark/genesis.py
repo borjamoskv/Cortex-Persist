@@ -93,7 +93,7 @@ class MutantServer:
 
         except asyncio.TimeoutError:
             pass  # Client took too long
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug(f"MutantServer connection error: {e}")
         finally:
             writer.close()

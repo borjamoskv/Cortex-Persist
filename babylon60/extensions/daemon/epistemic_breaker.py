@@ -98,7 +98,7 @@ class EpistemicBreakerDaemon:
                 confidence="C5",
                 source="agent:epistemic-breaker",
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to record breaker trip: %s", e)
 
         logger.info(
@@ -125,7 +125,7 @@ class EpistemicBreakerDaemon:
                 confidence="C5",
                 source="agent:epistemic-breaker",
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to record breaker wakeup: %s", e)
 
     async def run(self):
@@ -153,7 +153,7 @@ class EpistemicBreakerDaemon:
                 else:
                     logger.debug("Epistemic load nominal: %.3f", entropy)
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Error in Epistemic Breaker loop: %s", e)
 
             # Wait for next scan, adjust if circuit is currently open

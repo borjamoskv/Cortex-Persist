@@ -27,7 +27,7 @@ class CEnvironWiper:
         """Wipes a specific environment variable from the C memory space."""
         try:
             libc = ctypes.CDLL(None)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"[CEnvironWiper] Failed to load libc: {e}")
             return False
 
@@ -38,7 +38,7 @@ class CEnvironWiper:
                 environ = ns_get_environ().contents
             else:
                 environ = ctypes.POINTER(ctypes.c_char_p).in_dll(libc, "environ")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"[CEnvironWiper] Failed to map environ pointer: {e}")
             return False
 

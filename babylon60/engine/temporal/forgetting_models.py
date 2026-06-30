@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -28,7 +29,7 @@ class EvictionVerdict:
     was_regrettable: bool
     causal_weight: float  # 0.0→1.0 (type + depth bonus)
     causal_depth: int  # descendant count (0 = leaf)
-    access_frequency_score: float  # 0.0→1.0
+    access_frequency_score: Decimal  # 0.0→1.0
     eviction_value: float  # composite cost score
     details: dict[str, Any] = field(default_factory=dict)
 

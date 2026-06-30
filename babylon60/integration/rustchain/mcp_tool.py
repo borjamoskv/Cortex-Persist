@@ -43,6 +43,6 @@ def register_rustchain_tools(
         try:
             result = await stake_and_acquire(active_wallet, active_client, skill, amount)
             return json.dumps(result, indent=2)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Staking tool execution failed: %s", e)
             return json.dumps({"status": "failed", "error": str(e)}, indent=2)

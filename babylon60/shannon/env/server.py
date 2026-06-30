@@ -44,7 +44,7 @@ class MutantServer:
             response_bytes, reward, done, info = protocol.handle_message(data)
             writer.write(response_bytes)
             await writer.drain()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug(f"MutantServer connection error: {e}")
         finally:
             writer.close()

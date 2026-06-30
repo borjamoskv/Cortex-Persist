@@ -55,7 +55,7 @@ def evolve(file: str, simulations: int, prompt: str) -> None:
                 f"\n[bold green]👑 MUTACIÓN CON ÉXITO - MCTS COLAPSADO: checkout a `{best_branch}`[/bold green]"
             )
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         console.print(f"[red]Singularity Error:[/red] {e}")
         raise click.Abort() from e
 
@@ -85,7 +85,7 @@ def prune() -> None:
         if metrics["worktrees_removed"] == 0 and metrics["branches_removed"] == 0:
             console.print("[dim]The timeline is already clean. Zero anergy detected.[/dim]")
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         console.print(f"[red]Pruning Error:[/red] {e}")
         raise click.Abort() from e
 

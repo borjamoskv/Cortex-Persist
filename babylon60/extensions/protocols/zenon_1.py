@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 ZENÓN-1: Formalización Algorítmica del Detector de Rendimiento Decreciente.
@@ -37,7 +38,7 @@ class CognitiveIteration:
     computational_cost: float
 
     # 3. Entropía (S): Índice de confusión o discrepancia semántica en el texto generado.
-    entropy_score: float
+    entropy_score: Decimal
 
     @property
     def zeno_ratio(self) -> float:

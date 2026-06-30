@@ -82,7 +82,7 @@ class TrustMatrix:
             try:
                 pub_bytes = base64.b64decode(pub_b64)
                 public_key = ed25519.Ed25519PublicKey.from_public_bytes(pub_bytes)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"[TrustMatrix] Malformed public key from {agent_id}: {e}")
                 return False
 

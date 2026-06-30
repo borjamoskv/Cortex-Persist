@@ -57,7 +57,7 @@ class CortexSyncManager:
 
                 return stats
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.exception("Sync cycle failed")
                 return {"error": str(e)}
 

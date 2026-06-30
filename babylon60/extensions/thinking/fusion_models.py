@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
@@ -145,7 +146,7 @@ class FusedThought:
     strategy: FusionStrategy
     confidence: float  # 0.0-1.0
     sources: list[ModelResponse] = field(default_factory=list)
-    agreement_score: float = 0.0
+    agreement_score: Decimal = 0.0
     meta: dict = field(default_factory=dict)
 
     @property

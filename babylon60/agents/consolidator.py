@@ -63,7 +63,7 @@ class ConsolidatorAgent(ReactiveTaskAgent):
                     except json.JSONDecodeError:
                         directives.append(row["content"])
                 conn.close()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"[{self.agent_id}] Database extraction failed: {e}")
 
         # Standardization: Format into executable schema

@@ -87,7 +87,7 @@ class FrictionAnnihilatorAgent(EngineAwareMixin):
 
             return {"status": "success", "file": target_file}
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"FrictionAnnihilator: Failed to annihilate friction: {e}")
             return {"status": "failed", "reason": str(e)}
 

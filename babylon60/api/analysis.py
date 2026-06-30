@@ -63,7 +63,7 @@ def log_audit_event(method: str, path: str, ip: str, status: int, latency: float
     try:
         with open(log_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(event) + "\n")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"[AUDIT LOG ERROR] {e}")
 
 # Forensic Middleware
@@ -83,7 +83,7 @@ async def forensic_audit_middleware(request: Request, call_next):
             if scheme.lower() == "bearer":
                 payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
                 user = payload.get("user", "sys_auditor")
-        except Exception:
+        except Exception:  # noqa: BLE001
             user = "invalid_token"
 
     log_audit_event(
@@ -109,7 +109,7 @@ def verify_strict_token(authorization: str = Header(None)):
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="BFT_TOKEN_EXPIRED")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=401, detail=f"BFT_SIGNATURE_INVALID: {str(e)}")
 
 def _query_db_worker(query: str) -> list[FactNode]:
@@ -168,7 +168,7 @@ def _query_db_worker(query: str) -> list[FactNode]:
                     content=content_str,
                     timestamp=datetime.now(UTC).isoformat()
                 ))
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"[DB WORKER ERROR] {e}")
     finally:
         if conn:
@@ -191,7 +191,7 @@ def _read_memory_worker(query: str) -> list[FactNode]:
                             content=f"Project: {proj} | Task: {task} | Status: {ghost.get('status', 'active')}",
                             timestamp=ghost.get("timestamp", datetime.now(UTC).isoformat())
                         ))
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"[MEMORY WORKER ERROR] {e}")
     return facts
 

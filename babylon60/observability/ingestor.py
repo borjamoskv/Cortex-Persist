@@ -121,7 +121,7 @@ def _duration_ms(start_iso: str, end_iso: str) -> int | None:
                 continue
         if start_dt and end_dt:
             return max(0, int((end_dt - start_dt).total_seconds() * 1000))
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Suppressed exception: %s", exc)
     return None
 
@@ -530,7 +530,7 @@ def ingest_all_transcripts(log_path: str = LOG_FILE):
             n = process_transcript(t, telemetry)
             total_events += n
             processed += 1
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.info(f"  ERROR processing {t}: {e}")
     logger.info(f"Processed {processed}/{len(transcripts)} transcripts → {total_events} events")
     run_cronos_analysis(sorted_transcripts)

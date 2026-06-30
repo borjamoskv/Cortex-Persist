@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from dataclasses import dataclass
 from typing import Any
@@ -16,7 +17,7 @@ except ModuleNotFoundError:  # pragma: no cover
 class ExergyScore:
     """Termodinámica Cognitiva (Axiom Ω₁₃): Measures useful work extractable from a fact."""
 
-    score: float
+    score: Decimal
     justification: str
 
 

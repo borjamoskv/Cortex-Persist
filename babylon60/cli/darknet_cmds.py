@@ -190,7 +190,7 @@ def inject_vad(entropy: str) -> None:
             console.print(f"[bold white]Proof Density:[/bold white] {result['proof_density']}")
             console.print(f"[bold white]Quorum Size:[/bold white] {result['quorum_size']}")
             console.print(f"\n[dim]Audit Ledger Hash: {result['hash']}[/dim]")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             duration = time.perf_counter() - start_time
             console.print(
                 f"\n[bold red]💥 BYZANTINE FAULT / APOPTOSIS in {duration:.2f}s[/bold red]"

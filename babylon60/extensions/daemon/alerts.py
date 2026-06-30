@@ -375,7 +375,7 @@ class AlertHandlerMixin:
                 )
             else:
                 logger.error("🦾 [ACTUATOR] Ouroboros absorb script not found at %s", runner_script)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.exception("🦾 [ACTUATOR] Failed to dispatch Ouroboros Absorb: %s", e)
 
     def _flush_timer(self) -> None:

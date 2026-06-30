@@ -57,7 +57,7 @@ class SentinelMonitor:
                     stderr=asyncio.subprocess.PIPE,
                 )
                 await proc.communicate()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to send OS notification on %s: %s", sys.platform, e)
 
     def _log_fact(self, tx_hash: str, to_addr: str, value: str, asset: str) -> None:
@@ -80,7 +80,7 @@ class SentinelMonitor:
                 confidence="verified",
                 meta={"tx_hash": tx_hash, "from": TARGET_ADDRESS, "to": to_addr, "value": value},
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to store sentinel fact: %s", e)
 
     async def _fetch_txlist(
@@ -103,7 +103,7 @@ class SentinelMonitor:
                     data = await response.json()
                     if data.get("status") == "1" and isinstance(data.get("result"), list):
                         return data["result"]
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Fetch failed for %s: %s", action, e)
         return []
 
@@ -170,7 +170,7 @@ class SentinelMonitor:
                             logger.info(
                                 "Sentinel baseline established at block %s", self.last_block_scanned
                             )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Could not establish baseline block: %s", e)
 
             while self.is_running:
@@ -179,7 +179,7 @@ class SentinelMonitor:
                 except asyncio.CancelledError:
                     self.is_running = False
                     raise
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error("Error in Sentinel loop: %s", e)
 
                 await asyncio.sleep(self.check_interval)

@@ -230,7 +230,7 @@ class OSINTGuard:
             output = io.BytesIO()
             clean_img.save(output, format=img.format, exif=b"")
             return output.getvalue()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             # Purgar traza cruda para evitar fugas epistémicas de PII o rutas del sistema
             logger.error(
                 "[P0] OSINTGuard: Image metadata stripping failed (raw exception suppressed)."

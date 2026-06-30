@@ -48,7 +48,7 @@ class AgentExecutor:
                 router, provider = build_executor_stack()
                 self._router = router
                 self._provider = provider
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("[EXECUTOR] Failed to build stack via factory: %s", e)
 
         self._initialized = True
@@ -137,7 +137,7 @@ class AgentExecutor:
                 total_tokens += result.get("tokens", 0)
                 total_cost += result.get("cost_usd", 0.0)
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 latency_ms = (time.monotonic() - start) * 1000
                 logger.error("[EXECUTOR] Agent %s failed: %s", agent_id, e)
                 results.append(

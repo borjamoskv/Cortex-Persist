@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
@@ -96,7 +97,7 @@ def require_permission(permission: str | Permission):
 
 async def require_consensus(
     claim: str,
-    min_score: float = 1.6,
+    min_score: Decimal = 1.6,
     engine: Any = Depends(lambda: None),
 ) -> bool:
     """Verify a claim has reached sufficient consensus with KV-Aware Caching (Ω₂)."""

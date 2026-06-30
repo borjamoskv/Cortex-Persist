@@ -175,7 +175,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                 state["improvement_history"] = state["improvement_history"][-100:]
                 with open(state_file, "w") as f:
                     json.dump(state, f, indent=2, default=str)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 import logging
 
                 logging.warning("Suppressed exception: %s", exc)

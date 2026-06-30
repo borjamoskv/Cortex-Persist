@@ -103,7 +103,7 @@ class SagaCoordinator:
                 if encrypted_content is not None:
                     content = encrypted_content
                     metadata["cortex_encrypted"] = True
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 await self.ledger.log_action(
                     tenant_id, actor_role, actor_id, "WRITE_REJECTED", resource, status=f"Encryption Failed: {e}"
                 )
@@ -138,7 +138,7 @@ class SagaCoordinator:
                 )
                 return audit_id
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             # SAGA Reversion
             if not in_tx_before:
                 await self.ledger._conn.rollback()

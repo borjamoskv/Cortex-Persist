@@ -162,7 +162,7 @@ class HypothesisEngineTool:
                 f"domain={domain}, method={method}). "
                 f"The swarm verifies, the ledger remembers."
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Hypothesis engine failure: %s", e)
             return f"❌ HYPOTHESIS ENGINE FAILURE: {e}"
 

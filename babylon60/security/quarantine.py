@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from dataclasses import dataclass
 
@@ -8,7 +9,7 @@ class BlastRadiusReport:
     test_reference_count: int
     runtime_entrypoint_count: int
     causal_dependency_count: int
-    criticality_score: float
+    criticality_score: Decimal
 
 
 @dataclass(frozen=True)

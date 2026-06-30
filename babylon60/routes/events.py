@@ -52,13 +52,13 @@ async def event_generator(
                         if hasattr(sig, "model_dump_json")
                         else sig.json(),
                     }
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 import logging
 
                 logging.warning("Suppressed exception: %s", exc)
 
             await asyncio.sleep(1.0)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         import logging
 
         logging.warning("Suppressed exception: %s", exc)

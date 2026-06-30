@@ -107,7 +107,7 @@ class L3ArchiveEngine:
             )
             return True
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("L3 Archival failure: %s", e)
             return False
 

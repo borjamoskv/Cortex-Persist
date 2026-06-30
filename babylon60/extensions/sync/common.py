@@ -143,7 +143,7 @@ def atomic_write(path: Path, content: str) -> None:
         # Clean up temp if replace fails
         try:
             os.unlink(tmp_path)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
         raise
 

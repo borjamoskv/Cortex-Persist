@@ -246,7 +246,7 @@ def status(as_json: bool) -> None:
                     for s in collector.spans[-10:]
                 ],
             }
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logging.warning("Suppressed exception: %s", exc)
         click.echo(json.dumps(last, indent=2, ensure_ascii=False))
         sys.exit(0 if last.get("all_healthy") else 1)

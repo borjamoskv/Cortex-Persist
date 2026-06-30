@@ -170,7 +170,7 @@ class AsyncConnectionPool:
     async def _close_single_connection(self, conn: aiosqlite.Connection) -> None:
         try:
             await conn.close()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
     async def close(self):

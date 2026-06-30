@@ -186,7 +186,7 @@ class ApoptosisAgent:
                             tenant_id,
                         )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("ApoptosisAgent cycle failed for %s: %s", tenant_id, e)
             stats["errors"].append(str(e))
 

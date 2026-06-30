@@ -111,6 +111,6 @@ class SandboxJIT:
             compiled_code = compile(tree, filename="<agent_jit>", mode="exec")
             exec(compiled_code, exec_globals, exec_locals)
             return exec_locals
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"SandboxJIT RuntimeException: {e}")
             raise JITSandboxViolation(f"Sandbox execution error: {e}")

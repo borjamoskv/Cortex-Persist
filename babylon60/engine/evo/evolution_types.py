@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -13,11 +14,11 @@ class DomainMetrics:
     """
 
     domain_id: str
-    health_score: float = 1.0
+    health_score: Decimal = 1.0
     error_rate: float = 0.0
     ghost_density: float = 0.0
     fact_density: float = 0.0
-    bridge_score: float = 0.0
+    bridge_score: Decimal = 0.0
     fitness_delta: float = 0.0
     timestamp: float = field(default_factory=time.time)
 

@@ -119,7 +119,7 @@ class AsymmetricZKCompiler:
                 )
                 compiler_result["cortex_taint"] = f"taint:moskv-1:zk-compiler:{int(time.time())}:{ast_hash[:16]}"
                 compiler_result["ledger_hash"] = ledger_hash
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 compiler_result["cortex_taint_error"] = str(e)
         else:
             compiler_result["cortex_taint"] = f"taint:moskv-1:mock:{ast_hash[:16]}"

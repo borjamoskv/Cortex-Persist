@@ -1,3 +1,4 @@
+from decimal import Decimal
 """
 VisAnomReasoner Topology - VLM Time-Series Rationales for Anomaly Detection
 Implements algorithms inspired by arXiv:2605.30344v1 for visual time-series reasoning.
@@ -15,7 +16,7 @@ logger = logging.getLogger("babylon60.exergy.vision")
 @dataclass
 class AnomalyRationale:
     timestamp_range: tuple[float, float]
-    anomaly_score: float
+    anomaly_score: Decimal
     rationale: str
     is_anomalous: bool
 

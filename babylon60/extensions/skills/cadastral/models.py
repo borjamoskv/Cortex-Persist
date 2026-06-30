@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # SPDX-License-Identifier: Apache-2.0
 """Cadastral Perimeter Check - Data Models.
@@ -123,7 +124,7 @@ class RiskAssessment:
     risk: RiskLevel
     ownership: OwnershipType
     expropriation: ExpropiationStatus
-    risk_score: float  # 0.0 (sovereign) → 1.0 (forbidden)
+    risk_score: Decimal  # 0.0 (sovereign) → 1.0 (forbidden)
     factors: list[str] = field(default_factory=list)
     recommendation: str = ""
 
@@ -140,7 +141,7 @@ class BlindSpot:
     center: Coordinate
     radius_km: float
     zone: ZoneClassification
-    risk_score: float  # lower = safer
+    risk_score: Decimal  # lower = safer
     legal_gaps: list[str] = field(default_factory=list)
     confidence: float = 0.0  # C1→C5 mapped to 0.2→1.0
     notes: str = ""

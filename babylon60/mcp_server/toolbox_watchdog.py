@@ -117,7 +117,7 @@ class ToolboxWatchdog:
                 self._shutdown = True
                 self._kill()
                 raise
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.error(
                     "☠️ [WATCHDOG] Crash detected: %s",
                     exc,
@@ -276,6 +276,6 @@ class ToolboxWatchdog:
         if self._log_fd:
             try:
                 self._log_fd.close()
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
             self._log_fd = None

@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Memories Router (Public API Surface).
 
@@ -65,7 +66,7 @@ class MemoryResponse(BaseModel):
     created_at: str
     updated_at: str
     hash: str | None = None
-    score: float | None = None
+    score: Decimal | None = None
 
 
 # ─── Endpoints ───────────────────────────────────────────────────────
@@ -250,7 +251,7 @@ async def delete_memory(
     if not fact:
         raise HTTPException(status_code=404, detail=f"Memory #{memory_id} not found")
 
-    success = await engine.deprecate(memory_id, reason="api_deleted")
+    success = await engine.deprecate(memory_id, reason="api_deleted", tenant_id=auth.tenant_id)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to delete memory")
 

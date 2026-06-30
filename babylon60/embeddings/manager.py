@@ -56,7 +56,7 @@ class EmbeddingManager:
                 provider_type,
                 self.mode,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             raise RuntimeError(f"Failed to initialize embedder: {exc}") from exc
 
         return self._embedder

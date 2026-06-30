@@ -298,7 +298,7 @@ class CortexFactModel(BaseModel):
                         data["specular_embedding"] = (
                             hv.tolist() if hasattr(hv, "tolist") else list(hv)
                         )
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         import logging
 
                         logging.getLogger("babylon60.memory.models").warning(

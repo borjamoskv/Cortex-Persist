@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Sovereign Telemetry Gate (RADAR-Ω + KETER-OMEGA)
@@ -63,7 +64,7 @@ EvaluatorFn: TypeAlias = Callable[[dict[str, Any], Any], float]
 class StochasticDetonationError(Exception):
     """LLM output failed the Sovereign Quality Gate."""
 
-    def __init__(self, tool_name: str, score: float, threshold: float) -> None:
+    def __init__(self, tool_name: str, score: Decimal, threshold: float) -> None:
         self.tool_name = tool_name
         self.score = score
         self.threshold = threshold

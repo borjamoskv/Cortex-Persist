@@ -126,7 +126,7 @@ def run_reactor():
 if __name__ == "__main__":
     try:
         run_reactor()
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         import logging
 
         logging.warning("Suppressed exception: %s", exc)

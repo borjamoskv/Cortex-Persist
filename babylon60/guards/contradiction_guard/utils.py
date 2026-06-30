@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -157,7 +158,7 @@ def _classify_conflict(
     existing_content: str,
     new_tokens: set[str],
     existing_tokens: set[str],
-    base_score: float,
+    base_score: Decimal,
 ) -> tuple[str, float]:
     """Classify conflict type and apply score multipliers."""
     conflict_type = "keyword_overlap"

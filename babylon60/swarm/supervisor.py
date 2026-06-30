@@ -97,7 +97,7 @@ class SwarmSupervisor:
             logger.info("LocalEmbedder initialized for Semantic Cache.")
         except ImportError:
             logger.warning("LocalEmbedder not available. Semantic Cache disabled.")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Could not load LocalEmbedder: {e}")
 
         # Start Worker Pool
@@ -116,7 +116,7 @@ class SwarmSupervisor:
         while self._running:
             try:
                 await self._state_consumer_loop()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.critical(
                     f"HEARTBEAT FAILURE: Consumer loop crashed: {e}. Initiating Controlled Apocalypse."
                 )
@@ -137,7 +137,7 @@ class SwarmSupervisor:
                 pass  # Time to flush if anything is in the buffer
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"State consumer encountered error: {e}")
                 raise
 
@@ -155,7 +155,7 @@ class SwarmSupervisor:
                     await self.state_store.process_signals_batch(signal_buffer)
                     for _ in signal_buffer:
                         self.bus.task_done()
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error(f"Batch processing failed: {e}")
                     raise
                 finally:
@@ -223,7 +223,7 @@ class SwarmSupervisor:
                                 if is_semantically_equivalent(fp, cached_fp, threshold=0.99):
                                     cached_payload = cached_result
                                     break
-                        except Exception as e:
+                        except Exception as e:  # noqa: BLE001
                             logger.error(f"Semantic cache error: {e}")
 
                     if cached_payload:
@@ -313,7 +313,7 @@ class SwarmSupervisor:
                         )
                         await self._db.commit()
                     break
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error(
                         f"Dispatch failed for task {task['id']}. Rolling back lease. Error: {e}"
                     )
@@ -323,7 +323,7 @@ class SwarmSupervisor:
                             (task["id"],),
                         )
                         await self._db.commit()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"Critical dispatch loop failure for task {task['id']}: {e}")
 
         if dispatched > 0:

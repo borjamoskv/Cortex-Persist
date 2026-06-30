@@ -126,7 +126,7 @@ class AetherDaemon:
         while not self._stop_event.is_set():
             try:
                 ingestor.poll()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("GitHub ingestor error: %s", e)
             self._stop_event.wait(timeout=300)  # poll every 5 minutes
 

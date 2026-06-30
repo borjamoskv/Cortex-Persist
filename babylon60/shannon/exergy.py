@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -27,12 +28,12 @@ class ExergyInput:
 
 @dataclass(frozen=True)
 class ExergyResult:
-    score: float
+    score: Decimal
     signal_gain: float
     reversibility_penalty: float
     waste_ratio: float
     below_threshold: bool
-    exergy_score: float = 0.0
+    exergy_score: Decimal = 0.0
 
 
 class ThermodynamicWasteError(RuntimeError):

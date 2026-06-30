@@ -133,7 +133,7 @@ class FileActivityObserver:
                         source="perception:observer",
                         project=fe.project,
                     )
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logging.debug("Failed to emit file activity signal: %s", e)
 
         self.handler = _DebouncedHandler(_wrapped_callback, workspace, debounce_s)

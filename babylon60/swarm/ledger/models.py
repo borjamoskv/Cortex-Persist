@@ -1,3 +1,4 @@
+from decimal import Decimal
 import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -25,7 +26,7 @@ class SwarmEvent:
     routing_payload: dict
     version: str = "v2"
     quorum_agents: list[str] | None = None
-    entropy_score: float | None = None
+    entropy_score: Decimal | None = None
 
     def to_record(self):
         input_hash = sha256(self.input)

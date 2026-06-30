@@ -308,7 +308,7 @@ class AuthManager:
                 except AttributeError:
                     stub_hash = f"$argon2id$v=19$m=16,t=2,p=1$stub${self.hash_key_legacy_sha256(raw_key + AUTH_PEPPER)}"
                     is_valid = stub_hash == target_hash
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.exception("Cryptographic backend failure during token verification: %s", e)
                 is_valid = False
 

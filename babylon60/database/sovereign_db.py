@@ -131,7 +131,7 @@ class SovereignDB:
 
             self._conn = conn
             self._init_event.set()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to initialize SovereignDB background connection: %s", e)
             self._init_error = e
             self._init_event.set()

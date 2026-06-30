@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Exergy Scoring - Axiom Ω₁₃ Shannon Upgrade.
 
@@ -45,16 +46,16 @@ class ExergyReport:
         useful_work_ratio: Decisions enabled per token spent.
     """
 
-    entropy_score: float
+    entropy_score: Decimal
     compression_ratio: float
-    exergy_score: float
+    exergy_score: Decimal
     downstream_utility: float
     noise_fraction: float
     useful_work_ratio: float
 
 
 def compute_exergy_report(
-    entropy_score: float,
+    entropy_score: Decimal,
     compression_ratio: float,
     downstream_utility: float,
     decisions_enabled: int,

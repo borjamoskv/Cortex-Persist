@@ -84,7 +84,7 @@ class SagaOrchestrator:
                         resource=f"payload_hash:{ctx.get('ledger_hash', 'unknown')}",
                         status="REVERTED",
                     )
-                except Exception as l_err:
+                except Exception as l_err:  # noqa: BLE001
                     logger.critical(f"FATAL: Failed to inject SAGA Tombstone into Ledger: {l_err}")
 
             raise RuntimeError(f"Saga Mutation Aborted: {e}") from e

@@ -197,7 +197,7 @@ class PostgresConnectionAdapter:
             else:
                 rows = await conn.fetch(pg_sql, *pg_params)
                 return PostgresCursorAdapter(rows)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(
                 "Postgres execution error: %s | SQL: %s | Params: %s", e, pg_sql, pg_params
             )
@@ -211,7 +211,7 @@ class PostgresConnectionAdapter:
         conn = self._get_active_conn()
         try:
             await conn.executemany(pg_sql, params_list)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Postgres executemany error: %s | SQL: %s", e, pg_sql)
             raise
 
@@ -226,7 +226,7 @@ class PostgresConnectionAdapter:
                     translated = self.translate_sqlite_to_pg(stmt)
                     pg_sql, _ = self._translate_params(translated, ())
                     await conn.execute(pg_sql)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Postgres executescript error: %s", e)
             raise
 

@@ -60,7 +60,7 @@ class StripeBillingGateway:
                 metadata={"tenant_id": tenant_id},
             )
             return customer.id
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to create Stripe customer for %s: %s", tenant_id, e)
             raise
 
@@ -90,7 +90,7 @@ class StripeBillingGateway:
                 items=[{"price": price_id}],
             )
             return subscription.id
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(
                 "Failed to create Stripe subscription for customer %s on plan %s: %s",
                 customer_id,
@@ -121,7 +121,7 @@ class StripeBillingGateway:
                 timestamp="now",
                 action="increment",
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(
                 "Failed to report usage for Stripe subscription item %s: %s",
                 subscription_item_id,
@@ -147,14 +147,14 @@ class StripeBillingGateway:
                 data = json.loads(payload.decode("utf-8"))
                 logger.info("[BILLING][MOCK] Parsed mock webhook event type %s", data.get("type"))
                 return data
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Failed to decode mock webhook payload: %s", e)
                 return {"type": "unknown", "data": {}}
 
         try:
             event = stripe.Webhook.construct_event(payload, signature, config.STRIPE_WEBHOOK_SECRET)
             return event
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Webhook verification failed: %s", e)
             raise ValueError(f"Invalid webhook signature: {e}") from e
 

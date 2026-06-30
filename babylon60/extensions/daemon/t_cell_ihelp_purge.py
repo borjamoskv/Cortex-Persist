@@ -210,7 +210,7 @@ class IHelpPurgeDaemon:
 
             # Update daemon reputation (Success hit)
             await self._update_daemon_reputation(conn, is_hit=True)
-        except Exception as ex:
+        except Exception as ex:  # noqa: BLE001
             logger.error(f"[{self.agent_id}] Failed during phagocytosis transaction: {ex}")
             raise ex
         finally:
@@ -294,7 +294,7 @@ class IHelpPurgeDaemon:
                                     feed_content, source_agent=f"rss_feed:{hostname}"
                                 )
 
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         logger.error(
                             f"[{self.agent_id}] Domain checkout failed for {hostname}: {e}"
                         )

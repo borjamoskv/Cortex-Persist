@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Bayesian Trust Registry (Axiom Ω₃) - CORTEX Persist.
@@ -44,9 +45,9 @@ class WeightedProposal:
     action: str
     domain: str
     raw_confidence: float
-    trust_score: float = 0.0
+    trust_score: Decimal = 0.0
     influence_weight: float = 0.0
-    final_score: float = 0.0
+    final_score: Decimal = 0.0
     reasoning_ref: str | None = None
 
 
@@ -150,7 +151,7 @@ class TrustRegistry:
         # Normalize to [0, 1]
         return max(0.0, min(1.0, raw_score))
 
-    def compute_influence_weight(self, trust_score: float) -> float:
+    def compute_influence_weight(self, trust_score: Decimal) -> float:
         """
         inf_weight = trust_score ^ gamma
         gamma > 1 heavily penalizes mediocre agents and zeroes out tainted ones.

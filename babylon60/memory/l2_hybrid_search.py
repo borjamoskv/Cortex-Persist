@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 L2 Hybrid Search Engine (Mem0-Killer).
@@ -81,7 +82,7 @@ class L2SearchResult:
     is_bridge: bool
     confidence: str
     cognitive_layer: str
-    rrf_score: float
+    rrf_score: Decimal
     source_signals: list[str]  # ["vector", "fts"] - which branches contributed
     metadata: dict = field(default_factory=dict)
 

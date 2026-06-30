@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # cortex/evolution/models.py
 """Sovereign Evolution Models (350/100 standard).
@@ -94,4 +95,4 @@ class EngineParameters:
     extinction_cull_rate: float = 0.5
     speciation_rate: float = 0.1
     lateral_transfer_rate: float = 0.15  # 350/100: Lateral Transfer
-    meta_fitness_score: float = 0.0
+    meta_fitness_score: Decimal = 0.0

@@ -40,7 +40,7 @@ def run_claude_query(prompt: str, model: str = "claude-3-opus-20240229") -> str:
             return json.dumps(
                 {"status": "C5-REAL", "model": data.get("model", model), "response": text}
             )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         import logging
 
         logging.warning("Suppressed exception: %s", e)

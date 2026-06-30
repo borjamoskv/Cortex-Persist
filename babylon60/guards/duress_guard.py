@@ -71,7 +71,7 @@ class DuressGuard:
                         ),
                     )
                     conn.commit()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Failed to commit apoptosis to ledger: {e}")
 
         try:
@@ -80,7 +80,7 @@ class DuressGuard:
                 f.write("APOPTOSIS_LOCKED_P100")
             # Harden lock file permissions (read-only for owner, none for others)
             os.chmod(cls.LOCK_FILE, 0o400)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Failed to execute apoptosis lock: {e}")
 
     @classmethod

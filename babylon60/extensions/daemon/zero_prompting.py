@@ -115,7 +115,7 @@ class ZeroPromptingDaemon:
                 actor_id="zero_prompt",
             )
             logger.info("  ↳ Written to Ledger: Immutable C5.")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("[ZERO-PROMPTING] Ledger crystallization failed: %s", e)
 
     async def _revert(self, action: dict) -> None:

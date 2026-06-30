@@ -81,6 +81,6 @@ class EvaluationMonitor:
             )
             return alerts
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("EvaluationMonitor error: %s", e)
             return []

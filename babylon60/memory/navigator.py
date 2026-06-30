@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """CORTEX v7+ - Semantic Navigator (Grid Cell Architecture).
 
@@ -60,7 +61,7 @@ class NavigationState:
 
     center_id: str | int = ""
     center_content: str = ""
-    center_score: float = 0.0
+    center_score: Decimal = 0.0
     neighbors: list[dict[str, Any]] = field(default_factory=list)
     density: int = 0
     position: list[float] = field(default_factory=list)

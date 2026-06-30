@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Python SDK Client.
@@ -33,7 +34,7 @@ class Fact:
     created_at: str
     valid_from: str
     valid_until: str | None = None
-    score: float = 0.0
+    score: Decimal = 0.0
 
 
 class CortexError(Exception):

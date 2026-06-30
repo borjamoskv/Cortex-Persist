@@ -85,7 +85,7 @@ class BaseAgent:
 
         try:
             await self.on_start()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("[%s] on_start failed: %s", self.agent_id, exc)
             self.state.status = AgentStatus.FAILED
             return
@@ -111,7 +111,7 @@ class BaseAgent:
                     await self.tick()
                     self.state.record_success()
 
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 self.state.record_error(repr(exc))
                 logger.warning(
                     "[%s] Error (consecutive=%d): %s",
@@ -138,7 +138,7 @@ class BaseAgent:
         # Cleanup - preserve terminal statuses (QUARANTINED, FAILED)
         try:
             await self.on_stop()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("[%s] on_stop failed: %s", self.agent_id, exc)
 
         if self.state.status not in (
@@ -305,7 +305,7 @@ class ReactiveTaskAgent(BaseAgent):
         try:
             result = await self._dispatch(op, payload)
             await self._reply(message, {"op": op, "result": result})
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logging.getLogger(self.__class__.__module__).exception(
                 "%s op=%s failed", self.__class__.__name__, op
             )

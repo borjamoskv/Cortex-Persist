@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Injection Guard.
@@ -49,7 +50,7 @@ class InjectionReport:
     is_safe: bool = True
     matches: list[InjectionMatch] = field(default_factory=list)
     highest_severity: str = "none"
-    entropy_score: float = 0.0
+    entropy_score: Decimal = 0.0
     content_length: int = 0
 
     def to_dict(self) -> dict[str, Any]:
@@ -350,7 +351,7 @@ class InjectionGuard:
                     )
                     report.is_safe = False
                     report.highest_severity = "critical"
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Semantic WAF evaluation failed (fallback to fast-path): %s", e)
 
         return report

@@ -240,7 +240,7 @@ class ObjectLevel:
             try:
                 h = self._strategy._find_heuristic(heuristic_applied)
                 h.activate(success=(outcome == StepOutcome.SUCCESS))
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
         # Heuristic may have been pruned mid-execution
 

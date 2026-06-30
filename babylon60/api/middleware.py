@@ -273,7 +273,7 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
                 try:
                     with open(self.log_path, "a", encoding="utf-8") as f:
                         f.write("".join(data_lines))
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     logger.warning("Suppressed exception: %s", exc)
 
             # 1 thread spin-up per interval, not per attack request
@@ -422,7 +422,7 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
                             else:
                                 plan, plan_quota = "free", None
                                 database_read_success = True
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error("Failed to load tenant plan config from database: %s", e)
 
             # Evict cache entries if capacity is reached to prevent memory leaks
@@ -457,7 +457,7 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
                                 "error": "Payload rejected by Sovereign Isolation (Data Poisoning)"
                             },
                         )
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     logger.warning("Suppressed exception: %s", exc)
 
                 # Reconstruct stream since we consumed it
@@ -527,7 +527,7 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
                             stripe_subscription_item_id = config_data.get(
                                 "stripe_subscription_item_id"
                             )
-                        except Exception as e:
+                        except Exception as e:  # noqa: BLE001
                             logger.error("Failed to parse tenant config: %s", e)
 
             # Fallback to mock item ID if in test/mock mode
@@ -562,5 +562,5 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
                 result.tenant_id,
                 stripe_subscription_item_id[:12],
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Stripe billing increment failed for %s: %s", api_key[:12], e)

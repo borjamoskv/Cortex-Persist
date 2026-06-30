@@ -107,6 +107,6 @@ class VerificationOracle:
 
             logger.error("Ledger audit failed: engine does not expose a verification interface")
             return False
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Ledger audit failed: %s", e)
             return False

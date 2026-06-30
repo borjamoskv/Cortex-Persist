@@ -93,7 +93,7 @@ class GossipNode:
             self._task.cancel()
             try:
                 await self._task
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception during task cancel: %s", exc)
 
         if self.transport:
@@ -163,7 +163,7 @@ class GossipNode:
             response = self._build_payload("ACK")
             try:
                 self.transport.sendto(response, (addr[0], sender_port or addr[1]))
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug("Error sending ACK to %s: %s", addr, e)
 
     def _build_payload(self, msg_type: str) -> bytes:
@@ -208,5 +208,5 @@ class GossipNode:
         try:
             self.transport.sendto(payload, (host, port))
             peer["last_seen"] = time.monotonic()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("Gossip failed to send PING to peer %s: %s", peer_id, e)

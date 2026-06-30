@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -47,7 +48,7 @@ class Grade(enum.Enum):
         return self.threshold >= other.threshold
 
     @classmethod
-    def from_score(cls, score: float) -> Grade:
+    def from_score(cls, score: Decimal) -> Grade:
         """Map a 0-100 score to its corresponding grade."""
         for grade in cls:
             if score >= grade.threshold:
@@ -113,7 +114,7 @@ class HealthScore:
     Grade is a sealed ``Grade`` enum - raw strings are dead.
     """
 
-    score: float
+    score: Decimal
     grade: Grade
     metrics: list[MetricSnapshot] = field(default_factory=list)
     sub_indices: dict[str, float] = field(default_factory=dict)

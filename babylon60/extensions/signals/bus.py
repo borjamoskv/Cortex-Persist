@@ -103,7 +103,7 @@ class AsyncSignalBus:
 
         try:
             self._conn._signals_ready = True  # type: ignore
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
         self._ready = True
 
@@ -331,7 +331,7 @@ class SignalBus:
 
         try:
             self._conn._signals_ready = True  # type: ignore
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
         self._ready = True
 

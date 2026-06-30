@@ -198,7 +198,7 @@ class HydraChaosEngine:
             logger.error("🚨 [HYDRA-CHAOS] Engine failure: %s", e)
             critical_interrupted = True
             error_type = "AssertionError"
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("🚨 [HYDRA-CHAOS] Unexpected failure: %s", e)
             critical_interrupted = True
             error_type = type(e).__name__

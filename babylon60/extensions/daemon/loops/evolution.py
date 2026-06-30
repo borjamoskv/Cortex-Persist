@@ -69,6 +69,6 @@ async def evolution_loop(state, cortex_root, speak_func):
                                     )
 
             await asyncio.sleep(600)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Evolution Loop Error: %s", e)
             await asyncio.sleep(60)

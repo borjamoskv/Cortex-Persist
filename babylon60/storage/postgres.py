@@ -146,14 +146,14 @@ class PostgresBackend:
         try:
             await self.executescript(PG_EXTENSIONS)
             logger.debug("PostgreSQL: Extensions applied (pgvector, pg_trgm).")
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("PostgreSQL: Extensions skipped (insufficient privileges): %s", exc)
 
         # Apply all schema statements - each is idempotent
         for i, schema_sql in enumerate(PG_ALL_SCHEMA):
             try:
                 await self.executescript(schema_sql)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.error(
                     "PostgreSQL: Schema statement %d/%d failed: %s",
                     i + 1,
@@ -204,7 +204,7 @@ class PostgresBackend:
                 if ":" in pre_at:
                     user_part = pre_at.rsplit(":", 1)[0]
                     return f"{user_part}:***@{post_at}"
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
         return dsn
 
@@ -223,7 +223,7 @@ class PostgresBackend:
                 logger.warning("PG Slow Query (%.2fms): %s", elapsed_ms, sql[:100])
 
             return [dict(row) for row in rows]
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("PG Query Error: %s | Query: %s", exc, sql[:500])
             raise
 
@@ -246,7 +246,7 @@ class PostgresBackend:
             async with self._pool.acquire() as conn:
                 row = await conn.fetchrow(pg_sql, *pg_params)
                 return row["id"] if row else 0
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("PG Insert Error: %s", exc)
             raise
 
@@ -262,7 +262,7 @@ class PostgresBackend:
             async with self._pool.acquire() as conn, conn.transaction():
                 # asyncpg executemany is optimized for batch operations
                 await conn.executemany(pg_sql, params_list)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("PG Batch Error (size=%d): %s", len(params_list), exc)
             raise
 
@@ -282,7 +282,7 @@ class PostgresBackend:
             async with self._pool.acquire() as conn, conn.transaction():
                 for stmt in statements:
                     await conn.execute(stmt)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("PG Script Error (%d stmts): %s", len(statements), exc)
             raise
 
@@ -292,7 +292,7 @@ class PostgresBackend:
             try:
                 await self._pool.close()
                 logger.debug("PostgreSQL: Pool closed cleanly.")
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("PostgreSQL: Unclean pool close: %s", exc)
             finally:
                 self._pool = None

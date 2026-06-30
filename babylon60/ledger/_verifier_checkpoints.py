@@ -77,7 +77,7 @@ def _verify_single_checkpoint(
                 continue
             try:
                 reg_pub_bytes = _b64url_decode(reg_pub_b64)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug("Failed to decode public key in key record %s: %s", reg_pub_b64, e)  # pyright: ignore[reportUndefinedVariable]
                 continue
             if reg_pub_bytes == cp_pubkey_bytes:

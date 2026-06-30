@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """CORTEX Billing Core - Data Models.
 
@@ -43,7 +44,7 @@ class BillingEvent:
     ssu_units: float
     cost_usd: float
     causal_link: str
-    reproducibility_score: float = 1.0
+    reproducibility_score: Decimal = 1.0
     exploitability_index: float = 0.0
     failure_type: FailureType | None = None
     revenue_quarantined: bool = False

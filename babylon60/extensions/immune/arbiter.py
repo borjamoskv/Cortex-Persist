@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 IMMUNE-SYSTEM-v1 Arbiter.
@@ -35,14 +36,14 @@ class Verdict(Enum):
 class FilterResult:
     filter_id: str
     verdict: Verdict
-    score: float  # 0 to 100
+    score: Decimal  # 0 to 100
     justification: str
 
 
 @dataclass
 class TriageResult:
     verdict: Verdict
-    triage_score: float
+    triage_score: Decimal
     filter_results: list[FilterResult]
     blast_radius: float
     immunity_certificate: bool
@@ -172,7 +173,7 @@ class ImmuneArbiter:
                         f" ({echo_count}/{len(actions)} actions"
                         " mirror the signal)."
                     )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("F2 degraded to heuristic: %s", e)
             score = 70.0
             justification = f"Degraded: {e}"
@@ -229,7 +230,7 @@ class ImmuneArbiter:
                 score -= 10.0
                 justification += f" {len(dead_ends)} dead-end output(s)."
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("F3 degraded to heuristic: %s", e)
             score = 75.0
             justification = f"Degraded: {e}"
@@ -260,7 +261,7 @@ class ImmuneArbiter:
             justification=f"Entropy delta: {delta:.2f} (Added: {added}, Removed: {removed})",
         )
 
-    def _filter_confidence(self, reported: float, r_score: float) -> FilterResult:
+    def _filter_confidence(self, reported: float, r_score: Decimal) -> FilterResult:
         """F5: Calibrates confidence against reversibility risk."""
         # Risk-adjusted threshold: higher risk (lower r_score) requires higher confidence
         threshold = 1.0 - (r_score / 100.0)

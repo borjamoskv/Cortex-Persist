@@ -112,7 +112,7 @@ async def store_fact(
         raise HTTPException(status_code=400, detail=str(e)) from None
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.exception("Failed to store fact: %s", e)
         raise HTTPException(
             status_code=500, detail="Internal server error while storing fact"
@@ -296,7 +296,7 @@ async def get_fact_history(
         return response
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error("Failed to fetch fact history: %s", e)
         raise HTTPException(status_code=500, detail="Failed to fetch history") from e
 
@@ -315,7 +315,7 @@ async def propagate_taint(
             "affected_count": report.affected_count,
             "changes": report.confidence_changes,
         }
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error("Taint propagation failed: %s", e)
         raise HTTPException(status_code=500, detail="Taint propagation failed") from None
 
@@ -468,7 +468,7 @@ async def deprecate_fact(
     ):
         raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
-    success = await engine.deprecate(fact_id, reason="api deprecated")
+    success = await engine.deprecate(fact_id, reason="api deprecated", tenant_id=auth.tenant_id)
     if not success:
         raise HTTPException(status_code=500, detail=get_trans("error_deprecation_failed", lang))
 

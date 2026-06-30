@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 EU AI Act Compliance Engine.
@@ -32,8 +33,8 @@ class AIDecisionReport:
         action: str,
         input_data: dict[str, Any],
         output_data: dict[str, Any],
-        confidence_score: float,
-        evidence_score: float,
+        confidence_score: Decimal,
+        evidence_score: Decimal,
     ) -> dict[str, Any]:
         """
         Generates a transparent, human-readable record of an autonomous decision.

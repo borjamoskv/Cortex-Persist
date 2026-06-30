@@ -51,7 +51,7 @@ def _resolve_device() -> str:
             return "cuda"
         if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
             return "mps"
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Suppressed exception: %s", exc)
 
     return "cpu"
@@ -124,7 +124,7 @@ class LocalEmbedder:
                     device,
                     model_kwargs,
                 )
-            except Exception as err:
+            except Exception as err:  # noqa: BLE001
                 cls._model = None
                 cls._model_name = model_name
                 cls._using_fallback = True

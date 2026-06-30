@@ -30,7 +30,7 @@ class LedgerStore:
             with causal_write(conn):
                 yield conn
                 conn.commit()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             conn.rollback()
             if getattr(exc, "preserve_ledger_error", False):
                 raise

@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -19,7 +20,7 @@ logger = logging.getLogger("uvicorn.error")
 
 class TrustProfileResponse(BaseModel):
     agent_id: str
-    trust_score: float
+    trust_score: Decimal
     successes: int
     failures: int
     taint_events: int
@@ -30,7 +31,7 @@ class TrustProfileResponse(BaseModel):
 class ComplianceReport(BaseModel):
     status: str
     ledger_valid: bool
-    total_trust_score: float
+    total_trust_score: Decimal
     audit_coverage: float
     compliance_level: str
     article_12_status: str
@@ -60,7 +61,7 @@ async def dry_run_guard(
         raise HTTPException(
             status_code=400, detail={"valid": False, "rule": e.rule, "error": e.detail}
         ) from e
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error("Guard dry-run failed: %s", e)
         raise HTTPException(status_code=500, detail="Internal guard error") from e
 
@@ -112,6 +113,6 @@ async def get_compliance_status(
             compliance_level="Sovereign-Alpha",
             article_12_status="LOGGED_AND_VERIFIED",
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error("Compliance report generation failed: %s", e)
         raise HTTPException(status_code=500, detail="Failed to generate compliance report") from e

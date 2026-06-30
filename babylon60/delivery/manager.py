@@ -39,7 +39,7 @@ class DeliveryManager:
                 return True
             logger.warning("[DELIVERY] Unknown target type: %s", target.type)
             return False
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("[DELIVERY] Failed for mission %s: %s", mission_id, e)
             return False
 
@@ -100,7 +100,7 @@ class DeliveryManager:
             with urllib.request.urlopen(req, timeout=30) as resp:
                 logger.info("[DELIVERY] Webhook %s → %d", target.url, resp.status)
                 return resp.status < 400
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("[DELIVERY] Webhook failed: %s", e)
             return False
 

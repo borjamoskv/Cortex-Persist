@@ -46,7 +46,7 @@ class MacMaestroAgent:
 
                 _, router = build_executor_stack()
                 self.router = router
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Could not initialize CortexLLMRouter: %s", e)
 
     async def execute(self, instruction: str) -> dict[str, Any]:
@@ -108,21 +108,21 @@ class MacMaestroAgent:
     def _parse_json_response(self, text: str) -> dict[str, Any] | None:
         try:
             return json.loads(text)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
         match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
         if match:
             try:
                 return json.loads(match.group(1))
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
 
         match = re.search(r"(\{.*\})", text, re.DOTALL)
         if match:
             try:
                 return json.loads(match.group(1))
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
 
         return None

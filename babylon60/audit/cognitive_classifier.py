@@ -101,7 +101,7 @@ class SafetyClassifier:
                             else:
                                 embeddings.append(self.embedder.embed(anchor))
                     self._anchor_embeddings[cat_name] = embeddings
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning("Failed to precompute anchor embeddings: %s", e)
         self._initialized = True
 
@@ -178,7 +178,7 @@ class SafetyClassifier:
                         if sim >= self.semantic_threshold:
                             matched_categories.add(cat_name)
                             break
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Semantic classification failed; falling back: %s", e)
 
         return sorted(list(matched_categories))

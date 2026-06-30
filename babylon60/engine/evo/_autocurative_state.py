@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -63,7 +64,7 @@ class AgentHealth:
     total_repairs_succeeded: int
     active_circuit_breakers: dict[str, str]
     cortisol_level: float
-    health_score: float
+    health_score: Decimal
     recent_events: list[dict[str, Any]]
 
     def to_dict(self) -> dict[str, Any]:

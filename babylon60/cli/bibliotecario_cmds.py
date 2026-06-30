@@ -68,7 +68,7 @@ async def _ingest_and_organize(path: Path) -> str:
                 try:
                     text = file_path.read_text(encoding="utf-8")
                     content += f"\\n\\n--- FILE: {file_path.relative_to(path)} ---\\n{text}"
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     import logging
 
                     logging.warning("Suppressed exception: %s", exc)

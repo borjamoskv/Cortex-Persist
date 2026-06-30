@@ -146,7 +146,7 @@ class StagesMixin:
                     asyncio.create_task(persist_to_engine())
                 except RuntimeError:
                     asyncio.run(persist_to_engine())
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("  [PERSIST] Engine SQLite write failed: %s", e)
 
         elif self._ledger:  # pyright: ignore[reportAttributeAccessIssue]
@@ -156,7 +156,7 @@ class StagesMixin:
                     result_hash=result_hash,
                     tenant_id=request.tenant_id,
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("  [PERSIST] Ledger write failed: %s", e)
 
         logger.debug("  [PERSIST] Hash: %s", result_hash[:16])

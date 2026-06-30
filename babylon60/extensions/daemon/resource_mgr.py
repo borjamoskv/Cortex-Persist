@@ -156,7 +156,7 @@ class ResourceMgrMixin:
 
             self._event_bus = DistributedEventBus()
             logger.info("📡 DistributedEventBus ENABLED")
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
         # 2.5 Event Sovereignty Runtime (Hito 34)
@@ -176,7 +176,7 @@ class ResourceMgrMixin:
                     event_bus=self._event_bus, anomaly_bridge=anomaly_br, auth_gateway=auth_gw
                 )
                 logger.info("👑 EventSovereigntyRuntime ENABLED")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init EventSovereigntyRuntime: %s", e)
 
         # 3. Scheduler — cron/interval task execution

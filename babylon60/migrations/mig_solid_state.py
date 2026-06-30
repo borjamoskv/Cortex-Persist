@@ -26,7 +26,7 @@ def _migration_021_solid_state(conn: sqlite3.Connection) -> None:
                 schema_version  TEXT NOT NULL DEFAULT '1'
             )
         """)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         import logging
 
         logging.warning("Suppressed exception: %s", exc)

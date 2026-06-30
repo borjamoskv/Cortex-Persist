@@ -310,7 +310,7 @@ class OmegaDaemon:
                             purged_count = await apoptosis.execute_purge()
                             if purged_count > 0:
                                 self.events.append(f"[{timestamp}] [bold red]☠️ Apoptosis triggered[/]: Purged {purged_count} dead modules.")
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error("Thermodynamic Apoptosis failed: %s", e)
                     self.events.append(f"[{timestamp}] [bold red]✗ Apoptosis failure:[/] {e}")
                 # ------------------------------------
@@ -386,7 +386,7 @@ class OmegaDaemon:
                                 taint_signature=taint_signature,
                             )
                             await backend.close()
-                        except Exception as bp_exc:
+                        except Exception as bp_exc:  # noqa: BLE001
                             logger.error("Failed to execute autopoietic bypass in L2: %s", bp_exc)
 
                 except (ImportError, RuntimeError, ValueError) as e:

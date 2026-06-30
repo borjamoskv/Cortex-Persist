@@ -68,7 +68,7 @@ async def create_pool_async(dsn: str) -> asyncpg.Pool:  # pyright: ignore[report
         if pool is None:
             raise RuntimeError("Failed to initialize asyncpg pool")
         return pool
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"PostgreSQL Pool Initialization Error: {e}")
         raise DBLockError(f"Failed to acquire PostgreSQL pool: {e}") from e
 

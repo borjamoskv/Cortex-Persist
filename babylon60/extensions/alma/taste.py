@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """ALMA Taste Engine - Sovereign Quality Discriminator.
 
@@ -105,7 +106,7 @@ class TasteDimension:
     """Score for a single quality dimension."""
 
     name: str
-    score: float  # 0.0–1.0
+    score: Decimal  # 0.0–1.0
     weight: float  # Contribution to composite
     signal: str  # Human-readable justification
 
@@ -115,7 +116,7 @@ class TasteVerdict:
     """Complete taste evaluation result."""
 
     dimensions: tuple[TasteDimension, ...]
-    composite_score: float  # Weighted average 0.0–1.0
+    composite_score: Decimal  # Weighted average 0.0–1.0
     grade: str  # GOAT | strong | functional | mediocre | dead
     verdict: str  # One-line human assessment
     timestamp: float

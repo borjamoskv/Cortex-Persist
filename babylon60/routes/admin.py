@@ -484,7 +484,7 @@ async def execute_credibility_strike(
             "metrics": evidence["metrics"],
             "message": "Credibility strike executed successfully",
         }
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.error("Credibility strike failed for project=%s: %s", project, exc)
         raise HTTPException(
             status_code=500,

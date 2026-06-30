@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -114,7 +115,7 @@ class LedgerEvent:
     event_id: str
     parent_ids: list[str]
     status: EpistemicStatus
-    trust_score: float
+    trust_score: Decimal
     created_at: str
     last_revalidated_at: str | None = None
     tainted: bool = False

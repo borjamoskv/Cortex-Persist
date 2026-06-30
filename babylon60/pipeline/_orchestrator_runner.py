@@ -128,7 +128,7 @@ class RunnerMixin:
             result.stages = list(self._traces)
             result.completed_at = time.monotonic()
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             result.status = PipelineStatus.FAILED
             result.error = str(e)
             result.stages = list(self._traces)
@@ -167,7 +167,7 @@ class RunnerMixin:
                 result = await asyncio.to_thread(fn)
         except (BudgetExhaustedError, PipelineCancelledError):
             raise
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             error_msg = str(e)
             raise
         finally:
@@ -314,7 +314,7 @@ class RunnerMixin:
             result.stages = list(self._traces)
             result.completed_at = time.monotonic()
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             result.status = PipelineStatus.FAILED
             result.error = str(e)
             result.stages = list(self._traces)
@@ -364,7 +364,7 @@ class RunnerMixin:
                     result = asyncio.run(result)
         except (BudgetExhaustedError, PipelineCancelledError):
             raise
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             error_msg = str(e)
             raise
 

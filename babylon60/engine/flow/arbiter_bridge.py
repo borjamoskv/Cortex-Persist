@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Arbiter-Router Bridge — Cross-Layer Verdict → Contract-Compliant Routing.
 
@@ -249,7 +250,7 @@ class ArbiterBridge:
         )
 
     @staticmethod
-    def _score_to_severity(fused_score: float) -> Severity:
+    def _score_to_severity(fused_score: Decimal) -> Severity:
         """Convert fused confidence score to Severity enum."""
         for threshold, severity in SEVERITY_THRESHOLDS:
             if fused_score < threshold:

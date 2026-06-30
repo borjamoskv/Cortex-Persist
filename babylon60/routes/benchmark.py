@@ -81,7 +81,7 @@ async def ingest_influencer(
         return StoreResponse(
             fact_id=str(fact_id), project="benchmark", message="Influencer ingested successfully"
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.exception("Failed to ingest influencer: %s", e)
         raise HTTPException(status_code=500, detail="Failed to ingest influencer") from None
 
@@ -127,7 +127,7 @@ async def list_influencers(
                 continue
 
         return result
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.exception("Failed to retrieve influencer list: %s", e)
         raise HTTPException(
             status_code=500, detail="Internal server error retrieving benchmark"

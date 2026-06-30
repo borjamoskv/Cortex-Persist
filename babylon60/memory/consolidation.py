@@ -268,7 +268,7 @@ class SystemsConsolidator:
                         from babylon60.engine.core.l3_archive import l3_archiver
 
                         l3_archiver.archive_facts(doomed_facts)  # type: ignore[arg-type]
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         logger.warning("L3 Archival failed during Apoptosis: %s", e)
 
             # Annihilate from active memory
@@ -296,7 +296,7 @@ class SystemsConsolidator:
                     stats["matured"],
                     stats["deceased"],
                 )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to run O(1) consolidation sweep: %s", e)
 
         return stats

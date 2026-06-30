@@ -70,7 +70,7 @@ if _db_name_override == _DEFAULT_DB_NAME and not CORTEX_DB.exists() and _legacy_
     logging.getLogger("babylon60.paths").info("Migrating legacy cortex.db to runtime.db (ADR-0006)")
     try:
         _legacy_db.rename(CORTEX_DB)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logging.getLogger("babylon60.paths").error(
             f"Failed to migrate cortex.db to runtime.db: {e}"
         )

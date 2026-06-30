@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 PHOENIX-OMEGA: Motor de Transformación Atómica y Escalado Estructural
@@ -46,7 +47,7 @@ class StructuralAtom:
     id: str
     source_path: Path
     ast_node: ast.AST
-    complexity_score: float
+    complexity_score: Decimal
     dependencies: set[str]
     dependents: set[str]
     semantic_signature: str

@@ -109,7 +109,7 @@ def _worker(source_code: str, global_ctx: dict, result_dict: dict):
         else:
             result_dict["status"] = "failed"
             result_dict["error"] = f"AssertionError: {str(e)}"
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         result_dict["status"] = "failed"
         result_dict["error"] = f"{type(e).__name__}: {str(e)}"
 

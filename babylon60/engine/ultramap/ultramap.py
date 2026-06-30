@@ -97,7 +97,7 @@ class UltramapSubstrate:
                 logger.info(
                     f"EVO-LEDGER Active. Head: {self._evolution_ledger.head_hash[:12]}… Seq: {self._evolution_ledger.sequence}"
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"EVO-LEDGER init failed (non-fatal): {e}")
 
         logger.info(
@@ -321,7 +321,7 @@ class UltramapSubstrate:
                 vector_after=vector_after,
                 source=source,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"EVO-LEDGER write failed (non-fatal): {e}")
 
 

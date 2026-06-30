@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 PSYCH-OMEGA: The Cognitive Integrity Manifold.
@@ -31,8 +32,8 @@ class PsychologicalProfile:
 
     agent_id: str
     state: MentalState = MentalState.STABLE
-    entropy_score: float = 0.0
-    alignment_score: float = 100.0
+    entropy_score: Decimal = 0.0
+    alignment_score: Decimal = 100.0
     trauma_log: list[str] = field(default_factory=list)
 
 

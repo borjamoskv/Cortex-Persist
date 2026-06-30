@@ -306,7 +306,7 @@ class MemoryArchaeologist:
             from babylon60.engine.core.l3_archive import l3_archiver
 
             l3_archiver.archive_facts(cluster_facts)  # type: ignore[arg-type]
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             import logging
 
             logging.getLogger("babylon60.memory.archaeology").warning("L3 Archival failed: %s", e)

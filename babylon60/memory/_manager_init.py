@@ -15,7 +15,7 @@ def init_dynamic_space(l2: Any, manager: Any) -> Any | None:
         return DynamicSemanticSpace(l2, manager=manager)
     except ImportError:
         return None
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Dynamic semantic space unavailable: %s", exc)
         return None
 
@@ -27,7 +27,7 @@ def init_hologram(l2: Any) -> Any | None:
         from babylon60.memory.hologram import HolographicMemory
 
         return HolographicMemory(l2)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Holographic memory unavailable: %s", exc)
         return None
 
@@ -37,7 +37,7 @@ def init_metamemory() -> Any | None:
         from babylon60.memory.metamemory import MetamemoryMonitor
 
         return MetamemoryMonitor()
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Metamemory monitor unavailable: %s", exc)
         return None
 
@@ -51,7 +51,7 @@ def init_resonance_gate(l2: Any, endocrine: Any) -> Any | None:
         from babylon60.extensions.songlines.sensor import TopographicSensor
 
         sensor = TopographicSensor()
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Topographic sensor unavailable for resonance gate: %s", exc)
 
     try:
@@ -62,6 +62,6 @@ def init_resonance_gate(l2: Any, endocrine: Any) -> Any | None:
             songline_sensor=sensor,
             endocrine=endocrine,
         )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Resonance gate unavailable during startup: %s", exc)
         return None

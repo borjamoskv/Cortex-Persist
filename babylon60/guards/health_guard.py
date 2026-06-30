@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 CORTEX - Health Guard (Axiom 14: System Integrity).
@@ -31,7 +32,7 @@ except ImportError:
         def __init__(self, target_grade: str = "DEGRADED") -> None:
             self.target_grade = target_grade
 
-        def evaluate(self, score: float) -> bool:
+        def evaluate(self, score: Decimal) -> bool:
             return True
 
     class HealthSLAViolation(Exception):  # type: ignore[no-redef]

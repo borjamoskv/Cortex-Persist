@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Byzantine Default Auth Layer (Axiom 3).
@@ -40,7 +41,7 @@ class ByzantineAuthLayer:
         return base_cmd in cls.SAFE_COMMANDS and ">" not in command and "|" not in command
 
     @classmethod
-    async def acquire_lock(cls, intent: str, payload: dict, zenith_score: float = 0.0) -> bool:
+    async def acquire_lock(cls, intent: str, payload: dict, zenith_score: Decimal = 0.0) -> bool:
         """
         Acquire cryptographic lock for a destructive action.
         If Zenith score is 1.0 (unanimous Swarm certainty), auto-approve.

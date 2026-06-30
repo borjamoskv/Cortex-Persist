@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Base Filter Interface for IMMUNE-SYSTEM-V1.
@@ -21,7 +22,7 @@ class Verdict(Enum):
 class FilterResult:
     filter_id: str
     verdict: Verdict
-    score: float  # 0-100
+    score: Decimal  # 0-100
     justification: str
     metadata: dict[str, Any] = field(default_factory=dict)
 

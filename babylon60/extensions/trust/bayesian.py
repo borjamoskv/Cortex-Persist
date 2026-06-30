@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Bayesian Trust Updater - Sovereign confidence as a running posterior.
 
@@ -77,8 +78,8 @@ class TrustUpdate:
     signal: str
     old_confidence: str
     new_confidence: str
-    old_consensus_score: float
-    new_consensus_score: float
+    old_consensus_score: Decimal
+    new_consensus_score: Decimal
     alpha: float  # Posterior α
     beta: float  # Posterior β
     posterior_mean: float  # E[p] = α / (α + β)
@@ -139,7 +140,7 @@ class BayesianTrustUpdater:
             raise ValueError(f"Fact {fact_id} not found for tenant '{tenant_id}'")
 
         old_conf: str = row[0] or "C3"
-        old_score: float = float(row[1]) if row[1] is not None else 1.0
+        old_score: Decimal = float(row[1]) if row[1] is not None else 1.0
 
         # Build posterior from prior + signal
         alpha0, beta0 = _PRIORS.get(old_conf, _PRIORS["C3"])

@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # federated_search.py — Hybrid Cross-Tenant Search Layer
 # Operator: borjamoskv | Kernel: MOSKV-1 APEX
@@ -19,7 +20,7 @@ class SearchBackend(Enum):
 class SearchResult:
     tenant_id: str
     doc_id: str
-    score: float
+    score: Decimal
     text_snippet: str
     source_hash: str
 

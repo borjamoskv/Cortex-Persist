@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
@@ -23,8 +24,8 @@ class SearchResult:
     tags: list[str]
     created_at: str
     updated_at: str
-    score: float = 0.0
-    causal_gap_score: float = 0.0
+    score: Decimal = 0.0
+    causal_gap_score: Decimal = 0.0
     source: str | None = None
     meta: dict[str, Any] = field(default_factory=dict)
     tx_id: int | None = None

@@ -333,7 +333,7 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
                     (project, project),
                 )
                 tx_stats = await cursor.fetchone()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug("Failed to query transaction stats: %s", e)
                 tx_stats = (0, "N/A", "N/A")
 
@@ -525,7 +525,7 @@ def _register_linguistic_entropy(mcp: FastMCP, ctx: _MCPContext) -> None:
             try:
                 with open(safe_path, encoding="utf-8") as f:
                     text = f.read()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 ctx.metrics.record_error()
                 return f"❌ Failed to read file: {e}"
             label = f"FILE: {os.path.basename(safe_path)}"

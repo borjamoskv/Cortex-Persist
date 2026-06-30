@@ -39,7 +39,7 @@ class SpoofManager:
                 from babylon60.extensions.immune.error_boundary import ErrorBoundary
 
                 ErrorBoundary("gateway.spoof.load_rules", reraise=False)._persist_sync(e)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
             return {"mappings": {}, "default_intent": "general"}
 

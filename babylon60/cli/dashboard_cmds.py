@@ -80,7 +80,7 @@ async def _collect_recent(engine, limit: int = 8) -> list[dict]:
                 }
                 for r in results
             ]
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         import logging
 
         logging.warning("Suppressed exception: %s", exc)
@@ -367,7 +367,7 @@ def dashboard(db: str, interval: float, once: bool) -> None:
                     data = _run_async(_collect_all(engine))
                     live.update(_build_dashboard(data))
                     threading.Event().wait(interval)  # noqa: TID251 # Synchronous CLI loop
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 import logging
 
                 logging.warning("Suppressed exception: %s", exc)

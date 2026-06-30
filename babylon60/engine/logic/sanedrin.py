@@ -74,7 +74,7 @@ class SanedrinNode:
                 out = json.loads(raw_out)
                 chosen_claim = out.get("claim", id_a)
                 density = float(out.get("proof_density", 0.5))
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"[Sanhedrin] Node {self.node_id} output corruption: {e}")
                 chosen_claim = id_a if hash(id_a) > hash(id_b) else id_b
                 density = 0.5

@@ -92,11 +92,11 @@ Git Diff:
 
                     if isinstance(attacks, list):
                         return attacks
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("[MoskvVidentiaOracle] LLM Call Failed: %s", e)
                 try:
                     logger.error("[MoskvVidentiaOracle] Raw text was: %s", raw_response_text)
-                except Exception as inner_e:
+                except Exception as inner_e:  # noqa: BLE001
                     logger.error("[MoskvVidentiaOracle] Failed to log raw text: %s", inner_e)
                 # Fallback to simulated heuristics
 

@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 LLMSurgeon Topology - Real-time Data Mixture Surgery Engine
@@ -16,7 +17,7 @@ logger = logging.getLogger("babylon60.exergy.surgeon")
 
 @dataclass
 class MixtureAuditResult:
-    entropy_score: float
+    entropy_score: Decimal
     toxic_ratio: float
     surgical_pruning_mask: list[int]
     is_safe: bool

@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Kinetic Notes Extractor - Endogenous Growth Engine
@@ -14,7 +15,7 @@ logger = logging.getLogger("babylon60.extensions.growth.kinetic_extractor")
 @dataclass
 class ExergyNote:
     content: str
-    shannon_entropy_score: float
+    shannon_entropy_score: Decimal
     original_paragraph_ref: str
 
 

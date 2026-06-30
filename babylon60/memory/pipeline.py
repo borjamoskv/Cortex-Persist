@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Neuromorphic Pipeline (Pre-Query & Pre-Store Cognitive Gateway).
@@ -123,7 +124,7 @@ class NeuromorphicPipeline:
         predicted_confidence: float,
         actual_success: bool,
         project_id: str = "default_project",
-        retrieval_score: float = 0.0,
+        retrieval_score: Decimal = 0.0,
     ) -> None:
         self._metamemory.record_outcome(
             RetrievalOutcome(

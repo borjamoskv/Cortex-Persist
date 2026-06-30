@@ -53,7 +53,7 @@ def _load_command_modules() -> tuple[list[str], dict[str, str]]:
         try:
             importlib.import_module(full_name)
             loaded.append(module_name)
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             failed[module_name] = f"{type(err).__name__}: {err}"
             logger.debug("Skipping CLI module %s: %s", full_name, err)
 

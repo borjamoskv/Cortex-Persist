@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
@@ -91,7 +92,7 @@ class SkillManifest:
     amplified_by: list[str] = field(default_factory=list)  # who amplifies it
 
     # ── Fitness (calculated at runtime by NOOSPHERE) ──
-    fitness_score: float = -1.0  # -1 = not calculated yet
+    fitness_score: Decimal = -1.0  # -1 = not calculated yet
     usage_count: int = 0
 
     # ── Raw metadata ──

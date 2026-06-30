@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -12,7 +13,7 @@ class ConflictCandidate:
     project: str
     content: str
     date: str
-    overlap_score: float
+    overlap_score: Decimal
     conflict_type: str
 
     def __str__(self) -> str:

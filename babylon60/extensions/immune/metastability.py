@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Metastability Probing - Axiom Ω₁₃ Immune System Upgrade.
 
@@ -49,7 +50,7 @@ class MetastabilityReport:
 
     subsystem: str
     fragile_stable_state: bool
-    hidden_dependency_score: float
+    hidden_dependency_score: Decimal
     perturbation_needed: bool
     confidence_penalty: float
     reasons: list[str] = field(default_factory=list)

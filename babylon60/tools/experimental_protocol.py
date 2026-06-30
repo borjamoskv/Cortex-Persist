@@ -1,3 +1,4 @@
+from decimal import Decimal
 #!/usr/bin/env python3
 """
 BABYLON-60 / CORTEX: experimental_protocol.py
@@ -32,8 +33,8 @@ class RunStatistics:
 @dataclass
 class DegradationDataPoint:
     stimulus_level: float
-    capacity_score: float
-    policy_score: float
+    capacity_score: Decimal
+    policy_score: Decimal
 
 
 class ExperimentalProfiler:

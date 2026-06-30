@@ -54,7 +54,7 @@ def register_music_tools(mcp: FastMCP):
                 f"State: {result.state.value}\n"
                 f"Stems: {list(result.stems.keys())}"
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to generate track: %s", e)
             return f"Error generating track: {e!s}"
 

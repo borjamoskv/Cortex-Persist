@@ -325,7 +325,7 @@ class CopilotAgent(BaseAgent):
 
         try:
             context = CopilotContextPayload(**payload)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("[%s] Invalid context payload: %s", self.agent_id, exc)
             await self._reply(message, {"error": f"Invalid context: {exc}"})
             return
@@ -344,7 +344,7 @@ class CopilotAgent(BaseAgent):
                 context,
                 model=self.manifest.purpose,  # Use manifest purpose as model hint
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("[%s] Strategy %s failed: %s", self.agent_id, context.trigger, exc)
             proposals = []
 
@@ -390,7 +390,7 @@ class CopilotAgent(BaseAgent):
 
         try:
             verdict = SuggestionVerdict(**payload)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("[%s] Invalid verdict payload: %s", self.agent_id, exc)
             return
 

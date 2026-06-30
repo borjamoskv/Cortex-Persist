@@ -44,7 +44,7 @@ class SecurityAgent(BaseAgent):
     async def tick(self) -> None:
         try:
             alerts = await self._monitor.check_async()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.exception("SecurityAgent monitor.check_async() failed")
             raise RuntimeError(f"SecurityMonitor failure: {exc}") from exc
 

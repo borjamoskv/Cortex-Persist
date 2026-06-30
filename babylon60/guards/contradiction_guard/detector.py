@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -34,7 +35,7 @@ def _score_candidate(
     new_content: str,
     new_project: str,
     decrypt_fn: Callable[[str], str] | None,
-    min_score: float,
+    min_score: Decimal,
     new_embedding: list[float] | None = None,
     existing_embedding: list[float] | None = None,
 ) -> ConflictCandidate | None:
@@ -123,7 +124,7 @@ async def detect_contradictions(
     db_path: str | Path = DEFAULT_DB_PATH,
     decrypt_fn: Callable[[str], str] | None = None,
     max_candidates: int = MAX_CANDIDATES,
-    min_score: float = MIN_OVERLAP_SCORE,
+    min_score: Decimal = MIN_OVERLAP_SCORE,
 ) -> ConflictReport:
     """
     Scan existing decisions for potential contradictions with new_content.

@@ -123,7 +123,7 @@ class CortexPipelineBridge:
             logger.debug("[BRIDGE] VSA engine not available - algebraic context disabled")
         except ImportError:
             logger.debug("[BRIDGE] VSA adapter not available")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("[BRIDGE] VSA init failed: %s", e)
         return None
 
@@ -196,7 +196,7 @@ class FactStoreAdapter:
                 }
                 for r in (results or [])
             ]
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("[FACTS] Search failed: %s", e)
             return []
 
@@ -228,5 +228,5 @@ class LedgerAdapter:
                 f.write(entry + "\n")
 
             logger.debug("[LEDGER] Appended mission %s hash %s", mission_id, result_hash[:16])
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("[LEDGER] Append failed: %s", e)

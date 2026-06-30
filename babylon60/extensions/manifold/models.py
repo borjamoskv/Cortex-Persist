@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
@@ -32,7 +33,7 @@ class ConvergenceMetrics:
     entropy_delta: float = 0.0  # Should be <= 0
     siege_survival_rate: float = 0.0  # Should be >= 0.95
     prediction_accuracy: float = 0.0  # Should be >= 0.70
-    fitness_score: float = 0.0  # Should be >= 0.85
+    fitness_score: Decimal = 0.0  # Should be >= 0.85
     intent_drift: float = 0.0  # Should be <= 0.10
 
     def has_converged(self) -> bool:

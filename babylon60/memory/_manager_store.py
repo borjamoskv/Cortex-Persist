@@ -173,7 +173,7 @@ async def store_fact(
                 _meta["CORTEX-TAINT"] = taint_sig
             else:
                 logger.warning("C5-REAL: Could not retrieve key for %s, SAGA-2 might abort.", actor_id)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("C5-REAL: Failed to inject CORTEX-TAINT at the edge: %s", e)
 
     adjusted_layer = manager._determine_layer(project_id, layer)

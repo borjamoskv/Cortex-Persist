@@ -33,7 +33,7 @@ if _libc:
         _libc.malloc_trim.argtypes = [ctypes.c_size_t]
         _libc.malloc_trim.restype = ctypes.c_int
         HAS_MALLOC_TRIM = True
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         import logging
 
         logging.warning("Suppressed exception: %s", exc)
@@ -57,7 +57,7 @@ if _libc:
         _libc.mallinfo2.argtypes = []
         _libc.mallinfo2.restype = _MallInfo2Struct
         HAS_MALLINFO2 = True
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         import logging
 
         logging.warning("Suppressed exception: %s", exc)

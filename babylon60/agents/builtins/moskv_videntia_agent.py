@@ -48,7 +48,7 @@ class MoskvVidentiaAgent(BaseAgent):
                 await self._fail_task(
                     message, task, "Objective not supported by MoskvVidentiaAgent"
                 )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.exception("MoskvVidentiaAgent failed to process message")
             await self._fail_task(message, task, f"Internal failure: {exc}")
 

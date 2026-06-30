@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Cortex Router v1 - Epistemic Model Arbitrator.
 
@@ -23,7 +24,7 @@ class ExecutionContext:
 
     task_type: str  # e.g., 'mutation', 'validation', 'chaos_injection', 'statistical_inference'
     ast_complexity: int = 0
-    entropy_score: float = 0.0
+    entropy_score: Decimal = 0.0
     kl_instability: float = 0.0
 
 

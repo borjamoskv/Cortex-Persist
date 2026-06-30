@@ -44,7 +44,7 @@ async def resolve_keyed_context(request: ResolveContextRequest):
     try:
         resolved_subgraph = krgs_index.resolve_context(request.required_keys)
         return {"subgraph": resolved_subgraph}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(e))
 

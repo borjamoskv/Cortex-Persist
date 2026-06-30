@@ -64,7 +64,7 @@ def register_kapso_tools(mcp: Any, ctx: Any) -> None:
         except subprocess.CalledProcessError as e:
             logger.error(f"Kapso CLI error: {e.stderr}")
             return {"status": "error", "message": e.stderr}
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Unexpected error executing Kapso: {e}")
             return {"status": "error", "message": str(e)}
 
@@ -97,7 +97,7 @@ def register_kapso_tools(mcp: Any, ctx: Any) -> None:
         except subprocess.CalledProcessError as e:
             logger.error(f"Kapso CLI list error: {e.stderr}")
             return {"status": "error", "message": e.stderr}
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return {"status": "error", "message": str(e)}
 
     logger.debug("Registered kapso MCP tools")

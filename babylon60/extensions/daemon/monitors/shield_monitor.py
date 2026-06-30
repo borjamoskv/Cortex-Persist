@@ -132,7 +132,7 @@ class DailyShieldMonitor:
             return report.to_dict()
         except ImportError:
             logger.warning("ThreatFeedEngine not available")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Threat feed update failed: %s", e)
         return None
 
@@ -146,7 +146,7 @@ class DailyShieldMonitor:
             return report.to_dict()
         except ImportError:
             logger.warning("IntegrityAuditor not available")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Integrity audit failed: %s", e)
         return None
 
@@ -176,7 +176,7 @@ class DailyShieldMonitor:
                 capture_output=True,
                 timeout=5,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
 

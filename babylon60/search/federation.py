@@ -120,7 +120,7 @@ def detach_federated_dbs(
             continue
         try:
             conn.execute(f"DETACH DATABASE {alias}")
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
 
@@ -135,7 +135,7 @@ async def detach_federated_dbs_async(
             continue
         try:
             await conn.execute(f"DETACH DATABASE {alias}")
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
 

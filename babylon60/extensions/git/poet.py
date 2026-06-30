@@ -147,7 +147,7 @@ class CommitPoet:
             logger.warning(
                 "LLM generated invalid format: '%s', falling back to heuristics.", response
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Failed to generate commit via LLM (%s), falling back to heuristics.", e)
 
         # Fallback to local heuristic composition
@@ -258,7 +258,7 @@ class CommitPoet:
             if comment.startswith('"""') and comment.endswith('"""'):
                 return comment
             return f'"""{comment}"""'
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Failed to narrate via LLM (%s), falling back to heuristics.", e)
 
         return self.narrate(code, context)

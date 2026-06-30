@@ -159,7 +159,7 @@ class CopilotServer:
         try:
             async for raw_message in websocket:
                 await self._handle_message(session, raw_message)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Client %s error: %s", session.session_id, exc)
         finally:
             del self._sessions[session.session_id]
@@ -286,7 +286,7 @@ class CopilotServer:
         try:
             await session.websocket.send(json.dumps(data))
             session.messages_sent += 1
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Send to %s failed: %s", session.session_id, exc)
 
 

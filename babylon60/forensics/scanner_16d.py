@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # scanner_16d.py — Extended Dimensional Scanner (Dims 14-16)
 # Operator: borjamoskv | Kernel: MOSKV-1 APEX
@@ -14,7 +15,7 @@ class DimensionScore:
     """Puntuación de una dimensión individual."""
     dimension: int
     name: str
-    score: float           # 0.0 (catastrófico) - 1.0 (perfecto)
+    score: Decimal           # 0.0 (catastrófico) - 1.0 (perfecto)
     metrics: dict[str, float] = field(default_factory=dict)
     findings: list[str] = field(default_factory=list)
 

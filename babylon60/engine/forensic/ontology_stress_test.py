@@ -26,7 +26,7 @@ def parse_markdown_table(filepath):
                     entity = dict(zip(headers, cells, strict=False))
                     if entity.get("ID"):
                         entities.append(entity)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"[ERROR] Failed to parse {filepath}: {e}")
     return entities
 

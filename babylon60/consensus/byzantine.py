@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
@@ -59,7 +60,7 @@ class ResponseTrust:
     """Trust assessment for a single model response."""
 
     response: ModelResponse
-    trust_score: float  # 0.0-1.0 (agreement with consensus)
+    trust_score: Decimal  # 0.0-1.0 (agreement with consensus)
     reputation: float  # Historical win rate of this model
     vote_multiplier: float  # Based on domain relevance
     is_trusted: bool  # Passed Byzantine threshold

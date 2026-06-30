@@ -221,7 +221,7 @@ class LLMCompletionStrategy(SuggestionStrategy):
                     self._response_to_proposal(fallback_response, context_hash, window)
                 )
 
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.error("LLM call failed: %s, using fallback", exc)
                 fallback_response = await self._fallback.complete(
                     prompt, max_tokens=self._max_completion_tokens

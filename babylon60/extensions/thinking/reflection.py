@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Reflection Engine.
@@ -70,7 +71,7 @@ class InjectedLearning:
     project: str
     content: str
     fact_type: str
-    score: float
+    score: Decimal
     created_at: str
 
 

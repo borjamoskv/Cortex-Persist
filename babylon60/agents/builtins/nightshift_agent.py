@@ -47,7 +47,7 @@ class NightshiftAgent(BaseAgent):
         logger.info("NightshiftAgent - starting consolidation cycle")
         try:
             report: dict[str, Any] = await self._daemon.run_cycle()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.exception("NightshiftAgent - run_cycle() failed")
             raise RuntimeError(f"NightShiftCrystalDaemon failure: {exc}") from exc
 

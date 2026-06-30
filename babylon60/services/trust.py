@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """TrustService - Sovereign Audit, Compliance & Cryptographic Integrity (Ω₃).
 
@@ -32,7 +33,7 @@ class TrustSnapshot:
     total_facts: int
     signed_facts_ratio: float
     chain_integrity: bool
-    eu_ai_act_score: float
+    eu_ai_act_score: Decimal
     violations: tuple[str, ...]
 
     @property
@@ -412,7 +413,7 @@ class TrustService:
 class TrustProfile:
     """Agent trust profile representing an expected score derived from Beta(a, b)."""
 
-    score: float
+    score: Decimal
     a: float
     b: float
 

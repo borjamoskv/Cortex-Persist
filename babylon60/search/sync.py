@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Synchronous Search Engine.
@@ -41,7 +42,7 @@ class SyncSearchResult:
     content: str
     project: str
     fact_type: str
-    score: float = 0.0
+    score: Decimal = 0.0
     source: str | None = None
     confidence: str = "stated"
     tags: list[str] = field(default_factory=list)
@@ -109,7 +110,7 @@ def semantic_search_sync(
 
                 enc = get_default_encrypter()
                 content = enc.decrypt_str(content) or content
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
 
         results.append(
@@ -214,7 +215,7 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
 
             enc = get_default_encrypter()
             content = enc.decrypt_str(content) or content
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
     return SyncSearchResult(

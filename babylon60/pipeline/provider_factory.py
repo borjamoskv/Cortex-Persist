@@ -105,7 +105,7 @@ def _try_build_provider(name: str) -> Any | None:
 
         return LLMProvider(provider=name)
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.debug("[FACTORY] Provider '%s' unavailable: %s", name, e)
         return None
 
@@ -155,6 +155,6 @@ def _build_router(providers: list[Any]) -> Any | None:
         )
         return router
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.warning("[FACTORY] Router construction failed: %s", e)
         return None

@@ -68,7 +68,7 @@ class PulseRegistry:
                     with self._lock:
                         for signal in signals:
                             self._process_signal(signal)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("[PULSE] Pulse scan failed: %s", e)
             await asyncio.sleep(interval)
 

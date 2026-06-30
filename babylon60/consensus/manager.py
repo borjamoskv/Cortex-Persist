@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
@@ -164,7 +165,7 @@ class ConsensusManager:
 
         return score
 
-    async def _update_fact_score(self, fact_id: int, score: float, conn) -> None:
+    async def _update_fact_score(self, fact_id: int, score: Decimal, conn) -> None:
         from babylon60.engine.core.mutation_engine import MUTATION_ENGINE
 
         if score >= 1.5:

@@ -220,7 +220,7 @@ class Z3Guard:
                         compiler = Z3ASTCompiler(self.variables)
                         z3_expr = compiler.compile_expr(node)
                         self.add_constraint(g, z3_expr)
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         # Fallback robusto ante fallos de compilación AST
                         print(f"Error compilando guard {g}: {e}")
 

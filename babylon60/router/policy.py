@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Cortex Router v2 - Differentiable Policy Network.
 
@@ -25,7 +26,7 @@ class SignalVector:
 
     ast_complexity: float
     kl_instability: float
-    entropy_score: float
+    entropy_score: Decimal
     cyclomatic_depth: float
     event_rate: float
 

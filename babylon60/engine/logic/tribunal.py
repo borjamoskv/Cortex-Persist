@@ -19,7 +19,7 @@ class TribunalEngine:
     def __init__(self) -> None:
         try:
             self.atms = AtmsAdapter()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.atms = None
             logger.warning(
                 f"[Tribunal] Running without Rust ATMS backend ({e}). Orphaning will be emulated."

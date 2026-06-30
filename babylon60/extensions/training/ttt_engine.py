@@ -80,7 +80,7 @@ class TTTEngine:
                         "🗑️ Discarding low-quality trajectory: %s (Reward: %.2f)", sid, reward
                     )
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Failed to process trajectory %s: %s", sid, e)
 
         if not golden_trajectories:
@@ -128,7 +128,7 @@ class TTTEngine:
             try:
                 with open(train_path, encoding="utf-8") as f:
                     existing_lines = [line.strip() for line in f if line.strip()]
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Failed to read existing train.jsonl: %s", e)
 
         # Write combined dataset
@@ -141,7 +141,7 @@ class TTTEngine:
                 for entry in mapped_entries:
                     f.write(json.dumps(entry) + "\n")
             logger.info("Injected %d golden trajectories into train.jsonl", len(mapped_entries))
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to write to train.jsonl: %s", e)
 
         # Ensure valid.jsonl and test.jsonl exist with at least 1 entry to satisfy MLX-LM
@@ -157,7 +157,7 @@ class TTTEngine:
                             # Strict fallback dummy matching format
                             dummy = {"messages": [{"role": "system", "content": "stub"}, {"role": "user", "content": "ping"}, {"role": "assistant", "content": "pong"}]}
                             f.write(json.dumps(dummy) + "\n")
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error("Failed to write split file %s: %s", path, e)
 
         # Maintain a log of the nocturnal trajectories
@@ -167,7 +167,7 @@ class TTTEngine:
             with open(log_file, "w", encoding="utf-8") as f:
                 for entry in mapped_entries:
                     f.write(json.dumps(entry) + "\n")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to save golden log: %s", e)
 
         return train_path
@@ -234,6 +234,6 @@ class TTTEngine:
         except subprocess.TimeoutExpired:
             logger.warning("MLX LoRA timed out.")
             return {"status": "timeout"}
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Exception during MLX execution: %s", e)
             return {"status": "error", "error": str(e)}

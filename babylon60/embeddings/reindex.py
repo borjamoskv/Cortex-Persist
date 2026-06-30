@@ -41,7 +41,7 @@ class ReindexPipeline:
                     end = sql.find("]", start)
                     return int(sql[start:end])
                 return None
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Could not determine current db dimension: %s", e)
                 return None
 
@@ -137,7 +137,7 @@ class ReindexPipeline:
                     ),
                 )
                 await conn.commit()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to emit ledger event for re-indexing: %s", e)
 
         return {"total_facts": total, "success": success, "failed": failed, "dimension": target_dim}

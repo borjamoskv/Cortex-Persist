@@ -343,7 +343,7 @@ class LLMProvider(BaseProvider):
                     usage = data["usage"]
                     prompt.prompt_tokens = usage.get("prompt_tokens")
                     prompt.completion_tokens = usage.get("completion_tokens")
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning("Failed to extract usage metrics from response: %s", e)
             return sanitize_response(data["choices"][0]["message"]["content"])
         finally:
@@ -449,7 +449,7 @@ class LLMProvider(BaseProvider):
                         if (reg := json.load(f)).get("status") == "verified":
                             if adapter_path := reg.get("adapter_path"):
                                 return adapter_path
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     logger.warning("Suppressed exception: %s", exc)
         if self._intent_model_map:
             resolved = self._intent_model_map.get(intent, self._model)

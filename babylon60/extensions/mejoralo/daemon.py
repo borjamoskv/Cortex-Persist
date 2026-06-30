@@ -79,7 +79,7 @@ class MejoraloDaemon:
             self._loop_task.cancel()
             try:
                 await self._loop_task
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
             # expected - task was cancelled by us
             self._loop_task = None

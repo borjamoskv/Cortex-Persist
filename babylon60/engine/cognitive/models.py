@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 import json
 from dataclasses import dataclass, field
@@ -26,13 +27,13 @@ class Fact:
     confidence: str = "C3"
     quadrant: str = "ACTIVE"
     storage_tier: str = "HOT"
-    exergy_score: float = 1.0
+    exergy_score: Decimal = 1.0
     category: str = "general"
     parent_id: int | str | None = None
     parent_decision_id: int | str | None = None
     relation_type: str | None = None
-    yield_score: float = 1.0
-    consensus_score: float = 1.0
+    yield_score: Decimal = 1.0
+    consensus_score: Decimal = 1.0
     tx_id: int | None = None
     semantic_status: str | None = None
     semantic_error: str | None = None

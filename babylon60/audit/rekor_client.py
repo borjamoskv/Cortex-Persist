@@ -73,7 +73,7 @@ class RekorClient:
                 )
                 return None
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"[Rekor] Exception during log_entry: {e}")
             return None
 
@@ -90,6 +90,6 @@ class RekorClient:
                     f"[Rekor] Failed to fetch entry {rekor_uuid}. Status: {response.status_code}"
                 )
                 return None
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"[Rekor] Exception fetching entry: {e}")
             return None

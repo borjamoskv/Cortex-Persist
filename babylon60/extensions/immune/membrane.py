@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Cortex Immune Membrane - The Sovereign Arbiter.
@@ -26,7 +27,7 @@ class TriageReport:
     """Consolidated result from the immune membrane triage."""
 
     verdict: Verdict
-    triage_score: float
+    triage_score: Decimal
     filter_results: list[FilterResult]
     blast_radius: float
     immunity_certificate: bool
@@ -107,7 +108,7 @@ class ImmuneMembrane:
                 meta=meta,
             )
             logger.info("TriageReport autonomously persisted to Ledger.")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to autonomously persist TriageReport: %s", e)
 
     def _triage(self, results: list[FilterResult]) -> TriageReport:

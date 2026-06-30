@@ -56,7 +56,7 @@ class LandauerDaemonAgent(BaseAgent):
             except asyncio.CancelledError:
                 logger.info(f"[{self.manifest.agent_id}] Landauer Daemon stopped.")
                 break
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"[{self.manifest.agent_id}] Landauer Daemon error: {e}")
                 # Prevent silent thread death # noqa: BLE001
 

@@ -55,7 +55,7 @@ class ImmuneDaemon:
         while self._running:
             try:
                 self._execute_shadow_mutation()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"[Φ4] Fallo interno en fagocitosis: {e}")
 
             # Descanso termodinámico para no colapsar la RAM (Bucle asintótico)
@@ -73,7 +73,7 @@ class ImmuneDaemon:
                 with open(ontology_path, encoding="utf-8") as f:
                     ontology = json.load(f)
                     m5_vectors = ontology.get("M5_VECTORS", [])
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"[Φ4] No se pudo cargar ontología: {e}")
 
         adversarial_vector = "Generic Malicious Injection"
@@ -88,7 +88,7 @@ class ImmuneDaemon:
             try:
                 with open(guard_path, encoding="utf-8") as f:
                     source_guard = f.read()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"[Φ4] Error leyendo {guard_path}: {e}")
                 return
         else:

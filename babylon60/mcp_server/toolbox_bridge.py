@@ -155,7 +155,7 @@ class ToolboxBridge:
         if self._client:
             try:
                 await self._client.close()
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
         self._client = None
         self._tools = []

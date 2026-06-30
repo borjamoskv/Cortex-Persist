@@ -156,7 +156,7 @@ class SchemaTrait:
         except (RuntimeError, ValueError, OSError):
             try:
                 conn.close()
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
             raise
 
@@ -167,7 +167,7 @@ class SchemaTrait:
 
                 self._hybrid = L2HybridSearch(self)  # pyright: ignore[reportArgumentType]
                 self._hybrid.ensure_fts_table()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("L2HybridSearch init failed (FTS5 unavailable): %s", e)
                 self._hybrid = None
 
@@ -185,7 +185,7 @@ class SchemaTrait:
                 from babylon60.memory.pii_sanitizer import get_pii_sanitizer
 
                 self._sanitizer = get_pii_sanitizer()
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
         return self._sanitizer
 

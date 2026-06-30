@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """memory_retrieval - L2 Episodic Retrieval with Reciprocal Rank Fusion.
 
@@ -39,7 +40,7 @@ def _dict_from_fact(f: Any) -> dict[str, Any]:
     }
 
 
-def fact_to_dict(fact: CortexFactModel, rrf_score: float | None = None) -> dict[str, Any]:
+def fact_to_dict(fact: CortexFactModel, rrf_score: Decimal | None = None) -> dict[str, Any]:
     """Convert a fact model to a context-ready dict."""
     return {
         "id": fact.id,

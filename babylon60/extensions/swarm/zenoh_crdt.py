@@ -47,7 +47,7 @@ class ZenohCRDTBridge:
                 f"{self.workspace_prefix}/**", self._zenoh_callback
             )
             logger.info("[ZenohBridge] Connected to strictly native Rust Zenoh fabric.")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.critical(f"[ZenohBridge] Native Zenoh connection failed: {e}. Cannot fall back.")
             raise RuntimeError(f"[C5-REAL] Zenoh Fabric initialization failed: {e}")
 

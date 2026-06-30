@@ -556,7 +556,7 @@ class DreamEngine:
                             name, reason=f"dream: {insight.description[:60]}", factor=1 + delta
                         )
                     applied = True
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     logger.warning("Suppressed exception: %s", exc)
         return applied
 

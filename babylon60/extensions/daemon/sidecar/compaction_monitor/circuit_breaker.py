@@ -67,7 +67,7 @@ class CircuitBreaker:
 
         try:
             result = await func(*args, **kwargs)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             await self._record_failure(exc)
             raise
         else:
@@ -126,7 +126,7 @@ async def call_external_compact(
             if engine is not None:
                 # compact() is sync - run in thread to avoid blocking event loop
                 return await asyncio.to_thread(compact, engine, project)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logging.warning("Suppressed exception: %s", exc)
 
         # Fallback: direct SQLite WAL checkpoint

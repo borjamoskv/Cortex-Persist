@@ -144,7 +144,7 @@ class EnterpriseAuditLedger:
                     await self._conn.execute(
                         "ALTER TABLE security_audit_log ADD COLUMN external_anchor TEXT"
                     )
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     if "duplicate column name" not in str(e).lower():
                         raise e
 
@@ -217,7 +217,7 @@ class EnterpriseAuditLedger:
                         "corrupted_audit_id": "GENESIS",
                         "reason": "ledger_public_key_mismatch",
                     }
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Failed to verify pinned ledger public key: %s", e)
                 return {
                     "status": "tampered",
@@ -366,7 +366,7 @@ class EnterpriseAuditLedger:
                                         }
                             finally:
                                 await rekor_client.close()
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         logger.error("Failed to verify external Rekor anchor: %s", e)
 
             expected_prev_hash = entry_hash
@@ -498,9 +498,9 @@ class EnterpriseAuditLedger:
                                             )
                                             if not in_tx_before:
                                                 await self._conn.commit()
-                                except Exception as e:
+                                except Exception as e:  # noqa: BLE001
                                     logger.error("[AuditLedger] External anchoring failed: %s", e)
-        except Exception as general_err:
+        except Exception as general_err:  # noqa: BLE001
             logger.error(
                 "[AuditLedger] Unexpected exception in anchor worker loop: %s", general_err
             )

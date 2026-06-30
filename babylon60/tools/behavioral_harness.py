@@ -1,3 +1,4 @@
+from decimal import Decimal
 import statistics
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -38,7 +39,7 @@ class ComparisonReport:
     dtw_normalized: float
     dimension_deltas: dict[str, float]
     dominant_differences: list[str]
-    similarity_score: float
+    similarity_score: Decimal
 
 
 @dataclass

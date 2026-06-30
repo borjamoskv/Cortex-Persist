@@ -70,7 +70,7 @@ def run_demo():
         print(f" -> New State Hash: {new_hash}")
         print(f" -> Ledger Integrity Valid: {ledger.verify_chain()}")
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"System Error: {e}")
 
 

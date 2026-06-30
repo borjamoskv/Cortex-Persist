@@ -225,7 +225,7 @@ class FactManager:
                 commit,
                 tx_id,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             import logging
 
             log = logging.getLogger(__name__)

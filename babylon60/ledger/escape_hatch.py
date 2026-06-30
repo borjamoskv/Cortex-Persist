@@ -53,7 +53,7 @@ def record_liveness_sync(db_path: str | Path) -> None:
             logger.info("Liveness recorded (sync): %s", now_str)
         finally:
             conn.close()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.warning("Failed to record sync liveness at %s: %s", db_path, e)
 
 

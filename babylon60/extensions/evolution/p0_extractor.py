@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
@@ -75,7 +76,7 @@ class P0Report:
 
     target_file: str
     findings: list[P0Finding] = field(default_factory=list)
-    entropy_score: float = 0.0
+    entropy_score: Decimal = 0.0
     complexity_hotspots: list[str] = field(default_factory=list)
     model_used: str = "unknown"
     status: str = "pending"
@@ -179,7 +180,7 @@ class P0VulnerabilityExtractor:
                 report.high_count,
                 target_file,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("P0 extraction failed for %s: %s", target_file, e)
             report.status = f"failed: {e}"
 
@@ -382,7 +383,7 @@ class P0VulnerabilityExtractor:
                                 function_name=obj.get("function_name", ""),
                             )
                         )
-                    except Exception as exc:
+                    except Exception as exc:  # noqa: BLE001
                         logger.warning("Suppressed exception: %s", exc)
                     start = -1
 

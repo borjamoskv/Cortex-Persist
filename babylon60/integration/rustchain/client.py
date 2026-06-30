@@ -50,7 +50,7 @@ class RustChainClient:
             client = await self.get_client()
             res = await client.get(f"/wallet/balance?address={address}")
             return res.json()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             raise ConnectionError(f"RustChain node connection failed: {e}")
 
     async def stake_rtc(
@@ -95,5 +95,5 @@ class RustChainClient:
             )
             res.raise_for_status()
             return res.json()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             raise ConnectionError(f"RustChain staking failed: {e}")

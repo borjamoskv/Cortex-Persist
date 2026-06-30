@@ -297,7 +297,7 @@ class ImportResolutionLedger:
                         }
 
                     expected_prev_hash = entry_hash
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             return {"status": "failed", "reason": f"exception_during_verification: {e}"}
 
         return {"status": "verified", "total_lines": line_num}

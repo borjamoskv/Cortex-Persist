@@ -74,7 +74,7 @@ def seal_decision(fact_type: str, client_id_kwarg: str = "client_id"):
                 sovereign_run(_persist_fact())
                 logger.info(f"[CORTEX] Sealed decision {fact_type} for client {client_id}")
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 # Zero Friction: Do not crash the user's workflow if audit fails
                 logger.error(f"[CORTEX] Failed to seal decision: {e}")
 

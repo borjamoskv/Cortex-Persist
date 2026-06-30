@@ -30,15 +30,12 @@ const IMMUTABLE_HEADERS = {
   "Referrer-Policy": "no-referrer"
 };
 
-// Cristalización del estado de respuesta para clonación O(1) en caliente
-const STATIC_RESPONSE = new Response(COMPILED_PAYLOAD, { headers: IMMUTABLE_HEADERS });
-
 export default {
   // [C5-REAL] 'async' purgado. Erradicación de Promesas fantasma en el Event Loop
   fetch(request) {
     const method = request.method;
     if (method === "GET") {
-      return STATIC_RESPONSE.clone();
+      return new Response(COMPILED_PAYLOAD, { headers: IMMUTABLE_HEADERS });
     }
     if (method === "OPTIONS") {
       return new Response(null, { headers: IMMUTABLE_HEADERS });

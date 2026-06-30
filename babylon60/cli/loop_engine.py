@@ -82,7 +82,7 @@ class PersistSupervisor:
         while not self._stop.wait(timeout=self._interval):
             try:
                 self._flush(source="supervisor")
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("PersistSupervisor: flush error (non-fatal): %s", exc)
 
 
@@ -181,7 +181,7 @@ class ExecutionLoop:
                 parts.append(f"Quality: {payload['score_130_100']}/100")
             parts.append(f"Status: {payload.get('status', 'unknown')}")
             return " │ ".join(parts)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("KETER execution failed, storing as knowledge: %s", exc)
             return f"Task registered: {task}"
 

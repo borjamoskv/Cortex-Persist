@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Analyzer Mixin for Forgetting Oracle.
 
@@ -241,7 +242,7 @@ class AnalyzerMixin:
         self,
         was_regrettable: bool,
         causal_weight: float,
-        frequency_score: float,
+        frequency_score: Decimal,
     ) -> float:
         """Composite score: 0.0 (correct eviction) → 1.0 (costly mistake)."""
         if not was_regrettable:

@@ -329,7 +329,7 @@ class AutonomousAgent(BaseAgent):
                 step.mark_failed(f"Permission denied: {exc}")
                 logger.error("[%s] Step %s PERMISSION DENIED: %s", self.agent_id, step.step_id, exc)
 
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 error_msg = f"{type(exc).__name__}: {exc}"
                 step.mark_failed(error_msg)
                 logger.warning(

@@ -271,7 +271,7 @@ class TopologyIndex:
                         )
                     )
                     age_seconds = max(1.0, now - dt.timestamp())
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     import logging
 
                     logging.getLogger(__name__).warning(

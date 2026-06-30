@@ -303,7 +303,7 @@ def siege(db: str) -> None:
             key = os.environ.get("MOSKV_VAULT_KEY", os.environ.get("CORTEX_VAULT_KEY"))
             if key:
                 engine.vault = Vault(key.encode("utf-8"))  # pyright: ignore[reportAttributeAccessIssue]
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             import logging
 
             logging.warning("Suppressed exception: %s", exc)

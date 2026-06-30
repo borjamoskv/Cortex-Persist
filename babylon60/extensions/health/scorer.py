@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Weighted 0-100 health scoring engine.
 
@@ -92,7 +93,7 @@ class HealthScorer:
         )
 
     @staticmethod
-    def classify(score: float) -> Grade:
+    def classify(score: Decimal) -> Grade:
         """Map a 0-100 score to a sealed Grade."""
         return Grade.from_score(score)
 

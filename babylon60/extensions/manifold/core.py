@@ -227,5 +227,5 @@ class TesseractManifold:
                 capture_output=True,
                 timeout=5,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)

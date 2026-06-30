@@ -78,7 +78,7 @@ class HandoffAgent(BaseAgent):
                 {"path": str(path), "saved": True},
                 kind=MessageKind.HANDOFF_ACCEPTED,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.exception("HandoffAgent - save_handoff failed")
             await self._reply(
                 message,

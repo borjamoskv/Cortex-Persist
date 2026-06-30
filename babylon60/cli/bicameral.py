@@ -57,7 +57,7 @@ class BicameralConsole:
         try:
             with open(relay_path, "a") as f:
                 f.write(json.dumps(event) + "\n")
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             import logging
 
             logging.warning("Suppressed exception: %s", exc)

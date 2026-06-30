@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Anomaly Detector.
@@ -55,7 +56,7 @@ class AnomalyReport:
     anomaly_type: str = ""  # "rate_limit", "entropy", "behavioral", "bulk_mutation"
     severity: str = "low"  # "critical", "high", "medium", "low"
     description: str = ""
-    z_score: float = 0.0
+    z_score: Decimal = 0.0
     details: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

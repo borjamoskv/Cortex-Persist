@@ -50,6 +50,6 @@ class AtmsAdapter:
                     "ATMS Rust core lacks 'get_descendants'. Emulating."
                 )
                 return {str(root_id)}
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logging.getLogger(__name__).error(f"[ATMS] Failed to get descendants: {e}")
             return {str(root_id)}

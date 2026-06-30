@@ -51,10 +51,10 @@ class ASTOracleMonitor(IntervalProjectMonitor[ASTAlert]):
                         entropy_score=total_entropy,
                         message=f"AST Drift Detected: {error_count} errors, {warning_count} warnings.",
                     )
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("ASTOracle failed to scan %s: %s", project, e)
 
         return None

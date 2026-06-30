@@ -179,7 +179,7 @@ def register_singularity_tools(mcp) -> None:
             )
             conn.close()
             logging.info("⚡ [PULSE] Ledger chunk emitted to Aether Matrix.")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logging.error("Failed to emit V4 pulse: %s", e)
 
         return f"✅ Ledger entry created: {block_hash[:16]}... | Yield: {yield_amount}"

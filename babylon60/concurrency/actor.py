@@ -51,7 +51,7 @@ class BatchCommitActor:
                 try:
                     logger.debug("Flushing batch commit of size=%d", len(batch))
                     self.commit_callback(batch)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error("Failed to commit batch to SQLite database: %s", e)
 
     async def stop(self) -> None:

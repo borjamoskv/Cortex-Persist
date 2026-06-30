@@ -29,7 +29,7 @@ def parse_markdown_table(filepath):
                     entity = dict(zip(headers, cells, strict=False))
                     if entity.get("ID"):
                         entities.append(entity)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"Error parsing {filepath}: {e}")
     return entities
 
@@ -51,7 +51,7 @@ async def _log_compilation_to_ledger(yaml_path: str, sha256_hash: str) -> None:
                 status="SUCCESS",
             )
             logger.info(f"[C5-REAL] Ledger event committed: {audit_id}")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"[C5-REAL] Failed to log compilation to ledger: {e}")
 
 
@@ -103,7 +103,7 @@ def compile_ontology(primitives_dir, output_json, output_yaml):
 
         import asyncio
         asyncio.run(_log_compilation_to_ledger(output_yaml, sha256_hash))
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"[C5-REAL] Error logging to ledger: {e}")
 
 

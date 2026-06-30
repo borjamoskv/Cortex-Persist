@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -52,7 +53,7 @@ def transition_artifact(
 # ---------- 7. Decision policy ----------
 
 
-def classify_risk(score: float) -> RiskLevel:
+def classify_risk(score: Decimal) -> RiskLevel:
     if score >= 0.85:
         return RiskLevel.CRITICAL
     if score >= 0.65:

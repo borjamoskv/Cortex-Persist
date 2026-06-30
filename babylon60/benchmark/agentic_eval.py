@@ -73,7 +73,7 @@ class AsyncAgenticEvaluator:
 
             # Net Improvement = ratio of exergy-positive structural mutations
             return ((total_commits - revert_commits) / total_commits) * 100
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to compute empirical Git exergy: {e}")
             return 0.0
 
@@ -251,7 +251,7 @@ class AsyncAgenticEvaluator:
                 writer.writerow(list(results.keys()))
                 writer.writerow(list(results.values()))
             logger.info(f"[C5-REAL] Structural Matrix exported to {csv_path}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"CSV export failed: {e}")
 
 

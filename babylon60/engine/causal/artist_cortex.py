@@ -80,7 +80,7 @@ class ApoptosisEngine:
             return (
                 "[C5-REAL] Apoptosis executed. Access to references destroyed. Survive the vacuum."
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Apoptosis constraint failure: {e}")
             raise
 

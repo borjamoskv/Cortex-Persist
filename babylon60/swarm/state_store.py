@@ -179,7 +179,7 @@ class CausalStateStore:
                                         0,
                                     ),
                                 )
-                            except Exception as epi_e:
+                            except Exception as epi_e:  # noqa: BLE001
                                 logger.warning(
                                     f"[EpistemicBreaker] Failed to compile RawEvidence from {signal.target}: {epi_e}"
                                 )
@@ -240,7 +240,7 @@ class CausalStateStore:
                     await enforce_taint_check(self._db, taint_token, json.dumps(signal.payload))
                     valid_signals.append((signal, ledger_payload))
 
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.error(f"[SAGA REJECT] Signal validation failed for {signal.target}: {e}")
                     continue
 
@@ -294,7 +294,7 @@ class CausalStateStore:
                                         ),
                                     }
                                 )
-                            except Exception as epi_e:
+                            except Exception as epi_e:  # noqa: BLE001
                                 logger.warning(
                                     f"[EpistemicBreaker] Failed to compile RawEvidence from {s.target}: {epi_e}"
                                 )
@@ -304,7 +304,7 @@ class CausalStateStore:
 
                     AppendOnlyLog.append_batch(mutations)
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"[SAGA ROLLBACK] Batch AOL mutation failed: {e}")
 
     async def recover_in_flight_tasks(self, lease_id: str | None = None) -> int:

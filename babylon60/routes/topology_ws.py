@@ -43,7 +43,7 @@ class TopologyManager:
         for connection in self.active_connections:
             try:
                 await connection.send_text(message)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Failed to send to websocket: %s", e)
 
     async def notify_new_memory(self, node_data: dict, neighbors: list[dict] = None):  # type: ignore[type-error]
@@ -84,7 +84,7 @@ async def websocket_topology_endpoint(websocket: WebSocket):
                         "Manual noise injection command received for %s", command.get("node_id")
                     )
                     # Implementation would trigger a re-consolidation with perturbation
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
     except WebSocketDisconnect:
         topology_manager.disconnect(websocket)

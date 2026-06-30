@@ -87,5 +87,5 @@ class Autopoiesis:
         try:
             script_path.unlink()
             logger.info("Tool recycled: %s", script_path.name)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)

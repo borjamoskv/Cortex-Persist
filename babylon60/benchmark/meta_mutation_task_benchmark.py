@@ -275,7 +275,7 @@ def main() -> None:
                     ]
                 )
         print(f"Results written to {csv_path}")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"CSV export failed: {e}")
 
 

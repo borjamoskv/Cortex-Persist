@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Causal Gap Retrieval - Axiom Ω₁₃ Search Upgrade.
 
@@ -68,11 +69,11 @@ class SearchCandidate:
     """
 
     doc_id: str
-    semantic_score: float
-    evidence_match_score: float
-    confidence_gain_score: float
-    novelty_score: float
-    final_score: float = 0.0
+    semantic_score: Decimal
+    evidence_match_score: Decimal
+    confidence_gain_score: Decimal
+    novelty_score: Decimal
+    final_score: Decimal = 0.0
 
 
 def compute_candidate_score(candidate: SearchCandidate) -> float:
@@ -103,10 +104,10 @@ def retrieve_for_causal_gap(
 
     Each corpus item must have:
         - doc_id: str
-        - semantic_score: float (pre-computed cosine similarity)
-        - evidence_match_score: float (how well it matches missing_evidence)
-        - confidence_gain_score: float (expected confidence gain)
-        - novelty_score: float (information novelty)
+        - semantic_score: Decimal (pre-computed cosine similarity)
+        - evidence_match_score: Decimal (how well it matches missing_evidence)
+        - confidence_gain_score: Decimal (expected confidence gain)
+        - novelty_score: Decimal (information novelty)
 
     Args:
         gap: The causal gap to close.

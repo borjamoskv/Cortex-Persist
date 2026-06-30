@@ -39,7 +39,7 @@ def _count_python_loc(root: Path) -> int:
             continue
         try:
             total += sum(1 for _ in p.open("r", errors="replace"))
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             import logging
 
             logging.warning("Suppressed exception: %s", exc)
@@ -63,7 +63,7 @@ def _count_test_functions(root: Path) -> int:
             count += sum(
                 1 for line in p.open("r", errors="replace") if line.lstrip().startswith("def test_")
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             import logging
 
             logging.warning("Suppressed exception: %s", exc)
@@ -78,7 +78,7 @@ def _count_pattern_occurrences_in_py_files(root: Path, pattern: re.Pattern) -> i
             continue
         try:
             count += sum(1 for line in p.open("r", errors="replace") if pattern.search(line))
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             import logging
 
             logging.warning("Suppressed exception: %s", exc)

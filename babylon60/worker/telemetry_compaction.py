@@ -34,7 +34,7 @@ class TelemetryCompactionWorker:
         while self._running:
             try:
                 await self._process_compaction()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Telemetry compaction failed: %s", e)
             await asyncio.sleep(self.poll_interval)
 

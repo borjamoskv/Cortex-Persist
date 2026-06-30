@@ -101,7 +101,7 @@ class VirgoContextGuard:
                     logger.error(
                         f"Agent key mismatch: key passed {agent_public_key[:16]}... does not match registered key {registered_key[:16]}..."
                     )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug(f"Could not load KeyManager metadata for agent key verification: {e}")
 
         if not is_valid_sig:

@@ -87,7 +87,7 @@ def _apply_base_schema(conn: sqlite3.Connection) -> None:
     for stmt in get_all_schema():
         try:
             conn.executescript(stmt)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             msg = str(e).lower()
             if "vec0" in str(stmt) or "no such module" in msg:
                 logger.debug("Skipping optional sqlite-vec schema statement: %s", e)
@@ -163,7 +163,7 @@ def run_coroutine_sync(coro):
             try:
                 new_loop = asyncio.new_event_loop()
                 result.append(new_loop.run_until_complete(coro))
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 exception.append(e)
 
         t = threading.Thread(target=target)
@@ -251,7 +251,7 @@ async def _apply_base_schema_async(conn: aiosqlite.Connection) -> None:
     for stmt in get_all_schema():
         try:
             await conn.executescript(stmt)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             msg = str(e).lower()
             if "vec0" in str(stmt) or "no such module" in msg:
                 logger.debug("Skipping optional sqlite-vec schema statement: %s", e)

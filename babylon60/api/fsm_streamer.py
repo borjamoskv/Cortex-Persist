@@ -56,7 +56,7 @@ async def ledger_byte_watcher(request: Request, poll_interval: float = 0.5):
                 # Actualizar el offset O(1)
                 last_offset = f.tell()
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             # Fallo termodinámico capturado. Se notifica al Operador.
             yield {"event": "error", "data": json.dumps({"error": str(e), "entropy": "critical"})}
 

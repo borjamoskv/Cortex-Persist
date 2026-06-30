@@ -118,11 +118,11 @@ class CrystallizerDaemon:
 
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"[Crystallizer] AOL Drain failed: {e}")
                 try:
                     await db.rollback()
-                except Exception as roll_err:
+                except Exception as roll_err:  # noqa: BLE001
                     logger.debug(f"Failed to rollback database transaction: {roll_err}")
                 # Rollback file state safely
                 if "processing_file" in locals() and processing_file.exists():

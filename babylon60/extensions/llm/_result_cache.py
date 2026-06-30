@@ -113,7 +113,7 @@ class ResultCache:
                 if row:
                     logger.debug("LLM Cache [HIT] -> %s...", h[:8])
                     return row[0]
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
         return None
 

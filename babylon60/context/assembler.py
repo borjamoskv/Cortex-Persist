@@ -225,7 +225,7 @@ class ContextAssembler:
                                     return 0
                             except OSError:
                                 continue
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("  [FS_SCAN] Scan failed: %s", e)
 
         return budget
@@ -302,7 +302,7 @@ class ContextAssembler:
 
                     if budget <= 0:
                         break
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("  [VSA] Query failed: %s", e)
 
         return max(0, budget)
@@ -336,7 +336,7 @@ class ContextAssembler:
 
                     if budget <= 0:
                         break
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("  [VSA] Async query failed: %s", e)
 
         return max(0, budget)
@@ -390,7 +390,7 @@ class ContextAssembler:
                             "metadata": dict(meta) if meta else {},
                         }
                     )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("  [FACTS] Query failed: %s", e)
 
     async def _query_facts_async(self, intent: str, packet: ContextPacket, tenant_id: str) -> None:
@@ -446,5 +446,5 @@ class ContextAssembler:
                             "metadata": dict(meta) if meta else {},
                         }
                     )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("  [FACTS] Async query failed: %s", e)

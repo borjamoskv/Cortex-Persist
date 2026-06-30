@@ -78,7 +78,7 @@ class EventProjector:
         """
         try:
             await self._signal_endocrine("awareness", 0.1)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
     # ── Private side-effect implementations ───────────────────────
@@ -103,7 +103,7 @@ class EventProjector:
 
             endocrine = DigitalEndocrine()
             endocrine.signal(hormone, intensity=intensity)  # type: ignore[reportAttributeAccessIssue]
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
     # Endocrine not installed - degrade gracefully
@@ -115,7 +115,7 @@ class EventProjector:
 
             ap = Autopoiesis()
             await ap.verify_songlines(project)  # type: ignore[reportAttributeAccessIssue]
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
 

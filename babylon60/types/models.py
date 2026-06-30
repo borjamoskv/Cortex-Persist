@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -176,7 +177,7 @@ class SearchResult(BaseModel):
     project: str
     content: str
     fact_type: str
-    score: float
+    score: Decimal
     tags: list[str]
     created_at: str
     updated_at: str
@@ -202,7 +203,7 @@ class VoteResponse(BaseModel):
     fact_id: str
     agent: str
     vote: int
-    new_consensus_score: float
+    new_consensus_score: Decimal
     confidence: str | float | None = None
     status: str = "recorded"
 
@@ -217,7 +218,7 @@ class AgentResponse(BaseModel):
     agent_id: str
     name: str
     agent_type: str
-    reputation_score: float
+    reputation_score: Decimal
     created_at: str
 
 
@@ -244,7 +245,7 @@ class FactResponse(BaseModel):
     is_tombstoned: bool = False
     hash: str | None = None
     tx_id: str | None = None
-    consensus_score: float | None = None
+    consensus_score: Decimal | None = None
 
 
 class StatusResponse(BaseModel):
@@ -480,7 +481,7 @@ class ContextSignalModel(BaseModel):
 
 class ProjectScoreModel(BaseModel):
     project: str
-    score: float
+    score: Decimal
 
 
 class ContextSnapshotResponse(BaseModel):

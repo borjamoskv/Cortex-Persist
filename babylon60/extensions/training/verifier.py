@@ -112,7 +112,7 @@ class AdapterVerifier:
                             logger.error("❌ Inf values detected in LoRA layer: %s", key)
             except ImportError:
                 logger.warning("safetensors or numpy not installed. Skipping deep numerical scan.")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Failed to open safetensors file: %s", e)
                 return {
                     "success": False,

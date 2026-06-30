@@ -59,6 +59,6 @@ class TSAClient:
                 logger.error(f"[TSA] Failed to retrieve token. Status: {response.status_code}")
                 return None
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"[TSA] Exception during get_timestamp_token: {e}")
             return None

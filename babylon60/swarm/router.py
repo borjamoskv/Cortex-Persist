@@ -1,3 +1,4 @@
+from decimal import Decimal
 from __future__ import annotations
 
 import copy
@@ -144,7 +145,7 @@ def _evaluate_entropy(request: dict) -> float:
     return min(1.0, score)
 
 
-def _dispatch(candidates: list[dict], request: dict, entropy_score: float) -> dict:
+def _dispatch(candidates: list[dict], request: dict, entropy_score: Decimal) -> dict:
     """Pure selection: assigns to Quorum if high entropy, else single agent."""
     if not candidates:
         raise ValueError(f"No candidates for task: {request.get('task', '')}")

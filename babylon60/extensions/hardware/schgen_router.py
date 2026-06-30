@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 SchGen Topology - Semantically Grounded Hardware Generation
@@ -23,7 +24,7 @@ class NetlistNode:
 @dataclass
 class SchematicGraph:
     nodes: dict[str, NetlistNode]
-    density_score: float
+    density_score: Decimal
     is_routable: bool
 
 

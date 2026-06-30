@@ -81,7 +81,7 @@ def execute_sieve_batch(start_n: int, count: int):
             )
 
         conn.commit()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         conn.rollback()
         logger.error(f"Apoptosis de Lote: {e}")
         sys.exit(1)

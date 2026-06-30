@@ -57,6 +57,6 @@ GENERATE SUBSTACK MARKDOWN:
                 f"[C5-REAL] Essay crystallized successfully for {str(payload.get('hash') or '')[:7]}"
             )
             return essay
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Thermodynamic compression error: {e}")
             raise RuntimeError("LLM crystallization failure.") from e

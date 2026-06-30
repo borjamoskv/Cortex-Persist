@@ -53,6 +53,6 @@ def load_nexus_config(config_path: str | Path) -> NexusConfig:
         expanded_workspaces = [os.path.expanduser(w) for w in workspaces]
 
         return NexusConfig(target_workspaces=expanded_workspaces, artifacts=artifacts)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"[Nexus] Failed to parse {config_path}: {e}")
         return NexusConfig()

@@ -58,7 +58,7 @@ class FrontierDaemon:
                 if status == "SUCCESS":
                     msg = f"Auto-refactored {test_file.name} with Ouroboros-Omega."
                     await self._log_evolution("metabolism", msg)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("[FRONTIER] Metabolism cycle failed: %s", e)
 
     async def _run_ingestion(self):
@@ -89,7 +89,7 @@ class FrontierDaemon:
                 actor_id="frontier",
             )
             logger.info("[FRONTIER] Evolution event logged to CORTEX: %s", type)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("[FRONTIER] Failed to log evolution: %s", e)
 
     async def run_loop(self):

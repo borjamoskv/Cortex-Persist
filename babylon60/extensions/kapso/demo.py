@@ -38,7 +38,7 @@ async def main():
     try:
         res = await gateway.send_message(msg)
         print(f"[+] Transmission Successful. Hash/ID: {res}")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"[-] Transmission Failed. Entropic Collapse: {e}")
         sys.exit(1)
 

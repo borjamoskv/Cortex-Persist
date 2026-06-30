@@ -80,7 +80,7 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
     except subprocess.TimeoutExpired:
         logger.error("Axiom 3 Verification Timed out after 5 minutes.")
         return False
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error("Axiom 3 Verification OSAScript failed: %s", e)
         return False
 

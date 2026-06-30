@@ -94,5 +94,5 @@ class VisionEngine:
             if os.path.exists(filepath):
                 os.remove(filepath)
             return data
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             raise RuntimeError(f"Failed to read screenshot file: {e}")

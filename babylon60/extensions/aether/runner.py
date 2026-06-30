@@ -120,7 +120,7 @@ class AetherAgent:
             logger.info("🔍 Critiquing...")
             try:
                 critique = await self._critic.critique(task.description, toolkit)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning("Critic failed (%s) - skipping", e)
                 break
 
@@ -151,7 +151,7 @@ class AetherAgent:
                 None, self._tester.run, toolkit
             )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Tester failed (%s) - ignoring", e)
             test_result = None
 
@@ -269,5 +269,5 @@ class AetherAgent:
                 stderr=asyncio.subprocess.PIPE,
             )
             await asyncio.wait_for(proc.communicate(), timeout=5.0)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)

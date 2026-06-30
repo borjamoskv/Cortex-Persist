@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Shannon Entropy Module - Corpus-Level Information Measurement (Ω₁₃).
 
@@ -127,7 +128,7 @@ class ShannonReport:
     unique_tokens: int
     entropy_bits: float
     max_entropy_bits: float
-    redundancy_score: float
+    redundancy_score: Decimal
     exergy_ratio: float
     top_redundant_tokens: list[tuple[str, int]] = field(default_factory=list)
 
@@ -184,7 +185,7 @@ async def compute_corpus_entropy(
     try:
         async with conn.execute(query, params) as cursor:
             rows = await cursor.fetchall()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.warning("Corpus entropy query failed: %s", e)
         return ShannonReport(
             total_facts=0,

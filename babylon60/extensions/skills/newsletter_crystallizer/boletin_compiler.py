@@ -17,7 +17,7 @@ def get_cortex_commits():
         if not commits:
             return "- [SYSTEM] Sin mutaciones en las últimas 72h."
         return "\n".join([f"- `{c.split(' ', 1)[0]}` {c.split(' ', 1)[1]}" for c in commits.split("\n") if c])
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return f"- [ERROR] Fallo al extraer Sentinel Logs: {e}"
 
 def generate_newsletter():

@@ -173,7 +173,7 @@ class AzkartuRetrainDaemon:
 
                 self.replay.push(state, action, reward, next_state, done)
                 ingested += 1
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 # noqa: BLE001 - Deliberate fault-isolation boundary for background worker loops
                 logger.error(f"Azkartu Ingestion failed on payload: {e}")
 

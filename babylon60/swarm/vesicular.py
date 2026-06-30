@@ -106,7 +106,7 @@ class VesicularRuntime:
                 stderr = (err.decode("utf-8") if err else "") + "\nTimeoutExpired"
                 success = False
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.critical(f"[Vesicular] Membrane rupture during execution: {e}")
             stderr = str(e)
             success = False

@@ -121,7 +121,7 @@ def _check_and_register_nonce_sync(conn, nonce: str) -> bool:
         """)
         try:
             conn._taint_nonces_created = True
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("Failed to flag taint nonce creation: %s", e)
 
     cursor = conn.cursor()
@@ -145,7 +145,7 @@ async def _check_and_register_nonce_async(conn, nonce: str) -> bool:
         """)
         try:
             conn._taint_nonces_created = True
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("Failed to flag taint nonce creation: %s", e)
 
     with causal_write(conn):
@@ -436,7 +436,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
                 decoded_url = urllib.parse.unquote(raw_text)
                 if decoded_url != raw_text:
                     layers.update(_extract_text_layers(decoded_url, depth + 1))
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug("Failed URL layer extraction: %s", e)
 
         # Hex / Binary peel (optimizado longitud minima >= 10)
@@ -448,7 +448,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
                     decoded_hex = bytes.fromhex(hex_str).decode("utf-8", errors="ignore")
                     if decoded_hex and any(c.isalnum() for c in decoded_hex):
                         layers.update(_extract_text_layers(decoded_hex, depth + 1))
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.debug("Failed HEX layer extraction: %s", e)
 
         # Base64 peel
@@ -462,7 +462,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
                 decoded_b64 = base64.b64decode(b64_str).decode("utf-8", errors="ignore")
                 if decoded_b64 and any(c.isalnum() for c in decoded_b64):
                     layers.update(_extract_text_layers(decoded_b64, depth + 1))
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.debug("Failed B64 layer extraction: %s", e)
 
         return layers

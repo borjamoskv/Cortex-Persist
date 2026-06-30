@@ -87,7 +87,7 @@ class BillingIntegrityGateway:
                         "UPDATE ledger_events SET semantic_status = 'applied' WHERE event_id = ?",
                         (event_id,),
                     )
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.exception("Failed to process billing event %s", event_id)
                     await conn.execute(
                         "UPDATE ledger_events SET semantic_status = 'error', semantic_error = ? WHERE event_id = ?",

@@ -110,7 +110,7 @@ def _execute_translation(request: TranslateRequest) -> TranslateResponse:
             data = resp.json()
             content = data["choices"][0]["message"]["content"]
             usage = data.get("usage", {})
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error("Local inference failed: %s", e)
         raise ValueError("Local inference failure") from e
 

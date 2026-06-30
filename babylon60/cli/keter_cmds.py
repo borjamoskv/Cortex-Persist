@@ -103,7 +103,7 @@ def sovereign_ignite_cmd(env: str) -> None:
             if ctx.power.power >= 1300:
                 console.print("[bold green]🏆 SOVEREIGN STATUS VALIDATED[/]")
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         console.print(f"[bold red]Ignition Error:[/] {e}")
         raise click.Abort() from e
 

@@ -69,6 +69,6 @@ class TurbopufferSink:
             await asyncio.to_thread(_do_write)
             logger.info("[TurbopufferSink] Batch flush complete.")
             return True
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"[TurbopufferSink] Failed to flush batch: {e}")
             return False

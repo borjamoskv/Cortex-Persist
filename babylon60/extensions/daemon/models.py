@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
@@ -207,7 +208,7 @@ class SecurityAlert:
 
     ip_address: str
     payload: str
-    similarity_score: float
+    similarity_score: Decimal
     confidence: str
     summary: str
     timestamp: str

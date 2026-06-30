@@ -148,7 +148,7 @@ class SICAAgent(BaseAgent):
                 agent_id=self.agent_id,
                 directory=self._persist_dir,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("[%s] Failed to persist genome: %s", self.agent_id, exc)
 
         logger.info(
@@ -189,7 +189,7 @@ class SICAAgent(BaseAgent):
                     agent_id=self.agent_id,
                     directory=self._persist_dir,
                 )
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.error("[%s] Auto-save failed: %s", self.agent_id, exc)
 
     # ── Core SICA Loop ───────────────────────────────────────────
@@ -373,7 +373,7 @@ class SICAAgent(BaseAgent):
                     tool_used=tool_name,
                     output_summary=f"Tool '{tool_name}' not available",
                 )
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 duration = (time.monotonic() - start) * 1000
                 self._object_level.record_step(
                     action=f"use_tool:{tool_name}",

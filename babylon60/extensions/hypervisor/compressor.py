@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """CORTEX Hypervisor - Complexity Compressor.
 
@@ -88,7 +89,7 @@ class ComplexityCompressor:
 # ── Private helpers ──────────────────────────────────────────────────
 
 
-def _normalize_score(score: float | None) -> float:
+def _normalize_score(score: Decimal | None) -> float:
     """Clamp any internal score into [0.0, 1.0]."""
     if score is None:
         return 0.0

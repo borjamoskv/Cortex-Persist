@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """SICA Constitution - Immutable Epistemic Principles.
 
@@ -70,7 +71,7 @@ class ConstitutionalVerdict:
 
     passed: bool
     violations: list[Violation] = field(default_factory=list)
-    score: float = 1.0  # 1.0 = perfect compliance, 0.0 = full violation
+    score: Decimal = 1.0  # 1.0 = perfect compliance, 0.0 = full violation
     revision_needed: bool = False
     abort_needed: bool = False
 

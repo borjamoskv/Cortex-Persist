@@ -38,7 +38,7 @@ async def play_ping(state):
             stderr=subprocess.PIPE,
         )
         await proc.wait()
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Suppressed exception: %s", exc)
 
 

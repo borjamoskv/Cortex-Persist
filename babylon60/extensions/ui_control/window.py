@@ -63,7 +63,7 @@ class WindowEngine:
             if not output:
                 return []
             return self._parse_window_list(output, app_name)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Failed to list windows for %s: %s", app_name, e)
             return []
 
@@ -132,7 +132,7 @@ class WindowEngine:
                 width=int(size[0].strip()),
                 height=int(size[1].strip()),
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Failed to get frontmost window: %s", e)
             return None
 

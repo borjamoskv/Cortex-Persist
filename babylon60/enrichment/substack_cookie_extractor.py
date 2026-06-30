@@ -25,7 +25,7 @@ def get_chrome_key():
         # Fallback to keyring library
         try:
             return keyring.get_password("Chrome Safe Storage", "Chrome").encode("utf-8")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"Failed to retrieve Chrome key from Keychain: {e}")
             return None
 
@@ -73,7 +73,7 @@ def get_substack_cookies(db_path, key):
             decrypted = decrypt_cookie(enc_val, key)
             if decrypted:
                 cookies[name] = decrypted
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"Error decrypting {name} for {host}: {e}")
 
     conn.close()

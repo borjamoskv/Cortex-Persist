@@ -105,7 +105,7 @@ class TopographicSensor:
             except OSError:
                 import logging  # noqa: F401
 
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
         # 2. Try xattr CLI (Chronos Sniper: added timeout)
@@ -139,7 +139,7 @@ class TopographicSensor:
             except OSError:
                 import logging  # noqa: F401
 
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
         # 2. Try xattr CLI -p (Chronos Sniper: added timeout)
@@ -182,12 +182,12 @@ class TopographicSensor:
                 # type: ignore[reportAttributeAccessIssue]
                 os.removexattr(str(file_path), attr_name)  # type: ignore[reportAttributeAccessIssue]
                 return
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
 
         try:
             subprocess.run(["xattr", "-d", attr_name, str(file_path)], capture_output=True)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
 
     def _scan_single_manifest(self, manifest: Path) -> list[GhostTrace]:
@@ -207,6 +207,6 @@ class TopographicSensor:
                         ghost["strength"] = strength
                         ghost["source_file"] = str(manifest.parent / filename)
                         results.append(ghost)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
         return results

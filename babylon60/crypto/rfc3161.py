@@ -103,7 +103,7 @@ class RFC3161Client:
                     }
         except urllib.error.HTTPError as e:
             logger.error("HTTPError requesting timestamp from %s: %s", self.tsa_url, e.code)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to request timestamp: %s", e)
 
         return None

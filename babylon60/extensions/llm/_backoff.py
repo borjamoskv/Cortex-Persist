@@ -30,7 +30,7 @@ def extract_retry_delay(text: str) -> float | None:
                     return float(delay_str[:-2]) / 1000.0
                 if delay_str.endswith("s"):
                     return float(delay_str[:-1])
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Suppressed exception: %s", exc)
 
     match = re.search(r'"(?:quotaResetDelay|retryDelay)"\s*:\s*"([0-9\.]+)(m?s)"', text)
@@ -38,7 +38,7 @@ def extract_retry_delay(text: str) -> float | None:
         try:
             val = float(match.group(1))
             return val / 1000.0 if match.group(2) == "ms" else val
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Suppressed exception: %s", exc)
     return None
 

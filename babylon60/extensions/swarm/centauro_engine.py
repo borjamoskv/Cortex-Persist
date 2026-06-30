@@ -160,7 +160,7 @@ class VirtualAgent:
                         retry_result = await self._router.execute_resilient(cortex_prompt)
                         if hasattr(retry_result, "ok") and retry_result.ok is not None:
                             return str(retry_result.ok)
-                    except Exception as fallback_exc:
+                    except Exception as fallback_exc:  # noqa: BLE001
                         exc = fallback_exc
 
                 import logging

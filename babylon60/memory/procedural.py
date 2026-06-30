@@ -141,7 +141,7 @@ class ProceduralMemory:
                 except ImportError:
                     import logging
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             import logging
 
             logging.getLogger("babylon60.memory.procedural").error(

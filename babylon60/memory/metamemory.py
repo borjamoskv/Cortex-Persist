@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """CORTEX v7+ - Metamemory: The Agent That Knows What It Knows.
 
@@ -58,8 +59,8 @@ _TOT_FAILURE_THRESHOLD: Final[int] = 2
 class MetaJudgment:
     """Frozen metacognitive assessment of a knowledge state."""
 
-    fok_score: float = 0.0
-    jol_score: float = 0.0
+    fok_score: Decimal = 0.0
+    jol_score: Decimal = 0.0
     confidence: float = 0.0
     accessibility: float = 0.0
     tip_of_tongue: bool = False
@@ -75,7 +76,7 @@ class RetrievalOutcome:
     project_id: str = "default_project"
     predicted_confidence: float = 0.0
     actual_success: bool = False
-    retrieval_score: float = 0.0
+    retrieval_score: Decimal = 0.0
     timestamp: float = field(default_factory=time.time)
 
 
@@ -163,7 +164,7 @@ class MetamemoryMonitor:
             source="fok",
         )
 
-    def fok_recommendation(self, fok_score: float) -> FOKDirective:
+    def fok_recommendation(self, fok_score: Decimal) -> FOKDirective:
         """Route query based on initial FOK assessment without full retrieval."""
         if fok_score >= 0.8:
             return FOKDirective.RETRIEVE_INTERNAL
@@ -266,7 +267,7 @@ class MetamemoryMonitor:
         self,
         query_embedding: list[float],
         candidate_engrams: list[Any],
-        retrieval_score: float = 0.0,
+        retrieval_score: Decimal = 0.0,
     ) -> MetaJudgment:
         """Full metacognitive assessment combining FOK, JOL, and calibration.
 

@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Trend detection - drift detection from health snapshots.
 
@@ -44,7 +45,7 @@ class TrendDetector:
                 deque(self._scores, maxlen=self.window_size),
             )
 
-    def push(self, score: float) -> None:
+    def push(self, score: Decimal) -> None:
         """Record a new health score."""
         self._scores.append(score)
 
@@ -109,7 +110,7 @@ class TrendDetector:
     def persist_to_db(
         self,
         db_path: str,
-        score: float,
+        score: Decimal,
         grade: str = "",
         timestamp: float | None = None,
     ) -> None:

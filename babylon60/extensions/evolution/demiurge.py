@@ -157,7 +157,7 @@ class DemiurgeCompiler:
                     "code": generated_code,
                 }
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.debug("Ghost recorded: %s", intent[:30])
             return {"status": "ERROR", "reason": str(e)}
 

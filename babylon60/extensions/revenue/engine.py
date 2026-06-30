@@ -175,7 +175,7 @@ class RevenueEngine:
                     opportunity.title,
                     result.error,
                 )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             opportunity.status = OpportunityStatus.FAILED
             result = ExecutionResult(
                 opportunity_id=opportunity.id,
@@ -302,7 +302,7 @@ class RevenueEngine:
                 )
         except ImportError:
             logger.debug("CORTEX engine not available, skipping persistence.")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Failed to persist opportunities: %s", e)
 
     async def _persist_result(self, result: ExecutionResult) -> None:
@@ -326,5 +326,5 @@ class RevenueEngine:
             )
         except ImportError:
             logger.debug("CORTEX engine not available, skipping persistence.")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Failed to persist result: %s", e)

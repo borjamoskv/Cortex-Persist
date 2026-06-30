@@ -138,7 +138,7 @@ class RaftNode:
                 task.cancel()
                 try:
                     await task
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     logger.warning("Suppressed exception: %s", exc)
         # Expected - do NOT re-raise during shutdown
         self._election_task = None
@@ -325,7 +325,7 @@ class RaftNode:
                 granted = task.result()
                 if granted:
                     votes_received += 1
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.debug("Vote request failed: %s", exc)
 
         # If term changed while we were voting (split-brain / higher term), abort
@@ -433,7 +433,7 @@ class RaftNode:
                 self._heartbeat_task.cancel()
                 try:
                     await self._heartbeat_task
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     logger.warning("Suppressed exception: %s", exc)
 
             self.role = NodeRole.LEADER

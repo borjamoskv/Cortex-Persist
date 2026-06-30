@@ -52,7 +52,7 @@ async def proxy_inference(req: InferenceRequest):
         sig_bytes = base64.b64decode(req.signature_b64)
         prompt_hash = cortex_hash_raw(req.prompt.encode("utf-8"))
         public_key.verify(sig_bytes, prompt_hash)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.critical(
             f"[InferenceProxy] REJECTED. Invalid cryptographic signature from {req.agent_id}: {e}"
         )
@@ -70,7 +70,7 @@ async def proxy_inference(req: InferenceRequest):
         client = SovereignLLMClient()
         response = client.generate(req.prompt)  # type: ignore[call-arg]
         return {"response": response}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error(f"[InferenceProxy] Upstream LLM failure: {e}")
         raise HTTPException(status_code=502, detail="Upstream Inference Failed")
 

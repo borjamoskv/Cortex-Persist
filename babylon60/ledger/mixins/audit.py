@@ -101,7 +101,7 @@ class LedgerAuditMixin:
 
                 try:
                     detail = json.loads(det) if det else {}
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.debug("Failed to parse transaction detail json for tx %s: %s", tid, e)
                     detail = {}
 

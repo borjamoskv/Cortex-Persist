@@ -59,7 +59,7 @@ class CloudflareEdgeBridge:
         except httpx.HTTPError as e:
             logger.error(f"HTTP error during Edge D1 sync: {e}")
             return False
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Unexpected error during Edge D1 sync: {e}")
             return False
 

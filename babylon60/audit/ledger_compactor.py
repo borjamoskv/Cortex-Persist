@@ -184,7 +184,7 @@ async def compact_ledger(
             if not in_tx_before:
                 await conn.commit()
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             if not in_tx_before:
                 await conn.rollback()
             raise e

@@ -73,7 +73,7 @@ class Judge(ABC):
             return True
         except (ValueError, TypeError, OSError, KeyError):
             return False
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             if "InvalidSignature" in type(e).__name__:
                 return False
             raise

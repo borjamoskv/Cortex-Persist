@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized | borjamoskv
 """
 Linguistic Entropy Detector (Ω₁₇) — PLAYGROUND EDITION
@@ -96,7 +97,7 @@ class LinguisticEntropyReport:
     burstiness: float = 0.0
 
     # Context rot: rolling window entropy delta
-    context_rot_score: float = 0.0       # 0.0 = no rot, 1.0 = maximum decay
+    context_rot_score: Decimal = 0.0       # 0.0 = no rot, 1.0 = maximum decay
 
     # Slop
     slop_weight_total: float = 0.0
@@ -104,7 +105,7 @@ class LinguisticEntropyReport:
     slop_density: float = 0.0            # slop_weight / word_count
 
     # Final composite
-    exergy_score: float = 0.0            # 0.0 = pure anergy, 1.0 = max exergy
+    exergy_score: Decimal = 0.0            # 0.0 = pure anergy, 1.0 = max exergy
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)

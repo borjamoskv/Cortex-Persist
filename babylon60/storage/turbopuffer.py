@@ -113,7 +113,7 @@ class TurbopufferVectorBackend(VectorBackend):
                 "Turbopuffer: Upsert failed for fact_id=%d: %s", fact_id, exc.response.text
             )
             raise RuntimeError(f"Turbopuffer upsert failed: {exc.response.text}") from exc
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("Turbopuffer: Upsert failed for fact_id=%d: %s", fact_id, exc)
             raise
 
@@ -158,7 +158,7 @@ class TurbopufferVectorBackend(VectorBackend):
                 hits.append((hit_id, similarity))
 
             return hits
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("Turbopuffer: Search failed in '%s': %s", ns, exc)
             return []
 
@@ -174,7 +174,7 @@ class TurbopufferVectorBackend(VectorBackend):
             if resp.status_code != 404:
                 resp.raise_for_status()
             logger.debug("Turbopuffer: Deleted fact_id=%d from '%s'", fact_id, ns)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("Turbopuffer: Delete failed for fact_id=%d: %s", fact_id, exc)
             raise
 
@@ -235,7 +235,7 @@ class TurbopufferVectorBackend(VectorBackend):
                     entropy_threshold,
                 )
                 return 0
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("OUROBOROS-∞: Namespace prune failed in '%s': %s", ns, exc)
             return 0
 

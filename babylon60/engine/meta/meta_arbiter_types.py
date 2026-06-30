@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """CORTEX Meta-Arbiter Types.
 
@@ -36,7 +37,7 @@ class LayerSignal:
     """A normalized signal from one cognitive layer."""
 
     layer: LayerID
-    score: float  # Normalized [0.0, 1.0] confidence/relevance
+    score: Decimal  # Normalized [0.0, 1.0] confidence/relevance
     raw_value: Any  # Original value from the layer (for audit)
     metadata: dict[str, Any] = field(default_factory=dict)
     timestamp_ns: int = field(default_factory=lambda: time.time_ns())
@@ -64,7 +65,7 @@ class ArbiterVerdict:
     """The canonical output of the Meta-Arbiter."""
 
     resolution: Resolution
-    fused_score: float  # Final arbitrated confidence [0,1]
+    fused_score: Decimal  # Final arbitrated confidence [0,1]
     winning_layer: LayerID | None  # Which layer dominated (if applicable)
     conflicts: list[ConflictPair]
     layer_signals: dict[str, float]  # Snapshot of all input scores

@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Conflict Resolution Protocol (LEGION-Ω).
 
@@ -57,7 +58,7 @@ class AgentProfile:
     specialty: str = "general"
     success_rate: float = 0.5  # Historical accuracy [0, 1]
     confidence: float = 0.5  # Current self-assessed confidence [0, 1]
-    recency_score: float = 0.0  # How recently active in this domain [0, 1]
+    recency_score: Decimal = 0.0  # How recently active in this domain [0, 1]
 
 
 @dataclass(frozen=True)

@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -61,7 +62,7 @@ def _prepare_decisions(
 def _compare_decisions(
     a: dict[str, Any],
     b: dict[str, Any],
-    min_score: float,
+    min_score: Decimal,
 ) -> tuple[float, ConflictCandidate, ConflictCandidate] | None:
     """Score and classify a potential conflict between two decisions."""
     score = _jaccard(a["tokens"], b["tokens"])
@@ -101,7 +102,7 @@ def _process_token_bucket(
     group: list[dict[str, Any]],
     seen_pairs: set[tuple[int, int]],
     pairs: list[tuple[float, ConflictCandidate, ConflictCandidate]],
-    min_score: float,
+    min_score: Decimal,
 ) -> None:
     """Compare all pairs within a token bucket."""
     if len(indices) < 2 or len(indices) > 50:
@@ -127,7 +128,7 @@ async def scan_all_contradictions(
     *,
     db_path: str | Path = DEFAULT_DB_PATH,
     decrypt_fn: Callable[[str], str] | None = None,
-    min_score: float = 0.45,
+    min_score: Decimal = 0.45,
     limit: int = 50,
 ) -> list[tuple[ConflictCandidate, ConflictCandidate]]:
     """

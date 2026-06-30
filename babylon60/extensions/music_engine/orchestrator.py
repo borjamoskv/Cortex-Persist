@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Sovereign Electronic Music Engine (GRAMMY-Ω).
@@ -57,7 +58,7 @@ class TrackContext(BaseModel):
     bpm: int = Field(default=DEFAULT_BPM)
     key: str = Field(default=DEFAULT_KEY)
     state: TrackState = Field(default=TrackState.CONCEPT)
-    gri_score: float = Field(default=0.0)  # Grammy Readiness Index
+    gri_score: Decimal = Field(default=0.0)  # Grammy Readiness Index
     stems: dict[str, str] = Field(default_factory=dict)  # URL or local path to audio stems
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -260,7 +261,7 @@ class GRAMMYOrchestrator:
         except (json.JSONDecodeError, ValueError, KeyError) as e:
             logger.error("Error en evaluación GRI vía LLM: %s", e)
             return NEUTRAL_GRI_SCORE  # Fallback neutral
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Unexpected error in evaluation GRI: %s", e)
             return NEUTRAL_GRI_SCORE
 
@@ -338,7 +339,7 @@ class GRAMMYOrchestrator:
             lufs = self.dsp_engine.calculate_lufs(lufs_in, sr)
             track.metadata["lufs_integrated"] = lufs
             logger.info("DSP mastering complete. LUFS: %.2f", lufs)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("DSP mastering failed: %s", e)
 
         track.gri_score = 0.45

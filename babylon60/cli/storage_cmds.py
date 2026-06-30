@@ -192,7 +192,7 @@ def _sanitize_dsn(dsn: str) -> str:
             if ":" in pre_at:
                 user_part = pre_at.rsplit(":", 1)[0]
                 return f"{user_part}:***@{post_at}"
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             import logging
 
             logging.warning("Suppressed exception: %s", exc)

@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -25,7 +26,7 @@ class RiskLevel(str, Enum):
 
 @dataclass(frozen=True)
 class PathogenProfile:
-    entropy_score: float
+    entropy_score: Decimal
     contradiction_density: float
     provenance_confidence: float
     mutation_risk: float

@@ -152,7 +152,7 @@ async def audit_target(
                 "depth": req.depth,
             },
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.warning("Failed to persist Oracle audit to ledger: %s", e)
 
     return OracleResponse(

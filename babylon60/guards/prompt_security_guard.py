@@ -57,7 +57,7 @@ def get_sentence_transformer(model_name: str = "all-MiniLM-L6-v2") -> Any:
                 logger.info(
                     f"[PROMPT_SECURITY] Loaded SentenceTransformer model '{model_name}'. Threading optimized."
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(
                     f"[PROMPT_SECURITY] Failed to load SentenceTransformer: {e}. Falling back to syntactic overlap."
                 )
@@ -181,7 +181,7 @@ class PromptSecurityGuard:
                 self.system_prompt_embedding = self.model.encode(
                     system_prompt, convert_to_tensor=True
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(
                     f"[PROMPT_SECURITY] Failed to encode system prompt: {e}. Disabling model."
                 )
@@ -205,7 +205,7 @@ class PromptSecurityGuard:
                 response_embedding = self.model.encode(text, convert_to_tensor=True)
                 similarity = util.cos_sim(response_embedding, self.system_prompt_embedding)  # pyright: ignore[reportArgumentType]
                 return float(similarity)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error(f"[PROMPT_SECURITY] Error calculating cosine similarity: {e}")
 
         # Fallback syntactic-derived similarity

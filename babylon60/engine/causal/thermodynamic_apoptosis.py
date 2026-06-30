@@ -68,7 +68,7 @@ class OuroborosCollapseEngine:
 
             # Net Improvement (Signal to Noise ratio)
             return ((total_commits - revert_commits) / total_commits) * 100
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Failed to compute exergy for branch {branch_name}: {e}")
             return -float("inf")
 

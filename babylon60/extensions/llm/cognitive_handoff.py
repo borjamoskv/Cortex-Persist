@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
@@ -60,7 +61,7 @@ class _PrescreenResult:
 
     action: str  # "audit" | "compact_and_forget"
     tokens_used: int = 0
-    relevance_score: float = 0.0
+    relevance_score: Decimal = 0.0
 
 
 @dataclass

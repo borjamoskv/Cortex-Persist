@@ -150,7 +150,7 @@ class AgentCatalogEntry:
                 resolved = resolve_model(self.provider, self.intent)
                 if resolved:
                     return resolved
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 logger.warning("Suppressed exception: %s", exc)
         return self.model
 

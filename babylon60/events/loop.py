@@ -104,7 +104,7 @@ def sovereign_run(
                 "Sovereign loop: uvloop %s active (kqueue/epoll)",
                 getattr(uvloop, "__version__", "?"),
             )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Suppressed exception: %s", exc)
 
     # 2. Execute with appropriate runner

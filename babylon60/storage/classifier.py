@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """
 Privacy-Aware Data Classifier v2.
@@ -137,7 +138,7 @@ class DataSensitivity:
 
     __slots__ = ("matches", "score")
 
-    def __init__(self, score: float, matches: list[str]):
+    def __init__(self, score: Decimal, matches: list[str]):
         self.score = score  # 0.0 (Public) → 1.0 (Critical)
         self.matches = matches
 

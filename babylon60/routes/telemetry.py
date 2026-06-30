@@ -71,7 +71,7 @@ async def ingest_telemetry(
         )
         logger.info("Ingested telemetry batch from %s -> Fact ID %s", data.agent_id, fact_id)
         return {"status": "success", "fact_id": fact_id}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error("Failed to ingest telemetry: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -378,7 +378,7 @@ async def get_mafia_nodes(engine: AsyncCortexEngine = Depends(get_async_engine))
         dynamic_nodes = [f["content"] for f in facts]
         full_list = list(set(BASE_MAFIA_NODES + dynamic_nodes))
         return {"status": "success", "nodes": full_list}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error("Failed to query mafia nodes: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -409,7 +409,7 @@ async def add_mafia_node(
         await broadcast_nodes_update(data.node)
 
         return {"status": "success", "fact_id": fact_id, "node": data.node}
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.error("Failed to store mafia node: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -467,7 +467,7 @@ async def telemetry_nodes_ws(websocket: WebSocket):
                     )
             except json.JSONDecodeError:
                 pass  # Ignore non-JSON messages
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("Failed to ingest WS telemetry: %s", e)
 
     except WebSocketDisconnect:

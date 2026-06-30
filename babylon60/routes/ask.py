@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
@@ -92,7 +93,7 @@ class AskSource(BaseModel):
 
     fact_id: int
     content: str
-    score: float
+    score: Decimal
     project: str
 
 

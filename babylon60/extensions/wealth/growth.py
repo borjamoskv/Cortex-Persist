@@ -1,3 +1,4 @@
+from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 """Sovereign Growth Engine v1.0.0.
 
@@ -21,9 +22,9 @@ class GrowthSignal:
     platform: str
     target_url: str
     topic: str
-    urgency_score: float
-    relevance_score: float
-    alpha_score: float
+    urgency_score: Decimal
+    relevance_score: Decimal
+    alpha_score: Decimal
     suggested_action: str
 
     def __repr__(self) -> str:

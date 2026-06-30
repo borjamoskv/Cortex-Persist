@@ -82,7 +82,7 @@ class C6BlackoutAudit:
 
             if history_valid and single_truth:
                 return 1.0
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             import logging
 
             logging.warning("Suppressed exception: %s", exc)

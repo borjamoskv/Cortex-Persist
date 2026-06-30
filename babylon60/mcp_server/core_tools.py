@@ -197,7 +197,7 @@ def _register_embed_tool(mcp, ctx: _MCPContext) -> None:
                 f"  Task: {task_type}\n"
                 f"  Preview: [{', '.join(preview)}, ...]"
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             ctx.metrics.record_error()
             logger.error("Embedding failed: %s", e)
             return f"❌ Embedding failed: {e}"
