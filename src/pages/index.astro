@@ -3,6 +3,7 @@ import WebGLBackground from '../components/WebGLBackground';
 import AwwwardsHero from '../components/AwwwardsHero';
 import AwwwardsFadeIn from '../components/AwwwardsFadeIn';
 import CortexAuditLedger from '../components/CortexAuditLedger';
+import CausalFsmUI from '../components/CausalFsmUI';
 import CheckoutModal from '../components/CheckoutModal';
 import LenisController from '../components/LenisController';
 
@@ -122,6 +123,12 @@ import CheckoutFlow from '../components/CheckoutFlow';
                 <p class="section-sub">Witness the cryptographic ledger operating in real-time. Every fact, decision, and anomaly is hash-chained and sealed into the BABYLON 60 persistence substrate.</p>
             </div>
             <CortexAuditLedger client:visible />
+            
+            <div style="max-width: 1000px; margin: 60px auto 40px auto; text-align: center;">
+                <h2>Causal FSM UI</h2>
+                <p class="section-sub">Real-time AOF Ledger byte-offset watcher. Rendered deterministically, ensuring absolute zero causal drift in the DOM.</p>
+            </div>
+            <CausalFsmUI client:visible />
         </section>
     </AwwwardsFadeIn>
 
