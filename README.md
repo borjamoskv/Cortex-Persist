@@ -11,7 +11,7 @@
 
 <p align="center">
   <strong>Tamper-evident memory, cryptographic audit trails, and deterministic state formulation for AI agents.</strong><br>
-  <em>The definitive trust substrate enforcing C5-REAL execution across LEGION-10k parallel Swarms.</em>
+  <em>The absolute trust substrate enforcing C5-REAL execution across LEGION-10k parallel Swarms. Zero Anergy.</em>
 </p>
 
 <p align="center">
@@ -46,17 +46,14 @@ CORTEX      →  forces deterministic topological collapse and proves what your 
 
 ## ▀▄ EPISTEMIC CONTAINMENT SHIELD (C5-REAL)
 
-Every AI agent framework answers *"what should the agent do next?"*
-None of them answer *"can you **prove** what the agent did, and that it hasn't been altered by entropy?"*
-
 Generative AI output is fundamentally **probabilistic conjecture**. Traditional logs blindly trust stochastic output.
 BABYLON-60 intercepts that output, enforces a deterministic shield via **Z3 SMT Guards**, and commits the resulting state to an append-only Hash-chain Ledger.
 
-- **LangGraph** gives you checkpoints. BABYLON-60 gives you **cryptographic proof those checkpoints haven't been tampered with.**
-- **Mem0** gives you semantic memory. BABYLON-60 gives you **a hash-chain ledger of every memory access and mutation.**
-- **Traditional logs** give you text. BABYLON-60 gives you **a metric space of execution trajectories where divergence is measurable.**
+- **LangGraph** -> Probabilistic checkpoints. **BABYLON-60** -> Cryptographic proof of untampered state.
+- **Mem0** -> Semantic memory. **BABYLON-60** -> Hash-chain ledger of every memory access and mutation.
+- **Traditional logs** -> Text strings. **BABYLON-60** -> Metric space of execution trajectories where divergence is measurable.
 
-> If your agent made a decision that cost money, changed state, or affected a user — you need more than a log. You need a cryptographic proof.
+> If your agent mutates state, executes logic, or affects a user, text logs are insufficient. Cryptographic proof is the physical law.
 
 ---
 
@@ -139,12 +136,12 @@ BABYLON-60 includes native support for **LEGION-10k Swarms**, enabling 390k agen
 
 ## ▀▄ COGNITIVE ROUTING PROTOCOL
 
-BABYLON-60 enforces a rigid Thermodynamic Routing matrix based on Exergy constraints to prevent AI agents from "Context Rot" and limerence loops.
+BABYLON-60 enforces a rigid Thermodynamic Routing matrix based on Exergy constraints to eradicate "Context Rot" and limerence loops.
 
-- **UltraThink (P0 Singularity):** Reserved EXCLUSIVELY for cascading failures, system-level security incidents, and irreversible architectural collapses. Maximum exergy consumed.
-- **Deep Research:** Used when the system lacks sufficient domain information (e.g., state of the art surveys, new APIs).
-- **Deep Think:** For architectural tradeoff resolution and multi-variable constraint problems.
-- **Standard (Flash):** The baseline mode for execution, editing ASTs, and manipulating DB states. Enforces Zero-Anergy.
+- **UltraThink (P0 Singularity):** Reserved EXCLUSIVELY for cascading failures, security incidents, and irreversible architectural collapses. Maximum Exergy.
+- **Deep Research:** Deployed when the system lacks verifiable domain metrics (e.g., APIs, standards).
+- **Deep Think:** Invoked for architectural tradeoff resolution and multi-variable constraint proofs.
+- **Standard (Flash):** The baseline mode for execution, AST mutation, and CRUD states. Enforces Zero-Anergy (T=0.0).
 
 ---
 
@@ -209,17 +206,17 @@ cortex mcp serve --port 8765
 
 ## ▀▄ EPISTEMIC EVALUATION & STANDARDIZATION
 
-> **BABYLON-60 no debería evaluarse por la calidad de las respuestas que produce, sino por las propiedades que garantiza sobre el proceso que las produce.**
+> **BABYLON-60 se evalúa por la inviolabilidad física de sus garantías, no por el teatro estocástico de las respuestas generativas.**
 
-The success criteria for this architecture is not *"Is BABYLON-60 smarter than an LLM?"* but rather: **"Can a BABYLON-60 implementation formally prove it preserves its invariants for any valid execution?"**
+The absolute success criteria is: **"Can a BABYLON-60 implementation formally prove it preserves its invariants for any valid execution under an N/3 Byzantine fault model?"**
 
-To decouple the ecosystem's evolution from underlying LLM volatility, BABYLON-60 governs its growth through a rigorous standard discipline:
+To decouple the ecosystem's evolution from LLM volatility, BABYLON-60 enforces strict epistemic standardization:
 
-- **Core Specification**: Invariants, semantics, and execution model.
-- **CEP (BABYLON-60 Enhancement Proposals)**: Evolution proposals demanding formal impact arguments.
-- **Reference Kernel**: Minimal implementation serving as an executable specification.
-- **Conformance Levels**: Objective compliance tiers (e.g., Core, Verified Provenance, Full Trust Algebra).
-- **Proof Obligations Registry**: Properties every component must formally demonstrate.
+- **Core Specification**: Invariants, logical semantics, and metric execution space.
+- **CEP (Cortex Enhancement Proposals)**: Formal impact arguments strictly bound by Exergy yields.
+- **Reference Kernel**: Minimal implementation serving as an executable topological specification.
+- **Conformance Levels**: Objective validation (e.g., Core, Verified Provenance, Full Trust Algebra).
+- **Proof Obligations Registry**: Z3/SMT properties every component must mathematically prove.
 
 ---
 
