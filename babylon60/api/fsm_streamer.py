@@ -7,8 +7,8 @@ from sse_starlette.sse import EventSourceResponse
 
 router = APIRouter(prefix="/observability/fsm", tags=["CausalUI"])
 
-# Ruta del Master Ledger Inmutable
-LEDGER_PATH = os.getenv("MOSKV_LEDGER_PATH", os.getenv("CORTEX_LEDGER_PATH", "cortex_state.aof"))
+def get_ledger_path():
+    return os.getenv("MOSKV_LEDGER_PATH", os.getenv("CORTEX_LEDGER_PATH", "cortex_state.aof"))
 
 async def ledger_byte_watcher(request: Request, poll_interval: float = 0.5):
     """
@@ -16,10 +16,11 @@ async def ledger_byte_watcher(request: Request, poll_interval: float = 0.5):
     No re-escanea todo el archivo, solo salta al último offset conocido y espera deltas.
     """
     last_offset = 0
+    ledger_path = get_ledger_path()
 
     # Inicialización: saltar al final del archivo si no queremos el histórico completo.
     # Por defecto, emitimos el grafo completo para inicializar la UI, luego pasamos a tail mode.
-    if os.path.exists(LEDGER_PATH):
+    if os.path.exists(ledger_path):
         pass # Inicia en offset 0 para enviar el Grafo Causal base
 
     while True:
@@ -27,11 +28,12 @@ async def ledger_byte_watcher(request: Request, poll_interval: float = 0.5):
             break
 
         try:
-            if not os.path.exists(LEDGER_PATH):
+            ledger_path = get_ledger_path()
+            if not os.path.exists(ledger_path):
                 await asyncio.sleep(poll_interval)
                 continue
 
-            with open(LEDGER_PATH, 'rb') as f:
+            with open(ledger_path, 'rb') as f:
                 f.seek(last_offset)
                 while True:
                     line = f.readline()

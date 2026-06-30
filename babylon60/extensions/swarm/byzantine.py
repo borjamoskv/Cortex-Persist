@@ -35,13 +35,25 @@ class ByzantineConsensus:
         self.nodes[node_id] = ByzantineNode(node_id, initial_reputation)
 
     @staticmethod
-    def _hash_proposal(proposal: Any) -> str:
-        """Deterministic SHA-256 hash for any serializable proposal."""
+    def _normalize_proposal(proposal: Any) -> str:
+        """Normalize proposal content using AST unparsing for code structures to achieve semantic consensus."""
+        import ast
+        if isinstance(proposal, str):
+            try:
+                tree = ast.parse(proposal)
+                return ast.unparse(tree)
+            except Exception:
+                pass
         try:
-            serialized = json.dumps(proposal, sort_keys=True, default=str)
+            return json.dumps(proposal, sort_keys=True, default=str)
         except (TypeError, ValueError):
-            serialized = str(proposal)
-        return cortex_hash(serialized.encode())
+            return str(proposal)
+
+    @staticmethod
+    def _hash_proposal(proposal: Any) -> str:
+        """Deterministic SHA-256 hash of the normalized proposal."""
+        normalized = ByzantineConsensus._normalize_proposal(proposal)
+        return cortex_hash(normalized.encode())
 
     async def _get_proposal_hash(self, proposal: Any) -> str:
         """Hash a proposal in a background thread."""
