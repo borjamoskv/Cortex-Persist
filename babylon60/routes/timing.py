@@ -6,10 +6,10 @@ Timing Router.
 import logging
 import sqlite3
 
-import cortex.api.state as api_state
-from cortex.auth import AuthResult, require_permission
-from cortex.types.models import HeartbeatRequest, TimeSummaryResponse
-from cortex.utils.i18n import get_trans
+import babylon60.api.state as api_state
+from babylon60.auth import AuthResult, require_permission
+from babylon60.types.models import HeartbeatRequest, TimeSummaryResponse
+from babylon60.utils.i18n import get_trans
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from starlette.concurrency import run_in_threadpool
 

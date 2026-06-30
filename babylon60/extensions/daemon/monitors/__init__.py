@@ -6,25 +6,25 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.daemon.monitors.auto_immune import AutoImmuneMonitor
-    from cortex.extensions.daemon.monitors.cert import CertMonitor
-    from cortex.extensions.daemon.monitors.cloud import CloudSyncMonitor
-    from cortex.extensions.daemon.monitors.compaction import CompactionMonitor
-    from cortex.extensions.daemon.monitors.disk import DiskMonitor
-    from cortex.extensions.daemon.monitors.engine import EngineHealthCheck
-    from cortex.extensions.daemon.monitors.epistemic import EpistemicMonitor
-    from cortex.extensions.daemon.monitors.evaluation import EvaluationMonitor
-    from cortex.extensions.daemon.monitors.ghosts import GhostWatcher
-    from cortex.extensions.daemon.monitors.mejoralo import UnifiedMejoraloMonitor
-    from cortex.extensions.daemon.monitors.memory import MemorySyncer
-    from cortex.extensions.daemon.monitors.network import SiteMonitor
-    from cortex.extensions.daemon.monitors.neural import NeuralIntentMonitor
-    from cortex.extensions.daemon.monitors.perception import PerceptionMonitor
-    from cortex.extensions.daemon.monitors.security import SecurityMonitor
-    from cortex.extensions.daemon.monitors.signals import SignalMonitor
-    from cortex.extensions.daemon.monitors.tombstone import TombstoneMonitor
-    from cortex.extensions.daemon.monitors.trends import TrendsMonitor
-    from cortex.extensions.daemon.monitors.workflow import WorkflowMonitor
+    from babylon60.extensions.daemon.monitors.auto_immune import AutoImmuneMonitor
+    from babylon60.extensions.daemon.monitors.cert import CertMonitor
+    from babylon60.extensions.daemon.monitors.cloud import CloudSyncMonitor
+    from babylon60.extensions.daemon.monitors.compaction import CompactionMonitor
+    from babylon60.extensions.daemon.monitors.disk import DiskMonitor
+    from babylon60.extensions.daemon.monitors.engine import EngineHealthCheck
+    from babylon60.extensions.daemon.monitors.epistemic import EpistemicMonitor
+    from babylon60.extensions.daemon.monitors.evaluation import EvaluationMonitor
+    from babylon60.extensions.daemon.monitors.ghosts import GhostWatcher
+    from babylon60.extensions.daemon.monitors.mejoralo import UnifiedMejoraloMonitor
+    from babylon60.extensions.daemon.monitors.memory import MemorySyncer
+    from babylon60.extensions.daemon.monitors.network import SiteMonitor
+    from babylon60.extensions.daemon.monitors.neural import NeuralIntentMonitor
+    from babylon60.extensions.daemon.monitors.perception import PerceptionMonitor
+    from babylon60.extensions.daemon.monitors.security import SecurityMonitor
+    from babylon60.extensions.daemon.monitors.signals import SignalMonitor
+    from babylon60.extensions.daemon.monitors.tombstone import TombstoneMonitor
+    from babylon60.extensions.daemon.monitors.trends import TrendsMonitor
+    from babylon60.extensions.daemon.monitors.workflow import WorkflowMonitor
 
 # Aliases for backward compatibility
 _ALIASES: dict[str, str] = {

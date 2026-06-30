@@ -2,10 +2,10 @@
 NOUS Intent Architecture - End to End C5-REAL Demo.
 """
 
-from cortex.nous.dry_run import DryRunSimulator
-from cortex.nous.judge import DeterministicJudge
-from cortex.nous.ledger import MutationLedger
-from cortex.nous.parser import IntentParser
+from babylon60.nous.dry_run import DryRunSimulator
+from babylon60.nous.judge import DeterministicJudge
+from babylon60.nous.ledger import MutationLedger
+from babylon60.nous.parser import IntentParser
 
 
 def run_demo():

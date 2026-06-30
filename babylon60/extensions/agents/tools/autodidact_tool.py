@@ -5,7 +5,7 @@ import logging
 from typing import Any
 
 # Importación de la Cúspide O(1)
-from cortex.extensions.skills.autodidact.actuator import autodidact_pipeline
+from babylon60.extensions.skills.autodidact.actuator import autodidact_pipeline
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger("CORTEX.TOOLS.AUTODIDACT")

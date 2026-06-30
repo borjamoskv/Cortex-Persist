@@ -28,7 +28,7 @@ import re
 from datetime import datetime, timezone
 from typing import Any
 
-from cortex.observability.telemetry import CortexTelemetry
+from babylon60.observability.telemetry import CortexTelemetry
 
 LOG_FILE = os.path.expanduser("~/.gemini/config/skills/_metrics/runtime_events.jsonl")
 

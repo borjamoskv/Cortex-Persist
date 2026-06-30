@@ -7,7 +7,7 @@ import logging
 import sqlite3
 from typing import TYPE_CHECKING
 
-from cortex.extensions.sync.common import (
+from babylon60.extensions.sync.common import (
     MEMORY_DIR,
     SyncResult,
     calculate_fact_diff,
@@ -16,15 +16,15 @@ from cortex.extensions.sync.common import (
     load_sync_state,
     save_sync_state,
 )
-from cortex.extensions.sync.system import sync_system
-from cortex.memory.temporal import now_iso
+from babylon60.extensions.sync.system import sync_system
+from babylon60.memory.temporal import now_iso
 
 __all__ = ["sync_memory"]
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex_extensions.sync")
 

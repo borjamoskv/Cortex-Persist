@@ -9,16 +9,16 @@ from __future__ import annotations
 import logging
 import uuid
 
-from cortex.extensions.market_maker.detector import TrendDetector
-from cortex.extensions.market_maker.models import (
+from babylon60.extensions.market_maker.detector import TrendDetector
+from babylon60.extensions.market_maker.models import (
     Experiment,
     ExperimentStatus,
     Opportunity,
     Verdict,
 )
-from cortex.extensions.market_maker.mvp_generator import MVPGenerator
-from cortex.extensions.market_maker.scorer import OpportunityScorer
-from cortex.extensions.market_maker.validator import DemandValidator
+from babylon60.extensions.market_maker.mvp_generator import MVPGenerator
+from babylon60.extensions.market_maker.scorer import OpportunityScorer
+from babylon60.extensions.market_maker.validator import DemandValidator
 
 log = logging.getLogger(__name__)
 

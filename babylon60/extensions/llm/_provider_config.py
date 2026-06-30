@@ -3,8 +3,8 @@
 import os
 from typing import Any
 
-from cortex.extensions.llm._models import IntentProfile
-from cortex.extensions.llm._presets import check_api_key
+from babylon60.extensions.llm._models import IntentProfile
+from babylon60.extensions.llm._presets import check_api_key
 
 
 def resolve_provider_config(

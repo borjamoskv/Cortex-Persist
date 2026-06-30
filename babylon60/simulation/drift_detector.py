@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import numpy as np
-from cortex.simulation.primitives import MemoryTrajectory
+from babylon60.simulation.primitives import MemoryTrajectory
 
 
 class MemoryDriftDetector:

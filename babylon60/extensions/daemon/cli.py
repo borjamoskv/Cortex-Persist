@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 import click
-from cortex.extensions.daemon import (
+from babylon60.extensions.daemon import (
     BUNDLE_ID,
     DEFAULT_COOLDOWN,
     DEFAULT_INTERVAL,
@@ -28,7 +28,7 @@ from cortex.extensions.daemon import (
     DEFAULT_STALE_HOURS,
     MoskvDaemon,
 )
-from cortex.extensions.platform.sys import get_service_dir, is_linux, is_macos, is_windows
+from babylon60.extensions.platform.sys import get_service_dir, is_linux, is_macos, is_windows
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -236,7 +236,7 @@ def status(as_json: bool) -> None:
 
         # Enrich with telemetry if available
         try:
-            from cortex.telemetry import collector  # type: ignore[reportAttributeAccessIssue]
+            from babylon60.telemetry import collector  # type: ignore[reportAttributeAccessIssue]
 
             last["telemetry"] = {
                 "spans_total": len(collector),
@@ -288,7 +288,7 @@ def version() -> None:
 @cli.command()
 def install() -> None:
     """Install daemon as a system service (launchd / systemd / Task Scheduler)."""
-    from cortex.extensions.daemon.platform import (
+    from babylon60.extensions.daemon.platform import (
         install_linux,
         install_macos,
         install_windows,
@@ -308,7 +308,7 @@ def install() -> None:
 @cli.command()
 def uninstall() -> None:
     """Remove daemon system service."""
-    from cortex.extensions.daemon.platform import (
+    from babylon60.extensions.daemon.platform import (
         uninstall_linux,
         uninstall_macos,
         uninstall_windows,

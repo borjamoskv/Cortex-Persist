@@ -37,9 +37,9 @@ class SearchMixin(EngineMixinBase):
         import json
         from dataclasses import asdict
 
-        from cortex.cache import RedisL1Cache
-        from cortex.search import hybrid_search, text_search
-        from cortex.search.models import SearchResult
+        from babylon60.cache import RedisL1Cache
+        from babylon60.search import hybrid_search, text_search
+        from babylon60.search.models import SearchResult
 
         tenant_id = self._resolve_tenant(tenant_id)
         cache = RedisL1Cache.singleton()
@@ -74,7 +74,7 @@ class SearchMixin(EngineMixinBase):
                 embedder = self._get_embedder()
                 embedding = embedder.embed(query)
 
-                from cortex.embeddings.obfuscation import obfuscate_vector
+                from babylon60.embeddings.obfuscation import obfuscate_vector
 
                 embedding = obfuscate_vector(embedding, tenant_id=tenant_id, project=project or "")
 
@@ -113,7 +113,7 @@ class SearchMixin(EngineMixinBase):
                 # 2.5 Resolve thermodynamic pointers (NEXUS_SYMLINK) for bridge facts
                 symlink_results = [r for r in results if r.content.startswith("NEXUS_SYMLINK:")]
                 if symlink_results:
-                    from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
+                    from babylon60.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 
                     target_hashes = list(
                         {r.content.split("NEXUS_SYMLINK:")[1] for r in symlink_results}
@@ -202,7 +202,7 @@ class SearchMixin(EngineMixinBase):
     ) -> None:
         """Helper to enrich search results with graph context."""
         try:
-            from cortex.graph import extract_entities, get_context_subgraph
+            from babylon60.graph import extract_entities, get_context_subgraph
         except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             logger.debug("Graph context enrichment unavailable: %s", exc)
             return

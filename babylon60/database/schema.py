@@ -10,7 +10,7 @@ live in schema_extensions.py to satisfy the Landauer LOC barrier.
 from __future__ import annotations
 
 # Re-export extended tables for backward compat
-from cortex.database.schema_extensions import (
+from babylon60.database.schema_extensions import (
     CREATE_AGENTS,
     CREATE_AUDIT_EXPORTS,
     CREATE_CONTEXT_SNAPSHOTS,
@@ -404,7 +404,7 @@ ALL_SCHEMA = _CORE_SCHEMA + EXTENSION_SCHEMA
 def get_all_schema() -> list[str]:
     """Return ALL_SCHEMA + AUTH_SCHEMA (avoids circular import)."""
     try:
-        from cortex.auth import AUTH_SCHEMA
+        from babylon60.auth import AUTH_SCHEMA
 
         return ALL_SCHEMA + [AUTH_SCHEMA]
     except ImportError:

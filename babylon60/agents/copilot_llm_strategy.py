@@ -15,13 +15,13 @@ from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 from uuid import uuid4
 
-from cortex.agents.builtins.copilot_agent import SuggestionStrategy
-from cortex.agents.copilot_cache import SuggestionCache
-from cortex.agents.copilot_context import (
+from babylon60.agents.builtins.copilot_agent import SuggestionStrategy
+from babylon60.agents.copilot_cache import SuggestionCache
+from babylon60.agents.copilot_context import (
     ContextWindow,
     build_context_window,
 )
-from cortex.agents.copilot_contracts import (
+from babylon60.agents.copilot_contracts import (
     Confidence,
     CopilotContextPayload,
     SuggestionBatch,
@@ -174,7 +174,7 @@ class LLMCompletionStrategy(SuggestionStrategy):
         Returns:
             List of SuggestionProposals (NEVER applied, only proposed).
         """
-        from cortex.agents.builtins.copilot_agent import _hash_context
+        from babylon60.agents.builtins.copilot_agent import _hash_context
 
         context_hash = _hash_context(context)
 

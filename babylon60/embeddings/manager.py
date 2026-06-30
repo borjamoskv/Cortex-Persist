@@ -26,14 +26,14 @@ class EmbeddingManager:
     @property
     def mode(self) -> str:
         """Return the current embeddings mode (local|api)."""
-        from cortex.core import config
+        from babylon60.core import config
 
         return config.EMBEDDINGS_MODE
 
     @property
     def provider(self) -> str:
         """Return the configured provider name."""
-        from cortex.core import config
+        from babylon60.core import config
 
         return config.EMBEDDINGS_PROVIDER
 
@@ -166,8 +166,8 @@ class EmbeddingManager:
         This method is called by the EnrichmentWorker to finalize a fact's
         entry into the Double-Plane architecture.
         """
-        from cortex.engine.core.embedding_engine import embed_fact_async
-        from cortex.engine.meta.metadata_engine import MetadataEngine
+        from babylon60.engine.core.embedding_engine import embed_fact_async
+        from babylon60.engine.meta.metadata_engine import MetadataEngine
 
         async with self.engine.session() as conn:
             # 1. Dense & Specular Embeddings

@@ -10,7 +10,7 @@ from __future__ import annotations
 __all__: list[str] = []
 
 try:
-    from cortex.auth.manager import AuthManager, get_auth_manager, reset_auth_manager
+    from babylon60.auth.manager import AuthManager, get_auth_manager, reset_auth_manager
 except ImportError:
     AuthManager = None  # type: ignore[assignment]
     get_auth_manager = None  # type: ignore[assignment]
@@ -19,7 +19,7 @@ else:
     __all__ += ["AuthManager", "get_auth_manager", "reset_auth_manager"]
 
 try:
-    from cortex.auth.models import APIKey, AuthResult
+    from babylon60.auth.models import APIKey, AuthResult
 except ImportError:
     APIKey = None  # type: ignore[assignment]
     AuthResult = None  # type: ignore[assignment]
@@ -27,7 +27,7 @@ else:
     __all__ += ["APIKey", "AuthResult"]
 
 try:
-    from cortex.auth.schema import AUTH_SCHEMA, SQL_INSERT_KEY
+    from babylon60.auth.schema import AUTH_SCHEMA, SQL_INSERT_KEY
 except ImportError:
     AUTH_SCHEMA = None  # type: ignore[assignment]
     SQL_INSERT_KEY = None  # type: ignore[assignment]
@@ -35,7 +35,7 @@ else:
     __all__ += ["AUTH_SCHEMA", "SQL_INSERT_KEY"]
 
 try:
-    from cortex.auth.deps import (
+    from babylon60.auth.deps import (
         require_auth,
         require_consensus,
         require_permission,

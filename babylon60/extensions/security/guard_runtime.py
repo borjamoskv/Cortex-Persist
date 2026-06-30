@@ -66,7 +66,7 @@ class DuressGuardWrapper(BaseGuard):
 
     def evaluate(self, context: dict[str, Any]) -> GuardOutcome:
         try:
-            from cortex.guards.duress_guard import DuressGuard
+            from babylon60.guards.duress_guard import DuressGuard
 
             is_valid = DuressGuard.validate(context.get("content", ""))
             if not is_valid:
@@ -110,7 +110,7 @@ class InjectionGuardWrapper(BaseGuard):
 
     def evaluate(self, context: dict[str, Any]) -> GuardOutcome:
         try:
-            from cortex.extensions.security.injection_guard import GUARD
+            from babylon60.extensions.security.injection_guard import GUARD
 
             report = GUARD.scan(context["content"], source=context.get("source"))
             if not report.is_safe:
@@ -138,7 +138,7 @@ class AnomalyGuardWrapper(BaseGuard):
 
     def evaluate(self, context: dict[str, Any]) -> GuardOutcome:
         try:
-            from cortex.extensions.security.anomaly_detector import DETECTOR, SecurityEvent
+            from babylon60.extensions.security.anomaly_detector import DETECTOR, SecurityEvent
 
             anomaly = DETECTOR.record_event(
                 SecurityEvent(
@@ -173,7 +173,7 @@ class HoneypotGuardWrapper(BaseGuard):
 
     def evaluate(self, context: dict[str, Any]) -> GuardOutcome:
         try:
-            from cortex.extensions.security.honeypot import HONEY_POT
+            from babylon60.extensions.security.honeypot import HONEY_POT
 
             decoy = HONEY_POT.check_exploitation(context["content"])
             if decoy:

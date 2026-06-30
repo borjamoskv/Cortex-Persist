@@ -89,7 +89,7 @@ class UsageTracker:
 
     def __init__(self, db_path: str | None = None):
         if db_path is None:
-            from cortex.config import DB_PATH
+            from babylon60.config import DB_PATH
 
             db_path = DB_PATH
         self._db_path = db_path

@@ -14,14 +14,14 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import cortex.api.state as api_state
-from cortex.api.deps import get_engine
-from cortex.auth import AuthResult, get_auth_manager, require_permission
-from cortex.database.schema import SCHEMA_VERSION
-from cortex.engine import CortexEngine
-from cortex.routes.admin_health_probes import build_health_probes as _build_health_probes
-from cortex.routes.middleware import AuditLogger, RateLimiter, SelfHealingHook
-from cortex.types.models import (
+import babylon60.api.state as api_state
+from babylon60.api.deps import get_engine
+from babylon60.auth import AuthResult, get_auth_manager, require_permission
+from babylon60.database.schema import SCHEMA_VERSION
+from babylon60.engine import CortexEngine
+from babylon60.routes.admin_health_probes import build_health_probes as _build_health_probes
+from babylon60.routes.middleware import AuditLogger, RateLimiter, SelfHealingHook
+from babylon60.types.models import (
     ApiKeyListItem,
     ApiKeyResponse,
     DeepHealthResponse,
@@ -29,8 +29,8 @@ from cortex.types.models import (
     HealthCheckDetail,
     StatusResponse,
 )
-from cortex.utils.export import export_facts
-from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from babylon60.utils.export import export_facts
+from babylon60.utils.i18n import DEFAULT_LANGUAGE, get_trans
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -40,7 +40,7 @@ from starlette.requests import Request
 from cortex import __version__
 
 if TYPE_CHECKING:
-    from cortex.auth import AuthManager
+    from babylon60.auth import AuthManager
 
 __all__ = [
     "create_api_key",
@@ -281,7 +281,7 @@ async def deep_health_check(
             detail="Health check failed",
         ) from None
 
-    from cortex.routes.context import get_p95_context_latency
+    from babylon60.routes.context import get_p95_context_latency
 
     elapsed_ms = round((time.monotonic() - start) * 1000, 1)
     result = DeepHealthResponse(
@@ -419,7 +419,7 @@ async def generate_handoff_context(
 
     Used for transferring agentic state between platforms (macOS -> Web).
     """
-    from cortex.extensions.agents.handoff import generate_handoff, save_handoff
+    from babylon60.extensions.agents.handoff import generate_handoff, save_handoff
 
     lang = _get_lang(request)
 
@@ -455,7 +455,7 @@ async def execute_credibility_strike(
     if hasattr(engine, "_extensions") and hasattr(engine._extensions, "credibility_stack"):  # pyright: ignore[reportAttributeAccessIssue]
         stack = engine._extensions.credibility_stack  # pyright: ignore[reportAttributeAccessIssue]
     else:
-        from cortex.engine.cognitive.credibility_stack import LedgerCredibilityStack
+        from babylon60.engine.cognitive.credibility_stack import LedgerCredibilityStack
 
         stack = LedgerCredibilityStack(engine)
 

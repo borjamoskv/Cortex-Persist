@@ -14,8 +14,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.revenue.engine import RevenueEngine
-    from cortex.extensions.revenue.models import (
+    from babylon60.extensions.revenue.engine import RevenueEngine
+    from babylon60.extensions.revenue.models import (
         ExecutionResult,
         Opportunity,
         RevenueReport,
@@ -34,11 +34,11 @@ __all__ = [
 def __getattr__(name: str):
     """Lazy imports to avoid heavy startup cost."""
     if name == "RevenueEngine":
-        from cortex.extensions.revenue.engine import RevenueEngine
+        from babylon60.extensions.revenue.engine import RevenueEngine
 
         return RevenueEngine
     if name in ("Opportunity", "ExecutionResult", "RevenueReport", "RevenueVector"):
-        from cortex.extensions.revenue import models
+        from babylon60.extensions.revenue import models
 
         return getattr(models, name)
     raise AttributeError(f"module 'cortex_extensions.revenue' has no attribute {name!r}")

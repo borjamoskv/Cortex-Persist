@@ -8,7 +8,7 @@ the hot loop never crosses the FFI boundary.
 Reality Level: C5-REAL
 """
 
-from cortex.isa.builder import (
+from babylon60.isa.builder import (
     AgentOp,
     HaltReason,
     LedgerMutation,

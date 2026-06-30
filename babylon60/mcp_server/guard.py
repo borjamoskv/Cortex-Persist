@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 
-from cortex.config import (
+from babylon60.config import (
     MCP_MAX_CONTENT_LENGTH,
     MCP_MAX_QUERY_LENGTH,
     MCP_MAX_TAGS,

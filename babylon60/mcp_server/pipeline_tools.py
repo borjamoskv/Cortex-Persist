@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from cortex.pipeline import (
+from babylon60.pipeline import (
     DeliveryTarget,
     DeliveryType,
     PipelineRequest,
@@ -22,7 +22,7 @@ from cortex.pipeline import (
 )
 
 if TYPE_CHECKING:
-    from cortex.mcp_server.server import _MCPContext
+    from babylon60.mcp_server.server import _MCPContext
 
 logger = logging.getLogger("cortex.mcp_server.pipeline")
 
@@ -42,7 +42,7 @@ async def _get_bridge(db_path: str | Path | None = None):
 
     async with _bridge_lock:
         if _bridge_instance is None:
-            from cortex.pipeline.bridge import CortexPipelineBridge
+            from babylon60.pipeline.bridge import CortexPipelineBridge
 
             if db_path:
                 _bridge_instance = CortexPipelineBridge(db_path=db_path)
@@ -236,7 +236,7 @@ def _get_status() -> str:
     }
 
     try:
-        from cortex.extensions.swarm.budget import get_budget_manager
+        from babylon60.extensions.swarm.budget import get_budget_manager
 
         bm = get_budget_manager()
         budget_info = bm.get_remaining_budget()  # type: ignore

@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.extensions.metering.tracker import UsageTracker
+    from babylon60.extensions.metering.tracker import UsageTracker
 
 __all__ = ["PLAN_QUOTAS", "QuotaCheckResult", "QuotaEnforcer"]
 

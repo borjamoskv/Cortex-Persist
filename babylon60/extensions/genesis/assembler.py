@@ -11,8 +11,8 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from cortex.extensions.genesis.models import ComponentSpec, SystemSpec
-from cortex.extensions.genesis.templates import TemplateRegistry
+from babylon60.extensions.genesis.models import ComponentSpec, SystemSpec
+from babylon60.extensions.genesis.templates import TemplateRegistry
 
 __all__ = ["SystemAssembler"]
 
@@ -217,7 +217,7 @@ class SystemAssembler:
                 name=comp.name,
                 component_type="test",
                 interfaces=comp.interfaces,
-                imports=[f"# from cortex.{spec.name}.{comp.name} import *"],
+                imports=[f"# from babylon60.{spec.name}.{comp.name} import *"],
             )
             rendered = test_template.render(spec.name, test_comp)
 

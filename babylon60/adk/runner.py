@@ -80,7 +80,7 @@ async def _connect_toolbox(
     Returns an empty list if the Toolbox is not configured or unavailable.
     This is intentionally non-fatal - the agents work fine without it.
     """
-    from cortex.mcp_server.toolbox_bridge import ToolboxBridge, ToolboxConfig
+    from babylon60.mcp_server.toolbox_bridge import ToolboxBridge, ToolboxConfig
 
     config = ToolboxConfig.from_env()
     if server_url:
@@ -135,7 +135,7 @@ def run_cli(
         logger.error("Google ADK not installed. Install with: pip install google-adk")
         sys.exit(1)
 
-    from cortex.extensions.adk.agents import (
+    from babylon60.extensions.adk.agents import (
         create_analyst_agent,  # type: ignore
         create_cortex_swarm,
         create_gem_agent,
@@ -148,7 +148,7 @@ def run_cli(
     toolbox_tools = asyncio.run(_connect_toolbox(toolbox_url, toolbox_toolset))
 
     # Connect to local CORTEX MCP Server for native tool inheritance
-    from cortex.mcp_server.toolbox_bridge import cortex_self_bridge
+    from babylon60.mcp_server.toolbox_bridge import cortex_self_bridge
 
     try:
         cortex_bridge = asyncio.run(cortex_self_bridge())

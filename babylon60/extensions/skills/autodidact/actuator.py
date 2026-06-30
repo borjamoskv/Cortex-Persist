@@ -4,12 +4,12 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.extensions.skills.autodidact.fetchers import execute_cognitive_acquisition
-from cortex.extensions.skills.autodidact.synthesis import execute_cognitive_synthesis
+from babylon60.extensions.skills.autodidact.fetchers import execute_cognitive_acquisition
+from babylon60.extensions.skills.autodidact.synthesis import execute_cognitive_synthesis
 
 # Integración Babestu (Security)
 try:
-    from cortex.extensions.security.t_cell import BabestuTCell
+    from babylon60.extensions.security.t_cell import BabestuTCell
 except ImportError:
     BabestuTCell = None
 

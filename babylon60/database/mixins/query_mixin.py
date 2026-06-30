@@ -345,7 +345,7 @@ class QueryMixin(EngineMixinBase):
     async def graph(self, project: str | None = None, tenant_id: str = "default"):
         """Get entity graph for a project."""
         tenant_id = self._resolve_tenant(tenant_id)
-        from cortex.graph import get_graph
+        from babylon60.graph import get_graph
 
         async with self.session() as conn:
             return await get_graph(conn, project, tenant_id=tenant_id)
@@ -358,7 +358,7 @@ class QueryMixin(EngineMixinBase):
     ) -> dict[str, Any] | None:
         """Query a specific entity by name."""
         tenant_id = self._resolve_tenant(tenant_id)
-        from cortex.graph import query_entity
+        from babylon60.graph import query_entity
 
         async with self.session() as conn:
             return await query_entity(
@@ -377,7 +377,7 @@ class QueryMixin(EngineMixinBase):
     ) -> list[dict]:
         """Find paths between two entities."""
         tenant_id = self._resolve_tenant(tenant_id)
-        from cortex.graph import find_path
+        from babylon60.graph import find_path
 
         async with self.session() as conn:
             return await find_path(conn, source, target, max_depth, tenant_id=tenant_id)
@@ -391,7 +391,7 @@ class QueryMixin(EngineMixinBase):
     ) -> dict:
         """Retrieve a subgraph context for RAG."""
         tenant_id = self._resolve_tenant(tenant_id)
-        from cortex.graph import get_context_subgraph
+        from babylon60.graph import get_context_subgraph
 
         async with self.session() as conn:
             return await get_context_subgraph(conn, seeds, depth, max_nodes, tenant_id=tenant_id)

@@ -10,8 +10,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.core import config
-from cortex.extensions.billing.models import BillingEvent, FailureType
+from babylon60.core import config
+from babylon60.extensions.billing.models import BillingEvent, FailureType
 
 logger = logging.getLogger(__name__)
 

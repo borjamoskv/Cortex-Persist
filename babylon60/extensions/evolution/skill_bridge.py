@@ -13,7 +13,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.evolution.agents import AgentDomain
+from babylon60.extensions.evolution.agents import AgentDomain
 
 logger = logging.getLogger(__name__)
 

@@ -16,7 +16,7 @@ import re
 import time
 from dataclasses import dataclass
 
-from cortex.extensions.platform.sys import get_cortex_dir, is_linux, is_macos, is_windows
+from babylon60.extensions.platform.sys import get_cortex_dir, is_linux, is_macos, is_windows
 
 from babylon60.crypto.hash_registry import cortex_hash
 

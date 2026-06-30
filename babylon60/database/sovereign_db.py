@@ -20,7 +20,7 @@ logger = logging.getLogger("cortex.database.sovereign_db")
 
 # Import the unpatched connect function to bypass runtime connect block
 try:
-    from cortex.database.core import _original_sqlite3_connect as _sqlite_connect
+    from babylon60.database.core import _original_sqlite3_connect as _sqlite_connect
 except ImportError:
     _sqlite_connect = sqlite3.connect
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import subprocess
 
-from cortex.extensions.health.models import MetricSnapshot
+from babylon60.extensions.health.models import MetricSnapshot
 
 
 class SystemLoadCollector:

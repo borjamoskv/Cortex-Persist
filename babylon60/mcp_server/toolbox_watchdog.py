@@ -248,7 +248,7 @@ class ToolboxWatchdog:
                 return
 
             # HTTP health probe
-            from cortex.mcp_server.toolbox_bridge import (
+            from babylon60.mcp_server.toolbox_bridge import (
                 toolbox_health_check,
             )
 

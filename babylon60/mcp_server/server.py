@@ -10,28 +10,28 @@ import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from cortex.engine import CortexEngine
-from cortex.extensions.immune.filters.base import Verdict
-from cortex.extensions.immune.membrane import ImmuneMembrane
-from cortex.integration.rustchain.mcp_tool import register_rustchain_tools
-from cortex.ledger import ImmutableLedger
-from cortex.swarm import start_swarm_daemon
+from babylon60.engine import CortexEngine
+from babylon60.extensions.immune.filters.base import Verdict
+from babylon60.extensions.immune.membrane import ImmuneMembrane
+from babylon60.integration.rustchain.mcp_tool import register_rustchain_tools
+from babylon60.ledger import ImmutableLedger
+from babylon60.swarm import start_swarm_daemon
 
-from cortex.mcp_server.apollo_tools import register_apollo_tools
-from cortex.mcp_server.core_tools import (
+from babylon60.mcp_server.apollo_tools import register_apollo_tools
+from babylon60.mcp_server.core_tools import (
     _register_embed_status_tool,
     _register_embed_tool,
 )
-from cortex.mcp_server.genesis_tools import register_genesis_tools
-from cortex.mcp_server.guard import MCPGuard
-from cortex.mcp_server.health_tools import register_health_tools
-from cortex.mcp_server.kapso_tools import register_kapso_tools
-from cortex.mcp_server.knowledge_watcher import start_knowledge_daemon
-from cortex.mcp_server.mega_tools import register_mega_tools
-from cortex.mcp_server.music_tools import register_music_tools
-from cortex.mcp_server.singularity_tools import register_singularity_tools
-from cortex.mcp_server.trust_tools import register_trust_tools
-from cortex.mcp_server.utils import (
+from babylon60.mcp_server.genesis_tools import register_genesis_tools
+from babylon60.mcp_server.guard import MCPGuard
+from babylon60.mcp_server.health_tools import register_health_tools
+from babylon60.mcp_server.kapso_tools import register_kapso_tools
+from babylon60.mcp_server.knowledge_watcher import start_knowledge_daemon
+from babylon60.mcp_server.mega_tools import register_mega_tools
+from babylon60.mcp_server.music_tools import register_music_tools
+from babylon60.mcp_server.singularity_tools import register_singularity_tools
+from babylon60.mcp_server.trust_tools import register_trust_tools
+from babylon60.mcp_server.utils import (
     AsyncConnectionPool,
     MCPMetrics,
     MCPServerConfig,
@@ -314,7 +314,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
         register_trust_tools(mcp, ctx)
         register_mega_tools(mcp, ctx)
 
-        from cortex.mcp_server.hilbert_tools import register_hilbert_tools
+        from babylon60.mcp_server.hilbert_tools import register_hilbert_tools
 
         register_hilbert_tools(mcp, ctx)
 
@@ -325,7 +325,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
         register_singularity_tools(mcp)
         register_rustchain_tools(mcp)
 
-        from cortex.mcp_server.pipeline_tools import register_pipeline_tools
+        from babylon60.mcp_server.pipeline_tools import register_pipeline_tools
 
         register_pipeline_tools(mcp, ctx)
 

@@ -9,8 +9,8 @@ Uses AppleScript (System Events) for reliable keystroke injection.
 import logging
 from typing import TYPE_CHECKING, Optional
 
-from cortex.extensions.ui_control.applescript import run_applescript
-from cortex.extensions.ui_control.models import (
+from babylon60.extensions.ui_control.applescript import run_applescript
+from babylon60.extensions.ui_control.models import (
     SPECIAL_KEY_MAP,
     AppTarget,
     InteractionResult,
@@ -18,7 +18,7 @@ from cortex.extensions.ui_control.models import (
 )
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex_extensions.ui_control.keyboard")
 

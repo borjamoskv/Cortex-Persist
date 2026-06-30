@@ -9,10 +9,10 @@ and the MessageBus to prevent Context Rot.
 import asyncio
 import logging
 
-from cortex.agents.base import BaseAgent
-from cortex.agents.bus import MessageBus
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.state import AgentStatus
+from babylon60.agents.base import BaseAgent
+from babylon60.agents.bus import MessageBus
+from babylon60.agents.manifest import AgentManifest
+from babylon60.agents.state import AgentStatus
 
 logger = logging.getLogger("cortex.agents.landauer_daemon")
 

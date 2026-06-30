@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Final
 
-from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from babylon60.utils.i18n import DEFAULT_LANGUAGE, get_trans
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -332,8 +332,8 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
     _PUBLIC_PATHS = ("/docs", "/openapi.json", "/redoc", "/health", "/metrics", "/v1/status")
 
     async def dispatch(self, request: Request, call_next):
-        from cortex.auth.manager import get_auth_manager
-        from cortex.extensions.security.tenant import tenant_id_var
+        from babylon60.auth.manager import get_auth_manager
+        from babylon60.extensions.security.tenant import tenant_id_var
 
         # 1. Allow public paths without auth, default to 'default' tenant
         if any(request.url.path.startswith(p) for p in self._PUBLIC_PATHS):
@@ -404,7 +404,7 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
                                 config_data = json.loads(row[0])
                                 plan = config_data.get("plan", "free")
                                 if plan == "pwyw":
-                                    from cortex.extensions.metering.quotas import PlanQuota
+                                    from babylon60.extensions.metering.quotas import PlanQuota
                                     plan_quota = PlanQuota(
                                         name="pwyw",
                                         calls_limit=config_data.get("calls_limit", 1000),
@@ -441,7 +441,7 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
             if request.method in ("POST", "PUT", "PATCH"):
                 body = await request.body()
                 try:
-                    from cortex.mcp_server.guard import MCPGuard
+                    from babylon60.mcp_server.guard import MCPGuard
 
                     if MCPGuard.detect_poisoning(body.decode(errors="ignore")):
                         logger.warning(
@@ -494,8 +494,8 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
         """Asynchronously reports usage to Stripe via background task with secure DB lookup."""
         try:
             import stripe  # pyright: ignore[reportMissingImports]
-            from cortex.auth.manager import get_auth_manager
-            from cortex.core import config
+            from babylon60.auth.manager import get_auth_manager
+            from babylon60.core import config
 
             auth_mgr = get_auth_manager()
             result = await auth_mgr.authenticate_async(api_key)

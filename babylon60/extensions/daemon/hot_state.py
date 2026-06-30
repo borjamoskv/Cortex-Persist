@@ -84,7 +84,7 @@ class HotStateDB:
 
     @contextmanager
     def _conn(self):
-        from cortex.database.core import connect
+        from babylon60.database.core import connect
 
         conn = connect(str(self._db_path), check_same_thread=False)
         conn.row_factory = sqlite3.Row

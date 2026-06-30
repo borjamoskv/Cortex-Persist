@@ -23,7 +23,7 @@ except ImportError:
     FileSystemEvent = None  # type: ignore[assignment,misc]
     Observer = None  # type: ignore[assignment,misc]
 
-from cortex.extensions.perception.base import (
+from babylon60.extensions.perception.base import (
     DEBOUNCE_SECONDS,
     FileEvent,
     classify_file,

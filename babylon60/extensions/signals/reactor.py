@@ -23,8 +23,8 @@ import logging
 import time
 from typing import Any
 
-from cortex.extensions.signals.bus import SignalBus
-from cortex.utils.respiration import breathe, oxygenate
+from babylon60.extensions.signals.bus import SignalBus
+from babylon60.utils.respiration import breathe, oxygenate
 
 __all__ = ["SignalReactor"]
 
@@ -112,10 +112,10 @@ class SignalReactor:
         if self._trigger_engine is not None:
             return self._trigger_engine
         try:
-            from cortex.extensions.signals.trigger_engine import (
+            from babylon60.extensions.signals.trigger_engine import (
                 TriggerEngine,
             )
-            from cortex.extensions.signals.trigger_registry import (
+            from babylon60.extensions.signals.trigger_registry import (
                 register_defaults,
             )
 
@@ -153,7 +153,7 @@ class SignalReactor:
             return
 
         try:
-            from cortex.compaction.compactor import compact
+            from babylon60.compaction.compactor import compact
 
             logger.info("Reactor triggering autonomous compaction for [%s]", project)
 
@@ -172,7 +172,7 @@ class SignalReactor:
             return
 
         try:
-            from cortex.extensions.sync import export_snapshot
+            from babylon60.extensions.sync import export_snapshot
 
             logger.info("Reactor triggering autonomous snapshot export.")
             await export_snapshot(self.engine)

@@ -29,7 +29,7 @@ class GitWatcherHandler(FileSystemEventHandler):
 
             async def check_ghosts():
                 try:
-                    from cortex.engine import CortexEngine
+                    from babylon60.engine import CortexEngine
 
                     engine = CortexEngine()
                     modified_path = Path(event.src_path)  # type: ignore[type-error]

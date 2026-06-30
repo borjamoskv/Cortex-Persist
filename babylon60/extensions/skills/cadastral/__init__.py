@@ -9,8 +9,8 @@ with minimal legal and existential risk.
 
 from __future__ import annotations
 
-from cortex.extensions.skills.cadastral.engine import CadastralEngine
-from cortex.extensions.skills.cadastral.models import (
+from babylon60.extensions.skills.cadastral.engine import CadastralEngine
+from babylon60.extensions.skills.cadastral.models import (
     BlindSpot,
     CadastralReport,
     Coordinate,

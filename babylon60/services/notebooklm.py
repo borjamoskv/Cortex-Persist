@@ -7,8 +7,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.database.core import connect as db_connect
-from cortex.engine import CortexEngine
+from babylon60.database.core import connect as db_connect
+from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex.services.notebooklm")
 

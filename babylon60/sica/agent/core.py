@@ -34,24 +34,24 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.sica.agent.assessment import SelfAssessor
-from cortex.sica.agent.emission import AgentEmitter
-from cortex.sica.agent.stats import _LifetimeStats
-from cortex.sica.autonomy import (
+from babylon60.sica.agent.assessment import SelfAssessor
+from babylon60.sica.agent.emission import AgentEmitter
+from babylon60.sica.agent.stats import _LifetimeStats
+from babylon60.sica.autonomy import (
     AdaptiveRetry,
     AutonomousTick,
     SpeculativeFork,
 )
-from cortex.sica.constitution import Constitution
-from cortex.sica.meta_level import MetaAction, MetaJudgment, MetaLevel
-from cortex.sica.object_level import ExecutionTrace, ObjectLevel, StepOutcome
-from cortex.sica.persistence import load_or_default, save_genome
-from cortex.sica.strategy import SearchStrategy
+from babylon60.sica.constitution import Constitution
+from babylon60.sica.meta_level import MetaAction, MetaJudgment, MetaLevel
+from babylon60.sica.object_level import ExecutionTrace, ObjectLevel, StepOutcome
+from babylon60.sica.persistence import load_or_default, save_genome
+from babylon60.sica.strategy import SearchStrategy
 
-from cortex.agents.base import BaseAgent
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind
-from cortex.agents.tools import ToolRegistry
+from babylon60.agents.base import BaseAgent
+from babylon60.agents.manifest import AgentManifest
+from babylon60.agents.message_schema import AgentMessage, MessageKind
+from babylon60.agents.tools import ToolRegistry
 
 logger = logging.getLogger("cortex.sica.agent")
 

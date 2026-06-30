@@ -11,7 +11,7 @@ import json
 import time
 from typing import Any
 
-from cortex.telemetry.metrics import metrics
+from babylon60.telemetry.metrics import metrics
 
 from babylon60.crypto.hash_registry import cortex_hash
 

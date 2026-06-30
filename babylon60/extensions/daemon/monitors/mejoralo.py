@@ -14,9 +14,9 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.daemon.models import EntropyAlert, MejoraloAlert
-from cortex.extensions.daemon.monitors.base import IntervalProjectMonitor
-from cortex.extensions.mejoralo import MejoraloEngine
+from babylon60.extensions.daemon.models import EntropyAlert, MejoraloAlert
+from babylon60.extensions.daemon.monitors.base import IntervalProjectMonitor
+from babylon60.extensions.mejoralo import MejoraloEngine
 
 logger = logging.getLogger("moskv-daemon")
 

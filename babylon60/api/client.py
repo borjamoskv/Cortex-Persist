@@ -5,7 +5,7 @@ Python SDK Client.
 Simple, ergonomic client for the CORTEX REST API.
 
 Usage:
-    from cortex.client import CortexClient
+    from babylon60.client import CortexClient
 
     client = CortexClient("http://localhost:8484", api_key="ctx_...")
     client.store("my-project", "Important fact about the system")

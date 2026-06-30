@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import ast
 
-from cortex.extensions.mejoralo.models import AntipatternFinding
+from babylon60.extensions.mejoralo.models import AntipatternFinding
 
 __all__ = ["_AsyncIntegrityVisitor", "_BroadExceptionVisitor"]
 

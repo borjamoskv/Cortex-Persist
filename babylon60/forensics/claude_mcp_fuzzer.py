@@ -12,7 +12,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Optional
 
-from cortex.integration.rustchain.judge import ASTLintJudge, PolicyJudge
+from babylon60.integration.rustchain.judge import ASTLintJudge, PolicyJudge
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from mcp.server.fastmcp import FastMCP

@@ -36,7 +36,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 
-from cortex.extensions.thinking.presets import ThinkingMode
+from babylon60.extensions.thinking.presets import ThinkingMode
 
 __all__ = ["RouteDecision", "SemanticRouter"]
 

@@ -1,10 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 
-from cortex.extensions.genesis.renderers.api import _render_fastapi_route
-from cortex.extensions.genesis.renderers.cli import _render_cli_command
-from cortex.extensions.genesis.renderers.data import _render_agent_yaml, _render_migration
-from cortex.extensions.genesis.renderers.docs import _render_skill_md, _render_workflow_md
-from cortex.extensions.genesis.renderers.python import (
+from babylon60.extensions.genesis.renderers.api import _render_fastapi_route
+from babylon60.extensions.genesis.renderers.cli import _render_cli_command
+from babylon60.extensions.genesis.renderers.data import _render_agent_yaml, _render_migration
+from babylon60.extensions.genesis.renderers.docs import _render_skill_md, _render_workflow_md
+from babylon60.extensions.genesis.renderers.python import (
     _render_dataclass,
     _render_init,
     _render_mixin,

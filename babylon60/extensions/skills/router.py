@@ -11,9 +11,9 @@ from __future__ import annotations
 import logging
 from typing import Any, Final
 
-from cortex.extensions.skills.registry import SkillManifest, SkillRegistry
-from cortex.memory.metamemory import MetamemoryMonitor
-from cortex.memory.procedural import ProceduralMemory
+from babylon60.extensions.skills.registry import SkillManifest, SkillRegistry
+from babylon60.memory.metamemory import MetamemoryMonitor
+from babylon60.memory.procedural import ProceduralMemory
 
 logger = logging.getLogger(__name__)
 

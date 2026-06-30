@@ -86,7 +86,7 @@ class ErrorBoundary:
     async def _persist(self, error: BaseException) -> int | None:
         """Persist error to ghost pipeline (async path)."""
         try:
-            from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+            from babylon60.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
             pipeline = ErrorGhostPipeline()
             fact_id = await pipeline.capture(
@@ -109,7 +109,7 @@ class ErrorBoundary:
     def _persist_sync(self, error: BaseException) -> None:
         """Persist error to ghost pipeline (sync path)."""
         try:
-            from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+            from babylon60.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
             pipeline = ErrorGhostPipeline()
             pipeline.capture_sync(

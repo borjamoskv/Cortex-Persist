@@ -5,7 +5,7 @@ Reality Level: C5-REAL
 """
 
 import instructor
-from cortex.extensions.nous.models import NousAST
+from babylon60.extensions.nous.models import NousAST
 from openai import AsyncOpenAI
 
 

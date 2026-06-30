@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from cortex.guards.path_guard import is_safe_path
+from babylon60.guards.path_guard import is_safe_path
 
 from .constants import STACK_MARKERS
 
@@ -61,7 +61,7 @@ def get_test_cmd(stack: str) -> list[str] | None:
 
 def run_quiet(cmd: list[str], cwd: str | None = None) -> tuple[int, str, str]:
     """Run command without noise. Enforces path validation."""
-    from cortex.guards.path_guard import is_safe_path  # pyright: ignore
+    from babylon60.guards.path_guard import is_safe_path  # pyright: ignore
 
     if not cmd or not is_safe_path(cmd[0]):
         msg = f"Prohibida la ejecución de comando inseguro: {cmd[0] if cmd else 'None'}"

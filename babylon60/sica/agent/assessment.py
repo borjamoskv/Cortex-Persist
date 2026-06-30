@@ -2,9 +2,9 @@
 
 from typing import Any
 
-from cortex.sica.meta_level import MetaJudgment
-from cortex.sica.object_level import ObjectLevel, StepOutcome
-from cortex.sica.strategy import SearchStrategy
+from babylon60.sica.meta_level import MetaJudgment
+from babylon60.sica.object_level import ObjectLevel, StepOutcome
+from babylon60.sica.strategy import SearchStrategy
 
 
 class SelfAssessor:

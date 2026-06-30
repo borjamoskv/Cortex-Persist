@@ -5,8 +5,8 @@
 Perception, Decision, Creation, and Validation.
 """
 
-from cortex.extensions.manifold.convergence import ConvergenceEngine
-from cortex.extensions.manifold.models import (
+from babylon60.extensions.manifold.convergence import ConvergenceEngine
+from babylon60.extensions.manifold.models import (
     ConvergenceMetrics,
     DimensionalState,
     DimensionType,

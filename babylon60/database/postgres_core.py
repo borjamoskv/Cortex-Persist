@@ -24,7 +24,7 @@ try:
 except ImportError:
     register_vector = None
 
-from cortex.utils.errors import DBLockError
+from babylon60.utils.errors import DBLockError
 
 __all__ = [
     "connect_async_ctx",

@@ -123,7 +123,7 @@ def get_provider_configs() -> dict[str, dict[str, Any]]:
         return _CONFIGS_CACHE
 
     try:
-        from cortex.embeddings._presets import load_embedding_presets
+        from babylon60.embeddings._presets import load_embedding_presets
 
         presets = load_embedding_presets()
         if presets:

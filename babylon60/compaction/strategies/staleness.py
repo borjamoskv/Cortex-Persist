@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING
 __all__ = ["execute_staleness_prune", "find_stale_facts"]
 
 if TYPE_CHECKING:
-    from cortex.compaction.compactor import CompactionResult
-    from cortex.engine import CortexEngine
+    from babylon60.compaction.compactor import CompactionResult
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compaction.staleness")
 _LOG_FMT = "Compactor [%s] %s"

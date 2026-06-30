@@ -11,8 +11,8 @@ from __future__ import annotations
 import logging
 import time
 
-from cortex.extensions.llm.sovereign import SovereignLLM
-from cortex.gateway.spoof import SpoofManager
+from babylon60.extensions.llm.sovereign import SovereignLLM
+from babylon60.gateway.spoof import SpoofManager
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -65,7 +65,7 @@ async def openai_chat_completions(
         # in the same way as generate. But for high reliability, we prefer generate.
         # Actually, let's implement streaming in SovereignLLM?
         # For now, let's use the standard Manager for streaming and Sovereign for non-streaming.
-        from cortex.extensions.llm.manager import LLMManager
+        from babylon60.extensions.llm.manager import LLMManager
 
         mgr = LLMManager()
 

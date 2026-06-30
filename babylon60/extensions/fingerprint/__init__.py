@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from cortex.extensions.fingerprint.extractor import FingerprintExtractor
-from cortex.extensions.fingerprint.models import (
+from babylon60.extensions.fingerprint.extractor import FingerprintExtractor
+from babylon60.extensions.fingerprint.models import (
     CognitiveFingerprint,
     DomainPreference,
     PatternVector,
 )
-from cortex.extensions.fingerprint.scanner import FingerprintScanner
+from babylon60.extensions.fingerprint.scanner import FingerprintScanner
 
 __all__ = [
     "CognitiveFingerprint",

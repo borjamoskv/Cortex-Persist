@@ -5,8 +5,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.extensions.daemon.models import TrendsAlert
-from cortex.extensions.daemon.monitors.base import BaseMonitor
+from babylon60.extensions.daemon.models import TrendsAlert
+from babylon60.extensions.daemon.monitors.base import BaseMonitor
 
 logger = logging.getLogger("moskv-daemon")
 

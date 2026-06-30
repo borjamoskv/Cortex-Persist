@@ -16,7 +16,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 import aiosqlite
-from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
+from babylon60.extensions.immune.chaos import ChaosGate, async_interceptor
 
 __all__ = ["CortexConnectionPool"]
 
@@ -107,7 +107,7 @@ class CortexConnectionPool:
 
     async def _create_connection(self) -> aiosqlite.Connection:
         """Create a highly-optimized, WAL-enabled async connection."""
-        from cortex.database.core import connect_async, load_sqlite_vec_async
+        from babylon60.database.core import connect_async, load_sqlite_vec_async
 
         try:
             conn = await connect_async(self.db_path, read_only=self.read_only)

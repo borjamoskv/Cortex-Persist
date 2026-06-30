@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
-from cortex.simulation.drift_detector import MemoryDriftDetector
-from cortex.simulation.primitives import MemoryTrajectory, SimulationField
-from cortex.simulation.thermodynamics import MemoryEnergyField
+from babylon60.simulation.drift_detector import MemoryDriftDetector
+from babylon60.simulation.primitives import MemoryTrajectory, SimulationField
+from babylon60.simulation.thermodynamics import MemoryEnergyField
 
 
 class MemoryCollapseProtocol:

@@ -18,7 +18,7 @@ import json
 import logging
 import sys
 
-from cortex.extensions.evolution.engine import EvolutionEngine
+from babylon60.extensions.evolution.engine import EvolutionEngine
 
 logging.basicConfig(
     level=logging.INFO,

@@ -10,8 +10,8 @@ import logging
 from pathlib import Path
 
 import httpx
-from cortex.extensions.aether.models import AgentTask, TaskSource
-from cortex.extensions.aether.queue import TaskQueue
+from babylon60.extensions.aether.models import AgentTask, TaskSource
+from babylon60.extensions.aether.queue import TaskQueue
 
 __all__ = ["GitHubIngestor"]
 

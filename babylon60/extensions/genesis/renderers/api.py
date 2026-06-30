@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from cortex.extensions.genesis.models import ComponentSpec
+from babylon60.extensions.genesis.models import ComponentSpec
 
 
 def _render_fastapi_route(system_name: str, comp: ComponentSpec) -> str:

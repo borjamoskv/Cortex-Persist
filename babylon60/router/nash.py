@@ -13,8 +13,8 @@ import math
 from dataclasses import dataclass
 from typing import Literal
 
-from cortex.router.causal import CausalPolicyGradientRouter
-from cortex.router.policy import SignalVector
+from babylon60.router.causal import CausalPolicyGradientRouter
+from babylon60.router.policy import SignalVector
 
 logger = logging.getLogger("cortex.router.nash")
 

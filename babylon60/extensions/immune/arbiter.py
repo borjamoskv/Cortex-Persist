@@ -19,8 +19,8 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any
 
-from cortex.extensions.immune.falsification import EvolutionaryFalsifier
-from cortex.verification.verifier import SovereignVerifier
+from babylon60.extensions.immune.falsification import EvolutionaryFalsifier
+from babylon60.verification.verifier import SovereignVerifier
 
 logger = logging.getLogger("cortex_extensions.immune.arbiter")
 

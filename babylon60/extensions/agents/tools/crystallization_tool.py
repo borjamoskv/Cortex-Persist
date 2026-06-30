@@ -71,7 +71,7 @@ class CrystallizationTool:
             project,
         )
         try:
-            from cortex.engine import CortexEngine
+            from babylon60.engine import CortexEngine
 
             engine = CortexEngine()
             await engine.store(

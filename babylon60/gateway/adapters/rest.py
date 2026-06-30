@@ -20,7 +20,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.gateway import GatewayIntent, GatewayRequest, GatewayRouter
+from babylon60.gateway import GatewayIntent, GatewayRequest, GatewayRouter
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
@@ -63,7 +63,7 @@ class EmitBody(BaseModel):
 
 def _get_router(request: Request) -> GatewayRouter:
     """Build a GatewayRouter from app state for each request."""
-    import cortex.api.state as api_state
+    import babylon60.api.state as api_state
 
     engine = getattr(api_state, "async_engine", None) or getattr(api_state, "engine", None)
     bus = getattr(api_state, "notification_bus", None)

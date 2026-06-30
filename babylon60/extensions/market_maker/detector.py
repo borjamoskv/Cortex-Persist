@@ -11,7 +11,7 @@ import random
 from decimal import Decimal
 from typing import Any, Protocol
 
-from cortex.extensions.market_maker.models import TrendSignal
+from babylon60.extensions.market_maker.models import TrendSignal
 
 log = logging.getLogger(__name__)
 

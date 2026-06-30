@@ -5,7 +5,7 @@
 10 agents × 10 subagents = 100 entities improving forever.
 """
 
-from cortex.extensions.evolution.agents import (
+from babylon60.extensions.evolution.agents import (
     AgentDomain,
     EnneagramSovereign,
     EnneagramSubAgent,
@@ -13,14 +13,14 @@ from cortex.extensions.evolution.agents import (
     MutationType,
     create_sovereign_swarm,
 )
-from cortex.extensions.evolution.engine import EvolutionEngine
-from cortex.extensions.evolution.ledger_db import EvolutionLedgerDB
-from cortex.extensions.evolution.models import (
+from babylon60.extensions.evolution.engine import EvolutionEngine
+from babylon60.extensions.evolution.ledger_db import EvolutionLedgerDB
+from babylon60.extensions.evolution.models import (
     EvolutionMetric,
     EvolutionMutation,
     EvolutionType,
 )
-from cortex.extensions.evolution.persistence import load_swarm, save_swarm
+from babylon60.extensions.evolution.persistence import load_swarm, save_swarm
 
 __all__ = [
     "AgentDomain",

@@ -82,8 +82,8 @@ class SQLiteAuthBackend(BaseAuthBackend):
         self.db_path = db_path
 
     async def initialize(self) -> None:
-        from cortex.auth import AUTH_SCHEMA
-        from cortex.database.core import causal_write
+        from babylon60.auth import AUTH_SCHEMA
+        from babylon60.database.core import causal_write
 
         conn = await self._get_conn_async()
         try:
@@ -103,7 +103,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
             await conn.close()
 
     async def _get_conn_async(self) -> aiosqlite.Connection:
-        from cortex.database.core import connect_async
+        from babylon60.database.core import connect_async
 
         return await connect_async(self.db_path)
 
@@ -132,8 +132,8 @@ class SQLiteAuthBackend(BaseAuthBackend):
         key_hash_argon2: str | None = None,
         hash_algo: str = "sha256",
     ) -> int:
-        from cortex.auth import SQL_INSERT_KEY
-        from cortex.database.core import causal_write
+        from babylon60.auth import SQL_INSERT_KEY
+        from babylon60.database.core import causal_write
 
         args = (
             name,
@@ -172,7 +172,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
             await conn.close()
 
     async def revoke_key(self, key_id: KeyID) -> bool:
-        from cortex.database.core import causal_write
+        from babylon60.database.core import causal_write
 
         conn = await self._get_conn_async()
         try:
@@ -188,7 +188,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
     async def update_last_used(self, key_id: KeyID) -> None:
         from datetime import datetime, timezone
 
-        from cortex.database.core import causal_write
+        from babylon60.database.core import causal_write
 
         conn = await self._get_conn_async()
         try:
@@ -219,7 +219,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
     async def migrate_key_to_argon2(self, key_id: KeyID, key_hash_argon2: str) -> None:
         from datetime import datetime, timezone
 
-        from cortex.database.core import causal_write
+        from babylon60.database.core import causal_write
 
         conn = await self._get_conn_async()
         try:
@@ -257,7 +257,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
         return self._pool  # type: ignore[return-value]
 
     async def initialize(self) -> None:
-        from cortex.auth import AUTH_SCHEMA
+        from babylon60.auth import AUTH_SCHEMA
 
         # AlloyDB/Postgres uses SERIAL/TEXT instead of INTEGER PRIMARY KEY AUTOINCREMENT
         pg_schema = AUTH_SCHEMA.replace(
@@ -398,7 +398,7 @@ class TursoAuthBackend(BaseAuthBackend):
         return self._client
 
     async def initialize(self) -> None:
-        from cortex.auth import AUTH_SCHEMA
+        from babylon60.auth import AUTH_SCHEMA
 
         client = await self._get_client()
         # Create statements, ignoring empty ones
@@ -436,7 +436,7 @@ class TursoAuthBackend(BaseAuthBackend):
         key_hash_argon2: str | None = None,
         hash_algo: str = "sha256",
     ) -> int:
-        from cortex.auth import SQL_INSERT_KEY
+        from babylon60.auth import SQL_INSERT_KEY
 
         client = await self._get_client()
         args = [

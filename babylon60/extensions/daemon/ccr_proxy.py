@@ -7,10 +7,10 @@ import time
 import httpx
 
 # CORTEX L2 Membrane
-from cortex.engine import CortexEngine
-from cortex.extensions.immune.membrane import ImmuneMembrane, Verdict
-from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+from babylon60.engine import CortexEngine
+from babylon60.extensions.immune.membrane import ImmuneMembrane, Verdict
+from babylon60.memory.encoder import AsyncEncoder
+from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse

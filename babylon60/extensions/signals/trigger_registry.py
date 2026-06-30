@@ -7,8 +7,8 @@ from GEMINI.md §5 to automated CORTEX responses.
 
 Usage::
 
-    from cortex.extensions.signals.trigger_engine import TriggerEngine
-    from cortex.extensions.signals.trigger_registry import register_defaults
+    from babylon60.extensions.signals.trigger_engine import TriggerEngine
+    from babylon60.extensions.signals.trigger_registry import register_defaults
 
     engine = TriggerEngine(handler=my_handler)
     register_defaults(engine)
@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import logging
 
-from cortex.extensions.signals.trigger_engine import (
+from babylon60.extensions.signals.trigger_engine import (
     ActionType,
     EventHorizonPriority,
     TriggerAction,

@@ -7,9 +7,9 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.billing.gateway import StripeBillingGateway
-    from cortex.extensions.billing.metering import CausalMetering
-    from cortex.extensions.billing.models import BillingEvent, FailureType, StripeInvoice
+    from babylon60.extensions.billing.gateway import StripeBillingGateway
+    from babylon60.extensions.billing.metering import CausalMetering
+    from babylon60.extensions.billing.models import BillingEvent, FailureType, StripeInvoice
 
 __all__ = [
     "BillingEvent",

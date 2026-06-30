@@ -16,8 +16,8 @@ from dataclasses import dataclass, field
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
-from cortex.extensions.immune.chaos import ChaosScenario, async_interceptor
-from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+from babylon60.extensions.immune.chaos import ChaosScenario, async_interceptor
+from babylon60.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
 from babylon60.crypto.hash_registry import cortex_hash
 
@@ -233,7 +233,7 @@ class HydraChaosEngine:
         return res
 
     async def _scenario_redis_kill(self, mock_redis: MockRedisClient) -> None:
-        from cortex.memory.distributed_cache import DistributedSovereignCache
+        from babylon60.memory.distributed_cache import DistributedSovereignCache
 
         cache = DistributedSovereignCache(mock_redis)
         await cache.put("agent:alpha", {"context": "pre-kill"})
@@ -242,7 +242,7 @@ class HydraChaosEngine:
         await cache.get("agent:alpha")
 
     async def _scenario_stream_corruption(self, mock_redis: MockRedisClient) -> None:
-        from cortex.memory.distributed_cache import DistributedSovereignCache
+        from babylon60.memory.distributed_cache import DistributedSovereignCache
 
         cache = DistributedSovereignCache(mock_redis)
         await cache.put("agent:gamma", {"data": "clean"})
@@ -251,7 +251,7 @@ class HydraChaosEngine:
         await cache.get("agent:gamma")
 
     async def _scenario_partial_write(self, mock_redis: MockRedisClient) -> None:
-        from cortex.memory.distributed_cache import DistributedSovereignCache
+        from babylon60.memory.distributed_cache import DistributedSovereignCache
 
         cache = DistributedSovereignCache(mock_redis)
         assert cache.chaos_gate is not None
@@ -260,7 +260,7 @@ class HydraChaosEngine:
         assert not result, "Partial write must return False"
 
     async def _scenario_consumer_stall(self, mock_redis: MockRedisClient) -> None:
-        from cortex.memory.distributed_cache import DistributedSovereignCache
+        from babylon60.memory.distributed_cache import DistributedSovereignCache
 
         cache = DistributedSovereignCache(mock_redis)
         assert cache.chaos_gate is not None
@@ -273,7 +273,7 @@ class HydraChaosEngine:
             ErrorGhostPipeline().capture_sync(TimeoutError("Stall"), source="mock")
 
     async def _scenario_cascade_failure(self, mock_redis: MockRedisClient) -> None:
-        from cortex.memory.distributed_cache import DistributedSovereignCache
+        from babylon60.memory.distributed_cache import DistributedSovereignCache
 
         cache = DistributedSovereignCache(mock_redis)
         assert cache.chaos_gate is not None

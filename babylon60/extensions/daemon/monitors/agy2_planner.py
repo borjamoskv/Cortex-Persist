@@ -13,7 +13,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.daemon.models import WorkflowAlert
+from babylon60.extensions.daemon.models import WorkflowAlert
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -115,7 +115,7 @@ class AGY2PlannerMonitor:
         logger.info("Detected AGY2 Planning Mode. Extracting context for goal: %s...", goal[:50])
 
         try:
-            from cortex.memory.memory_manager import MemoryManager
+            from babylon60.memory.memory_manager import MemoryManager
 
             # We use the internal synchronous / async MemoryManager
             # Since MemoryManager is typically synchronous or has async variants,

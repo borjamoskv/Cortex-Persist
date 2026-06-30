@@ -11,7 +11,7 @@ import logging
 import os
 from pathlib import Path
 
-from cortex.extensions.mejoralo.constants import (
+from babylon60.extensions.mejoralo.constants import (
     GHOST_MIN_SUBTREE_SIZE,
     GHOST_PENALTY_PER_FINDING,
     INDENT_NESTING_THRESHOLD,
@@ -29,9 +29,9 @@ from cortex.extensions.mejoralo.constants import (
     SKIP_DIRS,
     SOVEREIGN_BONUS_FACTOR,
 )
-from cortex.extensions.mejoralo.models import DimensionResult, ScanResult
-from cortex.extensions.mejoralo.utils import detect_stack
-from cortex.guards.path_guard import is_safe_path
+from babylon60.extensions.mejoralo.models import DimensionResult, ScanResult
+from babylon60.extensions.mejoralo.utils import detect_stack
+from babylon60.guards.path_guard import is_safe_path
 
 __all__ = ["scan"]
 

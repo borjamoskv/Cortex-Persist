@@ -12,7 +12,7 @@ import logging
 from datetime import datetime, timezone
 
 import aiosqlite
-from cortex.database.core import causal_write, connect_async_ctx
+from babylon60.database.core import causal_write, connect_async_ctx
 
 logger = logging.getLogger("cortex.worker.telemetry_compaction")
 
@@ -103,7 +103,7 @@ class TelemetryCompactionWorker:
             )
 
             # Store summary using unified pipeline
-            from cortex.engine.core.fact_store_core import insert_fact_record
+            from babylon60.engine.core.fact_store_core import insert_fact_record
 
             with causal_write(conn):
                 await insert_fact_record(

@@ -19,10 +19,10 @@ import logging
 import time
 from typing import Any
 
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
-from cortex.agents.state import AgentState, AgentStatus, WorkingMemory
-from cortex.agents.tools import ToolRegistry
+from babylon60.agents.manifest import AgentManifest
+from babylon60.agents.message_schema import AgentMessage, MessageKind, new_message
+from babylon60.agents.state import AgentState, AgentStatus, WorkingMemory
+from babylon60.agents.tools import ToolRegistry
 
 logger = logging.getLogger("cortex.agents.base")
 

@@ -13,8 +13,8 @@ import random
 from dataclasses import dataclass, field
 from enum import Enum
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-from cortex.extensions.music_engine._synth import (
+from babylon60.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.extensions.music_engine._synth import (
     _note_to_freq,
     _synth_hihat,
     _synth_kick,

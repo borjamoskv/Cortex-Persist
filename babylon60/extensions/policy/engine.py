@@ -16,7 +16,7 @@ import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from cortex.extensions.policy.models import (
+from babylon60.extensions.policy.models import (
     ACTION_TYPE_MAP,
     REWARD_MAP,
     ActionItem,
@@ -24,8 +24,8 @@ from cortex.extensions.policy.models import (
 )
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
-    from cortex.engine.cognitive.models import Fact
+    from babylon60.engine import CortexEngine
+    from babylon60.engine.cognitive.models import Fact
 
 logger = logging.getLogger("cortex_extensions.policy")
 

@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 __all__ = ["export_facts"]
 
 if TYPE_CHECKING:
-    from cortex.engine.cognitive.models import Fact
+    from babylon60.engine.cognitive.models import Fact
 
 
 def export_facts(facts: list[Fact], fmt: str = "json") -> str:

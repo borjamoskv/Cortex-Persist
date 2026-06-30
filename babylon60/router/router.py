@@ -12,7 +12,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.pipeline import ContextPacket
+from babylon60.pipeline import ContextPacket
 
 logger = logging.getLogger("cortex.router")
 

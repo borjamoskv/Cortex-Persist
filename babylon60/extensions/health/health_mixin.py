@@ -10,15 +10,15 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.extensions.health.collector import HealthCollector
-from cortex.extensions.health.models import (
+from babylon60.extensions.health.collector import HealthCollector
+from babylon60.extensions.health.models import (
     Grade,
     HealthReport,
     HealthScore,
     HealthThresholds,
 )
-from cortex.extensions.health.scorer import HealthScorer
-from cortex.extensions.health.trend import TrendDetector
+from babylon60.extensions.health.scorer import HealthScorer
+from babylon60.extensions.health.trend import TrendDetector
 
 logger = logging.getLogger("cortex_extensions.health")
 

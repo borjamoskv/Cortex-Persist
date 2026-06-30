@@ -211,7 +211,7 @@ class ImportTracer:
     def detect_cycles(self, collapsed: bool = False) -> list[list[str]]:
         """
         Detects cycles in the import graph using DFS.
-        If collapsed is True, nodes are mapped from cortex.* -> babylon60.* to simulate collapse stability.
+        If collapsed is True, nodes are mapped from babylon60.* -> babylon60.* to simulate collapse stability.
         """
         # Build adjacency list
         graph = defaultdict(set)

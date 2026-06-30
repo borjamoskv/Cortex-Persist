@@ -14,8 +14,8 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.llm._cascade import CascadeManager, classify_tier
-from cortex.extensions.llm._models import (
+from babylon60.extensions.llm._cascade import CascadeManager, classify_tier
+from babylon60.extensions.llm._models import (
     BaseProvider,
     CascadeEvent,
     CascadeTier,
@@ -24,11 +24,11 @@ from cortex.extensions.llm._models import (
     IntentProfile,
     ReasoningMode,
 )
-from cortex.extensions.llm._router_hedging import execute_hedged, execute_swarm
-from cortex.extensions.llm._router_policy import ordered_fallbacks
-from cortex.extensions.llm._router_shannon import compress_working_memory
-from cortex.extensions.llm._telemetry import CascadeTelemetry
-from cortex.utils.result import Err, Ok, Result
+from babylon60.extensions.llm._router_hedging import execute_hedged, execute_swarm
+from babylon60.extensions.llm._router_policy import ordered_fallbacks
+from babylon60.extensions.llm._router_shannon import compress_working_memory
+from babylon60.extensions.llm._telemetry import CascadeTelemetry
+from babylon60.utils.result import Err, Ok, Result
 
 logger = logging.getLogger("cortex_extensions.llm.router")
 
@@ -154,7 +154,7 @@ class CortexLLMRouter:
         if not provider_hint and prompt.system_instruction:
             # Implement Cache-Aware Routing (Zero-Recompute Policy)
             try:
-                from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
+                from babylon60.extensions.swarm.kv_prefix_registry import get_kv_registry
 
                 registry = get_kv_registry()
                 hot_providers = registry.check_cache_affinity(prompt.system_instruction)
@@ -276,7 +276,7 @@ class CortexLLMRouter:
                 "🚀 [ZERO-WAIT FAILOVER] Primary Fast-Rejected. Racing %d fallbacks simultaneously...",
                 len(valid_fallbacks),
             )
-            from cortex.extensions.llm._hedging import HedgedRequestStrategy
+            from babylon60.extensions.llm._hedging import HedgedRequestStrategy
 
             fb_start = time.monotonic()
             hedged_res, hedge_errors = await HedgedRequestStrategy.race(valid_fallbacks, prompt)
@@ -352,7 +352,7 @@ class CortexLLMRouter:
     async def _try_provider(self, provider: BaseProvider, prompt: CortexPrompt) -> Result[str, str]:
         """Try a single provider, returning Result."""
         import httpx
-        from cortex.extensions.llm.quota import QuotaRejectedError
+        from babylon60.extensions.llm.quota import QuotaRejectedError
 
         try:
             return Ok(await provider.invoke(prompt))
@@ -391,7 +391,7 @@ class CortexLLMRouter:
     def select_model_for_intent(self, intent: str) -> str | None:
         """Resolve the optimal model for the primary provider's intent."""
         try:
-            from cortex.extensions.llm._presets import resolve_model
+            from babylon60.extensions.llm._presets import resolve_model
 
             return resolve_model(self._primary.provider_name, intent)
         except ImportError:
@@ -406,7 +406,7 @@ class CortexLLMRouter:
     ) -> list[tuple[str, str]]:
         """Return (provider_name, model) pairs for an intent, cost-optimized."""
         try:
-            from cortex.extensions.llm._presets import providers_for_intent
+            from babylon60.extensions.llm._presets import providers_for_intent
 
             return providers_for_intent(
                 intent, min_tier=min_tier, max_cost=max_cost, sort_by="cost"
@@ -418,7 +418,7 @@ class CortexLLMRouter:
     def frontier_order(intent: str) -> list[tuple[str, str]]:
         """Return frontier-tier providers for an intent, cheapest first."""
         try:
-            from cortex.extensions.llm._presets import frontier_providers
+            from babylon60.extensions.llm._presets import frontier_providers
 
             return frontier_providers(intent)
         except ImportError:

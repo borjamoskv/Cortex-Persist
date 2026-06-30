@@ -12,12 +12,12 @@ import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from cortex.ledger import ImmutableLedger
+from babylon60.ledger import ImmutableLedger
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
 
-    from cortex.mcp_server.server import _MCPContext
+    from babylon60.mcp_server.server import _MCPContext
 
 __all__ = ["register_compliance_tools"]
 

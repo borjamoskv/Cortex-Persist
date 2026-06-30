@@ -11,7 +11,7 @@ import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 __all__ = ["FingerprintScanner"]
 

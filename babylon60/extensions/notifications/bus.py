@@ -13,7 +13,7 @@ Design principles:
 Wire-up::
 
     # In cortex/api.py startup:
-    from cortex.extensions.notifications import get_notification_bus
+    from babylon60.extensions.notifications import get_notification_bus
     bus = get_notification_bus()
     bus.register(TelegramAdapter())
     bus.register(MacOSAdapter())
@@ -26,10 +26,10 @@ import logging
 import threading
 from typing import TYPE_CHECKING
 
-from cortex.extensions.notifications.events import CortexEvent, EventSeverity
+from babylon60.extensions.notifications.events import CortexEvent, EventSeverity
 
 if TYPE_CHECKING:
-    from cortex.extensions.notifications.adapters.base import BaseAdapter
+    from babylon60.extensions.notifications.adapters.base import BaseAdapter
 
 logger = logging.getLogger("cortex_extensions.notifications.bus")
 

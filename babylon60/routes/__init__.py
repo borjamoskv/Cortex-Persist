@@ -63,7 +63,7 @@ _API_ROUTE_SPECS_ALL: tuple[tuple[str, str], ...] = (
     ("ultramap", "router"),
 )
 
-from cortex.core import config
+from babylon60.core import config
 
 _DANGEROUS_CLOUD_ROUTES = {
     "admin",

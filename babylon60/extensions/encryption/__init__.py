@@ -1,4 +1,4 @@
 # [C5-REAL] Exergy-Maximized
-from cortex.extensions.encryption.zk_hardware import ZeroKnowledgeShield
+from babylon60.extensions.encryption.zk_hardware import ZeroKnowledgeShield
 
 __all__ = ["ZeroKnowledgeShield"]

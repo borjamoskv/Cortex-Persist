@@ -13,8 +13,8 @@ import subprocess
 import time
 from pathlib import Path
 
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.database.core import connect_async_ctx
+from babylon60.audit.ledger import EnterpriseAuditLedger
+from babylon60.database.core import connect_async_ctx
 
 logger = logging.getLogger("cortex.daemon.apoptosis")
 

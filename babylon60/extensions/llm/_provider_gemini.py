@@ -4,8 +4,8 @@ import asyncio
 import logging
 
 import httpx
-from cortex.extensions.llm._resilience import resilient_call
-from cortex.extensions.llm._stealth import apply_causal_jitter, sanitize_response
+from babylon60.extensions.llm._resilience import resilient_call
+from babylon60.extensions.llm._stealth import apply_causal_jitter, sanitize_response
 
 logger = logging.getLogger("cortex_extensions.llm")
 

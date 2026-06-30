@@ -2,7 +2,7 @@
 import re
 import time
 
-from cortex.observability.telemetry import telemetry
+from babylon60.observability.telemetry import telemetry
 from google.antigravity import hooks
 
 _timers = {}

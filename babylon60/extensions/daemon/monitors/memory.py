@@ -7,7 +7,7 @@ import logging
 import time
 from datetime import datetime, timezone
 
-from cortex.extensions.daemon.models import AGENT_DIR, DEFAULT_MEMORY_STALE_HOURS, MemoryAlert
+from babylon60.extensions.daemon.models import AGENT_DIR, DEFAULT_MEMORY_STALE_HOURS, MemoryAlert
 
 logger = logging.getLogger("moskv-daemon")
 

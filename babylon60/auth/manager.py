@@ -12,8 +12,8 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import Any
 
-from cortex.auth.backends import BaseAuthBackend
-from cortex.auth.models import APIKey, AuthResult
+from babylon60.auth.backends import BaseAuthBackend
+from babylon60.auth.models import APIKey, AuthResult
 
 import cortex_rs
 from babylon60.crypto.hash_registry import cortex_hash
@@ -38,11 +38,11 @@ class AuthManager:
             backend: BaseAuthBackend instance, or str (db_path) for SQLite.
         """
         if isinstance(backend, str):
-            from cortex.auth.backends import SQLiteAuthBackend
+            from babylon60.auth.backends import SQLiteAuthBackend
 
             backend = SQLiteAuthBackend(backend)
         elif backend is None:
-            from cortex.config import (
+            from babylon60.config import (
                 DB_PATH,
                 PG_URL,
                 RUNBOOT_MODE,
@@ -52,24 +52,24 @@ class AuthManager:
 
             if RUNBOOT_MODE == "cloud":
                 if TURSO_DATABASE_URL:
-                    from cortex.auth.backends import TursoAuthBackend
+                    from babylon60.auth.backends import TursoAuthBackend
 
                     logger.info("AuthManager: Using Cloud Sovereign (Turso) backend")
                     backend = TursoAuthBackend(TURSO_DATABASE_URL, TURSO_AUTH_TOKEN)
                 elif PG_URL:
-                    from cortex.auth.backends import AlloyDBAuthBackend
+                    from babylon60.auth.backends import AlloyDBAuthBackend
 
                     logger.info("AuthManager: Using Cloud Sovereign (PostgreSQL) backend")
                     backend = AlloyDBAuthBackend(PG_URL)
                 else:
-                    from cortex.auth.backends import SQLiteAuthBackend
+                    from babylon60.auth.backends import SQLiteAuthBackend
 
                     logger.info(
                         "AuthManager: Using Local Sovereign (SQLite) backend fallback in Cloud"
                     )
                     backend = SQLiteAuthBackend(DB_PATH)
             else:
-                from cortex.auth.backends import SQLiteAuthBackend
+                from babylon60.auth.backends import SQLiteAuthBackend
 
                 logger.info("AuthManager: Using Local Sovereign (SQLite) backend")
                 backend = SQLiteAuthBackend(DB_PATH)
@@ -111,7 +111,7 @@ class AuthManager:
         return cortex_hash(key.encode())
 
     async def hash_key_argon2id_async(self, key: str) -> str:
-        from cortex.config import AUTH_PEPPER
+        from babylon60.config import AUTH_PEPPER
 
         loop = asyncio.get_running_loop()
         try:
@@ -257,7 +257,7 @@ class AuthManager:
 
     async def authenticate_async(self, raw_key: str) -> AuthResult:
         """Fully async authentication with dual-stack Argon2id support."""
-        from cortex.config import AUTH_PEPPER
+        from babylon60.config import AUTH_PEPPER
 
         is_valid_format = bool(raw_key and raw_key.startswith("ctx_"))
         dummy_hash = self.hash_key_legacy_sha256("ctx_invalid_dummy_key_to_waste_time")

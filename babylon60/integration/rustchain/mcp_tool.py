@@ -10,9 +10,9 @@ import json
 import logging
 from typing import Optional
 
-from cortex.integration.rustchain.client import RustChainClient
-from cortex.integration.rustchain.staking import stake_and_acquire
-from cortex.integration.rustchain.wallet import RustChainWallet
+from babylon60.integration.rustchain.client import RustChainClient
+from babylon60.integration.rustchain.staking import stake_and_acquire
+from babylon60.integration.rustchain.wallet import RustChainWallet
 from mcp.server.fastmcp import FastMCP
 
 logger = logging.getLogger("cortex.integration.rustchain.mcp_tool")

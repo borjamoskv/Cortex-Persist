@@ -12,10 +12,10 @@ Endpoints:
 
 from __future__ import annotations
 
-from cortex.api.deps import get_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine
-from cortex.engine.core.tips import Tip, TipCategory, TipsEngine
+from babylon60.api.deps import get_engine
+from babylon60.auth import AuthResult, require_permission
+from babylon60.engine import CortexEngine
+from babylon60.engine.core.tips import Tip, TipCategory, TipsEngine
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 

@@ -10,7 +10,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from cortex.engine import CortexEngine
+from babylon60.engine import CortexEngine
 
 __all__ = ["DEFAULT_SWARM_PATH", "MissionOrchestrator"]
 
@@ -69,7 +69,7 @@ class MissionOrchestrator:
 
         # 3. Execute via SovereignGate (L3 interception)
         try:
-            from cortex.extensions.gate import ActionLevel, get_gate
+            from babylon60.extensions.gate import ActionLevel, get_gate
 
             logger.info("Executing swarm mission: %s", " ".join(cmd))
 

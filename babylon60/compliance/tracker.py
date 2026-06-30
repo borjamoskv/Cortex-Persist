@@ -2,7 +2,7 @@
 """ComplianceTracker - EU AI Act Article 12 compliance in 3 methods.
 
 Usage:
-    from cortex.compliance import ComplianceTracker
+    from babylon60.compliance import ComplianceTracker
 
     tracker = ComplianceTracker()
     tracker.log_decision("my-agent", "Approved loan #443", agent_id="agent:loan")
@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 
 __all__ = ["ComplianceTracker"]
 
@@ -53,7 +53,7 @@ class ComplianceTracker:
         db_path: str | Path = DEFAULT_DB_PATH,
         project: str = "default",
     ) -> None:
-        from cortex.engine import CortexEngine
+        from babylon60.engine import CortexEngine
 
         self._engine = CortexEngine(db_path=str(db_path), auto_embed=False)
         self._default_project = project

@@ -6,9 +6,9 @@ import os
 import sys
 import time
 
-from cortex.config import DB_PATH
-from cortex.database.core import connect
-from cortex.extensions.signals.bus import SignalBus
+from babylon60.config import DB_PATH
+from babylon60.database.core import connect
+from babylon60.extensions.signals.bus import SignalBus
 
 from babylon60.crypto.hash_registry import cortex_hash
 
@@ -89,8 +89,8 @@ def register_singularity_tools(mcp) -> None:
             top_k: Top limit of items to return based on distance.
         """
         try:
-            from cortex.memory.encoder import AsyncEncoder
-            from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+            from babylon60.memory.encoder import AsyncEncoder
+            from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
 
             encoder = AsyncEncoder()
             store = SovereignVectorStoreL2(encoder=encoder)

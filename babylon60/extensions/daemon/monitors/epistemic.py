@@ -12,8 +12,8 @@ import logging
 import time
 from typing import Any
 
-from cortex.extensions.daemon.models import WorkflowAlert
-from cortex.extensions.daemon.monitors.base import BaseMonitor
+from babylon60.extensions.daemon.models import WorkflowAlert
+from babylon60.extensions.daemon.monitors.base import BaseMonitor
 
 __all__ = ["EpistemicMonitor"]
 

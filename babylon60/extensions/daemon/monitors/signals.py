@@ -16,8 +16,8 @@ import logging
 import sqlite3
 from typing import Any
 
-from cortex.database.core import connect as db_connect
-from cortex.extensions.daemon.models import SignalAlert
+from babylon60.database.core import connect as db_connect
+from babylon60.extensions.daemon.models import SignalAlert
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -36,8 +36,8 @@ class SignalMonitor:
             return
 
         try:
-            from cortex.extensions.signals.bus import SignalBus
-            from cortex.extensions.signals.reactor import SignalReactor
+            from babylon60.extensions.signals.bus import SignalBus
+            from babylon60.extensions.signals.reactor import SignalReactor
 
             # Standard sqlite3 connection for the bus
             self._bus_conn = db_connect(self.db_path)

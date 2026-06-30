@@ -100,7 +100,7 @@ class OuroborosGate:
         # 350/100: Sensory Feedback
         import asyncio
 
-        from cortex.routes.notch_ws import notify_notch_pruning
+        from babylon60.routes.notch_ws import notify_notch_pruning
 
         asyncio.create_task(notify_notch_pruning())
 
@@ -141,8 +141,8 @@ class OuroborosGate:
         import time
         from datetime import datetime, timezone
 
-        from cortex.database.core import causal_write, connect_async_ctx
-        from cortex.engine.core.fact_store_core import insert_fact_record
+        from babylon60.database.core import causal_write, connect_async_ctx
+        from babylon60.engine.core.fact_store_core import insert_fact_record
 
         async def _async_log():
             try:

@@ -40,9 +40,9 @@ class GhostMixin(EngineMixinBase):
 
     def _ensure_songlines(self) -> tuple[Any, Any, Any]:
         if self._emitter is None or self._sensor is None or self._economy is None:
-            from cortex.extensions.songlines.economy import ThermalEconomy
-            from cortex.extensions.songlines.emitter import ResonanceEmitter
-            from cortex.extensions.songlines.sensor import TopographicSensor
+            from babylon60.extensions.songlines.economy import ThermalEconomy
+            from babylon60.extensions.songlines.emitter import ResonanceEmitter
+            from babylon60.extensions.songlines.sensor import TopographicSensor
 
             self._emitter = ResonanceEmitter()
             self._sensor = TopographicSensor()

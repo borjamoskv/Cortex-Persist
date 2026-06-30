@@ -18,7 +18,7 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 
-from cortex.audit.ledger import EnterpriseAuditLedger
+from babylon60.audit.ledger import EnterpriseAuditLedger
 
 logger = logging.getLogger("cortex.benchmark.agentic_eval")
 if not logger.handlers:
@@ -207,7 +207,7 @@ class AsyncAgenticEvaluator:
         logger.info(f"Scanning directory: {self.transcripts_dir} for transcript.jsonl files...")
         paths = list(self.transcripts_dir.rglob("transcript.jsonl"))
 
-        from cortex.database.core import connect_async_ctx
+        from babylon60.database.core import connect_async_ctx
 
         async with connect_async_ctx(self.db_path) as conn:
             ledger = EnterpriseAuditLedger(conn)

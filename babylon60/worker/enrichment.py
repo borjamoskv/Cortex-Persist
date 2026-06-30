@@ -12,8 +12,8 @@ import time
 from datetime import datetime, timedelta, timezone
 
 import aiosqlite
-from cortex.database.core import connect_async_ctx
-from cortex.embeddings.provider import EmbeddingProvider
+from babylon60.database.core import connect_async_ctx
+from babylon60.embeddings.provider import EmbeddingProvider
 
 logger = logging.getLogger("cortex")
 
@@ -87,7 +87,7 @@ class EnrichmentWorker:
             await self._mark_failure(conn, job_id, str(e))
 
     async def _mark_success(self, conn: aiosqlite.Connection, job_id: int):
-        from cortex.database.core import causal_write
+        from babylon60.database.core import causal_write
 
         query = """
             UPDATE enrichment_jobs
@@ -113,7 +113,7 @@ class EnrichmentWorker:
                 updated_at = ?
             WHERE id = ?
         """
-        from cortex.database.core import causal_write
+        from babylon60.database.core import causal_write
 
         with causal_write(conn):
             await conn.execute(

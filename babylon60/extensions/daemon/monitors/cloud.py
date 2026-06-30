@@ -7,9 +7,9 @@ import sqlite3
 import time
 from typing import Any
 
-from cortex.core import config
-from cortex.extensions.daemon.models import CloudSyncAlert
-from cortex.storage.turso import TursoBackend
+from babylon60.core import config
+from babylon60.extensions.daemon.models import CloudSyncAlert
+from babylon60.storage.turso import TursoBackend
 
 logger = logging.getLogger("moskv-daemon")
 

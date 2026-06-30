@@ -13,8 +13,8 @@ import statistics
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.engine import CortexEngine
-from cortex.extensions.mejoralo.ledger import get_history
+from babylon60.engine import CortexEngine
+from babylon60.extensions.mejoralo.ledger import get_history
 
 __all__ = ["EffectivenessTracker", "TrendReport"]
 

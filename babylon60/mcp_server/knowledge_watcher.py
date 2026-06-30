@@ -10,9 +10,9 @@ import logging
 import os
 import time
 
-from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.models import CortexFactModel
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+from babylon60.memory.encoder import AsyncEncoder
+from babylon60.memory.models import CortexFactModel
+from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 

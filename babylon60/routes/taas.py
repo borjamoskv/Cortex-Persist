@@ -3,10 +3,10 @@ from __future__ import annotations
 
 import logging
 
-from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.extensions.taas import JobExecutionResult, JobQuote, JobRequest, TaaSMarketplace
+from babylon60.api.deps import get_async_engine
+from babylon60.auth import AuthResult, require_permission
+from babylon60.engine import CortexEngine as AsyncCortexEngine
+from babylon60.extensions.taas import JobExecutionResult, JobQuote, JobRequest, TaaSMarketplace
 from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter(tags=["taas"])

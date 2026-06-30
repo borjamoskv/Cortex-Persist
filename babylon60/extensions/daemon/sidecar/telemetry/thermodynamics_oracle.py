@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 logger = logging.getLogger("cortex.extensions.daemon.sidecar.telemetry.thermodynamics_oracle")
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine as AsyncCortexEngine
+    from babylon60.engine import CortexEngine as AsyncCortexEngine
 
 
 class ThermodynamicsOracle:

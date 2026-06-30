@@ -11,10 +11,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from cortex.extensions.hypervisor.models import HealthReport, Memory, Receipt
+from babylon60.extensions.hypervisor.models import HealthReport, Memory, Receipt
 
 if TYPE_CHECKING:
-    from cortex.extensions.hypervisor.core import AgencyHypervisor
+    from babylon60.extensions.hypervisor.core import AgencyHypervisor
 
 __all__ = ["AgentHandle"]
 

@@ -117,7 +117,7 @@ class PrivacyMixin(EngineMixinBase):
                     }
 
                     # Retroactively update metadata of matched stored facts
-                    from cortex.database.core import causal_write
+                    from babylon60.database.core import causal_write
 
                     with causal_write(conn):
                         for stored_fact, category in flagged_stored_facts:

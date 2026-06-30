@@ -40,8 +40,8 @@ import math
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.extensions.evolution.agents import AgentDomain
-from cortex.extensions.evolution.cortex_metrics import CortexMetrics, DomainMetrics
+from babylon60.extensions.evolution.agents import AgentDomain
+from babylon60.extensions.evolution.cortex_metrics import CortexMetrics, DomainMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -281,7 +281,7 @@ class FreeEnergyMonitor:
 
     def total_free_energy(self) -> float:
         """Aggregate F across all domains - system-level health."""
-        from cortex.engine.cognitive.endocrine import ENDOCRINE
+        from babylon60.engine.cognitive.endocrine import ENDOCRINE
 
         states = self.snapshot()
         total_f = sum(s.free_energy for s in states.values())

@@ -5,14 +5,14 @@ SovereignGate API Router.
 REST endpoints for remote operator approval of L3 actions.
 """
 
-from cortex.auth import require_permission
-from cortex.extensions.gate import (
+from babylon60.auth import require_permission
+from babylon60.extensions.gate import (
     GateError,
     GateExpired,
     GateInvalidSignature,
     get_gate,
 )
-from cortex.types.models import (
+from babylon60.types.models import (
     GateActionResponse,
     GateApprovalRequest,
     GateStatusResponse,

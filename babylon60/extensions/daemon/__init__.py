@@ -9,7 +9,7 @@ ModuleNotFoundError cascades when importing lightweight daemon
 submodules like epistemic_breaker or models.
 
 Ghost #4731: The previous eager init caused cortex.cli store to crash
-because any `from cortex.extensions.daemon.X import Y` triggered the full import
+because any `from babylon60.extensions.daemon.X import Y` triggered the full import
 chain including optional dependencies.
 """
 
@@ -19,8 +19,8 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.daemon.core import MoskvDaemon
-    from cortex.extensions.daemon.models import (
+    from babylon60.extensions.daemon.core import MoskvDaemon
+    from babylon60.extensions.daemon.models import (
         BUNDLE_ID,
         DEFAULT_COOLDOWN,
         DEFAULT_INTERVAL,
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
         PerceptionAlert,
         SiteStatus,
     )
-    from cortex.extensions.daemon.monitors import (
+    from babylon60.extensions.daemon.monitors import (
         CertMonitor,
         DiskMonitor,
         EngineHealthCheck,
@@ -48,7 +48,7 @@ if TYPE_CHECKING:
         PerceptionMonitor,
         SiteMonitor,
     )
-    from cortex.extensions.daemon.notifier import Notifier
+    from babylon60.extensions.daemon.notifier import Notifier
 
 __all__ = [
     # core

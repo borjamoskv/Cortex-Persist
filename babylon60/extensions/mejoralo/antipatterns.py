@@ -22,15 +22,15 @@ import logging
 import os
 from pathlib import Path
 
-from cortex.extensions.mejoralo._scanner_import_graph import (
+from babylon60.extensions.mejoralo._scanner_import_graph import (
     run_graph_scanners as _run_graph_scanners,
 )
-from cortex.extensions.mejoralo._scanner_visitors import (
+from babylon60.extensions.mejoralo._scanner_visitors import (
     _AsyncIntegrityVisitor,
     _BroadExceptionVisitor,
 )
-from cortex.extensions.mejoralo.constants import MAX_FUNC_PARAMS, SKIP_DIRS, TOTAL_SCANNER_COUNT
-from cortex.extensions.mejoralo.models import AntipatternFinding, AntipatternReport
+from babylon60.extensions.mejoralo.constants import MAX_FUNC_PARAMS, SKIP_DIRS, TOTAL_SCANNER_COUNT
+from babylon60.extensions.mejoralo.models import AntipatternFinding, AntipatternReport
 
 __all__ = ["scan_antipatterns"]
 

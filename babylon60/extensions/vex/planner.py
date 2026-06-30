@@ -16,7 +16,7 @@ import logging
 import uuid
 from typing import Any, Protocol
 
-from cortex.extensions.vex.models import PlannedStep, TaskPlan
+from babylon60.extensions.vex.models import PlannedStep, TaskPlan
 
 __all__ = ["Planner", "default_planner"]
 

@@ -13,7 +13,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from cortex.shannon.entropy import compute_fact_entropy
+from babylon60.shannon.entropy import compute_fact_entropy
 
 # Markers that indicate high exergy (structural data, code, YAML, logic)
 _HIGH_EXERGY_MARKERS = re.compile(

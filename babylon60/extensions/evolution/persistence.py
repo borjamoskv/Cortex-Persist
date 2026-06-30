@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Final
 
-from cortex.extensions.evolution.agents import (
+from babylon60.extensions.evolution.agents import (
     AgentDomain,
     EnneagramSovereign,
     EnneagramSubAgent,

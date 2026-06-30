@@ -30,8 +30,8 @@ from typing import Any
 from uuid import uuid4
 
 from babylon60.crypto.hash_registry import cortex_hash_truncated
-from cortex.agents.base import BaseAgent
-from cortex.agents.copilot_contracts import (
+from babylon60.agents.base import BaseAgent
+from babylon60.agents.copilot_contracts import (
     CodeEdit,
     Confidence,
     CopilotContextPayload,
@@ -42,9 +42,9 @@ from cortex.agents.copilot_contracts import (
     SuggestionStatus,
     SuggestionVerdict,
 )
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
-from cortex.agents.tools import ToolRegistry
+from babylon60.agents.manifest import AgentManifest
+from babylon60.agents.message_schema import AgentMessage, MessageKind, new_message
+from babylon60.agents.tools import ToolRegistry
 
 logger = logging.getLogger("cortex.agents.copilot")
 

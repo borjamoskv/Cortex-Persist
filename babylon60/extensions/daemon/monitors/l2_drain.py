@@ -13,9 +13,9 @@ import logging
 import time
 from typing import Any
 
-from cortex.extensions.daemon.models import CompactionAlert
-from cortex.storage.qdrant import init_vector_backend
-from cortex.storage.turbopuffer import TurbopufferVectorBackend
+from babylon60.extensions.daemon.models import CompactionAlert
+from babylon60.storage.qdrant import init_vector_backend
+from babylon60.storage.turbopuffer import TurbopufferVectorBackend
 
 logger = logging.getLogger("moskv-daemon.l2_drain")
 
@@ -68,7 +68,7 @@ class L2DrainMonitor:
             # Support Ouroboros dynamic threshold
             threshold_seconds = MAX_AGE_SECONDS
             try:
-                from cortex.extensions.evolution.ouroboros_hook import get_dynamic_threshold
+                from babylon60.extensions.evolution.ouroboros_hook import get_dynamic_threshold
 
                 threshold_seconds = await get_dynamic_threshold(conn, project)
             except (ValueError, TypeError, OSError, KeyError):

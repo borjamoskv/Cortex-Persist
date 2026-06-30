@@ -35,12 +35,12 @@ class TransactionMixin(EngineMixinBase):
         detail: dict[str, Any],
         tenant_id: str = "default",
     ) -> int:
-        from cortex.utils.canonical import canonical_json, compute_tx_hash
-        from cortex.utils.locks import get_loop_lock
+        from babylon60.utils.canonical import canonical_json, compute_tx_hash
+        from babylon60.utils.locks import get_loop_lock
 
         # JIS (SOC 2 / C5 / GDPR) Audit Policy Check
         try:
-            from cortex.extensions.policy.jis_auditor import JISAuditor
+            from babylon60.extensions.policy.jis_auditor import JISAuditor
 
             auditor = JISAuditor(enforce_encryption=False)  # Enforced softly
             violations = auditor.audit_payload(detail, event_id=f"tx_pending_{project}_{action}")
@@ -85,7 +85,7 @@ class TransactionMixin(EngineMixinBase):
                         await self._ledger.create_checkpoint_async(conn)
                 except (sqlite3.Error, OSError, RuntimeError, AttributeError, ValueError) as e:
                     logger.warning("Auto-checkpoint failed: %s", e)
-                    from cortex.telemetry.metrics import metrics
+                    from babylon60.telemetry.metrics import metrics
 
                     metrics.inc(
                         "cortex_ledger_checkpoint_failures_total",
@@ -97,7 +97,7 @@ class TransactionMixin(EngineMixinBase):
     async def verify_ledger(self) -> dict[str, Any]:
         """Verify the integrity of the sovereign ledger (Operation Void)."""
         if not getattr(self, "_ledger", None):
-            from cortex.ledger import ImmutableLedger
+            from babylon60.ledger import ImmutableLedger
 
             # Pass the pool directly instead of a raw connection
             self._ledger = ImmutableLedger(cast(Any, self).pool)

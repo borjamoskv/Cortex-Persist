@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import logging
 
-from cortex.extensions.causality.models import (
+from babylon60.extensions.causality.models import (
     CONFIDENCE_ORDER,
     REVERSE_CONFIDENCE_ORDER,
     Confidence,

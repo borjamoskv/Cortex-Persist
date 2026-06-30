@@ -1,7 +1,7 @@
 import os
 import sys
 
-from cortex.enrichment.subscriber_triage import process_batch
+from babylon60.enrichment.subscriber_triage import process_batch
 
 
 def run_purge():

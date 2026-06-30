@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from cortex.auth import AuthResult, require_permission
+from babylon60.auth import AuthResult, require_permission
 from fastapi import APIRouter, Depends, Query
 
 router = APIRouter(tags=["notebooklm"])
@@ -27,7 +27,7 @@ async def notebooklm_status(
     import time
     from datetime import datetime, timezone
 
-    from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
+    from babylon60.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
 
     result: dict = {}
 
@@ -89,8 +89,8 @@ async def notebooklm_digest(
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
     """Generate Master Digest with Shadow Key anchors."""
-    from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-    from cortex.services.notebooklm import NotebookLMService
+    from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+    from babylon60.services.notebooklm import NotebookLMService
     from fastapi import HTTPException
 
     base_dir = Path.cwd().resolve()
@@ -117,8 +117,8 @@ async def notebooklm_fragment(
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
     """Fragment CORTEX facts into semantic domain files."""
-    from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-    from cortex.services.notebooklm import NotebookLMService
+    from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+    from babylon60.services.notebooklm import NotebookLMService
     from fastapi import HTTPException
 
     base_dir = Path.cwd().resolve()
@@ -144,7 +144,7 @@ async def notebooklm_sync(
     import time
     from datetime import datetime, timezone
 
-    from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
+    from babylon60.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
 
     target = None
     provider_name = "Custom"

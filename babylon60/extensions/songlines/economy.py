@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.songlines.sensor import TopographicSensor
+from babylon60.extensions.songlines.sensor import TopographicSensor
 
 logger = logging.getLogger("cortex_extensions.songlines.economy")
 

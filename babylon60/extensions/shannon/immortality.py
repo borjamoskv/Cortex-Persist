@@ -21,11 +21,11 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from cortex.extensions.shannon.analyzer import normalized_entropy
-from cortex.extensions.shannon.scanner import MemoryScanner
+from babylon60.extensions.shannon.analyzer import normalized_entropy
+from babylon60.extensions.shannon.scanner import MemoryScanner
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 __all__ = ["ImmortalityIndex"]
 

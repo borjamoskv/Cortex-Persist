@@ -9,8 +9,8 @@ import asyncio
 import os
 import sys
 
-from cortex.extensions.kapso.gateway import KapsoGateway
-from cortex.extensions.kapso.types import TextMessage, WhatsAppMessage
+from babylon60.extensions.kapso.gateway import KapsoGateway
+from babylon60.extensions.kapso.types import TextMessage, WhatsAppMessage
 
 
 async def main():

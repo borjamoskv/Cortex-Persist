@@ -53,7 +53,7 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
 
                 # Persist summary to CORTEX
                 await ctx.ensure_ready()
-                from cortex.engine import CortexEngine
+                from babylon60.engine import CortexEngine
 
                 async with ctx.pool.acquire() as conn:
                     engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)

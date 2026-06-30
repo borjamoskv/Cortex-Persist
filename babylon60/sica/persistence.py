@@ -21,7 +21,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.sica.strategy import (
+from babylon60.sica.strategy import (
     Heuristic,
     SearchStrategy,
     StrategyGenome,
@@ -189,7 +189,7 @@ def load_or_default(
     This is the primary entry point for autonomous agents:
     on startup, resume from last saved state or start fresh.
     """
-    from cortex.sica.strategy import default_genome
+    from babylon60.sica.strategy import default_genome
 
     genome = load_genome(agent_id, directory)
     if genome is not None:

@@ -6,13 +6,13 @@ import logging
 import time
 
 import httpx
-from cortex.extensions.daemon.models import (
+from babylon60.extensions.daemon.models import (
     DEFAULT_RETRIES,
     DEFAULT_TIMEOUT,
     RETRY_BACKOFF,
     SiteStatus,
 )
-from cortex.utils.respiration import breathe
+from babylon60.utils.respiration import breathe
 
 logger = logging.getLogger("moskv-daemon")
 

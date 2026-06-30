@@ -14,7 +14,7 @@ Status: IMPLEMENTED (Ω₁₃ enforcement - exergy wired into hot paths).
 
 from __future__ import annotations
 
-from cortex.extensions.shannon.analyzer import (
+from babylon60.extensions.shannon.analyzer import (
     conditional_entropy,
     cross_entropy,
     dead_weight,
@@ -29,7 +29,7 @@ from cortex.extensions.shannon.analyzer import (
     redundancy,
     shannon_entropy,
 )
-from cortex.extensions.shannon.epistemology import (
+from babylon60.extensions.shannon.epistemology import (
     assembly_index_proxy,
     compression_intelligence,
     dpi_verify,
@@ -39,10 +39,10 @@ from cortex.extensions.shannon.epistemology import (
     phi_proxy,
     renyi_entropy,
 )
-from cortex.extensions.shannon.exergy import ExergyReport, compute_exergy_report
-from cortex.extensions.shannon.immortality import ImmortalityIndex
-from cortex.extensions.shannon.report import EntropyReport
-from cortex.extensions.shannon.scanner import MemoryScanner
+from babylon60.extensions.shannon.exergy import ExergyReport, compute_exergy_report
+from babylon60.extensions.shannon.immortality import ImmortalityIndex
+from babylon60.extensions.shannon.report import EntropyReport
+from babylon60.extensions.shannon.scanner import MemoryScanner
 
 __all__ = [
     "EntropyReport",

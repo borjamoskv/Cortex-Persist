@@ -10,8 +10,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.events.bus import DistributedEventBus
-from cortex.memory.ledger import EventLedgerL3
+from babylon60.events.bus import DistributedEventBus
+from babylon60.memory.ledger import EventLedgerL3
 
 logger = logging.getLogger("cortex_extensions.agents.scavenger_governance")
 

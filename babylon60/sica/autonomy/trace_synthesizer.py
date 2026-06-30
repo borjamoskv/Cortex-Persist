@@ -4,8 +4,8 @@ from __future__ import annotations
 import logging
 from collections import Counter
 
-from cortex.sica.object_level import ExecutionTrace, StepOutcome
-from cortex.sica.strategy import Heuristic
+from babylon60.sica.object_level import ExecutionTrace, StepOutcome
+from babylon60.sica.strategy import Heuristic
 
 logger = logging.getLogger("cortex.sica.autonomy.trace")
 

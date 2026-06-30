@@ -10,16 +10,16 @@ import asyncio
 import logging
 from pathlib import Path
 
-from cortex.extensions.aether.models import AgentTask, TaskStatus
-from cortex.extensions.aether.tools import AgentToolkit
-from cortex.extensions.manifold.convergence import ConvergenceEngine
-from cortex.extensions.manifold.dimensions import (
+from babylon60.extensions.aether.models import AgentTask, TaskStatus
+from babylon60.extensions.aether.tools import AgentToolkit
+from babylon60.extensions.manifold.convergence import ConvergenceEngine
+from babylon60.extensions.manifold.dimensions import (
     CreationDimension,
     DecisionDimension,
     PerceptionDimension,
     ValidationDimension,
 )
-from cortex.extensions.manifold.models import DimensionType, WaveState
+from babylon60.extensions.manifold.models import DimensionType, WaveState
 
 logger = logging.getLogger("cortex_extensions.manifold.core")
 
@@ -28,8 +28,8 @@ class TesseractManifold:
     """The 4D Cognitive Manifold engine."""
 
     def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
-        from cortex.extensions.agents.registry import AgentCatalogLoader
-        from cortex.extensions.llm.provider import LLMProvider
+        from babylon60.extensions.agents.registry import AgentCatalogLoader
+        from babylon60.extensions.llm.provider import LLMProvider
 
         self._llm = LLMProvider(provider=llm_provider)
 

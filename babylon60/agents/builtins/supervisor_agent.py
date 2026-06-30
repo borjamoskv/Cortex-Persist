@@ -13,11 +13,11 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.agents.base import ReactiveTaskAgent
-from cortex.agents.bus import MessageBus
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.supervisor import Supervisor
-from cortex.agents.tools import ToolRegistry
+from babylon60.agents.base import ReactiveTaskAgent
+from babylon60.agents.bus import MessageBus
+from babylon60.agents.manifest import AgentManifest
+from babylon60.agents.supervisor import Supervisor
+from babylon60.agents.tools import ToolRegistry
 
 logger = logging.getLogger(__name__)
 

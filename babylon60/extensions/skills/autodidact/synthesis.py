@@ -16,14 +16,14 @@ import re
 import time
 from typing import Any
 
-from cortex.extensions.llm._models import CortexPrompt
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexLLMRouter, IntentProfile
-from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.models import CortexFactModel
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
-from cortex.utils.pulmones import sovereign_circuit_breaker
-from cortex.utils.turboquant import optimize_vector_qjl
+from babylon60.extensions.llm._models import CortexPrompt
+from babylon60.extensions.llm.provider import LLMProvider
+from babylon60.extensions.llm.router import CortexLLMRouter, IntentProfile
+from babylon60.memory.encoder import AsyncEncoder
+from babylon60.memory.models import CortexFactModel
+from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
+from babylon60.utils.pulmones import sovereign_circuit_breaker
+from babylon60.utils.turboquant import optimize_vector_qjl
 
 logger = logging.getLogger("CORTEX.AUTODIDACT.SYNTHESIS")
 
@@ -269,7 +269,7 @@ async def execute_cognitive_synthesis(
     logger.info("✅ Distillation: %.1f%% noise removed. Entities/Items: %d", yield_efficiency, total_extracted)
 
     # ── EPISTEMIC CONTRADICTION GUARD (Axioma Ω₁) ──
-    from cortex.guards.contradiction_guard import detect_contradictions
+    from babylon60.guards.contradiction_guard import detect_contradictions
 
     conflict_report = await detect_contradictions(
         new_content=memo_content,

@@ -10,11 +10,11 @@ from typing import TYPE_CHECKING, Any
 import aiosqlite
 
 if TYPE_CHECKING:
-    from cortex.crypto import CortexEncrypter
+    from babylon60.crypto import CortexEncrypter
 
-from cortex.memory.temporal import build_temporal_filter_params
-from cortex.search.models import SearchResult
-from cortex.storage import StorageMode, get_storage_mode
+from babylon60.memory.temporal import build_temporal_filter_params
+from babylon60.search.models import SearchResult
+from babylon60.storage import StorageMode, get_storage_mode
 
 __all__ = ["semantic_search", "semantic_search_sync"]
 
@@ -83,7 +83,7 @@ async def semantic_search(
             logger.error("PostgreSQL pgvector search failed: %s", e)
             return []
 
-        from cortex.crypto import get_default_encrypter
+        from babylon60.crypto import get_default_encrypter
 
         enc = get_default_encrypter()
         return [_row_to_result(row, enc, tenant_id) for row in rows]
@@ -101,7 +101,7 @@ async def semantic_search(
         logger.error("Semantic search failed: %s", e)
         return []
 
-    from cortex.crypto import get_default_encrypter
+    from babylon60.crypto import get_default_encrypter
 
     enc = get_default_encrypter()
 
@@ -240,7 +240,7 @@ def semantic_search_sync(
         logger.error("Semantic search sync failed: %s", e)
         return []
 
-    from cortex.crypto import get_default_encrypter
+    from babylon60.crypto import get_default_encrypter
 
     enc = get_default_encrypter()
 

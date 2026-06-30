@@ -3,7 +3,7 @@ import time
 from dataclasses import dataclass, field
 
 import numpy as np
-from cortex.observability.exergy_engine import ExecutionTrace
+from babylon60.observability.exergy_engine import ExecutionTrace
 
 MAX_FAILURE_REVENUE_MULTIPLIER = 3.0
 SYSTEM_REFLEX_TIME_SEC = 300  # Δt (billing -> execution) must be > 5 min

@@ -9,10 +9,10 @@ try:
 except ImportError:
     CG = None
 
-from cortex.extensions.ui_control.models import InteractionResult, Point
+from babylon60.extensions.ui_control.models import InteractionResult, Point
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex_extensions.ui_control.mouse")
 

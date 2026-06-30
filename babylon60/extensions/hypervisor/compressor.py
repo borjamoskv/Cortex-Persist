@@ -12,11 +12,11 @@ import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from cortex.extensions.hypervisor.models import HealthReport, Memory, Receipt
+from babylon60.extensions.hypervisor.models import HealthReport, Memory, Receipt
 
 if TYPE_CHECKING:
-    from cortex.engine.cognitive.models import Fact
-    from cortex.search import SearchResult
+    from babylon60.engine.cognitive.models import Fact
+    from babylon60.search import SearchResult
 
 __all__ = ["ComplexityCompressor"]
 

@@ -11,14 +11,14 @@ import asyncio
 import logging
 from typing import Any
 
-from cortex.extensions.aether.critic import CriticAgent
-from cortex.extensions.aether.executor import ExecutorAgent
-from cortex.extensions.aether.models import AgentTask
-from cortex.extensions.aether.planner import PlannerAgent
-from cortex.extensions.aether.redteam import RedTeamAgent
-from cortex.extensions.aether.tester import TesterAgent
-from cortex.extensions.aether.tools import AgentToolkit
-from cortex.extensions.manifold.models import DimensionalState
+from babylon60.extensions.aether.critic import CriticAgent
+from babylon60.extensions.aether.executor import ExecutorAgent
+from babylon60.extensions.aether.models import AgentTask
+from babylon60.extensions.aether.planner import PlannerAgent
+from babylon60.extensions.aether.redteam import RedTeamAgent
+from babylon60.extensions.aether.tester import TesterAgent
+from babylon60.extensions.aether.tools import AgentToolkit
+from babylon60.extensions.manifold.models import DimensionalState
 
 logger = logging.getLogger("cortex_extensions.manifold.dimensions")
 

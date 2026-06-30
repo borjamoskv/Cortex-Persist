@@ -11,7 +11,7 @@ Architecture: ATTACH DATABASE (SQLite native) for zero-copy
 cross-database queries. Each result carries `db_origin` provenance.
 
 Usage:
-    from cortex.search.federation import federated_search_sync
+    from babylon60.search.federation import federated_search_sync
     results = federated_search_sync(conn, "NAROA routing", scope="all")
 """
 
@@ -22,9 +22,9 @@ import sqlite3
 from pathlib import Path
 
 import aiosqlite
-from cortex.core.paths import COLD_STORAGE_DB, PERSONAL_DB
-from cortex.search.models import SearchResult, SearchScope
-from cortex.search.text import text_search, text_search_sync
+from babylon60.core.paths import COLD_STORAGE_DB, PERSONAL_DB
+from babylon60.search.models import SearchResult, SearchScope
+from babylon60.search.text import text_search, text_search_sync
 
 __all__ = [
     "attach_federated_dbs",
@@ -150,8 +150,8 @@ def _search_attached_db(
     Handles AES-GCM encrypted content by decrypting client-side.
     Falls back to LIKE for unencrypted DBs.
     """
-    from cortex.crypto import get_default_encrypter
-    from cortex.crypto.aes import CortexEncrypter
+    from babylon60.crypto import get_default_encrypter
+    from babylon60.crypto.aes import CortexEncrypter
 
     enc = get_default_encrypter()
     v6_prefix = CortexEncrypter.PREFIX
@@ -237,8 +237,8 @@ async def _search_attached_db_async(
     limit: int = 20,
 ) -> list[SearchResult]:
     """Search an attached database's facts table (async)."""
-    from cortex.crypto import get_default_encrypter
-    from cortex.crypto.aes import CortexEncrypter
+    from babylon60.crypto import get_default_encrypter
+    from babylon60.crypto.aes import CortexEncrypter
 
     enc = get_default_encrypter()
     v6_prefix = CortexEncrypter.PREFIX

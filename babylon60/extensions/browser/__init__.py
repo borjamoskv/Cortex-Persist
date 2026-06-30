@@ -5,7 +5,7 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.browser.engine import BrowserEngine
+    from babylon60.extensions.browser.engine import BrowserEngine
 
 __all__ = ["BrowserEngine"]
 

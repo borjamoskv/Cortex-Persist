@@ -51,10 +51,10 @@ import time
 from contextlib import asynccontextmanager
 from typing import Any
 
-from cortex.database.messages import (
+from babylon60.database.messages import (
     TransactionProxy as _TransactionProxy,
 )
-from cortex.database.messages import (
+from babylon60.database.messages import (
     _Message,
     _Shutdown,
     _TxBegin,
@@ -63,7 +63,7 @@ from cortex.database.messages import (
     _WriteManyOp,
     _WriteOp,
 )
-from cortex.utils.result import Err, Ok, Result
+from babylon60.utils.result import Err, Ok, Result
 
 __all__ = ["SqliteWriteWorker"]
 
@@ -127,7 +127,7 @@ class SqliteWriteWorker:
 
     def _create_connection(self) -> sqlite3.Connection:
         """Create and configure the single writer connection (runs in executor)."""
-        from cortex.database.core import connect_writer
+        from babylon60.database.core import connect_writer
 
         conn = connect_writer(self._db_path)
         if hasattr(conn, "authorize_causal_writes"):

@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-from cortex.extensions.llm.client import SovereignLLMClient
+from babylon60.extensions.llm.client import SovereignLLMClient
 
 __all__ = ["SovereignLLMClient"]

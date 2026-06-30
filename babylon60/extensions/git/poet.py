@@ -18,7 +18,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from cortex.extensions.git.poet_data import EMOJI_MAP, SCOPE_MAP, TEMPLATES, TYPE_REGEX
+from babylon60.extensions.git.poet_data import EMOJI_MAP, SCOPE_MAP, TEMPLATES, TYPE_REGEX
 
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 
@@ -98,9 +98,9 @@ class CommitPoet:
             return "chore: tend the sovereign void 🔄"
 
         try:
-            from cortex.extensions.agents.registry import get_agent
-            from cortex.extensions.llm._models import IntentProfile
-            from cortex.extensions.llm.provider import LLMProvider
+            from babylon60.extensions.agents.registry import get_agent
+            from babylon60.extensions.llm._models import IntentProfile
+            from babylon60.extensions.llm.provider import LLMProvider
 
             agent_def = get_agent("lorca")
             if agent_def:
@@ -224,9 +224,9 @@ class CommitPoet:
         Falls back to heuristic narrate() if LLM fails or is unavailable.
         """
         try:
-            from cortex.extensions.agents.registry import get_agent
-            from cortex.extensions.llm._models import IntentProfile
-            from cortex.extensions.llm.provider import LLMProvider
+            from babylon60.extensions.agents.registry import get_agent
+            from babylon60.extensions.llm._models import IntentProfile
+            from babylon60.extensions.llm.provider import LLMProvider
 
             agent_def = get_agent("lorca")
             if agent_def:

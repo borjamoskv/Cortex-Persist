@@ -15,14 +15,14 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from cortex.extensions.hypervisor.compressor import ComplexityCompressor
-from cortex.extensions.hypervisor.handle import AgentHandle
-from cortex.extensions.hypervisor.isolator import TenantIsolator
-from cortex.extensions.hypervisor.models import HealthReport, Memory, Receipt
-from cortex.extensions.hypervisor.projector import EventProjector
+from babylon60.extensions.hypervisor.compressor import ComplexityCompressor
+from babylon60.extensions.hypervisor.handle import AgentHandle
+from babylon60.extensions.hypervisor.isolator import TenantIsolator
+from babylon60.extensions.hypervisor.models import HealthReport, Memory, Receipt
+from babylon60.extensions.hypervisor.projector import EventProjector
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 __all__ = ["AgencyHypervisor"]
 

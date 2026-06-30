@@ -5,6 +5,6 @@ Routes pipeline results to their delivery targets:
 MCP responses, files, webhooks, or CLI stdout.
 """
 
-from cortex.delivery.manager import DeliveryManager
+from babylon60.delivery.manager import DeliveryManager
 
 __all__ = ["DeliveryManager"]

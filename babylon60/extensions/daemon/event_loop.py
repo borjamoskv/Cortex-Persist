@@ -5,7 +5,7 @@ import signal
 import time
 from datetime import datetime, timezone
 
-from cortex.extensions.daemon.models import DEFAULT_INTERVAL
+from babylon60.extensions.daemon.models import DEFAULT_INTERVAL
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -45,7 +45,7 @@ class EventLoopMixin:
 
     def run(self, interval: int = DEFAULT_INTERVAL) -> None:
         """Run the daemon using the sovereign async loop (all subsystems as tasks)."""
-        from cortex.events.loop import sovereign_run
+        from babylon60.events.loop import sovereign_run
 
         logger.info("🚀 MOSKV-1 Daemon starting in sovereign async mode (interval=%ds)", interval)
         sovereign_run(self.run_sovereign(interval=interval))
@@ -90,7 +90,7 @@ class EventLoopMixin:
             sys.path.append(scripts_path)
 
         async def run_ouroboros_prune():
-            from cortex.core.paths import CORTEX_DB
+            from babylon60.core.paths import CORTEX_DB
             from ouroboros_prune import execute_thermal_purge
 
             await asyncio.to_thread(execute_thermal_purge, db_path=str(CORTEX_DB))

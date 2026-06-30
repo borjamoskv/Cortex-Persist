@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from cortex.extensions.daemon.models import NeuralIntentAlert
+from babylon60.extensions.daemon.models import NeuralIntentAlert
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -18,8 +18,8 @@ class NeuralIntentMonitor:
     def check(self) -> list[NeuralIntentAlert]:
         alerts: list[NeuralIntentAlert] = []
         try:
-            from cortex.extensions.agents.neural import NeuralIntentEngine
-            from cortex.extensions.platform.sys import is_macos
+            from babylon60.extensions.agents.neural import NeuralIntentEngine
+            from babylon60.extensions.platform.sys import is_macos
 
             if not is_macos():
                 return []

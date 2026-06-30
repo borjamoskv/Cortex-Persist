@@ -21,9 +21,9 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.extensions.zkortex.commitment import KnowledgeCommitment, commit
-from cortex.extensions.zkortex.merkle import MerkleTree, ZKMembershipProof
-from cortex.extensions.zkortex.range_proof import ZKRangeProof, prove_range
+from babylon60.extensions.zkortex.commitment import KnowledgeCommitment, commit
+from babylon60.extensions.zkortex.merkle import MerkleTree, ZKMembershipProof
+from babylon60.extensions.zkortex.range_proof import ZKRangeProof, prove_range
 
 logger = logging.getLogger("cortex_extensions.zkortex.prover")
 
@@ -108,7 +108,7 @@ class ZKOrtexProver:
         c, blinding = commit(fact_content)
         if metadata:
             # Reemplazar con metadata (commitment es frozen, creamos nuevo)
-            from cortex.extensions.zkortex.commitment import KnowledgeCommitment as KC
+            from babylon60.extensions.zkortex.commitment import KnowledgeCommitment as KC
 
             c = KC(commitment_hex=c.commitment_hex, metadata=metadata)
 

@@ -5,8 +5,8 @@ import random
 import time
 from dataclasses import dataclass, field
 
-from cortex.sica.meta_level import MetaLevel
-from cortex.sica.strategy import SearchStrategy
+from babylon60.sica.meta_level import MetaLevel
+from babylon60.sica.strategy import SearchStrategy
 
 
 @dataclass

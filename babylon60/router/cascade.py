@@ -11,7 +11,7 @@ import asyncio
 import logging
 from typing import Any
 
-from cortex.router.router import AgentRouter
+from babylon60.router.router import AgentRouter
 
 logger = logging.getLogger("cortex.router.cascade")
 

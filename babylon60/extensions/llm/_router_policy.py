@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from cortex.extensions.llm._cascade import classify_tier
-from cortex.extensions.llm._models import CascadeTier, IntentProfile, ReasoningMode
+from babylon60.extensions.llm._cascade import classify_tier
+from babylon60.extensions.llm._models import CascadeTier, IntentProfile, ReasoningMode
 
 if TYPE_CHECKING:
-    from cortex.extensions.llm._cascade import CascadeManager
-    from cortex.extensions.llm._models import BaseProvider, CortexPrompt
+    from babylon60.extensions.llm._cascade import CascadeManager
+    from babylon60.extensions.llm._models import BaseProvider, CortexPrompt
 
 # Cost class ordering for tiebreaking (cheaper first)
 COST_ORDER: dict[str, int] = {
@@ -36,7 +36,7 @@ def promote_by_latency_then_cost(
     requires_frontier: bool = False,
 ) -> list[BaseProvider]:
     """A-record first (by latency), unknowns by (cost, tier)."""
-    from cortex.config import LLM_LOCAL_FIRST
+    from babylon60.config import LLM_LOCAL_FIRST
 
     fits_context: list[BaseProvider] = []
     overflows_context: list[BaseProvider] = []

@@ -14,7 +14,7 @@ import textwrap
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from cortex.extensions.mejoralo.constants import (
+from babylon60.extensions.mejoralo.constants import (
     DEVILS_ADVOCATE_THRESHOLD,
     SWARM_BASE_TEMPERATURE,
     SWARM_DEFAULT_SQUAD_SIZE,
@@ -23,14 +23,14 @@ from cortex.extensions.mejoralo.constants import (
     SWARM_TIMEOUT_SECONDS,
 )
 
-from cortex.cli.common import console  # pyright: ignore
+from babylon60.cli.common import console  # pyright: ignore
 
 if TYPE_CHECKING:
-    from cortex.extensions.mejoralo.engine import MejoraloEngine
+    from babylon60.extensions.mejoralo.engine import MejoraloEngine
 
-from cortex.extensions.thinking.fusion import FusionStrategy
-from cortex.extensions.thinking.orchestra import ThoughtOrchestra
-from cortex.extensions.thinking.presets import OrchestraConfig, ThinkingMode
+from babylon60.extensions.thinking.fusion import FusionStrategy
+from babylon60.extensions.thinking.orchestra import ThoughtOrchestra
+from babylon60.extensions.thinking.presets import OrchestraConfig, ThinkingMode
 
 logger = logging.getLogger("cortex_extensions.mejoralo.swarm")
 

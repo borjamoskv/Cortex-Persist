@@ -5,9 +5,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.auth.manager import get_auth_manager
-from cortex.auth.models import AuthResult
-from cortex.auth.rbac import RBAC, Permission
+from babylon60.auth.manager import get_auth_manager
+from babylon60.auth.models import AuthResult
+from babylon60.auth.rbac import RBAC, Permission
 from fastapi import Depends, Header, HTTPException, Request
 
 __all__ = [
@@ -28,7 +28,7 @@ async def require_auth(
     ),
 ) -> AuthResult:
     """Extract and validate API key from Authorization header."""
-    from cortex.utils.i18n import get_trans
+    from babylon60.utils.i18n import get_trans
 
     lang = request.headers.get("Accept-Language", "en")
 
@@ -52,7 +52,7 @@ async def require_auth(
         raise HTTPException(status_code=401, detail=error_msg)
 
     # SECURE LINK: Bind the dynamic tenant context to the authenticated identity
-    from cortex.extensions.security.tenant import tenant_id_var
+    from babylon60.extensions.security.tenant import tenant_id_var
 
     tenant_id_var.set(result.tenant_id)
 
@@ -79,7 +79,7 @@ def require_permission(permission: str | Permission):
             has_perm = True
 
         if not has_perm:
-            from cortex.utils.i18n import get_trans
+            from babylon60.utils.i18n import get_trans
 
             lang = request.headers.get("Accept-Language", "en")
             perm_name = permission.name if isinstance(permission, Permission) else permission
@@ -99,8 +99,8 @@ async def require_consensus(
     engine: Any = Depends(lambda: None),
 ) -> bool:
     """Verify a claim has reached sufficient consensus with KV-Aware Caching (Ω₂)."""
-    from cortex.auth.cache import AUTH_CACHE
-    from cortex.extensions.security.tenant import get_tenant_id
+    from babylon60.auth.cache import AUTH_CACHE
+    from babylon60.extensions.security.tenant import get_tenant_id
 
     tenant_id = get_tenant_id()
     cached_score = AUTH_CACHE.get(claim, tenant_id)
@@ -108,7 +108,7 @@ async def require_consensus(
         return cached_score >= min_score
 
     if engine is None:
-        from cortex.api.deps import get_async_engine
+        from babylon60.api.deps import get_async_engine
 
         async for e in get_async_engine():  # type: ignore[reportCallIssue]
             engine = e
@@ -150,7 +150,7 @@ def require_verified_permission(
         auth: AuthResult = Depends(require_auth),
     ) -> AuthResult:
         if permission not in auth.permissions:
-            from cortex.utils.i18n import get_trans
+            from babylon60.utils.i18n import get_trans
 
             lang = request.headers.get("Accept-Language", "en")
             detail = get_trans(
@@ -159,7 +159,7 @@ def require_verified_permission(
             ).format(permission=permission)
             raise HTTPException(status_code=403, detail=detail)
 
-        from cortex.api.deps import get_async_engine
+        from babylon60.api.deps import get_async_engine
 
         engine = None
         async for e in get_async_engine():  # type: ignore[reportCallIssue]

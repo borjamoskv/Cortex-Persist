@@ -131,7 +131,7 @@ def _collect_snapshot() -> MemorySnapshot:
     if _IS_LINUX:
         # Lazy import: ctypes.CDLL("libc.so.6") only attempted on Linux
         try:
-            from cortex.extensions.daemon.sidecar.compaction_monitor.memory_wrapper import (
+            from babylon60.extensions.daemon.sidecar.compaction_monitor.memory_wrapper import (
                 get_mallinfo2,
             )
 
@@ -156,7 +156,7 @@ def _do_malloc_trim() -> bool:
     if not _IS_LINUX:
         return False
     try:
-        from cortex.extensions.daemon.sidecar.compaction_monitor.memory_wrapper import (
+        from babylon60.extensions.daemon.sidecar.compaction_monitor.memory_wrapper import (
             malloc_trim,
         )
 

@@ -8,9 +8,9 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 import numpy as np
-from cortex.observability.caf import lagrangian, select_next
-from cortex.observability.efel import SystemState, encode_state, encode_task
-from cortex.observability.fdf import FailureField, Particle, simulate_field
+from babylon60.observability.caf import lagrangian, select_next
+from babylon60.observability.efel import SystemState, encode_state, encode_task
+from babylon60.observability.fdf import FailureField, Particle, simulate_field
 
 CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
 META_PARAMS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/meta_params.json")
@@ -61,7 +61,7 @@ class ExergyEngine:
     """
 
     def __init__(self):
-        from cortex.observability.ouroboros import OuroborosEngine
+        from babylon60.observability.ouroboros import OuroborosEngine
 
         self.history = self._load_cronos_history()
         self.genomes = self._extract_workflow_genomes()

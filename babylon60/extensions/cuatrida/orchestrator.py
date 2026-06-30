@@ -7,9 +7,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.extensions.cuatrida.models import CuatridaMetrics, DecisionNode, Dimension
-from cortex.extensions.mejoralo.engine import MejoraloEngine
+from babylon60.engine import CortexEngine as AsyncCortexEngine
+from babylon60.extensions.cuatrida.models import CuatridaMetrics, DecisionNode, Dimension
+from babylon60.extensions.mejoralo.engine import MejoraloEngine
 
 logger = logging.getLogger("cortex_extensions.cuatrida.orchestrator")
 
@@ -43,8 +43,8 @@ class CuatridaOrchestrator:
         # Dimension B: Hook into CORTEX ledger.
         # Use provided connection if available to stay in the same transaction.
         if conn:
-            from cortex.memory.temporal import now_iso
-            from cortex.utils.canonical import canonical_json, compute_tx_hash
+            from babylon60.memory.temporal import now_iso
+            from babylon60.utils.canonical import canonical_json, compute_tx_hash
 
             dj = canonical_json(metadata)
             ts = now_iso()
@@ -138,7 +138,7 @@ class CuatridaOrchestrator:
         Dimension A: Zero-Friction Sync.
         Interfaces with ghost-control to ensure the system is in a pre-cognitive state.
         """
-        from cortex.core.paths import SKILLS_DIR
+        from babylon60.core.paths import SKILLS_DIR
 
         ghost_path = SKILLS_DIR / "ghost-control" / "ghost.py"
         latency = 0.0

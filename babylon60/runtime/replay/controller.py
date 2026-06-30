@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from cortex.runtime.replay.divergence import DivergenceMap, DivergenceReport
+from babylon60.runtime.replay.divergence import DivergenceMap, DivergenceReport
 
 
 class EntropyViolation(Exception):

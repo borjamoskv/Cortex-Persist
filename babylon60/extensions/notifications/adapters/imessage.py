@@ -11,8 +11,8 @@ import asyncio
 import logging
 import sys
 
-from cortex.extensions.notifications.adapters.base import BaseAdapter
-from cortex.extensions.notifications.events import CortexEvent
+from babylon60.extensions.notifications.adapters.base import BaseAdapter
+from babylon60.extensions.notifications.events import CortexEvent
 
 logger = logging.getLogger("cortex_extensions.notifications.imessage")
 

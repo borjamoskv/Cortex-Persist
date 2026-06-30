@@ -11,11 +11,11 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any
 
-from cortex.extensions.llm.router import CortexPrompt, IntentProfile
-from cortex.extensions.ui_control.maestro import MaestroUI
+from babylon60.extensions.llm.router import CortexPrompt, IntentProfile
+from babylon60.extensions.ui_control.maestro import MaestroUI
 
 if TYPE_CHECKING:
-    from cortex.engine.core.cortex_engine import CortexEngine
+    from babylon60.engine.core.cortex_engine import CortexEngine
 
 logger = logging.getLogger("cortex_extensions.agents.mac_maestro")
 
@@ -42,7 +42,7 @@ class MacMaestroAgent:
             self.router = engine.llm_router
         else:
             try:
-                from cortex.pipeline.provider_factory import build_executor_stack
+                from babylon60.pipeline.provider_factory import build_executor_stack
 
                 _, router = build_executor_stack()
                 self.router = router

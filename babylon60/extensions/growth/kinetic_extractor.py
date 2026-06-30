@@ -135,11 +135,11 @@ if __name__ == "__main__":
         notes = execute_extraction(args.filepath)
         os.makedirs(args.outdir, exist_ok=True)
 
-        from cortex.audit.ledger import EnterpriseAuditLedger
-        from cortex.crypto.keys import KeyManager
-        from cortex.database.core import connect_async_ctx
-        from cortex.engine.causal.taint_engine import generate_secure_taint_token
-        from cortex.guards.saga_contract import SagaWriteProposal
+        from babylon60.audit.ledger import EnterpriseAuditLedger
+        from babylon60.crypto.keys import KeyManager
+        from babylon60.database.core import connect_async_ctx
+        from babylon60.engine.causal.taint_engine import generate_secure_taint_token
+        from babylon60.guards.saga_contract import SagaWriteProposal
 
         # 1. Identity Provisioning
         km = KeyManager(service_name="cortex_agent_keys")

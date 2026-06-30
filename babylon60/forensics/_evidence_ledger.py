@@ -5,8 +5,8 @@ import sqlite3
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.ledger.ledger_core import MerkleTree
-from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1
+from babylon60.ledger.ledger_core import MerkleTree
+from babylon60.utils.canonical import compute_tx_hash, compute_tx_hash_v1
 
 # Action constant used by ledger
 EVIDENCE_COMMIT_ACTION = "forensic_evidence_commit"

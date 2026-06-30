@@ -15,12 +15,12 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-from cortex.events.bus import DistributedEventBus
-from cortex.extensions.skills.cadastral.models import (
+from babylon60.events.bus import DistributedEventBus
+from babylon60.extensions.skills.cadastral.models import (
     ZoneClassification,
 )
-from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.models import MemoryEvent
+from babylon60.memory.ledger import EventLedgerL3
+from babylon60.memory.models import MemoryEvent
 
 logger = logging.getLogger("cortex_extensions.agents.scavenger_core")
 

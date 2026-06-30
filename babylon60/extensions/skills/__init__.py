@@ -10,9 +10,9 @@ From a .md directory to a living cognitive graph.
 Self-registering skills that declare capabilities and compose on demand.
 """
 
-from cortex.extensions.skills.registry import SkillManifest, SkillRegistry
-from cortex.extensions.skills.router import SkillRouter
-from cortex.extensions.skills.taxonomy import (
+from babylon60.extensions.skills.registry import SkillManifest, SkillRegistry
+from babylon60.extensions.skills.router import SkillRouter
+from babylon60.extensions.skills.taxonomy import (
     ANTIGRAVITY_CORTEX_NEXUS_SKILL,
     ANTIGRAVITY_CORTEX_NEXUS_TAG,
     CANONICAL_DANGER_LEVELS,

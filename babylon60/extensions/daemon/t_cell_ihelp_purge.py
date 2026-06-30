@@ -14,7 +14,7 @@ import re
 from datetime import datetime, timezone
 
 # Import the existing router from the engine
-from cortex.engine.causal.taint_engine import MHCAntigenRouter, canonicalize_content
+from babylon60.engine.causal.taint_engine import MHCAntigenRouter, canonicalize_content
 
 logger = logging.getLogger("cortex.daemon.t_cell_ihelp")
 
@@ -25,7 +25,7 @@ class IHelpPurgeDaemon:
         self.mhc_router = mhc_router
 
         # Import dynamically to avoid circular dependencies
-        from cortex.routes.telemetry import BASE_MAFIA_NODES
+        from babylon60.routes.telemetry import BASE_MAFIA_NODES
 
         # Escape all regex characters in the nodes, and convert whitespace in nodes to \s+
         escaped_nodes = []
@@ -53,10 +53,10 @@ class IHelpPurgeDaemon:
         import sqlite3
         import uuid
 
-        from cortex.audit.ledger import EnterpriseAuditLedger
-        from cortex.crypto.keys import KeyManager
-        from cortex.database.core import connect_async
-        from cortex.engine.causal.taint_engine import generate_secure_taint_token
+        from babylon60.audit.ledger import EnterpriseAuditLedger
+        from babylon60.crypto.keys import KeyManager
+        from babylon60.database.core import connect_async
+        from babylon60.engine.causal.taint_engine import generate_secure_taint_token
 
         canonical = canonicalize_content(payload)
         waste_bytes = len(canonical)
@@ -87,7 +87,7 @@ class IHelpPurgeDaemon:
                 pub_key = km.generate_and_store_key(self.agent_id)
 
             # Ensure agents table exists and contains the agent_id
-            from cortex.database.core import causal_write
+            from babylon60.database.core import causal_write
 
             row = None
             try:
@@ -97,7 +97,7 @@ class IHelpPurgeDaemon:
                     row = await cursor.fetchone()
             except sqlite3.OperationalError:
                 # Create agents table if missing
-                from cortex.database.schema_extensions import CREATE_AGENTS
+                from babylon60.database.schema_extensions import CREATE_AGENTS
 
                 with causal_write(conn):
                     await conn.execute(CREATE_AGENTS)
@@ -156,9 +156,9 @@ class IHelpPurgeDaemon:
         import os
 
         import httpx
-        from cortex.audit.ledger import EnterpriseAuditLedger
-        from cortex.database.core import connect_async
-        from cortex.routes.telemetry import BASE_MAFIA_NODES
+        from babylon60.audit.ledger import EnterpriseAuditLedger
+        from babylon60.database.core import connect_async
+        from babylon60.routes.telemetry import BASE_MAFIA_NODES
 
         # Filter out non-domains (e.g. names with spaces or no dots)
         domains = [node for node in BASE_MAFIA_NODES if "." in node and " " not in node]

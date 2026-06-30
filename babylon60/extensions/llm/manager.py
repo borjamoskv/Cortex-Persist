@@ -23,7 +23,7 @@ from __future__ import annotations
 import logging
 import os
 
-from cortex.extensions.llm.router import IntentProfile
+from babylon60.extensions.llm.router import IntentProfile
 
 __all__ = ["LLMManager"]
 
@@ -54,7 +54,7 @@ class LLMManager:
             return None
 
         try:
-            from cortex.extensions.llm.provider import LLMProvider
+            from babylon60.extensions.llm.provider import LLMProvider
 
             self._provider = LLMProvider(provider=self._provider_name)
             logger.info("LLM provider loaded: %s", self._provider)

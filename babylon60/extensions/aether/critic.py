@@ -9,8 +9,8 @@ from __future__ import annotations
 import json
 import logging
 
-from cortex.extensions.aether.models import CriticOutput
-from cortex.extensions.aether.tools import AgentToolkit
+from babylon60.extensions.aether.models import CriticOutput
+from babylon60.extensions.aether.tools import AgentToolkit
 
 __all__ = ["CriticAgent"]
 
@@ -47,7 +47,7 @@ class CriticAgent:
         toolkit: AgentToolkit,
     ) -> CriticOutput:
         """Review the current diff. Returns CriticOutput."""
-        from cortex.extensions.llm.router import IntentProfile
+        from babylon60.extensions.llm.router import IntentProfile
 
         diff = toolkit.git_diff()
         if not diff.strip() or diff.startswith("[ERROR]"):

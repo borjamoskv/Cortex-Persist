@@ -39,7 +39,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         Returns:
             dict with keys: file, facts_count, word_count, status.
         """
-        from cortex.services.notebooklm import NotebookLMService
+        from babylon60.services.notebooklm import NotebookLMService
 
         db_path = getattr(ctx, "db_path", "")
         svc = NotebookLMService(str(db_path))
@@ -71,7 +71,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         Returns:
             dict mapping domain name to fact count.
         """
-        from cortex.services.notebooklm import NotebookLMService
+        from babylon60.services.notebooklm import NotebookLMService
 
         db_path = getattr(ctx, "db_path", "")
         svc = NotebookLMService(str(db_path))
@@ -101,7 +101,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         import time
         from datetime import datetime, timezone
 
-        from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
+        from babylon60.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
 
         # Detect provider
         target = None
@@ -166,7 +166,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         import time
         from datetime import datetime, timezone
 
-        from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
+        from babylon60.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
 
         result: dict[str, Any] = {}
 

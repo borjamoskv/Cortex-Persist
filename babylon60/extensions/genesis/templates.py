@@ -5,8 +5,8 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 
-from cortex.extensions.genesis.models import ComponentSpec
-from cortex.extensions.genesis.renderers import (
+from babylon60.extensions.genesis.models import ComponentSpec
+from babylon60.extensions.genesis.renderers import (
     _render_agent_yaml,
     _render_cli_command,
     _render_dataclass,

@@ -4,7 +4,7 @@ import json
 import logging
 from collections.abc import AsyncGenerator
 
-from cortex.extensions.signals.bus import AsyncSignalBus
+from babylon60.extensions.signals.bus import AsyncSignalBus
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 

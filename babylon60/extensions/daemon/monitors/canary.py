@@ -9,9 +9,9 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from cortex.core import config
-from cortex.database.core import connect_async
-from cortex.extensions.daemon.models import SecurityAlert
+from babylon60.core import config
+from babylon60.database.core import connect_async
+from babylon60.extensions.daemon.models import SecurityAlert
 
 logger = logging.getLogger("moskv-daemon")
 

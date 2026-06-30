@@ -19,7 +19,7 @@ import asyncio
 import logging
 import time
 
-from cortex.extensions.llm._models import BaseProvider, CortexPrompt, HedgedResult
+from babylon60.extensions.llm._models import BaseProvider, CortexPrompt, HedgedResult
 
 __all__ = ["HedgedRequestStrategy"]
 

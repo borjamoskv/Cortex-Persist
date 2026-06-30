@@ -115,7 +115,7 @@ class TrendDetector:
     ) -> None:
         """Persist a health score snapshot to SQLite."""
         try:
-            from cortex.database.core import connect
+            from babylon60.database.core import connect
 
             conn = connect(db_path, timeout=5)
             try:
@@ -139,7 +139,7 @@ class TrendDetector:
     def prune_history(self, db_path: str, keep_days: int = 30) -> None:
         """Delete historical records older than keep_days."""
         try:
-            from cortex.database.core import connect
+            from babylon60.database.core import connect
 
             conn = connect(db_path, timeout=5)
             try:
@@ -164,7 +164,7 @@ class TrendDetector:
         """Seed ring buffer from historical DB records."""
         n = limit or self.window_size
         try:
-            from cortex.database.core import connect
+            from babylon60.database.core import connect
 
             conn = connect(db_path, timeout=5, row_factory=sqlite3.Row)
             try:
@@ -186,7 +186,7 @@ class TrendDetector:
     def query_history(db_path: str, limit: int = 20) -> list[dict[str, object]]:
         """Query persisted health history for display."""
         try:
-            from cortex.database.core import connect
+            from babylon60.database.core import connect
 
             conn = connect(db_path, timeout=5, row_factory=sqlite3.Row, read_only=True)
             try:

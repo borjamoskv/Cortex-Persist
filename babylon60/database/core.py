@@ -14,7 +14,7 @@ This module exists to make it ARCHITECTURALLY IMPOSSIBLE to create
 an unprotected SQLite connection that could cause lock cascade hangs.
 
 Usage (sync):
-    from cortex.db import connect
+    from babylon60.db import connect
     conn = connect("/path/to/db")
 
 Usage (read-only pool):
@@ -24,7 +24,7 @@ Usage (writer - disables auto WAL checkpoint):
     conn = connect_writer("/path/to/db")
 
 Usage (async):
-    from cortex.db import connect_async, apply_pragmas_async
+    from babylon60.db import connect_async, apply_pragmas_async
     conn = await connect_async("/path/to/db")
 """
 
@@ -51,7 +51,7 @@ except ImportError:  # pragma: no cover - sqlite-vec is a base dependency in rel
 logger = logging.getLogger("cortex.db")
 import datetime
 
-from cortex.utils.errors import DBLockError
+from babylon60.utils.errors import DBLockError
 
 sqlite3.register_adapter(datetime.datetime, lambda val: val.isoformat())
 sqlite3.register_adapter(datetime.date, lambda val: val.isoformat())

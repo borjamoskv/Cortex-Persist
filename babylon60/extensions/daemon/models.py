@@ -5,15 +5,15 @@ from __future__ import annotations
 import dataclasses
 from dataclasses import dataclass, field
 
-from cortex.core.paths import (
+from babylon60.core.paths import (
     AGENT_DIR,
     CORTEX_DB,
     CORTEX_DIR,
 )
-from cortex.core.paths import (
+from babylon60.core.paths import (
     DAEMON_CONFIG_FILE as CONFIG_FILE,
 )
-from cortex.core.paths import (
+from babylon60.core.paths import (
     DAEMON_STATUS_FILE as STATUS_FILE,
 )
 

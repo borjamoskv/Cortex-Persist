@@ -16,8 +16,8 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-from cortex.core import config
-from cortex.database.core import connect_async_ctx
+from babylon60.core import config
+from babylon60.database.core import connect_async_ctx
 
 from babylon60.crypto.hash_registry import cortex_hash
 
@@ -278,7 +278,7 @@ class IntegrityAuditor:
         failures: list[TamperedFact] = []
 
         try:
-            from cortex.extensions.security.signatures import (
+            from babylon60.extensions.security.signatures import (
                 SignatureVerificationError,
                 get_default_signer,
             )

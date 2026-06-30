@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
-from cortex.extensions.sovereign.observability import (
+from babylon60.extensions.sovereign.observability import (
     Dimension,
     compute_power,
     run_security_scans,
@@ -26,7 +26,7 @@ async def get_power_level() -> dict[str, Any]:
     """Return current sovereign power level."""
     scores = {}
     try:
-        from cortex.extensions.mejoralo.scan import scan  # real scanner
+        from babylon60.extensions.mejoralo.scan import scan  # real scanner
 
         result = scan("cortex/")  # type: ignore[reportCallIssue]
         # Map scan result dimensions to our Dimension enum
@@ -73,7 +73,7 @@ async def health() -> dict[str, str]:
 @router.get("/skills")
 async def list_skills() -> dict[str, Any]:
     """List all discovered sovereign skills."""
-    from cortex.extensions.sovereign.engine import (
+    from babylon60.extensions.sovereign.engine import (
         discover_skills,  # type: ignore[reportAttributeAccessIssue]
     )
 

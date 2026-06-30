@@ -31,11 +31,11 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex_extensions.sync")
 
-from cortex.core.paths import (
+from babylon60.core.paths import (
     AGENT_DIR,
     CORTEX_DIR,
     MEMORY_DIR,

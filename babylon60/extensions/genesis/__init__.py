@@ -6,7 +6,7 @@ specs, and templates from here.
 
 Example::
 
-    from cortex.extensions.genesis import GenesisEngine, SystemSpec, ComponentSpec
+    from babylon60.extensions.genesis import GenesisEngine, SystemSpec, ComponentSpec
 
     engine = GenesisEngine()
     spec = SystemSpec(name="my_module", components=[
@@ -20,11 +20,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.genesis.assembler import SystemAssembler
-    from cortex.extensions.genesis.engine import GenesisEngine
-    from cortex.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
-    from cortex.extensions.genesis.templates import SystemTemplate, TemplateRegistry
-    from cortex.extensions.genesis.validator import GenesisValidator
+    from babylon60.extensions.genesis.assembler import SystemAssembler
+    from babylon60.extensions.genesis.engine import GenesisEngine
+    from babylon60.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
+    from babylon60.extensions.genesis.templates import SystemTemplate, TemplateRegistry
+    from babylon60.extensions.genesis.validator import GenesisValidator
 
 __all__ = [
     "ComponentSpec",  # pyright: ignore[reportUnsupportedDunderAll]
@@ -41,7 +41,7 @@ __all__ = [
 def __getattr__(name: str) -> object:
     """Lazy imports for all public symbols."""
     if name in ("SystemSpec", "ComponentSpec", "GenesisResult"):
-        from cortex.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
+        from babylon60.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
 
         _map = {
             "SystemSpec": SystemSpec,
@@ -51,23 +51,23 @@ def __getattr__(name: str) -> object:
         return _map[name]
 
     if name == "GenesisEngine":
-        from cortex.extensions.genesis.engine import GenesisEngine
+        from babylon60.extensions.genesis.engine import GenesisEngine
 
         return GenesisEngine
 
     if name in ("TemplateRegistry", "SystemTemplate"):
-        from cortex.extensions.genesis.templates import SystemTemplate, TemplateRegistry
+        from babylon60.extensions.genesis.templates import SystemTemplate, TemplateRegistry
 
         _map = {"TemplateRegistry": TemplateRegistry, "SystemTemplate": SystemTemplate}
         return _map[name]
 
     if name == "SystemAssembler":
-        from cortex.extensions.genesis.assembler import SystemAssembler
+        from babylon60.extensions.genesis.assembler import SystemAssembler
 
         return SystemAssembler
 
     if name == "GenesisValidator":
-        from cortex.extensions.genesis.validator import GenesisValidator
+        from babylon60.extensions.genesis.validator import GenesisValidator
 
         return GenesisValidator
 

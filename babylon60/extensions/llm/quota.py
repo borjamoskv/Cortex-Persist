@@ -21,7 +21,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 
-from cortex.database.core import connect as db_connect
+from babylon60.database.core import connect as db_connect
 
 
 class QuotaRejectedError(Exception):

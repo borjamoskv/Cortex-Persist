@@ -7,13 +7,13 @@ import logging
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from cortex.compaction.utils import content_hash, similarity
+from babylon60.compaction.utils import content_hash, similarity
 
 __all__ = ["execute_dedup", "find_duplicates"]
 
 if TYPE_CHECKING:
-    from cortex.compaction.compactor import CompactionResult
-    from cortex.engine import CortexEngine
+    from babylon60.compaction.compactor import CompactionResult
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compaction.dedup")
 _LOG_FMT = "Compactor [%s] %s"
@@ -133,7 +133,7 @@ async def _merge_duplicate_group(
     if not canonical_fact:
         return
 
-    from cortex.compaction.utils import merge_error_contents
+    from babylon60.compaction.utils import merge_error_contents
 
     all_contents = [fact_map[fid].content for fid in group if fid in fact_map]
 

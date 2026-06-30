@@ -14,7 +14,7 @@ import sqlite3
 import time
 from typing import Any
 
-from cortex.database.core import connect as db_connect
+from babylon60.database.core import connect as db_connect
 
 from babylon60.crypto.hash_registry import cortex_hash
 

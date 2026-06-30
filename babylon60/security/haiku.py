@@ -12,7 +12,7 @@ import warnings
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.security.types import GuardViolation
+from babylon60.security.types import GuardViolation
 
 logger = logging.getLogger("cortex.security.haiku")
 

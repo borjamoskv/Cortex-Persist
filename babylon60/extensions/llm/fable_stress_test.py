@@ -24,7 +24,7 @@ patch(
     mock_generate_secure_taint_token,
 ).start()
 
-from cortex.extensions.llm._provider_fable import execute_fable_native
+from babylon60.extensions.llm._provider_fable import execute_fable_native
 
 
 class DummyCircuitBreaker:

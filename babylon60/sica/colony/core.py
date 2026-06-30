@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.sica.strategy import SearchStrategy
+from babylon60.sica.strategy import SearchStrategy
 
 from .genetics import GenePool, GenomeCrossover
 from .specialization import SpecializationDetector

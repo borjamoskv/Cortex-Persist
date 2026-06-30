@@ -145,7 +145,7 @@ class AgentCatalogEntry:
         """
         if self.provider and self.intent:
             try:
-                from cortex.extensions.llm._presets import resolve_model
+                from babylon60.extensions.llm._presets import resolve_model
 
                 resolved = resolve_model(self.provider, self.intent)
                 if resolved:
@@ -166,7 +166,7 @@ class AgentCatalogEntry:
         }
         if self.provider:
             try:
-                from cortex.extensions.llm._presets import get_preset_info
+                from babylon60.extensions.llm._presets import get_preset_info
 
                 preset = get_preset_info(self.provider)
                 if preset:

@@ -31,8 +31,8 @@ except ImportError:
     logging.warning("arq not installed; sidecar will use a dummy in‑process queue")
 
 # Local imports
-from cortex.engine import CortexEngine
-from cortex.extensions.daemon.monitors.l2_drain import L2DrainMonitor
+from babylon60.engine import CortexEngine
+from babylon60.extensions.daemon.monitors.l2_drain import L2DrainMonitor
 
 from .circuit_breaker import circuit_breaker
 from .memory_wrapper import get_mallinfo2, malloc_trim

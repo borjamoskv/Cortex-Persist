@@ -6,8 +6,8 @@ import logging
 import sqlite3
 from typing import Any
 
-from cortex.database.core import connect as db_connect
-from cortex.extensions.llm._models import CascadeEvent, CascadeTier
+from babylon60.database.core import connect as db_connect
+from babylon60.extensions.llm._models import CascadeEvent, CascadeTier
 
 logger = logging.getLogger("cortex_extensions.llm.telemetry")
 

@@ -14,7 +14,7 @@ import ast
 import logging
 from pathlib import Path
 
-from cortex.extensions.genesis.models import SystemSpec
+from babylon60.extensions.genesis.models import SystemSpec
 
 __all__ = ["GenesisValidator"]
 

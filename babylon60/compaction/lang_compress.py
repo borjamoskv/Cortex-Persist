@@ -458,7 +458,7 @@ class LangCompressor:
         """Decode a raw DB row into (fact_id, content, meta)."""
         fact_id, raw_content, meta_json = row[0], row[1], row[2]
         try:
-            from cortex.crypto import get_default_encrypter
+            from babylon60.crypto import get_default_encrypter
 
             enc = get_default_encrypter()
             content = enc.decrypt_str(raw_content, tenant_id="default") if raw_content else ""

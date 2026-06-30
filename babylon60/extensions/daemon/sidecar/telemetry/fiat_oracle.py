@@ -15,7 +15,7 @@ import logging
 from pathlib import Path
 from typing import Any, Final
 
-from cortex.utils.errors import CortexError
+from babylon60.utils.errors import CortexError
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class FiatOracle:
         logger.info("💸 [FIAT_ORACLE] (Thread) started.")
         self.running = True
 
-        from cortex.events.loop import sovereign_run
+        from babylon60.events.loop import sovereign_run
 
         while self.running:
             try:

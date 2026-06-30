@@ -9,13 +9,13 @@ import threading
 import time
 from datetime import datetime, timedelta, timezone
 
-from cortex.extensions.timing.models import (
+from babylon60.extensions.timing.models import (
     DEFAULT_GAP_SECONDS,
     TimeEntry,
     TimeSummary,
     classify_entity,
 )
-from cortex.memory.temporal import now_iso
+from babylon60.memory.temporal import now_iso
 
 __all__ = ["TimingTracker"]
 

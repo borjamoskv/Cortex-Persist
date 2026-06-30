@@ -15,7 +15,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Final
 
-from cortex.engine import CortexEngine
+from babylon60.engine import CortexEngine
 
 __all__ = [
     "ALL_TOOLS",
@@ -172,7 +172,7 @@ def adk_ledger_verify() -> dict[str, Any]:
     Returns:
         A dict with verification results.
     """
-    from cortex.ledger import ImmutableLedger
+    from babylon60.ledger import ImmutableLedger
 
     try:
         with _sovereign_engine() as engine:

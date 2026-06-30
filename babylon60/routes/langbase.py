@@ -17,13 +17,13 @@ from __future__ import annotations
 
 import logging
 
-from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.config import LANGBASE_API_KEY, LANGBASE_BASE_URL
-from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.extensions.langbase.client import LangbaseClient, LangbaseError
-from cortex.extensions.langbase.pipe import run_with_cortex_context
-from cortex.extensions.langbase.sync import sync_to_langbase
+from babylon60.api.deps import get_async_engine
+from babylon60.auth import AuthResult, require_permission
+from babylon60.config import LANGBASE_API_KEY, LANGBASE_BASE_URL
+from babylon60.engine import CortexEngine as AsyncCortexEngine
+from babylon60.extensions.langbase.client import LangbaseClient, LangbaseError
+from babylon60.extensions.langbase.pipe import run_with_cortex_context
+from babylon60.extensions.langbase.sync import sync_to_langbase
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 

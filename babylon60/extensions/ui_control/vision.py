@@ -17,10 +17,10 @@ except ImportError:
     ImageIO = None
     kUTTypePNG = None
 
-from cortex.extensions.ui_control.models import InteractionResult
+from babylon60.extensions.ui_control.models import InteractionResult
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex_extensions.ui_control.vision")
 

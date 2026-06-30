@@ -5,8 +5,8 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.signals.bus import SignalBus
-    from cortex.extensions.signals.models import Signal, SignalFilter
+    from babylon60.extensions.signals.bus import SignalBus
+    from babylon60.extensions.signals.models import Signal, SignalFilter
 
 __all__ = ["Signal", "SignalBus", "SignalFilter"]
 

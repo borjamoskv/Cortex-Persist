@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from cortex.extensions.notifications.events import CortexEvent
+from babylon60.extensions.notifications.events import CortexEvent
 
 
 class BaseAdapter(ABC):

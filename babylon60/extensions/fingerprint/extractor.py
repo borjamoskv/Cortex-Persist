@@ -17,14 +17,14 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
-from cortex.extensions.fingerprint.models import (
+from babylon60.extensions.fingerprint.models import (
     CognitiveFingerprint,
     DomainPreference,
     PatternVector,
 )
-from cortex.extensions.fingerprint.scanner import FingerprintScanner
+from babylon60.extensions.fingerprint.scanner import FingerprintScanner
 
 __all__ = ["FingerprintExtractor"]
 

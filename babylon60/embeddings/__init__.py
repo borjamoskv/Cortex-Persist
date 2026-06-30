@@ -6,10 +6,10 @@ Vector substrate for semantic memory and similarity search.
 
 from __future__ import annotations
 
-from cortex.embeddings import local as _local
-from cortex.embeddings.manager import EmbeddingManager
-from cortex.embeddings.obfuscation import obfuscate_vector
-from cortex.embeddings.provider import EmbeddingProvider
+from babylon60.embeddings import local as _local
+from babylon60.embeddings.manager import EmbeddingManager
+from babylon60.embeddings.obfuscation import obfuscate_vector
+from babylon60.embeddings.provider import EmbeddingProvider
 
 _DEVICE = _local._DEVICE
 EMBEDDING_DIM = _local.EMBEDDING_DIM

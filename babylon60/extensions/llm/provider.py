@@ -13,21 +13,21 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 import httpx
-from cortex.extensions.llm._audit import spectral_audit
-from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
-from cortex.extensions.llm._presets import get_prefix_cache_config, load_presets
-from cortex.extensions.llm._provider_config import resolve_provider_config
-from cortex.extensions.llm._provider_gemini import execute_gemini_native
-from cortex.extensions.llm._provider_stream import execute_stream
-from cortex.extensions.llm._resilience import CircuitBreaker, resilient_call
-from cortex.extensions.llm._result_cache import ResultCache
-from cortex.extensions.llm._stealth import (
+from babylon60.extensions.llm._audit import spectral_audit
+from babylon60.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
+from babylon60.extensions.llm._presets import get_prefix_cache_config, load_presets
+from babylon60.extensions.llm._provider_config import resolve_provider_config
+from babylon60.extensions.llm._provider_gemini import execute_gemini_native
+from babylon60.extensions.llm._provider_stream import execute_stream
+from babylon60.extensions.llm._resilience import CircuitBreaker, resilient_call
+from babylon60.extensions.llm._result_cache import ResultCache
+from babylon60.extensions.llm._stealth import (
     apply_causal_jitter,
     prepare_stealth_headers,
     sanitize_response,
 )
-from cortex.extensions.llm.gemini_cache import get_gemini_gateway
-from cortex.extensions.llm.quota import SovereignQuotaManager
+from babylon60.extensions.llm.gemini_cache import get_gemini_gateway
+from babylon60.extensions.llm.quota import SovereignQuotaManager
 from rich.console import Console
 
 __all__ = ["LLMProvider"]
@@ -288,7 +288,7 @@ class LLMProvider(BaseProvider):
                 err_text,
             )
             if wrap_errors:
-                from cortex.utils.errors import CortexError
+                from babylon60.utils.errors import CortexError
 
                 raise CortexError(f"HTTP {e.response.status_code} from {self._provider}") from e
             raise
@@ -301,7 +301,7 @@ class LLMProvider(BaseProvider):
         ) as e:
             logger.error("LLM Parse Error [%s]: %s", self._provider, e)
             if wrap_errors:
-                from cortex.utils.errors import CortexError
+                from babylon60.utils.errors import CortexError
 
                 raise CortexError(f"Unexpected JSON format from {self._provider}") from e
             raise ValueError(f"Unexpected response format from {self._provider}") from e
@@ -315,7 +315,7 @@ class LLMProvider(BaseProvider):
     ) -> str:
         color = _get_provider_color(self._provider)
         try:
-            from cortex.routes.notch_ws import notify_notch_halo
+            from babylon60.routes.notch_ws import notify_notch_halo
             asyncio.create_task(notify_notch_halo(color, True))
         except Exception:
             pass
@@ -337,7 +337,7 @@ class LLMProvider(BaseProvider):
             return sanitize_response(data["choices"][0]["message"]["content"])
         finally:
             try:
-                from cortex.routes.notch_ws import notify_notch_halo
+                from babylon60.routes.notch_ws import notify_notch_halo
                 asyncio.create_task(notify_notch_halo(color, False))
             except Exception:
                 pass
@@ -386,7 +386,7 @@ class LLMProvider(BaseProvider):
 
         color = _get_provider_color(self._provider)
         try:
-            from cortex.routes.notch_ws import notify_notch_halo
+            from babylon60.routes.notch_ws import notify_notch_halo
             asyncio.create_task(notify_notch_halo(color, True))
         except Exception:
             pass
@@ -404,7 +404,7 @@ class LLMProvider(BaseProvider):
                 yield chunk
         finally:
             try:
-                from cortex.routes.notch_ws import notify_notch_halo
+                from babylon60.routes.notch_ws import notify_notch_halo
                 asyncio.create_task(notify_notch_halo(color, False))
             except Exception:
                 pass

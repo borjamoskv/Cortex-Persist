@@ -32,8 +32,8 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.sica.object_level import ExecutionStep, ExecutionTrace, StepOutcome
-from cortex.sica.strategy import Heuristic, SearchStrategy
+from babylon60.sica.object_level import ExecutionStep, ExecutionTrace, StepOutcome
+from babylon60.sica.strategy import Heuristic, SearchStrategy
 
 logger = logging.getLogger("cortex.sica.dream")
 

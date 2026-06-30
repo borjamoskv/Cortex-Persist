@@ -4,9 +4,9 @@ API Dependencies.
 Shared dependencies for FastAPI routes.
 """
 
-from cortex.engine import CortexEngine
-from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.extensions.timing import TimingTracker
+from babylon60.engine import CortexEngine
+from babylon60.engine import CortexEngine as AsyncCortexEngine
+from babylon60.extensions.timing import TimingTracker
 from fastapi import Request
 
 __all__ = ["get_async_engine", "get_engine", "get_tracker"]

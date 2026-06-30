@@ -137,7 +137,7 @@ class PostgresBackend:
         Raises:
             RuntimeError: If the backend is not connected.
         """
-        from cortex.storage.pg_schema import PG_ALL_SCHEMA, PG_EXTENSIONS
+        from babylon60.storage.pg_schema import PG_ALL_SCHEMA, PG_EXTENSIONS
 
         self._ensure_pool()
         logger.info("PostgreSQL: Applying schema (idempotent)...")

@@ -7,7 +7,7 @@ local sandbox, and delivers a Git branch + optional PR.
 
 Usage::
 
-    from cortex.extensions.aether import AetherAgent, TaskQueue
+    from babylon60.extensions.aether import AetherAgent, TaskQueue
 
     queue = TaskQueue()
     queue.enqueue(AgentTask(
@@ -22,10 +22,10 @@ Usage::
     agent.run_task(queue.pop_next())
 """
 
-from cortex.extensions.aether.daemon import AetherDaemon, AetherMonitor
-from cortex.extensions.aether.models import AgentTask, TaskStatus
-from cortex.extensions.aether.queue import TaskQueue
-from cortex.extensions.aether.runner import AetherAgent
+from babylon60.extensions.aether.daemon import AetherDaemon, AetherMonitor
+from babylon60.extensions.aether.models import AgentTask, TaskStatus
+from babylon60.extensions.aether.queue import TaskQueue
+from babylon60.extensions.aether.runner import AetherAgent
 
 __all__ = [
     "AetherAgent",

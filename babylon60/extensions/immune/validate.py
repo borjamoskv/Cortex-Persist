@@ -5,8 +5,8 @@ IMMUNE-SYSTEM-V1 Validation Script.
 
 import asyncio
 
-from cortex.extensions.immune.filters.reversibility import ReversibilityLevel
-from cortex.extensions.immune.membrane import ImmuneMembrane
+from babylon60.extensions.immune.filters.reversibility import ReversibilityLevel
+from babylon60.extensions.immune.membrane import ImmuneMembrane
 
 
 async def validate_immune():

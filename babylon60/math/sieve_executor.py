@@ -6,8 +6,8 @@ import sys
 import uuid
 from datetime import datetime, timezone
 
-from cortex.math.riemann_sieve import get_riemann_zero
-from cortex.nodes.riemann_hypothesis_nodes import RiemannZeroNode
+from babylon60.math.riemann_sieve import get_riemann_zero
+from babylon60.nodes.riemann_hypothesis_nodes import RiemannZeroNode
 
 # Logger C5-REAL
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | C5-REAL | %(message)s")

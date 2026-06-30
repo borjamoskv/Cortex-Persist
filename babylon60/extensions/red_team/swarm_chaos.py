@@ -6,9 +6,9 @@ import re
 from collections.abc import Callable
 from typing import Any
 
-from cortex.engine.meta.nemesis import NemesisProtocol
-from cortex.extensions.immune.falsification import EvolutionaryFalsifier
-from cortex.extensions.red_team.discovery import DiscoveryProvider
+from babylon60.engine.meta.nemesis import NemesisProtocol
+from babylon60.extensions.immune.falsification import EvolutionaryFalsifier
+from babylon60.extensions.red_team.discovery import DiscoveryProvider
 
 logger = logging.getLogger("cortex_extensions.red_team.swarm_chaos")
 

@@ -13,12 +13,12 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 import httpx
-from cortex.memory.temporal import now_iso
+from babylon60.memory.temporal import now_iso
 
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 __all__ = ["GitHubCortexBridge", "SyncResult"]
 
@@ -315,7 +315,7 @@ class GitHubCortexBridge:
                 )
                 rows = await cursor.fetchall()
 
-            from cortex.crypto import get_default_encrypter
+            from babylon60.crypto import get_default_encrypter
 
             enc = get_default_encrypter()
 

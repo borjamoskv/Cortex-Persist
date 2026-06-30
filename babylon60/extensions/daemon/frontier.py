@@ -44,7 +44,7 @@ class FrontierDaemon:
             import os
 
             target_path = Path(os.environ.get("CORTEX_ROOT", Path(__file__).resolve().parents[2]))
-            from cortex.extensions.evolution.ouroboros_omega import OuroborosOmega
+            from babylon60.extensions.evolution.ouroboros_omega import OuroborosOmega
 
             test_file = target_path / "extensions/daemon/core.py"
             if test_file.exists():

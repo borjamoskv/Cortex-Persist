@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 
-from cortex.extensions.daemon.gmail_magic_link import GmailMagicLinkExtractor
+from babylon60.extensions.daemon.gmail_magic_link import GmailMagicLinkExtractor
 from playwright.async_api import async_playwright
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

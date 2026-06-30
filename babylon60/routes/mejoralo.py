@@ -5,11 +5,11 @@ MEJORAlo Router.
 API endpoints for the MEJORAlo v7.3 protocol.
 """
 
-from cortex.api.deps import get_engine
-from cortex.auth import require_permission
-from cortex.engine import CortexEngine
-from cortex.extensions.mejoralo import MejoraloEngine
-from cortex.types.models import (
+from babylon60.api.deps import get_engine
+from babylon60.auth import require_permission
+from babylon60.engine import CortexEngine
+from babylon60.extensions.mejoralo import MejoraloEngine
+from babylon60.types.models import (
     DimensionResultModel,
     MejoraloScanRequest,
     MejoraloScanResponse,

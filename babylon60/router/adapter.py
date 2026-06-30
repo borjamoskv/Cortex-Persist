@@ -26,14 +26,14 @@ try:
 except ImportError:
     yaml = None
 
-from cortex.router.contract import (
+from babylon60.router.contract import (
     CONTRACT_VERSION,
     CognitiveMode,
     RoutingContext,
     RoutingDecision,
     Severity,
 )
-from cortex.router.contract import (
+from babylon60.router.contract import (
     resolve as contract_resolve,
 )
 

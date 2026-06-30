@@ -8,11 +8,11 @@ Cold (Low Entropy) tasks are routed to Flash workers.
 
 import logging
 
-from cortex.agents.base import BaseAgent
-from cortex.agents.bus import MessageBus
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
-from cortex.agents.state import AgentStatus
+from babylon60.agents.base import BaseAgent
+from babylon60.agents.bus import MessageBus
+from babylon60.agents.manifest import AgentManifest
+from babylon60.agents.message_schema import AgentMessage, MessageKind, new_message
+from babylon60.agents.state import AgentStatus
 
 logger = logging.getLogger("cortex.agents.maxwell_router")
 

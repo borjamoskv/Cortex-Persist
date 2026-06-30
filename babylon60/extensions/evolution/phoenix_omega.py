@@ -4,7 +4,7 @@ PHOENIX-OMEGA: Motor de Transformación Atómica y Escalado Estructural
 Wrapper para el core engine en cortex.engine.phoenix_omega.
 """
 
-from cortex.swarm.phoenix_omega import (
+from babylon60.swarm.phoenix_omega import (
     AtomicPhase,
     BaseEngine,
     PhaseStatus,

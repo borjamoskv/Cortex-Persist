@@ -7,8 +7,8 @@ import time
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.guards.landauer_guard import LandauerGuard
-from cortex.security.types import (
+from babylon60.guards.landauer_guard import LandauerGuard
+from babylon60.security.types import (
     ImmuneArtifact,
     ImmunityState,
     PathogenProfile,

@@ -12,7 +12,7 @@ import logging
 import time
 from typing import Any
 
-from cortex.telemetry.metrics import metrics
+from babylon60.telemetry.metrics import metrics
 
 logger = logging.getLogger("cortex.telemetry.quality")
 

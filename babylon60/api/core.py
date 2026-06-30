@@ -13,21 +13,21 @@ import logging
 import sqlite3
 from contextlib import asynccontextmanager
 
-from cortex.auth import AuthManager
-from cortex.extensions.llm.quota import QuotaRejectedError
-from cortex.extensions.metering.middleware import MeteringMiddleware
-from cortex.extensions.swarm.manager import get_swarm_manager
-from cortex.extensions.timing import TimingTracker
-from cortex.routes import api_router
-from cortex.telemetry.metrics import MetricsMiddleware, metrics
-from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from babylon60.auth import AuthManager
+from babylon60.extensions.llm.quota import QuotaRejectedError
+from babylon60.extensions.metering.middleware import MeteringMiddleware
+from babylon60.extensions.swarm.manager import get_swarm_manager
+from babylon60.extensions.timing import TimingTracker
+from babylon60.routes import api_router
+from babylon60.telemetry.metrics import MetricsMiddleware, metrics
+from babylon60.utils.i18n import DEFAULT_LANGUAGE, get_trans
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-import cortex.api.state as api_state
+import babylon60.api.state as api_state
 from cortex import __version__, config
-from cortex.api.middleware import (
+from babylon60.api.middleware import (
     ContentSizeLimitMiddleware,
     CortexBillingMiddleware,
     RateLimitMiddleware,
@@ -36,8 +36,8 @@ from cortex.api.middleware import (
     SovereignIsolationMiddleware,
     TracingMiddleware,
 )
-from cortex.engine import CortexEngine
-from cortex.mcp_server.knowledge_watcher import start_knowledge_daemon
+from babylon60.engine import CortexEngine
+from babylon60.mcp_server.knowledge_watcher import start_knowledge_daemon
 
 __all__ = [
     "ContentSizeLimitMiddleware",
@@ -61,9 +61,9 @@ logger = logging.getLogger("uvicorn.error")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize async connection pool, engine, auth, and timing on startup."""
-    from cortex.database.pool import CortexConnectionPool
+    from babylon60.database.pool import CortexConnectionPool
 
-    from cortex.engine import CortexEngine as AsyncCortexEngine
+    from babylon60.engine import CortexEngine as AsyncCortexEngine
 
     db_path = config.DB_PATH
     logger.info("Lifespan: Initializing CORTEX with DB_PATH: %s", db_path)
@@ -74,18 +74,18 @@ async def lifespan(app: FastAPI):
     auth_manager = AuthManager()  # Use dynamic backend selection based on config
     await auth_manager.initialize()
 
-    from cortex.ledger.billing_gateway import get_billing_gateway
+    from babylon60.ledger.billing_gateway import get_billing_gateway
 
     await get_billing_gateway().initialize()
 
     # 2. Connection Pool & Async Engine
     # IMPORTANT: The pool must allow writes (read_only=False) because AsyncCortexEngine uses it
     # for facts insertion.
-    from cortex.storage import StorageMode, get_storage_config, get_storage_mode
+    from babylon60.storage import StorageMode, get_storage_config, get_storage_mode
 
     if get_storage_mode() == StorageMode.POSTGRES:
-        from cortex.database.postgres_core import create_pool_async
-        from cortex.storage.postgres import PostgresBackend
+        from babylon60.database.postgres_core import create_pool_async
+        from babylon60.storage.postgres import PostgresBackend
 
         storage_config = get_storage_config()
         pg_dsn = storage_config["dsn"]
@@ -97,7 +97,7 @@ async def lifespan(app: FastAPI):
 
         # 2b. Initialize pool
         raw_pool = await create_pool_async(pg_dsn)
-        from cortex.database.postgres_adapter import PostgresPoolAdapter
+        from babylon60.database.postgres_adapter import PostgresPoolAdapter
 
         pool = PostgresPoolAdapter(raw_pool)
     else:
@@ -108,12 +108,12 @@ async def lifespan(app: FastAPI):
     app.state.swarm_manager = get_swarm_manager()
 
     # 3. Global Auth Registration
-    import cortex.auth
+    import babylon60.auth
 
     cortex.auth.manager._auth_manager = auth_manager  # type: ignore[reportAttributeAccessIssue]
 
     # 4. Temporal Tracking
-    from cortex.database.core import connect as db_connect
+    from babylon60.database.core import connect as db_connect
 
     timing_conn = db_connect(db_path)
     tracker = TimingTracker(timing_conn)
@@ -131,14 +131,14 @@ async def lifespan(app: FastAPI):
     api_state.tracker = tracker
 
     # 6. Notification Bus - wire adapters from config
-    from cortex.extensions.notifications.setup import setup_notifications
+    from babylon60.extensions.notifications.setup import setup_notifications
 
     notification_bus = setup_notifications(config)
     api_state.notification_bus = notification_bus  # type: ignore[reportAttributeAccessIssue]
 
     # 7. V4 Singularity Daemons (Execution Plane Only)
     if config.DEPLOY_MODE != "cloud":
-        from cortex.swarm import start_swarm_daemon
+        from babylon60.swarm import start_swarm_daemon
 
         watcher = start_knowledge_daemon()
         swarm_daemon = start_swarm_daemon()
@@ -184,7 +184,7 @@ app.state.swarm_manager = get_swarm_manager()
 # ─── Internal Middleware ──────────────────────────────────────────────
 
 
-# Middlewares imported from cortex.middleware
+# Middlewares imported from babylon60.middleware
 
 
 # ─── Application Configuration ───────────────────────────────────────
@@ -326,7 +326,7 @@ async def health_check(request: Request) -> dict:
     health_score = 0.0
     health_grade = "F"
     try:
-        from cortex.extensions.health import HealthCollector, HealthScorer
+        from babylon60.extensions.health import HealthCollector, HealthScorer
 
         db_path = ""
         engine = getattr(request.app.state, "engine", None)
@@ -367,32 +367,32 @@ async def get_metrics():
 app.include_router(api_router)  # pyright: ignore[reportArgumentType]
 
 # V4 SSE Event Bus (Aether Matrix)
-from cortex.api import events as events_router
+from babylon60.api import events as events_router
 
 app.include_router(events_router.router)
 
 # V5 LLM Proxy Middleware (Exergy Labyrinth)
-from cortex.routes import llm_proxy
+from babylon60.routes import llm_proxy
 
 app.include_router(llm_proxy.router)
 
 # Extensions and third-party integrations
 
 # KAPSO Extension
-from cortex.extensions.kapso.webhook import router as kapso_router
+from babylon60.extensions.kapso.webhook import router as kapso_router
 
 app.include_router(kapso_router)
 logger.info("Kapso Webhook integration enabled")
 
 # Extension modules (opt-in)
 if config.LANGBASE_API_KEY:
-    from cortex.routes.langbase import router as langbase_router
+    from babylon60.routes.langbase import router as langbase_router
 
     app.include_router(langbase_router)
     logger.info("Langbase integration enabled")
 
 if config.STRIPE_SECRET_KEY:
-    from cortex.routes.stripe import router as stripe_router
+    from babylon60.routes.stripe import router as stripe_router
 
     app.include_router(stripe_router)
     logger.info("Stripe billing enabled")

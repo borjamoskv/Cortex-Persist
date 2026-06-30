@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
 
-from cortex.compliance.tracker import ComplianceTracker
+from babylon60.compliance.tracker import ComplianceTracker
 
 __all__ = ["ComplianceTracker"]

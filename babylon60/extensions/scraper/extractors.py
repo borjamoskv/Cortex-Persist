@@ -250,7 +250,7 @@ class PlaywrightExtractor(BaseExtractor):
         """Extract markdown from URL using an automated headless Playwright instance."""
         LOG.info("🔴 [PLAYWRIGHT] Extracting: %s", url)
         try:
-            from cortex.extensions.browser.engine import BrowserEngine
+            from babylon60.extensions.browser.engine import BrowserEngine
 
             engine = BrowserEngine(headless=True)
             await engine.start()

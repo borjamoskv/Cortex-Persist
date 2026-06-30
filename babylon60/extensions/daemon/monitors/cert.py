@@ -8,7 +8,7 @@ import ssl
 import time
 from datetime import datetime, timezone
 
-from cortex.extensions.daemon.models import DEFAULT_CERT_WARN_DAYS, DEFAULT_TIMEOUT, CertAlert
+from babylon60.extensions.daemon.models import DEFAULT_CERT_WARN_DAYS, DEFAULT_TIMEOUT, CertAlert
 
 logger = logging.getLogger("moskv-daemon")
 

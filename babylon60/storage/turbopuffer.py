@@ -16,7 +16,7 @@ import logging
 from typing import Any, Final
 
 import httpx
-from cortex.storage.qdrant import VectorBackend
+from babylon60.storage.qdrant import VectorBackend
 
 __all__ = ["TurbopufferVectorBackend"]
 
@@ -186,9 +186,9 @@ class TurbopufferVectorBackend(VectorBackend):
         """
         import os
 
-        from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-        from cortex.database.core import connect_async_ctx
-        from cortex.engine.causal.taint_engine import verify_taint_token
+        from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+        from babylon60.database.core import connect_async_ctx
+        from babylon60.engine.causal.taint_engine import verify_taint_token
 
         ns = self._namespace(tenant_id)
         content = f"prune:{ns}:{entropy_threshold}"

@@ -7,20 +7,20 @@ MCP Staking tools, and Open Judge gates.
 
 from __future__ import annotations
 
-from cortex.integration.rustchain.client import RustChainClient
-from cortex.integration.rustchain.judge import (
+from babylon60.integration.rustchain.client import RustChainClient
+from babylon60.integration.rustchain.judge import (
     ASTLintJudge,
     Judge,
     PolicyJudge,
     TestRunnerJudge,
 )
-from cortex.integration.rustchain.mcp_tool import register_rustchain_tools
-from cortex.integration.rustchain.staking import (
+from babylon60.integration.rustchain.mcp_tool import register_rustchain_tools
+from babylon60.integration.rustchain.staking import (
     GateUnavailableError,
     StakingError,
     stake_and_acquire,
 )
-from cortex.integration.rustchain.wallet import RustChainWallet
+from babylon60.integration.rustchain.wallet import RustChainWallet
 
 __all__ = [
     "RustChainClient",

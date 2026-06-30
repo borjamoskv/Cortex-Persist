@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 
-from cortex.forensics.claude_mcp_fuzzer import (
+from babylon60.forensics.claude_mcp_fuzzer import (
     ClaudeCodeSandboxFuzzer,
     MaliciousMCPServer,
     VulnerabilityReport,

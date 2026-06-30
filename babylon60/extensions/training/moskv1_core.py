@@ -174,8 +174,8 @@ class MOSKV1Core:
         vault_entries: list[str] = []
 
         try:
-            from cortex.embeddings.manager import get_embedding
-            from cortex.search.hybrid import hybrid_search
+            from babylon60.embeddings.manager import get_embedding
+            from babylon60.search.hybrid import hybrid_search
 
             query_embedding = await get_embedding(query)
             results = await hybrid_search(
@@ -201,7 +201,7 @@ class MOSKV1Core:
         except Exception as e:
             logger.warning("Hybrid search failed, trying ContextAssembler: %s", e)
             try:
-                from cortex.context.assembler import ContextAssembler
+                from babylon60.context.assembler import ContextAssembler
 
                 assembler = ContextAssembler(db_conn)
                 ctx_packet = await assembler.assemble(
@@ -535,7 +535,7 @@ class MOSKV1Core:
     ) -> str:
         """Fallback to CORTEX SovereignLLM multi-provider chain."""
         try:
-            from cortex.extensions.llm.sovereign import SovereignLLM
+            from babylon60.extensions.llm.sovereign import SovereignLLM
 
             if self._sovereign_llm is None:
                 self._sovereign_llm = SovereignLLM()

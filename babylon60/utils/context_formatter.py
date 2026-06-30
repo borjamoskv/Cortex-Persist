@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 __all__ = ["compact_session"]
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 _TYPE_ORDER = ["axiom", "decision", "rule", "error", "knowledge", "ghost", "intent", "schema"]
 

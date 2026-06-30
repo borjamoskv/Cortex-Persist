@@ -6,7 +6,7 @@ via serde_json. The tree is pure data until it crosses FFI, where it
 becomes executable code. This IS code-as-data.
 
 Usage:
-    from cortex.isa import dispatch, seq, par, cond, halt, Predicate
+    from babylon60.isa import dispatch, seq, par, cond, halt, Predicate
 
     plan = seq(
         bind("target", "bounty_alpha"),

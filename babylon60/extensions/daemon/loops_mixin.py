@@ -12,7 +12,7 @@ import logging
 import threading
 import time
 
-from cortex.extensions.daemon.models import DaemonStatus
+from babylon60.extensions.daemon.models import DaemonStatus
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -97,7 +97,7 @@ class LoopsMixin:
         if not self._shared_engine:
             return
         try:
-            from cortex.extensions.sync import export_snapshot, export_to_json, sync_memory
+            from babylon60.extensions.sync import export_snapshot, export_to_json, sync_memory
 
             async def _run_sync():
                 s_res = await sync_memory(self._shared_engine)
@@ -157,7 +157,7 @@ class LoopsMixin:
         """Periodic health monitoring via Health Index (Async)."""
         logger.info("🏥 Health Monitor task started (5min interval)")
 
-        from cortex.extensions.daemon.health_loop import HealthLoop
+        from babylon60.extensions.daemon.health_loop import HealthLoop
 
         db_path = ""
         if self._shared_engine:

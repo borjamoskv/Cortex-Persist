@@ -1,10 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 """CORTEX ADK Agents - Sovereign AI Agent Definitions.
 
-Re-exports from cortex.adk.agents to avoid code duplication.
+Re-exports from babylon60.adk.agents to avoid code duplication.
 """
 
-from cortex.adk.agents import (
+from babylon60.adk.agents import (
     create_cortex_swarm,
     create_gem_agent,
     create_google_one_agent,

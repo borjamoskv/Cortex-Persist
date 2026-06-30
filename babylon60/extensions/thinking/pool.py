@@ -16,7 +16,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 
-from cortex.extensions.llm.provider import LLMProvider
+from babylon60.extensions.llm.provider import LLMProvider
 
 __all__ = [
     "ProviderPool",

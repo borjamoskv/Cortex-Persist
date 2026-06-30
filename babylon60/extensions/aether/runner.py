@@ -11,13 +11,13 @@ import asyncio
 import logging
 from pathlib import Path
 
-from cortex.extensions.aether.critic import CriticAgent
-from cortex.extensions.aether.executor import ExecutorAgent
-from cortex.extensions.aether.models import AgentTask, TaskStatus
-from cortex.extensions.aether.planner import PlannerAgent
-from cortex.extensions.aether.queue import TaskQueue
-from cortex.extensions.aether.tester import TesterAgent
-from cortex.extensions.aether.tools import AgentToolkit
+from babylon60.extensions.aether.critic import CriticAgent
+from babylon60.extensions.aether.executor import ExecutorAgent
+from babylon60.extensions.aether.models import AgentTask, TaskStatus
+from babylon60.extensions.aether.planner import PlannerAgent
+from babylon60.extensions.aether.queue import TaskQueue
+from babylon60.extensions.aether.tester import TesterAgent
+from babylon60.extensions.aether.tools import AgentToolkit
 
 __all__ = ["AetherAgent"]
 
@@ -36,8 +36,8 @@ class AetherAgent:
     """
 
     def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
-        from cortex.extensions.agents.registry import AgentCatalogLoader
-        from cortex.extensions.llm.provider import LLMProvider
+        from babylon60.extensions.agents.registry import AgentCatalogLoader
+        from babylon60.extensions.llm.provider import LLMProvider
 
         self._llm = LLMProvider(provider=llm_provider)
 

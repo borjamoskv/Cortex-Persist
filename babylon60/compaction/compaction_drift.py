@@ -12,8 +12,8 @@ import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.compaction.compactor import CompactionResult
-    from cortex.engine import CortexEngine
+    from babylon60.compaction.compactor import CompactionResult
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compactor.drift")
 _LOG_FMT = "Compactor Drift [%s] %s"
@@ -29,11 +29,11 @@ async def apply_drift_check(
     Non-destructive - appends diagnostic info to result.details only.
     Does not deprecate or modify any facts.
     """
-    from cortex.compaction.compactor import CompactionStrategy
+    from babylon60.compaction.compactor import CompactionStrategy
 
     try:
         import numpy as np
-        from cortex.memory.drift import DriftMonitor, model_hash_from_name
+        from babylon60.memory.drift import DriftMonitor, model_hash_from_name
 
         embedder = getattr(engine, "_embedder", None)
         model_name = getattr(embedder, "model_name", "all-MiniLM-L6-v2")
@@ -58,7 +58,7 @@ async def apply_drift_check(
 
         from pathlib import Path  # noqa: F401
 
-        from cortex.core.paths import DRIFT_DIR
+        from babylon60.core.paths import DRIFT_DIR
 
         monitor = DriftMonitor(model_hash=model_hash, signature_dir=DRIFT_DIR)
         baseline = monitor.load_baseline()

@@ -8,7 +8,7 @@ import logging
 
 import pyloudnorm as pyln  # pyright: ignore[reportMissingImports]
 import scipy.signal  # pyright: ignore[reportMissingImports]
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
     from numba import njit  # pyright: ignore[reportMissingImports]

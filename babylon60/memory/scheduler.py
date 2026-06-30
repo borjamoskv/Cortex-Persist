@@ -24,7 +24,7 @@ try:
     from babylon60.extensions.hypervisor.belief_object import BeliefConfidence, BeliefObject
 except ImportError:
     try:
-        from cortex.extensions.hypervisor.belief_object import BeliefConfidence, BeliefObject
+        from babylon60.extensions.hypervisor.belief_object import BeliefConfidence, BeliefObject
     except ImportError:
         # Fallback dummy class if imports fail in isolated test environments
         class BeliefConfidence:  # type: ignore

@@ -7,7 +7,7 @@ Contains all extension modules, governed by the Tier Registry system.
 import importlib.abc
 import sys
 
-from cortex.extensions.registry import verify_extension_import
+from babylon60.extensions.registry import verify_extension_import
 
 
 class ExtensionTierImportEnforcer(importlib.abc.MetaPathFinder):

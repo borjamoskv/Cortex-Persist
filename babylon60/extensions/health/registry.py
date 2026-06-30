@@ -6,8 +6,8 @@ import logging
 import time
 from typing import Any
 
-from cortex.extensions.health.health_protocol import MetricCollectorProtocol
-from cortex.extensions.health.models import MetricSnapshot
+from babylon60.extensions.health.health_protocol import MetricCollectorProtocol
+from babylon60.extensions.health.models import MetricSnapshot
 
 logger = logging.getLogger("cortex_extensions.health.registry")
 

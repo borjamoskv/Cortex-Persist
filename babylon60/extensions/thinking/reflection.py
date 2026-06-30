@@ -30,7 +30,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex.reflection")
 
@@ -138,7 +138,7 @@ def inject_reflections(
     """
     import sqlite3 as _sqlite3
 
-    from cortex.database.core import connect as mt_connect
+    from babylon60.database.core import connect as mt_connect
 
     conn = mt_connect(str(engine._db_path))
     conn.row_factory = _sqlite3.Row
@@ -249,7 +249,7 @@ def _semantic_arm(  # nosec B608 - parameterized query
 ) -> list[dict]:
     """Semantic vector search arm."""
     try:
-        from cortex.embeddings import LocalEmbedder
+        from babylon60.embeddings import LocalEmbedder
 
         embedding = LocalEmbedder().embed(query)
     except (ImportError, RuntimeError, OSError, ValueError):

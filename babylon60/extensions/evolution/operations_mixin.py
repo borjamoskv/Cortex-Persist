@@ -10,25 +10,25 @@ import secrets
 import sqlite3
 from typing import TYPE_CHECKING
 
-from cortex.extensions.evolution.action import SymbolicActionState
-from cortex.extensions.evolution.agents import (
+from babylon60.extensions.evolution.action import SymbolicActionState
+from babylon60.extensions.evolution.agents import (
     AgentDomain,
     EnneagramSovereign,
     EnneagramSubAgent,
     Mutation,
     MutationType,
 )
-from cortex.extensions.evolution.cortex_metrics import DomainMetrics
-from cortex.extensions.evolution.models import EvolutionMetric, EvolutionMutation
-from cortex.extensions.evolution.strategies import DEFAULT_STRATEGIES
+from babylon60.extensions.evolution.cortex_metrics import DomainMetrics
+from babylon60.extensions.evolution.models import EvolutionMetric, EvolutionMutation
+from babylon60.extensions.evolution.strategies import DEFAULT_STRATEGIES
 
 if TYPE_CHECKING:
-    from cortex.extensions.evolution.action import SymbolicActionEngine
-    from cortex.extensions.evolution.ledger_db import EvolutionLedgerDB
-    from cortex.extensions.evolution.models import EngineParameters
-    from cortex.extensions.gate.ouroboros import OuroborosGate
-    from cortex.extensions.sovereign.endocrine import DigitalEndocrine
-    from cortex.ledger import SovereignLedger
+    from babylon60.extensions.evolution.action import SymbolicActionEngine
+    from babylon60.extensions.evolution.ledger_db import EvolutionLedgerDB
+    from babylon60.extensions.evolution.models import EngineParameters
+    from babylon60.extensions.gate.ouroboros import OuroborosGate
+    from babylon60.extensions.sovereign.endocrine import DigitalEndocrine
+    from babylon60.ledger import SovereignLedger
 
 logger = logging.getLogger("cortex_extensions.evolution.engine.ops")
 
@@ -233,7 +233,7 @@ class EvolutionOpsMixin:
             await asyncio.to_thread(self._ouroboros.trigger_pruning, target)
 
             try:
-                from cortex.routes.notch_ws import notch_hub
+                from babylon60.routes.notch_ws import notch_hub
 
                 if notch_hub:
                     self._broadcast_task = asyncio.create_task(

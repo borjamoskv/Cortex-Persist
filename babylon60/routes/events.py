@@ -8,9 +8,9 @@ from __future__ import annotations
 import asyncio
 from collections.abc import AsyncGenerator
 
-from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
+from babylon60.api.deps import get_async_engine
+from babylon60.auth import AuthResult, require_permission
+from babylon60.engine import CortexEngine as AsyncCortexEngine
 from fastapi import APIRouter, Depends, Query, Request
 from sse_starlette.sse import EventSourceResponse
 

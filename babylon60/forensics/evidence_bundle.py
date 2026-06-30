@@ -14,23 +14,23 @@ from collections.abc import Mapping
 from pathlib import PurePosixPath
 from typing import Any
 
-from cortex.database.core import connect
-from cortex.forensics._evidence_ledger import (
+from babylon60.database.core import connect
+from babylon60.forensics._evidence_ledger import (
     EVIDENCE_COMMIT_ACTION,
     _commit_detail,
     _commit_project,
     _find_existing_commit,
     _verify_existing_commit,
 )
-from cortex.forensics.crypto.hashing import (
+from babylon60.forensics.crypto.hashing import (
     canonical_json_bytes,
     sha256_hex,
 )
-from cortex.forensics.crypto.hashing import (
+from babylon60.forensics.crypto.hashing import (
     manifest_sha256 as _manifest_sha256,
 )
-from cortex.ledger.ledger_core import SovereignLedger
-from cortex.utils.canonical import now_iso
+from babylon60.ledger.ledger_core import SovereignLedger
+from babylon60.utils.canonical import now_iso
 
 EVIDENCE_MANIFEST_SCHEMA = "cortex.forensics.evidence_manifest.v1"
 

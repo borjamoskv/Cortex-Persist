@@ -28,7 +28,7 @@ Architecture::
 
 Usage::
 
-    from cortex.extensions.llm.sovereign import SovereignLLM
+    from babylon60.extensions.llm.sovereign import SovereignLLM
 
     async with SovereignLLM() as llm:
         result = await llm.generate("Write a reply", system="You are...")
@@ -46,9 +46,9 @@ import logging
 import time
 from dataclasses import dataclass, field
 
-from cortex.extensions.llm._presets import check_api_key, load_presets
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import IntentProfile
+from babylon60.extensions.llm._presets import check_api_key, load_presets
+from babylon60.extensions.llm.provider import LLMProvider
+from babylon60.extensions.llm.router import IntentProfile
 
 __all__ = ["Inquisitor", "SovereignLLM", "SovereignResult"]
 
@@ -251,7 +251,7 @@ class SovereignLLM:
         """Attempt ThoughtOrchestra. Returns None on failure."""
         try:
             # Lazy import to avoid circular deps
-            from cortex.extensions.thinking.orchestra import ThoughtOrchestra
+            from babylon60.extensions.thinking.orchestra import ThoughtOrchestra
 
             chain.append("orchestra")
             start = time.monotonic()
@@ -295,7 +295,7 @@ class SovereignLLM:
             if provider_name not in self._providers_cache:
                 if provider_name == "vllm_native":
                     # Carga bypass OOM a traves de Extractor KV 3.5b (arXiv:2504.19874)
-                    from cortex.extensions.llm.vllm_edge import NativeVLLMProvider
+                    from babylon60.extensions.llm.vllm_edge import NativeVLLMProvider
 
                     self._providers_cache[provider_name] = NativeVLLMProvider()  # type: ignore[reportArgumentType]
                 else:

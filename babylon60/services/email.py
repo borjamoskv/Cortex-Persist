@@ -10,8 +10,8 @@ import logging
 import os
 
 import httpx
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.guards.egress_guard import EgressGuard
+from babylon60.audit.ledger import EnterpriseAuditLedger
+from babylon60.guards.egress_guard import EgressGuard
 
 logger = logging.getLogger("cortex.services.email")
 

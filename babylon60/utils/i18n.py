@@ -193,7 +193,7 @@ def _report_missing_key(key: str, lang: Lang) -> None:
 def _report_as_ghost_fact(key: str, lang: Lang) -> None:
     """Report as Ghost Fact for permanent resolution."""
     try:
-        from cortex.facts import store_fact  # type: ignore[reportAttributeAccessIssue]
+        from babylon60.facts import store_fact  # type: ignore[reportAttributeAccessIssue]
 
         store_fact(
             "cortex", f"MISSING_I18N: Key '{key}' missing for lang '{lang.value}'", type="ghost"
@@ -205,7 +205,7 @@ def _report_as_ghost_fact(key: str, lang: Lang) -> None:
 def _trigger_adaptive_repair(key: str, lang: Lang) -> None:
     """Trigger background translation if LLM is available."""
     try:
-        from cortex.extensions.llm.manager import LLMManager
+        from babylon60.extensions.llm.manager import LLMManager
     except ImportError:
         return
 
@@ -228,7 +228,7 @@ def _trigger_adaptive_repair(key: str, lang: Lang) -> None:
             f"Translate only the value, be concise and professional."
         )
         try:
-            from cortex.extensions.llm.router import IntentProfile
+            from babylon60.extensions.llm.router import IntentProfile
 
             translation = await llm.complete(
                 prompt,

@@ -1,10 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - YAML Agent Loader (role.yaml → CortexEngine).
 
-Re-exports from cortex.agents.loader to avoid code duplication.
+Re-exports from babylon60.agents.loader to avoid code duplication.
 """
 
-from cortex.agents.loader import (
+from babylon60.agents.loader import (
     AgentInstance,
     compile_agent,
     load_agent,

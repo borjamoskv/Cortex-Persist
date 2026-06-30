@@ -40,10 +40,10 @@ def seal_decision(fact_type: str, client_id_kwarg: str = "client_id"):
 
             # 3. Forge the TaxFact payload (C5-REAL integration)
             try:
-                from cortex.events.loop import sovereign_run
-                from cortex.extensions.fiscal.models import TaxFact, TaxFactPayload
+                from babylon60.events.loop import sovereign_run
+                from babylon60.extensions.fiscal.models import TaxFact, TaxFactPayload
 
-                from cortex.cli.common import get_engine
+                from babylon60.cli.common import get_engine
 
                 # Parse result generically (assuming the agent returned a dict or we cast it to string)
                 # In a real integration, result would be typed or mapped to TaxFactPayload

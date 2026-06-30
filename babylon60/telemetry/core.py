@@ -21,7 +21,7 @@ Architecture::
 
 Usage::
 
-    from cortex.telemetry import traced, SpanContext, collector
+    from babylon60.telemetry import traced, SpanContext, collector
 
     @traced
     async def my_operation():
@@ -44,7 +44,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.telemetry.metrics import MetricsRegistry
+    from babylon60.telemetry.metrics import MetricsRegistry
 
 __all__ = ["Span", "SpanContext", "TraceCollector", "collector", "traced"]
 

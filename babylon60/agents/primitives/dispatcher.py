@@ -7,7 +7,7 @@ from collections.abc import Callable
 from types import MappingProxyType
 from typing import Any
 
-from cortex.agents.primitives.registry import apex_registry
+from babylon60.agents.primitives.registry import apex_registry
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class ApexDispatcher:
 
     def _op_git_sentinel(self, commit_msg: str, force: bool = False, path: str = ".") -> str:
         """OP_GIT_SENTINEL: Causal persistence via cryptographic commit."""
-        from cortex.engine.causal.taint_engine import (
+        from babylon60.engine.causal.taint_engine import (
             TaintValidationError,
             check_anergy_and_green_theater,
         )

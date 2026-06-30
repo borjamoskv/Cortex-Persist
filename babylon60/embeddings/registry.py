@@ -31,12 +31,12 @@ def get_provider(name: str, **kwargs: Any) -> EmbeddingProvider:
 # === Built-in Provider Factories ===
 
 def _local_embedder_factory(**kwargs: Any) -> EmbeddingProvider:
-    from cortex.embeddings.local import LocalEmbedder
+    from babylon60.embeddings.local import LocalEmbedder
     return LocalEmbedder()
 
 def _api_embedder_factory(**kwargs: Any) -> EmbeddingProvider:
-    from cortex.core import config
-    from cortex.embeddings.api_embedder import APIEmbedder
+    from babylon60.core import config
+    from babylon60.embeddings.api_embedder import APIEmbedder
     
     provider = kwargs.get("provider", config.EMBEDDINGS_PROVIDER)
     target_dimension = kwargs.get("target_dimension", config.EMBEDDINGS_DIMENSION)

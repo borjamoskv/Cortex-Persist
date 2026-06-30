@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
 
-    from cortex.mcp_server.server import _MCPContext
+    from babylon60.mcp_server.server import _MCPContext
 
 __all__ = ["register_mega_tools"]
 
@@ -227,7 +227,7 @@ def _register_entropy_cracker(mcp: FastMCP, ctx: _MCPContext) -> None:
             return f"❌ Path '{safe_path}' is not a valid directory."
 
         # Use the real EntropyAnnihilator
-        from cortex.engine.cognitive.entropy import EntropyAnnihilator
+        from babylon60.engine.cognitive.entropy import EntropyAnnihilator
 
         annihilator = EntropyAnnihilator(safe_path)
         scan_results = annihilator.scan_ecosystem()

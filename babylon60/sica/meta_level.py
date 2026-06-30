@@ -21,9 +21,9 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from cortex.sica.constitution import Constitution, ConstitutionalVerdict
-from cortex.sica.object_level import ExecutionTrace, StepOutcome
-from cortex.sica.strategy import (
+from babylon60.sica.constitution import Constitution, ConstitutionalVerdict
+from babylon60.sica.object_level import ExecutionTrace, StepOutcome
+from babylon60.sica.strategy import (
     Heuristic,
     SearchStrategy,
     StrategyMutation,

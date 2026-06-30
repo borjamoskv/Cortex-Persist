@@ -7,8 +7,8 @@ after config.py was moved to core/config.py.
 
 import sys
 
-import cortex.core.config as _config
-from cortex.core.config import *  # noqa: F403
+import babylon60.core.config as _config
+from babylon60.core.config import *  # noqa: F403
 
 # Replace this module with core.config to handle dynamic getattr if any
 sys.modules[__name__] = _config

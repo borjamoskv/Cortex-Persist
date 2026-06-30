@@ -10,8 +10,8 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.graph.backends import GraphBackend, SQLiteBackend
-    from cortex.graph.engine import (
+    from babylon60.graph.backends import GraphBackend, SQLiteBackend
+    from babylon60.graph.engine import (
         detect_relationships,
         extract_entities,
         find_path,
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
         query_entity,
         query_entity_sync,
     )
-    from cortex.graph.models import Entity, Ghost, Relationship
+    from babylon60.graph.models import Entity, Ghost, Relationship
 
 __all__ = [
     "Entity",

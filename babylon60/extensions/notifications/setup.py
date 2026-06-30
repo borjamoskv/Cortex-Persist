@@ -6,7 +6,7 @@ NotificationBus from CortexConfig environment variables.
 
 Usage (in cortex/api.py lifespan or daemon boot)::
 
-    from cortex.extensions.notifications.setup import setup_notifications
+    from babylon60.extensions.notifications.setup import setup_notifications
     setup_notifications(cfg)
 """
 
@@ -15,13 +15,13 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from cortex.extensions.notifications.adapters.macos import MacOSAdapter
-from cortex.extensions.notifications.adapters.telegram import TelegramAdapter
-from cortex.extensions.notifications.bus import NotificationBus, get_notification_bus
-from cortex.extensions.notifications.events import EventSeverity
+from babylon60.extensions.notifications.adapters.macos import MacOSAdapter
+from babylon60.extensions.notifications.adapters.telegram import TelegramAdapter
+from babylon60.extensions.notifications.bus import NotificationBus, get_notification_bus
+from babylon60.extensions.notifications.events import EventSeverity
 
 if TYPE_CHECKING:
-    from cortex.config import CortexConfig
+    from babylon60.config import CortexConfig
 
 logger = logging.getLogger("cortex_extensions.notifications.setup")
 

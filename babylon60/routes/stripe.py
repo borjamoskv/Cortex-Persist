@@ -18,7 +18,7 @@ import logging
 import os
 import time
 
-from cortex.core import config
+from babylon60.core import config
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
 
@@ -231,7 +231,7 @@ async def stripe_webhook(
     event_type = event["type"]
 
     # ── Enqueue event into Immutable Ledger ──
-    from cortex.ledger.billing_gateway import get_billing_gateway
+    from babylon60.ledger.billing_gateway import get_billing_gateway
 
     await get_billing_gateway().append_billing_event(event_type, event)
 

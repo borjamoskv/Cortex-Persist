@@ -52,7 +52,7 @@ class SQLiteHealthCheck(HealthCheck):
 
     def __init__(self, db_path: str | None = None):
         super().__init__(name="sqlite")
-        from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+        from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 
         self.db_path = db_path or str(DEFAULT_DB_PATH)
 
@@ -63,7 +63,7 @@ class SQLiteHealthCheck(HealthCheck):
         if not Path(self.db_path).exists():
             return DependencyAlert("sqlite", "unavailable", f"DB not found: {self.db_path}")
         try:
-            from cortex.database.core import connect as db_connect
+            from babylon60.database.core import connect as db_connect
 
             conn = db_connect(self.db_path, timeout=2)
             conn.execute("SELECT 1")
@@ -152,7 +152,7 @@ class EmbeddingModelHealthCheck(HealthCheck):
 
     def check(self) -> DependencyAlert | None:
         try:
-            from cortex.embeddings.manager import EmbeddingManager
+            from babylon60.embeddings.manager import EmbeddingManager
 
             provider = EmbeddingManager(engine=None)
             # Quick sanity check

@@ -19,10 +19,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.genesis.assembler import SystemAssembler
-from cortex.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
-from cortex.extensions.genesis.templates import TemplateRegistry
-from cortex.extensions.genesis.validator import GenesisValidator
+from babylon60.extensions.genesis.assembler import SystemAssembler
+from babylon60.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
+from babylon60.extensions.genesis.templates import TemplateRegistry
+from babylon60.extensions.genesis.validator import GenesisValidator
 
 __all__ = ["GenesisEngine"]
 
@@ -396,7 +396,7 @@ class GenesisEngine:
         """
         import os
 
-        from cortex.engine import CortexEngine
+        from babylon60.engine import CortexEngine
 
         if os.environ.get("CORTEX_TESTING") == "1":
             logger.info("📦 [TESTING] Skipping persistence to CORTEX ledger.")

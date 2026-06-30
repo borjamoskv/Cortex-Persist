@@ -6,7 +6,7 @@ All outbound HTTP requests MUST go through this module.
 Blocks SSRF vectors: file://, internal IPs, link-local, loopback.
 
 Usage:
-    from cortex.http.client import safe_get, safe_post, SovereignHTTPClient
+    from babylon60.http.client import safe_get, safe_post, SovereignHTTPClient
 
     # Simple
     resp = await safe_get("https://api.example.com/data")

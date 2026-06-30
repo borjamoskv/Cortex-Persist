@@ -105,7 +105,7 @@ def semantic_search_sync(
         content = row[1] or ""
         if content and str(content).startswith("v6_aesgcm:"):
             try:
-                from cortex.crypto import get_default_encrypter
+                from babylon60.crypto import get_default_encrypter
 
                 enc = get_default_encrypter()
                 content = enc.decrypt_str(content) or content
@@ -210,7 +210,7 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
     content = row[1] or ""  # type: ignore[reportGeneralTypeIssues]
     if content and str(content).startswith("v6_aesgcm:"):
         try:
-            from cortex.crypto import get_default_encrypter
+            from babylon60.crypto import get_default_encrypter
 
             enc = get_default_encrypter()
             content = enc.decrypt_str(content) or content

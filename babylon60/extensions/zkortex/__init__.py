@@ -21,12 +21,12 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.zkortex.commitment import KnowledgeCommitment
-    from cortex.extensions.zkortex.merkle import MerkleTree, ZKMembershipProof
-    from cortex.extensions.zkortex.opacity_layer import SovereignOpacityLayer
-    from cortex.extensions.zkortex.prover import ZKOrtexProver
-    from cortex.extensions.zkortex.range_proof import ZKRangeProof
-    from cortex.extensions.zkortex.verifier import ZKOrtexVerifier
+    from babylon60.extensions.zkortex.commitment import KnowledgeCommitment
+    from babylon60.extensions.zkortex.merkle import MerkleTree, ZKMembershipProof
+    from babylon60.extensions.zkortex.opacity_layer import SovereignOpacityLayer
+    from babylon60.extensions.zkortex.prover import ZKOrtexProver
+    from babylon60.extensions.zkortex.range_proof import ZKRangeProof
+    from babylon60.extensions.zkortex.verifier import ZKOrtexVerifier
 
 __all__ = [
     "KnowledgeCommitment",

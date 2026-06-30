@@ -15,8 +15,8 @@ try:
 except ImportError:
     async_playwright = None  # fallback
 
-from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
-from cortex.utils.result import Err, Ok, Result
+from babylon60.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
+from babylon60.utils.result import Err, Ok, Result
 
 logger = logging.getLogger("cortex.composer.vision_qa")
 

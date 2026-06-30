@@ -22,8 +22,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.training.collector import Trajectory, TrajectoryCollector
-from cortex.extensions.training.reward_engine import RewardEngine
+from babylon60.extensions.training.collector import Trajectory, TrajectoryCollector
+from babylon60.extensions.training.reward_engine import RewardEngine
 
 logger = logging.getLogger("cortex_extensions.training.ttt")
 

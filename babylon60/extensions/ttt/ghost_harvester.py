@@ -53,8 +53,8 @@ def format_for_lora(rows):
     """
     dataset = []
 
-    from cortex.crypto.aes import CortexEncrypter
-    from cortex.crypto.keyring import get_master_key
+    from babylon60.crypto.aes import CortexEncrypter
+    from babylon60.crypto.keyring import get_master_key
 
     # Try to load existing key via standard environment variable or default logic.
     if "CORTEX_MASTER_KEY" not in os.environ:

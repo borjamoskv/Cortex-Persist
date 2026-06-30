@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from uuid import uuid4
 
-from cortex.database.core import connect as db_connect
+from babylon60.database.core import connect as db_connect
 
 logger = logging.getLogger("cortex.darknet.ledger")
 

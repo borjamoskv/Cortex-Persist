@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from cortex.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT, NodeStatus
+from babylon60.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT, NodeStatus
 
 logger = logging.getLogger("cortex.monitors.swarm_heartbeat")
 

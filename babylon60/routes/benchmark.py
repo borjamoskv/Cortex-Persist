@@ -7,10 +7,10 @@ API endpoints for managing the CORTEX IA Hype Benchmark dataset.
 import json
 import logging
 
-from cortex.api.deps import get_async_engine
-from cortex.auth import AuthResult, require_permission
-from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.types.models import StoreResponse
+from babylon60.api.deps import get_async_engine
+from babylon60.auth import AuthResult, require_permission
+from babylon60.engine import CortexEngine as AsyncCortexEngine
+from babylon60.types.models import StoreResponse
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 

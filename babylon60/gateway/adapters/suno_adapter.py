@@ -10,7 +10,7 @@ import os
 from dataclasses import dataclass
 
 import httpx
-from cortex.guards.url_guard import SafeTransport
+from babylon60.guards.url_guard import SafeTransport
 
 logger = logging.getLogger("cortex.gateway.adapters.suno_adapter")
 

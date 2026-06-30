@@ -19,7 +19,7 @@ logger = logging.getLogger("cortex.openapi")
 
 def get_openapi_spec() -> dict:
     """Return the OpenAPI spec dict from the FastAPI app."""
-    from cortex.api.core import app
+    from babylon60.api.core import app
 
     return app.openapi()
 

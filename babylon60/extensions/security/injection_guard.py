@@ -320,8 +320,8 @@ class InjectionGuard:
         if len(content) > 10:
             try:
                 # Lazy import to avoid circular dependencies with cortex.llm.router
-                from cortex.extensions.llm._models import CortexPrompt
-                from cortex.extensions.llm.router import CortexLLMRouter
+                from babylon60.extensions.llm._models import CortexPrompt
+                from babylon60.extensions.llm.router import CortexLLMRouter
 
                 router = CortexLLMRouter.__new__(CortexLLMRouter)
                 prompt_text = (

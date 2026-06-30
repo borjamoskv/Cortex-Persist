@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.extensions.training.collector import Trajectory
+    from babylon60.extensions.training.collector import Trajectory
 
 logger = logging.getLogger("cortex_extensions.training.reward")
 

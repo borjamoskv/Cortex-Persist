@@ -8,7 +8,7 @@ import logging
 import time
 from typing import Any
 
-from cortex.memory.homeostasis import EntropyPruner
+from babylon60.memory.homeostasis import EntropyPruner
 
 logger = logging.getLogger("moskv-daemon")
 

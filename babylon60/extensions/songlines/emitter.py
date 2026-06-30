@@ -12,8 +12,8 @@ import os
 import time
 from pathlib import Path
 
-from cortex.memory.hdc.codec import HDCEncoder
-from cortex.memory.hdc.item_memory import ItemMemory
+from babylon60.memory.hdc.codec import HDCEncoder
+from babylon60.memory.hdc.item_memory import ItemMemory
 
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 

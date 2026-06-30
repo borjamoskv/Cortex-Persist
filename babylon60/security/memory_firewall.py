@@ -16,7 +16,7 @@ from typing import Any
 logger = logging.getLogger("cortex.security.firewall")
 
 
-from cortex.security.types import RiskLevel
+from babylon60.security.types import RiskLevel
 
 
 class CEnvironWiper:

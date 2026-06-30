@@ -7,8 +7,8 @@ Usage (CLI):
 
 Usage (library):
 
-    from cortex.tools.e1_profiler import E1Profiler
-    from cortex.tools.trace_adapter import ExecutionTrace
+    from babylon60.tools.e1_profiler import E1Profiler
+    from babylon60.tools.trace_adapter import ExecutionTrace
 
     profiler = E1Profiler()
     report = profiler.profile(traces)
@@ -29,9 +29,9 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
-from cortex.engine.meta.meta_arbiter import MetaArbiterKernel, TrajectoryScore
-from cortex.tools.trace_adapter import ExecutionTrace
-from cortex.tools.trace_builder import TraceBuilder
+from babylon60.engine.meta.meta_arbiter import MetaArbiterKernel, TrajectoryScore
+from babylon60.tools.trace_adapter import ExecutionTrace
+from babylon60.tools.trace_builder import TraceBuilder
 
 # ---------------------------------------------------------------------------
 # Report types

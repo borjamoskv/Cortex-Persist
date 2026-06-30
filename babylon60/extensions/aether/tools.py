@@ -14,8 +14,8 @@ from collections.abc import Callable
 from pathlib import Path
 
 import httpx
-from cortex.guards.capabilities import RiskTier
-from cortex.guards.capability_guard import CapabilityGuard
+from babylon60.guards.capabilities import RiskTier
+from babylon60.guards.capability_guard import CapabilityGuard
 
 __all__ = ["AgentToolkit"]
 
@@ -59,7 +59,7 @@ FORBIDDEN_BASH_PATTERNS: frozenset[str] = frozenset(
 )
 
 
-from cortex.extensions.aether.hooks import hooked_tool_execution
+from babylon60.extensions.aether.hooks import hooked_tool_execution
 
 
 class AgentToolkit:
@@ -273,7 +273,7 @@ class AgentToolkit:
         try:
             import asyncio
 
-            from cortex.extensions.skills.autodidact.actuator import autodidact_pipeline
+            from babylon60.extensions.skills.autodidact.actuator import autodidact_pipeline
 
             # Helper to run async in sync context
             def _run_async():

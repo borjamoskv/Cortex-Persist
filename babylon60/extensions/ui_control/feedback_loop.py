@@ -16,8 +16,8 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-from cortex.extensions.ui_control.maestro import MaestroUI
-from cortex.extensions.ui_control.models import AppTarget, InteractionResult
+from babylon60.extensions.ui_control.maestro import MaestroUI
+from babylon60.extensions.ui_control.models import AppTarget, InteractionResult
 
 try:
     import Vision

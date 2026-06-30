@@ -8,7 +8,7 @@ from __future__ import annotations
 import enum
 from typing import Any
 
-from cortex.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
+from babylon60.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
 
 
 class ReversibilityLevel(enum.IntEnum):

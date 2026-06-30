@@ -29,7 +29,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.sica.object_level import ExecutionStep, ExecutionTrace, StepOutcome
+from babylon60.sica.object_level import ExecutionStep, ExecutionTrace, StepOutcome
 
 logger = logging.getLogger("cortex.sica.world_model")
 

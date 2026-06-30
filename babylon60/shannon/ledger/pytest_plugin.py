@@ -6,7 +6,7 @@ Enforces that tests run under deterministic constraints.
 import os
 
 import pytest
-from cortex.shannon.ledger.determinism import apply_deterministic_patches
+from babylon60.shannon.ledger.determinism import apply_deterministic_patches
 
 
 def pytest_addoption(parser):

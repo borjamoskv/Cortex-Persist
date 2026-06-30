@@ -5,13 +5,13 @@ import dataclasses
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
-from cortex.engine.cognitive.models import Fact, row_to_fact
-from cortex.engine.core.store_validators import validate_content
-from cortex.utils.canonical import now_iso
+from babylon60.engine.cognitive.models import Fact, row_to_fact
+from babylon60.engine.core.store_validators import validate_content
+from babylon60.utils.canonical import now_iso
 from pydantic import ValidationError
 
 if TYPE_CHECKING:
-    from cortex.extensions.interfaces.engine import EngineProtocol
+    from babylon60.extensions.interfaces.engine import EngineProtocol
 
 _FACT_FIELDS = {f.name for f in dataclasses.fields(Fact)}
 
@@ -20,7 +20,7 @@ __all__ = ["FactManager"]
 logger = logging.getLogger("cortex.facts")
 
 try:
-    from cortex.guards.landauer_guard import LandauerGuard
+    from babylon60.guards.landauer_guard import LandauerGuard
 except ImportError:
     LandauerGuard = None
 
@@ -138,7 +138,7 @@ class FactManager:
                 content=content, project_id=project, tenant_id=tenant_id, fact_type=fact_type
             )
             if not should_process:
-                from cortex.routes.notch_ws import notify_notch_pruning
+                from babylon60.routes.notch_ws import notify_notch_pruning
 
                 await notify_notch_pruning()
                 raise ValueError(f"Thalamus: Fact rejected ({action})")
@@ -156,7 +156,7 @@ class FactManager:
             if row:
                 fact_id = row[0]
                 logger.info("V8 Guardrail: Fact discarded - P0 Exact Duplicate of #%s", fact_id)
-                from cortex.database.core import causal_write
+                from babylon60.database.core import causal_write
                 with causal_write(conn):
                     await conn.execute(
                         "UPDATE facts SET updated_at = ? WHERE id = ?", (now_iso(), fact_id)
@@ -185,7 +185,7 @@ class FactManager:
                                 results[0].score,  # type: ignore[reportAttributeAccessIssue]
                             )
                             # We update updated_at / last_accessed
-                            from cortex.database.core import causal_write
+                            from babylon60.database.core import causal_write
                             with causal_write(conn):
                                 await conn.execute(  # type: ignore[reportOptionalMemberAccess]
                                     "UPDATE facts SET updated_at = ? WHERE id = ?",
@@ -198,7 +198,7 @@ class FactManager:
         except (OSError, RuntimeError, ValueError) as e:
             logger.warning("V8 Ingestion check failed: %s", e)
 
-        from cortex.engine.core.store_mixin import StoreMixin
+        from babylon60.engine.core.store_mixin import StoreMixin
 
         started_tx = False
         if not conn.in_transaction:
@@ -310,26 +310,26 @@ class FactManager:
 
     async def graph(self, *args, **kwargs) -> Any:
         """Retrieve graph visualization data, delegated to QueryMixin."""
-        import cortex.graph
+        import babylon60.graph
 
         async with self.engine.session() as conn:
             return await cortex.graph.get_graph(conn, *args, **kwargs)
 
     async def query_entity(self, *args, **kwargs) -> Any:
         """Query detailed information about an entity, delegated to QueryMixin."""
-        import cortex.graph
+        import babylon60.graph
 
         async with self.engine.session() as conn:
             return await cortex.graph.query_entity(conn, *args, **kwargs)
 
     async def find_path(self, *args, **kwargs) -> Any:
-        import cortex.graph
+        import babylon60.graph
 
         async with self.engine.session() as conn:
             return await cortex.graph.find_path(conn, *args, **kwargs)
 
     async def get_context_subgraph(self, *args, **kwargs) -> Any:
-        import cortex.graph
+        import babylon60.graph
 
         async with self.engine.session() as conn:
             return await cortex.graph.get_context_subgraph(conn, *args, **kwargs)

@@ -7,13 +7,13 @@ import logging
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from cortex.compaction.utils import content_hash, merge_error_contents
+from babylon60.compaction.utils import content_hash, merge_error_contents
 
 __all__ = ["execute_merge_errors"]
 
 if TYPE_CHECKING:
-    from cortex.compaction.compactor import CompactionResult
-    from cortex.engine import CortexEngine
+    from babylon60.compaction.compactor import CompactionResult
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compaction.merge_errors")
 _LOG_FMT = "Compactor [%s] %s"

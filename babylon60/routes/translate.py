@@ -5,7 +5,7 @@ import os
 from typing import Final
 
 import httpx
-from cortex.auth import AuthResult, require_permission
+from babylon60.auth import AuthResult, require_permission
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 

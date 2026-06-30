@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from cortex.extensions.daemon.models import CORTEX_DB, EngineHealthAlert
+from babylon60.extensions.daemon.models import CORTEX_DB, EngineHealthAlert
 
 
 class EngineHealthCheck:

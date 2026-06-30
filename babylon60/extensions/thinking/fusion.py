@@ -6,8 +6,8 @@ import asyncio
 import logging
 from typing import Any
 
-from cortex.extensions.llm.boundary import ImmuneBoundary
-from cortex.extensions.thinking.fusion_models import (
+from babylon60.extensions.llm.boundary import ImmuneBoundary
+from babylon60.extensions.thinking.fusion_models import (
     FusedThought,
     FusionStrategy,
     ModelResponse,

@@ -25,7 +25,7 @@ import math
 from collections import Counter
 from typing import Any
 
-from cortex.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
+from babylon60.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
 
 __all__ = ["EntropicQuarantineFilter"]
 

@@ -5,7 +5,7 @@ Async Python SDK Client.
 Fully asynchronous client for the CORTEX REST API using httpx.AsyncClient.
 
 Usage:
-    from cortex.async_client import AsyncCortexClient
+    from babylon60.async_client import AsyncCortexClient
 
     async with AsyncCortexClient("http://localhost:8484", api_key="ctx_...") as client:
         await client.store("my-project", "Important fact")
@@ -19,9 +19,9 @@ import os
 from typing import Any
 
 import httpx
-from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
+from babylon60.extensions.immune.chaos import ChaosGate, async_interceptor
 
-from cortex.api.client import CortexError, Fact
+from babylon60.api.client import CortexError, Fact
 
 __all__ = ["AsyncCortexClient"]
 

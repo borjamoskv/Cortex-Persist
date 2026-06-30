@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.utils.canonical import compute_fact_hash
+from babylon60.utils.canonical import compute_fact_hash
 
 logger = logging.getLogger("cortex_extensions.security.honeypot")
 

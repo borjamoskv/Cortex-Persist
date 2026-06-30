@@ -8,25 +8,25 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.database.core import connect as db_connect
-from cortex.extensions.evolution.action import SymbolicActionEngine
-from cortex.extensions.evolution.agents import (
+from babylon60.database.core import connect as db_connect
+from babylon60.extensions.evolution.action import SymbolicActionEngine
+from babylon60.extensions.evolution.agents import (
     AgentDomain,
     EnneagramSovereign,
     EnneagramSubAgent,
 )
-from cortex.extensions.evolution.cortex_metrics import fetch_all_domain_metrics
-from cortex.extensions.evolution.ledger_db import EvolutionLedgerDB
-from cortex.extensions.evolution.lnn import LagrangianController
-from cortex.extensions.evolution.models import (
+from babylon60.extensions.evolution.cortex_metrics import fetch_all_domain_metrics
+from babylon60.extensions.evolution.ledger_db import EvolutionLedgerDB
+from babylon60.extensions.evolution.lnn import LagrangianController
+from babylon60.extensions.evolution.models import (
     CycleReport,
     EngineParameters,
 )
-from cortex.extensions.evolution.operations_mixin import EvolutionOpsMixin
-from cortex.extensions.evolution.persistence import load_swarm, save_swarm
-from cortex.extensions.gate.ouroboros import OuroborosGate
-from cortex.extensions.sovereign.endocrine import DigitalEndocrine
-from cortex.ledger import SovereignLedger  # pyright: ignore
+from babylon60.extensions.evolution.operations_mixin import EvolutionOpsMixin
+from babylon60.extensions.evolution.persistence import load_swarm, save_swarm
+from babylon60.extensions.gate.ouroboros import OuroborosGate
+from babylon60.extensions.sovereign.endocrine import DigitalEndocrine
+from babylon60.ledger import SovereignLedger  # pyright: ignore
 
 random = secrets.SystemRandom()
 

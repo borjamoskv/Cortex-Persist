@@ -9,8 +9,8 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from cortex.integration.rustchain.client import RustChainClient
-from cortex.integration.rustchain.wallet import RustChainWallet
+from babylon60.integration.rustchain.client import RustChainClient
+from babylon60.integration.rustchain.wallet import RustChainWallet
 
 
 class StakingError(Exception):

@@ -8,8 +8,8 @@ based on the volatility (entropy) of the afferent metric stream.
 import logging
 from pathlib import Path
 
-from cortex.extensions.evolution.agents import AgentDomain
-from cortex.extensions.evolution.cortex_metrics import (
+from babylon60.extensions.evolution.agents import AgentDomain
+from babylon60.extensions.evolution.cortex_metrics import (
     _DEFAULT_DB,
     DomainMetrics,
 )

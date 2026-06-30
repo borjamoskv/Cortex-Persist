@@ -3,7 +3,7 @@
 
 import os
 
-from cortex.graph.backends.base import GraphBackend
+from babylon60.graph.backends.base import GraphBackend
 from neo4j import AsyncGraphDatabase
 
 

@@ -6,7 +6,7 @@ import logging
 import sqlite3
 from pathlib import Path
 
-from cortex.extensions.health.models import MetricSnapshot
+from babylon60.extensions.health.models import MetricSnapshot
 
 logger = logging.getLogger("cortex_extensions.health.ledger")
 
@@ -38,7 +38,7 @@ class LedgerCollector:
                 weight=self.weight,
             )
         try:
-            from cortex.database.core import connect
+            from babylon60.database.core import connect
 
             with connect(db_path, timeout=2.0) as conn:  # pyright: ignore
                 conn.row_factory = sqlite3.Row

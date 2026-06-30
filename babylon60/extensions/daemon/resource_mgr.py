@@ -3,72 +3,72 @@ import logging
 from pathlib import Path
 
 try:
-    from cortex.extensions.daemon.centaur.engine import CentauroEngine
-    from cortex.extensions.daemon.centaur.entropic_queue import EntropicQueue
-    from cortex.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
+    from babylon60.extensions.daemon.centaur.engine import CentauroEngine
+    from babylon60.extensions.daemon.centaur.entropic_queue import EntropicQueue
+    from babylon60.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
 
     _CENTAUR_AVAILABLE = True
 except ImportError:
     _CENTAUR_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.frontier import FrontierDaemon
+    from babylon60.extensions.daemon.frontier import FrontierDaemon
 
     _FRONTIER_AVAILABLE = True
 except ImportError:
     _FRONTIER_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.zero_prompting import ZeroPromptingDaemon
+    from babylon60.extensions.daemon.zero_prompting import ZeroPromptingDaemon
 
     _ZERO_PROMPTING_AVAILABLE = True
 except ImportError:
     _ZERO_PROMPTING_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
+    from babylon60.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
 
     _EPISTEMIC_BREAKER_AVAILABLE = True
 except ImportError:
     _EPISTEMIC_BREAKER_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.hot_state import HotStateDB
+    from babylon60.extensions.daemon.hot_state import HotStateDB
 
     _HOT_STATE_AVAILABLE = True
 except ImportError:
     _HOT_STATE_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.scheduler import SovereignScheduler
+    from babylon60.extensions.daemon.scheduler import SovereignScheduler
 
     _SCHEDULER_AVAILABLE = True
 except ImportError:
     _SCHEDULER_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.watchers import WatchdogHub
+    from babylon60.extensions.daemon.watchers import WatchdogHub
 
     _WATCHDOG_HUB_AVAILABLE = True
 except ImportError:
     _WATCHDOG_HUB_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.api import HumanCallbackAPI
+    from babylon60.extensions.daemon.api import HumanCallbackAPI
 
     _API_AVAILABLE = True
 except ImportError:
     _API_AVAILABLE = False
 
 try:
-    from cortex.extensions.daemon.entropic_wake import EntropicWakeDaemon
+    from babylon60.extensions.daemon.entropic_wake import EntropicWakeDaemon
 
     _ENTROPIC_WAKE_AVAILABLE = True
 except ImportError:
     _ENTROPIC_WAKE_AVAILABLE = False
 
-from cortex.extensions.daemon.models import CORTEX_DB, CORTEX_DIR
-from cortex.extensions.daemon.monitors import CloudSyncMonitor, DiskMonitor, EngineHealthCheck
+from babylon60.extensions.daemon.models import CORTEX_DB, CORTEX_DIR
+from babylon60.extensions.daemon.monitors import CloudSyncMonitor, DiskMonitor, EngineHealthCheck
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -152,7 +152,7 @@ class ResourceMgrMixin:
         # 2. Event Bus (reuse existing or create)
         self._event_bus = None
         try:
-            from cortex.events.bus import DistributedEventBus
+            from babylon60.events.bus import DistributedEventBus
 
             self._event_bus = DistributedEventBus()
             logger.info("📡 DistributedEventBus ENABLED")
@@ -163,9 +163,9 @@ class ResourceMgrMixin:
         self.sovereignty_runtime = None
         if self._event_bus:
             try:
-                from cortex.engine.causal.anomaly_bridge import AnomalyBridge
-                from cortex.engine.temporal.event_sovereignty import EventSovereigntyRuntime
-                from cortex.swarm.auth_gateway import AuthGateway  # type: ignore
+                from babylon60.engine.causal.anomaly_bridge import AnomalyBridge
+                from babylon60.engine.temporal.event_sovereignty import EventSovereigntyRuntime
+                from babylon60.swarm.auth_gateway import AuthGateway  # type: ignore
 
                 auth_gw = AuthGateway(self._shared_engine)  # type: ignore
                 # ensure table is created, though we should probably run this asynchronously,
@@ -258,8 +258,8 @@ class ResourceMgrMixin:
         try:
             import sqlite3
 
-            from cortex.database.core import connect
-            from cortex.extensions.timing import TimingTracker
+            from babylon60.database.core import connect
+            from babylon60.extensions.timing import TimingTracker
 
             self.timing_conn = connect(file_config.get("db_path", str(CORTEX_DB)))
             self.tracker = TimingTracker(self.timing_conn)

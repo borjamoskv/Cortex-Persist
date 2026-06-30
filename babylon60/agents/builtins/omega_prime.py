@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from cortex.agents.base import BaseAgent
-from cortex.agents.contracts import (
+from babylon60.agents.base import BaseAgent
+from babylon60.agents.contracts import (
     TaskCompletedPayload,
     TaskFailedPayload,
     TaskRequestPayload,
@@ -13,8 +13,8 @@ from cortex.agents.contracts import (
     VerificationRequestPayload,
     VerificationResultPayload,
 )
-from cortex.agents.manifest import AgentManifest
-from cortex.agents.message_schema import AgentMessage, MessageKind
+from babylon60.agents.manifest import AgentManifest
+from babylon60.agents.message_schema import AgentMessage, MessageKind
 
 
 class ToolExecutor(Protocol):

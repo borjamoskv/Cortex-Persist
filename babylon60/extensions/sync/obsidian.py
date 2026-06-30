@@ -16,12 +16,12 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from cortex.memory.temporal import now_iso
+from babylon60.memory.temporal import now_iso
 
 __all__ = ["export_obsidian"]
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex_extensions.sync.obsidian")
 
@@ -323,7 +323,7 @@ async def export_obsidian(
     Returns:
         Dict with export stats: notes_created, projects, types, tags.
     """
-    from cortex.extensions.sync.common import CORTEX_DIR
+    from babylon60.extensions.sync.common import CORTEX_DIR
 
     if vault_path is None:
         vault_path = CORTEX_DIR / "obsidian-vault"

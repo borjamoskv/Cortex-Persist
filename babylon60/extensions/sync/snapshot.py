@@ -7,13 +7,13 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from cortex.extensions.sync.common import CORTEX_DIR
-from cortex.memory.temporal import now_iso
+from babylon60.extensions.sync.common import CORTEX_DIR
+from babylon60.memory.temporal import now_iso
 
 __all__ = ["export_snapshot"]
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex_extensions.sync")
 
@@ -162,7 +162,7 @@ def _format_project_section(project: str, facts: list[dict]) -> list[str]:
 async def _generate_tips_section(engine: CortexEngine) -> list[str]:
     """Generate a 'Tip del Día' section for the snapshot with 3 random tips."""
     try:
-        from cortex.engine.core.tips import TipsEngine
+        from babylon60.engine.core.tips import TipsEngine
 
         tips_engine = TipsEngine(engine, include_dynamic=True, lang="es")
         lines = [

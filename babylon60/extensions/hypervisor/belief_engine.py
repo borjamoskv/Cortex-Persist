@@ -19,7 +19,7 @@ import logging
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
-from cortex.extensions.hypervisor.belief_object import (
+from babylon60.extensions.hypervisor.belief_object import (
     BeliefConfidence,
     BeliefObject,
     BeliefStatus,
@@ -30,7 +30,7 @@ from cortex.extensions.hypervisor.belief_object import (
 )
 
 if TYPE_CHECKING:
-    from cortex.extensions.llm.cognitive_handoff import CognitiveHandoff
+    from babylon60.extensions.llm.cognitive_handoff import CognitiveHandoff
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ class BeliefEngine:
             BeliefVerdict with action and reasoning.
         """
         # Build candidate belief
-        from cortex.extensions.hypervisor.belief_object import _now_iso
+        from babylon60.extensions.hypervisor.belief_object import _now_iso
 
         provenance = ProvenanceChain()
         if source:
@@ -152,7 +152,7 @@ class BeliefEngine:
             ):
                 source_id = candidate.provenance.entries[-1].source_id
                 try:
-                    from cortex.engine.forensic.slashing import SlashingEngine, SlashingPenalty
+                    from babylon60.engine.forensic.slashing import SlashingEngine, SlashingPenalty
 
                     conn = getattr(self._engine, "conn", None) or getattr(
                         self._engine, "_conn", None

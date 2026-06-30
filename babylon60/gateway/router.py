@@ -22,7 +22,7 @@ Every request through the Gateway:
 
 Usage::
 
-    from cortex.gateway import GatewayRouter, GatewayRequest
+    from babylon60.gateway import GatewayRouter, GatewayRequest
 
     router = GatewayRouter(engine=engine, bus=notification_bus)
     response = await router.handle(GatewayRequest(
@@ -203,7 +203,7 @@ class GatewayRouter:
             )
             # Ω₅: Auto-persist error as ghost for Josu/Aether processing
             try:
-                from cortex.extensions.immune.error_boundary import ErrorBoundary
+                from babylon60.extensions.immune.error_boundary import ErrorBoundary
 
                 boundary = ErrorBoundary(
                     f"gateway.{intent_str}",
@@ -293,7 +293,7 @@ class GatewayRouter:
         if not self._bus:
             return {"delivered": False, "reason": "no notification bus configured"}
 
-        from cortex.extensions.notifications.events import CortexEvent, EventSeverity
+        from babylon60.extensions.notifications.events import CortexEvent, EventSeverity
 
         severity_str = req.payload.get("severity", "info")
         try:
@@ -314,7 +314,7 @@ class GatewayRouter:
 
     async def _handle_gidatu(self, req: GatewayRequest) -> dict[str, Any]:
         """Orchestrate UI/Desktop actions via Gidatu skill."""
-        from cortex.gateway.handlers.gidatu import GidatuHandler
+        from babylon60.gateway.handlers.gidatu import GidatuHandler
 
         handler = GidatuHandler()
         return await handler.handle(req)

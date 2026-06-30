@@ -11,7 +11,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from cortex.agents.base import ReactiveTaskAgent
+from babylon60.agents.base import ReactiveTaskAgent
 
 logger = logging.getLogger("cortex.agents.consolidator")
 

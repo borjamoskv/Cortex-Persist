@@ -17,23 +17,23 @@ Constitutional evaluation layer inspired by Anthropic Constitutional AI:
 
 from __future__ import annotations
 
-from cortex.sica.agent import SICAAgent
-from cortex.sica.autonomy import (
+from babylon60.sica.agent import SICAAgent
+from babylon60.sica.autonomy import (
     AdaptiveRetry,
     AutonomousTick,
     MetaMetaController,
     SpeculativeFork,
     TraceSynthesizer,
 )
-from cortex.sica.constitution import Constitution, Principle
-from cortex.sica.meta_level import MetaJudgment, MetaLevel
-from cortex.sica.object_level import ExecutionTrace, ObjectLevel
-from cortex.sica.persistence import (
+from babylon60.sica.constitution import Constitution, Principle
+from babylon60.sica.meta_level import MetaJudgment, MetaLevel
+from babylon60.sica.object_level import ExecutionTrace, ObjectLevel
+from babylon60.sica.persistence import (
     load_genome,
     load_or_default,
     save_genome,
 )
-from cortex.sica.strategy import (
+from babylon60.sica.strategy import (
     SearchStrategy,
     StrategyGenome,
     StrategyMutation,

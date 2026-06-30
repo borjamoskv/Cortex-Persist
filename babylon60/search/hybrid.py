@@ -16,14 +16,14 @@ from datetime import datetime, timezone
 from typing import Final
 
 import aiosqlite
-from cortex.search.causal_gap import (
+from babylon60.search.causal_gap import (
     CausalGap,
     SearchCandidate,
     compute_candidate_score,
 )
-from cortex.search.models import SearchResult
-from cortex.search.text import text_search, text_search_sync
-from cortex.search.vector import semantic_search, semantic_search_sync
+from babylon60.search.models import SearchResult
+from babylon60.search.text import text_search, text_search_sync
+from babylon60.search.vector import semantic_search, semantic_search_sync
 
 __all__ = ["hybrid_search", "hybrid_search_sync"]
 

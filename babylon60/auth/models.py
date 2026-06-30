@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from cortex.auth.rbac import Permission
+from babylon60.auth.rbac import Permission
 
 
 @dataclass

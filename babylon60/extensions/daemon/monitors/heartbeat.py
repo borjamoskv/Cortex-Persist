@@ -10,7 +10,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
-from cortex.extensions.daemon.models import SiteStatus
+from babylon60.extensions.daemon.models import SiteStatus
 
 from babylon60.crypto.hash_registry import cortex_hash
 

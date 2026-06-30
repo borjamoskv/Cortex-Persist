@@ -29,7 +29,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex.consolidator")
 
@@ -161,7 +161,7 @@ class BeliefConsolidator:
         by _MAX_EVENTS_PER_CYCLE (200). GPU-accelerated embedding.
         """
         import numpy as np
-        from cortex.engine.core.semantic_hash import batch_fingerprint
+        from babylon60.engine.core.semantic_hash import batch_fingerprint
 
         if len(contents) < _MIN_CLUSTER_SIZE:
             return []
@@ -258,7 +258,7 @@ class BeliefConsolidator:
 
             # Decrypt content
             try:
-                from cortex.crypto import get_default_encrypter
+                from babylon60.crypto import get_default_encrypter
 
                 enc = get_default_encrypter()
                 contents = []

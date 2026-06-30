@@ -7,7 +7,7 @@ Every action hash-chained. Every result provable. Every receipt verifiable.
 
 from __future__ import annotations
 
-from cortex.extensions.vex.models import (
+from babylon60.extensions.vex.models import (
     ExecutionReceipt,
     PlannedStep,
     StepResult,

@@ -27,10 +27,10 @@ import logging
 import time
 from typing import Any
 
-from cortex.extensions.zkortex.commitment import KnowledgeCommitment
-from cortex.extensions.zkortex.merkle import ZKMembershipProof
-from cortex.extensions.zkortex.prover import ZKOrtexProver
-from cortex.extensions.zkortex.range_proof import ZKRangeProof
+from babylon60.extensions.zkortex.commitment import KnowledgeCommitment
+from babylon60.extensions.zkortex.merkle import ZKMembershipProof
+from babylon60.extensions.zkortex.prover import ZKOrtexProver
+from babylon60.extensions.zkortex.range_proof import ZKRangeProof
 
 from babylon60.crypto.hash_registry import cortex_hash
 

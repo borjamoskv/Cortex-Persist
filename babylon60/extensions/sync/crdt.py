@@ -23,7 +23,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.extensions.sync.hlc import HLCTimestamp
+from babylon60.extensions.sync.hlc import HLCTimestamp
 
 logger = logging.getLogger("cortex_extensions.sync.crdt")
 

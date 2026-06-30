@@ -17,8 +17,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.database.core import connect as db_connect
-from cortex.extensions.evolution.models import EvolutionMutation
+from babylon60.database.core import connect as db_connect
+from babylon60.extensions.evolution.models import EvolutionMutation
 
 logger = logging.getLogger("cortex_extensions.evolution.ledger_db")
 

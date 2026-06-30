@@ -6,7 +6,7 @@ import logging
 import time
 from pathlib import Path
 
-from cortex.extensions.daemon.models import EvaluationAlert
+from babylon60.extensions.daemon.models import EvaluationAlert
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -38,7 +38,7 @@ class EvaluationMonitor:
         self._last_run = now
 
         try:
-            from cortex.database.core import connect as db_connect
+            from babylon60.database.core import connect as db_connect
 
             alerts = []
             with db_connect(self.db_path) as conn:  # type: ignore[type-error]

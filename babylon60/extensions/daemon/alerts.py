@@ -15,7 +15,7 @@ import logging
 import sys
 import time
 
-from cortex.extensions.daemon.notifier import Notifier
+from babylon60.extensions.daemon.notifier import Notifier
 
 __all__ = ["AlertHandlerMixin"]
 

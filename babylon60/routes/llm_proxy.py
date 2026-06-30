@@ -18,7 +18,7 @@ import re
 from collections.abc import AsyncGenerator
 
 import httpx
-from cortex.extensions.signals.bus import AsyncSignalBus
+from babylon60.extensions.signals.bus import AsyncSignalBus
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 

@@ -17,8 +17,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.extensions.evolution.agents import AgentDomain, EnneagramSovereign
-from cortex.extensions.evolution.cortex_metrics import DomainMetrics
+from babylon60.extensions.evolution.agents import AgentDomain, EnneagramSovereign
+from babylon60.extensions.evolution.cortex_metrics import DomainMetrics
 
 logger = logging.getLogger(__name__)
 

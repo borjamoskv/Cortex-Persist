@@ -9,12 +9,12 @@ from collections import defaultdict
 from collections.abc import Callable
 from pathlib import Path
 
-from cortex.extensions.perception.base import (
+from babylon60.extensions.perception.base import (
     MIN_EVENTS_FOR_INFERENCE,
     BehavioralSnapshot,
     FileEvent,
 )
-from cortex.memory.temporal import now_iso
+from babylon60.memory.temporal import now_iso
 
 __all__ = ["compute_event_stats", "infer_behavior"]
 _INTENT_RULES: list[tuple[Callable[[dict], bool], str, str, str]] = []

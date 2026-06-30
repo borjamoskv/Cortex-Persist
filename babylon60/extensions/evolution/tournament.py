@@ -14,7 +14,7 @@ import logging
 import secrets
 from dataclasses import dataclass
 
-from cortex.extensions.evolution.agents import (
+from babylon60.extensions.evolution.agents import (
     EnneagramSovereign,
     EnneagramSubAgent,
     Mutation,

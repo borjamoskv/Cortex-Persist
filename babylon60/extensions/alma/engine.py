@@ -13,12 +13,12 @@ from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.extensions.alma.taste import TasteVerdict
+    from babylon60.extensions.alma.taste import TasteVerdict
 
 import aiosqlite
-from cortex.config import DB_PATH
-from cortex.database.core import connect_async_ctx
-from cortex.telemetry.metrics import metrics
+from babylon60.config import DB_PATH
+from babylon60.database.core import connect_async_ctx
+from babylon60.telemetry.metrics import metrics
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +155,7 @@ class AlmaEngine:
         Caches the last verdict for inclusion in SoulState.
         """
         if self._taste_engine is None:
-            from cortex.extensions.alma.taste import TasteEngine
+            from babylon60.extensions.alma.taste import TasteEngine
 
             self._taste_engine = TasteEngine()
 

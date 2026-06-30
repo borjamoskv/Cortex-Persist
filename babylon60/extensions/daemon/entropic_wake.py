@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.songlines.sensor import TopographicSensor
+from babylon60.extensions.songlines.sensor import TopographicSensor
 
 logger = logging.getLogger("cortex_extensions.daemon.entropic_wake")
 

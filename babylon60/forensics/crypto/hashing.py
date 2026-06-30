@@ -3,7 +3,7 @@
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.utils.canonical import canonical_json
+from babylon60.utils.canonical import canonical_json
 
 from babylon60.crypto.hash_registry import cortex_hash
 

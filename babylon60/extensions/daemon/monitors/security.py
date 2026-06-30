@@ -11,9 +11,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.daemon.models import SecurityAlert
-from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2 as VectorStoreL2
+from babylon60.extensions.daemon.models import SecurityAlert
+from babylon60.memory.encoder import AsyncEncoder
+from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2 as VectorStoreL2
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -129,11 +129,11 @@ class SecurityMonitor:
 
     async def _blacklist_ips(self, alerts: list[SecurityAlert]) -> None:
         """Persist C5 alerts to the threat_intel blacklist."""
-        from cortex.core import config
+        from babylon60.core import config
 
         db_path = config.DB_PATH
         try:
-            from cortex.database.core import connect_async
+            from babylon60.database.core import connect_async
 
             async with await connect_async(db_path) as conn:
                 for alert in alerts:

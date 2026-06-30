@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.gateway import GatewayRequest
+    from babylon60.gateway import GatewayRequest
 
 logger = logging.getLogger("cortex.gateway.gidatu")
 

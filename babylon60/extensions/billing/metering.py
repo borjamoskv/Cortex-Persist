@@ -11,8 +11,8 @@ import json
 import logging
 import sqlite3
 
-from cortex.extensions.billing.gateway import StripeBillingGateway
-from cortex.extensions.billing.models import BillingEvent, FailureType
+from babylon60.extensions.billing.gateway import StripeBillingGateway
+from babylon60.extensions.billing.models import BillingEvent, FailureType
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class CausalMetering:
 
     def __init__(self, db_path: str | None = None, gateway: StripeBillingGateway | None = None):
         if db_path is None:
-            from cortex.core.config import DB_PATH
+            from babylon60.core.config import DB_PATH
 
             db_path = DB_PATH
 

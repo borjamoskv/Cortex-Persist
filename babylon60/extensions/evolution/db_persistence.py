@@ -37,9 +37,9 @@ from pathlib import Path
 from typing import Any
 
 import aiosqlite
-from cortex.database.core import connect_async_ctx
-from cortex.extensions.evolution.agents import EnneagramSovereign
-from cortex.extensions.evolution.persistence import (
+from babylon60.database.core import connect_async_ctx
+from babylon60.extensions.evolution.agents import EnneagramSovereign
+from babylon60.extensions.evolution.persistence import (
     SCHEMA_VERSION,
     _agent_to_dict,  # type: ignore[reportAttributeAccessIssue]
     _reconstruct_agents,

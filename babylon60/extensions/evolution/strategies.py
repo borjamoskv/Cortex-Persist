@@ -29,13 +29,13 @@ import logging
 import secrets
 from typing import Protocol
 
-from cortex.extensions.evolution.agents import (
+from babylon60.extensions.evolution.agents import (
     EnneagramSovereign,
     EnneagramSubAgent,
     Mutation,
     MutationType,
 )
-from cortex.extensions.evolution.cortex_metrics import CortexMetrics, DomainMetrics
+from babylon60.extensions.evolution.cortex_metrics import CortexMetrics, DomainMetrics
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@ Endpoints for visualizing the memory graph in 3D.
 
 import sqlite3
 
-from cortex.auth import AuthResult, require_permission
+from babylon60.auth import AuthResult, require_permission
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -49,8 +49,8 @@ def get_hive_graph(
     Get the knowledge graph for 3D visualization.
     Nodes are facts, links are semantic similarities.
     """
-    from cortex.config import DB_PATH
-    from cortex.database.core import connect
+    from babylon60.config import DB_PATH
+    from babylon60.database.core import connect
 
     conn = connect(DB_PATH, row_factory=sqlite3.Row)
 

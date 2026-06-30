@@ -9,7 +9,7 @@ import time
 from datetime import datetime, timedelta, timezone
 
 import aiosqlite
-from cortex.extensions.signals.models import Signal, signal_from_row
+from babylon60.extensions.signals.models import Signal, signal_from_row
 
 __all__ = ["AsyncSignalBus", "SignalBus"]
 

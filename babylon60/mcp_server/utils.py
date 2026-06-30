@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 import aiosqlite
-from cortex.database.core import connect_async
+from babylon60.database.core import connect_async
 
 __all__ = [
     "AsyncConnectionPool",

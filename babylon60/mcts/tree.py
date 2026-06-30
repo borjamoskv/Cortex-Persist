@@ -12,8 +12,8 @@ import math
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from cortex.extensions.llm.router import CortexLLMRouter
-from cortex.mcts.git_env import MCTSGitEnvironment
+from babylon60.extensions.llm.router import CortexLLMRouter
+from babylon60.mcts.git_env import MCTSGitEnvironment
 
 logger = logging.getLogger("cortex.mcts.tree")
 

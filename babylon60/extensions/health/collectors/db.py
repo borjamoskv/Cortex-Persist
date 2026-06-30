@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from cortex.extensions.health.models import HealthThresholds, MetricSnapshot
+from babylon60.extensions.health.models import HealthThresholds, MetricSnapshot
 
 
 class DbCollector:

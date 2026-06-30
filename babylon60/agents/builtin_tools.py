@@ -348,7 +348,7 @@ class ApexKnowledgeTool:
             list: Return IDs and names of all 100 primitives.
             lookup: Return full details (Trigger, Execute, Verify, Fail) for a specific apex_id.
         """
-        from cortex.agents.primitives.registry import apex_registry
+        from babylon60.agents.primitives.registry import apex_registry
 
         if action == "list":
             return {

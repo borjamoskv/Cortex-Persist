@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from cortex.extensions.shannon.analyzer import (
+from babylon60.extensions.shannon.analyzer import (
     dead_weight,
     exergy_score,
     max_entropy,
@@ -20,11 +20,11 @@ from cortex.extensions.shannon.analyzer import (
     redundancy,
     shannon_entropy,
 )
-from cortex.extensions.shannon.exergy import compute_exergy_report
-from cortex.extensions.shannon.scanner import MemoryScanner
+from babylon60.extensions.shannon.exergy import compute_exergy_report
+from babylon60.extensions.shannon.scanner import MemoryScanner
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
 __all__ = ["EntropyReport"]
 

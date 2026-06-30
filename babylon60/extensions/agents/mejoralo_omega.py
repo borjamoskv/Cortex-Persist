@@ -17,13 +17,13 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.mejoralo.constants import (
+from babylon60.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_TARGET_SCORE,
     STAGNATION_LIMIT,
 )
-from cortex.extensions.mejoralo.models import ScanResult
+from babylon60.extensions.mejoralo.models import ScanResult
 
-from cortex.agents.mixins import EngineAwareMixin
+from babylon60.agents.mixins import EngineAwareMixin
 
 logger = logging.getLogger("cortex_extensions.agents.mejoralo_omega")
 
@@ -67,7 +67,7 @@ class MejoraloOmegaAgent(EngineAwareMixin):
         """Lazy-initialize CortexEngine and MejoraloEngine."""
         if self._engine is not None:
             return
-        from cortex.extensions.mejoralo.engine import MejoraloEngine
+        from babylon60.extensions.mejoralo.engine import MejoraloEngine
 
         assert self._engine is not None
         self._mejoralo = MejoraloEngine(engine=self._engine)
@@ -77,7 +77,7 @@ class MejoraloOmegaAgent(EngineAwareMixin):
         if self._agent_def is not None:
             return
         try:
-            from cortex.extensions.agents.registry import get_agent
+            from babylon60.extensions.agents.registry import get_agent
 
             self._agent_def = get_agent("mejoralo_omega")
             if self._agent_def:
@@ -134,7 +134,7 @@ class MejoraloOmegaAgent(EngineAwareMixin):
 
     async def _execute_cycle(self) -> None:
         """Single improvement cycle: scan → prioritize → heal → verify → absorb."""
-        from cortex.cli import console  # pyright: ignore
+        from babylon60.cli import console  # pyright: ignore
 
         console.rule(f"[cyan]MEJORALO-Ω Cycle {self._cycle_count}")
 
