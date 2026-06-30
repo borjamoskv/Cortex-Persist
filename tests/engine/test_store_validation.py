@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -53,10 +54,15 @@ async def test_taint_is_verified_after_bridge_mutation(monkeypatch: pytest.Monke
     async def mock_privacy_shield(conn, content, project, tenant_id, meta):
         return meta or {}
 
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.execute.return_value.__aenter__.return_value = mock_cursor
+    mock_cursor.fetchone = AsyncMock(return_value=None)
+
     mixin = SimpleNamespace(_apply_privacy_shield=mock_privacy_shield)
     result = await sv.run_store_validation_logic(
         mixin_instance=mixin,
-        conn=object(),
+        conn=mock_conn,
         project="alpha",
         content="seed content",
         tenant_id="tenant-a",
