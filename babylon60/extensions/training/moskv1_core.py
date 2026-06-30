@@ -722,6 +722,21 @@ class MOSKV1Core:
     async def _async_reload_weights(self, target_mtime: float) -> None:
         """Asynchronously loads the new LoRA weights and swaps them atomically in memory."""
         try:
+            # Release old model references to free Unified Memory/VRAM before reloading
+            self._mlx_model = None
+            self._mlx_tokenizer = None
+            
+            import gc
+            gc.collect()
+            try:
+                import mlx.core as mx
+                mx.metal.clear_cache()
+            except Exception:
+                pass
+            
+            # Wait for Metal command queue to drain and unmap memory segments cleanly
+            await asyncio.sleep(2.0)
+
             def _load_new():
                 from mlx_lm import load
                 logger.info("Background Reload: Loading base model and new LoRA adapter...")
