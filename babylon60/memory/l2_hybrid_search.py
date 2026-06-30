@@ -364,13 +364,20 @@ class L2HybridSearch:
             except (json.JSONDecodeError, TypeError):
                 meta = {}
 
+            content_val = row[3] or ""
+            if content_val.startswith("v6_aesgcm:"):
+                from babylon60.crypto import get_default_encrypter
+                enc = get_default_encrypter()
+                decrypted = enc.decrypt_str(content_val, tenant_id=row[1])
+                content_val = decrypted if decrypted else "[CORTEX-ENCRYPTED-BLOB]"
+
             results.append(
                 L2SearchResult(
                     rank_index=rank_index,  # UUID Trick: clean 0-based index
                     internal_id=fact_id,
                     tenant_id=row[1],
                     project_id=row[2],
-                    content=row[3] or "",
+                    content=content_val,
                     timestamp=float(row[4] or 0.0),
                     is_diamond=bool(row[5]),
                     is_bridge=bool(row[6]),

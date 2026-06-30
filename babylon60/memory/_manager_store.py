@@ -201,11 +201,18 @@ async def store_fact(
         if not source_meta:
             raise ValueError("C5-REAL Guard: provenance/source_metadata OBLIGATORIO faltante en payload")
 
+        # Zero-Knowledge Encryption
+        from babylon60.crypto import get_default_encrypter
+        enc = get_default_encrypter()
+        encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
+        if not encrypted_content:
+            raise ValueError("C5-REAL Guard: Fallo de encriptación Zero-Knowledge")
+
         candidate = CortexSemanticEngram(
             id=fact_id,
             tenant_id=tenant_id,
             project_id=project_id,
-            content=content,
+            content=encrypted_content,
             embedding=vector,
             timestamp=time.time(),
             metadata=_meta,
