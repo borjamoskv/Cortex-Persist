@@ -1,4 +1,4 @@
-# MATRIX 2: 150 INVARIANTES TERMODINÁMICAS
+# MATRIX 2: 200 INVARIANTES TERMODINÁMICAS
 
 > **Ecosistema:** CORTEX-Persist / BABYLON-60 v10.0  
 > **Autor:** Borja Moskv (`borjamoskv`)  
