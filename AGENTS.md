@@ -349,6 +349,17 @@ To optimize exergy and avoid computational anergy (O(M * T) complexity), the exe
     2. **Cosmetic & Frontend (Astro/React):** UI presentation layers, styling, and design templates.
     3. **Prototyping & High-Velocity Loops:** Early alpha stages where signatures and API contracts change on a high-frequency basis.
 
+### 6.2.3 Ultrathink (P0) Autopilot Governance (SAGA-UT)
+
+To govern reasoning depth and avoid cognitive dissipation (Landauer's non-linear thermal penalty), the activation of the Ultrathink reasoning model must be mathematically guided by the automated governor:
+
+*   **Execution rule:** Run `python3 scripts/ultrathink_governor.py` before executing modifications on critical domains.
+*   **🟢 Status: MANDATED (P0 Singularity Authorized):**
+    1. The agent MUST escalate to high-exergy thinking models (e.g. Gemini 3.1 Pro (High) or Claude 4.6 Thinking).
+    2. The agent MUST dispatch the specified Swarm Formation (e.g., `HYDRA` or `TESTUDO` or `LEVIATHAN`) to contain the topological `Max_Blast_Radius`.
+*   **⚪ Status: BYPASS_ALLOWED:**
+    1. The agent is authorized to default to standard fast models (Gemini 3.5 Flash) for low-entropy operations, minimizing token costs and thermal overhead.
+
 ### 6.3 PR & Change Acceptance Gate
 
 A change is **INCOMPLETE** if any applicable step is missing:
