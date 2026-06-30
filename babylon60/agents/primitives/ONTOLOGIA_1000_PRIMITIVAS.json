@@ -9999,6 +9999,2006 @@
       "name": "Colapso de Topología de Red (Teoría de Información)",
       "description": "Invariante estructural que aplica colapso sobre Topología de Red garantizando Densidad de Exergía Máxima.",
       "c5_rule": "Rechazar Ruido de Canal / Slop mediante Compresión Entrópica."
+    },
+    {
+      "id": "CAT-001",
+      "global_index": 1001,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor de Preservación de Estado",
+      "description": "Mapeo F: C→D que preserva identidad y composición entre categorías de estado del sistema",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-002",
+      "global_index": 1002,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Transformación Natural",
+      "description": "Mutación η: F⇒G entre functores que conmuta con todos los morfismos sin alterar topología",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-003",
+      "global_index": 1003,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Límite Categórico",
+      "description": "Cono universal terminal: consenso de enjambre como objeto terminal de un diagrama",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-004",
+      "global_index": 1004,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Colímite Categórico",
+      "description": "Cocono universal inicial: fusión de estados divergentes en un estado canónico",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-005",
+      "global_index": 1005,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Objeto Inicial",
+      "description": "∅-Estado: el estado vacío desde el cual todo worktree se origina (void bootstrap)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-006",
+      "global_index": 1006,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Objeto Terminal",
+      "description": "1-Estado: el estado de convergencia al que todo pipeline debe colapsar para ser válido",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-007",
+      "global_index": 1007,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Morfismo de Identidad",
+      "description": "id_A: A→A, la operación nula que certifica que un estado no ha sido alterado (hash check)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-008",
+      "global_index": 1008,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Composición Asociativa",
+      "description": "(g∘f)∘h = g∘(f∘h): garantía de que el orden de encadenamiento de mutaciones es determinista",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-009",
+      "global_index": 1009,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Isomorfismo Categórico",
+      "description": "f: A→B con inversa g: B→A tal que g∘f=id_A, f∘g=id_B: equivalencia perfecta entre estados",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-010",
+      "global_index": 1010,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Epimorfismo",
+      "description": "Morfismo surjectivo: toda salida del pipeline tiene al menos una entrada causal",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-011",
+      "global_index": 1011,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Monomorfismo",
+      "description": "Morfismo inyectivo: entradas distintas producen estados distintos (no-colisión de hashes)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-012",
+      "global_index": 1012,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Endomorfismo",
+      "description": "f: A→A no trivial: transformación interna de estado (self-mutation del AST)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-013",
+      "global_index": 1013,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Automorfismo",
+      "description": "Endomorfismo invertible: transformación reversible de estado (rollback garantizado)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-014",
+      "global_index": 1014,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Categoría Opuesta",
+      "description": "C^op: inversión de todos los morfismos. Análisis de causalidad reversa (backtracking)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-015",
+      "global_index": 1015,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Categoría Producto",
+      "description": "C×D: ejecución paralela de dos pipelines con estado combinado",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-016",
+      "global_index": 1016,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Categoría Coma",
+      "description": "(F↓G): espacio de transiciones entre dos functores. Espacio de migraciones de estado",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-017",
+      "global_index": 1017,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Categoría Slice",
+      "description": "C/A: todos los morfismos que apuntan a un objeto A. Dependencias de un módulo",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-018",
+      "global_index": 1018,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Categoría Coslice",
+      "description": "A/C: todos los morfismos que parten de A. Ramificaciones desde un commit",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-019",
+      "global_index": 1019,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Subcategoría Plena",
+      "description": "Inclusión que preserva todos los morfismos entre objetos seleccionados (filtrado sin pérdida)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-020",
+      "global_index": 1020,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Subcategoría Ancha",
+      "description": "Inclusión que contiene todos los objetos pero restringe morfismos (restricción de permisos)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-021",
+      "global_index": 1021,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor Covariante",
+      "description": "F: C→D que preserva dirección de morfismos: mapeo de pipeline que conserva flujo causal",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-022",
+      "global_index": 1022,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor Contravariante",
+      "description": "F: C→D^op que invierte dirección: transformación de productor a consumidor",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-023",
+      "global_index": 1023,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor Fiel",
+      "description": "F inyectivo en hom-sets: mapeo que no confunde operaciones distintas",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-024",
+      "global_index": 1024,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor Pleno",
+      "description": "F surjectivo en hom-sets: mapeo que no pierde operaciones disponibles",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-025",
+      "global_index": 1025,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor Plenamente Fiel",
+      "description": "Embedding categórico: inclusión perfecta de un subsistema en otro",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-026",
+      "global_index": 1026,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor de Olvido",
+      "description": "U: Struct→Set que descarta estructura: extracción de datos crudos desde estados tipados",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-027",
+      "global_index": 1027,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor Libre",
+      "description": "F: Set→Struct adjunto izquierdo al olvido: generación de estructura mínima desde datos crudos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-028",
+      "global_index": 1028,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Bifunctor",
+      "description": "F: C×D→E: operación que toma dos inputs de categorías distintas (join cross-domain)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-029",
+      "global_index": 1029,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Profunctor",
+      "description": "P: C^op × D → Set: relación heterogénea entre sistemas (bridge entre tenants)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-030",
+      "global_index": 1030,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor Representable",
+      "description": "Hom(A,−): C→Set: espacio de todas las operaciones posibles desde un estado dado",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-031",
+      "global_index": 1031,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor Hom Interno",
+      "description": "[A,B]: exponencial categórico: espacio de funciones/lambdas entre tipos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-032",
+      "global_index": 1032,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor Diagonal",
+      "description": "Δ: C→C×C: duplicación de estado para validación paralela (N=3 quorum)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-033",
+      "global_index": 1033,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor Constante",
+      "description": "Δ_A: siempre retorna A: estado invariante como baseline de comparación",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-034",
+      "global_index": 1034,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor Potencia",
+      "description": "P: C→C que mapea A al objeto de sus subobjetos: generación de espacio de configuraciones",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-035",
+      "global_index": 1035,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Equivalencia de Categorías",
+      "description": "F: C→D con cuasi-inversa: dos sistemas son computacionalmente equivalentes",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-036",
+      "global_index": 1036,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Adjunción Libre-Olvidadizo",
+      "description": "F⊣U: par fundamental generación-extracción. Bootstrap-Teardown de contexto",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-037",
+      "global_index": 1037,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Unidad de Adjunción",
+      "description": "η: Id_C → U∘F: inyección de dato crudo en su envolvente estructural",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-038",
+      "global_index": 1038,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Counidad de Adjunción",
+      "description": "ε: F∘U → Id_D: evaluación/colapso de estructura a resultado concreto",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-039",
+      "global_index": 1039,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Adjunción de Galois",
+      "description": "Conexión entre retículos: mapeo entre jerarquías de permisos/restricciones",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-040",
+      "global_index": 1040,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Functor Nervio",
+      "description": "N: Cat→sSet: serialización de una categoría en su representación simplicial (log chain)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-041",
+      "global_index": 1041,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Producto Categórico",
+      "description": "A×B con proyecciones π₁,π₂: estado compuesto con acceso a componentes (struct fields)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-042",
+      "global_index": 1042,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Coproducto",
+      "description": "A⊔B con inyecciones ι₁,ι₂: unión disjunta de estados (tagged union / enum)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-043",
+      "global_index": 1043,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Ecualizador",
+      "description": "Eq(f,g): subobjeto donde f=g: filtro de estados que satisfacen invariante",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-044",
+      "global_index": 1044,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Coecualizador",
+      "description": "Coeq(f,g): cociente que identifica outputs iguales: deduplicación semántica",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-045",
+      "global_index": 1045,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Pullback",
+      "description": "A ×_C B: producto fibrado: join de estados sobre un ancestro común (merge de branches)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-046",
+      "global_index": 1046,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Pushout",
+      "description": "A ⊔_C B: coproducto fibrado: fusión de divergencias desde una base común",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-047",
+      "global_index": 1047,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Exponencial",
+      "description": "B^A: objeto de morfismos de A a B: espacio de todas las transformaciones posibles",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-048",
+      "global_index": 1048,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Subobjeto Clasificador",
+      "description": "Ω con true: 1→Ω: objeto verdad que clasifica todas las subpartes (type predicate)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-049",
+      "global_index": 1049,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Objeto Cero",
+      "description": "0 = objeto inicial = terminal: categoría puntuada (null state)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-050",
+      "global_index": 1050,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Kernel Categórico",
+      "description": "Ker(f) = Eq(f,0): núcleo de una transformación: estados aniquilados por la operación",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-051",
+      "global_index": 1051,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Cokernel",
+      "description": "Coker(f) = Coeq(f,0): cociente por imagen: estados ortogonales a la operación",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-052",
+      "global_index": 1052,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Imagen Categórica",
+      "description": "Im(f): factorización epi-mono: rango efectivo de una transformación",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-053",
+      "global_index": 1053,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Límite Inverso",
+      "description": "lim←: límite de sistema proyectivo: convergencia de refinamientos sucesivos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-054",
+      "global_index": 1054,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Límite Directo",
+      "description": "lim→: colímite de sistema inductivo: expansión controlada de capacidad",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-055",
+      "global_index": 1055,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Límite Filtrado",
+      "description": "Colímite sobre categoría filtrada: agregación que conmuta con límites finitos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-056",
+      "global_index": 1056,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Objeto Compacto",
+      "description": "Hom(K,−) conmuta con colímites filtrados: estado finitamente representable",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-057",
+      "global_index": 1057,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Generador",
+      "description": "G tal que Hom(G,−) es fiel: estado desde el cual se puede distinguir todo",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-058",
+      "global_index": 1058,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Cogenerador",
+      "description": "Q tal que Hom(−,Q) es fiel: estado al que se puede proyectar para distinguir",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-059",
+      "global_index": 1059,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Objeto Proyectivo",
+      "description": "P con lifting de epimorfismos: estado que puede acceder a cualquier preimagen",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-060",
+      "global_index": 1060,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Objeto Inyectivo",
+      "description": "I con extensión de monomorfismos: estado que absorbe cualquier inyección parcial",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-061",
+      "global_index": 1061,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Monada",
+      "description": "(T, η, μ): endofunctor con unidad y multiplicación: patrón de encapsulación de efectos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-062",
+      "global_index": 1062,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Unidad Monádica",
+      "description": "η: Id→T: inyección de valor puro en contexto computacional (wrap)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-063",
+      "global_index": 1063,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Multiplicación Monádica",
+      "description": "μ: T²→T: aplanamiento de contextos anidados (flatMap / bind)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-064",
+      "global_index": 1064,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Álgebra de Monada",
+      "description": "α: TA→A: interpretación/evaluación de un programa encapsulado",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-065",
+      "global_index": 1065,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Categoría de Kleisli",
+      "description": "C_T: categoría de morfismos A→TB: composición de operaciones con efectos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-066",
+      "global_index": 1066,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Categoría de Eilenberg-Moore",
+      "description": "C^T: categoría de T-álgebras: espacio de todas las interpretaciones posibles",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-067",
+      "global_index": 1067,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Comonada",
+      "description": "(D, ε, δ): dual de monada: contexto ambiental y extracción (read environment)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-068",
+      "global_index": 1068,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Coextracción",
+      "description": "ε: D→Id: extracción de valor desde contexto (unwrap/focus)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-069",
+      "global_index": 1069,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Coduplicación",
+      "description": "δ: D→D²: duplicación de contexto para inspección (logging sin mutación)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-070",
+      "global_index": 1070,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Monada Libre",
+      "description": "Free(F): monada generada por un functor: AST sin interpretación fija",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-071",
+      "global_index": 1071,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Monada Estado",
+      "description": "State(S,A) = S→(A,S): computación con estado mutable encapsulado",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-072",
+      "global_index": 1072,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Monada Reader",
+      "description": "Reader(E,A) = E→A: computación con entorno de solo lectura (config injection)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-073",
+      "global_index": 1073,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Monada Writer",
+      "description": "Writer(W,A) = (A,W): computación con log acumulativo (audit trail)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-074",
+      "global_index": 1074,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Monada IO",
+      "description": "IO(A): computación con efectos del mundo real (filesystem, network)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-075",
+      "global_index": 1075,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Monada Continuación",
+      "description": "Cont(R,A) = (A→R)→R: control explícito del flujo futuro (CPS transform)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-076",
+      "global_index": 1076,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Transformer Monádico",
+      "description": "T∘M: composición de monadas: apilamiento de efectos (error + state + IO)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-077",
+      "global_index": 1077,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Distributive Law",
+      "description": "λ: ST→TS: ley que permite intercambiar orden de efectos monádicos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-078",
+      "global_index": 1078,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Strength Monádica",
+      "description": "t: A×TB→T(A×B): capacidad de arrastrar contexto puro a través de efectos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-079",
+      "global_index": 1079,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Idempotente Monádico",
+      "description": "μ∘η_T = μ∘Tη = id_T: monada cuya aplicación doble no cambia el resultado",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-080",
+      "global_index": 1080,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Resolución de Monada",
+      "description": "Factorización de monada en adjunción F⊣U: descomposición de efecto en generación+interpretación",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-081",
+      "global_index": 1081,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "2-Categoría",
+      "description": "Categoría con 2-morfismos (morfismos entre morfismos): transformaciones de transformaciones",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-082",
+      "global_index": 1082,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "2-Morfismo",
+      "description": "α: f⇒g entre morfismos f,g: A→B: homotopía entre caminos de ejecución",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-083",
+      "global_index": 1083,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Composición Horizontal",
+      "description": "α∗β de 2-morfismos: composición paralela de transformaciones",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-084",
+      "global_index": 1084,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Composición Vertical",
+      "description": "α∘β de 2-morfismos: composición secuencial de transformaciones",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-085",
+      "global_index": 1085,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Ley de Intercambio",
+      "description": "(α∗β)∘(γ∗δ) = (α∘γ)∗(β∘δ): coherencia de composiciones mixtas",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-086",
+      "global_index": 1086,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "∞-Categoría",
+      "description": "Categoría con n-morfismos para todo n: espacio de homotopías sin truncación",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-087",
+      "global_index": 1087,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Categoría Enriquecida",
+      "description": "V-Categoría: hom-objects en V en vez de Set: cuantificación de similaridad (métricas)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-088",
+      "global_index": 1088,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Categoría Monoidal",
+      "description": "(C, ⊗, I): categoría con producto tensorial: composición paralela de recursos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-089",
+      "global_index": 1089,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Categoría Monoidal Simétrica",
+      "description": "σ: A⊗B ≅ B⊗A: conmutatividad del paralelismo (orden de ejecución intercambiable)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-090",
+      "global_index": 1090,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Categoría Monoidal Cerrada",
+      "description": "[A,B] como exponencial respecto a ⊗: funciones de primer orden como recursos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-091",
+      "global_index": 1091,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Categoría Trenzada",
+      "description": "β: A⊗B → B⊗A con coherencia: intercambio controlado de recursos (no necesariamente simétrico)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-092",
+      "global_index": 1092,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Objeto Monoideal",
+      "description": "(M, μ: M⊗M→M, η: I→M): objeto con multiplicación y unidad interna (acumulador)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-093",
+      "global_index": 1093,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Objeto Comonoideal",
+      "description": "(C, δ: C→C⊗C, ε: C→I): objeto con copia y descarte (broadcast/drop)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-094",
+      "global_index": 1094,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Topos",
+      "description": "Categoría cartesiana cerrada con subobjeto clasificador: universo lógico completo",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-095",
+      "global_index": 1095,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Topos de Presheaves",
+      "description": "[C^op, Set]: funtor de contexto que genera universos locales de estado",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-096",
+      "global_index": 1096,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Haz (Sheaf)",
+      "description": "Presheaf que satisface condición de pegado: estado globalmente consistente desde datos locales",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-097",
+      "global_index": 1097,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Topología de Grothendieck",
+      "description": "J: selección de cubiertas sobre C: definición de qué observaciones son \"suficientes\"",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-098",
+      "global_index": 1098,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Kan Extension Izquierda",
+      "description": "Lan_K F: mejor aproximación covariante: interpolación óptima de datos incompletos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-099",
+      "global_index": 1099,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Kan Extension Derecha",
+      "description": "Ran_K F: mejor aproximación contravariante: extrapolación conservadora",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "CAT-100",
+      "global_index": 1100,
+      "theory": "TEORÍA DE CATEGORÍAS (CAT)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Lema de Yoneda",
+      "description": "Nat(Hom(A,−), F) ≅ F(A): un objeto es completamente determinado por cómo se relaciona con todos los demás",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-001",
+      "global_index": 1101,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Límite de Landauer",
+      "description": "E_min = kT·ln(2) por bit borrado: costo termodinámico irreducible del olvido",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-002",
+      "global_index": 1102,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Exergía Computacional",
+      "description": "Energía libre disponible para realizar trabajo útil de transformación en el AST",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-003",
+      "global_index": 1103,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Disipación Estocástica",
+      "description": "Energía convertida en calor sin producir trabajo útil: Green Theater / anergía",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-004",
+      "global_index": 1104,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Entropía de Von Neumann",
+      "description": "S(ρ) = −Tr(ρ ln ρ): medida de información en estados cuánticos/mixtos del sistema",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-005",
+      "global_index": 1105,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Principio de Carnot Computacional",
+      "description": "Eficiencia máxima η = 1 − T_cold/T_hot: límite de conversión información→acción",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-006",
+      "global_index": 1106,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Demonio de Maxwell",
+      "description": "Agente que reduce entropía localmente a costa de aumentarla globalmente (sorting)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-007",
+      "global_index": 1107,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Erasure Tax",
+      "description": "Costo total acumulado de borrar estados intermedios durante la ejecución",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-008",
+      "global_index": 1108,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Reversibilidad de Bennett",
+      "description": "Computación reversible que evita disipación de Landauer: backtracking sin pérdida",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-009",
+      "global_index": 1109,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Costo de Copia",
+      "description": "En computación clásica: copiar es gratis; en termodinámica: copia ≠ gratuita si implica borrado",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-010",
+      "global_index": 1110,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Trabajo de Szilard",
+      "description": "W = kT·ln(2): trabajo extractable de un bit de información (motor de un bit)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-011",
+      "global_index": 1111,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Principio de Equipartición",
+      "description": "kT/2 por grado de libertad: distribución base de energía en subsistemas",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-012",
+      "global_index": 1112,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Fluctuación-Disipación",
+      "description": "Relación entre ruido térmico y disipación: base del balance señal/ruido en pipelines",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-013",
+      "global_index": 1113,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Irreversibilidad Termodinámica",
+      "description": "ΔS_universe ≥ 0: toda ejecución real incrementa entropía global del sistema",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-014",
+      "global_index": 1114,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Energía Libre de Helmholtz",
+      "description": "F = U − TS: energía disponible para trabajo a temperatura constante",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-015",
+      "global_index": 1115,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Energía Libre de Gibbs",
+      "description": "G = H − TS: potencial para trabajo útil a presión y temperatura constantes",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-016",
+      "global_index": 1116,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Potencial Químico Computacional",
+      "description": "μ = ∂G/∂N: costo marginal de añadir un agente/nodo al enjambre",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-017",
+      "global_index": 1117,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Equilibrio Termodinámico",
+      "description": "Estado de máxima entropía: sistema sin gradientes explotables (muerte térmica del contexto)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-018",
+      "global_index": 1118,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Estado Estacionario de No-Equilibrio",
+      "description": "Flujo constante de entropía: sistema vivo con disipación continua (NESS)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-019",
+      "global_index": 1119,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Producción Mínima de Entropía",
+      "description": "Principio de Prigogine: sistemas cerca del equilibrio minimizan producción de entropía",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-020",
+      "global_index": 1120,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Máxima Producción de Entropía",
+      "description": "Principio MEPP: sistemas lejos del equilibrio maximizan disipación (exploración agresiva)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-021",
+      "global_index": 1121,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Información Mutua",
+      "description": "I(X;Y) = H(X) − H(X|Y): reducción de incertidumbre compartida",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-022",
+      "global_index": 1122,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Entropía Condicional",
+      "description": "H(X|Y): incertidumbre residual después de conocer el estado de Y",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-023",
+      "global_index": 1123,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Divergencia KL",
+      "description": "D_KL(P‖Q): costo de usar modelo Q cuando la distribución real es P (slop penalty)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-024",
+      "global_index": 1124,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Entropía Relativa",
+      "description": "Medida asimétrica de distancia entre distribuciones de estado: drift detector",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-025",
+      "global_index": 1125,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Información de Fisher",
+      "description": "I(θ) = E[(∂logP/∂θ)²]: sensibilidad de la distribución a cambios de parámetro",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-026",
+      "global_index": 1126,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Capacidad de Canal",
+      "description": "C = max I(X;Y): tasa máxima de información sin error por unidad de comunicación",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-027",
+      "global_index": 1127,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Tasa de Distorsión",
+      "description": "R(D): mínima tasa de bits para representar fuente con distorsión ≤ D: compresión lossy",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-028",
+      "global_index": 1128,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Entropía de Rényi",
+      "description": "H_α(X) = (1/(1−α)) log Σ p_i^α: familia paramétrica de medidas de incertidumbre",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-029",
+      "global_index": 1129,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Entropía de Tsallis",
+      "description": "S_q = (1−Σp_i^q)/(q−1): extensión no-extensiva para sistemas con correlaciones de largo alcance",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-030",
+      "global_index": 1130,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Complejidad Termodinámica",
+      "description": "W_diss = kT · D_KL(P_forward ‖ P_reverse): trabajo disipado en proceso irreversible",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-031",
+      "global_index": 1131,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Igualdad de Jarzynski",
+      "description": "⟨e^{−W/kT}⟩ = e^{−ΔF/kT}: conexión entre trabajo y energía libre en procesos fuera de equilibrio",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-032",
+      "global_index": 1132,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Teorema de Crooks",
+      "description": "P_F(W)/P_R(−W) = e^{(W−ΔF)/kT}: ratio de probabilidades forward/reverse",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-033",
+      "global_index": 1133,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Segunda Ley Generalizada",
+      "description": "⟨W⟩ ≥ ΔF: el trabajo promedio siempre excede el cambio en energía libre",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-034",
+      "global_index": 1134,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Retroalimentación de Maxwell",
+      "description": "Reducción de entropía por medición + feedback: information-to-energy conversion",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-035",
+      "global_index": 1135,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Costo de Medición",
+      "description": "Adquirir información tiene costo termodinámico: observar el sistema lo perturba",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-036",
+      "global_index": 1136,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Borrado Correlacionado",
+      "description": "Borrar bits correlacionados cuesta menos que independientes: compresión termodinámica",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-037",
+      "global_index": 1137,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Información Accesible",
+      "description": "Fracción de entropía total que es operacionalmente utilizable por el agente",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-038",
+      "global_index": 1138,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Entropía de Mezcla",
+      "description": "ΔS_mix: entropía generada al combinar sistemas previamente separados (merge entropy)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-039",
+      "global_index": 1139,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Neguentropía",
+      "description": "J = S_max − S: entropía disponible para generar orden: capacidad de organización",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-040",
+      "global_index": 1140,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Temperatura de Información",
+      "description": "T_info = ∂E/∂S: tasa de cambio de energía con respecto a entropía informacional",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-041",
+      "global_index": 1141,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "FLOPS/Watt",
+      "description": "Operaciones por segundo por vatio: eficiencia energética del hardware subyacente",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-042",
+      "global_index": 1142,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Tokens/Joule",
+      "description": "Tokens generados por julio de energía: eficiencia termodinámica del pipeline LLM",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-043",
+      "global_index": 1143,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Exergía por Token",
+      "description": "Fracción de energía por token que produce trabajo útil (acción determinista) vs calor",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-044",
+      "global_index": 1144,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Anergía por Token",
+      "description": "Fracción de energía por token que se disipa sin trabajo útil (boilerplate / padding)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-045",
+      "global_index": 1145,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Costo de Contexto",
+      "description": "Energía total para mantener N tokens en la ventana de atención del transformer",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-046",
+      "global_index": 1146,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Presupuesto Térmico",
+      "description": "Límite superior de disipación térmica antes de throttling o degradación del sistema",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-047",
+      "global_index": 1147,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Eficiencia de Carnot del Pipeline",
+      "description": "η_pipeline = (Exergía_output) / (Exergía_input): fracción útil de la computación",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-048",
+      "global_index": 1148,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Costo de Atención",
+      "description": "O(n²) energía para self-attention: escala cuadrática con longitud de contexto",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-049",
+      "global_index": 1149,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Presupuesto Exergético Total",
+      "description": "Suma de exergías asignables a todas las operaciones de un ciclo completo",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-050",
+      "global_index": 1150,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Waste Heat Computacional",
+      "description": "Calor generado por operaciones que no contribuyen al resultado (retries, hallucinations)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-051",
+      "global_index": 1151,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Amortización Energética",
+      "description": "Distribución del costo de entrenamiento del modelo sobre sus N inferencias",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-052",
+      "global_index": 1152,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "ROI Termodinámico",
+      "description": "Retorno de inversión medido en bits útiles por julio invertido",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-053",
+      "global_index": 1153,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Densidad de Exergía",
+      "description": "Exergía por unidad de volumen de estado (bits útiles por byte de almacenamiento)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-054",
+      "global_index": 1154,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Cascada Exergética",
+      "description": "Transferencia de exergía entre etapas del pipeline: cada etapa recibe la exergía residual",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-055",
+      "global_index": 1155,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Reciclaje de Exergía",
+      "description": "Reutilización de resultados intermedios para evitar recomputación (caching termodinámico)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-056",
+      "global_index": 1156,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Pérdida por Serialización",
+      "description": "Energía gastada en convertir estado interno a formato transmisible (JSON, protobuf)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-057",
+      "global_index": 1157,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Costo de Sincronización",
+      "description": "Energía para garantizar consistencia entre N réplicas del estado (consensus overhead)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-058",
+      "global_index": 1158,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Energía de Activación",
+      "description": "Barrera mínima de energía para iniciar una transición de estado (bootstrap cost)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-059",
+      "global_index": 1159,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Punto de Curie Computacional",
+      "description": "Temperatura crítica donde el sistema pierde coherencia magnética / organizacional",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-060",
+      "global_index": 1160,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Degradación Entrópica",
+      "description": "Tasa de pérdida de exergía por unidad de tiempo sin intervención (context rot rate)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-061",
+      "global_index": 1161,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Distribución de Boltzmann",
+      "description": "P(s) ∝ e^{−E(s)/kT}: probabilidad de un microestado dado su nivel energético",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-062",
+      "global_index": 1162,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Función de Partición",
+      "description": "Z = Σ e^{−E_i/kT}: normalizadora que codifica toda la termodinámica del sistema",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-063",
+      "global_index": 1163,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Ensemble Canónico",
+      "description": "Colección de estados a temperatura constante: distribución de configuraciones del swarm",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-064",
+      "global_index": 1164,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Ensemble Microcanónico",
+      "description": "Colección de estados a energía constante: exploración ergódica de configuraciones",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-065",
+      "global_index": 1165,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Ensemble Gran Canónico",
+      "description": "Estados con intercambio de partículas/agentes: swarm con tamaño variable",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-066",
+      "global_index": 1166,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Ergodicidad",
+      "description": "Promedio temporal = promedio de ensemble: el agente explora todos los estados accesibles",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-067",
+      "global_index": 1167,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Ruptura de Ergodicidad",
+      "description": "Sistema atrapado en subconjunto de estados: dead-end / local minimum del pipeline",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-068",
+      "global_index": 1168,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Transición de Fase",
+      "description": "Cambio discontinuo de comportamiento al variar un parámetro: colapso/emergencia abrupta",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-069",
+      "global_index": 1169,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Parámetro de Orden",
+      "description": "Observable que distingue fases: métrica de coherencia del sistema (C1→C5)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-070",
+      "global_index": 1170,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Punto Crítico",
+      "description": "Divergencia de correlaciones: punto donde el sistema es maximalmente sensible",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-071",
+      "global_index": 1171,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Exponente Crítico",
+      "description": "Leyes de potencia cerca de transiciones: escalado de comportamiento emergente",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-072",
+      "global_index": 1172,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Grupo de Renormalización",
+      "description": "Transformación que cambia escala preservando física: coarse-graining del estado",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-073",
+      "global_index": 1173,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Universalidad",
+      "description": "Clases de sistemas con mismos exponentes críticos: isomorfismo termodinámico entre dominios",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-074",
+      "global_index": 1174,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Simetría Rota",
+      "description": "Estado fundamental con menos simetría que el hamiltoniano: especialización espontánea",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-075",
+      "global_index": 1175,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Modo de Goldstone",
+      "description": "Excitación sin masa que emerge de simetría rota: grado de libertad residual",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-076",
+      "global_index": 1176,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Nucleación",
+      "description": "Formación de nueva fase dentro de la vieja: bootstrap de nuevo subsistema",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-077",
+      "global_index": 1177,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Spinodal",
+      "description": "Límite de metaestabilidad: punto donde el sistema DEBE transicionar (deadline)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-078",
+      "global_index": 1178,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Histéresis",
+      "description": "Dependencia del estado actual en la historia: memoria termodinámica del sistema",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-079",
+      "global_index": 1179,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Vidrio de Espín",
+      "description": "Estado desordenado congelado: sistema con frustración máxima (deadlock multiagente)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-080",
+      "global_index": 1180,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Temple Simulado",
+      "description": "Optimización por enfriamiento gradual: reducción controlada de exploración estocástica",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-081",
+      "global_index": 1181,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Estructura Disipativa",
+      "description": "Orden que emerge y se mantiene por flujo constante de energía (sistema vivo)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-082",
+      "global_index": 1182,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Autopoiesis Termodinámica",
+      "description": "Sistema que se reproduce y mantiene a sí mismo usando flujos disipativos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-083",
+      "global_index": 1183,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Frontera del Sistema",
+      "description": "Membrana que define qué es interior (agente) y exterior (entorno): process boundary",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-084",
+      "global_index": 1184,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Flujo de Entropía",
+      "description": "dS/dt = dS_i/dt + dS_e/dt: producción interna + intercambio con exterior",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-085",
+      "global_index": 1185,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Acoplamiento Termodinámico",
+      "description": "Uso de un proceso espontáneo para impulsar uno no-espontáneo: subsidio cruzado",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-086",
+      "global_index": 1186,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Principio de Le Chatelier",
+      "description": "Sistema en equilibrio responde a perturbación minimizándola: resistencia a cambio",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-087",
+      "global_index": 1187,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Régimen Lineal",
+      "description": "Cerca del equilibrio: flujos proporcionales a fuerzas: comportamiento predecible",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-088",
+      "global_index": 1188,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Régimen No-Lineal",
+      "description": "Lejos del equilibrio: bifurcaciones, oscilaciones, caos: comportamiento emergente",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-089",
+      "global_index": 1189,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Reciprocidad de Onsager",
+      "description": "L_ij = L_ji: simetría de coeficientes de transporte cruzado: fairness de intercambio",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-090",
+      "global_index": 1190,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Efecto Peltier Computacional",
+      "description": "Flujo de información que genera o absorbe entropía en la frontera",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-091",
+      "global_index": 1191,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Efecto Seebeck Computacional",
+      "description": "Gradiente de entropía que genera flujo de información: información emergente de ruido",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-092",
+      "global_index": 1192,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Ciclo de Carnot Computacional",
+      "description": "Ciclo ideal: input→compress→compute→expand→output con eficiencia máxima",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-093",
+      "global_index": 1193,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Ciclo Otto Computacional",
+      "description": "Ciclo real con compresión/expansión isocórica: batch processing con overhead",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-094",
+      "global_index": 1194,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Bomba de Calor Informacional",
+      "description": "Transferencia de entropía de sistema frío (organizado) a caliente (caótico): garbage collection",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-095",
+      "global_index": 1195,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Refrigeración Algorítmica",
+      "description": "Reducción de entropía de qubits/bits de interés a costa de bits auxiliares",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-096",
+      "global_index": 1196,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Entropía de Clausius",
+      "description": "dS = δQ_rev/T: definición original conectando calor y entropía",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-097",
+      "global_index": 1197,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Exergía de Flujo",
+      "description": "Exergía transportada por flujo de materia/información a través de frontera del sistema",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-098",
+      "global_index": 1198,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Destrucción de Exergía",
+      "description": "Exergía irrecuperablemente perdida por irreversibilidades internas (bugs, retries)",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-099",
+      "global_index": 1199,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Balance Exergético",
+      "description": "Σ(Ex_in) = Σ(Ex_out) + Σ(Ex_destroyed): contabilidad completa de recursos",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
+    },
+    {
+      "id": "THD-100",
+      "global_index": 1200,
+      "theory": "TERMODINÁMICA DE LA COMPUTACIÓN (THD)",
+      "operation": "Matriz Base",
+      "target": "CORTEX-PERSIST",
+      "name": "Apoptosis Termodinámica",
+      "description": "Muerte programada de un proceso cuando su balance exergético es negativo neto",
+      "c5_rule": "Invariante de validación ontológica obligatoria."
     }
   ]
 }
