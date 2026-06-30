@@ -384,6 +384,16 @@ class CortexLLMRouter:
                 )
                 self._evicted.add(provider.provider_name)
             return Err(str(exc))
+        except Exception as exc:  # noqa: BLE001
+            # Catch CortexError and any other wrapped provider errors
+            # to prevent cascade bypass (P0 fix: HTTP 402/5xx propagation)
+            if "HTTP 401" in str(exc) or "401" in str(exc) or "invalid_api_key" in str(exc):
+                logger.error(
+                    "🚫 [EVICTION] Provider %s hit 401 Unauthorized. Evicting...",
+                    provider.provider_name,
+                )
+                self._evicted.add(provider.provider_name)
+            return Err(str(exc))
 
     def cascade_stats(self) -> dict[str, Any]:
         """Aggregated cascade metrics."""
