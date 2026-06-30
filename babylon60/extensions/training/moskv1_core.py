@@ -30,9 +30,15 @@ Invariant: El modelo nunca genera sin contexto vectorial. Zero hallucination pat
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
+
+# Secure absolute offline autarchy for HF model loading
+os.environ["HF_HUB_OFFLINE"] = "1"
+os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
 import time
 from collections import deque
 from collections.abc import AsyncIterator

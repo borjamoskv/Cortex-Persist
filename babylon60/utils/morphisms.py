@@ -175,3 +175,66 @@ class MorphismVerifier:
             except (ValueError, TypeError, ZeroDivisionError, AttributeError):
                 return False
         return True
+
+    @staticmethod
+    def is_functor(
+        F_obj: Callable[[Any], Any],
+        F_morph: Callable[[Callable[[Any], Any]], Callable[[Any], Any]],
+        domain_sample: Sequence[Any],
+        morphisms_sample: Sequence[tuple[Callable[[Any], Any], Callable[[Any], Any]]],
+        tol: float = 1e-9,
+    ) -> bool:
+        """
+        Verifies if F_obj (object mapping) and F_morph (morphism mapping)
+        form a covariant functor.
+        Checks:
+        1. Identity preservation: F_morph(1_X) == 1_F(X)
+        2. Composition preservation: F_morph(g . f) == F_morph(g) . F_morph(f)
+        """
+        # 1. Identity check
+        f_id = lambda x: x
+        F_f_id = F_morph(f_id)
+        for x in domain_sample:
+            try:
+                fx = F_obj(x)
+                val_lhs = F_f_id(fx)
+                if isinstance(fx, (int, float)) and isinstance(val_lhs, (int, float)):
+                    if abs(val_lhs - fx) > tol:
+                        return False
+                elif hasattr(fx, "val") and hasattr(val_lhs, "val"):
+                    if abs(val_lhs.val - fx.val) > tol or abs(val_lhs.der - fx.der) > tol:
+                        return False
+                else:
+                    if val_lhs != fx:
+                        return False
+            except (ValueError, TypeError, AttributeError):
+                return False
+
+        # 2. Composition check
+        for g, f in morphisms_sample:
+            # Compound morphism g . f
+            g_comp_f = lambda x, g_fn=g, f_fn=f: g_fn(f_fn(x))
+            F_g_comp_f = F_morph(g_comp_f)
+
+            # Compound mapped morphisms F(g) . F(f)
+            Fg = F_morph(g)
+            Ff = F_morph(f)
+            Fg_comp_Ff = lambda x, Fg_fn=Fg, Ff_fn=Ff: Fg_fn(Ff_fn(x))
+
+            for x in domain_sample:
+                try:
+                    lhs = F_g_comp_f(F_obj(x))
+                    rhs = Fg_comp_Ff(F_obj(x))
+
+                    if isinstance(lhs, (int, float)) and isinstance(rhs, (int, float)):
+                        if abs(lhs - rhs) > tol:
+                            return False
+                    elif hasattr(lhs, "val") and hasattr(rhs, "val"):
+                        if abs(lhs.val - rhs.val) > tol or abs(lhs.der - rhs.der) > tol:
+                            return False
+                    else:
+                        if lhs != rhs:
+                            return False
+                except (ValueError, TypeError, AttributeError):
+                    return False
+        return True

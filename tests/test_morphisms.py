@@ -220,3 +220,40 @@ def test_archaeologist_clustering_idempotence():
     # Should result in 0 new clusters (every node is isolated under the threshold)
     assert len(second_pass_clusters) == 0
 
+
+def test_morphism_functor():
+    """
+    Validates a covariant functor that maps from the category of Real numbers
+    to the category of Dual numbers.
+    - F_obj(x) = Dual(x, 1.0)
+    - F_morph(f) maps a real function f to a Dual function.
+    """
+    # Object mapping: float -> Dual
+    def F_obj(x: float) -> Dual:
+        return Dual(x, 1.0)
+
+    # Morphism mapping: maps a function f(float) -> function(Dual)
+    # Since Dual supports +, -, *, / operators, we can just run the same function
+    # on the Dual object if it is polynomial/linear.
+    def F_morph(f: Callable[[float], float]) -> Callable[[Dual], Dual]:
+        return lambda d, f_fn=f: f_fn(d)  # type: ignore[return-value]
+
+    # Test domain
+    domain = [1.0, 2.5, -4.0]
+
+    # Test morphisms (functions) in the source category
+    # Morphism 1: f(x) = 2x
+    # Morphism 2: g(x) = x + 3
+    f_double = lambda x: x * 2.0
+    g_add_three = lambda x: x + 3.0
+
+    morphisms = [(g_add_three, f_double)]
+
+    assert MorphismVerifier.is_functor(
+        F_obj=F_obj,
+        F_morph=F_morph,
+        domain_sample=domain,
+        morphisms_sample=morphisms,
+    )
+
+
