@@ -148,35 +148,38 @@ async def compact_ledger(
             if not in_tx_before:
                 await conn.execute("BEGIN IMMEDIATE")
 
-            # Delete old rows
-            placeholders = ",".join(["?"] * len(rowids_to_delete))
-            await conn.execute(
-                f"DELETE FROM security_audit_log WHERE rowid IN ({placeholders})", rowids_to_delete
-            )
+            from babylon60.database.core import causal_write
 
-            # Insert COMPACTION_NODE at the exact rowid of the first deleted row to maintain ORDER BY rowid ASC
-            first_rowid = rowids_to_delete[0]
+            with causal_write(conn):
+                # Delete old rows
+                placeholders = ",".join(["?"] * len(rowids_to_delete))
+                await conn.execute(
+                    f"DELETE FROM security_audit_log WHERE rowid IN ({placeholders})", rowids_to_delete
+                )
 
-            await conn.execute(
-                """INSERT INTO security_audit_log
-                   (rowid, audit_id, timestamp, tenant_id, actor_role, actor_id, action,
-                    resource, status, prev_hash, signature, external_anchor)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    first_rowid,
-                    compaction_audit_id,
-                    compaction_timestamp,
-                    "system",
-                    "CORTEX_KERNEL",
-                    "ledger_master",
-                    "COMPACTION_NODE",
-                    snapshot_hash,
-                    h_end,
-                    h_start,
-                    compaction_signature,
-                    json.dumps({"snapshot_path": str(filepath)}),
-                ),
-            )
+                # Insert COMPACTION_NODE at the exact rowid of the first deleted row to maintain ORDER BY rowid ASC
+                first_rowid = rowids_to_delete[0]
+
+                await conn.execute(
+                    """INSERT INTO security_audit_log
+                       (rowid, audit_id, timestamp, tenant_id, actor_role, actor_id, action,
+                        resource, status, prev_hash, signature, external_anchor)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        first_rowid,
+                        compaction_audit_id,
+                        compaction_timestamp,
+                        "system",
+                        "CORTEX_KERNEL",
+                        "ledger_master",
+                        "COMPACTION_NODE",
+                        snapshot_hash,
+                        h_end,
+                        h_start,
+                        compaction_signature,
+                        json.dumps({"snapshot_path": str(filepath)}),
+                    ),
+                )
 
             if not in_tx_before:
                 await conn.commit()

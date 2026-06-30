@@ -2,26 +2,32 @@
 """
 cat_id: cortex-anergy-purge
 cat_type: script
-version: 1.0.0
+version: 1.1.0
 reality_level: C5-REAL
 owner: borjamoskv
 exergy_tier: P2
 """
 
+import json
+import os
 import re
 import shutil
 from pathlib import Path
 
 # C5-REAL Anergy Purge Engine
-# Thermodynamically quarantines purely narrative files
+# Thermodynamically quarantines purely narrative files and performs ledger apoptosis.
 
-workspace_root = Path("/Users/borjafernandezangulo/30_CORTEX")
+workspace_root = Path(__file__).resolve().parent.parent
+# Fallback to current working directory if not structured
+if not (workspace_root / "babylon60").exists():
+    workspace_root = Path(os.getcwd())
+
 quarantine_dir = workspace_root / "docs" / "archive" / "narrative_quarantine"
 quarantine_dir.mkdir(parents=True, exist_ok=True)
 
 target_dirs = [
     workspace_root / "docs",
-    workspace_root / "cortex" / "agents" / "ontology"
+    workspace_root / "babylon60" / "agents" / "ontology"
 ]
 
 hype_keywords = [
@@ -75,7 +81,7 @@ def scan_and_purge():
                 content = filepath.read_text(encoding="utf-8")
                 anergy_score = calculate_anergy_score(content)
                 
-                # If score > 10 and no significant code structures, quarantine it
+                # If score >= 10 and no significant code structures, quarantine it
                 if anergy_score >= 10:
                     dest = quarantine_dir / filepath.name
                     # If filename conflict, append hash
@@ -87,10 +93,56 @@ def scan_and_purge():
             except Exception:
                 pass
 
-scan_and_purge()
+async def perform_ledger_apoptosis():
+    print("[C5-REAL] Iniciando purga termodinámica de Ledger (Apoptosis)...")
+    try:
+        from babylon60.database.core import connect_async_ctx
+        from babylon60.audit.ledger import EnterpriseAuditLedger
+        from babylon60.audit.ledger_compactor import compact_ledger
+        
+        db_path = str(workspace_root / "cortex_ledger.db")
+        if not os.path.exists(db_path):
+            print(f"[C5-REAL] Ledger database no existe en {db_path}. Omitiendo Apoptosis.")
+            return None
+            
+        async with connect_async_ctx(db_path) as conn:
+            ledger = EnterpriseAuditLedger(conn)
+            # Compact if we have complete batches (compact all but the last one)
+            result = await compact_ledger(conn, ledger, max_rows=1000, snapshot_dir=workspace_root / ".snapshots")
+            print(f"[C5-REAL] Apoptosis de Ledger: {result}")
+            return result
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"status": "failed", "error": str(e)}
 
-with open(workspace_root / "purge_report.json", "w") as f:
-    import json
-    json.dump({"purged_count": len(purged_files), "files": purged_files}, f, indent=2)
-
-print(f"Purged {len(purged_files)} high-anergy narrative files into quarantine.")
+if __name__ == "__main__":
+    import sys
+    # Add workspace to path to allow import
+    sys.path.insert(0, str(workspace_root))
+    
+    # 1. Perform standard file purge
+    scan_and_purge()
+    
+    # 2. Run ledger apoptosis
+    import asyncio
+    os.environ["CORTEX_TEST_ENV"] = "1"
+    
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        compaction_res = loop.run_until_complete(perform_ledger_apoptosis())
+    finally:
+        loop.close()
+    
+    # 3. Dump report
+    report_path = workspace_root / "purge_report.json"
+    report_data = {
+        "purged_count": len(purged_files),
+        "files": purged_files,
+        "ledger_apoptosis": compaction_res
+    }
+    with open(report_path, "w", encoding="utf-8") as f:
+        json.dump(report_data, f, indent=2, ensure_ascii=False)
+        
+    print(f"Purged {len(purged_files)} high-anergy narrative files into quarantine.")
