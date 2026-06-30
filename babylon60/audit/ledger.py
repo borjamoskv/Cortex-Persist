@@ -100,8 +100,14 @@ class EnterpriseAuditLedger:
         self._batch_task: asyncio.Task | None = None
 
         # Configure thresholds
-        self.batch_window_ms = int(os.environ.get("CORTEX_LEDGER_BATCH_MS", "50"))
-        self.max_batch_size = int(os.environ.get("CORTEX_LEDGER_MAX_BATCH", "500"))
+        self.batch_window_ms = int(
+            os.environ.get("MOSKV_LEDGER_BATCH_MS", os.environ.get("CORTEX_LEDGER_BATCH_MS", "50"))
+        )
+        self.max_batch_size = int(
+            os.environ.get(
+                "MOSKV_LEDGER_MAX_BATCH", os.environ.get("CORTEX_LEDGER_MAX_BATCH", "500")
+            )
+        )
 
         # C5-REAL Sovereign Ed25519 Keypair (Enterprise Key Management)
         from babylon60.crypto.keys import KeyManager
@@ -186,7 +192,9 @@ class EnterpriseAuditLedger:
         await self.ensure_table()
 
         # [C5-REAL] Verify pinned public key from environment/config if present
-        pinned_pub_pem = os.environ.get("CORTEX_LEDGER_PUBLIC_KEY")
+        pinned_pub_pem = os.environ.get("MOSKV_LEDGER_PUBLIC_KEY") or os.environ.get(
+            "CORTEX_LEDGER_PUBLIC_KEY"
+        )
         if pinned_pub_pem:
             try:
                 pinned_bytes = pinned_pub_pem.encode("utf-8")
@@ -315,7 +323,10 @@ class EnterpriseAuditLedger:
                 }
 
             # [C5-REAL] Verify external Rekor/TSA anchor if requested and present
-            if os.environ.get("CORTEX_VERIFY_EXTERNAL_ANCHORS") == "true":
+            if (
+                os.environ.get("MOSKV_VERIFY_EXTERNAL_ANCHORS") == "true"
+                or os.environ.get("CORTEX_VERIFY_EXTERNAL_ANCHORS") == "true"
+            ):
                 row = batch_rows[0]
                 if len(row) > 11 and row["external_anchor"]:
                     try:
