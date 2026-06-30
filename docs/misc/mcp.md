@@ -40,7 +40,7 @@ RESOURCES_EXPOSED: 3
 **Install the MCP extras:**
 
 ```bash
-pip install "cortex-persist[api,mcp,daemon]"
+pip install "babylon60[api,mcp,daemon]"
 ```
 
 **Start the server (stdio — default for desktop clients):**
@@ -73,7 +73,7 @@ Add BABYLON-60 as an MCP server in your Perplexity agent config. The server expo
 ```json
 {
   "mcpServers": {
-    "cortex-persist": {
+    "babylon60": {
       "command": "cortex",
       "args": ["mcp", "serve"],
       "env": {
@@ -85,7 +85,7 @@ Add BABYLON-60 as an MCP server in your Perplexity agent config. The server expo
 }
 ```
 
-> **Perplexity-specific:** BABYLON-60 tools will appear in the tool picker under `cortex-persist.*`. Every tool call is automatically sealed into the C5-REAL ledger — Perplexity's reasoning trace is cryptographically bound.
+> **Perplexity-specific:** BABYLON-60 tools will appear in the tool picker under `babylon60.*`. Every tool call is automatically sealed into the C5-REAL ledger — Perplexity's reasoning trace is cryptographically bound.
 
 ### 2.2 Claude Desktop / Claude Code
 
@@ -94,7 +94,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 ```json
 {
   "mcpServers": {
-    "cortex-persist": {
+    "babylon60": {
       "command": "cortex",
       "args": ["mcp", "serve"],
       "env": {
@@ -108,7 +108,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 For **Claude Code** (CLI):
 
 ```bash
-claude mcp add cortex-persist -- cortex mcp serve
+claude mcp add babylon60 -- cortex mcp serve
 ```
 
 ### 2.3 Custom A2A Orchestrator
@@ -383,7 +383,7 @@ When Perplexity or Claude calls `cortex_seal_decision`, the returned `block_hash
 | `CORTEX_E002` | `MERKLE_CHAIN_BROKEN` | Hash-link mismatch detected | Run `cortex ledger repair --dry-run` to identify the corrupt block |
 | `CORTEX_E003` | `Z3_ASSERTION_FAILED` | Z3 SMT guard rejected the payload in strict mode | Review the `z3_violations` field in the error response |
 | `CORTEX_E004` | `AUTH_SCOPE_INSUFFICIENT` | API key lacks required scope for this tool | Upgrade key to `write` or `admin` scope |
-| `CORTEX_E005` | `EMBEDDING_MODEL_MISSING` | Semantic search requested but `[embeddings]` extra not installed | Run `pip install "cortex-persist[embeddings]"` |
+| `CORTEX_E005` | `EMBEDDING_MODEL_MISSING` | Semantic search requested but `[embeddings]` extra not installed | Run `pip install "babylon60[embeddings]"` |
 | `CORTEX_E006` | `ZK_PROOF_UNAVAILABLE` | ZK-STARK proof requested but not on LEGION tier | Upgrade to LEGION or use `cortex_verify_block` instead |
 | `CORTEX_E007` | `SWARM_ENGINE_NOT_STARTED` | Rust swarm engine not initialized | Start with `cortex swarm start` or set `CORTEX_SWARM_AUTO=true` |
 | `CORTEX_E008` | `BLOCK_NOT_FOUND` | Requested block index or hash does not exist in the ledger | Verify the block reference — ledger may have been rotated |
@@ -434,4 +434,4 @@ graph LR
 ---
 
 > **Related docs:** [API Reference](api.md) · [Security Trust Model](SECURITY_TRUST_MODEL.md) · [Architecture](architecture.md) · [LEGION 10k Evaluation](legion_10k_evaluation.md)  
-> **Operator:** borjamoskv · [cortex-persist](https://github.com/borjamoskv/Cortex-Persist) · Apache-2.0
+> **Operator:** borjamoskv · [babylon60](https://github.com/borjamoskv/Cortex-Persist) · Apache-2.0

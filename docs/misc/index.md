@@ -57,7 +57,7 @@ Traditional logging and standard vector stores fail the epistemic containment te
 ## Quick Start
 
 ```bash
-pip install cortex-persist
+pip install babylon60
 cortex init
 cortex memory store my-agent "Chose OAuth2 PKCE for auth" --type decision
 cortex verify 1
@@ -119,4 +119,4 @@ cortex verify 1
 
 ---
 
-*by [borjamoskv.com](https://borjamoskv.com) · [cortex-persist](https://github.com/borjamoskv/Cortex-Persist)*
+*by [borjamoskv.com](https://borjamoskv.com) · [babylon60](https://github.com/borjamoskv/Cortex-Persist)*

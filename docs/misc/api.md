@@ -16,7 +16,7 @@ feature-gated or depend on optional extras, and maturity still varies by router.
 ## Run Locally
 
 ```bash
-pip install "cortex-persist[api]"
+pip install "babylon60[api]"
 uvicorn cortex.api:app --host 0.0.0.0 --port 8484
 ```
 

@@ -87,7 +87,7 @@ BABYLON-60 is a verification layer that wraps your existing memory stack (Mem0, 
 ## Get Started Now
 
 ```bash
-pip install cortex-persist
+pip install babylon60
 cortex store --type decision --project my-agent "Chose OAuth2 PKCE for auth"
 cortex verify 1
 # → ✅ VERIFIED — Hash chain intact, Merkle sealed
@@ -101,7 +101,7 @@ cortex verify 1
 
 | Phase | Timeline | Milestone |
 |:---|:---:|:---|
-| **Trust Layer** | 2026 Q1 ✅ | `pip install cortex-persist` · MCP server for every IDE |
+| **Trust Layer** | 2026 Q1 ✅ | `pip install babylon60` · MCP server for every IDE |
 | **Compliance Standard** | 2026 Q3 | Helm charts · GraphQL API · ZK encryption at rest |
 | **"Let's Encrypt" of AI** | 2027 | Industry standard · Cross-org trust federation |
 | **Universal Protocol** | 2028 | Every autonomous agent ships with BABYLON-60 |

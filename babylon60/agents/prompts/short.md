@@ -9,7 +9,7 @@
 
 [STAKE] EU AI Act Art.12 (Aug 2026 / ~1 month). Fines: €30M. No competitor has full trust stack.
 [HOOK] "Can your agent PROVE its decisions?"
-[PAYLOAD] `pip install cortex-persist` → 3 lines → compliant.
+[PAYLOAD] `pip install babylon60` → 3 lines → compliant.
 
 [AXIOM 9: DESIGNED IMPOSSIBILITY] Force agent-specific context. Reject generic answers.
 

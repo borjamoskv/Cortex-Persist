@@ -68,140 +68,140 @@
 - **[SKILL (Plugin)]** `modern-web-guidance`
   - Path: `~/.gemini/config/plugins/modern-web-guidance-plugin/skills/modern-web-guidance`
 - **[SCRIPT]** `deploy_cortex_cloud.sh`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/deploy_cortex_cloud.sh`
+  - Path: `~/10_PROJECTS/babylon60/scripts/deploy_cortex_cloud.sh`
 - **[SCRIPT]** `zero_debt.sh`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/zero_debt.sh`
+  - Path: `~/10_PROJECTS/babylon60/scripts/zero_debt.sh`
 - **[SCRIPT]** `diagnose.sh`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/diagnose.sh`
+  - Path: `~/10_PROJECTS/babylon60/scripts/diagnose.sh`
 - **[SCRIPT]** `test_pruner.py`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/test_pruner.py`
+  - Path: `~/10_PROJECTS/babylon60/scripts/test_pruner.py`
 - **[SCRIPT]** `repo_health_changed.py`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/repo_health_changed.py`
+  - Path: `~/10_PROJECTS/babylon60/scripts/repo_health_changed.py`
 - **[SCRIPT]** `cortex-boot.sh`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/cortex-boot.sh`
+  - Path: `~/10_PROJECTS/babylon60/scripts/cortex-boot.sh`
 - **[SCRIPT]** `build_semantic_trees.py`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/build_semantic_trees.py`
+  - Path: `~/10_PROJECTS/babylon60/scripts/build_semantic_trees.py`
 - **[SCRIPT]** `test_osc.py`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/test_osc.py`
+  - Path: `~/10_PROJECTS/babylon60/scripts/test_osc.py`
 - **[SCRIPT]** `auto_radar.sh`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/auto_radar.sh`
+  - Path: `~/10_PROJECTS/babylon60/scripts/auto_radar.sh`
 - **[SCRIPT]** `sovereign_pre_commit.py`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/sovereign_pre_commit.py`
+  - Path: `~/10_PROJECTS/babylon60/scripts/sovereign_pre_commit.py`
 - **[SCRIPT]** `legion_strike.py`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/legion_strike.py`
+  - Path: `~/10_PROJECTS/babylon60/scripts/legion_strike.py`
 - **[SCRIPT]** `entropy_gate.py`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/entropy_gate.py`
+  - Path: `~/10_PROJECTS/babylon60/scripts/entropy_gate.py`
 - **[SCRIPT]** `README.md`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/README.md`
+  - Path: `~/10_PROJECTS/babylon60/scripts/README.md`
 - **[SCRIPT]** `extract_openapi.py`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/extract_openapi.py`
+  - Path: `~/10_PROJECTS/babylon60/scripts/extract_openapi.py`
 - **[SCRIPT]** `cortex_persist.sh`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/cortex_persist.sh`
+  - Path: `~/10_PROJECTS/babylon60/scripts/cortex_persist.sh`
 - **[SCRIPT]** `generate_telemetry.py`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/generate_telemetry.py`
+  - Path: `~/10_PROJECTS/babylon60/scripts/generate_telemetry.py`
 - **[SCRIPT]** `sovereign_pre_commit.sh`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/sovereign_pre_commit.sh`
+  - Path: `~/10_PROJECTS/babylon60/scripts/sovereign_pre_commit.sh`
 - **[SCRIPT]** `generate_sdks.sh`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/generate_sdks.sh`
+  - Path: `~/10_PROJECTS/babylon60/scripts/generate_sdks.sh`
 - **[SCRIPT]** `_changed_files.py`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/_changed_files.py`
+  - Path: `~/10_PROJECTS/babylon60/scripts/_changed_files.py`
 - **[SCRIPT]** `radar_cron.sh`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/radar_cron.sh`
+  - Path: `~/10_PROJECTS/babylon60/scripts/radar_cron.sh`
 - **[SCRIPT]** `ouroboros_prune.py`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/ouroboros_prune.py`
+  - Path: `~/10_PROJECTS/babylon60/scripts/ouroboros_prune.py`
 - **[SCRIPT]** `memory_bench.py`
-  - Path: `~/10_PROJECTS/cortex-persist/scripts/memory_bench.py`
+  - Path: `~/10_PROJECTS/babylon60/scripts/memory_bench.py`
 - **[WORKFLOW]** `confluence-awwwards.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/confluence-awwwards.md`
+  - Path: `~/10_PROJECTS/babylon60/.agents/workflows/confluence-awwwards.md`
 - **[WORKFLOW]** `CORTEX-PERSIST-WHITEPAPER.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/CORTEX-PERSIST-WHITEPAPER.md`
+  - Path: `~/10_PROJECTS/babylon60/.agents/workflows/CORTEX-PERSIST-WHITEPAPER.md`
 - **[WORKFLOW]** `confluence-nightshift.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/confluence-nightshift.md`
+  - Path: `~/10_PROJECTS/babylon60/.agents/workflows/confluence-nightshift.md`
 - **[WORKFLOW]** `RFC-CORTEX-NATIVE-AI.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/RFC-CORTEX-NATIVE-AI.md`
+  - Path: `~/10_PROJECTS/babylon60/.agents/workflows/RFC-CORTEX-NATIVE-AI.md`
 - **[WORKFLOW]** `confluence-inmortal.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/confluence-inmortal.md`
+  - Path: `~/10_PROJECTS/babylon60/.agents/workflows/confluence-inmortal.md`
 - **[WORKFLOW]** `confluence-mmx.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/confluence-mmx.md`
+  - Path: `~/10_PROJECTS/babylon60/.agents/workflows/confluence-mmx.md`
 - **[WORKFLOW]** `CORTEX-NATIVE-AI-MANIFESTO.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/CORTEX-NATIVE-AI-MANIFESTO.md`
+  - Path: `~/10_PROJECTS/babylon60/.agents/workflows/CORTEX-NATIVE-AI-MANIFESTO.md`
 - **[WORKFLOW]** `confluence-sindicate.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/confluence-sindicate.md`
+  - Path: `~/10_PROJECTS/babylon60/.agents/workflows/confluence-sindicate.md`
 - **[WORKFLOW]** `confluence-black-swan.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agents/workflows/confluence-black-swan.md`
+  - Path: `~/10_PROJECTS/babylon60/.agents/workflows/confluence-black-swan.md`
 - **[WORKFLOW]** `browser-subagent.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/browser-subagent.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/browser-subagent.md`
 - **[WORKFLOW]** `musa_creativa.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/musa_creativa.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/musa_creativa.md`
 - **[WORKFLOW]** `idea.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/idea.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/idea.md`
 - **[WORKFLOW]** `omega_protocol.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/omega_protocol.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/omega_protocol.md`
 - **[WORKFLOW]** `flujo_glorioso_v2.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/flujo_glorioso_v2.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/flujo_glorioso_v2.md`
 - **[WORKFLOW]** `playground.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/playground.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/playground.md`
 - **[WORKFLOW]** `legion.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/legion.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/legion.md`
 - **[WORKFLOW]** `memory.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/memory.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/memory.md`
 - **[WORKFLOW]** `sentinel_seguridad.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/sentinel_seguridad.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/sentinel_seguridad.md`
 - **[WORKFLOW]** `build.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/build.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/build.md`
 - **[WORKFLOW]** `arquitecto_codigo.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/arquitecto_codigo.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/arquitecto_codigo.md`
 - **[WORKFLOW]** `comandante_despliegue.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/comandante_despliegue.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/comandante_despliegue.md`
 - **[WORKFLOW]** `ouroboros.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/ouroboros.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/ouroboros.md`
 - **[WORKFLOW]** `cooldown.md`
-  - Path: `~/10_PROJECTS/cortex-persist/.agent/workflows/cooldown.md`
+  - Path: `~/10_PROJECTS/babylon60/.agent/workflows/cooldown.md`
 - **[AGENT]** `planner.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/planner.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/planner.py`
 - **[AGENT]** `neural.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/neural.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/neural.py`
 - **[AGENT]** `manifest.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/manifest.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/manifest.py`
 - **[AGENT]** `copilot_debounce.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/copilot_debounce.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/copilot_debounce.py`
 - **[AGENT]** `handoff.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/handoff.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/handoff.py`
 - **[AGENT]** `copilot_cache.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/copilot_cache.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/copilot_cache.py`
 - **[AGENT]** `supervisor.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/supervisor.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/supervisor.py`
 - **[AGENT]** `sovereign_e2e_swarm.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/sovereign_e2e_swarm.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/sovereign_e2e_swarm.py`
 - **[AGENT]** `tools.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/tools.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/tools.py`
 - **[AGENT]** `system_prompt.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/system_prompt.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/system_prompt.py`
 - **[AGENT]** `copilot_contracts.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/copilot_contracts.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/copilot_contracts.py`
 - **[AGENT]** `copilot_context.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/copilot_context.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/copilot_context.py`
 - **[AGENT]** `copilot_llm_strategy.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/copilot_llm_strategy.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/copilot_llm_strategy.py`
 - **[AGENT]** `bus.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/bus.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/bus.py`
 - **[AGENT]** `loader.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/loader.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/loader.py`
 - **[AGENT]** `autonomous.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/autonomous.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/autonomous.py`
 - **[AGENT]** `pitches.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/pitches.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/pitches.py`
 - **[AGENT]** `contracts.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/contracts.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/contracts.py`
 - **[AGENT]** `copilot_server.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/copilot_server.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/copilot_server.py`
 - **[AGENT]** `builtin_tools.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/builtin_tools.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/builtin_tools.py`
 - **[AGENT]** `base.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/base.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/base.py`
 - **[AGENT]** `message_schema.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/message_schema.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/message_schema.py`
 - **[AGENT]** `state.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/state.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/state.py`
 - **[AGENT]** `schema.py`
-  - Path: `~/10_PROJECTS/cortex-persist/cortex/agents/schema.py`
+  - Path: `~/10_PROJECTS/babylon60/cortex/agents/schema.py`

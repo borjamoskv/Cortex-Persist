@@ -89,7 +89,7 @@ BABYLON-60 Persist graduates from beta to production-stable. This release repres
 - **SMTE (Self-Modifying Topology Engine)**: AST parser + LLM mutator for autonomous code evolution under exergy guards.
 
 ### Changed
-- **Lean core install surface**: moved heavyweight local embedding, Chroma, and numba dependencies behind optional extras so `pip install cortex-persist` stays focused on the supported trust-layer core.
+- **Lean core install surface**: moved heavyweight local embedding, Chroma, and numba dependencies behind optional extras so `pip install babylon60` stays focused on the supported trust-layer core.
 - **Extended runtime split**: moved `aiohttp`, `beautifulsoup4`, `arq`, and `email-validator` out of the base install into `mcp`, `daemon`, and `api` extras.
 - **YAML / watcher split**: moved `PyYAML` and `watchdog` out of the base install into `authoring`, `mcp`, and `daemon` extras.
 - **Daemon relay split**: moved `aiofiles` out of the base install into the `daemon` extra.
@@ -142,14 +142,14 @@ BABYLON-60 Persist graduates from beta to production-stable. This release repres
 ## [0.3.0b2] — 2026-04-13
 
 ### Added
-- **First public PyPI release**: `cortex-persist 0.3.0b2` se publicó mediante GitHub Actions Trusted Publishing y creó el proyecto público en PyPI.
+- **First public PyPI release**: `babylon60 0.3.0b2` se publicó mediante GitHub Actions Trusted Publishing y creó el proyecto público en PyPI.
 - **Public GitHub prerelease**: `v0.3.0b2` ya dispone de prerelease pública y artefactos firmados/trazables en GitHub.
 
 ### Changed
 - **Release hardening**: El paquete público ya no arrastra workspaces como `cortex-sdk/` en wheel/sdist; CI y release ejecutan preflight de artefactos, `twine check`, build provenance y verificación de visibilidad en PyPI.
 
 ### Verified
-- **Clean install smoke test**: Validada la instalación en entorno limpio con `pip install cortex-persist==0.3.0b2`, `import cortex` y `cortex --version`.
+- **Clean install smoke test**: Validada la instalación en entorno limpio con `pip install babylon60==0.3.0b2`, `import cortex` y `cortex --version`.
 
 ### Security
 - **Security Audit (2026-03-02)**: Complete autonomous audit across 58,098 LOC with 0 High/Medium findings.
@@ -283,7 +283,7 @@ BABYLON-60 Persist graduates from beta to production-stable. This release repres
 - **Async API**: High-performance FastAPI backend with connection pooling and async SQLite
 - **Industrial Noir UI**: Dashboard with Cyber Lime (`#CCFF00`) and Abyssal Black (`#0A0A0A`) theme
 - **Internationalization**: Localized error messages (en, es)
-- **Python SDK** (`sdks/python/`): `pip install cortex-persist` public API
+- **Python SDK** (`sdks/python/`): `pip install babylon60` public API
 - **OpenAPI spec** (`openapi.yaml` — 70.5 KB): Full machine-readable API contract
 - **CI/CD** (`ci.yml`): GitHub Actions pipeline with pytest + ruff
 

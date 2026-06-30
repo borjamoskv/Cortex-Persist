@@ -14,7 +14,7 @@
 The quickest way to get started:
 
 ```bash
-pip install cortex-persist
+pip install babylon60
 ```
 
 This installs the supported core flow with deterministic fallback embeddings, which is enough for:
@@ -34,74 +34,74 @@ If you run in a headless environment without OS Keychain support, set `CORTEX_MA
 On macOS, enable native keychain support with:
 
 ```bash
-pip install "cortex-persist[platform]"
+pip install "babylon60[platform]"
 ```
 
 ### Optional Extras
 
 === "Local Embeddings"
     ```bash
-    pip install "cortex-persist[embeddings]"
+    pip install "babylon60[embeddings]"
     ```
     Adds `sentence-transformers` and `onnxruntime` for local semantic embeddings and reranking instead of deterministic fallback vectors.
 
 === "Acceleration"
     ```bash
-    pip install "cortex-persist[acceleration]"
+    pip install "babylon60[acceleration]"
     ```
     Adds `numba` for optional JIT acceleration in specialized DSP and swarm modules.
 
 === "API Server"
     ```bash
-    pip install cortex-persist[api]
+    pip install babylon60[api]
     ```
     Includes FastAPI, Uvicorn, HTTPX, and email validation for the REST API and dashboard.
 
 === "MCP Server"
     ```bash
-    pip install cortex-persist[mcp]
+    pip install babylon60[mcp]
     ```
     Adds FastMCP runtime dependencies, HTML extraction helpers, and filesystem watchers for MCP and resilient gateway flows.
 
 === "Daemon / Sidecars"
     ```bash
-    pip install cortex-persist[daemon]
+    pip install babylon60[daemon]
     ```
     Adds `aiofiles`, `aiohttp`, `arq`, and `watchdog` for daemon, SSE, relay, and background queue surfaces.
 
 === "Platform Bindings"
     ```bash
-    pip install cortex-persist[platform]
+    pip install babylon60[platform]
     ```
     Adds `pyobjc` bindings required by macOS keychain integration.
 
 === "Authoring / YAML"
     ```bash
-    pip install cortex-persist[authoring]
+    pip install babylon60[authoring]
     ```
     Adds `PyYAML` for agent configs, genesis specs, and other YAML-driven authoring surfaces.
 
 === "Development"
     ```bash
-    pip install cortex-persist[dev]
+    pip install babylon60[dev]
     ```
     Includes pytest, pytest-cov, pytest-asyncio, and HTTPX for testing.
 
 === "Google ADK"
     ```bash
-    pip install cortex-persist[adk]
+    pip install babylon60[adk]
     ```
     Adds Google Agent Developer Kit integration.
 
 === "Billing"
     ```bash
-    pip install cortex-persist[billing]
+    pip install babylon60[billing]
     ```
     Stripe integration for SaaS subscription management.
 
 === "Everything"
     ```bash
-    pip install cortex-persist[all]
+    pip install babylon60[all]
     ```
     Installs all optional dependencies.
 
@@ -154,7 +154,7 @@ This creates the database at `~/.cortex/cortex.db` with the base ledger/fact sch
 
 - Notifications use `osascript` (Notification Center)
 - Daemon installs as a `launchd` agent (`~/Library/LaunchAgents/`)
-- Native Keychain integration via `pyobjc` (install `cortex-persist[platform]` if needed)
+- Native Keychain integration via `pyobjc` (install `babylon60[platform]` if needed)
 
 ### Linux
 

@@ -22,7 +22,7 @@ pip install git+https://github.com/borjamoskv/Cortex-Persist.git
 O, si el paquete está disponible en PyPI:
 
 ```bash
-pip install cortex-persist langchain langchain-openai
+pip install babylon60 langchain langchain-openai
 ```
 
 ## Arquitectura
@@ -194,7 +194,7 @@ Esto permite que agentes LangGraph, AutoGen u otros frameworks usen BABYLON-60 c
 
 - Adaptador para **LangGraph** cuando el flujo del agente sea stateful.
 - `CortexPersistDocumentLoader` para cargar historial como documentos en un RAG pipeline.
-- Paquete separado `cortex-persist-langchain` para instalación simplificada.
+- Paquete separado `babylon60-langchain` para instalación simplificada.
 - Integración con **AutoGen** y **CrewAI** siguiendo el mismo patrón de `BaseMemory`.
 
 ## Referencias

@@ -10,18 +10,18 @@ TypeScript SDK is an early HTTP client layer and depends on the REST API being a
 
 ## Python SDK
 
-The Python SDK is the primary interface, distributed as `cortex-persist` on PyPI.
+The Python SDK is the primary interface, distributed as `babylon60` on PyPI.
 
 ### Install
 
 ```bash
-pip install cortex-persist
+pip install babylon60
 ```
 
 If another process needs remote access instead of in-process embedding/search, host the API with:
 
 ```bash
-pip install "cortex-persist[api]"
+pip install "babylon60[api]"
 uvicorn cortex.api:app --host 0.0.0.0 --port 8484
 ```
 
@@ -137,7 +137,7 @@ asyncio.run(main())
 
 ## JavaScript / TypeScript SDK
 
-> ⏳ **Roadmap — Not yet published.** The JS/TS SDK is in early development. `npm install @cortex-persist/sdk` is not yet available on npm. Check [ROADMAP.md](../ROADMAP.md) for the planned release timeline.
+> ⏳ **Roadmap — Not yet published.** The JS/TS SDK is in early development. `npm install @babylon60/sdk` is not yet available on npm. Check [ROADMAP.md](../ROADMAP.md) for the planned release timeline.
 
 > **Status:** Early development. Available at `sdks/js/`.
 
@@ -154,7 +154,7 @@ npm install
 ### Usage
 
 ```typescript
-import { CortexClient } from '@cortex-persist/sdk';
+import { CortexClient } from '@babylon60/sdk';
 
 const cortex = new CortexClient({
   baseUrl: 'http://localhost:8484',
@@ -182,7 +182,7 @@ const allFacts = await cortex.recall('my-app');
 
 ```bash
 # ⏳ Coming Soon — not yet published on npm
-# npm install @cortex-persist/sdk
+# npm install @babylon60/sdk
 ```
 
 ---

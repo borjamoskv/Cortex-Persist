@@ -642,7 +642,7 @@ At minimum, the following event types SHOULD exist where eventing is enabled:
   "strategy": "auto",
   "filters": {
     "tenant_id": "tenant_01",
-    "project": "cortex-persist",
+    "project": "babylon60",
     "exclude_tombstoned": true,
     "min_confidence": 0.7
   },
@@ -781,7 +781,7 @@ At minimum, the following event types SHOULD exist where eventing is enabled:
   "event_type": "fact.stored",
   "ts": "2026-03-14T10:33:00Z",
   "tenant_id": "tenant_01",
-  "project": "cortex-persist",
+  "project": "babylon60",
   "source": "memory",
   "sequence": 9821,
   "idempotency_key": "fact.stored:tenant_01:fact_9a1",

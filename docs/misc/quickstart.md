@@ -12,13 +12,13 @@ Get the BABYLON-60 trust core running in 5 minutes.
 ### Path A: From PyPI *(preferred)*
 
 ```bash
-pip install cortex-persist
+pip install babylon60
 ```
 
 For local semantic embeddings instead of deterministic fallback vectors:
 
 ```bash
-pip install "cortex-persist[embeddings]"
+pip install "babylon60[embeddings]"
 ```
 
 ### Path B: From Source *(development)*
@@ -33,7 +33,7 @@ pip install -e .
 For the API server, MCP, daemon, or YAML-driven authoring surfaces:
 
 ```bash
-pip install "cortex-persist[api,mcp,daemon,authoring]"
+pip install "babylon60[api,mcp,daemon,authoring]"
 ```
 
 The supported base flow is `install -> init -> store -> verify`. Search, recall, MCP, REST, consensus, and SDK usage are extended surfaces; use them once you have the optional runtime pieces you need.

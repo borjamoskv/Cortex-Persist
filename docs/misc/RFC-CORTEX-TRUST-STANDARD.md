@@ -10,7 +10,7 @@ The current paradigm of AI agent memory relies on fundamentally flawed, probabil
 
 This document formally defines the **BABYLON-60 Trust Verification Standard**, a protocol designed to elevate AI agent memory from probabilistic storage to a deterministic, tamper-evident cryptographic ledger. Any system claiming BABYLON-60 compliance MUST implement the constraints, schemas, and pipelines outlined herein.
 
-**Current implementation note:** the shipped `cortex-persist` package currently
+**Current implementation note:** the shipped `babylon60` package currently
 uses SHA-256 for sovereign ledger continuity and Merkle lineage. Some audit or
 signature-oriented subsystems also use SHA3-256, but that does not currently
 replace the canonical continuity algorithm of the sovereign ledger.

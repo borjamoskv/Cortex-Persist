@@ -30,7 +30,7 @@ graph TD
 
     subgraph "Nodos de Ejecución (Runtimes)"
         K_APEX["moskv-1-apex\n(Sovereign Kernel)"]:::kernel
-        E_PERSIST["cortex-persist\n(Memory Engine)"]:::repo
+        E_PERSIST["babylon60\n(Memory Engine)"]:::repo
         E_MAC["mac-maestro\n(OS Control)"]:::repo
     end
 

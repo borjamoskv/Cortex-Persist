@@ -108,7 +108,7 @@ that are not uniformly present in the current workspace snapshot.
 - Docker support
 - CI/CD via GitHub Actions
 - Cross-platform (macOS, Linux, Windows)
-- `pip install cortex-persist`
+- `pip install babylon60`
 
 ---
 

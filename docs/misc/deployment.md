@@ -15,11 +15,11 @@ still local verifiable memory first, then optional HTTP and MCP surfaces only wh
 The simplest deployment. Zero network dependencies.
 
 ```bash
-pip install cortex-persist
+pip install babylon60
 
 # Add only the surfaces you need locally
-pip install "cortex-persist[api]"
-pip install "cortex-persist[mcp]"
+pip install "babylon60[api]"
+pip install "babylon60[mcp]"
 cortex init
 
 # Start REST API
@@ -41,8 +41,8 @@ run either service.
 ### Development
 
 ```bash
-docker build -t cortex-persist:local .
-docker run --rm -p 8484:8484 cortex-persist:local
+docker build -t babylon60:local .
+docker run --rm -p 8484:8484 babylon60:local
 ```
 
 This repository snapshot ships a `Dockerfile`, but does not include `docker-compose.yml` or

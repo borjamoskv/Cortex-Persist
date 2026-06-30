@@ -47,10 +47,10 @@ El **vacío exérgico** actual radica en el compromiso entre:
 ## 4. Cristalización: El Vacío Exérgico a Resolver
 
 La literatura y las implementaciones SOTA (2024-2026) demuestran que **el cuello de botella ya no es algorítmico, sino arquitectónico**. 
-El verdadero "vacío exérgico" en el desarrollo de `cortex-persist` y `LEGION-10k` reside en la **pérdida de consistencia en tiempo real ante indexaciones masivas con escritura concurrente**.
+El verdadero "vacío exérgico" en el desarrollo de `babylon60` y `LEGION-10k` reside en la **pérdida de consistencia en tiempo real ante indexaciones masivas con escritura concurrente**.
 
 Las implementaciones actuales (como `pgvectorscale`) requieren detener o ralentizar drásticamente la ingesta para compilar o balancear el grafo StreamingDiskANN. Para un enjambre de 10,000 agentes que graban hechos y decisiones en caliente en un Ledger criptográfico (como `LORCA_LEDGER.md`), un retraso en la disponibilidad del vector de memoria rompe la causalidad temporal del sistema.
 
-### Estrategia de Mitigación para cortex-persist (v11.0 Roadmap):
+### Estrategia de Mitigación para babylon60 (v11.0 Roadmap):
 1. **Hibridación Activa:** Uso de una capa intermedia de escritura (`cortex_memory_vsa.db`) local ultrarrápida sin indexar (o usando indexación plana temporizada en memoria) que se consolida de forma asíncrona hacia pgvector/AlloyDB.
 2. **SBQ Dinámico:** Implementación de un monitor de deriva de embeddings (dentro de los deamons de telemetría) que recalcule los umbrales de la cuantización estadística sin necesidad de bloquear los hilos de búsqueda del motor Rust (`cortex_rs`).

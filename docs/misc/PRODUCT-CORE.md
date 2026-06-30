@@ -19,7 +19,7 @@ This document defines the **supported core** of BABYLON-60 Persist and distingui
 
 ## Supported Core (Stable API)
 
-These modules form the public surface of `cortex-persist`. Their APIs are covered by semver guarantees from v1.0 onwards.
+These modules form the public surface of `babylon60`. Their APIs are covered by semver guarantees from v1.0 onwards.
 
 | Module | Path | Description |
 |:---|:---|:---|

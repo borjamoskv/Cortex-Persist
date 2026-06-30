@@ -24,4 +24,4 @@
 *   **Proof Conditions:** 
     *   *Base:* Standard run of 30 tasks with simulated network instability, permission locks, and schema drift vs. Run under `PronoicErrorTransducer` enabling JIT code generation.
     *   *Measurement:* Task completion rate without human intervention, number of manual correction requests, and system stabilization time.
-    *   *Confidence:* C5-REAL (Actionable integration inside `cortex-persist`).
+    *   *Confidence:* C5-REAL (Actionable integration inside `babylon60`).
