@@ -1,9 +1,9 @@
-import json
 import hashlib
+import json
 import sys
-from enum import Enum
 from dataclasses import dataclass
-from typing import List, Dict
+from enum import Enum
+
 
 # LL-AC-01 · Invariante de Tipado Estricto
 class Componente(str, Enum):
@@ -43,9 +43,9 @@ class PrimitivaBFT:
 
 class OntologiaParser:
     @staticmethod
-    def parse_file(filepath: str) -> List[PrimitivaBFT]:
+    def parse_file(filepath: str) -> list[PrimitivaBFT]:
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath) as f:
                 data = json.load(f)
             
             primitivas = []
@@ -62,7 +62,7 @@ class OntologiaParser:
                         break
                         
                 comp_enum = Componente.AST
-                for c in Componente:
+                for _c in Componente:
                     # Mapeo simple de siglas
                     if tgt == "Árbol de Sintaxis Abstracta": comp_enum = Componente.AST
                     elif tgt == "Memoria Persistente (SQLite)": comp_enum = Componente.MEM

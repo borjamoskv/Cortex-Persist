@@ -3,22 +3,22 @@
 Morphism Tractors - A Computable Category Theory Model of the Tractor Analogy.
 Verified as C5-REAL under the Babylone-60 rules.
 """
-from typing import TypeVar, Generic, Callable, Dict, Set, Tuple, Any
+from typing import Any, Generic, TypeVar
 
 # Types for Objects and Morphisms
-O = TypeVar("O")  # Object Type
+Obj_T = TypeVar("Obj_T")  # Object Type
 M = TypeVar("M")  # Morphism Type
-O2 = TypeVar("O2")  # Object Type 2
+Obj_T2 = TypeVar("Obj_T2")  # Object Type 2
 M2 = TypeVar("M2")  # Morphism Type 2
 
-class Category(Generic[O, M]):
+class Category(Generic[Obj_T, M]):
     def __init__(
         self,
         name: str,
-        objects: Set[O],
-        morphisms: Dict[Tuple[O, O], Set[M]],
-        identity_map: Dict[O, M],
-        compose_map: Dict[Tuple[M, M], M]
+        objects: set[Obj_T],
+        morphisms: dict[tuple[Obj_T, Obj_T], set[M]],
+        identity_map: dict[Obj_T, M],
+        compose_map: dict[tuple[M, M], M]
     ) -> None:
         self.name = name
         self.objects = objects
@@ -33,7 +33,7 @@ class Category(Generic[O, M]):
             raise ValueError(f"Composition of {g} after {f} not defined in category {self.name}")
         return res
 
-    def identity(self, obj: O) -> M:
+    def identity(self, obj: Obj_T) -> M:
         if obj not in self.objects:
             raise ValueError(f"Object {obj} not in category {self.name}")
         return self.identity_map[obj]
@@ -51,13 +51,13 @@ class Category(Generic[O, M]):
 
         # Validate associativity
         # For all f: A -> B, g: B -> C, h: C -> D: h o (g o f) = (h o g) o f
-        for (A, B_obj), f_morphs in self.morphisms.items():
+        for (_A, B_obj), f_morphs in self.morphisms.items():
             for f in f_morphs:
                 for (B_obj2, C_obj), g_morphs in self.morphisms.items():
                     if B_obj != B_obj2:
                         continue
                     for g in g_morphs:
-                        for (C_obj2, D_obj), h_morphs in self.morphisms.items():
+                        for (C_obj2, _D_obj), h_morphs in self.morphisms.items():
                             if C_obj != C_obj2:
                                 continue
                             for h in h_morphs:
@@ -66,14 +66,14 @@ class Category(Generic[O, M]):
                                 assert lhs == rhs, f"Associativity fails for {h}, {g}, {f}"
 
 
-class Functor(Generic[O, M, O2, M2]):
+class Functor(Generic[Obj_T, M, Obj_T2, M2]):
     def __init__(
         self,
         name: str,
-        dom: Category[O, M],
-        cod: Category[O2, M2],
-        object_map: Dict[O, O2],
-        morphism_map: Dict[M, M2]
+        dom: Category[Obj_T, M],
+        cod: Category[Obj_T2, M2],
+        object_map: dict[Obj_T, Obj_T2],
+        morphism_map: dict[M, M2]
     ) -> None:
         self.name = name
         self.dom = dom
@@ -82,7 +82,7 @@ class Functor(Generic[O, M, O2, M2]):
         self.morphism_map = morphism_map
         self._validate_functor_laws()
 
-    def map_object(self, obj: O) -> O2:
+    def map_object(self, obj: Obj_T) -> Obj_T2:
         return self.object_map[obj]
 
     def map_morphism(self, morph: M) -> M2:
@@ -97,9 +97,9 @@ class Functor(Generic[O, M, O2, M2]):
             assert mapped_id == expected_id, f"F(id) != id_F fails for {obj}"
 
         # 2. Preservation of composition: F(g o f) = F(g) o F(f)
-        for (A, B), f_morphs in self.dom.morphisms.items():
+        for (_A, B), f_morphs in self.dom.morphisms.items():
             for f in f_morphs:
-                for (B2, C), g_morphs in self.dom.morphisms.items():
+                for (B2, _C), g_morphs in self.dom.morphisms.items():
                     if B != B2:
                         continue
                     for g in g_morphs:
@@ -113,15 +113,15 @@ class Functor(Generic[O, M, O2, M2]):
                         )
 
 
-class NaturalTransformation(Generic[O, M, O2, M2]):
+class NaturalTransformation(Generic[Obj_T, M, Obj_T2, M2]):
     def __init__(
         self,
         name: str,
-        dom: Category[O, M],
-        cod: Category[O2, M2],
-        F: Functor[O, M, O2, M2],
-        G: Functor[O, M, O2, M2],
-        components: Dict[O, M2]  # Maps object X in dom to morph in cod: F(X) -> G(X)
+        dom: Category[Obj_T, M],
+        cod: Category[Obj_T2, M2],
+        F: Functor[Obj_T, M, Obj_T2, M2],
+        G: Functor[Obj_T, M, Obj_T2, M2],
+        components: dict[Obj_T, M2]  # Maps object X in dom to morph in cod: F(X) -> G(X)
     ) -> None:
         self.name = name
         self.dom = dom
@@ -131,7 +131,7 @@ class NaturalTransformation(Generic[O, M, O2, M2]):
         self.components = components
         self._validate_naturality()
 
-    def component(self, obj: O) -> Any:
+    def component(self, obj: Obj_T) -> Any:
         return self.components[obj]
 
     def _validate_naturality(self) -> None:
@@ -235,6 +235,7 @@ def run_tractor_validation() -> None:
     # Natural transformation (Identity since translators are isomorphic/equal here)
     eta_components = {"A": "id_R", "B": "id_Az", "C": "id_V"}
     nat_trans = NaturalTransformation("Sincronia", cat_M, cat_N, functor_F, functor_G, eta_components)
+    _ = nat_trans  # Reference it to pass the linter
 
     print("==================================================")
     print("CATEGORICAL LAW AUDIT: ALL TESTS PASSED.")

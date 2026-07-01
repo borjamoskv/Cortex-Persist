@@ -1,4 +1,3 @@
-import random
 
 class RedDinamicaBFT:
     def __init__(self, nodos_iniciales, fallos_maximos):

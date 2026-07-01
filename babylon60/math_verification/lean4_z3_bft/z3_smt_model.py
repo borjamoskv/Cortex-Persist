@@ -1,4 +1,3 @@
-import os
 
 def generate_smt2_bft_node():
     smt_model = """

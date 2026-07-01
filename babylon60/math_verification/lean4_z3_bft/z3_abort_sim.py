@@ -1,5 +1,6 @@
 import sys
 
+
 def simulate_z3_discovery(node_state):
     print(f"[Z3 SMT Solver] Analizando transición de estado: {node_state}")
     
