@@ -35,7 +35,7 @@ anyio==4.14.1
 argon2-cffi==25.1.0
 argon2-cffi-bindings==25.1.0
     # via argon2-cffi
-arq==0.25.0
+arq==0.28.0
     # via cortex-persist
 async-timeout==4.0.3 ; python_full_version < '3.11'
     # via
