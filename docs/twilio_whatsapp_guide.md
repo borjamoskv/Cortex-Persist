@@ -10,7 +10,7 @@ Esta guía describe el flujo de configuración, emparejamiento y transmisión pa
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Operador as Operador (+34658010102)
+    actor Operador as Operador (+34606091875)
     participant Twilio as Twilio Sandbox (+14155238886)
     participant Engine as MOSKV-1 Engine (Local Host)
 
@@ -37,7 +37,7 @@ sequenceDiagram
 ### Paso B: Activar el Sandbox
 1. En el menú de Twilio, ve a: **Messaging → Try it out → Send a WhatsApp Message**.
 2. Verás un número de teléfono asignado (típicamente `+1 415 523 8886`) y una palabra clave de emparejamiento (ej. `join code-word`).
-3. Envía un mensaje por WhatsApp desde tu teléfono (`+34658010102`) a ese número con el texto exacto:
+3. Envía un mensaje por WhatsApp desde tu teléfono (`+34606091875`) a ese número con el texto exacto:
    ```text
    join code-word
    ```
@@ -49,7 +49,7 @@ Edita tu archivo [.env](file:///Users/borjafernandezangulo/30_BABYLON-60/.env) e
 TWILIO_ACCOUNT_SID="tu_account_sid_de_twilio"
 TWILIO_AUTH_TOKEN="tu_auth_token_de_twilio"
 TWILIO_SENDER="+14155238886"
-TWILIO_TARGET="+34658010102"
+TWILIO_TARGET="+34606091875"
 ```
 
 ---
@@ -79,7 +79,7 @@ Los agentes autónomos interactúan con este canal mediante el módulo de herram
 * **Ejemplo de ejecución interna:**
   ```python
   await send_twilio_whatsapp_message(
-      to="+34658010102",
+      to="+34606091875",
       text="[CRÍTICO] Espacio de direcciones AST modificado sin firma en commit ledger."
   )
   ```
