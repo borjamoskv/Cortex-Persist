@@ -804,7 +804,7 @@ tenacity==9.1.4
     #   langchain-core
 threadpoolctl==3.6.0
     # via scikit-learn
-tokenizers==0.21.4
+tokenizers==0.23.1
     # via
     #   chromadb
     #   transformers
