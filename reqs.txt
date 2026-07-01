@@ -399,7 +399,7 @@ nvidia-cublas==13.1.1.3 ; sys_platform == 'linux'
     #   torch
 nvidia-cuda-cupti==13.0.85 ; sys_platform == 'linux'
     # via cuda-toolkit
-nvidia-cuda-nvrtc==13.0.88 ; sys_platform == 'linux'
+nvidia-cuda-nvrtc==13.3.33 ; sys_platform == 'linux'
     # via
     #   cuda-toolkit
     #   nvidia-cublas
