@@ -13,19 +13,19 @@ def detect_pattern(state):
 
     # MVC signals
     mvc_keywords = ["controller", "view", "model", "template"]
-    for kw in mvc_keywords:
-        if any(kw in f for f in files_lower):
-            scores["MVC"] += 2
-        if any(kw in m for m in modules_lower):
-            scores["MVC"] += 2
-
     # Clean Architecture signals
     clean_keywords = ["usecase", "repository", "entity", "domain", "infrastructure"]
-    for kw in clean_keywords:
-        if any(kw in f for f in files_lower):
-            scores["Clean Architecture"] += 2
-        if any(kw in m for m in modules_lower):
-            scores["Clean Architecture"] += 2
+    # Microservices signals
+    micro_keywords = ["service", "gateway", "proxy", "worker"]
+
+    # Pre-compute keyword containment in files and modules to minimize nested loops and conditionals
+    all_kws = mvc_keywords + clean_keywords + micro_keywords
+    matched_files = {kw for kw in all_kws if any(kw in f for f in files_lower)}
+    matched_modules = {kw for kw in all_kws if any(kw in m for m in modules_lower)}
+
+    scores["MVC"] = 2 * sum(1 for kw in mvc_keywords if kw in matched_files) + 2 * sum(1 for kw in mvc_keywords if kw in matched_modules)
+    scores["Clean Architecture"] = 2 * sum(1 for kw in clean_keywords if kw in matched_files) + 2 * sum(1 for kw in clean_keywords if kw in matched_modules)
+    scores["Microservices"] = 2 * sum(1 for kw in micro_keywords if kw in matched_modules)
 
     # Monolito modular
     if len(modules) >= 4:
@@ -37,12 +37,6 @@ def detect_pattern(state):
     if total_functions > total_classes * 2:
         scores["Script-based"] += 3
 
-    # Microservices
-    micro_keywords = ["service", "gateway", "proxy", "worker"]
-    for kw in micro_keywords:
-        if any(kw in m for m in modules_lower):
-            scores["Microservices"] += 2
-
     detected = max(scores, key=scores.get)
     confidence = scores[detected]
 
@@ -51,3 +45,4 @@ def detect_pattern(state):
         "confidence_score": confidence,
         "all_scores": scores
     }
+
