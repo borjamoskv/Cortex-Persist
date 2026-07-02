@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger("babylon60.security.vesicular_runtime")
 
 _original_environ_get = os.environ.get
-_original_environ_getitem = os.environ.__getitem__
+_original_environ_getitem = os.environ.__class__.__getitem__
 
 FORBIDDEN_SUFFIXES = ("_API_KEY", "_SECRET", "_TOKEN")
 FORBIDDEN_EXACT = ("OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY")
@@ -34,16 +34,17 @@ class VesicularRuntime:
             
         logger.warning("🛡️ VESICULAR RUNTIME: ENGAGED. OS-Level Apoptosis is active.")
 
-        def _guarded_get(key, default=None):
+        def _guarded_get(env_self, key, default=None):
             cls._check_key(key)
+            # _original_environ_get was a bound method, so we don't pass env_self
             return _original_environ_get(key, default)
 
-        def _guarded_getitem(key):
+        def _guarded_getitem(env_self, key):
             cls._check_key(key)
-            return _original_environ_getitem(key)
+            return _original_environ_getitem(env_self, key)
 
-        os.environ.get = _guarded_get
-        os.environ.__getitem__ = _guarded_getitem
+        os.environ.get = _guarded_get.__get__(os.environ)
+        os.environ.__class__.__getitem__ = _guarded_getitem
         
         cls._is_enforced = True
 

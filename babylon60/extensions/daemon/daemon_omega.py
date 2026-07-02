@@ -51,7 +51,7 @@ class DaemonOmega:
                     new_state = BeliefState.ACTIVE
                 elif verdict.action == VerdictAction.QUARANTINE:
                     new_state = BeliefState.QUARANTINED
-                elif verdict.action == VerdictAction.DISCARD:
+                elif verdict.action == VerdictAction.SKIP:
                     new_state = BeliefState.DISCARDED
                 else:
                     new_state = BeliefState.DISCARDED # Force Landauer principle on ambiguous states

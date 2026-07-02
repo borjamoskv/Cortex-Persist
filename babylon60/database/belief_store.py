@@ -157,7 +157,7 @@ class BeliefStore:
         Recupera subgrafos completos filtrados por estado para su resolución.
         (Retorna un listado parcial instanciado como BeliefObject para uso del Handoff).
         """
-        from babylon60.engine.causal.belief_objects import BeliefState, Provenance, ContextRelations
+        from babylon60.engine.causal.belief_objects import BeliefState, ProvenanceEnvelope, BeliefRelations
 
         if not states:
             return []
@@ -181,7 +181,7 @@ class BeliefStore:
                 confidence_score=row[3],
                 variance=row[4],
                 decay_rate=row[5],
-                provenance=Provenance(
+                provenance=ProvenanceEnvelope(
                     source_hash=row[6],
                     source_type=row[7],
                     tenant_id=row[8],
@@ -190,7 +190,7 @@ class BeliefStore:
                     created_at=row[11],
                     was_generated_by=row[12],
                 ),
-                relations=ContextRelations(
+                relations=BeliefRelations(
                     entails=json.loads(row[13]),
                     discards=json.loads(row[14])
                 ),
