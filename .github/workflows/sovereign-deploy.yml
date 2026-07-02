@@ -1,7 +1,4 @@
-# ─────────────────────────────────────────────────────────────
-# SOVEREIGN CI/CD · Multi-Cloud Deploy + Security Scans
-# ─────────────────────────────────────────────────────────────
-name: Sovereign Deploy
+name: Sovereign Deploy FSM
 
 on:
   push:
@@ -11,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 concurrency:
   group: sovereign-${{ github.ref }}
@@ -23,412 +21,41 @@ env:
   NODE_VERSION: "20"
 
 jobs:
-  change-scope:
-    name: change-scope
+  fsm-deploy:
+    name: "Determinismo C5-REAL: FSM Deploy Engine"
     runs-on: ubuntu-latest
-    outputs:
-      automation_only: ${{ steps.scope.outputs.automation_only }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4
         with:
           fetch-depth: 0
-      - id: scope
-        shell: bash
-        run: |
-          set -euo pipefail
 
-          zero_sha="0000000000000000000000000000000000000000"
-          event_name="${{ github.event_name }}"
-          diff_range=""
-
-          if [[ "$event_name" == "pull_request" ]]; then
-            git fetch --no-tags origin "${{ github.base_ref }}" --depth=1
-            diff_range="origin/${{ github.base_ref }}...HEAD"
-          elif [[ "$event_name" == "push" && "${{ github.event.before }}" != "$zero_sha" ]]; then
-            diff_range="${{ github.event.before }}...HEAD"
-          fi
-
-          if [[ -z "$diff_range" ]]; then
-            echo "automation_only=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$diff_range")
-          if [[ ${#files[@]} -eq 0 ]]; then
-            echo "automation_only=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          automation_only=true
-
-          for file in "${files[@]}"; do
-            case "$file" in
-              .github/workflows/ci.yml|\
-              .github/workflows/quality_gates.yml|\
-              .github/workflows/repo-health-lite.yml|\
-              .github/workflows/sigint-monitor.yml|\
-              .github/workflows/sovereign-deploy.yml|\
-              scripts/repo_health_changed.py|\
-              cortex/extensions/moltbook/sigint.py)
-                ;;
-              *)
-                automation_only=false
-                ;;
-            esac
-          done
-
-          echo "automation_only=$automation_only" >> "$GITHUB_OUTPUT"
-
-  # ── Phase 1: Quality Gate ─────────────────────────────────
-  quality-gate:
-    name: "🔒 Quality Gate (130/100)"
-    needs: [change-scope]
-    if: needs.change-scope.outputs.automation_only != 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Determine scope
-        id: scope
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git fetch --no-tags --prune origin "${{ github.base_ref }}"
-            git diff --name-only --diff-filter=ACMR "origin/${{ github.base_ref }}...HEAD" | sort -u > .changed_files
-          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            git diff --name-only --diff-filter=ACMR "${{ github.event.before }}" HEAD | sort -u > .changed_files
-          else
-            git ls-files | sort -u > .changed_files
-          fi
-
-          release_only=true
-          while IFS= read -r file; do
-            [ -z "${file}" ] && continue
-            case "${file}" in
-              .github/workflows/*|.github/mlc_config.json|README.md|README.es.md|README.zh.md|CONTRIBUTING.md|RELEASE_PROCESS.md|CHANGELOG.md|VERSION_SUPPORT.md|docs/*|ouroboros-matrix/README.md|Dockerfile|pyproject.toml|uv.lock|MANIFEST.in|cortex/__init__.py|cortex/cli/prompt_cmds.py|scripts/release_preflight.py|scripts/repo_health_changed.py|astro.config.mjs|wrangler.json|package.json|package-lock.json|src/*|public/*)
-                ;;
-              *)
-                release_only=false
-                break
-                ;;
-            esac
-          done < .changed_files
-
-          python_files="$(grep -E '^(cortex|tests|scripts)/.*\\.py$' .changed_files || true)"
-          {
-            echo "release_only=${release_only}"
-            echo "python_files<<EOF"
-            printf '%s\n' "${python_files}"
-            echo "EOF"
-          } >> "${GITHUB_OUTPUT}"
-
-      - name: Install dependencies
+      - name: Instalar Dependencias
         run: |
           pip install -e ".[dev,api,mcp]" numpy
-          pip install ruff bandit safety mypy build twine
+          pip install ruff bandit safety mypy build twine click
 
-      - name: Release-only smoke
-        if: steps.scope.outputs.release_only == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t files < <(printf '%s\n' "${{ steps.scope.outputs.python_files }}" | sed '/^$/d')
-          if [ "${#files[@]}" -gt 0 ]; then
-            ruff check "${files[@]}"
-          fi
-          python scripts/repo_health_changed.py
-          python -m build
-          python scripts/release_preflight.py
-          python -m twine check dist/*
-
-      - name: Detect changed Python files for quality gate
-        id: quality_targets
-        shell: bash
-        run: |
-          set -euo pipefail
-          base_sha=""
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            base_sha="${{ github.event.pull_request.base.sha }}"
-          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            base_sha="${{ github.event.before }}"
-          fi
-
-          if [ -n "${base_sha}" ]; then
-            mapfile -t files < <(
-              git diff --name-only --diff-filter=ACMRT "${base_sha}" "${{ github.sha }}" |
-              grep -E '^cortex/.*\.py$' |
-              while IFS= read -r path; do
-                [ -f "${path}" ] && printf '%s\n' "${path}"
-              done || true
-            )
-          else
-            mapfile -t files < <(git ls-files | grep -E '^cortex/.*\.py$' || true)
-          fi
-
-          if [ "${#files[@]}" -eq 0 ]; then
-            echo "count=0" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          {
-            echo "count=${#files[@]}"
-            echo "files<<EOF"
-            printf "%s\n" "${files[@]}"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Lint (Ruff)
-        if: steps.scope.outputs.release_only != 'true'
-        run: ruff check cortex/ --output-format=github
-
-      - name: Type check (mypy — supplementary, Pyright is canonical)
-        if: steps.scope.outputs.release_only != 'true'
-        run: mypy cortex/ --ignore-missing-imports || true
-
-      - name: Security scan (Bandit)
-        if: steps.scope.outputs.release_only != 'true'
-        run: bandit -r cortex/ -f json -o bandit-report.json || true
-
-      - name: Dependency audit (Safety)
-        if: steps.scope.outputs.release_only != 'true'
-        run: safety check --output json > safety-report.json || true
-
-      - name: Unit tests
-        if: steps.scope.outputs.release_only != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          mapfile -t changed_tests < <(
-            { grep -E '^tests/.*\.py$' .changed_files || true; } |
-            while IFS= read -r path; do
-              [ -f "${path}" ] && printf '%s\n' "${path}"
-            done
-          )
-
-          if [ "${#changed_tests[@]}" -gt 0 ]; then
-            pytest_targets=("${changed_tests[@]}")
-          else
-            pytest_targets=(tests/)
-          fi
-
-          printf 'Pytest targets:\n'
-          printf ' - %s\n' "${pytest_targets[@]}"
-
-          python -X faulthandler -m pytest "${pytest_targets[@]}" -q --tb=short \
-            --timeout=180 --timeout-method=thread \
-            --junitxml=test-results.xml
-
-      - name: MEJORAlo Score Check
-        if: steps.scope.outputs.release_only != 'true'
-        run: |
-          python -c "
-          from cortex.extensions.mejoralo.scan import scan
-          result = scan('cortex', 'cortex/')
-          score = result.score
-          print(f'MEJORAlo Score: {score}/100')
-          if score < 70:
-              raise SystemExit(f'BLOCKED: Score {score} < 70 threshold')
-          "
-
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: quality-reports
-          path: |
-            bandit-report.json
-            safety-report.json
-            test-results.xml
-
-  # ── Phase 2: Container Build ──────────────────────────────
-  build:
-    name: "🏗️ Build & Scan Container"
-    needs: [change-scope, quality-gate]
-    if: needs.change-scope.outputs.automation_only != 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          fetch-depth: 0
-
-      - name: Determine scope
-        id: scope
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git fetch --no-tags --prune origin "${{ github.base_ref }}"
-            git diff --name-only --diff-filter=ACMR "origin/${{ github.base_ref }}...HEAD" | sort -u > .changed_files
-          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            git diff --name-only --diff-filter=ACMR "${{ github.event.before }}" HEAD | sort -u > .changed_files
-          else
-            git ls-files | sort -u > .changed_files
-          fi
-
-          release_only=true
-          while IFS= read -r file; do
-            [ -z "${file}" ] && continue
-            case "${file}" in
-              .github/workflows/*|.github/mlc_config.json|README.md|README.es.md|README.zh.md|CONTRIBUTING.md|RELEASE_PROCESS.md|CHANGELOG.md|VERSION_SUPPORT.md|docs/*|ouroboros-matrix/README.md|Dockerfile|pyproject.toml|uv.lock|MANIFEST.in|cortex/__init__.py|cortex/cli/prompt_cmds.py|scripts/release_preflight.py|scripts/repo_health_changed.py|astro.config.mjs|wrangler.json|package.json|package-lock.json|src/*|public/*)
-                ;;
-              *)
-                release_only=false
-                break
-                ;;
-            esac
-          done < .changed_files
-
-          echo "release_only=${release_only}" >> "${GITHUB_OUTPUT}"
-
-      - name: Release-only container skip
-        if: steps.scope.outputs.release_only == 'true'
-        run: echo "Skipping container build for release-only scope."
-
-      - name: Pull request container skip
-        if: github.event_name == 'pull_request' && steps.scope.outputs.release_only != 'true'
-        run: echo "CI/docker owns PR container build, scan, and smoke validation."
-
-      - name: Build Docker image
-        if: github.event_name != 'pull_request' && steps.scope.outputs.release_only != 'true'
-        run: docker build -t cortex-sovereign:${{ github.sha }} .
-
-      - name: Trivy scan (CRITICAL + HIGH)
-        if: github.event_name != 'pull_request' && steps.scope.outputs.release_only != 'true'
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: cortex-sovereign:${{ github.sha }}
-          severity: CRITICAL,HIGH
-          exit-code: 0
-          format: sarif
-          output: trivy-report.sarif
-
-      - name: Trivy report summary
-        if: github.event_name != 'pull_request' && steps.scope.outputs.release_only != 'true'
-        run: |
-          echo "Trivy SARIF report generated at trivy-report.sarif." >> "$GITHUB_STEP_SUMMARY"
-          echo "Container vulnerability findings are reported here; blocking policy is enforced by dedicated security workflows and dependency remediation." >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Push to registries
-        if: github.ref == 'refs/heads/main' && steps.scope.outputs.release_only != 'true'
-        run: |
-          # GCR
-          echo '${{ secrets.GCP_SA_KEY }}' | docker login -u _json_key --password-stdin gcr.io
-          docker tag cortex-sovereign:${{ github.sha }} gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:${{ github.sha }}
-          docker tag cortex-sovereign:${{ github.sha }} gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:latest
-          docker push gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:${{ github.sha }}
-          docker push gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:latest
-          # ECR
-          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY }}
-          docker tag cortex-sovereign:${{ github.sha }} ${{ secrets.AWS_ECR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
-          docker push ${{ secrets.AWS_ECR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
-          # ACR
-          docker login ${{ secrets.AZURE_ACR_REGISTRY }} -u ${{ secrets.AZURE_ACR_USER }} -p ${{ secrets.AZURE_ACR_PASSWORD }}
-          docker tag cortex-sovereign:${{ github.sha }} ${{ secrets.AZURE_ACR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
-          docker push ${{ secrets.AZURE_ACR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
-
-  # ── Phase 3: Infrastructure ───────────────────────────────
-  terraform:
-    name: "☁️ Multi-Cloud Infra"
-    needs: [change-scope, build]
-    if: github.ref == 'refs/heads/main' && needs.change-scope.outputs.automation_only != 'true'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: infra/terraform
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: hashicorp/setup-terraform@v3  # verified publisher — keep tag
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Terraform Init
-        run: terraform init
+      - name: Ignición FSM Deploy Engine
+        run: python -m babylon60.cli deploy run-fsm
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan -no-color
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-  # ── Phase 4: Deploy to K8s clusters ───────────────────────
-  deploy:
-    name: "🚀 Deploy to GCP"
-    needs: [change-scope, terraform]
-    if: github.ref == 'refs/heads/main' && needs.change-scope.outputs.automation_only != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
-      - name: Deploy to GCP
-        run: |
-          kubectl apply -f infra/k8s/gcp/ --recursive
-          kubectl set image deployment/cortex-sovereign cortex=gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:${{ github.sha }} -n cortex
-          kubectl rollout status deployment/cortex-sovereign -n cortex --timeout=300s
-
-  # ── Phase 5: Smoke Tests ──────────────────────────────────
-  smoke:
-    name: "🔥 Smoke Tests"
-    needs: [change-scope, deploy]
-    if: github.ref == 'refs/heads/main' && needs.change-scope.outputs.automation_only != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - name: Health checks
-        run: |
-          checked=0
-          for endpoint in "${AWS_ENDPOINT:-}" "${GCP_ENDPOINT:-}" "${AZURE_ENDPOINT:-}"; do
-            if [ -z "$endpoint" ]; then
-              continue
-            fi
-            checked=1
-            curl -sf "$endpoint/health" || exit 1
-            echo "✅ $endpoint healthy"
-          done
-          if [ "$checked" -eq 0 ]; then
-            echo "No external endpoints configured; skipping smoke health checks."
-          fi
-      - name: Sovereign power verification
-        run: |
-          if [ -z "${GCP_ENDPOINT:-}" ]; then
-            echo "GCP_ENDPOINT not configured; skipping sovereign power verification."
-            exit 0
-          fi
-          python -c "
-          import json, urllib.request
-          r = urllib.request.urlopen('$GCP_ENDPOINT/api/v1/sovereign/power')
-          data = json.loads(r.read())
-          power = data['power_level']
-          print(f'Power Level: {power}/1000')
-          assert power >= 1300, f'Power {power} < 1300 target'
-          print('🏆 SOVEREIGN THRESHOLD EXCEEDED')
-          "
+          AWS_ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_ACR_REGISTRY: ${{ secrets.AZURE_ACR_REGISTRY }}
+          AZURE_ACR_USER: ${{ secrets.AZURE_ACR_USER }}
+          AZURE_ACR_PASSWORD: ${{ secrets.AZURE_ACR_PASSWORD }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          AWS_ENDPOINT: ${{ secrets.AWS_ENDPOINT }}
+          GCP_ENDPOINT: ${{ secrets.GCP_ENDPOINT }}
+          AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
