@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock
@@ -8,9 +10,7 @@ from babylon60.embeddings.local import LocalEmbedder
 
 @pytest.fixture
 def mock_store():
-    store = AsyncMock(spec=BeliefStore)
-    store.insert_belief = AsyncMock(return_value=1)
-    return store
+    return AsyncMock(spec=BeliefStore)
 
 @pytest.fixture
 def mock_embedder():
@@ -19,7 +19,9 @@ def mock_embedder():
     return embedder
 
 @pytest.mark.asyncio
-async def test_flujo_glorioso_concepcion(mock_store, mock_embedder):
+@patch("babylon60.engine.core.ultrathink_physics.UltrathinkPhysicsEngine.calculate_exergy_yield")
+async def test_flujo_glorioso_concepcion(mock_exergy, mock_store, mock_embedder):
+    mock_exergy.return_value = 1.0 # Simulate high exergy
     orchestrator = DecaCoreOrchestrator(mock_store, mock_embedder)
     input_data = {"idea": "glorious concept"}
     result = await orchestrator.concepcion(input_data)
@@ -35,7 +37,9 @@ async def test_flujo_glorioso_concepcion(mock_store, mock_embedder):
     mock_embedder.embed.assert_called_once()
 
 @pytest.mark.asyncio
-async def test_flujo_glorioso_full_pipeline(mock_store, mock_embedder):
+@patch("babylon60.engine.core.ultrathink_physics.UltrathinkPhysicsEngine.calculate_exergy_yield")
+async def test_flujo_glorioso_full_pipeline(mock_exergy, mock_store, mock_embedder):
+    mock_exergy.return_value = 1.0 # Simulate high exergy to prevent Apoptosis
     orchestrator = DecaCoreOrchestrator(mock_store, mock_embedder)
     trajectory = await orchestrator.execute_genesis("omega project")
     

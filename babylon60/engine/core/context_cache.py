@@ -72,12 +72,26 @@ class CacheEntry:
     agent_id: str = ""  # Which agent created this cache
     parent_cache_id: str | None = None  # Delta-Cache reference (ArXiv:2603.04428)
     is_delta: bool = False  # True if this cache only holds divergent tensors
+    entropy_score: float = 1.0  # Normalized Shannon Entropy (1.0 = optimal exergy)
+    rot_multiplier: float = 1.0  # Degradation multiplier (context rot)
     tags: list[str] = field(default_factory=list)
     meta: dict[str, Any] = field(default_factory=dict)
 
+    def calculate_thermal_ttl(self) -> float:
+        """
+        Calculates the thermodynamic TTL (Ω2 KV-Cache Rot).
+        Low entropy or high parametric rot rapidly dissipates the cache.
+        """
+        base_ttl = float(self.ttl_seconds)
+        if self.entropy_score < 0.1:
+            return 0.0  # Pure anergy, immediate apoptosis
+        
+        thermal_penalty = max(0.1, self.entropy_score) / max(1.0, self.rot_multiplier)
+        return base_ttl * thermal_penalty
+
     @property
     def is_expired(self) -> bool:
-        return time.monotonic() > (self.created_at + self.ttl_seconds)
+        return time.monotonic() > (self.created_at + self.calculate_thermal_ttl())
 
     @property
     def age_seconds(self) -> float:
@@ -139,6 +153,8 @@ class ContextCacheManager:
         parent_cache_id: str | None = None,
         is_delta: bool = False,
         ttl_seconds: int | None = None,
+        entropy_score: float = 1.0,
+        rot_multiplier: float = 1.0,
         tags: list[str] | None = None,
         meta: dict[str, Any] | None = None,
     ) -> CacheEntry:
@@ -168,6 +184,8 @@ class ContextCacheManager:
             agent_id=agent_id,
             parent_cache_id=parent_cache_id,
             is_delta=is_delta,
+            entropy_score=entropy_score,
+            rot_multiplier=rot_multiplier,
             tags=tags or [],
             meta=meta or {},
         )

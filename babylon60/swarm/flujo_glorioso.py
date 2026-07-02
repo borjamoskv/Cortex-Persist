@@ -23,7 +23,14 @@ class DecaCoreOrchestrator:
         self.embedder = embedder or LocalEmbedder()
 
     async def _execute_phase(self, phase_name: str, agent_role: str, input_data: dict[str, Any]) -> BeliefObject:
+        from decimal import Decimal
+        from babylon60.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
+        from babylon60.engine.entropy import EntropyAnnihilator
+
         """Ejecuta una fase atómica asíncrona inyectando el linaje (agent_role)."""
+        import time
+        start_time = time.monotonic()
+
         # Mutamos el estado para simular la ejecución de la fase
         output_data = dict(input_data)
         output_data[f"{phase_name}_completed"] = True
@@ -31,6 +38,23 @@ class DecaCoreOrchestrator:
         output_data["agent_role"] = agent_role
 
         data_str = json.dumps(output_data, sort_keys=True)
+        input_str = json.dumps(input_data, sort_keys=True)
+
+        execution_time = max(0.001, time.monotonic() - start_time)
+
+        stochastic_entropy = max(0.1, UltrathinkPhysicsEngine.estimate_shannon_entropy(input_str))
+        deterministic_output = max(0.1, UltrathinkPhysicsEngine.estimate_shannon_entropy(data_str))
+
+        # Termodinámica: Calcular Exergy Yield (L12 - Fail-Fast Termodinámico)
+        exergy_yield = UltrathinkPhysicsEngine.calculate_exergy_yield(stochastic_entropy, deterministic_output, execution_time)
+        if exergy_yield < 0.1:
+            annihilator = EntropyAnnihilator()
+            annihilator.execute_apoptosis_on_rot(rot_score=Decimal(1.0 - exergy_yield))
+            raise RuntimeError(f"Fallo Termodinámico: Exergía insuficiente en fase {phase_name} ({exergy_yield:.2f}). Apoptosis invocada.")
+
+        # Entropía determina la tasa de decaimiento (Anergía penalizada)
+        dynamic_decay = 0.05 / deterministic_output
+
         embedding = self.embedder.embed(data_str)
         
         belief = BeliefObject(
@@ -40,7 +64,7 @@ class DecaCoreOrchestrator:
             state=BeliefState.ACTIVE,
             confidence_score=1.0,
             variance=0.0,
-            decay_rate=0.0,
+            decay_rate=dynamic_decay,
             provenance=ProvenanceEnvelope(
                 source_hash=f"{phase_name}_ctx",
                 source_type="agent",

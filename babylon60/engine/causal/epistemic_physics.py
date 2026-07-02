@@ -18,6 +18,13 @@ class SemanticParticle:
     def __init__(self, claim: Claim):
         self.claim = claim
 
+        # Termodinámica LLM: Calcular Entropía de Shannon del texto original
+        try:
+            from babylon60.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
+            self.entropy_score = max(0.1, UltrathinkPhysicsEngine.estimate_shannon_entropy(claim.statement))
+        except ImportError:
+            self.entropy_score = 1.0
+
         # Determinar la masa (confianza inicial) a partir del promedio de evidencias
         if claim.evidence_list:
             self.mass = max(
@@ -54,16 +61,20 @@ class SemanticParticle:
         for i in range(len(self.position)):
             self.velocity[i] += impulse[i] / self.mass
 
-    def update(self, dt: float, decay_rate: float):
+    def update(self, dt: float, base_decay_rate: float):
         if not self.active:
             return
+        
+        # El decaimiento real es inversamente proporcional a la entropía (menor entropía = decaimiento exponencial)
+        thermal_decay_rate = base_decay_rate / self.entropy_score
+        
         assert self.position is not None
         for i in range(len(self.position)):
             self.position[i] += self.velocity[i] * dt
-            self.velocity[i] *= 1.0 - decay_rate * dt
+            self.velocity[i] *= 1.0 - thermal_decay_rate * dt
 
         # Degradación temporal
-        self.mass = max(0.01, self.mass - decay_rate * 0.02 * dt)
+        self.mass = max(0.01, self.mass - thermal_decay_rate * 0.02 * dt)
 
 
 class EpistemicPhysicsArbiter:
