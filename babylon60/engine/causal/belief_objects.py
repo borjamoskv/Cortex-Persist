@@ -5,7 +5,7 @@ Strictly implements the RFC-CORTEX-NATIVE-AI specification.
 """
 
 import enum
-from typing import Literal, Optional, Tuple
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -62,7 +62,7 @@ class BeliefVerdict(BaseModel):
     """Result of the CognitiveHandoff processing a belief."""
     action: VerdictAction
     model: str = "unknown"
-    contradictions: Tuple[str, ...] = Field(default_factory=tuple)
+    contradictions: tuple[str, ...] = Field(default_factory=tuple)
     revised_belief: Optional[BeliefObject] = None
     cost_tokens: int = 0
     reason: str = ""

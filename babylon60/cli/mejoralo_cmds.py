@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import time
-
 import click
 from rich.table import Table
 

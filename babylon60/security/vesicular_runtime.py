@@ -5,9 +5,9 @@ Pilar 7 del Manifiesto C5-REAL: Destrucción de la memoria en espacio OS.
 Bloquea de manera agresiva el acceso a las variables de entorno para forzar Keyring.
 """
 
+import logging
 import os
 import signal
-import logging
 
 logger = logging.getLogger("babylon60.security.vesicular_runtime")
 

@@ -11,6 +11,10 @@ from babylon60.agents.base import BaseAgent, ReactiveTaskAgent
 from babylon60.agents.boltzmann_engine import BoltzmannEngineAgent, create_boltzmann_engine
 from babylon60.agents.bus import MessageBus, SqliteMessageBus
 from babylon60.agents.consolidator import ConsolidatorAgent
+from babylon60.agents.hypervigilant_exergy import (
+    HypervigilantExergyAgent,
+    create_hypervigilant_exergy_agent,
+)
 from babylon60.agents.landauer_daemon import LandauerDaemonAgent, create_landauer_daemon
 from babylon60.agents.manifest import AgentManifest
 from babylon60.agents.maxwell_router import MaxwellRouterAgent, create_maxwell_router
@@ -36,6 +40,8 @@ __all__ = [
     "create_maxwell_router",
     "LandauerDaemonAgent",
     "create_landauer_daemon",
+    "HypervigilantExergyAgent",
+    "create_hypervigilant_exergy_agent",
     "Supervisor",
     # Manifest & schema
     "AgentManifest",

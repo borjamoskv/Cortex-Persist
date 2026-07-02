@@ -7,7 +7,6 @@ C5-REAL Execution: Physical annihilation of discarded and orphaned entities.
 import asyncio
 import logging
 import subprocess
-from typing import Any
 
 from babylon60.database.belief_store import BeliefStore
 from babylon60.engine.causal.belief_objects import BeliefState, VerdictAction

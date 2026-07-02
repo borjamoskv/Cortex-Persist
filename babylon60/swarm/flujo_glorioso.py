@@ -6,9 +6,9 @@ from babylon60.database.belief_store import BeliefStore
 from babylon60.embeddings.local import LocalEmbedder
 from babylon60.engine.causal.belief_objects import (
     BeliefObject,
+    BeliefRelations,
     BeliefState,
     ProvenanceEnvelope,
-    BeliefRelations,
 )
 
 
@@ -24,6 +24,7 @@ class DecaCoreOrchestrator:
 
     async def _execute_phase(self, phase_name: str, agent_role: str, input_data: dict[str, Any]) -> BeliefObject:
         from decimal import Decimal
+
         from babylon60.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
         from babylon60.engine.entropy import EntropyAnnihilator
 

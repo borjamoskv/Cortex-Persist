@@ -35,7 +35,6 @@ def tmp_db():
 
 def test_billing_event_serialization():
     """BillingEvent should serialize and deserialize correctly."""
-    from decimal import Decimal
     event = BillingEvent(
         agent_id="test-agent",
         ssu_units=Decimal("12.5"),
@@ -166,7 +165,6 @@ def test_record_and_quarantine_flow(tmp_db, monkeypatch):
     gateway = StripeBillingGateway()
     metering = CausalMetering(db_path=tmp_db, gateway=gateway)
 
-    from decimal import Decimal
     # 1. Standard billing event (F1)
     ev1 = BillingEvent(
         agent_id="agent-alice",

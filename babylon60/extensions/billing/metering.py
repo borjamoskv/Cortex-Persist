@@ -172,7 +172,6 @@ class CausalMetering:
                 except (ValueError, TypeError, OSError, KeyError):
                     pass
 
-            from decimal import Decimal
             events.append(
                 BillingEvent(
                     agent_id=r["agent_id"],

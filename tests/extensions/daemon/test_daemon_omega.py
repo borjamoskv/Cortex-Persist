@@ -28,7 +28,7 @@ class MockBeliefStore:
             confidence_score=0.5,
             variance=0.1,
             decay_rate=0.0,
-            provenance=ProvenanceEnvelope(source_hash="x", source_type="y", tenant_id="z", signer_id="a", signature="b", created_at="c", was_generated_by="d"),
+            provenance=ProvenanceEnvelope(source_hash="x", source_type="agent", tenant_id="z", signer_id="a", signature="b", created_at="c", was_generated_by="d"),
             relations=BeliefRelations(),
             semantic_embedding=[]
         )

@@ -14,6 +14,7 @@ Orchestrates the 7-step cryptographic transaction for autonomous agent writes:
 
 import asyncio
 import logging
+import sqlite3
 from typing import Any
 
 from babylon60.audit.ledger import EnterpriseAuditLedger
