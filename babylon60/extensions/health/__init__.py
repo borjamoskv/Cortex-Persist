@@ -1,3 +1,7 @@
+
+import logging
+
+logger = logging.getLogger(__name__)
 # [C5-REAL] Exergy-Maximized
 """CORTEX Health - system-wide monitoring and scoring.
 
@@ -8,7 +12,7 @@ Usage::
     collector = HealthCollector(db_path="~/.cortex/cortex.db")
     metrics = collector.collect_all()
     score = HealthScorer.score(metrics)
-    print(score.grade)  # Grade.SOVEREIGN
+    logger.info(score.grade)  # Grade.SOVEREIGN
 """
 
 from babylon60.extensions.health.collector import (

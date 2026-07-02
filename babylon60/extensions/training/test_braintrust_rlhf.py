@@ -1,3 +1,7 @@
+
+import logging
+
+logger = logging.getLogger(__name__)
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import datetime
@@ -56,7 +60,7 @@ class MockEpisodicMemory:
 
 
 async def run_triad_rlhf_sandbox():
-    print("[SOVEREIGN SANDBOX] Iniciando Pruebas RLHF con Braintrust...")
+    logger.info("[SOVEREIGN SANDBOX] Iniciando Pruebas RLHF con Braintrust...")
 
     mock_memory = MockEpisodicMemory()
 
@@ -68,23 +72,23 @@ async def run_triad_rlhf_sandbox():
     collector = TrajectoryCollector(episodic_memory=mock_memory)
     engine = RewardEngine(use_tests=True)
 
-    print(f"1. Extrayendo trayectoria virtual (ID: {session_id})")
+    logger.info(f"1. Extrayendo trayectoria virtual (ID: {session_id})")
     trajectory = await collector.collect_session_trajectory(session_id)
 
     if not trajectory:
-        print("Fallo recolectando trayectoria.")
+        logger.info("Fallo recolectando trayectoria.")
         return
 
-    print("2. Trayectoria Extraída:")
-    print(f"   - Proyecto: {trajectory.project}")
-    print(f"   - Acciones: {len(trajectory.actions)}")
-    print(f"   - Outcome Inferido: {trajectory.outcome}")
+    logger.info("2. Trayectoria Extraída:")
+    logger.info(f"   - Proyecto: {trajectory.project}")
+    logger.info(f"   - Acciones: {len(trajectory.actions)}")
+    logger.info(f"   - Outcome Inferido: {trajectory.outcome}")
 
-    print("3. Calculando Sovereign V2 Reward (Sincronizado a Braintrust)")
+    logger.info("3. Calculando Sovereign V2 Reward (Sincronizado a Braintrust)")
     reward = engine.calculate_reward(trajectory)
 
-    print(f"   => SCORE FINAL (Escala [-1.0, 1.0]): {reward:.3f}")
-    print("4. Braintrust trace execution triggers in background via SovereignTriad O(1).")
+    logger.info(f"   => SCORE FINAL (Escala [-1.0, 1.0]): {reward:.3f}")
+    logger.info("4. Braintrust trace execution triggers in background via SovereignTriad O(1).")
 
 
 if __name__ == "__main__":

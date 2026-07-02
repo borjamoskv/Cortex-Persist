@@ -184,19 +184,19 @@ if __name__ == "__main__":
     async def run_triad_test():
         triad = SovereignTriad()
 
-        print("--- 1. Test Jina Extract ---")
+        logger.info("--- 1. Test Jina Extract ---")
         jina_res = await triad.extract_url_jina("https://news.ycombinator.com")
-        print(f"Jina: {len(jina_res)} chars recibidos. Preview: {jina_res[:100]}...\n")
+        logger.info(f"Jina: {len(jina_res)} chars recibidos. Preview: {jina_res[:100]}...\n")
 
-        print("--- 2. Test Exa Search ---")
+        logger.info("--- 2. Test Exa Search ---")
         exa_res = await triad.neural_search_exa(
             "best python agentic frameworks 2026", num_results=2
         )
-        print(f"Exa: Encontrados {len(exa_res)} nodos.\n")
+        logger.info(f"Exa: Encontrados {len(exa_res)} nodos.\n")
 
-        print("--- 3. Test Braintrust Telemetry ---")
+        logger.info("--- 3. Test Braintrust Telemetry ---")
         # braintrust_res = await triad.log_braintrust_trace("Aether-Agent-Test", "Test Run", "hello", "world")
-        # print(f"Braintrust Log Status: {braintrust_res}")
-        print("Braintrust no comprobado en este script local para evitar ruido.\n")
+        # logger.info(f"Braintrust Log Status: {braintrust_res}")
+        logger.info("Braintrust no comprobado en este script local para evitar ruido.\n")
 
     asyncio.run(run_triad_test())

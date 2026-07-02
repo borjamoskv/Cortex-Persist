@@ -23,11 +23,11 @@ from typing import TYPE_CHECKING
 
 from babylon60.engine.causal.belief_objects import (
     BeliefObject,
+    BeliefRelations,
     BeliefState,
     BeliefVerdict,
     ProvenanceEnvelope,
     VerdictAction,
-    BeliefRelations
 )
 
 if TYPE_CHECKING:
@@ -131,7 +131,7 @@ class BeliefEngine:
                             reason=f"Hallucination/Contradiction caught by {verdict.model}: {verdict.reason}",
                             tenant_id=candidate.provenance.tenant_id,
                         )
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     logger.error("Failed to execute Epistemic Slashing: %s", exc)
 
         elif verdict.action == VerdictAction.ACCEPT:
@@ -188,7 +188,7 @@ class BeliefEngine:
                     beliefs.append(BeliefObject.model_validate(belief_data))
             self._cache[cache_key] = beliefs
             return beliefs[: self._max_context]
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.warning("Failed to load belief context: %s", exc)
             return []
 
@@ -252,7 +252,7 @@ class BeliefEngine:
                 belief_data = meta.get("belief_object")
                 if belief_data:
                     context.append(BeliefObject.model_validate(belief_data))
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("Failed to load unbounded context for cascade: %s", exc)
             return
 

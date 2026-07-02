@@ -131,7 +131,7 @@ class P0VulnerabilityExtractor:
         )
 
         for finding in report.findings:
-            print(f"[{finding.severity}] {finding.hypothesis}")
+            logger.info(f"[{finding.severity}] {finding.hypothesis}")
     """
 
     # Maximum source code length to include in prompt (token budget guard)

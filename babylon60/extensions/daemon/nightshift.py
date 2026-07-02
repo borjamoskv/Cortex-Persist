@@ -80,4 +80,4 @@ if __name__ == "__main__":
 
     daemon = NightShiftDaemon(args.transcript)
     axiom_path = daemon.execute_purge()
-    print(f"\\n[C5-REAL] NightShift successful. Structural Invariant: {axiom_path}")
+    logger.info(f"\\n[C5-REAL] NightShift successful. Structural Invariant: {axiom_path}")

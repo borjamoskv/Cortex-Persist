@@ -53,6 +53,7 @@ if TYPE_CHECKING:
 __all__ = [
     # core
     "MoskvDaemon",
+    "DaemonOmega",
     # models
     "BUNDLE_ID",
     "DEFAULT_COOLDOWN",
@@ -87,6 +88,7 @@ __all__ = [
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # core
     "MoskvDaemon": ("babylon60.extensions.daemon.core", "MoskvDaemon"),
+    "DaemonOmega": ("babylon60.extensions.daemon.daemon_omega", "DaemonOmega"),
     # models
     "BUNDLE_ID": ("babylon60.extensions.daemon.models", "BUNDLE_ID"),
     "DEFAULT_COOLDOWN": ("babylon60.extensions.daemon.models", "DEFAULT_COOLDOWN"),

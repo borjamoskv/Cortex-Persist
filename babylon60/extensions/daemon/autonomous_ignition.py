@@ -51,7 +51,7 @@ class AutonomousIgnitionDaemon:
 
         try:
             asyncio.create_task(self._process_mutation(path))
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(
                 "AutonomousIgnition: Failed to spawn mutation processing for %s: %s", path, e
             )

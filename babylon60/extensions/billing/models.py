@@ -43,11 +43,11 @@ class BillingEvent:
     """
 
     agent_id: str
-    ssu_units: float
-    cost_usd: float
+    ssu_units: Decimal
+    cost_usd: Decimal
     causal_link: str
-    reproducibility_score: Decimal = 1.0
-    exploitability_index: float = 0.0
+    reproducibility_score: Decimal = Decimal("1.0")
+    exploitability_index: Decimal = Decimal("0.0")
     failure_type: FailureType | None = None
     revenue_quarantined: bool = False
     event_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
@@ -59,11 +59,11 @@ class BillingEvent:
         return {
             "event_id": self.event_id,
             "agent_id": self.agent_id,
-            "ssu_units": self.ssu_units,
-            "cost_usd": self.cost_usd,
+            "ssu_units": str(self.ssu_units),
+            "cost_usd": str(self.cost_usd),
             "causal_link": self.causal_link,
-            "reproducibility_score": self.reproducibility_score,
-            "exploitability_index": self.exploitability_index,
+            "reproducibility_score": str(self.reproducibility_score),
+            "exploitability_index": str(self.exploitability_index),
             "failure_type": self.failure_type.value if self.failure_type else None,
             "revenue_quarantined": self.revenue_quarantined,
             "timestamp": self.timestamp,
@@ -77,11 +77,11 @@ class BillingEvent:
         failure_type = FailureType(ft) if ft else None
         return cls(
             agent_id=data["agent_id"],
-            ssu_units=data["ssu_units"],
-            cost_usd=data["cost_usd"],
+            ssu_units=Decimal(str(data["ssu_units"])),
+            cost_usd=Decimal(str(data["cost_usd"])),
             causal_link=data["causal_link"],
-            reproducibility_score=data.get("reproducibility_score", 1.0),
-            exploitability_index=data.get("exploitability_index", 0.0),
+            reproducibility_score=Decimal(str(data.get("reproducibility_score", 1.0))),
+            exploitability_index=Decimal(str(data.get("exploitability_index", 0.0))),
             failure_type=failure_type,
             revenue_quarantined=data.get("revenue_quarantined", False),
             event_id=data["event_id"],

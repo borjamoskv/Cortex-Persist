@@ -50,7 +50,7 @@ class GenesisEngine:
             auto_tests=True,
         )
         result = engine.create(spec)
-        print(result.summary())
+        logger.info(result.summary())
     """
 
     def __init__(self, cortex_root: Path | None = None) -> None:

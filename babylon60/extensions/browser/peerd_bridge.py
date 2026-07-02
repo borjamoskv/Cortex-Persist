@@ -34,7 +34,7 @@ class PeerdBridgeDaemon:
                 if self.event_bus:
                     await self.event_bus.publish("browser.task.response", data)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Peerd client disconnected: {e}")
         finally:
             self._clients.remove(websocket)
@@ -48,7 +48,7 @@ class PeerdBridgeDaemon:
             await self._shutdown_event.wait()
         except ImportError:
             logger.error("websockets package not found. Cannot start PeerdBridgeDaemon.")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Failed to start PeerdBridgeDaemon: {e}")
 
     async def stop(self):

@@ -6,6 +6,10 @@ Registered as `cortex aether` subcommand group.
 
 from __future__ import annotations
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import sys
 from pathlib import Path
@@ -27,15 +31,15 @@ def cmd_enqueue(args: argparse.Namespace) -> None:
         source=TaskSource.CLI,
     )
     queue.enqueue(task)
-    print(f"✅ Enqueued task [{task.id}]: {task.title}")
-    print(f"   Repo: {task.repo_path}")
+    logger.info(f"✅ Enqueued task [{task.id}]: {task.title}")
+    logger.info(f"   Repo: {task.repo_path}")
 
 
 def cmd_status(args: argparse.Namespace) -> int:
     queue = _make_queue()
     tasks = queue.list_tasks(limit=20)
     if not tasks:
-        print("No tasks found.")
+        logger.info("No tasks found.")
         return 0
 
     _STATUS_EMOJI = {
@@ -49,13 +53,13 @@ def cmd_status(args: argparse.Namespace) -> int:
         "cancelled": "🚫",
     }
     header = f"{'ID':<14} {'STATUS':<12} {'TITLE':<40} {'BRANCH':<25}"
-    print(header)
-    print("-" * len(header))
+    logger.info(header)
+    logger.info("-" * len(header))
     for t in tasks:
         emoji = _STATUS_EMOJI.get(t.status, "❓")
         title = t.title[:38] + ".." if len(t.title) > 40 else t.title
         branch = t.branch[:23] + ".." if len(t.branch) > 25 else t.branch
-        print(f"{t.id:<14} {emoji}{t.status:<11} {title:<40} {branch:<25}")
+        logger.info(f"{t.id:<14} {emoji}{t.status:<11} {title:<40} {branch:<25}")
     return 0
 
 
@@ -63,28 +67,28 @@ def cmd_logs(args: argparse.Namespace) -> int:
     queue = _make_queue()
     task = queue.get(args.task_id)
     if task is None:
-        print(f"Task [{args.task_id}] not found.")
+        logger.info(f"Task [{args.task_id}] not found.")
         return 1
-    print(f"Task [{task.id}] - {task.title}")
-    print(f"Status  : {task.status}")
-    print(f"Branch  : {task.branch or 'none'}")
-    print(f"Created : {task.created_at}")
-    print(f"Updated : {task.updated_at}")
+    logger.info(f"Task [{task.id}] - {task.title}")
+    logger.info(f"Status  : {task.status}")
+    logger.info(f"Branch  : {task.branch or 'none'}")
+    logger.info(f"Created : {task.created_at}")
+    logger.info(f"Updated : {task.updated_at}")
     if task.plan:
-        print(f"\n── PLAN ──\n{task.plan}")
+        logger.info(f"\n── PLAN ──\n{task.plan}")
     if task.result:
-        print(f"\n── RESULT ──\n{task.result[:2000]}")
+        logger.info(f"\n── RESULT ──\n{task.result[:2000]}")
     if task.error:
-        print(f"\n── ERROR ──\n{task.error}")
+        logger.info(f"\n── ERROR ──\n{task.error}")
     return 0
 
 
 def cmd_cancel(args: argparse.Namespace) -> int:
     queue = _make_queue()
     if queue.cancel(args.task_id):
-        print(f"🚫 Cancelled task [{args.task_id}]")
+        logger.info(f"🚫 Cancelled task [{args.task_id}]")
         return 0
-    print(f"Task [{args.task_id}] not found or already terminal.")
+    logger.info(f"Task [{args.task_id}] not found or already terminal.")
     return 1
 
 
@@ -95,17 +99,17 @@ def cmd_run(args: argparse.Namespace) -> int:
     queue = _make_queue()
     task = queue.pop_next()
     if task is None:
-        print("No pending tasks.")
+        logger.info("No pending tasks.")
         return 0
 
-    print(f"🤖 Running task [{task.id}]: {task.title}")
+    logger.info(f"🤖 Running task [{task.id}]: {task.title}")
     agent = AetherAgent(llm_provider=getattr(args, "provider", "qwen"))
     result = agent.run_task_sync(task, queue)
-    print(f"\n{'✅' if result.status == 'done' else '❌'} Task {result.status}")
+    logger.info(f"\n{'✅' if result.status == 'done' else '❌'} Task {result.status}")
     if result.branch:
-        print(f"Branch: {result.branch}")
+        logger.info(f"Branch: {result.branch}")
     if result.error:
-        print(f"Error: {result.error}")
+        logger.info(f"Error: {result.error}")
     return 0 if result.status == "done" else 1
 
 

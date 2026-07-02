@@ -1,3 +1,7 @@
+
+import logging
+
+logger = logging.getLogger(__name__)
 # [C5-REAL] Exergy-Maximized
 # Asynchronous Stress Test: Claude Fable 5 Agentic Orchestrator
 import asyncio
@@ -83,7 +87,7 @@ async def stress_worker(client: httpx.AsyncClient, worker_id: int, semaphore: as
 
 
 async def run_stress_test(concurrency: int, total_requests: int):
-    print(
+    logger.info(
         f"[*] Initiating C5-REAL Async Stress Test: {total_requests} requests (Concurrency limit: {concurrency})"
     )
 
@@ -104,16 +108,16 @@ async def run_stress_test(concurrency: int, total_requests: int):
 
     avg_latency = sum(r["latency"] for r in successes) / len(successes) if successes else 0
 
-    print("\n=== [CORTEX] STRESS TEST RESULTS ===")
-    print(f"Total Requests: {total_requests}")
-    print(f"Concurrency Limit: {concurrency}")
-    print(f"Wall Time: {total_wall_time:.3f}s")
-    print(f"Successful: {len(successes)}")
-    print(f"Failed: {len(errors)}")
+    logger.info("\n=== [CORTEX] STRESS TEST RESULTS ===")
+    logger.info(f"Total Requests: {total_requests}")
+    logger.info(f"Concurrency Limit: {concurrency}")
+    logger.info(f"Wall Time: {total_wall_time:.3f}s")
+    logger.info(f"Successful: {len(successes)}")
+    logger.info(f"Failed: {len(errors)}")
     if successes:
-        print(f"Average Latency per task: {avg_latency:.3f}s")
+        logger.info(f"Average Latency per task: {avg_latency:.3f}s")
     if errors:
-        print(f"Sample Error: {errors[0]['error']}")
+        logger.info(f"Sample Error: {errors[0]['error']}")
 
 
 if __name__ == "__main__":

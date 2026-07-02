@@ -16,6 +16,10 @@ Commands:
 
 from __future__ import annotations
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 
 # Secure absolute offline autarchy for HF model loading
@@ -37,9 +41,9 @@ def cmd_compile(workspace: str | None = None) -> None:
     ws = Path(workspace) if workspace else Path.cwd()
     compiler = MOSKV1DatasetCompiler(workspace_path=ws)
 
-    print("🔧 MOSKV-1 Dataset Compilation v2.0 — C5-REAL")
-    print(f"   Workspace: {ws}")
-    print()
+    logger.info("🔧 MOSKV-1 Dataset Compilation v2.0 — C5-REAL")
+    logger.info(f"   Workspace: {ws}")
+    logger.info()
 
     compiler.compile_full_dataset()
 
@@ -47,12 +51,12 @@ def cmd_compile(workspace: str | None = None) -> None:
     sharegpt_path = compiler.export_sharegpt(split=True)
     alpaca_path = compiler.export_alpaca()
 
-    print()
-    print("═══ COMPILATION STATS ═══")
-    print(compiler.get_stats_yaml())
-    print()
-    print(f"📁 ShareGPT: {sharegpt_path}")
-    print(f"📁 Alpaca:   {alpaca_path}")
+    logger.info()
+    logger.info("═══ COMPILATION STATS ═══")
+    logger.info(compiler.get_stats_yaml())
+    logger.info()
+    logger.info(f"📁 ShareGPT: {sharegpt_path}")
+    logger.info(f"📁 Alpaca:   {alpaca_path}")
 
     # Show split info
     dataset_dir = compiler.output_dir
@@ -60,7 +64,7 @@ def cmd_compile(workspace: str | None = None) -> None:
         path = dataset_dir / f"{name}.jsonl"
         if path.exists():
             lines = sum(1 for _ in open(path))
-            print(f"📁 {name}: {lines} entries ({path.stat().st_size / 1024:.1f} KB)")
+            logger.info(f"📁 {name}: {lines} entries ({path.stat().st_size / 1024:.1f} KB)")
 
 
 def cmd_train(
@@ -80,10 +84,10 @@ def cmd_train(
     # Check for train.jsonl (v2 split format) or moskv1_dataset.jsonl
     if not (dataset_dir / "train.jsonl").exists():
         if (dataset_dir / "moskv1_dataset.jsonl").exists():
-            print("⚠️ No train/val/test split found. Run 'compile' with v2.0 first.")
-            print("   Falling back to moskv1_dataset.jsonl")
+            logger.info("⚠️ No train/val/test split found. Run 'compile' with v2.0 first.")
+            logger.info("   Falling back to moskv1_dataset.jsonl")
         else:
-            print("❌ Dataset not found. Run 'compile' first.")
+            logger.info("❌ Dataset not found. Run 'compile' first.")
             sys.exit(1)
 
     # Use non-deprecated mlx_lm subcommand syntax
@@ -129,12 +133,12 @@ def cmd_train(
         "42",
     ]
 
-    print(f"🧠 MLX LoRA Training — {model}")
-    print(f"   Iterations: {iters} | Batch: 1 (Acc: 2) | Layers: {lora_layers}")
-    print(f"   Learning Rate: {learning_rate} | Optimizer: adamw")
-    print("   Max Seq Length: 1280 | Mask Prompt: True | Grad Checkpoint: True")
-    print(f"   Output: {adapter_path}")
-    print()
+    logger.info(f"🧠 MLX LoRA Training — {model}")
+    logger.info(f"   Iterations: {iters} | Batch: 1 (Acc: 2) | Layers: {lora_layers}")
+    logger.info(f"   Learning Rate: {learning_rate} | Optimizer: adamw")
+    logger.info("   Max Seq Length: 1280 | Mask Prompt: True | Grad Checkpoint: True")
+    logger.info(f"   Output: {adapter_path}")
+    logger.info()
 
     result = subprocess.run(cmd, text=True)
     sys.exit(result.returncode)
@@ -151,10 +155,10 @@ def cmd_register() -> None:
     modelfile_path.parent.mkdir(parents=True, exist_ok=True)
     modelfile_path.write_text(modelfile, encoding="utf-8")
 
-    print(f"📄 Modelfile written to: {modelfile_path}")
-    print()
-    print("To register in Ollama, run:")
-    print(f"  ollama create moskv1-core -f {modelfile_path}")
+    logger.info(f"📄 Modelfile written to: {modelfile_path}")
+    logger.info()
+    logger.info("To register in Ollama, run:")
+    logger.info(f"  ollama create moskv1-core -f {modelfile_path}")
 
 
 def cmd_validate() -> None:
@@ -162,7 +166,7 @@ def cmd_validate() -> None:
     dataset_dir = Path.home() / ".babylon60" / "training" / "datasets"
     dataset_path = dataset_dir / "moskv1_dataset.jsonl"
     if not dataset_path.exists():
-        print("❌ No compiled dataset found. Run 'compile' first.")
+        logger.info("❌ No compiled dataset found. Run 'compile' first.")
         sys.exit(1)
 
     entries: list[dict] = []
@@ -254,43 +258,43 @@ def cmd_validate() -> None:
     )
 
     # ─── Report ────────────────────────────────────────────────────
-    print("═══ MOSKV-1 DATASET VALIDATION v2.0 ═══")
-    print()
-    print(f"📊 Total entries: {n}")
-    print()
-    print("── Length Distribution ──")
-    print(f"  Avg output length:       {avg_out:.0f} chars")
-    print(f"  Avg instruction length:  {avg_inst:.0f} chars")
-    print(f"  Min output:              {min(output_lengths) if output_lengths else 0} chars")
-    print(f"  Max output:              {max(output_lengths) if output_lengths else 0} chars")
-    print(f"  Length entropy:          {len_entropy:.2f} bits")
-    print()
-    print("── Content Quality ──")
-    print(f"  Has code blocks:         {has_code} ({has_code / n * 100:.1f}%)")
-    print(f"  Has YAML/structured:     {has_yaml} ({has_yaml / n * 100:.1f}%)")
-    print(f"  Has lists/tables:        {has_structure} ({has_structure / n * 100:.1f}%)")
-    print()
-    print("── Defects ──")
-    print(
+    logger.info("═══ MOSKV-1 DATASET VALIDATION v2.0 ═══")
+    logger.info()
+    logger.info(f"📊 Total entries: {n}")
+    logger.info()
+    logger.info("── Length Distribution ──")
+    logger.info(f"  Avg output length:       {avg_out:.0f} chars")
+    logger.info(f"  Avg instruction length:  {avg_inst:.0f} chars")
+    logger.info(f"  Min output:              {min(output_lengths) if output_lengths else 0} chars")
+    logger.info(f"  Max output:              {max(output_lengths) if output_lengths else 0} chars")
+    logger.info(f"  Length entropy:          {len_entropy:.2f} bits")
+    logger.info()
+    logger.info("── Content Quality ──")
+    logger.info(f"  Has code blocks:         {has_code} ({has_code / n * 100:.1f}%)")
+    logger.info(f"  Has YAML/structured:     {has_yaml} ({has_yaml / n * 100:.1f}%)")
+    logger.info(f"  Has lists/tables:        {has_structure} ({has_structure / n * 100:.1f}%)")
+    logger.info()
+    logger.info("── Defects ──")
+    logger.info(
         f"  HTML in instructions:    {html_in_instruction} {'✅' if html_in_instruction == 0 else '❌'}"
     )
-    print(f"  Anergy detected:         {anergy_detected} {'✅' if anergy_detected == 0 else '⚠️'}")
-    print()
-    print("── Category Distribution ──")
+    logger.info(f"  Anergy detected:         {anergy_detected} {'✅' if anergy_detected == 0 else '⚠️'}")
+    logger.info()
+    logger.info("── Category Distribution ──")
     for cat, count in categories.most_common():
         bar = "█" * (count * 40 // n)
-        print(f"  {cat:20s} {count:5d} ({count / n * 100:5.1f}%) {bar}")
+        logger.info(f"  {cat:20s} {count:5d} ({count / n * 100:5.1f}%) {bar}")
 
     # ─── Split Validation ──────────────────────────────────────────
-    print()
-    print("── Train/Val/Test Split ──")
+    logger.info()
+    logger.info("── Train/Val/Test Split ──")
     for name in ["train", "valid", "test"]:
         path = dataset_dir / f"{name}.jsonl"
         if path.exists():
             count = sum(1 for _ in open(path))
-            print(f"  {name:8s} {count:5d} entries  ({path.stat().st_size / 1024:.1f} KB)")
+            logger.info(f"  {name:8s} {count:5d} entries  ({path.stat().st_size / 1024:.1f} KB)")
         else:
-            print(f"  {name:8s} NOT FOUND ❌")
+            logger.info(f"  {name:8s} NOT FOUND ❌")
 
     # ─── Overall Score ─────────────────────────────────────────────
     score = 0
@@ -302,20 +306,20 @@ def cmd_validate() -> None:
     score += min(int(len_entropy * 50), 200)  # Length diversity
     score += min(int(len(categories) * 30), 200)  # Category diversity
 
-    print()
-    print(f"🎯 DATASET EXERGY SCORE: {score}/1000")
+    logger.info()
+    logger.info(f"🎯 DATASET EXERGY SCORE: {score}/1000")
     if score >= 800:
-        print("   ✅ Dataset is production-ready for LoRA training")
+        logger.info("   ✅ Dataset is production-ready for LoRA training")
     elif score >= 500:
-        print("   ⚠️ Dataset is acceptable but could be improved")
+        logger.info("   ⚠️ Dataset is acceptable but could be improved")
     else:
-        print("   ❌ Dataset quality is insufficient — review filter settings")
+        logger.info("   ❌ Dataset quality is insufficient — review filter settings")
 
     # ─── Weights Verification ───
     adapter_path = Path.home() / ".babylon60" / "training" / "adapters"
     if (adapter_path / "adapters.safetensors").exists():
-        print()
-        print("═══ LoRA WEIGHTS VERIFICATION (C5-REAL) ═══")
+        logger.info()
+        logger.info("═══ LoRA WEIGHTS VERIFICATION (C5-REAL) ═══")
         from babylon60.extensions.training.verifier import AdapterVerifier
 
         verifier = AdapterVerifier()
@@ -324,23 +328,23 @@ def cmd_validate() -> None:
 
         if verdict["success"]:
             metrics = verdict["metrics"]
-            print("   Status:        ✅ PASSED")
-            print(f"   Total Tensors: {metrics['tensor_count']}")
-            print(f"   Parameters:    {metrics['total_params']:,}")
-            print("   Layers Check:  All weights finite, zero NaNs/infs.")
+            logger.info("   Status:        ✅ PASSED")
+            logger.info(f"   Total Tensors: {metrics['tensor_count']}")
+            logger.info(f"   Parameters:    {metrics['total_params']:,}")
+            logger.info("   Layers Check:  All weights finite, zero NaNs/infs.")
         else:
-            print("   Status:        ❌ FAILED")
-            print(f"   Error:         {verdict['error']}")
+            logger.info("   Status:        ❌ FAILED")
+            logger.info(f"   Error:         {verdict['error']}")
     else:
-        print()
-        print("💡 Tip: No adapter weights found in adapters/. Run 'train' to generate weights.")
+        logger.info()
+        logger.info("💡 Tip: No adapter weights found in adapters/. Run 'train' to generate weights.")
 
 
 def cmd_stats() -> None:
     """Show stats of the last compiled dataset."""
     dataset_path = Path.home() / ".babylon60" / "training" / "datasets" / "moskv1_dataset.jsonl"
     if not dataset_path.exists():
-        print("❌ No compiled dataset found.")
+        logger.info("❌ No compiled dataset found.")
         sys.exit(1)
 
     entries = []
@@ -359,10 +363,10 @@ def cmd_stats() -> None:
         // 4
     )
 
-    print(f"📊 Dataset: {dataset_path}")
-    print(f"   Entries: {len(entries)}")
-    print(f"   Estimated tokens: {total_tokens:,}")
-    print(f"   File size: {dataset_path.stat().st_size / 1024:.1f} KB")
+    logger.info(f"📊 Dataset: {dataset_path}")
+    logger.info(f"   Entries: {len(entries)}")
+    logger.info(f"   Estimated tokens: {total_tokens:,}")
+    logger.info(f"   File size: {dataset_path.stat().st_size / 1024:.1f} KB")
 
     # Show split info
     dataset_dir = dataset_path.parent
@@ -370,7 +374,7 @@ def cmd_stats() -> None:
         path = dataset_dir / f"{name}.jsonl"
         if path.exists():
             count = sum(1 for _ in open(path))
-            print(f"   {name}: {count} entries")
+            logger.info(f"   {name}: {count} entries")
 
 
 def cmd_health() -> None:
@@ -380,36 +384,36 @@ def cmd_health() -> None:
     core = MOSKV1Core()
     result = asyncio.run(core.check_ollama_health())
 
-    print("═══ MOSKV-1 HEALTH CHECK ═══")
-    print()
-    print(f"Ollama reachable:    {'✅' if result['ollama_reachable'] else '❌'}")
-    print(f"MOSKV-1 available:   {'✅' if result['moskv1_available'] else '❌'}")
-    print(f"Fallback available:  {'✅' if result['fallback_available'] else '❌'}")
-    print()
+    logger.info("═══ MOSKV-1 HEALTH CHECK ═══")
+    logger.info()
+    logger.info(f"Ollama reachable:    {'✅' if result['ollama_reachable'] else '❌'}")
+    logger.info(f"MOSKV-1 available:   {'✅' if result['moskv1_available'] else '❌'}")
+    logger.info(f"Fallback available:  {'✅' if result['fallback_available'] else '❌'}")
+    logger.info()
     if result["models"]:
-        print("Available models:")
+        logger.info("Available models:")
         for m in result["models"]:
             marker = " ◀ MOSKV-1" if "moskv1" in m else ""
-            print(f"  - {m}{marker}")
+            logger.info(f"  - {m}{marker}")
     else:
-        print("No models available (Ollama may not be running)")
+        logger.info("No models available (Ollama may not be running)")
 
 
 def main() -> None:
     """CLI entry point."""
     if len(sys.argv) < 2:
-        print("MOSKV-1 Cognitive Kernel — CLI v2.0")
-        print("Author: borjamoskv")
-        print()
-        print("Usage: python -m babylon60.extensions.training.moskv1_cli <command>")
-        print()
-        print("Commands:")
-        print("  compile    Compile CORTEX knowledge into training dataset")
-        print("  train      Run MLX LoRA fine-tuning")
-        print("  register   Generate Ollama Modelfile")
-        print("  validate   Validate dataset quality with diagnostics")
-        print("  stats      Show dataset statistics")
-        print("  health     Check Ollama availability")
+        logger.info("MOSKV-1 Cognitive Kernel — CLI v2.0")
+        logger.info("Author: borjamoskv")
+        logger.info()
+        logger.info("Usage: python -m babylon60.extensions.training.moskv1_cli <command>")
+        logger.info()
+        logger.info("Commands:")
+        logger.info("  compile    Compile CORTEX knowledge into training dataset")
+        logger.info("  train      Run MLX LoRA fine-tuning")
+        logger.info("  register   Generate Ollama Modelfile")
+        logger.info("  validate   Validate dataset quality with diagnostics")
+        logger.info("  stats      Show dataset statistics")
+        logger.info("  health     Check Ollama availability")
         sys.exit(1)
 
     command = sys.argv[1]
@@ -434,7 +438,7 @@ def main() -> None:
     elif command == "health":
         cmd_health()
     else:
-        print(f"❌ Unknown command: {command}")
+        logger.info(f"❌ Unknown command: {command}")
         sys.exit(1)
 
 

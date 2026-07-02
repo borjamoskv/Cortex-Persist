@@ -21,7 +21,7 @@ Uso::
 
     async with ThoughtOrchestra() as orchestra:
         thought = await orchestra.think("¿Cuál es la raíz del bug?")
-        print(thought.content, thought.confidence)
+        logger.info(thought.content, thought.confidence)
 """
 
 from __future__ import annotations

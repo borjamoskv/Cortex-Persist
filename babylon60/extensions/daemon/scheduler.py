@@ -85,7 +85,7 @@ class SovereignScheduler:
         scheduler = SovereignScheduler()
 
         async def my_task():
-            print("tick")
+            logger.info("tick")
 
         scheduler.add_recurring("health_check", lambda: my_task(), interval_s=300)
         await scheduler.run()  # blocks forever

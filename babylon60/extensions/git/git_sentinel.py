@@ -80,5 +80,5 @@ class GitSentinel:
                     "Git Sentinel: Nothing to commit or commit failed. %s", stderr.decode()
                 )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Git Sentinel Byzantine Fault: %s", e)

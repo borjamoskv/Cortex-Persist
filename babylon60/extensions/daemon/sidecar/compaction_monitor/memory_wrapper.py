@@ -1,3 +1,7 @@
+
+import logging
+
+logger = logging.getLogger(__name__)
 # [C5-REAL] Exergy-Maximized
 """memory_wrapper.py
 
@@ -133,9 +137,9 @@ def get_mallinfo2() -> MallInfo2:
 # Simple sanity test (executed only when run as a script)
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    print("mallinfo2:", get_mallinfo2())
+    logger.info("mallinfo2:", get_mallinfo2())
     try:
         malloc_trim()
-        print("malloc_trim succeeded")
+        logger.info("malloc_trim succeeded")
     except OSError as exc:
-        print("malloc_trim failed:", exc)
+        logger.info("malloc_trim failed:", exc)

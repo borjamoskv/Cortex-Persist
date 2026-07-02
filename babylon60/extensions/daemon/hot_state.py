@@ -67,8 +67,8 @@ class HotStateDB:
         state.set("daemon.mode", "active")
         state.set("cache.token", "abc123", ttl_s=3600)
 
-        print(state.get("daemon.mode"))  # "active"
-        print(state.metrics())           # {"uptime_s": ..., "cycle_count": ...}
+        logger.info(state.get("daemon.mode"))  # "active"
+        logger.info(state.metrics())           # {"uptime_s": ..., "cycle_count": ...}
     """
 
     __slots__ = ("_boot_time", "_db_path")

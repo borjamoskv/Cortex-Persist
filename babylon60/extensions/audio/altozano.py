@@ -87,6 +87,6 @@ if __name__ == "__main__":
 
         agent = AltozanoAnalyzer()
         res = agent.deconstruct_track(sys.argv[1])
-        print(yaml.dump(res, default_flow_style=False))
+        logger.info(yaml.dump(res, default_flow_style=False))
     else:
-        print("Usage: python altozano.py <path_to_wav>")
+        logger.info("Usage: python altozano.py <path_to_wav>")

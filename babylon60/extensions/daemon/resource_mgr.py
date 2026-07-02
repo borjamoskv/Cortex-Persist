@@ -230,7 +230,7 @@ class ResourceMgrMixin:
                         workspace_root=str(Path.home() / "10_PROJECTS"),
                     )
                     logger.info("🧬 AutonomousIgnitionDaemon ENABLED")
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning("Failed to init AutonomousIgnitionDaemon: %s", e)
                     self.autonomous_ignition_daemon = None
 
@@ -263,7 +263,7 @@ class ResourceMgrMixin:
                 event_bus=self._event_bus,
             )
             logger.info("🌉 PeerdBridgeDaemon (Browser Agent Harness) ENABLED")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Failed to init PeerdBridgeDaemon: %s", e)
 
     def _init_persistence_checkers(self, file_config: dict) -> None:

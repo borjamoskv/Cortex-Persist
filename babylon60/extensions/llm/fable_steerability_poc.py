@@ -1,3 +1,7 @@
+
+import logging
+
+logger = logging.getLogger(__name__)
 # [C5-REAL] Exergy-Maximized
 # Proof of Concept: Steerability & Negative Constraints (Fable 5)
 import asyncio
@@ -50,7 +54,7 @@ async def capture_fable_payload(*args, **kwargs):
         "Steerability force tool_choice missing!"
     )
 
-    print("[+] Steerability Assertions Passed (L1 Payload Level).")
+    logger.info("[+] Steerability Assertions Passed (L1 Payload Level).")
 
     # Return a mocked success
     return httpx.Response(
@@ -66,7 +70,7 @@ async def capture_fable_payload(*args, **kwargs):
 
 
 async def run_steerability_poc():
-    print("[*] Initiating C5-REAL Steerability PoC (Fable 5 Constraint Override)")
+    logger.info("[*] Initiating C5-REAL Steerability PoC (Fable 5 Constraint Override)")
 
     api_key = "dummy_key_for_steerability"
     prompt = "Write a script in Python 2.7 to parse a text file."
@@ -86,7 +90,7 @@ async def run_steerability_poc():
                 tools=tools,
                 cortex_private_key="dGVzdF9rZXlfdGVzdF9rZXlfdGVzdF9rZXlfdGVzdA==",
             )
-            print(f"[+] Result from Agentic Simulation: {result}")
+            logger.info(f"[+] Result from Agentic Simulation: {result}")
 
 
 if __name__ == "__main__":

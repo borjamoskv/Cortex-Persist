@@ -327,9 +327,9 @@ if __name__ == "__main__":
     async def run():
         if args.diagnose_only:
             diag = await engine.diagnose()
-            print(f"Entropy: {diag.entropy_score:.2f}")
+            logger.info(f"Entropy: {diag.entropy_score:.2f}")
         else:
             res = await engine.execute_atomic_cycle()
-            print(json.dumps(res, indent=2))
+            logger.info(json.dumps(res, indent=2))
 
     asyncio.run(run())

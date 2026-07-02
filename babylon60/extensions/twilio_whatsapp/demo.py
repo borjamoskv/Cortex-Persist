@@ -1,3 +1,7 @@
+
+import logging
+
+logger = logging.getLogger(__name__)
 #!/usr/bin/env python3
 # [C5-REAL] Exergy-Maximized
 """
@@ -18,13 +22,13 @@ async def main():
     sender = os.getenv("TWILIO_SENDER")
     target = os.getenv("TWILIO_TARGET")
 
-    print("[*] Initiating Twilio WhatsApp Singularity Test...")
+    logger.info("[*] Initiating Twilio WhatsApp Singularity Test...")
 
     if not all([account_sid, auth_token, sender, target]):
-        print("[!] Missing Environment Variables (Anergy Drain).")
-        print("    Requires: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SENDER, TWILIO_TARGET")
-        print("    Fallback: Using Sandbox / Simulation Mode (C4-SIM).")
-        print("[*] Sandbox payload structurally validated. Skipping HTTP post.")
+        logger.info("[!] Missing Environment Variables (Anergy Drain).")
+        logger.info("    Requires: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SENDER, TWILIO_TARGET")
+        logger.info("    Fallback: Using Sandbox / Simulation Mode (C4-SIM).")
+        logger.info("[*] Sandbox payload structurally validated. Skipping HTTP post.")
         sys.exit(0)
 
     gateway = TwilioWhatsAppGateway(account_sid=account_sid, auth_token=auth_token, sender=sender)
@@ -33,9 +37,9 @@ async def main():
         res = await gateway.send_message(
             to=target, body="[CORTEX-PERSIST] C5-REAL: Transmission from MOSKV-1 APEX via Twilio."
         )
-        print(f"[+] Transmission Successful. SID: {res.get('sid')}")
+        logger.info(f"[+] Transmission Successful. SID: {res.get('sid')}")
     except Exception as e:  # noqa: BLE001
-        print(f"[-] Transmission Failed. Entropic Collapse: {e}")
+        logger.info(f"[-] Transmission Failed. Entropic Collapse: {e}")
         sys.exit(1)
 
 

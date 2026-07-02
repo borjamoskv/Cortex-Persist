@@ -1,6 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 import json
 import os
@@ -62,20 +66,20 @@ class BCI_Daemon:
                 )
 
             # 4. Route to executing logic (Babestu integration point)
-            print(f"[BCI] ⚡ INTENT RECEIVED | Action: {action} | Derivation: {derivation}")
+            logger.info(f"[BCI] ⚡ INTENT RECEIVED | Action: {action} | Derivation: {derivation}")
             if action in self.action_handlers:
                 await self.action_handlers[action](instruction, raw_cargo)
                 writer.write(b"\x01")  # ACK
             else:
-                print(f"[BCI] ⚠️ Unknown action: {action}")
+                logger.info(f"[BCI] ⚠️ Unknown action: {action}")
                 writer.write(b"\x00")  # NACK
 
             await writer.drain()
 
         except asyncio.IncompleteReadError:
-            print("[BCI] ❌ Byte buffer terminated unexpectedly.")
+            logger.info("[BCI] ❌ Byte buffer terminated unexpectedly.")
         except Exception as e:  # noqa: BLE001
-            print(f"[BCI] ❌ Error processing intent: {e}")
+            logger.info(f"[BCI] ❌ Error processing intent: {e}")
             writer.write(b"\x00")
         finally:
             writer.close()
@@ -89,8 +93,8 @@ class BCI_Daemon:
         # Apply restrictive permissions to the socket
         os.chmod(SOCKET_PATH, 0o600)
 
-        print(f"[BCI] 🚀 ZERO-LATENCY UNIX SOCKET ESTABLISHED AT {SOCKET_PATH}")
-        print("[BCI] Listening for binary intent. No words. No entropy.")
+        logger.info(f"[BCI] 🚀 ZERO-LATENCY UNIX SOCKET ESTABLISHED AT {SOCKET_PATH}")
+        logger.info("[BCI] Listening for binary intent. No words. No entropy.")
 
         async with self.server:
             await self.server.serve_forever()
@@ -133,7 +137,7 @@ class BCI_Transmitter:
             return False
 
         except Exception as e:  # noqa: BLE001
-            print(f"[BCI-CLIENT] Failed to inject intent: {e}")
+            logger.info(f"[BCI-CLIENT] Failed to inject intent: {e}")
             return False
         finally:
             try:
@@ -150,9 +154,9 @@ class BCI_Transmitter:
 # -----------------------
 async def mock_handler(instruction: str, payload: str):
     """Simulates Babestu or Cortex execution."""
-    print(f"      -> Running instruction [{instruction}]")
-    print(f"      -> Payload size: {len(payload)} bytes")
-    print(f"      -> Content chunk: {payload[:50]}...")
+    logger.info(f"      -> Running instruction [{instruction}]")
+    logger.info(f"      -> Payload size: {len(payload)} bytes")
+    logger.info(f"      -> Content chunk: {payload[:50]}...")
     await asyncio.sleep(0.1)
 
 
@@ -172,7 +176,7 @@ async def test_bci():
     await asyncio.sleep(0.5)
 
     # Inject intent bypass
-    print("\n--- INJECTING INTENT 0x01 ---")
+    logger.info("\n--- INJECTING INTENT 0x01 ---")
     await BCI_Transmitter.send_intent(
         derivation="Ω₂ (Entropic Asymmetry)",
         action=1,
@@ -180,7 +184,7 @@ async def test_bci():
         payload="def fast_func(): return O(1)",
     )
 
-    print("\n--- INJECTING INTENT 0x02 ---")
+    logger.info("\n--- INJECTING INTENT 0x02 ---")
     await BCI_Transmitter.send_intent(
         derivation="Ω₅ (Antifragile)",
         action=2,

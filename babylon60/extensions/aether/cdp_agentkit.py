@@ -251,23 +251,23 @@ class CDPSovereignWallet:
 if __name__ == "__main__":
 
     async def run_wallet_test():
-        print("--- Testing CDP Sovereign Wallet V3 ---")
+        logger.info("--- Testing CDP Sovereign Wallet V3 ---")
         wallet = CDPSovereignWallet(network_id="base-sepolia")
         success = wallet.initialize()
 
         if success:
             balance = await wallet.get_balance("eth")
-            print(f"✅ Wallet OK. Balance: {balance} ETH")
-            print(f"   Tools loaded: {len(wallet.tools)}")
+            logger.info(f"✅ Wallet OK. Balance: {balance} ETH")
+            logger.info(f"   Tools loaded: {len(wallet.tools)}")
             for t in wallet.tools:
                 desc = t.description[:70]
-                print(f"   - {t.name}: {desc}...")
+                logger.info(f"   - {t.name}: {desc}...")
 
             # Verify singleton
             w2 = CDPSovereignWallet()
             assert w2 is wallet, "Singleton broken!"
-            print("✅ Singleton verified")
+            logger.info("✅ Singleton verified")
         else:
-            print("❌ Init failed. Check ENVs and deps.")
+            logger.info("❌ Init failed. Check ENVs and deps.")
 
     asyncio.run(run_wallet_test())

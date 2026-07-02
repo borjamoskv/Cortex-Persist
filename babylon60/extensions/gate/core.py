@@ -202,19 +202,19 @@ class SovereignGate:
             return True
 
         # ENFORCE mode - actual interactive prompt
-        print(f"\n{'=' * 60}")
-        print("⚡ SOVEREIGN GATE - L3 ACTION APPROVAL REQUIRED")
-        print(f"{'=' * 60}")
-        print(f"  Action:  {action.description}")
-        print(f"  Level:   {action.level.value}")
-        print(f"  Project: {action.project or 'N/A'}")
+        logger.info(f"\n{'=' * 60}")
+        logger.info("⚡ SOVEREIGN GATE - L3 ACTION APPROVAL REQUIRED")
+        logger.info(f"{'=' * 60}")
+        logger.info(f"  Action:  {action.description}")
+        logger.info(f"  Level:   {action.level.value}")
+        logger.info(f"  Project: {action.project or 'N/A'}")
         if action.command:
             cmd_str = " ".join(action.command)
             if len(cmd_str) > 100:
                 cmd_str = cmd_str[:100] + "..."
-            print(f"  Command: {cmd_str}")
-        print(f"  ID:      {action_id}")
-        print(f"{'=' * 60}")
+            logger.info(f"  Command: {cmd_str}")
+        logger.info(f"  ID:      {action_id}")
+        logger.info(f"{'=' * 60}")
 
         try:
             response = input("  ¿Aprobar ejecución? [s/N]: ").strip().lower()

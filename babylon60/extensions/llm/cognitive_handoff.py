@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-from decimal import Decimal
 import logging
 from dataclasses import dataclass
+from decimal import Decimal
 
 # [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
-
 from babylon60.engine.causal.belief_objects import (
     BeliefObject,
     BeliefVerdict,

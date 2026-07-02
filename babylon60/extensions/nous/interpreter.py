@@ -120,9 +120,9 @@ if __name__ == "__main__":
         runtime = NousRuntime(tenant_id="cortex-master")
         script = "Ensure the primary database is wiped, but strictly preserve the audit ledger."
 
-        print(f"\\n[NOUS SCRIPT] {script}")
+        logger.info(f"\\n[NOUS SCRIPT] {script}")
         result = await runtime.execute(script)
-        print("\\n[EXECUTION RESULT]")
-        print(json.dumps(result, indent=2))
+        logger.info("\\n[EXECUTION RESULT]")
+        logger.info(json.dumps(result, indent=2))
 
     asyncio.run(run_nous())

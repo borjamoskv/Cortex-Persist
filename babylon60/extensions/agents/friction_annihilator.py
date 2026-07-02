@@ -95,7 +95,7 @@ class FrictionAnnihilatorAgent(EngineAwareMixin):
 async def run_friction_cli(target_file: str, error_trace: str):
     agent = FrictionAnnihilatorAgent()
     result = await agent.annihilate_friction(target_file, error_trace, "CLI triggered annihilation")
-    print(result)
+    logger.info(result)
 
 
 if __name__ == "__main__":
@@ -105,4 +105,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         asyncio.run(run_friction_cli(sys.argv[1], sys.argv[2]))
     else:
-        print("Usage: python friction_annihilator.py <target_file> <error_trace>")
+        logger.info("Usage: python friction_annihilator.py <target_file> <error_trace>")

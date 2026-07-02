@@ -1,3 +1,6 @@
+
+import logging
+logger = logging.getLogger(__name__)
 import os
 import subprocess
 import datetime
@@ -27,7 +30,7 @@ def generate_newsletter():
     # 1. Leer Template
     template_path = SKILL_DIR / "newsletter_template.md"
     if not template_path.exists():
-        print("Falta el template.")
+        logger.info("Falta el template.")
         return
         
     template = template_path.read_text()
@@ -60,7 +63,7 @@ def generate_newsletter():
     # 5. Escribir en BOCETOS
     output_path = BOCETOS_DIR / f"SOTA_CRYSTAL_Issue_{issue_num}.md"
     output_path.write_text(compiled)
-    print(f"[C5-REAL] Boletín compilado exitosamente en: {output_path}")
+    logger.info(f"[C5-REAL] Boletín compilado exitosamente en: {output_path}")
 
 if __name__ == "__main__":
     generate_newsletter()

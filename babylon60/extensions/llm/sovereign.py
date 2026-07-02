@@ -32,11 +32,11 @@ Usage::
 
     async with SovereignLLM() as llm:
         result = await llm.generate("Write a reply", system="You are...")
-        print(result.content)      # Always has content
-        print(result.provider)     # Which provider answered
-        print(result.is_local)     # True if local fallback was used
-        print(result.is_template)  # True if zero-connectivity template
-        print(result.latency_ms)   # Actual latency measured
+        logger.info(result.content)      # Always has content
+        logger.info(result.provider)     # Which provider answered
+        logger.info(result.is_local)     # True if local fallback was used
+        logger.info(result.is_template)  # True if zero-connectivity template
+        logger.info(result.latency_ms)   # Actual latency measured
 """
 
 from __future__ import annotations

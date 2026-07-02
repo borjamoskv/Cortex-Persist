@@ -297,7 +297,7 @@ class AsyncStripeSyncer:
                 action="increment",
             )
             logger.info("Stripe bulk usage (%d units) reported for tenant %s", amount, tenant_id)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error("Failed to sync bulk usage to Stripe for %s: %s", tenant_id, exc)
 
 

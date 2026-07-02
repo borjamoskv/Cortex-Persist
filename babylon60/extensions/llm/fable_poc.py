@@ -1,3 +1,7 @@
+
+import logging
+
+logger = logging.getLogger(__name__)
 # [C5-REAL] Exergy-Maximized
 # Proof of Concept: Claude Fable 5 Agentic Orchestration
 import asyncio
@@ -28,7 +32,7 @@ from babylon60.extensions.llm._provider_fable import execute_fable_native
 
 async def main():
     api_key = os.getenv("ANTHROPIC_API_KEY", "dummy_key_for_poc")
-    print("[*] Initiating Fable 5 Agentic PoC")
+    logger.info("[*] Initiating Fable 5 Agentic PoC")
 
     tools = [
         {
@@ -59,8 +63,8 @@ async def main():
 
     async with httpx.AsyncClient() as client:
         try:
-            print(f"[*] Prompt: {prompt}")
-            print("[*] Expected Tool: read_cortex_ledger")
+            logger.info(f"[*] Prompt: {prompt}")
+            logger.info("[*] Expected Tool: read_cortex_ledger")
 
             # Note: This will fail with a 401 if ANTHROPIC_API_KEY is dummy
             # but the structural binding is proven.
@@ -75,10 +79,10 @@ async def main():
                 tools=tools,
                 cortex_private_key="dGVzdF9rZXlfdGVzdF9rZXlfdGVzdF9rZXlfdGVzdA==",
             )
-            print(f"[+] Output: {result}")
+            logger.info(f"[+] Output: {result}")
         except ValueError as e:
             # Expected if API key is invalid
-            print(f"[-] Execution aborted (Expected if no valid API key): {str(e)}")
+            logger.info(f"[-] Execution aborted (Expected if no valid API key): {str(e)}")
 
 
 if __name__ == "__main__":

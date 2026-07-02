@@ -11,6 +11,10 @@ This ensures the markdown doc is always in sync with the code.
 
 from __future__ import annotations
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import datetime
 from pathlib import Path
 
@@ -107,7 +111,7 @@ def main() -> None:
     out = Path(__file__).resolve().parents[2] / "docs" / "axiom-registry.md"
     out.write_text(doc)
     lines = doc.count(chr(10))
-    print(f"✅ Generated {out} ({len(doc)} bytes, {lines} lines)")
+    logger.info(f"✅ Generated {out} ({len(doc)} bytes, {lines} lines)")
 
 
 if __name__ == "__main__":

@@ -207,7 +207,7 @@ if __name__ == "__main__":
 
             # Await ledger queue flush
             await ledger.close()
-            print(
+            logger.info(
                 f"[C5-REAL] Extracted, Tainted and Ledger-Audited {saved_count} High-Exergy Notes to {args.outdir}/"
             )
 

@@ -1,3 +1,7 @@
+
+import logging
+
+logger = logging.getLogger(__name__)
 """
 C5-REAL: NOUS-Lang AST Compiler for CORTEX
 Transforms NOUS declarative intents into CORTEX Saga Guard ASTs.
@@ -76,7 +80,7 @@ if __name__ == "__main__":
         intent = compiler.parse(content)
         ast = compiler.compile(intent)
 
-        print(f"--- PARSED INTENT ---\n{intent.model_dump_json(indent=2)}")
-        print(f"\n--- COMPILED AST ---\n{[node.model_dump_json(indent=2) for node in ast]}")
+        logger.info(f"--- PARSED INTENT ---\n{intent.model_dump_json(indent=2)}")
+        logger.info(f"\n--- COMPILED AST ---\n{[node.model_dump_json(indent=2) for node in ast]}")
     else:
-        print("Usage: python compiler.py <path_to_nous_file>")
+        logger.info("Usage: python compiler.py <path_to_nous_file>")
