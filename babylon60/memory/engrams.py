@@ -43,5 +43,3 @@ class CortexSemanticEngram(CortexFactModel):
     def decay(self, penalty: float = 0.05) -> None:
         """Process an LTD event (Long-Term Depression), reducing synaptic energy."""
         object.__setattr__(self, "energy_level", max(0.0, self.energy_level - penalty))
-
-

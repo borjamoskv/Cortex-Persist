@@ -308,7 +308,9 @@ class CortexFactModel(BaseModel):
 
     # Pragmatic Metamemory Phase 1 Additions
     source_metadata: SourceMetadata = Field(
-        default_factory=lambda: SourceMetadata(origin="system", author="system", confidence_in_source=1.0),
+        default_factory=lambda: SourceMetadata(
+            origin="system", author="system", confidence_in_source=1.0
+        ),
         description="Provenance of the fact for Source Monitoring. OBLIGATORIO.",
     )
     access_stats: MemoryAccessStats = Field(

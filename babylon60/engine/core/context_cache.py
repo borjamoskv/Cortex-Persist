@@ -251,7 +251,9 @@ class ContextCacheManager:
                     "mmap_uri": safetensors_path,
                     "provider": provider,
                 },
-                source_metadata=SourceMetadata(origin="system", author="kv_cache_engine", confidence_in_source=1.0)
+                source_metadata=SourceMetadata(
+                    origin="system", author="kv_cache_engine", confidence_in_source=1.0
+                ),
             )
 
             # Direct connection to SQLite Layer (MMAP Pointer Only)

@@ -53,4 +53,6 @@ def test_cli_lazy_loader_works():
     loaded_cmds = loaded_cmds_str.split(",") if loaded_cmds_str else []
 
     assert len(loaded_cmds) > 0, "Failed to lazy load the commands upon access."
-    assert "babylon60.cli.agent_cmds" in loaded_cmds, "The specific agent_cmds module was not loaded."
+    assert "babylon60.cli.agent_cmds" in loaded_cmds, (
+        "The specific agent_cmds module was not loaded."
+    )

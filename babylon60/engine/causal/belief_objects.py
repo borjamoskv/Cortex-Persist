@@ -15,11 +15,13 @@ class BeliefState(str, enum.Enum):
     REJECTED = "REJECTED"
     SUSPENDED = "SUSPENDED"
 
+
 class RelationType(str, enum.Enum):
     ENTAILS = "ENTAILS"
     CONTRADICTS = "CONTRADICTS"
     SUPPORTS = "SUPPORTS"
     INDEPENDENT = "INDEPENDENT"
+
 
 class ProvenanceEnvelope(BaseModel):
     agent_id: str
@@ -27,10 +29,12 @@ class ProvenanceEnvelope(BaseModel):
     timestamp: datetime
     signature: str = Field(..., description="CORTEX-TAINT signature")
 
+
 class PropositionPayload(BaseModel):
     content: str
     context_hash: str
     certainty: float = Field(..., ge=0.0, le=1.0)
+
 
 class BeliefObject(BaseModel):
     id: str

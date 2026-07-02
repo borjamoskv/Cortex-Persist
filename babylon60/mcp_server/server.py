@@ -24,12 +24,12 @@ from babylon60.mcp_server.genesis_tools import register_genesis_tools
 from babylon60.mcp_server.guard import MCPGuard
 from babylon60.mcp_server.health_tools import register_health_tools
 from babylon60.mcp_server.kapso_tools import register_kapso_tools
-from babylon60.mcp_server.twilio_tools import register_twilio_tools
 from babylon60.mcp_server.knowledge_watcher import start_knowledge_daemon
 from babylon60.mcp_server.mega_tools import register_mega_tools
 from babylon60.mcp_server.music_tools import register_music_tools
 from babylon60.mcp_server.singularity_tools import register_singularity_tools
 from babylon60.mcp_server.trust_tools import register_trust_tools
+from babylon60.mcp_server.twilio_tools import register_twilio_tools
 from babylon60.mcp_server.utils import (
     AsyncConnectionPool,
     MCPMetrics,

@@ -42,7 +42,7 @@ class WeightedByzantineConsensus:
             # If 3 agents share the same 'llama' ancestry, their single weight is diluted
             diversity_divisor = family_counts[vote.model_family]
             weighted_vote = (vote.reputation * 1.0) / diversity_divisor
-            
+
             scores[vote.vote_payload] = scores.get(vote.vote_payload, 0.0) + weighted_vote
 
         best_payload = max(scores, key=lambda p: scores[p])

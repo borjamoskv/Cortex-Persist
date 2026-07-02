@@ -124,7 +124,6 @@ async def hybrid_search(
         confidence=confidence,
     )
 
-
     try:
         sem_results, txt_results = await asyncio.gather(sem_task, txt_task)
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as exc:

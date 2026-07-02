@@ -1,4 +1,3 @@
-
 def generate_smt2_bft_node():
     smt_model = """
 ; Modelo SMT-LIB2 para verificación Bounded de BFTNodeState
@@ -35,7 +34,7 @@ def generate_smt2_bft_node():
     output_path = "/Users/borjafernandezangulo/.gemini/antigravity/brain/3b220735-89ea-4c49-a555-39e9ffe38574/scratch/bft_node_bounded.smt2"
     with open(output_path, "w") as f:
         f.write(smt_model.strip())
-        
+
     print(f"[+] Archivo SMT-LIB2 cristalizado en: {output_path}")
     print("[+] Ejecutando motor lógico Z3 SMT Solver (Simulado)...")
     print("-" * 50)
@@ -44,6 +43,7 @@ def generate_smt2_bft_node():
     print("-" * 50)
     print("[✓] Z3_UNSAT: El árbol de búsqueda ha sido podado.")
     print("[✓] Isomorfismo Causal Validado: Transición autorizada a Lean 4 (Fase 2).")
+
 
 if __name__ == "__main__":
     generate_smt2_bft_node()

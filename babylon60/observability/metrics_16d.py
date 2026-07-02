@@ -19,7 +19,7 @@ class Dimensions16D(NamedTuple):
     # ...
     # New C7 dimensions (§3)
     dependency_entropy: float  # Scale 0.0 (clean) to 1.0 (bloated npm/pypi dependencies)
-    state_friction: float      # Mutability outside determinism
+    state_friction: float  # Mutability outside determinism
     causal_isomorphism: float  # Ratio of executable logic / defensive boilerplate ("Green Theater")
 
 
@@ -40,12 +40,17 @@ class Scanner16D:
 
         # 3. Causal Isomorphism (Axiom 16 / Code-to-Noise Ratio)
         # Identify "Green Theater" defensive patterns (e.g. if is None return) vs active logic
-        boilerplate_patterns = ["if not ", "if obj is None", "try: pass", "except Exception:  # noqa: BLE001"]
+        boilerplate_patterns = [
+            "if not ",
+            "if obj is None",
+            "try: pass",
+            "except Exception:  # noqa: BLE001",
+        ]
         boilerplate_hits = sum(code.count(pat) for pat in boilerplate_patterns)
-        
+
         lines = [line.strip() for line in code.splitlines() if line.strip()]
         total_code_lines = len(lines) or 1
-        
+
         # Approximate isomorphism score: lower boilerplate hits = higher isomorphism
         isomorphism_score = max(0.1, 1.0 - (boilerplate_hits / total_code_lines))
 
@@ -55,5 +60,5 @@ class Scanner16D:
             psi=0.8,
             dependency_entropy=dep_entropy,
             state_friction=state_friction,
-            causal_isomorphism=isomorphism_score
+            causal_isomorphism=isomorphism_score,
         )

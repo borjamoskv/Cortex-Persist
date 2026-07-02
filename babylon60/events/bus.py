@@ -106,7 +106,9 @@ class DistributedEventBus:
                                 payload = json.loads(raw_payload)
                                 await self._dispatch_local(topic, payload)
                             except json.JSONDecodeError:
-                                logger.warning("Malformed JSON in stream %s message %s", stream_key, msg_id)
+                                logger.warning(
+                                    "Malformed JSON in stream %s message %s", stream_key, msg_id
+                                )
             except asyncio.CancelledError:
                 break
             except Exception as e:  # noqa: BLE001
@@ -155,7 +157,9 @@ class DistributedEventBus:
                 )
                 return
             except Exception as e:  # noqa: BLE001
-                logger.warning("Redis stream write failed, falling back to local RAM dispatch: %s", e)
+                logger.warning(
+                    "Redis stream write failed, falling back to local RAM dispatch: %s", e
+                )
 
         # Fallback to local dispatch
         await self._dispatch_local(topic, payload)
@@ -187,12 +191,12 @@ class DistributedEventBus:
     async def shutdown(self) -> None:
         """Graceful shutdown of the bus and all active topic workers."""
         self._running = False
-        
+
         # Cancel all background listener tasks
         for task in self._redis_tasks:
             if not task.done():
                 task.cancel()
-        
+
         if self._redis_tasks:
             await asyncio.gather(*self._redis_tasks, return_exceptions=True)
             self._redis_tasks.clear()
@@ -207,4 +211,3 @@ class DistributedEventBus:
 
         self._subscribers.clear()
         logger.info("Distributed Event Bus shut down successfully.")
-

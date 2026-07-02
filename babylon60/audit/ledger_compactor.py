@@ -154,7 +154,8 @@ async def compact_ledger(
                 # Delete old rows
                 placeholders = ",".join(["?"] * len(rowids_to_delete))
                 await conn.execute(
-                    f"DELETE FROM security_audit_log WHERE rowid IN ({placeholders})", rowids_to_delete
+                    f"DELETE FROM security_audit_log WHERE rowid IN ({placeholders})",
+                    rowids_to_delete,
                 )
 
                 # Insert COMPACTION_NODE at the exact rowid of the first deleted row to maintain ORDER BY rowid ASC

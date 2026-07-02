@@ -126,7 +126,7 @@ class ConnectionMixin:
         """Bootstrap the base schema once per engine instance."""
         if getattr(self, "_schema_ready", False):
             return
-            
+
         async with self._schema_lock:
             if getattr(self, "_schema_ready", False):
                 return

@@ -26,15 +26,23 @@ async def test_saga_semantic_deduplication(tmp_path: Path, monkeypatch: pytest.M
         with causal_write(conn):
             await conn.execute(CREATE_FACTS)
             try:
-                await conn.execute("CREATE VIRTUAL TABLE fact_embeddings USING vec0(fact_id INTEGER PRIMARY KEY, embedding FLOAT[384])")
+                await conn.execute(
+                    "CREATE VIRTUAL TABLE fact_embeddings USING vec0(fact_id INTEGER PRIMARY KEY, embedding FLOAT[384])"
+                )
                 is_virtual = True
             except Exception:
                 # Fallback to standard table for test environments where vec0 is not compiled
-                await conn.execute("CREATE TABLE fact_embeddings (fact_id INTEGER PRIMARY KEY, embedding TEXT, distance REAL)")
+                await conn.execute(
+                    "CREATE TABLE fact_embeddings (fact_id INTEGER PRIMARY KEY, embedding TEXT, distance REAL)"
+                )
                 is_virtual = False
 
-            await conn.execute("CREATE TABLE agents (id TEXT PRIMARY KEY, public_key TEXT, is_active INTEGER)")
-            await conn.execute("INSERT INTO agents (id, public_key, is_active) VALUES ('test_agent', 'mock_pubkey', 1)")
+            await conn.execute(
+                "CREATE TABLE agents (id TEXT PRIMARY KEY, public_key TEXT, is_active INTEGER)"
+            )
+            await conn.execute(
+                "INSERT INTO agents (id, public_key, is_active) VALUES ('test_agent', 'mock_pubkey', 1)"
+            )
             await conn.commit()
 
         ledger = EnterpriseAuditLedger(conn)
@@ -48,7 +56,14 @@ async def test_saga_semantic_deduplication(tmp_path: Path, monkeypatch: pytest.M
                 INSERT INTO facts (tenant_id, project, content, fact_type, metadata, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?)
                 """,
-                ("test_tenant", "test_proj", "This is a unique causal fact about AI consensus.", "knowledge", "{}", "2026-06-30T12:00:00Z")
+                (
+                    "test_tenant",
+                    "test_proj",
+                    "This is a unique causal fact about AI consensus.",
+                    "knowledge",
+                    "{}",
+                    "2026-06-30T12:00:00Z",
+                ),
             ) as cursor:
                 fact_id = cursor.lastrowid
 
@@ -57,34 +72,42 @@ async def test_saga_semantic_deduplication(tmp_path: Path, monkeypatch: pytest.M
             if is_virtual:
                 await conn.execute(
                     "INSERT INTO fact_embeddings (fact_id, embedding) VALUES (?, ?)",
-                    (fact_id, json.dumps(mock_vector))
+                    (fact_id, json.dumps(mock_vector)),
                 )
             else:
                 await conn.execute(
                     "INSERT INTO fact_embeddings (fact_id, embedding, distance) VALUES (?, ?, ?)",
-                    (fact_id, json.dumps(mock_vector), 0.0)
+                    (fact_id, json.dumps(mock_vector), 0.0),
                 )
             await conn.commit()
 
         # Let's write SAGA write path using a mock apex_dispatcher
-        with patch("babylon60.agents.primitives.dispatcher.apex_dispatcher.execute") as mock_exec, \
-             patch("babylon60.embeddings.local.LocalEmbedder.embed", return_value=mock_vector):
+        with (
+            patch("babylon60.agents.primitives.dispatcher.apex_dispatcher.execute") as mock_exec,
+            patch("babylon60.embeddings.local.LocalEmbedder.embed", return_value=mock_vector),
+        ):
             mock_exec.return_value = "mock_hash"
 
             # 3. Insert same content again -> should be detected as semantic duplicate (>90%)
             if not is_virtual:
                 original_execute = conn.execute
+
                 async def mock_execute(sql, params=()):
                     if "MATCH" in sql or "fact_embeddings" in sql:
+
                         class MockCursor:
                             async def fetchone(self):
                                 return (fact_id, 0.0)
+
                             async def __aenter__(self):
                                 return self
+
                             async def __aexit__(self, exc_type, exc, tb):
                                 pass
+
                         return MockCursor()
                     return await original_execute(sql, params)
+
                 monkeypatch.setattr(conn, "execute", mock_execute)
 
             with pytest.raises(ValueError, match="Duplicate fact rejected"):
@@ -95,7 +118,7 @@ async def test_saga_semantic_deduplication(tmp_path: Path, monkeypatch: pytest.M
                     resource="test_resource",
                     content="This is a unique causal fact about AI consensus.",
                     taint_token="mock_token",
-                    schema_name="mock_schema"
+                    schema_name="mock_schema",
                 )
 
             # Verify that WRITE_REJECTED was logged
@@ -107,7 +130,9 @@ async def test_saga_semantic_deduplication(tmp_path: Path, monkeypatch: pytest.M
             assert "Duplicate of" in row[0]
 
             # Verify that the original fact's updated_at and metadata last_accessed were updated
-            cursor = await conn.execute("SELECT updated_at, metadata FROM facts WHERE id = ?", (fact_id,))
+            cursor = await conn.execute(
+                "SELECT updated_at, metadata FROM facts WHERE id = ?", (fact_id,)
+            )
             updated_row = await cursor.fetchone()
             assert updated_row[0] != "2026-06-30T12:00:00Z"
             meta_dict = json.loads(updated_row[1])

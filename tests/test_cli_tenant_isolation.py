@@ -32,8 +32,12 @@ def test_resolve_cli_tenant_from_active_context(monkeypatch, tmp_path):
     # Clear CORTEX_TENANT_ID from environment
     monkeypatch.delenv("CORTEX_TENANT_ID", raising=False)
 
-    with patch("pathlib.Path.is_file", return_value=True), \
-         patch("pathlib.Path.read_text", return_value=json.dumps({"tenant_id": "tenant-from-config"})):
+    with (
+        patch("pathlib.Path.is_file", return_value=True),
+        patch(
+            "pathlib.Path.read_text", return_value=json.dumps({"tenant_id": "tenant-from-config"})
+        ),
+    ):
         resolve_cli_tenant("default")
         assert tenant_id_var.get() == "tenant-from-config"
 

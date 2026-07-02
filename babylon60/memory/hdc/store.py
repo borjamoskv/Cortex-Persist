@@ -359,7 +359,9 @@ class HDCVectorStoreL2:
 
         # Fetch embedding for inhibition check and models
         v_cursor = conn.cursor()
-        v_cursor.execute("SELECT embedding FROM hdc_vec_facts WHERE rowid = ?", (row["rowid"],))  # bypass-tenant
+        v_cursor.execute(
+            "SELECT embedding FROM hdc_vec_facts WHERE rowid = ?", (row["rowid"],)
+        )  # bypass-tenant
         v_row = v_cursor.fetchone()
         if v_row:
             emb_f32 = np.frombuffer(v_row["embedding"], dtype=np.float32)

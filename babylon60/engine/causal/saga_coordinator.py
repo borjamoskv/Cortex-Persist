@@ -69,14 +69,20 @@ class SagaCoordinator:
         # SAGA-2.5: BFT Quorum (Ouroboros)
         if "bft_signatures" in metadata:
             from babylon60.consensus.bft_quorum import BFTQuorumError, BFTQuorumGuard
+
             bft_sigs = metadata["bft_signatures"]
             known_peers = metadata.get("bft_known_peers", {})
             try:
                 guard = BFTQuorumGuard(known_peers)
-                guard.authorize_payload(content.encode('utf-8'), bft_sigs)
+                guard.authorize_payload(content.encode("utf-8"), bft_sigs)
             except BFTQuorumError as e:
                 await self.ledger.log_action(
-                    tenant_id, actor_role, actor_id, "WRITE_REJECTED", resource, status=f"BFT Quorum Failed: {e}"
+                    tenant_id,
+                    actor_role,
+                    actor_id,
+                    "WRITE_REJECTED",
+                    resource,
+                    status=f"BFT Quorum Failed: {e}",
                 )
                 logger.error(f"[SAGA] Aborted at SAGA-2.5: {e}")
                 raise ValueError(f"SAGA Aborted: {e}")
@@ -140,13 +146,15 @@ class SagaCoordinator:
                                     meta_dict = {}
 
                             meta_dict["last_accessed"] = now_str
-                            meta_dict["last_accessed_ts"] = datetime.datetime.now(datetime.timezone.utc).timestamp()
+                            meta_dict["last_accessed_ts"] = datetime.datetime.now(
+                                datetime.timezone.utc
+                            ).timestamp()
 
                             # Execute update
                             with causal_write(self.ledger._conn):
                                 await self.ledger._conn.execute(
                                     "UPDATE facts SET metadata = ?, updated_at = ? WHERE id = ?",
-                                    (json.dumps(meta_dict), now_str, fact_id)
+                                    (json.dumps(meta_dict), now_str, fact_id),
                                 )
                                 await self.ledger._conn.commit()
 
@@ -157,7 +165,7 @@ class SagaCoordinator:
                                 actor_id,
                                 "WRITE_REJECTED",
                                 resource,
-                                status=f"Duplicate of #{fact_id} (Similarity: {score:.4f})"
+                                status=f"Duplicate of #{fact_id} (Similarity: {score:.4f})",
                             )
 
                             logger.info(
@@ -175,7 +183,9 @@ class SagaCoordinator:
         # SAGA-3: Schema Validation
         payload = {"content": content, "metadata": metadata}
         # In test mode, we might not have schemas defined. We will allow simple dict validation or skip if 'mock_schema'
-        if schema_name != "mock_schema" and not self.validator.validate_payload(schema_name, payload):
+        if schema_name != "mock_schema" and not self.validator.validate_payload(
+            schema_name, payload
+        ):
             await self.ledger.log_action(
                 tenant_id,
                 actor_role,
@@ -197,14 +207,19 @@ class SagaCoordinator:
                     metadata["cortex_encrypted"] = True
             except Exception as e:  # noqa: BLE001
                 await self.ledger.log_action(
-                    tenant_id, actor_role, actor_id, "WRITE_REJECTED", resource, status=f"Encryption Failed: {e}"
+                    tenant_id,
+                    actor_role,
+                    actor_id,
+                    "WRITE_REJECTED",
+                    resource,
+                    status=f"Encryption Failed: {e}",
                 )
                 logger.error(f"[SAGA] Aborted at SAGA-4: {e}")
                 raise ValueError(f"SAGA Aborted: Encryption failed - {e}")
 
         # SAGA-6: DB Write Transaction boundaries
         in_tx_before = self.ledger._conn.in_transaction
-        
+
         try:
             with causal_write(self.ledger._conn):
                 # SAGA-5: Ledger Emission
@@ -217,7 +232,7 @@ class SagaCoordinator:
                 commit_metadata = metadata.copy()
                 commit_metadata["agent_id"] = actor_id
                 commit_metadata["audit_id"] = audit_id
-                
+
                 # Freeze and commit
                 frozen_state, hash_ledger = secure_state_commit(content, commit_metadata)
 
@@ -234,7 +249,7 @@ class SagaCoordinator:
             # SAGA Reversion
             if not in_tx_before:
                 await self.ledger._conn.rollback()
-                
+
             await self.ledger.log_action(
                 tenant_id, actor_role, actor_id, "WRITE_ABORTED", resource, status=str(e)
             )

@@ -200,6 +200,7 @@ class CausalMetering:
     def __exit__(self, *exc: object) -> None:
         self.close()
 
+
 import asyncio
 from collections import defaultdict
 from typing import Any
@@ -207,7 +208,7 @@ from typing import Any
 
 class AsyncStripeSyncer:
     """Buffer asíncrono para reportar el uso a Stripe en lotes (evita Rate Limits de la API)."""
-    
+
     _instance: AsyncStripeSyncer | None = None
 
     def __init__(self):
@@ -225,13 +226,14 @@ class AsyncStripeSyncer:
         """Encola el uso O(1) en RAM."""
         if self._sync_task is None:
             self._sync_task = asyncio.create_task(self._sync_loop())
-        
+
         async with self.lock:
             self.usage_buffer[(api_key, tenant_id)] += ssu_cost
 
     async def _sync_loop(self) -> None:
         """Loop en background para flushear a Stripe cada 60 segundos."""
         from babylon60.core import config
+
         try:
             import stripe
         except ImportError:
@@ -258,15 +260,17 @@ class AsyncStripeSyncer:
                 # Para aislar, lo hacemos en una tarea separada para no bloquear todo el loop.
                 asyncio.create_task(self._report_batch(api_key, tenant_id, amount, stripe))
 
-    async def _report_batch(self, api_key: str, tenant_id: str, amount: int, stripe_lib: Any) -> None:
+    async def _report_batch(
+        self, api_key: str, tenant_id: str, amount: int, stripe_lib: Any
+    ) -> None:
         try:
             import json
             import sqlite3
 
             from babylon60.core.config import DB_PATH
-            
+
             stripe_subscription_item_id = None
-            
+
             def _fetch_sub_id():
                 with sqlite3.connect(DB_PATH) as conn:
                     cur = conn.cursor()
@@ -276,7 +280,7 @@ class AsyncStripeSyncer:
                         cfg = json.loads(row[0])
                         return cfg.get("stripe_subscription_item_id")
                 return None
-            
+
             stripe_subscription_item_id = await asyncio.to_thread(_fetch_sub_id)
 
             if not stripe_subscription_item_id:
@@ -290,11 +294,12 @@ class AsyncStripeSyncer:
                 stripe_subscription_item_id,
                 quantity=amount,
                 timestamp="now",
-                action="increment"
+                action="increment",
             )
             logger.info("Stripe bulk usage (%d units) reported for tenant %s", amount, tenant_id)
         except Exception as exc:
             logger.error("Failed to sync bulk usage to Stripe for %s: %s", tenant_id, exc)
+
 
 def get_stripe_syncer() -> AsyncStripeSyncer:
     return AsyncStripeSyncer.singleton()

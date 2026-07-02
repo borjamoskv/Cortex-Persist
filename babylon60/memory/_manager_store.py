@@ -12,7 +12,9 @@ from babylon60.memory.engrams import CortexSemanticEngram
 logger = logging.getLogger("babylon60.memory._manager_store")
 
 
-async def check_deduplication(l2: Any, tenant_id: str, project_id: str, content: str, vector: list[float] | None = None) -> str | None:
+async def check_deduplication(
+    l2: Any, tenant_id: str, project_id: str, content: str, vector: list[float] | None = None
+) -> str | None:
     """Return deduplicated ID if fact exists (exact or semantic), else None (async)."""
     if not content or not content.strip():
         logger.warning("CortexMemoryManager: Rejected empty fact pipeline.")
@@ -34,16 +36,16 @@ async def check_deduplication(l2: Any, tenant_id: str, project_id: str, content:
                 if row:
                     conn.rollback()
                     return str(row["id"])
-                    
+
                 # 2. Semantic vector deduplication (>90% similarity -> cosine distance < 0.10)
                 if vector:
                     import numpy as np
 
                     from babylon60.utils.turboquant import encode_query_qjl
-                    
+
                     rotated_query = encode_query_qjl(vector)
                     embedding_bytes = np.array(rotated_query, dtype=np.float32).tobytes()
-                    
+
                     cursor.execute(
                         "SELECT m.id, v.distance "
                         "FROM vec_facts v "
@@ -51,14 +53,16 @@ async def check_deduplication(l2: Any, tenant_id: str, project_id: str, content:
                         "WHERE v.embedding MATCH ? AND k = 3 "
                         "AND m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1) "
                         "ORDER BY v.distance ASC LIMIT 1",
-                        (embedding_bytes, tenant_id, project_id)
+                        (embedding_bytes, tenant_id, project_id),
                     )
                     semantic_row = cursor.fetchone()
                     if semantic_row and semantic_row["distance"] < 0.10:
-                        logger.info(f"CortexMemoryManager: Fact deduplicated via Semantic Similarity (distance={semantic_row['distance']:.3f}).")
+                        logger.info(
+                            f"CortexMemoryManager: Fact deduplicated via Semantic Similarity (distance={semantic_row['distance']:.3f})."
+                        )
                         conn.rollback()
                         return str(semantic_row["id"])
-                        
+
                 conn.rollback()
             except (OSError, RuntimeError, ValueError) as e:
                 logger.warning("CortexMemoryManager: Deduplication check failed: %s", e)
@@ -157,12 +161,12 @@ async def store_fact(
 
             km = KeyManager("cortex_persist_enterprise")
             actor_id = tenant_id if tenant_id and tenant_id != "default" else "system"
-            
+
             priv_key = km.get_private_key_b64(actor_id)
             if not priv_key:
                 km.generate_and_store_key(actor_id)
                 priv_key = km.get_private_key_b64(actor_id)
-                
+
             if priv_key:
                 taint_sig = generate_secure_taint_token(
                     agent_id=actor_id,
@@ -172,7 +176,9 @@ async def store_fact(
                 )
                 _meta["CORTEX-TAINT"] = taint_sig
             else:
-                logger.warning("C5-REAL: Could not retrieve key for %s, SAGA-2 might abort.", actor_id)
+                logger.warning(
+                    "C5-REAL: Could not retrieve key for %s, SAGA-2 might abort.", actor_id
+                )
         except Exception as e:  # noqa: BLE001
             logger.warning("C5-REAL: Failed to inject CORTEX-TAINT at the edge: %s", e)
 
@@ -183,26 +189,30 @@ async def store_fact(
         _meta.update({"active_schema": matched_schema.name})
 
     vector = await manager._encoder.encode(content)
-    
+
     # Ouroboros Anti-Rot: Semantic Deduplication
-    dedup_id_semantic = await manager._check_deduplication(tenant_id, project_id, content, vector=vector)
+    dedup_id_semantic = await manager._check_deduplication(
+        tenant_id, project_id, content, vector=vector
+    )
     if dedup_id_semantic:
         return f"deduplicated_semantic:{dedup_id_semantic}"
 
     fact_id = str(uuid.uuid4())
 
     try:
-
         confidence = _meta.get("confidence_score") or _meta.get("confidence")
         if not confidence:
             raise ValueError("C5-REAL Guard: confidence_score OBLIGATORIO faltante en payload")
-            
+
         source_meta = _meta.get("source_metadata", _meta.get("provenance"))
         if not source_meta:
-            raise ValueError("C5-REAL Guard: provenance/source_metadata OBLIGATORIO faltante en payload")
+            raise ValueError(
+                "C5-REAL Guard: provenance/source_metadata OBLIGATORIO faltante en payload"
+            )
 
         # Zero-Knowledge Encryption
         from babylon60.crypto import get_default_encrypter
+
         enc = get_default_encrypter()
         encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
         if not encrypted_content:
@@ -221,10 +231,9 @@ async def store_fact(
             confidence=str(confidence),
             source_metadata=source_meta,
         )
-    except (Exception) as e:  # noqa: BLE001
+    except Exception as e:  # noqa: BLE001
         logger.error("SAGA-1 Abort: Fact validation failed: %s", e)
         return "aborted:validation_error"
-
 
     if manager._resonance_gate is None:
         raise RuntimeError("Resonance gate unavailable; refusing to persist without validation")

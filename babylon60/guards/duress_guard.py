@@ -101,11 +101,11 @@ class DuressGuard:
             return False
 
         code = cls.get_duress_code()
-        
-        # C5-REAL: Extraemos representación de string fuerte para evadir 
+
+        # C5-REAL: Extraemos representación de string fuerte para evadir
         # envoltorios estructurales del hypervisor (ej. list[Content])
         content_str = str(content)
-        
+
         if code in content_str:
             cls.execute_apoptosis()
             return False

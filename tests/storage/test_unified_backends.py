@@ -22,8 +22,12 @@ from babylon60.storage.turso import TursoBackend
 def test_backends_conformance():
     """Verify all backend adapter classes strictly implement the StorageAdapter Protocol."""
     # Class-level check via issubclass
-    assert issubclass(SQLitePoolAdapter, StorageAdapter), "SQLitePoolAdapter must satisfy StorageAdapter"
-    assert issubclass(PostgresBackend, StorageAdapter), "PostgresBackend must satisfy StorageAdapter"
+    assert issubclass(SQLitePoolAdapter, StorageAdapter), (
+        "SQLitePoolAdapter must satisfy StorageAdapter"
+    )
+    assert issubclass(PostgresBackend, StorageAdapter), (
+        "PostgresBackend must satisfy StorageAdapter"
+    )
     assert issubclass(TursoBackend, StorageAdapter), "TursoBackend must satisfy StorageAdapter"
 
 
@@ -77,6 +81,8 @@ async def test_router_returns_conforming_local_backend():
     router = get_router()
     backend = await router.get_backend("default")
 
-    assert isinstance(backend, StorageAdapter), "Router-returned backend must satisfy StorageAdapter"
+    assert isinstance(backend, StorageAdapter), (
+        "Router-returned backend must satisfy StorageAdapter"
+    )
     health = await backend.health_check()
     assert health is True

@@ -13,6 +13,7 @@ from typing import Optional
 @dataclass
 class MerkleNode:
     """Nodo individual del Merkle Tree."""
+
     hash_value: str
     left: Optional["MerkleNode"] = None
     right: Optional["MerkleNode"] = None
@@ -21,7 +22,7 @@ class MerkleNode:
 class MerkleTree:
     """
     Árbol de Merkle sobre las transacciones del ledger.
-    
+
     Construye el árbol completo desde las hojas (hashes de txn)
     y expone la raíz para anclar externamente con prevención de colisiones.
     """
@@ -46,15 +47,8 @@ class MerkleTree:
             nodes.append(MerkleNode(hash_value=nodes[-1].hash_value))
         parents = []
         for i in range(0, len(nodes), 2):
-            parent_hash = self._hash_pair(
-                nodes[i].hash_value,
-                nodes[i + 1].hash_value
-            )
-            parents.append(MerkleNode(
-                hash_value=parent_hash,
-                left=nodes[i],
-                right=nodes[i + 1]
-            ))
+            parent_hash = self._hash_pair(nodes[i].hash_value, nodes[i + 1].hash_value)
+            parents.append(MerkleNode(hash_value=parent_hash, left=nodes[i], right=nodes[i + 1]))
         return self._build(parents)
 
     @property
@@ -65,19 +59,20 @@ class MerkleTree:
 @dataclass
 class EpochAnchor:
     """Registro de un anchor publicado."""
+
     epoch_id: int
     merkle_root: str
     tx_count: int
     timestamp: str
-    anchor_target: str          # "ethereum" | "arbitrum" | "git"
-    anchor_tx_hash: str         # Hash de la transacción en L1/L2
+    anchor_target: str  # "ethereum" | "arbitrum" | "git"
+    anchor_tx_hash: str  # Hash de la transacción en L1/L2
     verified: bool = False
 
 
 class AnchorService:
     """
     Servicio de anclaje periódico con persistencia de cola (WAL).
-    
+
     Cada N transacciones (epoch), construye un Merkle Tree
     sobre los hashes acumulados y publica la raíz en un
     destino externo inmutable.
@@ -110,7 +105,7 @@ class AnchorService:
                 )
             """)
             conn.commit()
-            
+
             cur = conn.execute("SELECT MAX(epoch_id) FROM merkle_anchors")
             result = cur.fetchone()[0]
             return result if result is not None else 0
@@ -132,10 +127,7 @@ class AnchorService:
         """
         conn = sqlite3.connect(self.db_path)
         try:
-            conn.execute(
-                "INSERT OR IGNORE INTO pending_tx_hashes (tx_hash) VALUES (?)",
-                (tx_hash,)
-            )
+            conn.execute("INSERT OR IGNORE INTO pending_tx_hashes (tx_hash) VALUES (?)", (tx_hash,))
             conn.commit()
         finally:
             conn.close()
@@ -149,17 +141,17 @@ class AnchorService:
     def _seal_epoch(self) -> EpochAnchor:
         tree = MerkleTree(self.pending_hashes)
         root_hash = tree.root_hash
-        
+
         # Publicar
         anchor_tx = self._publish_to_l2(root_hash)
-        
+
         anchor = EpochAnchor(
             epoch_id=self.current_epoch,
             merkle_root=root_hash,
             tx_count=len(self.pending_hashes),
             timestamp=datetime.now(UTC).isoformat(),
             anchor_target="arbitrum",
-            anchor_tx_hash=anchor_tx
+            anchor_tx_hash=anchor_tx,
         )
 
         conn = sqlite3.connect(self.db_path)
@@ -169,8 +161,14 @@ class AnchorService:
                    (epoch_id, merkle_root, tx_count, timestamp, 
                     anchor_target, anchor_tx)
                    VALUES (?, ?, ?, ?, ?, ?)""",
-                (anchor.epoch_id, anchor.merkle_root, anchor.tx_count,
-                 anchor.timestamp, anchor.anchor_target, anchor.anchor_tx_hash)
+                (
+                    anchor.epoch_id,
+                    anchor.merkle_root,
+                    anchor.tx_count,
+                    anchor.timestamp,
+                    anchor.anchor_target,
+                    anchor.anchor_tx_hash,
+                ),
             )
             # Limpiar el WAL local
             conn.execute("DELETE FROM pending_tx_hashes")
@@ -187,9 +185,7 @@ class AnchorService:
         Publica el Merkle Root en Arbitrum L2 (STUB).
         """
         # TODO: Integración real con web3.py + L2 contract call
-        placeholder_tx = hashlib.sha256(
-            f"anchor:{merkle_root}".encode()
-        ).hexdigest()
+        placeholder_tx = hashlib.sha256(f"anchor:{merkle_root}".encode()).hexdigest()
         return placeholder_tx
 
     def verify_epoch(self, epoch_id: int, tx_hashes: list[str]) -> bool:
@@ -200,8 +196,7 @@ class AnchorService:
         conn = sqlite3.connect(self.db_path)
         try:
             cur = conn.execute(
-                "SELECT merkle_root FROM merkle_anchors WHERE epoch_id = ?",
-                (epoch_id,)
+                "SELECT merkle_root FROM merkle_anchors WHERE epoch_id = ?", (epoch_id,)
             )
             row = cur.fetchone()
         finally:
@@ -212,10 +207,10 @@ class AnchorService:
 
         stored_root = row[0]
         recalculated = MerkleTree(tx_hashes).root_hash
-        
+
         if recalculated != stored_root:
             return False
-            
+
         # Romper circularidad local buscando el commitment en el log de commits de Git (Sentinel)
         try:
             # Buscar si el hash del Merkle root está publicado en algún commit con el tag [bridge]
@@ -224,14 +219,14 @@ class AnchorService:
                 ["git", "log", "--grep", f"Merkle Root {stored_root}", "--oneline"],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0 and stored_root in result.stdout:
                 return True
         except (subprocess.SubprocessError, OSError):
             # Fallback a advertencia si git no está disponible
             pass
-            
+
         # Si no se encuentra en Git (y Git está activo), hay sospecha de manipulación local
         # Pero retornamos la validez de los hashes locales como chequeo básico
         return True

@@ -71,6 +71,7 @@ def build_manifest_cmd(
 ) -> None:
     """Build a canonical SHA-256 manifest for local evidence artifacts."""
     from babylon60.cli.common import resolve_cli_tenant
+
     tenant_id = resolve_cli_tenant(tenant_id)
     base = _resolve_base_dir(base_dir)
     output_path = Path(output)

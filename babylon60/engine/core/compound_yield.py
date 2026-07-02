@@ -137,7 +137,7 @@ class CompoundProjector:
 class CompoundYieldTracker:
     """Engine module that detects causal chains and calculates Ω₁₁ yield."""
 
-    def __init__(self, db_path: str, reuse_rate: float = 0.15, tenant_id: str = 'default') -> None:
+    def __init__(self, db_path: str, reuse_rate: float = 0.15, tenant_id: str = "default") -> None:
         self.tenant_id = tenant_id
         self.db_path = db_path
         self.reuse_rate = reuse_rate
@@ -147,7 +147,9 @@ class CompoundYieldTracker:
         import json
 
         # First check meta for explicitly tracked hours
-        cursor = conn.execute("SELECT meta FROM facts WHERE id = ? AND tenant_id = ?", (fact_id, self.tenant_id))
+        cursor = conn.execute(
+            "SELECT meta FROM facts WHERE id = ? AND tenant_id = ?", (fact_id, self.tenant_id)
+        )
         row = cursor.fetchone()
         if not row:
             return 0.0

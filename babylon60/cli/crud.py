@@ -32,6 +32,7 @@ def _run_async(coro: Coroutine[Any, Any, _T]) -> _T:
 def delete(fact_id, reason, tenant_id, db) -> None:
     """Soft-delete: depreca un fact y auto-sincroniza JSON."""
     from babylon60.cli.common import resolve_cli_tenant
+
     tenant_id = resolve_cli_tenant(tenant_id)
 
     async def _do_delete():
@@ -80,6 +81,7 @@ def delete(fact_id, reason, tenant_id, db) -> None:
 def list_facts(project, fact_type, limit, tenant_id, db) -> None:
     """Listar facts activos (tabulado)."""
     from babylon60.cli.common import resolve_cli_tenant
+
     tenant_id = resolve_cli_tenant(tenant_id)
 
     async def _do_list():
@@ -153,6 +155,7 @@ def list_facts(project, fact_type, limit, tenant_id, db) -> None:
 def edit(fact_id, new_content, tenant_id, db) -> None:
     """Editar un fact: depreca el viejo y crea uno nuevo con el contenido actualizado."""
     from babylon60.cli.common import resolve_cli_tenant
+
     tenant_id = resolve_cli_tenant(tenant_id)
 
     async def _do_edit():
@@ -201,6 +204,7 @@ def edit(fact_id, new_content, tenant_id, db) -> None:
 def inspect(fact_id, tenant_id, db) -> None:
     """Deep inspection of a fact (Double-Plane V2 facets)."""
     from babylon60.cli.common import resolve_cli_tenant
+
     tenant_id = resolve_cli_tenant(tenant_id)
 
     async def _do_inspect():

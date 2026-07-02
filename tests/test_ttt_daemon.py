@@ -80,6 +80,7 @@ class TestAdapterVerifier:
         try:
             from safetensors.numpy import save_file
             import numpy as np
+
             save_file({"weight": np.zeros((2, 2), dtype=np.float32)}, str(weights_safetensors))
         except ImportError:
             weights_safetensors.write_text("fake safetensors weights")

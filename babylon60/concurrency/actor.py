@@ -21,7 +21,9 @@ class BatchCommitActor:
     Prevents SQLite WAL connection blockages and lock contention under high-frequency writes.
     """
 
-    def __init__(self, commit_callback: Callable[[list[dict[str, Any]]], None], flush_interval_ms: int = 1000):
+    def __init__(
+        self, commit_callback: Callable[[list[dict[str, Any]]], None], flush_interval_ms: int = 1000
+    ):
         self.queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
         self.commit_callback = commit_callback
         self.flush_interval = flush_interval_ms / 1000.0
@@ -41,12 +43,12 @@ class BatchCommitActor:
     async def _process_queue(self) -> None:
         while self.is_running:
             await asyncio.sleep(self.flush_interval)
-            
+
             batch = []
             while not self.queue.empty():
                 batch.append(await self.queue.get())
                 self.queue.task_done()
-                
+
             if batch:
                 try:
                     logger.debug("Flushing batch commit of size=%d", len(batch))

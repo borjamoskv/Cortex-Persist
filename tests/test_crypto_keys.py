@@ -137,4 +137,3 @@ def test_zk_encryption_flow(km):
         # Decrypt
         decrypted = enc.decrypt_str(encrypted, tenant_id="test_tenant")
         assert decrypted == plaintext
-

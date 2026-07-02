@@ -10,6 +10,7 @@ from babylon60.utils.linguistic_entropy import LinguisticEntropyDetector, _token
 
 # ─── Tokenizer ────────────────────────────────────────────────────────────────
 
+
 def test_tokenizer_basic() -> None:
     tokens = _tokenize("Hello world!")
     assert tokens == ["hello", "world"]
@@ -27,6 +28,7 @@ def test_sentences_split() -> None:
 
 
 # ─── Shannon Entropies ────────────────────────────────────────────────────────
+
 
 class TestShannonEntropies:
     def setup_method(self) -> None:
@@ -74,6 +76,7 @@ class TestShannonEntropies:
 
 # ─── Lexical Diversity ────────────────────────────────────────────────────────
 
+
 class TestLexicalDiversity:
     def setup_method(self) -> None:
         self.d = LinguisticEntropyDetector()
@@ -100,6 +103,7 @@ class TestLexicalDiversity:
 
 # ─── Burstiness ───────────────────────────────────────────────────────────────
 
+
 class TestBurstiness:
     def setup_method(self) -> None:
         self.d = LinguisticEntropyDetector()
@@ -117,6 +121,7 @@ class TestBurstiness:
 
     def test_burstiness_range(self) -> None:
         import random
+
         random.seed(42)
         words = random.choices(["a", "b", "c", "d", "e", "f"], k=100)
         b = self.d._burstiness(words)
@@ -124,6 +129,7 @@ class TestBurstiness:
 
 
 # ─── Context Rot ──────────────────────────────────────────────────────────────
+
 
 class TestContextRot:
     def setup_method(self) -> None:
@@ -149,6 +155,7 @@ class TestContextRot:
 
 
 # ─── Slop Detection ───────────────────────────────────────────────────────────
+
 
 class TestSlopDetection:
     def setup_method(self) -> None:
@@ -180,6 +187,7 @@ class TestSlopDetection:
 
 # ─── Full Analysis Report ─────────────────────────────────────────────────────
 
+
 class TestFullAnalysis:
     def setup_method(self) -> None:
         self.d = LinguisticEntropyDetector()
@@ -188,12 +196,24 @@ class TestFullAnalysis:
         report = self.d.analyze("hello world")
         rdict = report.to_dict()
         for key in [
-            "char_count", "word_count", "sentence_count", "unique_words",
-            "char_entropy", "word_entropy", "bigram_entropy", "trigram_entropy",
-            "ttr", "mattr", "avg_sentence_length", "sentence_length_variance",
-            "burstiness", "context_rot_score",
-            "slop_weight_total", "slop_instances", "slop_density",
-            "exergy_score"
+            "char_count",
+            "word_count",
+            "sentence_count",
+            "unique_words",
+            "char_entropy",
+            "word_entropy",
+            "bigram_entropy",
+            "trigram_entropy",
+            "ttr",
+            "mattr",
+            "avg_sentence_length",
+            "sentence_length_variance",
+            "burstiness",
+            "context_rot_score",
+            "slop_weight_total",
+            "slop_instances",
+            "slop_density",
+            "exergy_score",
         ]:
             assert key in rdict, f"Missing field: {key}"
 

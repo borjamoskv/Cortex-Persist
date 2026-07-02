@@ -12,7 +12,12 @@ from typing import Any, Optional
 
 
 class MerkleNode:
-    def __init__(self, left: "Optional[MerkleNode]" = None, right: "Optional[MerkleNode]" = None, hash_val: str = ""):
+    def __init__(
+        self,
+        left: "Optional[MerkleNode]" = None,
+        right: "Optional[MerkleNode]" = None,
+        hash_val: str = "",
+    ):
         self.left = left
         self.right = right
         self.hash_val = hash_val
@@ -39,7 +44,7 @@ class StateEntangler:
         """Computes an entangled hash linking the transaction data to parallel agents."""
         sorted_parallel = sorted(parallel_state_hashes)
         parallel_seed = calculate_sha256(json.dumps(sorted_parallel, sort_keys=True))
-        
+
         payload = {
             "previous_hash": previous_hash,
             "tx": transaction_data,
@@ -57,7 +62,7 @@ class MerkleTreeAnchoring:
     def build_tree(leaves: list[str]) -> MerkleNode | None:
         if not leaves:
             return None
-        
+
         nodes = [MerkleNode(hash_val=h) for h in leaves]
         while len(nodes) > 1:
             next_level = []
@@ -82,39 +87,39 @@ class MerkleTreeAnchoring:
 @dataclass(frozen=True)
 class EntangledHash:
     """Hash entrelazado con firma y tracking de secuencia cruzada."""
+
     agent_id: str
     sequence: int
     own_previous: str
-    foreign_previous: str        # Hash del agente entrelazado
+    foreign_previous: str  # Hash del agente entrelazado
     foreign_agent_id: str
-    foreign_sequence: int        # Secuencia exacta del vecino al entrelazar (evita bug 1:1)
+    foreign_sequence: int  # Secuencia exacta del vecino al entrelazar (evita bug 1:1)
     payload_hash: str
-    combined_hash: str           # El hash final entrelazado
-    signature: str               # Autenticación cruzada (HMAC con clave de agente)
+    combined_hash: str  # El hash final entrelazado
+    signature: str  # Autenticación cruzada (HMAC con clave de agente)
 
 
 class EntanglementRing:
     """
     Anillo de entrelazamiento criptográfico con firmas y locks de grano fino.
-    
+
     Topología: A ──► B ──► C ──► A
     """
 
     def __init__(self, agent_ids: list[str]):
         if len(agent_ids) < 2:
             raise ValueError("Ring requires at least 2 agents")
-        
+
         self.agent_ids = agent_ids
-        
+
         # Locks por agente para eliminar el cuello de botella global
         self._locks: dict[str, Lock] = {aid: Lock() for aid in agent_ids}
-        
+
         # Secretos de firma compartida simétrica por agente (sustituye firmas débiles)
         self.agent_secrets: dict[str, bytes] = {
-            aid: hashlib.sha256(f"secret:{aid}".encode()).digest()
-            for aid in agent_ids
+            aid: hashlib.sha256(f"secret:{aid}".encode()).digest() for aid in agent_ids
         }
-        
+
         # Mapa de dependencia circular
         self.entanglement_map: dict[str, str] = {}
         for i, agent_id in enumerate(agent_ids):
@@ -138,7 +143,7 @@ class EntanglementRing:
 
         # Ordenar deterministamente los IDs para evitar deadlocks en la adquisición
         lock_order = sorted([agent_id, foreign_id])
-        
+
         # Adquirir ambos locks en orden determinista
         for lock_id in lock_order:
             self._locks[lock_id].acquire()
@@ -168,7 +173,7 @@ class EntanglementRing:
                 foreign_sequence=foreign_seq,
                 payload_hash=payload_hash,
                 combined_hash=combined,
-                signature=sig
+                signature=sig,
             )
 
             self.latest_hashes[agent_id] = combined
@@ -187,19 +192,23 @@ class EntanglementRing:
         secret = self.agent_secrets[agent_id]
 
         for entry in chain:
-            preimage = f"{entry.own_previous}\x00{entry.foreign_previous}\x00{entry.payload_hash}".encode()
+            preimage = (
+                f"{entry.own_previous}\x00{entry.foreign_previous}\x00{entry.payload_hash}".encode()
+            )
             expected = hashlib.sha256(preimage).hexdigest()
 
             if expected != entry.combined_hash:
                 return False
             if entry.own_previous != prev:
                 return False
-            
+
             # Validar firma del emisor
-            sig_check = hmac.new(secret, entry.combined_hash.encode("utf-8"), hashlib.sha256).hexdigest()
+            sig_check = hmac.new(
+                secret, entry.combined_hash.encode("utf-8"), hashlib.sha256
+            ).hexdigest()
             if sig_check != entry.signature:
                 return False
-                
+
             prev = entry.combined_hash
 
         return True
@@ -214,7 +223,7 @@ class EntanglementRing:
             chain = self.chain[agent_id]
             foreign_id = self.entanglement_map[agent_id]
             foreign_chain = self.chain[foreign_id]
-            
+
             genesis = hashlib.sha256(b"CORTEX_GENESIS_v8").hexdigest()
             valid = True
 
@@ -243,25 +252,29 @@ class EntanglementRing:
         """
         if agent_id not in self._locks:
             return False
-            
+
         with self._locks[agent_id]:
             # Validar de forma secuencial la cadena entrante
             genesis = hashlib.sha256(b"CORTEX_GENESIS_v8").hexdigest()
             prev = genesis
             secret = self.agent_secrets[agent_id]
-            
+
             for entry in correct_chain:
                 preimage = f"{entry.own_previous}\x00{entry.foreign_previous}\x00{entry.payload_hash}".encode()
                 expected = hashlib.sha256(preimage).hexdigest()
-                
+
                 if expected != entry.combined_hash or entry.own_previous != prev:
                     return False
-                sig_check = hmac.new(secret, entry.combined_hash.encode("utf-8"), hashlib.sha256).hexdigest()
+                sig_check = hmac.new(
+                    secret, entry.combined_hash.encode("utf-8"), hashlib.sha256
+                ).hexdigest()
                 if sig_check != entry.signature:
                     return False
                 prev = entry.combined_hash
-                
+
             self.chain[agent_id] = list(correct_chain)
-            self.latest_hashes[agent_id] = correct_chain[-1].combined_hash if correct_chain else genesis
+            self.latest_hashes[agent_id] = (
+                correct_chain[-1].combined_hash if correct_chain else genesis
+            )
             self.sequences[agent_id] = len(correct_chain)
             return True

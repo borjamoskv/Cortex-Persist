@@ -108,9 +108,7 @@ class IHelpPurgeDaemon:
         if is_hit:
             hits += 1
             new_rep: float = min(1.0, current_rep + 0.05 * (1.0 - current_rep))
-            query: str = (
-                "UPDATE agents SET reputation_score = ?, alignment_hits = ?, last_active_at = ? WHERE id = ?"
-            )
+            query: str = "UPDATE agents SET reputation_score = ?, alignment_hits = ?, last_active_at = ? WHERE id = ?"
             params: tuple[float, int, str, str] = (
                 new_rep,
                 hits,
@@ -120,9 +118,7 @@ class IHelpPurgeDaemon:
         else:
             misses += 1
             new_rep = max(0.0, current_rep * 0.95)
-            query = (
-                "UPDATE agents SET reputation_score = ?, alignment_misses = ?, last_active_at = ? WHERE id = ?"
-            )
+            query = "UPDATE agents SET reputation_score = ?, alignment_misses = ?, last_active_at = ? WHERE id = ?"
             params = (
                 new_rep,
                 misses,
@@ -169,9 +165,7 @@ class IHelpPurgeDaemon:
             f"Thermodynamic Action: Payload obliterated. Saved {waste_bytes} bytes ({tokens_saved} tokens) of GC/LLM evaluation overhead."
         )
 
-        db_path: str = (
-            os.environ.get("CORTEX_DB_PATH") or os.path.expanduser("~/.cortex/cortex.db")
-        )
+        db_path: str = os.environ.get("CORTEX_DB_PATH") or os.path.expanduser("~/.cortex/cortex.db")
         conn = await connect_async(db_path)
         try:
             # Initialize EnterpriseAuditLedger
@@ -243,13 +237,9 @@ class IHelpPurgeDaemon:
         from babylon60.routes.telemetry import BASE_MAFIA_NODES
 
         # Filter out non-domains (e.g. names with spaces or no dots)
-        domains: list[str] = [
-            node for node in BASE_MAFIA_NODES if "." in node and " " not in node
-        ]
+        domains: list[str] = [node for node in BASE_MAFIA_NODES if "." in node and " " not in node]
 
-        db_path: str = (
-            os.environ.get("CORTEX_DB_PATH") or os.path.expanduser("~/.cortex/cortex.db")
-        )
+        db_path: str = os.environ.get("CORTEX_DB_PATH") or os.path.expanduser("~/.cortex/cortex.db")
         conn = await connect_async(db_path)
         try:
             ledger = EnterpriseAuditLedger(conn)

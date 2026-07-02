@@ -91,15 +91,22 @@ def memory_db(tmp_path: Path):
     return str(db_path)
 
 
-def _insert_fact(db_path: str, fact_id: int, project: str, hours: float | None = 0.5, tenant_id: str = "default"):
+def _insert_fact(
+    db_path: str, fact_id: int, project: str, hours: float | None = 0.5, tenant_id: str = "default"
+):
     meta = json.dumps({"hours_saved": hours}) if hours is not None else "{}"
     conn = sqlite3.connect(db_path)
-    conn.execute("INSERT INTO facts (id, project, meta, tenant_id) VALUES (?, ?, ?, ?)", (fact_id, project, meta, tenant_id))
+    conn.execute(
+        "INSERT INTO facts (id, project, meta, tenant_id) VALUES (?, ?, ?, ?)",
+        (fact_id, project, meta, tenant_id),
+    )
     conn.commit()
     conn.close()
 
 
-def _insert_edge(db_path: str, child_id: int, parent_id: int, project: str, tenant_id: str = "default"):
+def _insert_edge(
+    db_path: str, child_id: int, parent_id: int, project: str, tenant_id: str = "default"
+):
     conn = sqlite3.connect(db_path)
     conn.execute(
         "INSERT INTO causal_edges (fact_id, parent_id, project, edge_type, tenant_id) VALUES (?, ?, ?, 'derived_from', ?)",

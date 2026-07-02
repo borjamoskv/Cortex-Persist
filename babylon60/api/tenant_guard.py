@@ -30,7 +30,7 @@ class TenantGuard:
         else:
             if now > self._local_counts[key]["expires_at"]:
                 self._local_counts[key] = {"count": 0, "expires_at": now + ttl}
-        
+
         self._local_counts[key]["count"] += amount
         return int(self._local_counts[key]["count"])
 
@@ -52,7 +52,7 @@ class TenantGuard:
         # 1. Check Rate Limit (requests per minute window)
         current_minute = int(time.time() // 60)
         rate_key = f"rate_limit:{tenant_id}:{current_minute}"
-        
+
         count = self.cache.incr(rate_key, 1, ttl=60)
         if count is None:
             # Fallback to local memory if Redis is unavailable
@@ -61,7 +61,7 @@ class TenantGuard:
         if count > rate_limit:
             raise HTTPException(
                 status_code=429,
-                detail=f"Rate limit exceeded. Plan '{plan_name}' allows {rate_limit} req/min."
+                detail=f"Rate limit exceeded. Plan '{plan_name}' allows {rate_limit} req/min.",
             )
 
         # 2. Check Monthly Quota (SSU limits per month)
@@ -69,7 +69,7 @@ class TenantGuard:
         if calls_limit != -1:
             current_month = datetime.now(timezone.utc).strftime("%Y-%m")
             quota_key = f"quota:{tenant_id}:{current_month}"
-            
+
             # 31 days ttl ~ 2678400 seconds
             used_quota = self.cache.incr(quota_key, ssu_cost, ttl=2678400)
             if used_quota is None:
@@ -78,8 +78,9 @@ class TenantGuard:
             if used_quota > calls_limit:
                 raise HTTPException(
                     status_code=402,
-                    detail=f"Monthly quota exhausted. Plan '{plan_name}' limit: {calls_limit}."
+                    detail=f"Monthly quota exhausted. Plan '{plan_name}' limit: {calls_limit}.",
                 )
+
 
 # Default singleton guard
 tenant_guard = TenantGuard()

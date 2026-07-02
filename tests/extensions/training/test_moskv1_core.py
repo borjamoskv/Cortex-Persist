@@ -141,9 +141,11 @@ async def test_infer_fallbacks():
 
     # Case 1: MLX fails, Ollama MOSKV-1 succeeds
     core._mlx_chat = AsyncMock(return_value="[ERROR] MLX failed")
-    core._ollama_chat = AsyncMock(side_effect=lambda messages, temp, model_override=None: (
-        "Ollama MOSKV-1 response" if model_override is None else "[ERROR] base failed"
-    ))
+    core._ollama_chat = AsyncMock(
+        side_effect=lambda messages, temp, model_override=None: (
+            "Ollama MOSKV-1 response" if model_override is None else "[ERROR] base failed"
+        )
+    )
 
     result = await core.infer(
         user_query="Test query",
@@ -155,9 +157,11 @@ async def test_infer_fallbacks():
     assert result.fallback_used is True
 
     # Case 2: MLX and Ollama MOSKV-1 fail, Ollama base succeeds
-    core._ollama_chat = AsyncMock(side_effect=lambda messages, temp, model_override=None: (
-        "[ERROR] MOSKV-1 failed" if model_override is None else "Ollama base response"
-    ))
+    core._ollama_chat = AsyncMock(
+        side_effect=lambda messages, temp, model_override=None: (
+            "[ERROR] MOSKV-1 failed" if model_override is None else "Ollama base response"
+        )
+    )
 
     result = await core.infer(
         user_query="Test query",

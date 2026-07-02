@@ -340,7 +340,7 @@ class TestBaseAgent:
             agent_id="agent-ui-1",
             purpose="test",
             tools_allowed=["filesystem", "shell"],
-            project_id="cortex_ui"
+            project_id="cortex_ui",
         )
 
         registry = ToolRegistry()
@@ -364,7 +364,9 @@ class TestBaseAgent:
 
         # Validate shell tool CWD containment
         with pytest.raises(PermissionError) as exc:
-            await agent_ui.use_tool("shell", cmd="pwd", cwd="/Users/borjafernandezangulo/30_BABYLON-60/babylon60")
+            await agent_ui.use_tool(
+                "shell", cmd="pwd", cwd="/Users/borjafernandezangulo/30_BABYLON-60/babylon60"
+            )
         assert "Project boundary violation" in str(exc.value)
 
 

@@ -30,7 +30,7 @@ class Guard(Protocol[E]):
     def evaluate(self, payload: E, **kwargs: Any) -> E:
         """
         Evalúa el payload y retorna el mismo si es válido.
-        
+
         Raises:
             GuardViolation: Si el payload viola las leyes termodinámicas o estructurales.
         """

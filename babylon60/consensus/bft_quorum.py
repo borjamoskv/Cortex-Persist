@@ -49,7 +49,7 @@ class BFTQuorumGuard:
             return True
 
         total_nodes = len(self.known_peers)
-        
+
         # In a BFT system tolerating f faults, total_nodes (n) >= 3f + 1
         # Thus, f = (total_nodes - 1) // 3
         # The required honest quorum to safely commit is 2f + 1
@@ -85,4 +85,6 @@ class BFTQuorumGuard:
         logger.critical(
             f"[BFT_QUORUM] Quorum NOT met. Only {valid_count}/{required_quorum} valid signatures."
         )
-        raise BFTQuorumError(f"Ouroboros Quorum NOT met. Only {valid_count}/{required_quorum} valid signatures.")
+        raise BFTQuorumError(
+            f"Ouroboros Quorum NOT met. Only {valid_count}/{required_quorum} valid signatures."
+        )

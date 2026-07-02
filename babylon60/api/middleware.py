@@ -446,11 +446,13 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
             from fastapi import HTTPException
 
             from babylon60.api.tenant_guard import tenant_guard
+
             # Free bypass for default or pwyw without strict enforcement on stripe
             if plan != "free" and plan != "pwyw":
                 tenant_guard.verify_request(tenant_id=tenant_id, plan_name=plan, ssu_cost=1)
         except Exception as exc:
             from fastapi import HTTPException
+
             if isinstance(exc, HTTPException):
                 return JSONResponse(status_code=exc.status_code, content={"error": exc.detail})
             logger.error("TenantGuard failure: %s", exc)
@@ -526,6 +528,6 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
 
             # Push usage into O(1) async buffer
             await get_stripe_syncer().queue_usage(api_key, result.tenant_id, ssu_cost=1)
-            
+
         except Exception as e:  # noqa: BLE001
             logger.error("Stripe billing increment failed for %s: %s", api_key[:12], e)

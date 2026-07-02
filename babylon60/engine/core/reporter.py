@@ -50,7 +50,8 @@ class SovereignReporter:
         """Fetch the latest ROI records from the facts table."""
         cursor = await conn.execute(
             "SELECT content, metadata FROM facts WHERE fact_type='knowledge' "
-            "AND source='chronos-roi' AND tenant_id = ? ORDER BY id DESC LIMIT 5", (self.tenant_id,)
+            "AND source='chronos-roi' AND tenant_id = ? ORDER BY id DESC LIMIT 5",
+            (self.tenant_id,),
         )
         roi_history = []
         rows = await cursor.fetchall()
@@ -95,12 +96,17 @@ class SovereignReporter:
                 roi_history = await self._fetch_roi_history(conn)
 
                 # 4. Active Ghosts
-                cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE fact_type='ghost' AND tenant_id=?", (self.tenant_id,))
+                cursor = await conn.execute(
+                    "SELECT COUNT(*) FROM facts WHERE fact_type='ghost' AND tenant_id=?",
+                    (self.tenant_id,),
+                )
                 row = await cursor.fetchone()
                 ghost_count = row[0] if row else 0
 
                 # 5. Architecture Integrity
-                cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE tenant_id=?", (self.tenant_id,))
+                cursor = await conn.execute(
+                    "SELECT COUNT(*) FROM facts WHERE tenant_id=?", (self.tenant_id,)
+                )
                 row = await cursor.fetchone()
                 fact_count = row[0] if row else 0
                 integrity = (total_edges / max(1, fact_count)) * 100.0

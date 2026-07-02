@@ -22,14 +22,16 @@ def test_state_entanglement():
     prev_hash = "00000000000000000000"
     tx = {"amount": 100, "recipient": "swarm-0"}
     parallel_hashes = ["hash-a", "hash-b", "hash-c"]
-    
+
     entangled_1 = StateEntangler.entangle_states(prev_hash, tx, parallel_hashes)
     entangled_2 = StateEntangler.entangle_states(prev_hash, tx, parallel_hashes)
-    
+
     # Determinism assertion
     assert len(entangled_1) == 64
     # State-rollback protection assertion (modifying one parallel hash changes final hash)
-    entangled_modified = StateEntangler.entangle_states(prev_hash, tx, ["hash-a", "hash-b", "hash-x"])
+    entangled_modified = StateEntangler.entangle_states(
+        prev_hash, tx, ["hash-a", "hash-b", "hash-x"]
+    )
     assert entangled_1 != entangled_modified
 
 
@@ -38,7 +40,7 @@ def test_merkle_anchoring():
     root = MerkleTreeAnchoring.build_tree(leaves)
     assert root is not None
     assert root.hash_val != ""
-    
+
     msg = MerkleTreeAnchoring.generate_git_anchor_commit_message(root.hash_val, 42)
     assert "Merkle Root" in msg
     assert "epoch 42" in msg
@@ -47,11 +49,11 @@ def test_merkle_anchoring():
 def test_federation_router():
     qdrant = MockQdrantIndex()
     router = FederationRouter(qdrant)
-    
+
     # Route write
     router.route_write("tenant-1", 1, "Fact 1 content", [0.1, 0.2, 0.3])
     router.route_write("tenant-2", 2, "Fact 2 content", [0.9, 0.8, 0.7])
-    
+
     # Query cross-tenant
     results = router.route_cross_query([0.8, 0.8, 0.8], limit=1)
     assert len(results) == 1
@@ -77,10 +79,10 @@ def test_scanner_16d():
 def test_consensus_wbft_sybil_dilution():
     votes = [
         SwarmVote("a1", "groq", "llama", 1.0, "result-A"),
-        SwarmVote("a2", "groq", "llama", 1.0, "result-A"), # Colluding llama family
+        SwarmVote("a2", "groq", "llama", 1.0, "result-A"),  # Colluding llama family
         SwarmVote("a3", "cerebras", "qwen", 1.0, "result-B"),
     ]
-    
+
     payload, ratio = WeightedByzantineConsensus.compute_quorum(votes)
     # The two llama votes are divided by 2 (weight = 0.5 each). Total A weight = 1.0
     # The single qwen vote is divided by 1 (weight = 1.0). Total B weight = 1.0
@@ -92,19 +94,19 @@ def test_consensus_wbft_sybil_dilution():
 @pytest.mark.asyncio
 async def test_batch_commit_actor():
     committed = []
-    
+
     def callback(batch):
         committed.extend(batch)
-        
+
     actor = BatchCommitActor(commit_callback=callback, flush_interval_ms=10)
     actor.start()
-    
+
     await actor.send_write({"id": 1})
     await actor.send_write({"id": 2})
-    
+
     # Wait for flush interval
     await asyncio.sleep(0.05)
     await actor.stop()
-    
+
     assert len(committed) == 2
     assert committed[0]["id"] == 1

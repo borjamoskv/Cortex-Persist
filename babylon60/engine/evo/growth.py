@@ -42,9 +42,7 @@ class NeuralGrowthEngine:
 
         return consolidated + promoted
 
-    async def _consolidate_redundant_facts(
-        self, conn: aiosqlite.Connection, tenant_id: str
-    ) -> int:
+    async def _consolidate_redundant_facts(self, conn: aiosqlite.Connection, tenant_id: str) -> int:
         """
         Merges redundant 'tentative' facts with high semantic similarity.
         (Heuristic: same project, same type, overlapping content).
@@ -53,7 +51,7 @@ class NeuralGrowthEngine:
             "SELECT project, content, count(*) as cnt "
             "FROM facts WHERE fact_type = 'bridge' AND valid_until IS NULL AND tenant_id = ? "
             "GROUP BY project, content HAVING cnt > 1",
-            (tenant_id,)
+            (tenant_id,),
         )
         dupes = await cursor.fetchall()
 

@@ -72,7 +72,9 @@ class AutodidactFunctor:
             for claim in claims:
                 if len(claim.evidence_list) < 2:
                     logger.error(f"Apoptosis Celular: Claim {claim.id} no alcanza BFT (N<2).")
-                    raise ValueError(f"Fallo BFT: Evidencia independiente insuficiente para colapsar {state.id}")
+                    raise ValueError(
+                        f"Fallo BFT: Evidencia independiente insuficiente para colapsar {state.id}"
+                    )
 
         # Cristalizar en matriz C5-REAL mediante las claims
         prims = [c.statement for c in claims if "primitiva" in c.statement.lower()][:5]
@@ -82,11 +84,16 @@ class AutodidactFunctor:
         reda = [c.statement for c in claims if "vector adversarial" in c.statement.lower()][:2]
 
         # Padding estructural (Cortex 135 invariantes dummy bounds) si la asimilación fue incompleta
-        while len(prims) < 5: prims.append("PRIM-000: Primitiva Estructural Asimilada")
-        while len(invt) < 3: invt.append("INVT-000: Estabilidad Causal BFT")
-        while len(antip) < 3: antip.append("ANTIP-000: Erradicación Green Theater")
-        while len(redun) < 2: redun.append("REDUN-000: Caché Criptográfico Activo")
-        while len(reda) < 2: reda.append("REDA-000: Vector Inyección Anérgico Mitigado")
+        while len(prims) < 5:
+            prims.append("PRIM-000: Primitiva Estructural Asimilada")
+        while len(invt) < 3:
+            invt.append("INVT-000: Estabilidad Causal BFT")
+        while len(antip) < 3:
+            antip.append("ANTIP-000: Erradicación Green Theater")
+        while len(redun) < 2:
+            redun.append("REDUN-000: Caché Criptográfico Activo")
+        while len(reda) < 2:
+            reda.append("REDA-000: Vector Inyección Anérgico Mitigado")
 
         matrix = OntologyForgeMatrix(
             source_state_id=state.id,
@@ -95,15 +102,19 @@ class AutodidactFunctor:
             anti_patterns=antip,
             redundancies=redun,
             adversarial_vectors=reda,
-            confidence_level="C5-REAL"
+            confidence_level="C5-REAL",
         )
-        
+
         if not matrix.is_valid():
             raise RuntimeError("Fallo de cristalización ontológica C5-REAL")
-            
+
         return matrix
-        
-    def map_morphism(self, source_matrix: OntologyForgeMatrix, transformation: Callable[[OntologyForgeMatrix], OntologyForgeMatrix]) -> OntologyForgeMatrix:
+
+    def map_morphism(
+        self,
+        source_matrix: OntologyForgeMatrix,
+        transformation: Callable[[OntologyForgeMatrix], OntologyForgeMatrix],
+    ) -> OntologyForgeMatrix:
         """
         Preserva composición de transformaciones causales.
         """

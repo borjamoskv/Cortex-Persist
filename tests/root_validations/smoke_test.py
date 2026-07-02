@@ -12,6 +12,7 @@ async def main():
     # We must insert the workspace path first so we can import babylon60 modules correctly
     workspace_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     import sys
+
     sys.path.insert(0, workspace_root)
 
     from babylon60.database.core import connect as secure_connect, causal_write
@@ -66,9 +67,7 @@ async def main():
 
         print(f"Processing task {task_id}...")
 
-        os.environ["PATH"] = (
-            f"{workspace_root}/tests/mock-bin:{os.environ.get('PATH', '')}"
-        )
+        os.environ["PATH"] = f"{workspace_root}/tests/mock-bin:{os.environ.get('PATH', '')}"
         from babylon60.engine.flow.cascade_router import CascadeRouter
 
         router = CascadeRouter()

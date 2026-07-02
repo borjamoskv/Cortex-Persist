@@ -160,7 +160,13 @@ class TTTEngine:
                             f.write(existing_lines[0] + "\n")
                         else:
                             # Strict fallback dummy matching format
-                            dummy = {"messages": [{"role": "system", "content": "stub"}, {"role": "user", "content": "ping"}, {"role": "assistant", "content": "pong"}]}
+                            dummy = {
+                                "messages": [
+                                    {"role": "system", "content": "stub"},
+                                    {"role": "user", "content": "ping"},
+                                    {"role": "assistant", "content": "pong"},
+                                ]
+                            }
                             f.write(json.dumps(dummy) + "\n")
                 except Exception as e:  # noqa: BLE001
                     logger.error("Failed to write split file %s: %s", path, e)
@@ -209,14 +215,14 @@ class TTTEngine:
             "--iters",
             "50",  # Optimized iterations for nocturnal cycle
             "--batch-size",
-            "1",   # Lower batch size to prevent OOM
+            "1",  # Lower batch size to prevent OOM
             "--grad-accumulation-steps",
-            "2",   # Virtual batch size = 2
+            "2",  # Virtual batch size = 2
             "--val-batches",
-            "5",   # Speed up validation checks
+            "5",  # Speed up validation checks
             "--max-seq-length",
-            "1280", # Avoid truncation
-            "--grad-checkpoint", # Enable memory optimizations
+            "1280",  # Avoid truncation
+            "--grad-checkpoint",  # Enable memory optimizations
         ]
 
         try:

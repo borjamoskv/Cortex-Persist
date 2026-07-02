@@ -38,10 +38,7 @@ class DualNumber:
 
     def __mul__(self, other: DualNumber | float) -> DualNumber:
         if isinstance(other, DualNumber):
-            return DualNumber(
-                self.val * other.val,
-                self.der * other.val + self.val * other.der
-            )
+            return DualNumber(self.val * other.val, self.der * other.val + self.val * other.der)
         return DualNumber(self.val * other, self.der * other)
 
     def __rmul__(self, other: float) -> DualNumber:
@@ -52,8 +49,7 @@ class DualNumber:
             if abs(other.val) < 1e-15:
                 raise ZeroDivisionError("Dual division by zero in value.")
             return DualNumber(
-                self.val / other.val,
-                (self.der * other.val - self.val * other.der) / (other.val ** 2)
+                self.val / other.val, (self.der * other.val - self.val * other.der) / (other.val**2)
             )
         if abs(other) < 1e-15:
             raise ZeroDivisionError("Dual division by zero in scalar.")
@@ -62,7 +58,7 @@ class DualNumber:
     def __rtruediv__(self, other: float) -> DualNumber:
         if abs(self.val) < 1e-15:
             raise ZeroDivisionError("Dual division by zero in value.")
-        return DualNumber(other / self.val, -other * self.der / (self.val ** 2))
+        return DualNumber(other / self.val, -other * self.der / (self.val**2))
 
     def sin(self) -> DualNumber:
         return DualNumber(math.sin(self.val), self.der * math.cos(self.val))
@@ -81,12 +77,14 @@ def test_dual_number_differentiation():
     # f'(x) = 3*x^2 + exp(x) * sin(x) + exp(x) * cos(x)
     x_val = 2.0
     x = DualNumber(x_val, 1.0)
-    
+
     y = (x * x * x) + (x.exp() * x.sin())
-    
+
     expected_val = x_val**3 + math.exp(x_val) * math.sin(x_val)
-    expected_der = 3 * (x_val**2) + math.exp(x_val) * math.sin(x_val) + math.exp(x_val) * math.cos(x_val)
-    
+    expected_der = (
+        3 * (x_val**2) + math.exp(x_val) * math.sin(x_val) + math.exp(x_val) * math.cos(x_val)
+    )
+
     assert abs(y.val - expected_val) < 1e-12
     assert abs(y.der - expected_der) < 1e-12
 
@@ -101,11 +99,11 @@ def test_symplectic_vs_explicit_euler():
     """Verify that symplectic Verlet conserves energy while explicit Euler diverges."""
     dt = 0.05
     steps = 1000
-    
+
     # Initial conditions
     q_init, p_init = 1.0, 0.0
     initial_energy = simple_harmonic_oscillator_hamiltonian(q_init, p_init)
-    
+
     # 2.1 Explicit Euler
     q, p = q_init, p_init
     for _ in range(steps):
@@ -114,7 +112,7 @@ def test_symplectic_vs_explicit_euler():
         q += dt * dq
         p += dt * dp
     euler_energy = simple_harmonic_oscillator_hamiltonian(q, p)
-    
+
     # 2.2 Symplectic Verlet (Stormer-Verlet / leapfrog style)
     q_s, p_s = q_init, p_init
     for _ in range(steps):
@@ -125,7 +123,7 @@ def test_symplectic_vs_explicit_euler():
         # Complete step update for p
         p_s = p_half - 0.5 * dt * q_s
     symplectic_energy = simple_harmonic_oscillator_hamiltonian(q_s, p_s)
-    
+
     # Explicit Euler MUST explode (increase energy)
     assert euler_energy > initial_energy * 1.5
     # Symplectic Verlet MUST conserve energy (within small bounded error)

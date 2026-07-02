@@ -18,20 +18,20 @@ from babylon60.events.bus import DistributedEventBus
 async def test_event_bus_local_fallback_dispatch():
     """Verify that when Redis is unavailable, the bus falls back to local RAM dispatch."""
     bus = DistributedEventBus(redis_url=None)
-    
+
     received_payloads = []
 
     async def callback(payload):
         received_payloads.append(payload)
 
     bus.subscribe("test.topic", callback)
-    
+
     test_payload = {"source": "test_suite", "message": "hello"}
     await bus.publish("test.topic", test_payload)
 
     # Allow async loop to settle
     await asyncio.sleep(0.05)
-    
+
     assert len(received_payloads) == 1
     assert received_payloads[0] == test_payload
     await bus.shutdown()
@@ -41,7 +41,7 @@ async def test_event_bus_local_fallback_dispatch():
 async def test_event_bus_redis_stream_publishing():
     """Verify that when Redis is active, events are published using xadd."""
     mock_redis = AsyncMock()
-    
+
     with patch("redis.asyncio.from_url", return_value=mock_redis):
         # We explicitly pass a url to trigger Redis connection path
         bus = DistributedEventBus(redis_url="redis://localhost:6379")
@@ -65,14 +65,12 @@ async def test_event_bus_redis_stream_subscriber_worker():
     """Verify that subscribing triggers background xread worker task and updates callbacks."""
     mock_redis = AsyncMock()
     mock_redis.xinfo_stream.side_effect = Exception("No stream yet")
-    
+
     # Simulate a single stream message yield, then block/exit
     future_data = [
-        [
-            ("cortex:stream:swarm.update", [("12345-0", {"payload": '{"event": "alert"}'})])
-        ]
+        [("cortex:stream:swarm.update", [("12345-0", {"payload": '{"event": "alert"}'})])]
     ]
-    
+
     async def mock_xread(*args, **kwargs):
         if future_data:
             await asyncio.sleep(0.01)
@@ -84,12 +82,13 @@ async def test_event_bus_redis_stream_subscriber_worker():
     mock_redis.xread.side_effect = mock_xread
 
     received_alerts = []
+
     async def alert_callback(payload):
         received_alerts.append(payload)
 
     with patch("redis.asyncio.from_url", return_value=mock_redis):
         bus = DistributedEventBus(redis_url="redis://localhost:6379")
-        
+
         bus.subscribe("swarm.update", alert_callback)
         assert len(bus._redis_tasks) == 1
 
@@ -98,5 +97,5 @@ async def test_event_bus_redis_stream_subscriber_worker():
 
         assert len(received_alerts) == 1
         assert received_alerts[0] == {"event": "alert"}
-        
+
         await bus.shutdown()

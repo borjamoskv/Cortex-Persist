@@ -80,16 +80,16 @@ def test_apoptosis_prunes_explicit_and_anergy(temp_ledger):
 
     # Initialize Apoptosis with entropy threshold of 2.0
     apoptosis = ThermodynamicLedgerApoptosis(str(temp_ledger), entropy_threshold=2.0)
-    
+
     # Run compaction/snapshot
     active_count = apoptosis.trigger_snapshot()
 
     # Verify statistics
     assert apoptosis.stats["scanned"] == 5
     assert apoptosis.stats["purged_explicit"] == 1  # child_deleted
-    assert apoptosis.stats["purged_anergy"] == 1     # child_low_entropy
-    assert apoptosis.stats["purged_cascade"] == 1     # grandchild_cascade
-    assert apoptosis.stats["crystallized"] == 2       # root_01 and child_active
+    assert apoptosis.stats["purged_anergy"] == 1  # child_low_entropy
+    assert apoptosis.stats["purged_cascade"] == 1  # grandchild_cascade
+    assert apoptosis.stats["crystallized"] == 2  # root_01 and child_active
     assert active_count == 2
 
     # Verify persistent file content on disk after snapshotting

@@ -160,7 +160,8 @@ class AsyncCausalGraph:
         if not fact_hash:
             try:
                 async with self.conn.execute(
-                    "SELECT fact_hash FROM facts WHERE id = ? AND tenant_id = ?", (fact_id, tenant_id)
+                    "SELECT fact_hash FROM facts WHERE id = ? AND tenant_id = ?",
+                    (fact_id, tenant_id),
                 ) as cursor:
                     row = await cursor.fetchone()
                     fact_hash = row[0] if row else None
@@ -170,7 +171,8 @@ class AsyncCausalGraph:
         if parent_id and not parent_hash:
             try:
                 async with self.conn.execute(
-                    "SELECT fact_hash FROM facts WHERE id = ? AND tenant_id = ?", (parent_id, tenant_id)
+                    "SELECT fact_hash FROM facts WHERE id = ? AND tenant_id = ?",
+                    (parent_id, tenant_id),
                 ) as cursor:
                     row = await cursor.fetchone()
                     parent_hash = row[0] if row else None

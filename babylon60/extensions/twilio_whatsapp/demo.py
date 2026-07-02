@@ -30,7 +30,9 @@ async def main():
     gateway = TwilioWhatsAppGateway(account_sid=account_sid, auth_token=auth_token, sender=sender)
 
     try:
-        res = await gateway.send_message(to=target, body="[CORTEX-PERSIST] C5-REAL: Transmission from MOSKV-1 APEX via Twilio.")
+        res = await gateway.send_message(
+            to=target, body="[CORTEX-PERSIST] C5-REAL: Transmission from MOSKV-1 APEX via Twilio."
+        )
         print(f"[+] Transmission Successful. SID: {res.get('sid')}")
     except Exception as e:  # noqa: BLE001
         print(f"[-] Transmission Failed. Entropic Collapse: {e}")

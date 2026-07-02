@@ -370,6 +370,7 @@ class L2HybridSearch:
             content_val = row[3] or ""
             if content_val.startswith("v6_aesgcm:"):
                 from babylon60.crypto import get_default_encrypter
+
                 enc = get_default_encrypter()
                 decrypted = enc.decrypt_str(content_val, tenant_id=row[1])
                 content_val = decrypted if decrypted else "[CORTEX-ENCRYPTED-BLOB]"

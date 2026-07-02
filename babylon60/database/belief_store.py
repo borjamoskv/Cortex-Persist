@@ -29,7 +29,7 @@ class BeliefStore:
                 certainty REAL NOT NULL
             )
         """)
-        
+
         # Virtual table for embeddings (text-1536)
         await self.db.execute("""
             CREATE VIRTUAL TABLE IF NOT EXISTS cortex_embeddings_text USING vec0(
@@ -45,7 +45,7 @@ class BeliefStore:
         """
         # The prompt demands CORTEX-TAINT application. We ensure the signature is present.
         # Since it is a Pydantic model, it has already been validated.
-        
+
         # Step 1: Insert metadata and get rowid. VEC-0 Invariant: separate tables, manual mapping.
         cursor = await self.db.execute(
             """
@@ -65,18 +65,18 @@ class BeliefStore:
                 belief.payload.content,
                 belief.payload.context_hash,
                 belief.payload.certainty,
-            )
+            ),
         )
-        
+
         rowid = cursor.lastrowid
-        
+
         # Step 2: Insert into vec0 table with matching rowid
         await self.db.execute(
             """
             INSERT INTO cortex_embeddings_text (rowid, embedding)
             VALUES (?, ?)
             """,
-            (rowid, json.dumps(embedding))
+            (rowid, json.dumps(embedding)),
         )
-        
+
         return rowid

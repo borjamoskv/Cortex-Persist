@@ -141,13 +141,16 @@ class ThermodynamicLedgerApoptosis:
 
                 # Reemplazo atómico a nivel de sistema operativo
                 shutil.move(temp_path, self.ledger_path)
-                
+
                 # Emitir telemetría de decaimiento
-                total_pruned = self.stats["purged_explicit"] + self.stats["purged_anergy"] + self.stats["purged_cascade"]
+                total_pruned = (
+                    self.stats["purged_explicit"]
+                    + self.stats["purged_anergy"]
+                    + self.stats["purged_cascade"]
+                )
                 if total_pruned > 0:
                     metrics.inc("cortex_stale_memory_cleaned_total", value=total_pruned)
-                    
+
                 return len(state)
             finally:
                 fcntl.flock(origin_fd.fileno(), fcntl.LOCK_UN)
-

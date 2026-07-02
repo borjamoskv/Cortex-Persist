@@ -69,6 +69,7 @@ def _sentences(text: str) -> list[str]:
 
 # ─── Core data model ─────────────────────────────────────────────────────────
 
+
 @dataclass
 class LinguisticEntropyReport:
     # Raw counts
@@ -84,11 +85,11 @@ class LinguisticEntropyReport:
     trigram_entropy: float = 0.0
 
     # Lexical diversity
-    ttr: float = 0.0                     # Type-Token Ratio
-    mattr: float = 0.0                   # Moving Average TTR (window=50)
+    ttr: float = 0.0  # Type-Token Ratio
+    mattr: float = 0.0  # Moving Average TTR (window=50)
 
     # Sentence metrics
-    avg_sentence_length: float = 0.0     # words per sentence
+    avg_sentence_length: float = 0.0  # words per sentence
     sentence_length_variance: float = 0.0
 
     # Burstiness (Goh-Barabási): B ∈ [-1, 1]
@@ -98,15 +99,15 @@ class LinguisticEntropyReport:
     burstiness: float = 0.0
 
     # Context rot: rolling window entropy delta
-    context_rot_score: Decimal = 0.0       # 0.0 = no rot, 1.0 = maximum decay
+    context_rot_score: Decimal = 0.0  # 0.0 = no rot, 1.0 = maximum decay
 
     # Slop
     slop_weight_total: float = 0.0
     slop_instances: list[dict[str, Any]] = field(default_factory=list)
-    slop_density: float = 0.0            # slop_weight / word_count
+    slop_density: float = 0.0  # slop_weight / word_count
 
     # Final composite
-    exergy_score: Decimal = 0.0            # 0.0 = pure anergy, 1.0 = max exergy
+    exergy_score: Decimal = 0.0  # 0.0 = pure anergy, 1.0 = max exergy
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
@@ -119,8 +120,8 @@ class LinguisticEntropyReport:
         return d
 
 
-
 # ─── Detector ────────────────────────────────────────────────────────────────
+
 
 class LinguisticEntropyDetector:
     """
@@ -131,8 +132,7 @@ class LinguisticEntropyDetector:
 
     def __init__(self) -> None:
         self._compiled_slop: list[tuple[re.Pattern[str], float]] = [
-            (re.compile(pattern, re.IGNORECASE), weight)
-            for pattern, weight in _SLOP_PATTERNS
+            (re.compile(pattern, re.IGNORECASE), weight) for pattern, weight in _SLOP_PATTERNS
         ]
 
     # ── Shannon utilities ───────────────────────────────────────────────
@@ -143,9 +143,7 @@ class LinguisticEntropyDetector:
             return 0.0
         counts = Counter(items)
         total = len(items)
-        return float(-sum(
-            (c / total) * math.log2(c / total) for c in counts.values()
-        ))
+        return float(-sum((c / total) * math.log2(c / total) for c in counts.values()))
 
     def calculate_char_entropy(self, text: str) -> float:
         return round(self._shannon(list(text)), 4)
@@ -155,12 +153,12 @@ class LinguisticEntropyDetector:
 
     def calculate_bigram_entropy(self, text: str) -> float:
         words = _tokenize(text)
-        bigrams = [f"{words[i]} {words[i+1]}" for i in range(len(words) - 1)]
+        bigrams = [f"{words[i]} {words[i + 1]}" for i in range(len(words) - 1)]
         return round(self._shannon(bigrams), 4)
 
     def calculate_trigram_entropy(self, text: str) -> float:
         words = _tokenize(text)
-        trigrams = [f"{words[i]} {words[i+1]} {words[i+2]}" for i in range(len(words) - 2)]
+        trigrams = [f"{words[i]} {words[i + 1]} {words[i + 2]}" for i in range(len(words) - 2)]
         return round(self._shannon(trigrams), 4)
 
     # ── Lexical diversity ───────────────────────────────────────────────
@@ -178,10 +176,7 @@ class LinguisticEntropyDetector:
             if not words:
                 return 0.0
             return round(len(set(words)) / len(words), 4)
-        ttrs = [
-            len(set(words[i:i + window])) / window
-            for i in range(len(words) - window + 1)
-        ]
+        ttrs = [len(set(words[i : i + window])) / window for i in range(len(words) - window + 1)]
         return round(sum(ttrs) / len(ttrs), 4)
 
     # ── Sentence metrics ────────────────────────────────────────────────
@@ -241,7 +236,7 @@ class LinguisticEntropyDetector:
 
         windows: list[float] = []
         for i in range(0, len(words) - window_size, window_size // 2):
-            chunk = words[i:i + window_size]
+            chunk = words[i : i + window_size]
             counts = Counter(chunk)
             total = len(chunk)
             h = -sum((c / total) * math.log2(c / total) for c in counts.values())
@@ -251,8 +246,8 @@ class LinguisticEntropyDetector:
             return 0.0
 
         # Compute the cumulative decay: how much entropy drops from first to last window
-        first_half = windows[:len(windows) // 2]
-        second_half = windows[len(windows) // 2:]
+        first_half = windows[: len(windows) // 2]
+        second_half = windows[len(windows) // 2 :]
         h_first = sum(first_half) / len(first_half)
         h_second = sum(second_half) / len(second_half)
 
@@ -267,13 +262,15 @@ class LinguisticEntropyDetector:
         results: list[dict[str, Any]] = []
         for pattern, weight in self._compiled_slop:
             for match in pattern.finditer(text):
-                results.append({
-                    "pattern": pattern.pattern,
-                    "matched_text": match.group(),
-                    "start": match.start(),
-                    "end": match.end(),
-                    "severity_weight": weight,
-                })
+                results.append(
+                    {
+                        "pattern": pattern.pattern,
+                        "matched_text": match.group(),
+                        "start": match.start(),
+                        "end": match.end(),
+                        "severity_weight": weight,
+                    }
+                )
         return results
 
     # ── Full analysis ───────────────────────────────────────────────────

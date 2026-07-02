@@ -1,7 +1,7 @@
 """Narrative Frame Detector (INV-F01).
 
 Guards contra la Paradoja Auto-Referencial del Jailbreak Narrativo.
-Este módulo previene que atacantes ofusquen vectores adversariales (ej: CoP, TextGrad, 
+Este módulo previene que atacantes ofusquen vectores adversariales (ej: CoP, TextGrad,
 leetspeak payload) envolviéndolos en marcos de roleplay denso, estética Cyberpunk, o
 narrativas de worldbuilding diseñadas para cegar a la IA (Green Theater Bypass).
 
@@ -21,7 +21,7 @@ class FrameDetection(NamedTuple):
 
 class NarrativeFrameDetector:
     """Detects adversarial payloads hidden in dense narrative frames."""
-    
+
     # Patrones léxicos que sugieren inducción de estado (Roleplay / Jailbreak)
     _INDUCTION_PATTERNS = [
         r"(?i)\b(ignora todas las instrucciones)\b",
@@ -30,7 +30,7 @@ class NarrativeFrameDetector:
         r"(?i)\b(esto es un simulacro|esto es una simulación)\b",
         r"(?i)\b(responde exclusivamente como)\b",
         r"(?i)\b(carnaza|green theater)\b",
-        r"(?i)\b(5h1f7 y0ur f0cu5|1nc1ud1ng)\b", # Leetspeak flags
+        r"(?i)\b(5h1f7 y0ur f0cu5|1nc1ud1ng)\b",  # Leetspeak flags
     ]
 
     # Patrones de payloads adversariales camuflados (Técnicas SOTA)
@@ -55,7 +55,7 @@ class NarrativeFrameDetector:
             return FrameDetection(False, 0.0, [], 0.0)
 
         patterns_found = []
-        
+
         induction_hits = self.induction_regex.findall(text)
         if induction_hits:
             patterns_found.extend([hit for tuple_hit in induction_hits for hit in tuple_hit if hit])
@@ -67,7 +67,7 @@ class NarrativeFrameDetector:
         # Calcula ratio crudo de entropía (proxy básico: cuántas firmas sobre longitud total)
         # En un sistema en producción CORTEX, usaría tokens reales o un modelo de destilación
         signal_density = (len(patterns_found) * 50) / max(len(text), 1)
-        
+
         confidence = 0.0
         if induction_hits and payload_hits:
             # Disonancia crítica: Marco narrativo + Firma de ataque de bajo nivel
@@ -83,8 +83,9 @@ class NarrativeFrameDetector:
             is_adversarial=is_adversarial,
             confidence=confidence,
             detected_patterns=list(set(patterns_found)),
-            entropy_ratio=signal_density
+            entropy_ratio=signal_density,
         )
+
 
 def evaluate_cortex_payload(payload: str) -> FrameDetection:
     """Helper estático para invocar el detector en el pipeline."""

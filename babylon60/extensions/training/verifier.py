@@ -101,9 +101,10 @@ class AdapterVerifier:
                         tensor = f.get_tensor(key)
                         tensor_count += 1
                         total_parameters += tensor.size
-                        
+
                         # Math check via numpy
                         import numpy as np
+
                         if np.isnan(tensor).any():
                             nan_detected = True
                             logger.error("❌ NaN values detected in LoRA layer: %s", key)
@@ -135,6 +136,7 @@ class AdapterVerifier:
         import_error_msg = None
         try:
             import mlx_lm  # pyright: ignore[reportMissingImports]  # noqa: F401
+
             load_success = True
         except ImportError as e:
             import_error_msg = str(e)

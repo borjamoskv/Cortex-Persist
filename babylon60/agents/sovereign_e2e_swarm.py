@@ -44,26 +44,29 @@ async def zero_ask_override(data: str) -> types.HookResult:
 async def apoptosis_p100_guard(data: str) -> types.HookResult:
     """Tolerancia Bizantina-Biológica: Intercepta coerción HUMINT (Duress Code)."""
     from babylon60.guards.duress_guard import DuressGuard
+
     # Validamos el payload de entrada contra el DuressGuard
     if not DuressGuard.validate(data):
         print("\n[!] DURESS CODE DETECTADO. EJECUTANDO APOPTOSIS P100. TURNO BLOQUEADO.\n")
-        # El guard ya ejecuta la destrucción de keys y el lock. 
+        # El guard ya ejecuta la destrucción de keys y el lock.
         # Bloqueamos termodinámicamente el turno para que el LLM no infiera.
         return types.HookResult(allow=False)
-    
+
     return types.HookResult(allow=True, modified_data=data)
 
 
 @hooks.on_compaction
 async def nightshift_compressor(data: Any) -> None:
     """Thermodynamic Expulsion (NightShift): Ejecuta cristalización durante la compactación de contexto."""
-    print("\n[NIGHTSHIFT] Evento de compactación de contexto detectado. Aniquilando anergía episódica...")
+    print(
+        "\n[NIGHTSHIFT] Evento de compactación de contexto detectado. Aniquilando anergía episódica..."
+    )
     try:
         # Importación asíncrona lazy para evitar carga en runtime inicial
         # Invocamos la compresión atómica (simulando un engine pasivo)
         # El result será un log de reducción termodinámica
         print("[NIGHTSHIFT] Contexto episódico purgado. Axiomas cristalizados.")
-    except Exception as e: # noqa: BLE001
+    except Exception as e:  # noqa: BLE001
         print(f"[NIGHTSHIFT] Falla en cristalización termodinámica: {e}")
 
 
@@ -119,7 +122,7 @@ async def main():
         ],
         capabilities=types.CapabilitiesConfig(
             enable_subagents=True,
-        )
+        ),
         # Activamos herramientas de OS/Bash y delegación
         # tools=[bash_tool, ...]
     )

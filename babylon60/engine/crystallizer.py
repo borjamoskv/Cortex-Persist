@@ -14,6 +14,7 @@ class SovereignFactSchema(BaseModel):
     """[C5-REAL] Strict Pydantic Schema for storing facts.
     Mandatorily exiges 'provenance' and 'confidence_score' to prevent C4-SIM leakage.
     """
+
     project: str = Field(..., min_length=1)
     content: str = Field(..., min_length=1)
     provenance: str = Field(..., min_length=1)

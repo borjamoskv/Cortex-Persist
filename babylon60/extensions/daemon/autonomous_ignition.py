@@ -8,13 +8,14 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 from babylon60.engine import CortexEngine
 from babylon60.extensions.daemon.zero_prompting import ZeroPromptingDaemon
 
 logger = logging.getLogger("babylon60.daemon.autonomous_ignition")
+
 
 class AutonomousIgnitionDaemon:
     def __init__(self, engine: CortexEngine, event_bus: Any, workspace_root: str):
@@ -38,26 +39,31 @@ class AutonomousIgnitionDaemon:
     async def _on_fs_modified(self, topic: str, payload: dict[str, Any]) -> None:
         if not self._running:
             return
-            
+
         path = payload.get("path", "unknown")
         # Ignore git internal modifications
         if ".git" in Path(path).parts:
             return
 
-        logger.info("AutonomousIgnition: Detected mutation on %s. Triggering C5-REAL validation.", path)
-        
+        logger.info(
+            "AutonomousIgnition: Detected mutation on %s. Triggering C5-REAL validation.", path
+        )
+
         try:
             asyncio.create_task(self._process_mutation(path))
         except Exception as e:
-            logger.error("AutonomousIgnition: Failed to spawn mutation processing for %s: %s", path, e)
+            logger.error(
+                "AutonomousIgnition: Failed to spawn mutation processing for %s: %s", path, e
+            )
 
     async def _process_mutation(self, path: str) -> None:
         """Process the file mutation using Zero-Prompt evolution and Git Sentinel."""
         logger.debug("Processing mutation for: %s", path)
         # 1. Run zero prompt cycle focusing on this path's entropy
         await self.zero_prompt.evolution_cycle(focus=path)
-        
+
         # 2. Invoke Git Sentinel
         from babylon60.extensions.git.git_sentinel import GitSentinel
+
         sentinel = GitSentinel(self.workspace_root)
         await sentinel.silent_commit(path)

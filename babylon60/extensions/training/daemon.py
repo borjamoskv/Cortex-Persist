@@ -60,15 +60,20 @@ class AutonomousTrainingDaemon:
             if hasattr(self.episodic_memory, "_conn"):
                 conn = self.episodic_memory._conn
                 import inspect
-                
+
                 # Check if connection is a mock/MagicMock or async test double
                 is_mock = hasattr(conn, "_mock_methods") or "mock" in type(conn).__name__.lower()
-                
+
                 # Detect if conn.execute is explicitly mocked with context manager return (testing)
-                has_execute_mock = hasattr(conn, "execute") and hasattr(conn.execute, "return_value") and (
-                    hasattr(conn.execute.return_value, "__aenter__") or hasattr(conn.execute.return_value, "__aenter__")
+                has_execute_mock = (
+                    hasattr(conn, "execute")
+                    and hasattr(conn.execute, "return_value")
+                    and (
+                        hasattr(conn.execute.return_value, "__aenter__")
+                        or hasattr(conn.execute.return_value, "__aenter__")
+                    )
                 )
-                
+
                 if is_mock and has_execute_mock:
                     # Fallback for the explicit async context manager mock used in tests
                     cursor = conn.execute("SELECT DISTINCT session_id FROM episodes")
@@ -178,7 +183,11 @@ class AutonomousTrainingDaemon:
             with open(self.verified_adapter_file, "w", encoding="utf-8") as f:
                 json.dump(registry_data, f, indent=2)
 
-            logger.info("🎉 Archived and registered verified adapter version v%d at %s", next_version, adapter_path)
+            logger.info(
+                "🎉 Archived and registered verified adapter version v%d at %s",
+                next_version,
+                adapter_path,
+            )
         except Exception as e:  # noqa: BLE001
             logger.error("Failed to register and archive verified adapter: %s", e)
 
@@ -197,15 +206,18 @@ class AutonomousTrainingDaemon:
         # ─── Step 1: Pre-compilation ──────────────────────────────────
         try:
             from babylon60.extensions.training.moskv1_dataset_compiler import MOSKV1DatasetCompiler
+
             # Resolve workspace path automatically (pointing to the base directory of babylon60)
             workspace_path = Path(__file__).resolve().parents[3]
             logger.info("🔧 Pre-compiling static dataset from workspace: %s", workspace_path)
-            
+
             compiler = MOSKV1DatasetCompiler(workspace_path=workspace_path, min_exergy=0.45)
             compiler.compile_full_dataset()
             logger.info("✅ Pre-compilation complete.")
         except Exception as ce:  # noqa: BLE001
-            logger.error("Failed pre-compiling static dataset: %s. Continuing with existing files.", ce)
+            logger.error(
+                "Failed pre-compiling static dataset: %s. Continuing with existing files.", ce
+            )
 
         # ─── Step 2: Session Consolidation ────────────────────────────
         all_sessions = await self.get_all_session_ids()
@@ -282,7 +294,7 @@ class AutonomousTrainingDaemon:
             log_entry = {
                 "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 "unconsolidated_sessions_found": len(unconsolidated),
-                **cycle_result
+                **cycle_result,
             }
             with open(telemetry_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(log_entry) + "\n")

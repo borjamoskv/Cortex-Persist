@@ -106,7 +106,7 @@ class SignalReactor:
         """Lazy-initialize the TriggerEngine with default triggers."""
         if self._trigger_engine is not None:
             return self._trigger_engine
-        
+
         from babylon60.extensions.signals.trigger_engine import (
             TriggerEngine,
         )
@@ -126,7 +126,9 @@ class SignalReactor:
     async def _handle_experience_recorded(self, signal: Any) -> None:
         """Reflex: Reconcile an experience into stratified memory layers."""
         if not self.engine or not self.engine.memory:
-            raise RuntimeError("Experience reconciliation failed: Engine or MemoryManager not available.")
+            raise RuntimeError(
+                "Experience reconciliation failed: Engine or MemoryManager not available."
+            )
 
         logger.info("Reactor: Reconciling experience signal #%d", signal.id)
         await self.engine.memory.reconcile_experience(signal)

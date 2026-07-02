@@ -38,19 +38,29 @@ async def test_text_search_dynamic_filtering():
                 updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
             )
         """)
-        
+
         # Insert test facts
         await conn.execute(
             "INSERT INTO facts (project, content, fact_type, tags) VALUES (?, ?, ?, ?)",
-            ("p1", "cortex semantic search with dynamic filtering", "knowledge", json.dumps(["cortex", "filtering"]))
+            (
+                "p1",
+                "cortex semantic search with dynamic filtering",
+                "knowledge",
+                json.dumps(["cortex", "filtering"]),
+            ),
         )
         await conn.execute(
             "INSERT INTO facts (project, content, fact_type, tags) VALUES (?, ?, ?, ?)",
-            ("p1", "exergy storage and cortex memory limits decision", "decision", json.dumps(["exergy", "cortex"]))
+            (
+                "p1",
+                "exergy storage and cortex memory limits decision",
+                "decision",
+                json.dumps(["exergy", "cortex"]),
+            ),
         )
         await conn.execute(
             "INSERT INTO facts (project, content, fact_type, tags) VALUES (?, ?, ?, ?)",
-            ("p1", "some unrelated information fact", "knowledge", json.dumps(["unrelated"]))
+            ("p1", "some unrelated information fact", "knowledge", json.dumps(["unrelated"])),
         )
         await conn.commit()
 
@@ -59,17 +69,28 @@ async def test_text_search_dynamic_filtering():
         assert len(results) == 2
 
         # Test case 2: Query content "cortex" with fact_type="knowledge" (should match fact 1 only)
-        results = await text_search(conn, "cortex", tenant_id="default", project="p1", fact_type="knowledge")
+        results = await text_search(
+            conn, "cortex", tenant_id="default", project="p1", fact_type="knowledge"
+        )
         assert len(results) == 1
         assert "dynamic filtering" in results[0].content
 
         # Test case 3: Query content "cortex" with tags=["exergy"] (should match fact 2 only)
-        results = await text_search(conn, "cortex", tenant_id="default", project="p1", tags=["exergy"])
+        results = await text_search(
+            conn, "cortex", tenant_id="default", project="p1", tags=["exergy"]
+        )
         assert len(results) == 1
         assert "exergy storage" in results[0].content
 
         # Test case 4: Query content "cortex" with tag "filtering" and fact_type="decision" (should match none)
-        results = await text_search(conn, "cortex", tenant_id="default", project="p1", tags=["filtering"], fact_type="decision")
+        results = await text_search(
+            conn,
+            "cortex",
+            tenant_id="default",
+            project="p1",
+            tags=["filtering"],
+            fact_type="decision",
+        )
         assert len(results) == 0
 
 
@@ -86,7 +107,9 @@ def test_build_semantic_query_dynamic_filtering():
     confidence = None
 
     # Base query without dynamic filters
-    sql, params = _build_semantic_query(tenant_id, embedding_json, top_k, project, as_of, confidence)
+    sql, params = _build_semantic_query(
+        tenant_id, embedding_json, top_k, project, as_of, confidence
+    )
     assert "AND f.fact_type = ?" not in sql
     assert "EXISTS (SELECT 1 FROM json_each(f.tags) WHERE value = ?)" not in sql
 
@@ -99,12 +122,12 @@ def test_build_semantic_query_dynamic_filtering():
         as_of,
         confidence,
         fact_type="decision",
-        tags=["exergy", "cortex"]
+        tags=["exergy", "cortex"],
     )
 
     assert "AND f.fact_type = ?" in sql
     assert "EXISTS (SELECT 1 FROM json_each(f.tags) WHERE value = ?)" in sql
-    
+
     # Verify parameter order
     # Base params: [tenant_id, embedding_json, top_k*3, project] -> length 4
     # Plus fact_type, plus tag1, plus tag2 -> total length 7

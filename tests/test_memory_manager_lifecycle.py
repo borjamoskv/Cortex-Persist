@@ -107,9 +107,9 @@ async def test_store_pipeline_states(manager, mock_encoder):
                 "source_metadata": {
                     "origin": "system",
                     "author": "test",
-                    "confidence_in_source": 1.0
-                }
-            }
+                    "confidence_in_source": 1.0,
+                },
+            },
         )
 
     assert fact_id == "engram_1"
@@ -139,9 +139,9 @@ async def test_store_rollback_resonance_failure(manager):
                     "source_metadata": {
                         "origin": "system",
                         "author": "test",
-                        "confidence_in_source": 1.0
-                    }
-                }
+                        "confidence_in_source": 1.0,
+                    },
+                },
             )
 
 

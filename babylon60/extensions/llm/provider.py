@@ -533,7 +533,9 @@ class LLMProvider(BaseProvider):
 
         cache_config = get_prefix_cache_config(self._provider)
         if cache_config.get("enabled") and self._provider == "gemini":
-            if res := await self._try_gemini_cached_invoke(model_name, messages, prompt, cache_config):
+            if res := await self._try_gemini_cached_invoke(
+                model_name, messages, prompt, cache_config
+            ):
                 return res
 
         cache = _get_result_cache()

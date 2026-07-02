@@ -42,6 +42,7 @@ class Z3ASTCompiler(ast.NodeVisitor):
     Seguridad AST compiler para mapear strings a constraints Z3 en runtime.
     Garantiza una ejecución C5-REAL libre de inyecciones de código arbitrario.
     """
+
     def __init__(self, variables: dict[str, Any]):
         self.variables = variables
 
@@ -54,10 +55,14 @@ class Z3ASTCompiler(ast.NodeVisitor):
     def visit_BinOp(self, node: ast.BinOp):
         left = self.visit(node.left)
         right = self.visit(node.right)
-        if isinstance(node.op, ast.Add): return left + right
-        if isinstance(node.op, ast.Sub): return left - right
-        if isinstance(node.op, ast.Mult): return left * right
-        if isinstance(node.op, ast.Div): return left / right
+        if isinstance(node.op, ast.Add):
+            return left + right
+        if isinstance(node.op, ast.Sub):
+            return left - right
+        if isinstance(node.op, ast.Mult):
+            return left * right
+        if isinstance(node.op, ast.Div):
+            return left / right
         raise ValueError(f"Operador binario no soportado: {type(node.op)}")
 
     def visit_Compare(self, node: ast.Compare):
@@ -65,13 +70,20 @@ class Z3ASTCompiler(ast.NodeVisitor):
         expr = True
         for op, comparator in zip(node.ops, node.comparators, strict=True):
             right = self.visit(comparator)
-            if isinstance(op, ast.Eq): current = (left == right)
-            elif isinstance(op, ast.NotEq): current = (left != right)
-            elif isinstance(op, ast.Lt): current = (left < right)
-            elif isinstance(op, ast.LtE): current = (left <= right)
-            elif isinstance(op, ast.Gt): current = (left > right)
-            elif isinstance(op, ast.GtE): current = (left >= right)
-            else: raise ValueError(f"Operador de comparación no soportado: {type(op)}")
+            if isinstance(op, ast.Eq):
+                current = left == right
+            elif isinstance(op, ast.NotEq):
+                current = left != right
+            elif isinstance(op, ast.Lt):
+                current = left < right
+            elif isinstance(op, ast.LtE):
+                current = left <= right
+            elif isinstance(op, ast.Gt):
+                current = left > right
+            elif isinstance(op, ast.GtE):
+                current = left >= right
+            else:
+                raise ValueError(f"Operador de comparación no soportado: {type(op)}")
             expr = And(expr, current) if expr is not True else current
             left = right
         return expr
@@ -87,7 +99,7 @@ class Z3ASTCompiler(ast.NodeVisitor):
     def visit_Constant(self, node: ast.Constant):
         return node.value
 
-    def visit_Num(self, node: ast.Num): # Compatibilidad Python anterior
+    def visit_Num(self, node: ast.Num):  # Compatibilidad Python anterior
         return node.n
 
     def visit_BoolOp(self, node: ast.BoolOp):
@@ -96,6 +108,7 @@ class Z3ASTCompiler(ast.NodeVisitor):
             return And(*values)
         if isinstance(node.op, ast.Or):
             from z3 import Or
+
             return Or(*values)
         raise ValueError(f"Operador lógico no soportado: {type(node.op)}")
 

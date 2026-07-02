@@ -1,6 +1,7 @@
 """
 [C5-REAL] MOSKV-1 Asymmetric ZK Compiler Types
 """
+
 from typing import Optional
 
 from typing_extensions import TypedDict

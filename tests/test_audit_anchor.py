@@ -49,7 +49,7 @@ def test_merkle_tree_odd_leaves():
 def test_anchor_service_lifecycle(tmp_path: Path):
     db_file = str(tmp_path / "anchor_test.db")
     service = AnchorService(db_path=db_file, epoch_size=3)
-    
+
     assert service.current_epoch == 1
     assert len(service.pending_hashes) == 0
 

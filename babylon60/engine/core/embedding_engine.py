@@ -98,7 +98,9 @@ async def embed_fact_async(
                         embedding=fact_hv.tolist(),
                         specular_embedding=intent_hv.tolist(),
                         confidence="C5",
-                        source_metadata=SourceMetadata(origin="system", author="embedding_engine", confidence_in_source=1.0)
+                        source_metadata=SourceMetadata(
+                            origin="system", author="embedding_engine", confidence_in_source=1.0
+                        ),
                     )
                     await memory_manager._hdc.memorize(fact)
                     logger.debug("Vector Alpha (HDC) indexed for fact %d", fact_id)

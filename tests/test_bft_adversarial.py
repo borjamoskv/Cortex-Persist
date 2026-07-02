@@ -169,6 +169,7 @@ async def test_concurrent_proposals_resolved():
     # Issue 10 proposals concurrently
     await asyncio.gather(*(run_single_proposal(i) for i in range(10)))
 
+
 @pytest.mark.asyncio
 async def test_network_partition_convergence_time():
     """Simulates a network partition (async delay) to check convergence time."""
@@ -200,7 +201,7 @@ async def test_network_partition_convergence_time():
     # Simulate delay for agent 2
     delay_time = 0.2
     await asyncio.sleep(delay_time)
-    
+
     v2 = await gateway.submit_vote(
         req_id, sign_payload(agents[2][0], payload_str, req_id), agents[2][1]
     )

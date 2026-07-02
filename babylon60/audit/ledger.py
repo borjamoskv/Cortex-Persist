@@ -674,10 +674,9 @@ class EnterpriseAuditLedger:
         # Asume que un commit C5-REAL válido registra su hash en el resource o action.
         async with self._conn.execute(
             "SELECT COUNT(*) FROM security_audit_log WHERE resource LIKE ? OR action LIKE ?",
-            (f"%{commit_hash}%", f"%{commit_hash}%")
+            (f"%{commit_hash}%", f"%{commit_hash}%"),
         ) as cursor:
             row = await cursor.fetchone()
             if row and row[0] > 0:
                 return True
         return False
-

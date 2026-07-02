@@ -130,6 +130,7 @@ class SovereignDB:
             conn.execute("PRAGMA foreign_keys=ON")
 
             from babylon60.database.core import load_sqlite_vec
+
             load_sqlite_vec(conn)
 
             self._conn = conn

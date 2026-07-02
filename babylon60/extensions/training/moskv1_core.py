@@ -56,12 +56,15 @@ logger = logging.getLogger("babylon60.training.moskv1_core")
 
 # ─── Configuration ─────────────────────────────────────────────────────────
 
+
 def _get_ram_gb() -> float:
     try:
         import os
-        return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / (1024 ** 3)
+
+        return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / (1024**3)
     except Exception:
         return 32.0
+
 
 _is_test = "pytest" in sys.modules or "py.test" in sys.modules
 _low_memory = _get_ram_gb() < 24.0 and not _is_test
@@ -176,7 +179,7 @@ class MOSKV1Core:
         self._adapter_path = Path.home() / ".babylon60" / "training" / "adapters"
         self._history: deque[ConversationTurn] = deque(maxlen=max_history * 2)
         self._sovereign_llm = None  # Lazy-loaded fallback
-        
+
         # MLX Native model cache
         self._mlx_model = None
         self._mlx_tokenizer = None
@@ -193,7 +196,7 @@ class MOSKV1Core:
             return False
 
         current_mtime = adapter_file.stat().st_mtime
-        
+
         # Check if the cache needs invalidation (hot reload weights)
         if self._mlx_model is not None and current_mtime <= self._mlx_loaded_mtime:
             return True
@@ -206,11 +209,9 @@ class MOSKV1Core:
         def _load():
             try:
                 from mlx_lm import load
+
                 logger.info("Warmup: loading MLX model and LoRA adapter...")
-                res = load(
-                    self._mlx_base_model_path,
-                    adapter_path=str(self._adapter_path)
-                )
+                res = load(self._mlx_base_model_path, adapter_path=str(self._adapter_path))
                 model, tokenizer = res[0], res[1]
                 return model, tokenizer
             except Exception as e:  # noqa: BLE001
@@ -265,8 +266,10 @@ class MOSKV1Core:
         try:
             from babylon60.embeddings import LocalEmbedder
             from babylon60.search.hybrid import hybrid_search
+
             embedder = LocalEmbedder()
             from typing import cast
+
             raw_embedding = embedder.embed(query)
             if raw_embedding and isinstance(raw_embedding[0], list):
                 query_embedding: list[float] = raw_embedding[0]
@@ -465,14 +468,18 @@ class MOSKV1Core:
 
         # Attempt 2: Ollama with MOSKV-1 model
         if response_text.startswith("[ERROR]"):
-            logger.warning("Native MLX-LM failed, falling back to Ollama MOSKV-1 model: %s", response_text)
+            logger.warning(
+                "Native MLX-LM failed, falling back to Ollama MOSKV-1 model: %s", response_text
+            )
             response_text = await self._ollama_chat(messages, temperature)
             model_used = self.model_name
             fallback_used = True
 
         # Attempt 3: Ollama with base model
         if response_text.startswith("[ERROR]"):
-            logger.warning("Ollama MOSKV-1 model failed, trying Ollama base model: %s", response_text)
+            logger.warning(
+                "Ollama MOSKV-1 model failed, trying Ollama base model: %s", response_text
+            )
             response_text = await self._ollama_chat(
                 messages, temperature, model_override=FALLBACK_MODEL
             )
@@ -481,7 +488,9 @@ class MOSKV1Core:
 
         # Attempt 4: SovereignLLM (CORTEX multi-provider chain)
         if response_text.startswith("[ERROR]"):
-            logger.warning("Ollama base model failed, falling back to SovereignLLM: %s", response_text)
+            logger.warning(
+                "Ollama base model failed, falling back to SovereignLLM: %s", response_text
+            )
             response_text = await self._sovereign_fallback(messages, temperature)
             model_used = "sovereign_llm"
             fallback_used = True
@@ -681,31 +690,30 @@ class MOSKV1Core:
 
         try:
             current_mtime = adapter_file.stat().st_mtime
-            
+
             def _load_and_gen():
                 # Lazy-load MLX model and tokenizer (synchronous load if never loaded)
                 model = self._mlx_model
                 tokenizer = self._mlx_tokenizer
                 if model is None or tokenizer is None:
                     from mlx_lm import load
+
                     logger.info("Loading base model and LoRA adapter into MLX...")
-                    res = load(
-                        self._mlx_base_model_path,
-                        adapter_path=str(self._adapter_path)
-                    )
+                    res = load(self._mlx_base_model_path, adapter_path=str(self._adapter_path))
                     model = res[0]
                     tokenizer = res[1]
                     self._mlx_model = model
                     self._mlx_tokenizer = tokenizer
-                
+
                 # Apply chat template
                 from mlx_lm import generate
+
                 prompt = tokenizer.apply_chat_template(
                     messages,
                     tokenize=False,
                     add_generation_prompt=True,
                 )
-                
+
                 logger.info("Executing native MLX generation...")
                 raw_response = generate(
                     model,
@@ -724,17 +732,19 @@ class MOSKV1Core:
             # to avoid blocking the asyncio event loop.
             loop = asyncio.get_running_loop()
             response = await loop.run_in_executor(self._pool, _load_and_gen)
-            
+
             # Hot reload weights asynchronously post-inference if file was modified
             if self._mlx_model is not None and current_mtime > self._mlx_loaded_mtime:
                 if not self._mlx_is_reloading:
-                    logger.info("Hot Reload: New adapter weights detected. Triggering post-inference background reload.")
+                    logger.info(
+                        "Hot Reload: New adapter weights detected. Triggering post-inference background reload."
+                    )
                     self._mlx_is_reloading = True
                     asyncio.create_task(self._async_reload_weights(current_mtime))
             else:
                 # Update mtime if this was a synchronous load or no update needed
                 self._mlx_loaded_mtime = current_mtime
-            
+
             return response
 
         except ImportError as e:
@@ -750,25 +760,25 @@ class MOSKV1Core:
             # Release old model references to free Unified Memory/VRAM before reloading
             self._mlx_model = None
             self._mlx_tokenizer = None
-            
+
             import gc
+
             gc.collect()
             try:
                 import mlx.core as mx
+
                 mx.metal.clear_cache()
             except Exception:
                 pass
-            
+
             # Wait for Metal command queue to drain and unmap memory segments cleanly
             await asyncio.sleep(2.0)
 
             def _load_new():
                 from mlx_lm import load
+
                 logger.info("Background Reload: Loading base model and new LoRA adapter...")
-                res = load(
-                    self._mlx_base_model_path,
-                    adapter_path=str(self._adapter_path)
-                )
+                res = load(self._mlx_base_model_path, adapter_path=str(self._adapter_path))
                 return res[0], res[1]
 
             loop = asyncio.get_running_loop()

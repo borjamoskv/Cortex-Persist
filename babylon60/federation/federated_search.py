@@ -29,6 +29,7 @@ class FederationConfig:
     """
     Configuración del switch de federación.
     """
+
     qps_threshold: int = 50
     tenant_threshold: int = 500
     qdrant_url: str = "http://localhost:6333"
@@ -83,14 +84,14 @@ class QdrantAdapter:
         self.config = config
         self.circuit_breaker = CircuitBreaker(
             threshold=config.circuit_breaker_failure_threshold,
-            recovery_timeout=config.circuit_breaker_recovery_timeout_s
+            recovery_timeout=config.circuit_breaker_recovery_timeout_s,
         )
 
     def search(
         self,
         query_embedding: list[float],
         tenant_filter: Optional[list[str]] = None,
-        limit: int = 20
+        limit: int = 20,
     ) -> list[SearchResult]:
         if not self.circuit_breaker.allow_request():
             # Devuelve vacío si el Circuit Breaker está abierto para forzar el fallback
@@ -107,12 +108,7 @@ class QdrantAdapter:
             return []
 
     def upsert_document(
-        self,
-        tenant_id: str,
-        doc_id: str,
-        embedding: list[float],
-        text: str,
-        source_hash: str
+        self, tenant_id: str, doc_id: str, embedding: list[float], text: str, source_hash: str
     ) -> bool:
         """Inyecta o actualiza un documento en el índice."""
         if not self.circuit_breaker.allow_request():
@@ -136,10 +132,7 @@ class SQLiteMergeSearch:
         self.db_paths = db_paths  # tenant_id -> path
 
     def search(
-        self,
-        query: str,
-        tenant_filter: Optional[list[str]] = None,
-        limit: int = 20
+        self, query: str, tenant_filter: Optional[list[str]] = None, limit: int = 20
     ) -> list[SearchResult]:
         results: list[SearchResult] = []
         targets = tenant_filter or list(self.db_paths.keys())
@@ -155,16 +148,18 @@ class SQLiteMergeSearch:
                     "rank, source_hash "
                     "FROM fts_facts WHERE fts_facts MATCH ? "
                     "ORDER BY rank LIMIT ?",
-                    (query, limit)
+                    (query, limit),
                 )
                 for row in cur:
-                    results.append(SearchResult(
-                        tenant_id=tenant_id,
-                        doc_id=row[0],
-                        score=abs(row[2]),
-                        text_snippet=row[1],
-                        source_hash=row[3]
-                    ))
+                    results.append(
+                        SearchResult(
+                            tenant_id=tenant_id,
+                            doc_id=row[0],
+                            score=abs(row[2]),
+                            text_snippet=row[1],
+                            source_hash=row[3],
+                        )
+                    )
             except sqlite3.OperationalError:
                 continue
             finally:
@@ -183,7 +178,7 @@ class FederatedSearchRouter:
         self,
         config: FederationConfig,
         sqlite_search: SQLiteMergeSearch,
-        qdrant_search: QdrantAdapter
+        qdrant_search: QdrantAdapter,
     ):
         self.config = config
         self.sqlite = sqlite_search
@@ -195,9 +190,7 @@ class FederatedSearchRouter:
     def current_qps(self) -> float:
         with self._lock:
             now = time.monotonic()
-            self._query_timestamps = [
-                t for t in self._query_timestamps if now - t < 10.0
-            ]
+            self._query_timestamps = [t for t in self._query_timestamps if now - t < 10.0]
             return len(self._query_timestamps) / 10.0
 
     def _select_backend(self, tenant_count: int) -> SearchBackend:
@@ -205,8 +198,10 @@ class FederatedSearchRouter:
         if not self.qdrant.circuit_breaker.allow_request():
             return SearchBackend.SQLITE_MERGE
 
-        if (self.current_qps > self.config.qps_threshold
-                or tenant_count > self.config.tenant_threshold):
+        if (
+            self.current_qps > self.config.qps_threshold
+            or tenant_count > self.config.tenant_threshold
+        ):
             return SearchBackend.QDRANT_FEDERATED
         return SearchBackend.SQLITE_MERGE
 
@@ -216,7 +211,7 @@ class FederatedSearchRouter:
         query_embedding: Optional[list[float]],
         tenant_count: int,
         tenant_filter: Optional[list[str]] = None,
-        limit: int = 20
+        limit: int = 20,
     ) -> tuple[list[SearchResult], SearchBackend]:
         with self._lock:
             self._query_timestamps.append(time.monotonic())
@@ -227,24 +222,14 @@ class FederatedSearchRouter:
             if query_embedding is None:
                 raise ValueError("Qdrant backend requires query_embedding")
             results = self.qdrant.search(
-                query_embedding=query_embedding,
-                tenant_filter=tenant_filter,
-                limit=limit
+                query_embedding=query_embedding, tenant_filter=tenant_filter, limit=limit
             )
             # Fallback en caliente si Qdrant no devolvió resultados por fallo o CB
             if not results:
-                results = self.sqlite.search(
-                    query=query,
-                    tenant_filter=tenant_filter,
-                    limit=limit
-                )
+                results = self.sqlite.search(query=query, tenant_filter=tenant_filter, limit=limit)
                 backend = SearchBackend.SQLITE_MERGE
         else:
-            results = self.sqlite.search(
-                query=query,
-                tenant_filter=tenant_filter,
-                limit=limit
-            )
+            results = self.sqlite.search(query=query, tenant_filter=tenant_filter, limit=limit)
 
         return results, backend
 
@@ -279,7 +264,7 @@ class CDCPipeline:
                     doc_id=doc_id,
                     embedding=embedding,
                     text=text,
-                    source_hash=source_hash
+                    source_hash=source_hash,
                 )
                 if success:
                     count += 1

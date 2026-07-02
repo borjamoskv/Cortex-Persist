@@ -181,7 +181,10 @@ class AdaptiveResonanceGate:
 
             # Reality hierarchy check: skip resonance if candidate is speculative (< C5)
             # and neighbor is established C5 truth, and contents differ.
-            if sim >= 0.80 and candidate.content.strip().lower() != neighbor.content.strip().lower():
+            if (
+                sim >= 0.80
+                and candidate.content.strip().lower() != neighbor.content.strip().lower()
+            ):
                 cand_speculative = is_less_than_c5(get_confidence_val(candidate))
                 neigh_established = not is_less_than_c5(get_confidence_val(neighbor))
                 if cand_speculative and neigh_established:
@@ -301,7 +304,10 @@ class AdaptiveResonanceGate:
                 # IMPLICIT COLLISION: speculative fact vs established C5 truth
                 sim = cosine_similarity(candidate.embedding, neighbor.embedding)
                 # If they are semantically very similar (>80% similarity) but have different text content
-                if sim >= 0.80 and candidate.content.strip().lower() != neighbor.content.strip().lower():
+                if (
+                    sim >= 0.80
+                    and candidate.content.strip().lower() != neighbor.content.strip().lower()
+                ):
                     cand_speculative = is_less_than_c5(get_confidence_val(candidate))
                     neigh_established = not is_less_than_c5(get_confidence_val(neighbor))
                     if cand_speculative and neigh_established:
@@ -347,14 +353,14 @@ class AdaptiveResonanceGate:
                 logger.warning(
                     "ART GATE: Ingestion blocked. Speculative claim collapsed by established C5 truth."
                 )
-                
+
                 # Emitir métrica de telemetría factual
                 metrics.inc(
                     "cortex_contradictions_total",
                     labels={"domain": candidate.tenant_id or "unknown"},
-                    meta={"candidate_id": candidate.id}
+                    meta={"candidate_id": candidate.id},
                 )
-                
+
                 return ("blocked", candidate)
 
             # Update neighbors affected by the collision

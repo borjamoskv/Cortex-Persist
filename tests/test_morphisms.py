@@ -58,6 +58,7 @@ def test_morphism_isomorphism():
     E.g. scaling: f(x) = 5x, f_inv(x) = x/5.
     And a custom Dual numbers isomorphism.
     """
+
     # Scalar Isomorphism
     def f_scale(x: float) -> float:
         return x * 5.0
@@ -83,6 +84,7 @@ def test_morphism_endomorphism_automorphism():
     """
     Validates endomorphism (codomain matches domain) and automorphism (invertible endomorphism).
     """
+
     # Guard to check if value lies within the domain of positive floats/Duals
     def is_positive(x: Any) -> bool:
         if isinstance(x, (int, float)):
@@ -112,6 +114,7 @@ def test_morphism_idempotence():
     Validates idempotence: f(f(x)) == f(x).
     E.g. Projections.
     """
+
     # Absolute value projection on positive numbers or Duals (already positive, so idempotent)
     def f_abs(x: Any) -> Any:
         return abs(x)
@@ -128,6 +131,7 @@ def test_morphism_involution():
     Validates involution: f(f(x)) == x.
     E.g. Negation or Inversion.
     """
+
     def f_neg(x: Any) -> Any:
         return -x
 
@@ -228,6 +232,7 @@ def test_morphism_functor():
     - F_obj(x) = Dual(x, 1.0)
     - F_morph(f) maps a real function f to a Dual function.
     """
+
     # Object mapping: float -> Dual
     def F_obj(x: float) -> Dual:
         return Dual(x, 1.0)
@@ -244,8 +249,11 @@ def test_morphism_functor():
     # Test morphisms (functions) in the source category
     # Morphism 1: f(x) = 2x
     # Morphism 2: g(x) = x + 3
-    def f_double(x): return x * 2.0
-    def g_add_three(x): return x + 3.0
+    def f_double(x):
+        return x * 2.0
+
+    def g_add_three(x):
+        return x + 3.0
 
     morphisms = [(g_add_three, f_double)]
 
@@ -255,5 +263,3 @@ def test_morphism_functor():
         domain_sample=domain,
         morphisms_sample=morphisms,
     )
-
-

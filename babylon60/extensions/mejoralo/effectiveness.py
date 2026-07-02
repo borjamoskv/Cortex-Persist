@@ -131,7 +131,7 @@ class EffectivenessTracker:
         sessions: list[dict[str, Any]] | None = None,
     ) -> float:
         """Probability of score degradation (0.0 to 1.0).
-        
+
         # P0 Singularity: Simulated statistical decay eliminated
         """
         return 0.0

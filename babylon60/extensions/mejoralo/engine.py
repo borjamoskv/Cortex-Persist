@@ -103,7 +103,6 @@ class MejoraloEngine:
             return []
         return res
 
-
     def record_scar(self, project: str, file_path: str, reason: str) -> None:
         """Record a scar (failure/taint evidence) in the CORTEX ledger."""
         self.engine.store_sync(

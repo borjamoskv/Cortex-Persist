@@ -105,6 +105,7 @@ def get_zk_master_key(actor_id: str) -> bytes | None:
 
     try:
         import hashlib
+
         raw_priv = base64.b64decode(priv_b64)
         private_key = ed25519.Ed25519PrivateKey.from_private_bytes(raw_priv)
 
@@ -115,4 +116,3 @@ def get_zk_master_key(actor_id: str) -> bytes | None:
     except Exception as e:  # noqa: BLE001
         logger.error("Failed to derive ZK master key from Ed25519 private key: %s", e)
         return None
-

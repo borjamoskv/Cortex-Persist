@@ -521,7 +521,7 @@ def _register_linguistic_entropy(mcp: FastMCP, ctx: _MCPContext) -> None:
             if safe_path is None or not os.path.isfile(safe_path):
                 ctx.metrics.record_error()
                 return f"❌ Path '{path_or_text}' is outside allowed boundaries or is not a file."
-            
+
             try:
                 with open(safe_path, encoding="utf-8") as f:
                     text = f.read()
@@ -535,7 +535,7 @@ def _register_linguistic_entropy(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         report = detector.analyze(text)
         r = report.to_dict()
-        
+
         lines = [
             f"═══ LINGUISTIC ENTROPY ANALYSIS: {label} ═══",
             "",
@@ -565,12 +565,12 @@ def _register_linguistic_entropy(mcp: FastMCP, ctx: _MCPContext) -> None:
             f"- **Weight Total:** {report.slop_weight_total:.2f}",
         ]
 
-        if r['slop_instances_count'] > 0:
+        if r["slop_instances_count"] > 0:
             lines.append("")
             lines.append("#### Slop Matches Detected:")
             for s in r["slop_instances"][:5]:
                 lines.append(f"- `[{s['severity_weight']:.1f}]` {s['matched_text'][:60]}")
-            if r['slop_instances_count'] > 5:
+            if r["slop_instances_count"] > 5:
                 lines.append(f"- ... and {r['slop_instances_count'] - 5} more.")
 
         ctx.metrics.record_request()

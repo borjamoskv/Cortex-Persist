@@ -90,7 +90,9 @@ class ThalamusGate:
         # 3. Causal Saturation Check (Entropy Containment)
         if parent_decision_id and conn:
             try:
-                child_count = await self._count_children(conn, parent_decision_id, fact_type, tenant_id)
+                child_count = await self._count_children(
+                    conn, parent_decision_id, fact_type, tenant_id
+                )
                 if child_count >= self.max_causal_children:
                     logger.info(
                         "Thalamus: Discarding fact - causal saturation "

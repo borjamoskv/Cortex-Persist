@@ -191,9 +191,11 @@ class MorphismVerifier:
         1. Identity preservation: F_morph(1_X) == 1_F(X)
         2. Composition preservation: F_morph(g . f) == F_morph(g) . F_morph(f)
         """
+
         # 1. Identity check
         def f_id(x):
             return x
+
         F_f_id = F_morph(f_id)
         for x in domain_sample:
             try:
@@ -216,11 +218,13 @@ class MorphismVerifier:
             # Compound morphism g . f
             def g_comp_f(x, g_fn=g, f_fn=f):
                 return g_fn(f_fn(x))
+
             F_g_comp_f = F_morph(g_comp_f)
 
             # Compound mapped morphisms F(g) . F(f)
             Fg = F_morph(g)
             Ff = F_morph(f)
+
             def Fg_comp_Ff(x, Fg_fn=Fg, Ff_fn=Ff):
                 return Fg_fn(Ff_fn(x))
 

@@ -57,8 +57,9 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str, project: str)
                 private_key_b64=priv_b64,
             )
             meta["cortex_taint"] = token
-            
+
             from babylon60.crypto.keys import ZKSwarmIdentity
+
             meta["logos_signature"] = ZKSwarmIdentity.sign_payload(content, priv_b64)
             # Try to derive public key
             try:
@@ -66,13 +67,20 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str, project: str)
 
                 from cryptography.hazmat.primitives import serialization
                 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
                 priv_bytes = base64.urlsafe_b64decode(priv_b64 + "=" * (-len(priv_b64) % 4))
                 if len(priv_bytes) == 32:
                     pk = Ed25519PrivateKey.from_private_bytes(priv_bytes)
-                    meta["agent_public_key"] = base64.urlsafe_b64encode(pk.public_key().public_bytes(
-                        encoding=serialization.Encoding.Raw,
-                        format=serialization.PublicFormat.Raw
-                    )).decode().rstrip("=")
+                    meta["agent_public_key"] = (
+                        base64.urlsafe_b64encode(
+                            pk.public_key().public_bytes(
+                                encoding=serialization.Encoding.Raw,
+                                format=serialization.PublicFormat.Raw,
+                            )
+                        )
+                        .decode()
+                        .rstrip("=")
+                    )
             except (ValueError, TypeError, KeyError, AttributeError):
                 pass
 
@@ -81,11 +89,12 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str, project: str)
 
             console.print(f"[yellow]Warning: Failed to generate taint token: {e}[/]")
             os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
-            
+
     # Universal fallback for Virgo & Archaeology in CLI
     meta["archaeology_audited"] = True
     if "logos_signature" not in meta:
         from babylon60.crypto.hash_registry import cortex_hash
+
         meta["logos_signature"] = cortex_hash(f"{content}{meta.get('nonce', '')}{project}".encode())
         os.environ["CORTEX_VIRGO_MODE"] = "LEGACY"
     else:

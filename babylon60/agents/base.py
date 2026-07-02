@@ -194,7 +194,6 @@ class BaseAgent:
         project_id = self.manifest.project_id
         workspace_base = Path(__file__).resolve().parents[2]
 
-
         if project_id == "cortex_ui":
             project_root = (workspace_base / "cortex_ui").resolve()
         elif project_id == "babylon60":

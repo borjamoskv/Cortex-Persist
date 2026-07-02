@@ -232,7 +232,7 @@ class EventLoopMixin:
                 tasks.append(
                     asyncio.create_task(self.sovereignty_runtime.auth_gateway.ensure_table())
                 )
-                
+
         if getattr(self, "autonomous_ignition_daemon", None):
             tasks.append(
                 asyncio.create_task(
@@ -242,9 +242,7 @@ class EventLoopMixin:
 
         if getattr(self, "peerd_bridge_daemon", None):
             tasks.append(
-                asyncio.create_task(
-                    self.peerd_bridge_daemon.start(), name="PeerdBridgeDaemon"
-                )
+                asyncio.create_task(self.peerd_bridge_daemon.start(), name="PeerdBridgeDaemon")
             )
 
         tasks.append(asyncio.create_task(self._run_health_loop_async(), name="HealthMonitor"))
@@ -301,7 +299,7 @@ class EventLoopMixin:
         if getattr(self, "epistemic_breaker_daemon", None):
             self.epistemic_breaker_daemon.stop()  # type: ignore[union-attr]
         if getattr(self, "autonomous_ignition_daemon", None):
-            await self.autonomous_ignition_daemon.stop() # type: ignore[union-attr]
+            await self.autonomous_ignition_daemon.stop()  # type: ignore[union-attr]
         if getattr(self, "sovereignty_runtime", None):
             await self.sovereignty_runtime.stop()
 

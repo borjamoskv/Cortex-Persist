@@ -399,7 +399,7 @@ class MOSKV1DatasetCompiler:
         # Length bounds
         inst_len = len(entry.instruction)
         output_len = len(entry.output.strip())
-        
+
         if output_len < _MIN_OUTPUT_LENGTH:
             self._filter_reason("output_too_short")
             return False

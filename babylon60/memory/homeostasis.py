@@ -62,6 +62,7 @@ class EntropyPruner:
             return False
 
         import time
+
         days_since_access = max(0.0, (time.time() - engram.last_accessed) / 86400.0)
         decay_rate = 0.05
         decayed_energy = max(0.0, engram.energy_level - (days_since_access * decay_rate))

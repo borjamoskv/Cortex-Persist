@@ -132,7 +132,9 @@ class MetamemoryMonitor:
         # Extract pre-computed scores from Hybrid/Dense search
         similarities: list[float] = []
         for e in candidate_engrams:
-            s = float(getattr(e, "score", getattr(e, "rrf_score", getattr(e, "_recall_score", 0.0))))
+            s = float(
+                getattr(e, "score", getattr(e, "rrf_score", getattr(e, "_recall_score", 0.0)))
+            )
             # Auto-scale RRF scores (which max out around 0.01639 for K=60, W=1.0)
             if 0.0 < s < 0.1:
                 s = min(1.0, s * 60.0)

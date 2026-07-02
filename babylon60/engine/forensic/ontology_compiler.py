@@ -97,15 +97,16 @@ def compile_ontology(primitives_dir, output_json, output_yaml):
 
     try:
         import hashlib
+
         with open(output_yaml, "rb") as f:
             yaml_content = f.read()
         sha256_hash = hashlib.sha256(yaml_content).hexdigest()
 
         import asyncio
+
         asyncio.run(_log_compilation_to_ledger(output_yaml, sha256_hash))
     except Exception as e:  # noqa: BLE001
         logger.error(f"[C5-REAL] Error logging to ledger: {e}")
-
 
 
 if __name__ == "__main__":

@@ -17,14 +17,14 @@ def test_validation_success():
             "confidence_score": 0.95,
             "fact_type": "knowledge",
             "tags": ["axiom", "c5-real"],
-            "metadata": {"source_session": "session-1"}
+            "metadata": {"source_session": "session-1"},
         },
         {
             "project": "beta",
             "content": "Axiom 2: Anergy is the death.",
             "provenance": "agent-2",
-            "confidence_score": 1.0
-        }
+            "confidence_score": 1.0,
+        },
     ]
     results = crystallizer.validate_facts_json(valid_data)
     assert len(results) == 2
@@ -41,7 +41,7 @@ def test_validation_missing_provenance():
             "project": "alpha",
             "content": "Some content",
             # missing provenance
-            "confidence_score": 0.8
+            "confidence_score": 0.8,
         }
     ]
     with pytest.raises(ValidationError) as excinfo:
@@ -55,7 +55,7 @@ def test_validation_missing_confidence_score():
         {
             "project": "alpha",
             "content": "Some content",
-            "provenance": "agent-1"
+            "provenance": "agent-1",
             # missing confidence_score
         }
     ]
@@ -72,7 +72,7 @@ def test_validation_invalid_confidence_score_range():
             "project": "alpha",
             "content": "Some content",
             "provenance": "agent-1",
-            "confidence_score": 1.1
+            "confidence_score": 1.1,
         }
     ]
     with pytest.raises(ValidationError) as excinfo:
@@ -85,7 +85,7 @@ def test_validation_invalid_confidence_score_range():
             "project": "alpha",
             "content": "Some content",
             "provenance": "agent-1",
-            "confidence_score": -0.1
+            "confidence_score": -0.1,
         }
     ]
     with pytest.raises(ValidationError) as excinfo:

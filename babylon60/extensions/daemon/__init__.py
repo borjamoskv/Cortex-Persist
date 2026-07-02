@@ -91,7 +91,10 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "BUNDLE_ID": ("babylon60.extensions.daemon.models", "BUNDLE_ID"),
     "DEFAULT_COOLDOWN": ("babylon60.extensions.daemon.models", "DEFAULT_COOLDOWN"),
     "DEFAULT_INTERVAL": ("babylon60.extensions.daemon.models", "DEFAULT_INTERVAL"),
-    "DEFAULT_MEMORY_STALE_HOURS": ("babylon60.extensions.daemon.models", "DEFAULT_MEMORY_STALE_HOURS"),
+    "DEFAULT_MEMORY_STALE_HOURS": (
+        "babylon60.extensions.daemon.models",
+        "DEFAULT_MEMORY_STALE_HOURS",
+    ),
     "DEFAULT_STALE_HOURS": ("babylon60.extensions.daemon.models", "DEFAULT_STALE_HOURS"),
     "STATUS_FILE": ("babylon60.extensions.daemon.models", "STATUS_FILE"),
     "CertAlert": ("babylon60.extensions.daemon.models", "CertAlert"),
@@ -133,4 +136,3 @@ def __getattr__(name: str) -> object:
 def __dir__() -> list[str]:
     """Expose lazy-loaded symbols to dir() function calls."""
     return sorted(list(globals().keys()) + list(_LAZY_IMPORTS.keys()))
-

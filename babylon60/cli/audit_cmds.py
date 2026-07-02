@@ -112,9 +112,9 @@ def start_watchdog_cmd(db_path: str, interval: float):
     import asyncio
 
     from babylon60.guards.git_sentinel_daemon import GitSentinelDaemon
-    
+
     daemon = GitSentinelDaemon(db_path=db_path, check_interval=interval)
-    
+
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(daemon.start())
@@ -122,4 +122,3 @@ def start_watchdog_cmd(db_path: str, interval: float):
     except KeyboardInterrupt:
         console.print("[bold yellow]Watchdog interrupted. Shutting down...[/bold yellow]")
         loop.run_until_complete(daemon.stop())
-

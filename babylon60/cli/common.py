@@ -184,7 +184,6 @@ def resolve_cli_tenant(tenant_id: str) -> str:
     return tenant_id
 
 
-
 @click.group()
 @click.version_option(__version__, prog_name="cortex")
 def cli() -> None:

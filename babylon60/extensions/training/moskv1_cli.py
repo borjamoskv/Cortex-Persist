@@ -13,6 +13,7 @@ Commands:
     stats      — Mostrar estadísticas del dataset compilado
     health     — Verificar estado de Ollama y modelos disponibles
 """
+
 from __future__ import annotations
 
 import os
@@ -113,13 +114,19 @@ def cmd_train(
         "2",  # Accumulate gradient to maintain effective batch size of 2
         "--learning-rate",
         str(learning_rate),
-        "--steps-per-report", "10",
-        "--steps-per-eval", "50",
-        "--val-batches", "5",
-        "--max-seq-length", "1280",  # Fit maximum character limit securely
+        "--steps-per-report",
+        "10",
+        "--steps-per-eval",
+        "50",
+        "--val-batches",
+        "5",
+        "--max-seq-length",
+        "1280",  # Fit maximum character limit securely
         "--grad-checkpoint",  # Use gradient checkpointing to save VRAM
-        "--save-every", "100",
-        "--seed", "42",
+        "--save-every",
+        "100",
+        "--seed",
+        "42",
     ]
 
     print(f"🧠 MLX LoRA Training — {model}")
@@ -310,10 +317,11 @@ def cmd_validate() -> None:
         print()
         print("═══ LoRA WEIGHTS VERIFICATION (C5-REAL) ═══")
         from babylon60.extensions.training.verifier import AdapterVerifier
+
         verifier = AdapterVerifier()
         base_model = "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"
         verdict = verifier.verify_adapter(adapter_path, base_model)
-        
+
         if verdict["success"]:
             metrics = verdict["metrics"]
             print("   Status:        ✅ PASSED")
@@ -342,7 +350,10 @@ def cmd_stats() -> None:
 
     total_tokens = (
         sum(
-            sum(len(m.get("content", "")) for m in (e.get("messages") or e.get("conversations") or []))
+            sum(
+                len(m.get("content", ""))
+                for m in (e.get("messages") or e.get("conversations") or [])
+            )
             for e in entries
         )
         // 4

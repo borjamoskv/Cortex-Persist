@@ -1,6 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-"""MCP tools for CORTEX Twilio WhatsApp Integration.
-"""
+"""MCP tools for CORTEX Twilio WhatsApp Integration."""
 
 from __future__ import annotations
 

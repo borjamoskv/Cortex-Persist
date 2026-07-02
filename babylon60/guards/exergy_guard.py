@@ -341,11 +341,13 @@ def calculate_exergy(content: str) -> float:
 
 class ExergyGuardViolation(GuardViolation, ValueError):
     """Raised when exergy guard validation fails."""
+
     pass
 
 
 class LandauerGuardViolation(GuardViolation, ValueError):
     """Raised when Landauer guard validation fails."""
+
     pass
 
 

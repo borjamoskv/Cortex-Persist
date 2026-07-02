@@ -68,7 +68,10 @@ async def test_billing_middleware_success_db_lookup():
     # 2. Patch AuthManager and AsyncStripeSyncer.queue_usage
     with (
         patch("babylon60.auth.manager.get_auth_manager", return_value=mock_auth_manager),
-        patch("babylon60.extensions.billing.metering.AsyncStripeSyncer.queue_usage", new_callable=AsyncMock) as mock_queue_call,
+        patch(
+            "babylon60.extensions.billing.metering.AsyncStripeSyncer.queue_usage",
+            new_callable=AsyncMock,
+        ) as mock_queue_call,
     ):
         await middleware._report_usage(api_key, mock_request)
 
@@ -80,9 +83,9 @@ async def test_billing_middleware_success_db_lookup():
 async def test_billing_middleware_bypass_prevention_no_item_in_db(tmp_path: Path):
     # Directly test the AsyncStripeSyncer._report_batch function with database lookup
     from babylon60.extensions.billing.metering import AsyncStripeSyncer
-    
+
     db_file = str(tmp_path / "billing_test.db")
-    
+
     # Setup mock tenants table with no stripe_subscription_item_id
     conn = sqlite3.connect(db_file)
     conn.execute("CREATE TABLE tenants (id TEXT PRIMARY KEY, config TEXT)")
@@ -92,25 +95,24 @@ async def test_billing_middleware_bypass_prevention_no_item_in_db(tmp_path: Path
 
     # Patch DB_PATH in metering config
     from babylon60.core import config
-    
+
     # We patch DB_PATH and stripe_lib
     mock_stripe_lib = MagicMock()
     mock_stripe_lib.api_key = "sk_live_prodkey"
-    
+
     syncer = AsyncStripeSyncer()
-    
+
     with (
         patch("babylon60.core.config.DB_PATH", db_file),
-        patch.object(config, "STRIPE_SECRET_KEY", "sk_live_prodkey")
+        patch.object(config, "STRIPE_SECRET_KEY", "sk_live_prodkey"),
     ):
         await syncer._report_batch(
             api_key="ctx_cloud_abcdef123",
             tenant_id="tenant_no_stripe",
             amount=10,
-            stripe_lib=mock_stripe_lib
+            stripe_lib=mock_stripe_lib,
         )
-        
-        # In production mode (not sk_test_mock), if no stripe subscription item ID exists, 
+
+        # In production mode (not sk_test_mock), if no stripe subscription item ID exists,
         # it returns early and does NOT call SubscriptionItem.create_usage_record
         mock_stripe_lib.SubscriptionItem.create_usage_record.assert_not_called()
-

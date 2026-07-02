@@ -204,7 +204,9 @@ async def test_store_direct_pipeline(manager, mock_mem0_pipeline):
                 content="c",
                 embedding=[0.0],
                 confidence="C5",
-                source_metadata=SourceMetadata(origin="system", author="test", confidence_in_source=1.0),
+                source_metadata=SourceMetadata(
+                    origin="system", author="test", confidence_in_source=1.0
+                ),
             ),
         )
     )
@@ -231,9 +233,9 @@ async def test_store_direct_pipeline(manager, mock_mem0_pipeline):
                 "source_metadata": {
                     "origin": "system",
                     "author": "test",
-                    "confidence_in_source": 1.0
-                }
-            }
+                    "confidence_in_source": 1.0,
+                },
+            },
         )
 
     assert result_id == "engram_123"
@@ -307,9 +309,9 @@ async def test_store_resonance_deduplication(manager, mock_mem0_pipeline):
                 "source_metadata": {
                     "origin": "system",
                     "author": "test",
-                    "confidence_in_source": 1.0
-                }
-            }
+                    "confidence_in_source": 1.0,
+                },
+            },
         )
     assert result_id == "deduplicated:existing_456"
 
@@ -371,7 +373,10 @@ async def test_store_semantic_deduplication(manager, mock_mem0_pipeline):
     mock_cursor = MagicMock()
     mock_cursor.fetchone.side_effect = [
         None,  # First query: exact string check -> no match
-        {"id": "semantic_existing_123", "distance": 0.05}  # Second query: semantic check -> match (< 0.10)
+        {
+            "id": "semantic_existing_123",
+            "distance": 0.05,
+        },  # Second query: semantic check -> match (< 0.10)
     ]
 
     mock_conn = MagicMock()
@@ -384,12 +389,8 @@ async def test_store_semantic_deduplication(manager, mock_mem0_pipeline):
         content="This is semantically very similar fact",
         metadata={
             "confidence_score": "C5",
-            "source_metadata": {
-                "origin": "system",
-                "author": "test",
-                "confidence_in_source": 1.0
-            }
-        }
+            "source_metadata": {"origin": "system", "author": "test", "confidence_in_source": 1.0},
+        },
     )
 
     assert result_id == "deduplicated_semantic:semantic_existing_123"

@@ -292,24 +292,30 @@ class OmegaDaemon:
                     from babylon60.audit.ledger_compactor import compact_ledger
                     from babylon60.database.core import connect_async_ctx
                     from babylon60.extensions.daemon.apoptosis_daemon import ApoptosisDaemon
-                    
+
                     async with connect_async_ctx("cortex_ledger.db") as conn:
                         ledger = EnterpriseAuditLedger(conn)
                         await ledger.ensure_table()
-                        
+
                         # O(1) Bounded Ledger Snapshotting
                         logger.debug("Executing L1 Ledger Compaction...")
                         compaction_res = await compact_ledger(conn, ledger, max_rows=1000)
                         if compaction_res.get("status") == "compacted":
-                            self.events.append(f"[{timestamp}] [bold magenta]🗜️ Ledger compacted[/]: {compaction_res.get('rows_compacted')} rows.")
-                        
+                            self.events.append(
+                                f"[{timestamp}] [bold magenta]🗜️ Ledger compacted[/]: {compaction_res.get('rows_compacted')} rows."
+                            )
+
                         # Continuous Entropy Pruning (Code Apoptosis)
                         if total_entropy > Decimal("30.0"):
-                            logger.warning("High entropy detected. Triggering structural source apoptosis.")
+                            logger.warning(
+                                "High entropy detected. Triggering structural source apoptosis."
+                            )
                             apoptosis = ApoptosisDaemon(repo_path=Path(os.getcwd()))
                             purged_count = await apoptosis.execute_purge()
                             if purged_count > 0:
-                                self.events.append(f"[{timestamp}] [bold red]☠️ Apoptosis triggered[/]: Purged {purged_count} dead modules.")
+                                self.events.append(
+                                    f"[{timestamp}] [bold red]☠️ Apoptosis triggered[/]: Purged {purged_count} dead modules."
+                                )
                 except Exception as e:  # noqa: BLE001
                     logger.error("Thermodynamic Apoptosis failed: %s", e)
                     self.events.append(f"[{timestamp}] [bold red]✗ Apoptosis failure:[/] {e}")

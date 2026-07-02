@@ -16,13 +16,16 @@ from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logger = logging.getLogger("babylon60_cascade.router")
 
+
 def _get_local_ollama_models() -> list[str]:
     import sys
+
     if "pytest" in sys.modules or "py.test" in sys.modules:
         return ["qwen2.5-coder:32b", "qwen2.5-coder:7b", "llama3:latest"]
 
     import json
     import urllib.request
+
     try:
         req = urllib.request.Request("http://localhost:11434/api/tags")
         with urllib.request.urlopen(req, timeout=1.0) as response:
@@ -96,7 +99,10 @@ class CascadeRouter:
 
                 # Downgrade immediately if the primary model is not locally installed in Ollama
                 local_models = _get_local_ollama_models()
-                if primary_model not in local_models and f"{primary_model}:latest" not in local_models:
+                if (
+                    primary_model not in local_models
+                    and f"{primary_model}:latest" not in local_models
+                ):
                     if fallback_model in local_models or f"{fallback_model}:latest" in local_models:
                         logger.info(
                             f"🔌 [ROUTER] {primary_model} not found locally. Fast-falling back to {fallback_model}."
@@ -177,6 +183,7 @@ class CascadeRouter:
                         if db_path.exists():
                             from babylon60.database.core import causal_write
                             from babylon60.database.core import connect as secure_connect
+
                             conn = secure_connect(str(db_path))
                             digest = cortex_hash_truncated(
                                 output_content.encode("utf-8"), length=16

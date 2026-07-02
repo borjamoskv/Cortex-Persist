@@ -125,7 +125,7 @@ class SovereignScheduler:
 
     @contextmanager
     def _conn(self):
-        from babylon60.database.core import connect, causal_write
+        from babylon60.database.core import causal_write, connect
 
         conn = connect(str(self._db_path), check_same_thread=False)
         conn.row_factory = sqlite3.Row

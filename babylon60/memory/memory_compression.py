@@ -109,7 +109,9 @@ async def compress_and_store(
                 timestamp=time.monotonic(),
                 cognitive_layer="episodic",
                 confidence="C5",
-                source_metadata=SourceMetadata(origin="system", author="system", confidence_in_source=1.0),
+                source_metadata=SourceMetadata(
+                    origin="system", author="system", confidence_in_source=1.0
+                ),
                 metadata=_meta,
             )
             await manager._l2.memorize(fact)

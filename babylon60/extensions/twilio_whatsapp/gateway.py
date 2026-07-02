@@ -29,7 +29,7 @@ class TwilioWhatsAppGateway:
         Send a WhatsApp message via Twilio API.
         """
         url = f"https://api.twilio.com/2010-04-01/Accounts/{self.account_sid}/Messages.json"
-        
+
         # Ensure numbers are formatted with whatsapp: prefix for Twilio
         to_formatted = f"whatsapp:{to}" if not to.startswith("whatsapp:") else to
         from_formatted = f"whatsapp:{self.sender}"

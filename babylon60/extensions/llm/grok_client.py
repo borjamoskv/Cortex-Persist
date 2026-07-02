@@ -65,7 +65,7 @@ class ConversationHistory:
 
         # Calculate how many to remove
         to_remove = len(self.messages) - self.max_messages
-        
+
         # Remove oldest non-system messages
         for _ in range(to_remove):
             if len(self.messages) > start_idx:
@@ -133,11 +133,13 @@ class ResilientGrokClient:
         return self._async_client
 
     @retry(
-        retry=retry_if_exception_type((
-            openai.APIConnectionError,
-            openai.APITimeoutError,
-            openai.RateLimitError,
-        )),
+        retry=retry_if_exception_type(
+            (
+                openai.APIConnectionError,
+                openai.APITimeoutError,
+                openai.RateLimitError,
+            )
+        ),
         wait=wait_exponential(multiplier=1, min=2, max=10),
         stop=stop_after_attempt(5),
         reraise=True,
@@ -167,11 +169,13 @@ class ResilientGrokClient:
             raise
 
     @retry(
-        retry=retry_if_exception_type((
-            openai.APIConnectionError,
-            openai.APITimeoutError,
-            openai.RateLimitError,
-        )),
+        retry=retry_if_exception_type(
+            (
+                openai.APIConnectionError,
+                openai.APITimeoutError,
+                openai.RateLimitError,
+            )
+        ),
         wait=wait_exponential(multiplier=1, min=2, max=10),
         stop=stop_after_attempt(5),
         reraise=True,
@@ -203,11 +207,13 @@ class ResilientGrokClient:
             raise
 
     @retry(
-        retry=retry_if_exception_type((
-            openai.APIConnectionError,
-            openai.APITimeoutError,
-            openai.RateLimitError,
-        )),
+        retry=retry_if_exception_type(
+            (
+                openai.APIConnectionError,
+                openai.APITimeoutError,
+                openai.RateLimitError,
+            )
+        ),
         wait=wait_exponential(multiplier=1, min=2, max=10),
         stop=stop_after_attempt(5),
         reraise=True,
@@ -244,11 +250,13 @@ class ResilientGrokClient:
     # ─── Async Implementations ───────────────────────────────────────────
 
     @retry(
-        retry=retry_if_exception_type((
-            openai.APIConnectionError,
-            openai.APITimeoutError,
-            openai.RateLimitError,
-        )),
+        retry=retry_if_exception_type(
+            (
+                openai.APIConnectionError,
+                openai.APITimeoutError,
+                openai.RateLimitError,
+            )
+        ),
         wait=wait_exponential(multiplier=1, min=2, max=10),
         stop=stop_after_attempt(5),
         reraise=True,
@@ -278,11 +286,13 @@ class ResilientGrokClient:
             raise
 
     @retry(
-        retry=retry_if_exception_type((
-            openai.APIConnectionError,
-            openai.APITimeoutError,
-            openai.RateLimitError,
-        )),
+        retry=retry_if_exception_type(
+            (
+                openai.APIConnectionError,
+                openai.APITimeoutError,
+                openai.RateLimitError,
+            )
+        ),
         wait=wait_exponential(multiplier=1, min=2, max=10),
         stop=stop_after_attempt(5),
         reraise=True,
@@ -314,11 +324,13 @@ class ResilientGrokClient:
             raise
 
     @retry(
-        retry=retry_if_exception_type((
-            openai.APIConnectionError,
-            openai.APITimeoutError,
-            openai.RateLimitError,
-        )),
+        retry=retry_if_exception_type(
+            (
+                openai.APIConnectionError,
+                openai.APITimeoutError,
+                openai.RateLimitError,
+            )
+        ),
         wait=wait_exponential(multiplier=1, min=2, max=10),
         stop=stop_after_attempt(5),
         reraise=True,

@@ -37,6 +37,7 @@ class _FakeAsyncEngine:
         # Return a mock fact if tenant matches AND fact_id matches 123
         if tenant_id == "authorized-tenant" and fact_id == 123:
             from unittest.mock import MagicMock
+
             mock_fact = MagicMock()
             mock_fact.tenant_id = tenant_id
             mock_fact.project = "alpha"
@@ -64,7 +65,7 @@ class _FakeAsyncEngine:
         self,
         fact_id: int,
         reason: str | None = None,
-        conn = None,
+        conn=None,
         tenant_id: str = "default",
     ) -> bool:
         self.deprecate_calls.append((fact_id, reason, tenant_id))

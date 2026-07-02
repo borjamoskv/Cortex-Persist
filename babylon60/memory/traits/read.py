@@ -57,9 +57,13 @@ class ReadTrait:
                         try:
                             source_meta = SourceMetadata.model_validate(source_meta_dict)
                         except Exception:  # noqa: BLE001
-                            source_meta = SourceMetadata(origin="system", author="unknown", confidence_in_source=1.0)
+                            source_meta = SourceMetadata(
+                                origin="system", author="unknown", confidence_in_source=1.0
+                            )
                     else:
-                        source_meta = SourceMetadata(origin="system", author="unknown", confidence_in_source=1.0)
+                        source_meta = SourceMetadata(
+                            origin="system", author="unknown", confidence_in_source=1.0
+                        )
                     fact = CortexFactModel(
                         id=row["id"],
                         tenant_id=row["tenant_id"],
@@ -191,9 +195,13 @@ class ReadTrait:
                     try:
                         source_meta = SourceMetadata.model_validate(source_meta_dict)
                     except Exception:  # noqa: BLE001
-                        source_meta = SourceMetadata(origin="system", author="unknown", confidence_in_source=1.0)
+                        source_meta = SourceMetadata(
+                            origin="system", author="unknown", confidence_in_source=1.0
+                        )
                 else:
-                    source_meta = SourceMetadata(origin="system", author="unknown", confidence_in_source=1.0)
+                    source_meta = SourceMetadata(
+                        origin="system", author="unknown", confidence_in_source=1.0
+                    )
                 fact = CortexFactModel(
                     id=row["id"],
                     tenant_id=row["tenant_id"],

@@ -42,6 +42,7 @@ __all__ = ["OraclePool", "InferenceRecord", "OracleResult"]
 # Inference Ledger — C5-REAL cryptographic seal per inference
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class InferenceRecord:
     """Cryptographic attestation of a single oracle inference.
@@ -50,13 +51,13 @@ class InferenceRecord:
     Persisted to babylon60/audit/ledger.py on commit.
     """
 
-    input_hash: str      # sha3_256(prompt)
-    output_hash: str     # sha3_256(response)
-    model_id: str        # "provider:model_name"
+    input_hash: str  # sha3_256(prompt)
+    output_hash: str  # sha3_256(response)
+    model_id: str  # "provider:model_name"
     provider: str
     latency_ms: float
     timestamp_iso: str
-    taint: str           # taint:{session}:{ts}:{output_hash[:16]}
+    taint: str  # taint:{session}:{ts}:{output_hash[:16]}
     success: bool
     error: str | None = None
 
@@ -126,6 +127,7 @@ def _emit_to_audit(record: InferenceRecord) -> None:
 # OracleResult — typed output carrier
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class OracleResult:
     """Output of a single oracle call, including cryptographic attestation."""
@@ -139,6 +141,7 @@ class OracleResult:
 # ---------------------------------------------------------------------------
 # BFT Fallback Chain — ordered cascade with health state
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class _NodeHealth:
@@ -168,6 +171,7 @@ class _NodeHealth:
 # ---------------------------------------------------------------------------
 # OraclePool — 1000/1000 sovereign async engine
 # ---------------------------------------------------------------------------
+
 
 class OraclePool:
     """Sovereign Async Oracle Pool — 1000/1000 exergy score.
@@ -385,6 +389,7 @@ class OraclePool:
 # ---------------------------------------------------------------------------
 # Factory — sovereign default configuration
 # ---------------------------------------------------------------------------
+
 
 def build_sovereign_pool(
     primary_provider: str = "ollama",

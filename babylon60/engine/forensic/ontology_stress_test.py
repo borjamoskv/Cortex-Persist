@@ -108,4 +108,3 @@ if __name__ == "__main__":
     PRIMITIVES_DIR = "babylon60/agents/primitives"
     REPORT_OUT = "ontology_stress_report.md"
     run_stress_test(PRIMITIVES_DIR, REPORT_OUT)
-

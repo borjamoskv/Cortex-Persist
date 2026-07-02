@@ -311,8 +311,13 @@ class MemoryArchaeologist:
 
             logging.getLogger("babylon60.memory.archaeology").warning("L3 Archival failed: %s", e)
 
-        cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders}) AND tenant_id = ?", str_old_ids + [tenant_id])  # nosec B608
-        cl2.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")  # bypass-tenant
+        cl2.execute(
+            f"DELETE FROM facts_meta WHERE id IN ({placeholders}) AND tenant_id = ?",
+            str_old_ids + [tenant_id],
+        )  # nosec B608
+        cl2.execute(
+            "DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)"
+        )  # bypass-tenant
         cl2 = l2_conn.cursor()
         cl2.execute(
             f"UPDATE facts_meta SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders}) AND tenant_id = ?",  # nosec B608
