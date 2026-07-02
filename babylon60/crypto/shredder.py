@@ -386,7 +386,5 @@ class CryptoShredder:
             "total_shredded": total,
             "by_reason": reasons,
             "compliant": True,
-            "audit_timestamp": datetime.fromtimestamp(
-                time.monotonic(), tz=timezone.utc
-            ).isoformat(),
+            "audit_timestamp": datetime.now(timezone.utc).isoformat(),
         }

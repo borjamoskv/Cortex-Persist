@@ -31,6 +31,8 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     """
     store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
     store._get_conn()
+    if store._conn and hasattr(store._conn, "authorize_causal_writes"):
+        store._conn.authorize_causal_writes()
     if not store._vector_enabled:
         pytest.skip("sqlite-vec not available")
 
@@ -114,6 +116,8 @@ async def test_fallback_mode_score_zero(temp_db_path, mock_encoder):
 
     # Initialize DB schema
     store._get_conn()
+    if store._conn and hasattr(store._conn, "authorize_causal_writes"):
+        store._conn.authorize_causal_writes()
 
     # Force fallback mode
     store._vector_enabled = False

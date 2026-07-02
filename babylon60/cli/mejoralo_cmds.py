@@ -164,9 +164,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                 state["improvement_history"].append(
                     {
                         "project": project,
-                        "timestamp": datetime.fromtimestamp(
-                            time.monotonic(), tz=timezone.utc
-                        ).isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                         "score_before": score_before,
                         "score_after": score_after,
                         "delta": delta,

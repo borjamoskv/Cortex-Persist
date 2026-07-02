@@ -1,9 +1,10 @@
 import pytest
 import json
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 from babylon60.swarm.flujo_glorioso import DecaCoreOrchestrator
 from babylon60.engine.causal.belief_objects import BeliefObject
 from babylon60.database.belief_store import BeliefStore
+from babylon60.embeddings.local import LocalEmbedder
 
 @pytest.fixture
 def mock_store():
@@ -11,9 +12,15 @@ def mock_store():
     store.insert_belief = AsyncMock(return_value=1)
     return store
 
+@pytest.fixture
+def mock_embedder():
+    embedder = MagicMock(spec=LocalEmbedder)
+    embedder.embed.return_value = [0.0] * 384
+    return embedder
+
 @pytest.mark.asyncio
-async def test_flujo_glorioso_concepcion(mock_store):
-    orchestrator = DecaCoreOrchestrator(mock_store)
+async def test_flujo_glorioso_concepcion(mock_store, mock_embedder):
+    orchestrator = DecaCoreOrchestrator(mock_store, mock_embedder)
     input_data = {"idea": "glorious concept"}
     result = await orchestrator.concepcion(input_data)
     
@@ -25,10 +32,11 @@ async def test_flujo_glorioso_concepcion(mock_store):
     assert output_data["concepcion_completed"] is True
     assert output_data["agent_role"] == "Musa"
     mock_store.insert_belief.assert_awaited_once()
+    mock_embedder.embed.assert_called_once()
 
 @pytest.mark.asyncio
-async def test_flujo_glorioso_full_pipeline(mock_store):
-    orchestrator = DecaCoreOrchestrator(mock_store)
+async def test_flujo_glorioso_full_pipeline(mock_store, mock_embedder):
+    orchestrator = DecaCoreOrchestrator(mock_store, mock_embedder)
     trajectory = await orchestrator.execute_genesis("omega project")
     
     assert len(trajectory) == 10

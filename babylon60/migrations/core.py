@@ -149,6 +149,9 @@ def run_coroutine_sync(coro):
 
     try:
         loop = asyncio.get_event_loop()
+        if loop.is_closed():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
     except RuntimeError:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -174,6 +177,7 @@ def run_coroutine_sync(coro):
         return result[0]
     else:
         return loop.run_until_complete(coro)
+
 
 
 def _apply_migration_sync(conn: sqlite3.Connection, version: int, description: str, func) -> bool:

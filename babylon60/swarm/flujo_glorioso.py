@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from babylon60.database.belief_store import BeliefStore
+from babylon60.embeddings.local import LocalEmbedder
 from babylon60.engine.causal.belief_objects import (
     BeliefObject,
     BeliefState,
@@ -18,8 +19,9 @@ class DecaCoreOrchestrator:
     Operando bajo modo C5-REAL (Fail-Fast Termodinámico, Async Non-Blocking).
     """
 
-    def __init__(self, store: BeliefStore):
+    def __init__(self, store: BeliefStore, embedder: LocalEmbedder | None = None):
         self.store = store
+        self.embedder = embedder or LocalEmbedder()
 
     async def _execute_phase(self, phase_name: str, agent_role: str, input_data: dict[str, Any]) -> BeliefObject:
         """Ejecuta una fase atómica asíncrona inyectando el linaje (agent_role)."""
@@ -46,8 +48,8 @@ class DecaCoreOrchestrator:
             ),
         )
 
-        dummy_embedding = [0.0] * 1536
-        await self.store.insert_belief(belief, dummy_embedding)
+        embedding = self.embedder.embed(data_str)
+        await self.store.insert_belief(belief, embedding)
         return belief
 
     async def concepcion(self, input_data: dict[str, Any]) -> BeliefObject:

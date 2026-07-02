@@ -227,7 +227,7 @@ class ConflictResolver:
         """Execute the full escalation ladder."""
         self._conflict_counter += 1
         conflict_id = self._generate_id()
-        now = time.monotonic()
+        now = time.time()
         participants = list(agents.keys())
 
         logger.info(

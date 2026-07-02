@@ -36,6 +36,13 @@ class BeliefStore:
                 embedding float[1536]
             )
         """)
+        
+        # Virtual table for local ONNX embeddings (local-384)
+        await self.db.execute("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS cortex_embeddings_local USING vec0(
+                embedding float[384]
+            )
+        """)
 
     async def insert_belief(self, belief: BeliefObject, embedding: list[float]) -> int:
         """
@@ -70,10 +77,12 @@ class BeliefStore:
 
         rowid = cursor.lastrowid
 
-        # Step 2: Insert into vec0 table with matching rowid
+        # Step 2: Insert into vec0 table with matching rowid based on dimension length
+        table_name = "cortex_embeddings_text" if len(embedding) == 1536 else "cortex_embeddings_local"
+        
         await self.db.execute(
-            """
-            INSERT INTO cortex_embeddings_text (rowid, embedding)
+            f"""
+            INSERT INTO {table_name} (rowid, embedding)
             VALUES (?, ?)
             """,
             (rowid, json.dumps(embedding)),
