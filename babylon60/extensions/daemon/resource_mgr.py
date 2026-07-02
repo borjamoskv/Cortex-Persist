@@ -245,6 +245,18 @@ class ResourceMgrMixin:
             except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init HumanCallbackAPI: %s", e)
 
+        # 6. Peerd Bridge (Browser Agents)
+        self.peerd_bridge_daemon = None
+        try:
+            from babylon60.extensions.browser.peerd_bridge import PeerdBridgeDaemon
+            self.peerd_bridge_daemon = PeerdBridgeDaemon(
+                engine=self._shared_engine,  # type: ignore
+                event_bus=self._event_bus
+            )
+            logger.info("🌉 PeerdBridgeDaemon (Browser Agent Harness) ENABLED")
+        except Exception as e:
+            logger.warning("Failed to init PeerdBridgeDaemon: %s", e)
+
     def _init_persistence_checkers(self, file_config: dict) -> None:
         """Initialize checks related to data persistence and timing."""
         self.engine_health = EngineHealthCheck(Path(file_config.get("db_path", str(CORTEX_DB))))

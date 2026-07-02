@@ -240,6 +240,13 @@ class EventLoopMixin:
                 )
             )
 
+        if getattr(self, "peerd_bridge_daemon", None):
+            tasks.append(
+                asyncio.create_task(
+                    self.peerd_bridge_daemon.start(), name="PeerdBridgeDaemon"
+                )
+            )
+
         tasks.append(asyncio.create_task(self._run_health_loop_async(), name="HealthMonitor"))
         async_count = len(tasks)
         thread_count = len(self._threads)
