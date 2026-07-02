@@ -70,7 +70,9 @@ class ByzantineConsensus:
         results = await asyncio.gather(*tasks.values())
         return dict(zip(tasks.keys(), results, strict=False))
 
-    async def execute_consensus(self, proposals: dict[str, T]) -> T | None:
+    async def execute_consensus(
+        self, proposals: dict[str, T], node_ids: list[str] | None = None
+    ) -> T | None:
         """
         Takes proposals from multiple nodes. Validates them via reputation-weighted
         thresholding. Returns the absolute truth or None if BFT consensus fails.
@@ -78,20 +80,33 @@ class ByzantineConsensus:
         if not proposals:
             return None
 
+        if node_ids is None:
+            participating_nodes = list(proposals.keys())
+        else:
+            participating_nodes = node_ids
+
         vote_tally: dict[str, float] = {}
         hash_to_proposal: dict[str, T] = {}
-        total_reputation = 0.0
 
-        # Batch hash all proposals concurrently (Ω₂: no serial thread dispatch)
-        node_hashes = await self._batch_hash_proposals(proposals)
+        # Batch hash only proposals from participating nodes
+        filtered_proposals = {
+            nid: prop for nid, prop in proposals.items() if nid in participating_nodes
+        }
+        node_hashes = await self._batch_hash_proposals(filtered_proposals)
 
         for node_id, proposal_hash in node_hashes.items():
-            rep = self.nodes[node_id].reputation
-            total_reputation += rep
-            vote_tally[proposal_hash] = vote_tally.get(proposal_hash, 0.0) + rep
-            hash_to_proposal[proposal_hash] = proposals[node_id]
+            if node_id in self.nodes:
+                rep = self.nodes[node_id].reputation
+                vote_tally[proposal_hash] = vote_tally.get(proposal_hash, 0.0) + rep
+                hash_to_proposal[proposal_hash] = proposals[node_id]
 
-        if math.isclose(total_reputation, 0.0, abs_tol=1e-9):
+        total_reputation = sum(
+            self.nodes[node_id].reputation
+            for node_id in participating_nodes
+            if node_id in self.nodes
+        )
+
+        if math.isclose(total_reputation, 0.0, abs_tol=1e-9) or not vote_tally:
             return None
 
         # Find winning proposal

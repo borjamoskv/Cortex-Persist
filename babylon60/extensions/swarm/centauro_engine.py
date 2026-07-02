@@ -61,6 +61,7 @@ class Formation:
     GHOST = "GHOST"  # Single specialized agent
     TESTUDO = "TESTUDO"  # 15 agents, proactive defensive shell
     SANEDRIN = "SANEDRIN"  # 5 agents, Heterogeneous Supreme Quorum
+    CENTURIA = "CENTURIA"  # 100 agents, Centuria Squad
 
 
 class VirtualAgent:
@@ -212,6 +213,7 @@ class CentauroEngine:
         Formation.GHOST: 1,
         Formation.TESTUDO: 15,
         Formation.SANEDRIN: 5,
+        Formation.CENTURIA: 100,
     }
 
     def __init__(self, tolerance: float = 0.67, router: Any | None = None):
@@ -236,16 +238,25 @@ class CentauroEngine:
 
     def _get_specialty(self, index: int, formation: str) -> str:
         """Determines agent specialty based on formation and index. (O(1) Selection)"""
-        if formation == Formation.PHALANX:
-            return "SECURITY" if index % 2 == 0 else "CODE"
-        if formation == Formation.TESTUDO:
-            _roles = ["SECURITY", "INFRA", "CODE"]
-            return _roles[index % 3]
         if formation == Formation.GHOST:
             return "CODE"
-        if formation == Formation.SANEDRIN:
+        elif formation in (Formation.SPECTRE, Formation.BLITZ):
+            _roles = ["INTEL", "CODE", "SECURITY"]
+            return _roles[index % 3]
+        elif formation == Formation.SENTINEL:
+            _roles = ["INTEL", "CODE", "SECURITY", "DATA"]
+            return _roles[index % 4]
+        elif formation in (Formation.ORACLE, Formation.SANEDRIN):
             _roles = ["INTEL", "CODE", "SECURITY", "DATA", "INFRA"]
             return _roles[index % 5]
+        elif formation == Formation.OUROBOROS:
+            _roles = ["INTEL", "CODE", "SECURITY", "DATA", "INFRA", "CODE"]
+            return _roles[index % 6]
+        elif formation == Formation.PHALANX:
+            return "SECURITY" if index % 2 == 0 else "CODE"
+        elif formation == Formation.TESTUDO:
+            _roles = ["SECURITY", "INFRA", "CODE"]
+            return _roles[index % 3]
         return self.SPECIALISTS[index % len(self.SPECIALISTS)]
 
     async def _run_consensus(
@@ -302,7 +313,7 @@ class CentauroEngine:
 
             str_result = cast(str, result)
             proposals[agent_id] = str_result
-            winning = await self.consensus.execute_consensus(proposals)
+            winning = await self.consensus.execute_consensus(proposals, node_ids=list(squad.keys()))
             if winning:
                 logger.info("⚔️ [QUORUM] Consensus achieved early! Bypassing trailing latency.")
                 break
